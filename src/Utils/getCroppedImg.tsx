@@ -1,10 +1,23 @@
+import i18next from "i18next";
+
 const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const image = new Image();
     image.addEventListener("load", () => resolve(image));
     image.addEventListener("error", (error) => reject(error));
-    image.setAttribute("crossOrigin", "anonymous"); // needed to avoid cross-origin issues on some browsers
-    image.src = url;
+    image.setAttribute("crossOrigin", "anonymous");
+
+    // Add more detailed validation for the URL
+    if (
+      url.startsWith("blob:") || // Accept blob URLs
+      ((url.startsWith("http://") || url.startsWith("https://")) &&
+        /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(url)) ||
+      url.startsWith("data:image/")
+    ) {
+      image.src = url;
+    } else {
+      reject(new Error(i18next.t("AVATAR_EDIT__INVALID_IMAGE_URL")));
+    }
   });
 
 // Define interface for cropped area pixels
@@ -19,27 +32,43 @@ export async function getCroppedImg(
   imageSrc: string,
   croppedAreaPixels: CroppedAreaPixels,
 ) {
-  const image = await createImage(imageSrc);
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
+  try {
+    if (!imageSrc) {
+      return "";
+    }
 
-  if (!ctx) {
-    return Promise.resolve("");
+    const image = await createImage(imageSrc);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      return "";
+    }
+
+    const { x, y, width, height } = croppedAreaPixels;
+
+    // Validate crop dimensions
+    if (width <= 0 || height <= 0) {
+      return "";
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+
+    // Draw the cropped image
+    ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+
+    return new Promise<string>((resolve) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          return resolve("");
+        }
+        const url = URL.createObjectURL(blob);
+        resolve(url);
+      }, "image/png");
+    });
+  } catch (error) {
+    console.log(error);
+    return "";
   }
-
-  const { x, y, width, height } = croppedAreaPixels;
-
-  canvas.width = width;
-  canvas.height = height;
-
-  ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
-
-  return new Promise<string>((resolve) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        return resolve("");
-      }
-      resolve(URL.createObjectURL(blob));
-    }, "image/png");
-  });
 }
