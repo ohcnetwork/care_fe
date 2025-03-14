@@ -425,7 +425,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                       <SelectContent>
                         {ContactPointSystems.map((system) => (
                           <SelectItem key={system} value={system}>
-                            {t(`contact_system_${system}`)}
+                            {t(`contact_system__${system}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
