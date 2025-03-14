@@ -164,7 +164,7 @@ export const EncounterShow = (props: Props) => {
           <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
               <nav
-                className="flex space-x-6 overflow-x-auto pb-2 pl-2"
+                className="flex gap-3 flex-wrap pb-2 pl-2"
                 id="encounter_tab_nav"
               >
                 {keysOf(tabs).map((tab) => (
