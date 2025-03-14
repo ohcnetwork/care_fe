@@ -6,15 +6,24 @@ const createImage = (url: string): Promise<HTMLImageElement> =>
     image.addEventListener("load", () => resolve(image));
     image.addEventListener("error", (error) => reject(error));
     image.setAttribute("crossOrigin", "anonymous");
+import DOMPurify from "dompurify";
 
+const createImage = (url: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener("load", () => resolve(image));
+    image.addEventListener("error", (error) => reject(error));
+    image.setAttribute("crossOrigin", "anonymous");
+
+    const sanitizedUrl = DOMPurify.sanitize(url.trim());
     // Add more detailed validation for the URL
     if (
-      url.startsWith("blob:") || // Accept blob URLs
-      ((url.startsWith("http://") || url.startsWith("https://")) &&
-        /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(url)) ||
-      url.startsWith("data:image/")
+      sanitizedUrl.startsWith("blob:") || // Accept blob URLs
+      ((sanitizedUrl.startsWith("http://") || sanitizedUrl.startsWith("https://")) &&
+        /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(sanitizedUrl)) ||
+      sanitizedUrl.startsWith("data:image/")
     ) {
-      image.src = url;
+      image.src = sanitizedUrl;
     } else {
       reject(new Error(i18next.t("AVATAR_EDIT__INVALID_IMAGE_URL")));
     }
