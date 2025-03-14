@@ -129,7 +129,7 @@ function PatientIndex() {
             <div className="flex flex-row md:flex-col gap-2 md:gap-0 md:flex-grow md:mr-8">
               <span className="text-xs font-medium">{t("location")}: </span>
               <span className="text-sm">
-                {appointment.facility?.name || "Unknown Facility"}
+                {appointment.facility?.name}
               </span>
             </div>
             <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start md:flex-none md:w-[80px] md:mr-8">
