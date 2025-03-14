@@ -1333,7 +1333,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     <div className="space-y-6">
                       {questionnaire.questions.map((question) => (
                         <div key={question.id} id={`question-${question.id}`}>
-                          {QuestionPreview(question, 0)}
+                          <QuestionPreview question={question} depth={0} />
                         </div>
                       ))}
                     </div>
@@ -1378,7 +1378,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     </div>
   );
 }
-function QuestionPreview(question: Question, depth: number) {
+function QuestionPreview({
+  question,
+  depth,
+}: {
+  question: Question;
+  depth: number;
+}) {
   const isRequired = question.required;
   const hasSubQuestions =
     question.type === "group" && (question.questions?.length ?? 0) > 0;
@@ -1539,9 +1545,13 @@ function QuestionPreview(question: Question, depth: number) {
 
       {hasSubQuestions && (
         <div className="border border-gray-200 rounded-md p-4 space-y-3 mt-2">
-          {question.questions?.map((subQuestion) =>
-            QuestionPreview(subQuestion, depth + 1),
-          )}
+          {question.questions?.map((subQuestion) => (
+            <QuestionPreview
+              key={subQuestion.id}
+              question={subQuestion}
+              depth={depth + 1}
+            />
+          ))}
         </div>
       )}
     </div>
