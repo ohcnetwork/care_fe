@@ -63,6 +63,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
+import { QuestionInput } from "@/components/Questionnaire/QuestionTypes/QuestionInput";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -1031,10 +1032,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   <div>
                     <CardTitle>
                       <p className="text-sm text-gray-700 font-medium mt-1">
-                        {questionnaire.questions?.length || 0}{" "}
-                        {questionnaire.questions?.length === 1
-                          ? t("question_one")
-                          : t("question_other")}
+                        {t("question", {
+                          count: questionnaire.questions?.length || 0,
+                        })}
                       </p>
                     </CardTitle>
                   </div>
@@ -1390,7 +1390,7 @@ function QuestionPreview({
     question.type === "group" && (question.questions?.length ?? 0) > 0;
 
   return (
-    <div className="space-y-2">
+    <div id={`question-${question.id}`} className="space-y-2">
       <div
         className={`pl-3 -ml-6 ${
           depth === 0
@@ -1405,143 +1405,26 @@ function QuestionPreview({
             {question.text || t("Untitled")}
             {isRequired && <span className="text-red-500 ml-1">*</span>}
           </span>
-          <Button variant="ghost" className="underline">
-            + {t("add_notes")}
-          </Button>
         </div>
       </div>
-
-      {question.type === "boolean" && (
-        <RadioGroup>
-          <div className="flex gap-4">
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="true" id={`boolean-yes-${question.id}`} />
-              <Label htmlFor={`boolean-yes-${question.id}`}>{t("yes")}</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="false" id={`boolean-no-${question.id}`} />
-              <Label htmlFor={`boolean-no-${question.id}`}>{t("no")}</Label>
-            </div>
-          </div>
-        </RadioGroup>
-      )}
-
-      {(question.type === "decimal" || question.type === "integer") && (
-        <Input
-          type="number"
-          className="border border-gray-300 rounded-md p-2 text-sm w-full"
-        />
-      )}
-
-      {question.type === "structured" && question.structured_type && (
-        <>
-          {question.structured_type === "symptom" && (
-            <Input placeholder="Search Symptoms..." className="w-full" />
-          )}
-
-          {question.structured_type === "diagnosis" && (
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Diagnosis..." />
-              </SelectTrigger>
-              <SelectContent></SelectContent>
-            </Select>
-          )}
-
-          {question.structured_type === "medication_request" && (
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose Medication..." />
-              </SelectTrigger>
-              <SelectContent></SelectContent>
-            </Select>
-          )}
-
-          {question.structured_type === "medication_statement" && (
-            <Input
-              type="text"
-              placeholder="Medication History..."
-              className="border border-gray-300 rounded-md p-2 text-sm w-full"
-              readOnly
-            />
-          )}
-
-          {question.structured_type === "allergy_intolerance" && (
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Alergies..." />
-              </SelectTrigger>
-              <SelectContent></SelectContent>
-            </Select>
-          )}
-
-          {question.structured_type === "encounter" && (
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Pick Encounter..." />
-              </SelectTrigger>
-              <SelectContent></SelectContent>
-            </Select>
-          )}
-
-          {question.structured_type === "appointment" && (
-            <Input
-              type="date"
-              className="border border-gray-300 rounded-md p-2 text-sm w-full"
-            />
-          )}
-        </>
-      )}
-
-      {(question.type === "date" ||
-        question.type === "dateTime" ||
-        question.type === "time") && (
-        <div className="flex gap-2">
-          <Input type="date" />
-          {(question.type === "dateTime" || question.type === "time") && (
-            <Input type="time" />
-          )}
-        </div>
-      )}
-
-      {(question.type === "string" || question.type === "text") && (
-        <Input className="border border-gray-300 rounded-md p-2 text-sm w-full" />
-      )}
-
-      {question.type === "url" && (
-        <Input
-          type="url"
-          className="border border-gray-300 rounded-md p-2 text-sm w-full"
-        />
-      )}
-      {question.type === "choice" && question.answer_option && (
-        <Select defaultValue={question.answer_option[0]?.value}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder={t("select")} />
-          </SelectTrigger>
-          <SelectContent>
-            {question.answer_option.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.display || option.value}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
-
-      {question.type === "quantity" && (
-        <div className="flex items-center gap-2">
-          <Input
-            type="number"
-            className="border border-gray-300 rounded-md p-2 text-sm w-full"
-          />
-          <span>{question.unit?.display || t("unit_unit(s)")}</span>
-        </div>
-      )}
-
-      {question.type === "display" && (
-        <p className="text-gray-600">{question.text}</p>
-      )}
+      <QuestionInput
+        question={question}
+        questionnaireResponses={[
+          {
+            question_id: question.id,
+            link_id: "",
+            values: [],
+            structured_type: question.structured_type ?? null,
+          },
+        ]}
+        updateQuestionnaireResponseCB={() => {}}
+        errors={[]}
+        clearError={() => {}}
+        patientId="preview"
+        encounterId="preview"
+        facilityId="preview"
+        disabled
+      />
 
       {hasSubQuestions && (
         <div className="border border-gray-200 rounded-md p-4 space-y-3 mt-2">
@@ -2087,7 +1970,7 @@ function QuestionEditor({
             <div className="bg-gray-100 rounded-lg p-1">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-gray-950 font-semibold">
-                  {t("sub_questions_for_group", {
+                  {t("sub_question_for_group", {
                     count: question.questions?.length || 0,
                     text,
                   })}
