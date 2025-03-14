@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Link } from "raviger";
 import { useCallback } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -220,12 +220,25 @@ export function EncounterList({
           className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
           variant="outline"
         >
-          {isLoading
-            ? t("loading")
-            : t("entity_count", {
-                count: queryEncounters?.count ?? 0,
+          {isLoading ? (
+            t("loading")
+          ) : queryEncounters?.count ? (
+            <Trans
+              i18nKey="entity_count_other"
+              values={{
+                count: queryEncounters?.count,
                 entity: "Encounter",
-              })}
+              }}
+            />
+          ) : (
+            <Trans
+              i18nKey="entity_count_one"
+              values={{
+                count: 0,
+                entity: "Encounter",
+              }}
+            />
+          )}
         </Badge>
       }
     >

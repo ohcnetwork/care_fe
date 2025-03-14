@@ -76,10 +76,15 @@ export default function FacilityUsers(props: { facilityId: string }) {
         >
           {userListFetching
             ? t("loading")
-            : t("entity_count", {
-                count: userListData?.count ?? 0,
-                entity: "User",
-              })}
+            : userListData?.count === 1
+              ? t("entity_count_one", {
+                  count: 1,
+                  entity: "User",
+                })
+              : t("entity_count_other", {
+                  count: userListData?.count ?? 0,
+                  entity: "User",
+                })}
         </Badge>
       }
     >

@@ -203,7 +203,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                   <SelectContent>
                     {DeviceStatuses.map((status) => (
                       <SelectItem key={status} value={status}>
-                        {t(`device_status_${status}`)}
+                        {t(`device_status__${status}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -1,5 +1,5 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 
@@ -8,18 +8,21 @@ interface EntityBadgeProps {
   count?: number | null | undefined;
   isFetching: boolean;
   translationParams?: Record<string, string>;
-  customTranslation?: string;
+  customTranslation?: React.ReactNode;
 }
 
 const EntityBadge: React.FC<EntityBadgeProps> = ({
   title,
   count,
   isFetching,
-  translationParams,
+  translationParams = {},
   customTranslation,
 }) => {
   const { t } = useTranslation();
-
+  const translationCountValue = {
+    count: count ?? 0,
+    ...translationParams,
+  };
   return (
     <div className="flex items-center">
       <h2 className="text-lg font-semibold">{title}</h2>
@@ -29,10 +32,18 @@ const EntityBadge: React.FC<EntityBadgeProps> = ({
       >
         {isFetching
           ? t("loading")
-          : t(customTranslation || "entity_count", {
-              count: count ?? 0,
-              ...translationParams,
-            })}
+          : customTranslation ||
+            (count && count == 1 ? (
+              <Trans
+                i18nKey={"entity_count_one"}
+                values={translationCountValue}
+              />
+            ) : (
+              <Trans
+                i18nKey={"entity_count_other"}
+                values={translationCountValue}
+              />
+            ))}
       </Badge>
     </div>
   );

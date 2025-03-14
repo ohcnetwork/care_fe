@@ -64,7 +64,13 @@ export default function OrganizationFacilities({
               title={t("facilities")}
               count={facilities?.count}
               isFetching={isFetching}
-              customTranslation="facility_count"
+              customTranslation={
+                facilities?.count === 1
+                  ? t("facility_count_one", {
+                      count: 1,
+                    })
+                  : t("facility_count_other", { count: facilities?.count ?? 0 })
+              }
             />
           </div>
           <AddFacilitySheet organizationId={id} />

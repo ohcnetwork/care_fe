@@ -235,7 +235,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                   variant="secondary"
                   className={getStatusColor(device.status)}
                 >
-                  {t(`device_status_${device.status}`)}
+                  {t(`device_status__${device.status}`)}
                 </Badge>
                 <Badge
                   variant="secondary"

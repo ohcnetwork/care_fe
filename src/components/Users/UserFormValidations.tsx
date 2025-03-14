@@ -1,5 +1,3 @@
-import { Trans } from "react-i18next";
-
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -9,7 +7,7 @@ export type UserType = "doctor" | "nurse" | "staff" | "volunteer";
 export type Gender = "male" | "female" | "non_binary" | "transgender";
 
 type Validation = {
-  description: string;
+  description: React.ReactNode;
   fulfilled: boolean;
 };
 
@@ -34,14 +32,14 @@ export const ValidationHelper = ({
       {isInputEmpty &&
         validations.map((validation, index) => (
           <div key={index} className="text-gray-500 mb-2 text-sm">
-            <Trans i18nKey={validation.description} />
+            {validation.description}
           </div>
         ))}
       {!isInputEmpty &&
         !allValid &&
         unfulfilledValidations.map((validation, index) => (
           <div key={index} className="text-gray-500 mb-2 text-sm">
-            <Trans i18nKey={validation.description} />
+            <div>{validation.description}</div>
           </div>
         ))}
       {allValid && (

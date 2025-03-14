@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const glob = require("glob");
 const scanner = require("i18next-scanner");
+const babel = require("@babel/core");
 
 async function extractAndCleanTranslations(options) {
   const { src, localesPath, extensions, locales } = options;
@@ -34,6 +35,12 @@ async function extractAndCleanTranslations(options) {
       suffix: "}}",
     },
     allowDynamicKeys: true,
+    plural: true,
+    trans: {
+      component: "Trans",
+      extensions: [".ts", ".tsx"],
+      key: "i18nKey",
+    },
   };
 
   const parser = new scanner.Parser(scanOptions);
@@ -49,6 +56,19 @@ async function extractAndCleanTranslations(options) {
         allUsedKeys.add(key);
       },
     );
+
+    if (content.includes("{ Trans, useTranslation }")) {
+      let jsContent = content;
+      const result = babel.transformSync(content, {
+        filename: filePath,
+        presets: ["@babel/preset-typescript"],
+      });
+      jsContent = result.code;
+      parser.parseTransFromString(jsContent, (key, options) => {
+        parser.set(key, options);
+        allUsedKeys.add(key);
+      });
+    }
   });
 
   // const localeFiles = glob.sync(`en.json`, { cwd: localesPath });

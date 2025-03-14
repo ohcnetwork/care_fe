@@ -113,7 +113,7 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
           {/* Hospitalisation Details */}
           <section>
             <h3 className="text-lg font-medium mb-3">
-              {t("hospitalisation_details")}
+              {t("hospitalization_details")}
             </h3>
             <div className="space-y-2 text-sm mt-4 bg-gray-50 p-2 rounded-md">
               <div className="flex justify-between">

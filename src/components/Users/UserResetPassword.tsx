@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -157,23 +157,41 @@ export default function UserResetPassword({
                             successMessage={t("password_success_message")}
                             validations={[
                               {
-                                description: "password_length_validation",
+                                description: (
+                                  <Trans
+                                    i18nKey={"password_length_validation"}
+                                  />
+                                ),
                                 fulfilled: field.value.length >= 8,
                               },
                               {
-                                description: "password_lowercase_validation",
+                                description: (
+                                  <Trans
+                                    i18nKey={"password_lowercase_validation"}
+                                  />
+                                ),
                                 fulfilled: /[a-z]/.test(field.value),
                               },
                               {
-                                description: "password_uppercase_validation",
+                                description: (
+                                  <Trans
+                                    i18nKey={"password_uppercase_validation"}
+                                  />
+                                ),
                                 fulfilled: /[A-Z]/.test(field.value),
                               },
                               {
-                                description: "password_number_validation",
+                                description: (
+                                  <Trans
+                                    i18nKey={"password_number_validation"}
+                                  />
+                                ),
                                 fulfilled: /\d/.test(field.value),
                               },
                               {
-                                description: "new_password_same_as_old",
+                                description: (
+                                  <Trans i18nKey={"new_password_same_as_old"} />
+                                ),
                                 fulfilled:
                                   field.value !== form.watch("old_password"),
                               },

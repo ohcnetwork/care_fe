@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -375,27 +375,47 @@ export default function UserForm({
                           successMessage={t("username_success_message")}
                           validations={[
                             {
-                              description: "username_min_length_validation",
+                              description: (
+                                <Trans
+                                  i18nKey={"username_min_length_validation"}
+                                />
+                              ),
                               fulfilled: (field.value || "").length >= 4,
                             },
                             {
-                              description: "username_max_length_validation",
+                              description: (
+                                <Trans
+                                  i18nKey={"username_max_length_validation"}
+                                />
+                              ),
                               fulfilled: (field.value || "").length <= 16,
                             },
                             {
-                              description: "username_characters_validation",
+                              description: (
+                                <Trans
+                                  i18nKey={"username_characters_validation"}
+                                />
+                              ),
                               fulfilled: /^[a-z0-9._-]*$/.test(
                                 field.value || "",
                               ),
                             },
                             {
-                              description: "username_start_end_validation",
+                              description: (
+                                <Trans
+                                  i18nKey={"username_start_end_validation"}
+                                />
+                              ),
                               fulfilled: /^[a-z0-9].*[a-z0-9]$/.test(
                                 field.value || "",
                               ),
                             },
                             {
-                              description: "username_consecutive_validation",
+                              description: (
+                                <Trans
+                                  i18nKey={"username_consecutive_validation"}
+                                />
+                              ),
                               fulfilled: !/(?:[._-]{2,})/.test(
                                 field.value || "",
                               ),
@@ -440,19 +460,31 @@ export default function UserForm({
                           successMessage={t("password_success_message")}
                           validations={[
                             {
-                              description: "password_length_validation",
+                              description: (
+                                <Trans i18nKey={"password_length_validation"} />
+                              ),
                               fulfilled: (field.value || "").length >= 8,
                             },
                             {
-                              description: "password_lowercase_validation",
+                              description: (
+                                <Trans
+                                  i18nKey={"password_lowercase_validation"}
+                                />
+                              ),
                               fulfilled: /[a-z]/.test(field.value || ""),
                             },
                             {
-                              description: "password_uppercase_validation",
+                              description: (
+                                <Trans
+                                  i18nKey={"password_uppercase_validation"}
+                                />
+                              ),
                               fulfilled: /[A-Z]/.test(field.value || ""),
                             },
                             {
-                              description: "password_number_validation",
+                              description: (
+                                <Trans i18nKey={"password_number_validation"} />
+                              ),
                               fulfilled: /\d/.test(field.value || ""),
                             },
                           ]}

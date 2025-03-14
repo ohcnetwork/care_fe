@@ -30,7 +30,7 @@ export const patientTabs = [
     component: EncounterHistory,
   },
   {
-    route: "health-profile",
+    route: "health_profile",
     component: HealthProfileSummary,
   },
   {
