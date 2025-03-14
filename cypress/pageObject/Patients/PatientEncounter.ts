@@ -20,7 +20,6 @@ export class PatientEncounter {
     cy.verifyAndClickElement('[data-cy="edit-prescription"]', "Edit");
     return this;
   }
-  //
   addMedication(
     medicineName,
     dosage,
