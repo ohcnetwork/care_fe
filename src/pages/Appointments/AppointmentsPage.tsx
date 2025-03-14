@@ -761,7 +761,7 @@ function AppointmentRow(props: {
             <p className="text-gray-500">{t("no_appointments")}</p>
           </div>
         ) : (
-          <Table className="p-2 border-separate border-spacing-y-3 min-w-[900px]">
+          <Table className="p-2 border-separate border-spacing-y-3">
             <TableHeader>
               <TableRow>
                 <TableHead className="pl-8 font-semibold text-black text-xs">
