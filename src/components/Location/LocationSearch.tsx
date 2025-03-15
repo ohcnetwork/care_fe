@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -29,6 +31,7 @@ interface LocationSearchProps {
   onSelect: (location: LocationList | null) => void;
   disabled?: boolean;
   value?: LocationList | null;
+  className?: string;
 }
 
 export function LocationSearch({
@@ -37,6 +40,7 @@ export function LocationSearch({
   onSelect,
   disabled,
   value,
+  className,
 }: LocationSearchProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -54,7 +58,10 @@ export function LocationSearch({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={disabled}>
         <div
-          className="w-full h-10 px-3 rounded-lg border border-gray-300 text-sm shadow-sm transition-colors bg-white flex items-center justify-between cursor-pointer text-gray-950"
+          className={cn(
+            "w-full h-9 px-3 rounded-md border text-sm flex items-center justify-between cursor-pointer", // Default styles
+            className,
+          )}
           role="combobox"
           aria-expanded={open}
         >
@@ -75,7 +82,7 @@ export function LocationSearch({
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="min-w-[250px] max-w-[400px] w-full p-0">
+      <PopoverContent className="w-[400px] p-0">
         <Command className="pt-1">
           <CommandInput
             placeholder="Search locations..."
