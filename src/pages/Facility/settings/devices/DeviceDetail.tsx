@@ -38,6 +38,7 @@ import query from "@/Utils/request/query";
 import { ContactPoint } from "@/types/common/contactPoint";
 import deviceApi from "@/types/device/deviceApi";
 
+import DeviceEncounterHistory from "./DeviceEncounterHistory";
 import AssociateLocationSheet from "./components/AssociateLocationSheet";
 
 interface Props {
@@ -145,12 +146,16 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
         <PageTitle title={device.registered_name} />
         <div className="flex flex-wrap justify-center gap-3">
           <div className="flex  gap-2 flex-wrap flex-col sm:flex-row">
-            <Link href={`/devices/${deviceId}/encounterHistory`}>
-              <Button variant="outline_primary">
-                <CareIcon icon="l-medkit" className="h-4 w-4" />
-                {t("encounter_history")}
-              </Button>
-            </Link>
+            <DeviceEncounterHistory
+              trigger={
+                <Button variant="outline_primary">
+                  <CareIcon icon="l-medkit" className="h-4 w-4" />
+                  {t("encounter_history")}
+                </Button>
+              }
+              facilityId={facilityId}
+              deviceId={deviceId}
+            />
             <Link href={`/devices/${deviceId}/locationHistory`}>
               <Button variant="outline_primary" className="sm:mr-3">
                 <CareIcon icon="l-location-point" className="h-4 w-4" />
