@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import LocationPicker from "@/components/Facility/LocationPicker";
 import { FacilityModel } from "@/components/Facility/models";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
@@ -399,30 +400,16 @@ export default function FacilityForm({
 
         {/* Location Information */}
         <div className="space-y-4 rounded-lg border p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">{t("location_details")}</h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleGetCurrentLocation}
-              disabled={isGettingLocation}
-              className="flex items-center gap-2"
-              data-cy="get-location-button"
-            >
-              {isGettingLocation ? (
-                <>
-                  <CareIcon icon="l-spinner" className="h-4 w-4 animate-spin" />
-                  {t("getting_location")}
-                </>
-              ) : (
-                <>
-                  <CareIcon icon="l-location-point" className="h-4 w-4" />
-                  {t("get_current_location")}
-                </>
-              )}
-            </Button>
-          </div>
+          <LocationPicker
+            latitude={form.watch("latitude")}
+            longitude={form.watch("longitude")}
+            onLocationSelect={(lat, lng) => {
+              form.setValue("latitude", lat, { shouldDirty: true });
+              form.setValue("longitude", lng, { shouldDirty: true });
+            }}
+            isGettingLocation={isGettingLocation}
+            onGetCurrentLocation={handleGetCurrentLocation}
+          />
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
