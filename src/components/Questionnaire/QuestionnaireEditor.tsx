@@ -393,15 +393,6 @@ function TagSelector({
     });
   };
 
-  // Filter tags based on search query
-  const filteredTags =
-    selection.available?.results.filter((tag) =>
-      tag.name.toLowerCase().includes(selection.searchQuery.toLowerCase()),
-    ) || [];
-
-  // Check if there are no matching tags and we have a search query
-  const noMatchingTags = selection.searchQuery && filteredTags.length === 0;
-
   if (id) {
     return (
       <>
@@ -480,46 +471,48 @@ function TagSelector({
               onValueChange={selection.setSearchQuery}
             />
             <CommandList>
-              <CommandGroup>
-                {selection.isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  filteredTags.map((tag) => (
-                    <CommandItem
-                      key={tag.id}
-                      value={tag.id}
-                      onSelect={() => selection.onToggle(tag.id)}
-                    >
-                      <div className="flex flex-1 items-center gap-2">
-                        <Tags className="h-4 w-4" />
-                        <span>{tag.name}</span>
-                      </div>
-                      {selection.selectedIds.includes(tag.id) && (
-                        <Check className="h-4 w-4" />
-                      )}
-                    </CommandItem>
-                  ))
-                )}
-              </CommandGroup>
-              {noMatchingTags && (
-                <CommandEmpty>
-                  <div
-                    className="flex items-center gap-2 text-primary rounded-sm px-4 py-3 cursor-pointer hover:bg-accent"
-                    onClick={() => handleCreateTag(selection.searchQuery)}
+              {selection.isLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : (
+                selection.available?.results.map((tag) => (
+                  <CommandItem
+                    key={tag.id}
+                    value={tag.name}
+                    onSelect={() => selection.onToggle(tag.id)}
                   >
-                    {isCreating ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Plus className="h-4 w-4" />
+                    <div className="flex flex-1 items-center gap-2">
+                      <Building className="h-4 w-4" />
+                      <span>{tag.name}</span>
+                    </div>
+                    {selection.selectedIds.includes(tag.id) && (
+                      <Check className="h-4 w-4" />
                     )}
-                    <span>
-                      {t("create_new")} "{selection.searchQuery}" {t("tag")}
-                    </span>
-                  </div>
-                </CommandEmpty>
+                  </CommandItem>
+                ))
               )}
+              {selection.searchQuery &&
+                selection.available?.results.filter(
+                  (r) => r.name === selection.searchQuery,
+                ).length === 0 && (
+                  <CommandItem
+                    value={`create-${selection.searchQuery}`}
+                    onSelect={() => handleCreateTag(selection.searchQuery)}
+                    className="text-primary"
+                  >
+                    <div className="flex items-center gap-2">
+                      {isCreating ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                      <span>
+                        {t("create_new")} "{selection.searchQuery}" {t("tag")}
+                      </span>
+                    </div>
+                  </CommandItem>
+                )}
             </CommandList>
           </Command>
         </PopoverContent>
@@ -527,6 +520,7 @@ function TagSelector({
     </div>
   );
 }
+
 function QuestionnaireProperties({
   questionnaire,
   updateQuestionnaireField,
@@ -545,7 +539,6 @@ function QuestionnaireProperties({
           value={questionnaire.status}
           onChange={(val) => updateQuestionnaireField("status", val)}
         />
-
         <SubjectTypeSelector
           value={questionnaire.subject_type}
           onChange={(val) => updateQuestionnaireField("subject_type", val)}
