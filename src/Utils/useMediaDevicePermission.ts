@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-export const useCamera = () => {
+export const useMediaDevicePermission = () => {
   const toastShownRef = useRef(false);
   const { t } = useTranslation();
 
@@ -30,7 +30,7 @@ export const useCamera = () => {
         return { hasPermission: false, mediaStream: null };
       }
     },
-    [t],
+    [],
   );
 
   return { requestPermission };

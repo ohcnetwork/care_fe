@@ -525,7 +525,7 @@
   "by_name": "by <strong>{{by}}</strong>",
   "camera": "Camera",
   "camera_bed_link_success": "Camera linked to bed successfully.",
-  "camera_permission_denied": "Camera Permission Denied",
+  "camera_permission_denied": "Camera permission denied",
   "camera_was_linked_to_bed": "This camera was linked to this bed",
   "cancel": "Cancel",
   "cancel_appointment": "Cancel Appointment",
