@@ -197,10 +197,10 @@ const SymptomRow = React.memo(function SymptomRow({
             symptom.verification_status === "entered_in_error",
         })}
       >
-        <TableCell className="min-w-[220px] font-medium py-1 pl-1">
+        <TableCell className="font-medium py-1 pl-1">
           {symptom.code.display}
         </TableCell>
-        <TableCell className="min-w-[100px] py-1 px-1">
+        <TableCell className="py-1 px-1">
           <Input
             type="date"
             value={symptom.onset?.onset_datetime || ""}
@@ -210,7 +210,7 @@ const SymptomRow = React.memo(function SymptomRow({
           />
         </TableCell>
 
-        <TableCell className="min-w-[80px] py-1 px-0.5">
+        <TableCell className="py-1 px-0.5">
           <Select
             value={symptom.clinical_status}
             onValueChange={handleStatusChange}
@@ -229,7 +229,7 @@ const SymptomRow = React.memo(function SymptomRow({
           </Select>
         </TableCell>
 
-        <TableCell className="min-w-[80px] py-1 px-0.5">
+        <TableCell className="py-1 px-0.5">
           <Select
             value={symptom.severity}
             onValueChange={handleSeverityChange}
@@ -252,7 +252,7 @@ const SymptomRow = React.memo(function SymptomRow({
           </Select>
         </TableCell>
 
-        <TableCell className="min-w-[35px] py-1 px-0">
+        <TableCell className="py-1 px-0">
           <SymptomActionsMenu
             showNotes={showNotes}
             verificationStatus={symptom.verification_status}
