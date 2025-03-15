@@ -1963,6 +1963,7 @@
   "quantity_requested": "Quantity Requested",
   "quantity_required": "Quantity Required",
   "question": "Question",
+  "questionnaire_appointment_no_encounter": "Appointment cannot be recorded without an active encounter",
   "questionnaire_diagnosis_no_encounter": "Diagnosis cannot be recorded without an active encounter",
   "questionnaire_error_loading": "Error loading questionnaire",
   "questionnaire_medication_request_no_encounter": "Medication requests cannot be recorded without an active encounter",
