@@ -95,6 +95,7 @@ export function QuestionInput({
       clearError,
       index,
       patientId,
+      errors,
     };
 
     switch (question.type) {
