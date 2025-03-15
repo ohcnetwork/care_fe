@@ -56,7 +56,7 @@ export default function AssociateDeviceSheet({
   const { mutate: associateDevice, isPending: isPendingAssociation } =
     useMutation({
       mutationFn: mutate(deviceApi.associateEncounter, {
-        pathParams: { facilityId, id: selectedDevice?.id },
+        pathParams: { facilityId, deviceId: selectedDevice?.id },
       }),
       onSuccess: () => {
         queryClient.invalidateQueries({

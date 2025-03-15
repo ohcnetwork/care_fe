@@ -51,13 +51,13 @@ export default {
     TBody: Type<{ location: string }>(),
   },
   associateEncounter: {
-    path: "/api/v1/facility/{facilityId}/device/{id}/associate_encounter/",
+    path: "/api/v1/facility/{facilityId}/device/{deviceId}/associate_encounter/",
     method: HttpMethod.POST,
     TRes: Type<DeviceDetail>(),
     TBody: Type<{ encounter: string }>(),
   },
   encounterHistory: {
-    path: "/api/v1/facility/{facilityId}/device/{id}/encounter_history/",
+    path: "/api/v1/facility/{facilityId}/device/{deviceId}/encounter_history/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<DeviceEncounterHistory>>(),
   },

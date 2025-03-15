@@ -33,7 +33,7 @@ const DeviceEncounterHistory = ({ facilityId, deviceId }: Props) => {
       },
       pathParams: {
         facilityId,
-        id: deviceId,
+        deviceId,
       },
     }),
   });
