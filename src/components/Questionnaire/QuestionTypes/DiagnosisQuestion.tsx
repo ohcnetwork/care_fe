@@ -444,27 +444,13 @@ const DiagnosisTableRow = ({
   onUpdate,
   onRemove,
 }: DiagnosisItemProps) => {
-  const [showNotes, setShowNotes] = useState(diagnosis.note !== undefined);
+  const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
 
   const rowClassName = `group ${
     diagnosis.verification_status === "entered_in_error"
       ? "opacity-40 pointer-events-none"
-      : diagnosis.clinical_status === "inactive"
-        ? "opacity-60"
-        : diagnosis.clinical_status === "resolved"
-          ? "line-through"
-          : ""
+      : ""
   }`;
-
-  const handleNotesToggle = () => {
-    if (showNotes) {
-      setShowNotes(false);
-      onUpdate?.({ note: undefined });
-    } else {
-      setShowNotes(true);
-      onUpdate?.({ note: "" });
-    }
-  };
 
   return (
     <>
@@ -543,35 +529,11 @@ const DiagnosisTableRow = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleNotesToggle}>
+              <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
                 <Pencil2Icon className="h-4 w-4 mr-2" />
                 {showNotes ? t("hide_notes") : t("add_notes")}
               </DropdownMenuItem>
-              {diagnosis.clinical_status !== "active" && (
-                <DropdownMenuItem
-                  onClick={() => onUpdate?.({ clinical_status: "active" })}
-                >
-                  <CheckCircledIcon className="h-4 w-4 mr-2" />
-                  {t("mark_active")}
-                </DropdownMenuItem>
-              )}
-              {diagnosis.clinical_status !== "inactive" && (
-                <DropdownMenuItem
-                  onClick={() => onUpdate?.({ clinical_status: "inactive" })}
-                >
-                  <CircleBackslashIcon className="h-4 w-4 mr-2" />
-                  {t("mark_inactive")}
-                </DropdownMenuItem>
-              )}
-              {diagnosis.clinical_status !== "resolved" && (
-                <DropdownMenuItem
-                  onClick={() => onUpdate?.({ clinical_status: "resolved" })}
-                >
-                  <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
-                  {t("mark_resolved")}
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
+
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onClick={onRemove}
