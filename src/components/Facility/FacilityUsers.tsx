@@ -84,7 +84,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
       }
     >
       <hr className="mt-4"></hr>
-      <div className="flex flex-col sm:flex-row sm:items-center  sm:justify-between gap-4 m-5 ml-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 m-5 ml-0">
         <Input
           id="search-by-username"
           name="username"
