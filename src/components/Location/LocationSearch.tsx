@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -42,7 +42,6 @@ export function LocationSearch({
   value,
   className,
 }: LocationSearchProps) {
-  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
