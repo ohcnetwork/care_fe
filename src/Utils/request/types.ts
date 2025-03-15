@@ -71,3 +71,7 @@ export interface PaginatedResponse<TItem> {
   count: number;
   results: TItem[];
 }
+
+export interface UpsertRequest<TCreate, TUpdate> {
+  datapoints: (TCreate | (TUpdate & { id: string }))[];
+}

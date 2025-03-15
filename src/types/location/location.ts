@@ -1,3 +1,15 @@
+import {
+  Bed,
+  Building,
+  Building2,
+  Car,
+  Eye,
+  Home,
+  Hospital,
+  LucideIcon,
+  Map,
+} from "lucide-react";
+
 import { Encounter } from "@/types/emr/encounter";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { Code } from "@/types/questionnaire/code";
@@ -59,3 +71,21 @@ export const LocationFormOptions = [
   "jdn",
   "vi",
 ] as const;
+
+export const LocationTypeIcons = {
+  bd: Bed, // bed
+  wa: Hospital, // ward
+  lvl: Building2, // level/floor
+  bu: Building, // building
+  si: Map, // site
+  wi: Building2, // wing
+  co: Building2, // corridor
+  ro: Home, // room
+  ve: Car, // vehicle
+  ho: Home, // house
+  ca: Car, // carpark
+  rd: Car, // road
+  area: Map, // area
+  jdn: Map, // garden
+  vi: Eye, // virtual
+} as const satisfies Record<LocationForm, LucideIcon>;

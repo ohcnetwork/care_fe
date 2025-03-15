@@ -1,24 +1,25 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { Building } from "lucide-react";
+import { Building, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Autocomplete from "@/components/ui/autocomplete";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
   FacilityOrganization,
   FacilityOrganizationResponse,
 } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface FacilityOrganizationSelectorProps {
-  value?: string;
-  onChange: (value: string) => void;
-  required?: boolean;
+  value?: string | null;
+  onChange: (value: string | null) => void;
   facilityId: string;
 }
 
@@ -32,29 +33,35 @@ export default function FacilityOrganizationSelector(
   props: FacilityOrganizationSelectorProps,
 ) {
   const { t } = useTranslation();
-  const { onChange, required, facilityId } = props;
+  const { onChange, facilityId } = props;
   const [selectedLevels, setSelectedLevels] = useState<FacilityOrganization[]>(
     [],
   );
   const [selectedOrganization, setSelectedOrganization] =
     useState<FacilityOrganization | null>(null);
   const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
+  const [showAllOrgs, setShowAllOrgs] = useState(false);
 
   const { data: rootOrganizations } = useQuery<FacilityOrganizationResponse>({
-    queryKey: ["organizations-root", facilityOrgSearch],
-    queryFn: query.debounced(routes.facilityOrganization.list, {
-      pathParams: { facilityId },
-      queryParams: {
-        parent: "",
-        name: facilityOrgSearch,
+    queryKey: ["organizations-root", facilityOrgSearch, showAllOrgs],
+    queryFn: query.debounced(
+      showAllOrgs
+        ? facilityOrganizationApi.list
+        : facilityOrganizationApi.listMine,
+      {
+        pathParams: { facilityId },
+        queryParams: {
+          parent: "",
+          name: facilityOrgSearch,
+        },
       },
-    }),
+    ),
   });
 
   const organizationQueries = useQueries({
     queries: selectedLevels.map((level, _index) => ({
       queryKey: ["organizations", level.id, facilityOrgSearch],
-      queryFn: query.debounced(routes.facilityOrganization.list, {
+      queryFn: query.debounced(facilityOrganizationApi.list, {
         pathParams: { facilityId },
         queryParams: {
           parent: level.id,
@@ -103,8 +110,21 @@ export default function FacilityOrganizationSelector(
       onChange(lastOrg.id);
     } else {
       setSelectedOrganization(null);
-      onChange("");
+      onChange(null);
     }
+  };
+
+  const handleRemoveOrganization = () => {
+    setSelectedLevels([]);
+    setSelectedOrganization(null);
+    onChange(null);
+  };
+
+  const handleOrganizationViewChange = (value: string) => {
+    setShowAllOrgs(value === "all");
+    setSelectedLevels([]);
+    setSelectedOrganization(null);
+    onChange(null);
   };
 
   const renderOrganizationLevel = (level: number) => {
@@ -156,11 +176,27 @@ export default function FacilityOrganizationSelector(
   };
 
   return (
-    <>
-      <Label className="mb-2 block">
-        {t("select_department")}
-        {required && <span className="text-red-500">*</span>}
-      </Label>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <Label>
+            {t("select_department")}
+            <span className="text-red-500 ml-0.5">*</span>
+          </Label>
+        </div>
+      </div>
+
+      <Tabs
+        value={showAllOrgs ? "all" : "mine"}
+        onValueChange={handleOrganizationViewChange}
+        className="w-full sm:w-auto"
+      >
+        <TabsList className="grid w-full grid-cols-2 sm:w-[300px]">
+          <TabsTrigger value="mine">{t("my_organizations")}</TabsTrigger>
+          <TabsTrigger value="all">{t("all_organizations")}</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       <div className="space-y-3">
         {selectedOrganization && (
           <div className="flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5">
@@ -175,6 +211,15 @@ export default function FacilityOrganizationSelector(
                 </p>
               )}
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900"
+              onClick={handleRemoveOrganization}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">{t("remove_organization")}</span>
+            </Button>
           </div>
         )}
         <div className="space-y-1.5">
@@ -186,6 +231,6 @@ export default function FacilityOrganizationSelector(
             renderOrganizationLevel(selectedLevels.length)}
         </div>
       </div>
-    </>
+    </div>
   );
 }

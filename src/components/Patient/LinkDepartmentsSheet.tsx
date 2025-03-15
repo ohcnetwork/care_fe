@@ -156,7 +156,7 @@ export default function LinkDepartmentsSheet({
   onUpdate,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<string>("");
+  const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { mutate: addOrganization, isPending: isAdding } = useMutation({
@@ -176,7 +176,7 @@ export default function LinkDepartmentsSheet({
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
       toast.success(t("organization_added_successfully"));
-      setSelectedOrg("");
+      setSelectedOrg(null);
       setOpen(false);
       onUpdate?.();
     },
