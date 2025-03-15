@@ -2,10 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  formatPhoneNumberIntl,
-  isValidPhoneNumber,
-} from "react-phone-number-input";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -55,19 +53,18 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     },
   ];
 
-  const handleSearch = useCallback(
-    (key: string, value: string) => {
-      const searchParams = {
-        name: key === "username" ? value : "",
-        phone_number:
-          key === "phone_number" && isValidPhoneNumber(value)
+  const handleSearch = useCallback((key: string, value: string) => {
+    const searchParams = {
+      name: key === "username" ? value : "",
+      phone_number:
+        key === "phone_number"
+          ? isValidPhoneNumber(value)
             ? value
-            : undefined,
-      };
-      updateQuery(searchParams);
-    },
-    [updateQuery],
-  );
+            : undefined
+          : undefined,
+    };
+    updateQuery(searchParams);
+  }, []);
 
   const handleFieldChange = () => {
     updateQuery({
@@ -107,44 +104,50 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   return (
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
-        <div className="flex flex-col justify-between items-start gap-4 md:flex-row md:items-center">
-          <EntityBadge
-            title={t("users")}
-            count={users?.count}
-            isFetching={isFetchingUsers}
-            translationParams={{ entity: "User" }}
-          />
-          <div className="flex gap-2 w-full md:w-auto">
+        <div className="justify-between items-center flex flex-wrap">
+          <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
+            <EntityBadge
+              title={t("users")}
+              count={users?.count}
+              isFetching={isFetchingUsers}
+              translationParams={{ entity: "User" }}
+            />
+          </div>
+          <div className="gap-2 flex flex-wrap mt-2">
             <AddUserSheet
               open={openAddUserSheet}
-              setOpen={(open) => updateQuery({ sheet: open ? "add" : "" })}
-              onUserCreated={(user) =>
-                updateQuery({ sheet: "link", username: user.username })
-              }
+              setOpen={(open) => {
+                updateQuery({ sheet: open ? "add" : "" });
+              }}
+              onUserCreated={(user) => {
+                updateQuery({ sheet: "link", username: user.username });
+              }}
               organizationId={id}
             />
             <LinkUserSheet
               organizationId={id}
               open={openLinkUserSheet}
-              setOpen={(open) =>
-                updateQuery({ sheet: open ? "link" : "", username: "" })
-              }
+              setOpen={(open) => {
+                updateQuery({ sheet: open ? "link" : "", username: "" });
+              }}
               preSelectedUsername={qParams.username}
             />
           </div>
         </div>
-        <SearchByMultipleFields
-          id="user-search"
-          options={searchOptions}
-          initialOptionIndex={Math.max(
-            searchOptions.findIndex((option) => option.value !== ""),
-            0,
-          )}
-          onSearch={handleSearch}
-          onFieldChange={handleFieldChange}
-          className="w-full"
-          data-cy="search-user"
-        />
+        <div className="flex gap-2">
+          <SearchByMultipleFields
+            id="user-search"
+            options={searchOptions}
+            initialOptionIndex={Math.max(
+              searchOptions.findIndex((option) => option.value !== ""),
+              0,
+            )}
+            onSearch={handleSearch}
+            onFieldChange={handleFieldChange}
+            className="w-full"
+            data-cy="search-user"
+          />
+        </div>
         {isFetchingUsers ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <CardGridSkeleton count={6} />
@@ -170,7 +173,8 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                         imageUrl={userRole.user.profile_picture_url}
                         className="h-10 w-10 flex-shrink-0 sm:h-12 sm:w-12 lg:h-14 lg:w-14 text-lg sm:text-xl lg:text-2xl"
                       />
-                      <div className="flex flex-col flex-1 min-w-0">
+
+                      <div className="flex flex-col min-w-0 flex-1">
                         <div className="flex flex-col gap-1">
                           <div className="flex items-start justify-between gap-2">
                             <h1 className="text-base font-bold leading-tight truncate">
@@ -181,14 +185,14 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                               <UserStatusIndicator user={userRole.user} />
                             </span>
                           </div>
-                          <span className="text-sm text-gray-500 truncate">
+                          <span className="text-sm text-gray-500 mr-2 break-words">
                             {userRole.user.username}
                           </span>
                         </div>
-                        <div className="mt-2 grid grid-cols-1 gap-2 text-sm">
+                        <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
                           <div>
                             <div className="text-gray-500">{t("role")}</div>
-                            <div className="font-medium break-words">
+                            <div className="font-medium truncate">
                               {userRole.role.name ?? "-"}
                             </div>
                           </div>
@@ -196,7 +200,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                             <div className="text-gray-500">
                               {t("phone_number")}
                             </div>
-                            <div className="font-medium break-words">
+                            <div className="font-medium truncate">
                               {userRole.user.phone_number
                                 ? formatPhoneNumberIntl(
                                     userRole.user.phone_number,
@@ -207,32 +211,24 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                         </div>
                       </div>
                     </div>
-                    <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:justify-end">
+
+                    <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
                       <EditUserRoleSheet
                         organizationId={id}
                         userRole={userRole}
                         trigger={
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full sm:w-auto"
-                          >
-                            {t("edit_role")}
+                          <Button variant="outline" size="sm">
+                            <span>{t("edit_role")}</span>
                           </Button>
                         }
                       />
-                      <Button
-                        asChild
-                        variant="outline"
-                        size="sm"
-                        className="w-full sm:w-auto"
-                      >
+                      <Button asChild variant="outline" size="sm">
                         <Link href={`/users/${userRole.user.username}`}>
                           <CareIcon
                             icon="l-arrow-up-right"
                             className="text-lg mr-1"
                           />
-                          {t("see_details")}
+                          <span>{t("see_details")}</span>
                         </Link>
                       </Button>
                     </div>
