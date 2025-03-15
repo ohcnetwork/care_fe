@@ -220,9 +220,11 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
   return (
     <React.Fragment>
       <div
-        className={`p-4 border-t border-gray-200 ${isInactive ? "bg-gray-100" : ""}`}
+        className={`p-4 border-t border-gray-200 ${isInactive ? "bg-gray-100 opacity-80" : ""}`}
       >
-        <div className="font-semibold truncate">
+        <div
+          className={`font-semibold truncate ${isInactive ? "line-through" : ""}`}
+        >
           {medication.medication?.display}
         </div>
         <MedicationBadges medication={medication} />
@@ -255,7 +257,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
         return (
           <div
             key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-            className={`p-4 border-t border-gray-200 relative text-sm ${isInactive ? "bg-gray-100" : ""}`}
+            className={`p-4 border-t relative text-sm ${isInactive ? "bg-gray-100 opacity-80" : ""}`}
           >
             {administrationRecords?.map((admin) => {
               const colorClass =

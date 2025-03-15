@@ -80,9 +80,11 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
             return (
               <TableRow
                 key={medication.id}
-                className={`divide-x font-medium ${isInactive ? "bg-gray-100" : ""}`}
+                className={`divide-x font-medium ${isInactive ? "bg-gray-200 opacity-40" : ""}`}
               >
-                <TableCell className="py-2 px-3">
+                <TableCell
+                  className={`py-2 px-3 $ ${isInactive ? "line-through" : ""}`}
+                >
                   {medication.medication?.display}
                 </TableCell>
                 <TableCell className="py-2 px-3">{dosage}</TableCell>
