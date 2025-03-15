@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -16,7 +17,7 @@ interface UseCameraSelectOptions {
 }
 
 const useCameraSelect = ({ onChange }: UseCameraSelectOptions = {}) => {
-  const [devices, setDevices] = useState<any[]>([]);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const { preferredDeviceId, setDeviceId } = usePreferredMediaDevice();
 
@@ -29,27 +30,36 @@ const useCameraSelect = ({ onChange }: UseCameraSelectOptions = {}) => {
         );
         setDevices(videoDevices);
 
-        let initialId = preferredDeviceId;
-        if (initialId != null) {
-          const exists = videoDevices.some(
-            (device) => device.deviceId === initialId,
+        let deviceId = preferredDeviceId;
+        if (deviceId != null) {
+          const filteredId = videoDevices.some(
+            (device) => device.deviceId === deviceId,
           );
-          if (!exists && videoDevices.length > 0) {
-            initialId = videoDevices[0].deviceId;
+          if (!filteredId && videoDevices.length > 0) {
+            deviceId = videoDevices[0].deviceId;
           }
         } else {
-          initialId = videoDevices[0].deviceId;
+          deviceId = videoDevices.length > 0 ? videoDevices[0].deviceId : "";
         }
-        setSelectedDeviceId(initialId);
-        if (initialId && onChange) {
-          onChange(initialId);
+        setSelectedDeviceId(deviceId);
+        if (deviceId && onChange) {
+          onChange(deviceId);
         }
       } catch {
-        toast.error("Error fetching camera devices");
+        toast.error(t("error_fetching_camera_devices"));
       }
     };
-
     getDevices();
+    const onDeviceChange = () => {
+      getDevices();
+    };
+    navigator.mediaDevices.addEventListener("devicechange", onDeviceChange);
+    return () => {
+      navigator.mediaDevices.removeEventListener(
+        "devicechange",
+        onDeviceChange,
+      );
+    };
   }, [onChange, preferredDeviceId]);
 
   const handleValueChange = (value: string) => {

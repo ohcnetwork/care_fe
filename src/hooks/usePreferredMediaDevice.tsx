@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { useState } from "react";
 
 const usePreferredMediaDevice = () => {
@@ -15,7 +16,7 @@ const usePreferredMediaDevice = () => {
       try {
         localStorage.setItem("preferredDeviceId", deviceId);
       } catch {
-        throw new Error("Failed to save device preference to localStorage");
+        throw new Error(t("failed_to_save_preferred_device_to_localstorage"));
       }
     }
     setPreferredDeviceId(deviceId);
