@@ -1,6 +1,4 @@
 import {
-  CheckCircledIcon,
-  CircleBackslashIcon,
   DotsVerticalIcon,
   MinusCircledIcon,
   Pencil2Icon,
@@ -15,7 +13,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -272,43 +269,6 @@ export function DiagnosisQuestion({
                           ? t("hide_notes")
                           : t("add_notes")}
                       </DropdownMenuItem>
-                      {diagnosis.clinical_status !== "active" && (
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleUpdateDiagnosis(index, {
-                              clinical_status: "active",
-                            })
-                          }
-                        >
-                          <CheckCircledIcon className="h-4 w-4 mr-2" />
-                          {t("mark_active")}
-                        </DropdownMenuItem>
-                      )}
-                      {diagnosis.clinical_status !== "inactive" && (
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleUpdateDiagnosis(index, {
-                              clinical_status: "inactive",
-                            })
-                          }
-                        >
-                          <CircleBackslashIcon className="h-4 w-4 mr-2" />
-                          {t("mark_inactive")}
-                        </DropdownMenuItem>
-                      )}
-                      {diagnosis.clinical_status !== "resolved" && (
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleUpdateDiagnosis(index, {
-                              clinical_status: "resolved",
-                            })
-                          }
-                        >
-                          <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
-                          {t("mark_resolved")}
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
                         onClick={() => handleRemoveDiagnosis(index)}
