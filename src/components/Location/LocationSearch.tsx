@@ -59,7 +59,7 @@ export function LocationSearch({
       <PopoverTrigger asChild disabled={disabled}>
         <div
           className={cn(
-            "w-full h-9 px-3 rounded-md border text-sm flex items-center justify-between cursor-pointer", // Default styles
+            "w-full h-9 px-3 rounded-lg border border-gray-300 text-sm shadow-sm transition-colors bg-white flex items-center justify-between cursor-pointer text-gray-950",
             className,
           )}
           role="combobox"
@@ -82,7 +82,7 @@ export function LocationSearch({
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0">
+      <PopoverContent className="min-w-[250px] max-w-[400px] w-full p-0">
         <Command className="pt-1">
           <CommandInput
             placeholder="Search locations..."

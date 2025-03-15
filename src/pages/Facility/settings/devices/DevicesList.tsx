@@ -63,56 +63,63 @@ export default function DevicesList({ facilityId }: Props) {
         <div className="flex items-center gap-4">
           <PageTitle title={t("devices")} />
         </div>
-        <div className="flex flex-wrap sm:flex-row  items-center gap-4">
-          <div className="flex items-center rounded-lg bg-gray-50 w-full sm:w-auto">
-            <Select
-              value={searchType}
-              onValueChange={(value: "name" | "location") => {
-                setSearchType(value);
-                updateQuery({
-                  [value === "name" ? "current_location" : "search_text"]: "",
-                });
-              }}
-            >
-              <SelectTrigger className="w-36 border border-gray-300 rounded-lg px-4 py-2 rounded-r-none ">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">{t("name")}</SelectItem>
-                <SelectItem value="location">{t("location")}</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="w-64">
-              {searchType === "name" ? (
-                <Input
-                  placeholder={t("search_by_name")}
-                  value={qParams.search_text || ""}
-                  onChange={(e) =>
-                    updateQuery({
-                      search_text: e.target.value,
-                      current_location: "",
-                    })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-primary focus:border-primary rounded-l-none"
-                />
-              ) : (
-                <LocationSearch
-                  facilityId={facilityId}
-                  onSelect={(location: LocationList | null) => {
-                    updateQuery({
-                      current_location: location?.id || "",
-                      search_text: "",
-                    });
-                    setSelectedLocation(location);
-                  }}
-                  value={selectedLocation}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-primary focus:border-primary rounded-l-none"
-                />
-              )}
+        <div className="flex flex-wrap sm:flex-row items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+            <div className="flex w-full sm:w-full items-center rounded-lg bg-gray-50">
+              <Select
+                value={searchType}
+                onValueChange={(value: "name" | "location") => {
+                  setSearchType(value);
+                  updateQuery({
+                    [value === "name" ? "current_location" : "search_text"]: "",
+                  });
+                  setSelectedLocation(null);
+                }}
+              >
+                <SelectTrigger className="w-24 sm:w-36 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base rounded-r-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">{t("name")}</SelectItem>
+                  <SelectItem value="location">{t("location")}</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="w-full sm:w-64">
+                {searchType === "name" ? (
+                  <Input
+                    placeholder={t("search_by_name")}
+                    value={qParams.search_text || ""}
+                    onChange={(e) => {
+                      updateQuery({
+                        search_text: e.target.value,
+                        current_location: "",
+                      });
+                      setSelectedLocation(null);
+                    }}
+                    className="w-full h-9 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base shadow-sm focus:ring-2 focus:ring-primary focus:border-primary rounded-l-none"
+                  />
+                ) : (
+                  <LocationSearch
+                    facilityId={facilityId}
+                    onSelect={(location: LocationList | null) => {
+                      updateQuery({
+                        current_location: location?.id || "",
+                        search_text: "",
+                      });
+                      setSelectedLocation(location);
+                    }}
+                    value={selectedLocation}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base shadow-sm focus:ring-2 focus:ring-primary focus:border-primary rounded-l-none"
+                  />
+                )}
+              </div>
             </div>
           </div>
-          <Button variant="primary" asChild>
+          <Button
+            variant="primary"
+            asChild
+            className="w-full sm:w-auto text-sm sm:text-base"
+          >
             <Link href="/devices/create">
               <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
               {t("add_device")}
