@@ -486,7 +486,6 @@ function TagSelector({
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
                 ) : (
-                  // Map through the filtered tags
                   filteredTags.map((tag) => (
                     <CommandItem
                       key={tag.id}
@@ -494,7 +493,7 @@ function TagSelector({
                       onSelect={() => selection.onToggle(tag.id)}
                     >
                       <div className="flex flex-1 items-center gap-2">
-                        <Building className="h-4 w-4" />
+                        <Tags className="h-4 w-4" />
                         <span>{tag.name}</span>
                       </div>
                       {selection.selectedIds.includes(tag.id) && (
@@ -504,8 +503,6 @@ function TagSelector({
                   ))
                 )}
               </CommandGroup>
-
-              {/* Show create option when no matching tags and we have a search query */}
               {noMatchingTags && (
                 <CommandEmpty>
                   <div
@@ -530,7 +527,6 @@ function TagSelector({
     </div>
   );
 }
-
 function QuestionnaireProperties({
   questionnaire,
   updateQuestionnaireField,
