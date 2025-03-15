@@ -63,6 +63,13 @@ class PatientVerify {
     cy.verifyNotification("Encounter created successfully");
     return this;
   }
+
+  assertEncounterMaxFailure() {
+    cy.verifyNotification(
+      "Patient already has maximum number of active encounters (5)",
+    );
+    return this;
+  }
 }
 
 export const patientVerify = new PatientVerify();
