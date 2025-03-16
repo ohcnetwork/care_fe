@@ -31,7 +31,6 @@ enum DashboardTabs {
 type TabContentProps = {
   tabId: string;
   tabItems: UserFacilityModel[] | Organization[];
-  emptyMessage: string;
   description: string;
   renderChild: (item: UserFacilityModel | Organization) => JSX.Element;
 };
@@ -181,7 +180,6 @@ export default function UserDashboard() {
               <TabContent
                 tabId="facilities-panel"
                 tabItems={facilities}
-                emptyMessage={t("no_facilities_found")}
                 description={t("dashboard_tab_facilities")}
                 renderChild={(facility) => {
                   return (
@@ -216,7 +214,6 @@ export default function UserDashboard() {
               <TabContent
                 tabId="associations-panel"
                 tabItems={associations}
-                emptyMessage={t("no_associations_found")}
                 description={t("dashboard_tab_associations")}
                 renderChild={(association) => (
                   <Link
@@ -253,7 +250,6 @@ export default function UserDashboard() {
               <TabContent
                 tabId="governance-panel"
                 tabItems={governance}
-                emptyMessage={t("no_governance_found")}
                 description={t("dashboard_tab_governance")}
                 renderChild={(governanceOrg) => (
                   <Link
@@ -295,7 +291,6 @@ export default function UserDashboard() {
 const TabContent = ({
   tabId,
   tabItems,
-  emptyMessage,
   description,
   renderChild,
 }: TabContentProps) => {
@@ -307,20 +302,15 @@ const TabContent = ({
       aria-labelledby={tabId}
     >
       <p className="text-sm text-gray-800 font-normal px-1">{description}</p>
-      {tabItems.length === 0 ? (
-        <div className="text-center py-6 text-gray-500">
-          <p>{emptyMessage}</p>
-        </div>
-      ) : (
-        <div
-          className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-          data-cy={`${tabId}-list`}
-        >
-          {tabItems.map((item: UserFacilityModel | Organization) => {
-            return renderChild(item);
-          })}
-        </div>
-      )}
+
+      <div
+        className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        data-cy={`${tabId}-list`}
+      >
+        {tabItems.map((item: UserFacilityModel | Organization) => {
+          return renderChild(item);
+        })}
+      </div>
     </section>
   );
 };
