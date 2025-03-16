@@ -1,0 +1,129 @@
+import { CaretDownIcon } from "@radix-ui/react-icons";
+import { CheckIcon } from "@radix-ui/react-icons";
+import { PopoverClose } from "@radix-ui/react-popover";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { Avatar } from "@/components/Common/Avatar";
+
+import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
+import scheduleApi from "@/types/scheduling/scheduleApi";
+import { UserBase } from "@/types/user/user";
+
+interface PractitionerSelectorProps {
+  selected: UserBase | null;
+  onSelect: (user: UserBase | null) => void;
+  facilityId: string;
+  clearSelection?: string;
+}
+
+export const PractitionerSelector = ({
+  facilityId,
+  selected,
+  onSelect,
+  clearSelection,
+}: PractitionerSelectorProps) => {
+  const { t } = useTranslation();
+  const {
+    data: practitioners,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ["practitioners", facilityId],
+    queryFn: query(scheduleApi.appointments.availableUsers, {
+      pathParams: { facility_id: facilityId },
+    }),
+  });
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild disabled={isLoading}>
+        <Button
+          variant="outline"
+          role="combobox"
+          className="min-w-60 w-full justify-start"
+        >
+          {selected ? (
+            <div className="flex items-center gap-2">
+              <Avatar
+                imageUrl={selected.profile_picture_url}
+                name={formatName(selected)}
+                className="size-6 rounded-full"
+              />
+              <span>{formatName(selected)}</span>
+            </div>
+          ) : (
+            <span>{t("show_all")}</span>
+          )}
+          <CaretDownIcon className="ml-auto" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="p-0" align="start">
+        <Command>
+          <CommandInput
+            placeholder={t("search")}
+            className="outline-none border-none ring-0 shadow-none"
+          />
+          <CommandList>
+            <CommandEmpty>
+              {isFetching ? t("searching") : t("no_results")}
+            </CommandEmpty>
+            <CommandGroup>
+              {clearSelection && (
+                <CommandItem
+                  value="all"
+                  onSelect={() => onSelect(null)}
+                  className="cursor-pointer w-full"
+                >
+                  <PopoverClose className="w-full flex items-start">
+                    <span>{clearSelection}</span>
+                    {!selected && <CheckIcon className="ml-auto" />}
+                  </PopoverClose>
+                </CommandItem>
+              )}
+              {practitioners?.users.map((user) => (
+                <CommandItem
+                  key={user.id}
+                  value={formatName(user)}
+                  onSelect={() => onSelect(user)}
+                  className="cursor-pointer w-full"
+                >
+                  <PopoverClose className="flex items-center gap-2 w-full">
+                    <Avatar
+                      imageUrl={user.profile_picture_url}
+                      name={formatName(user)}
+                      className="size-6 rounded-full"
+                    />
+                    <span>{formatName(user)}</span>
+                    <span className="text-xs text-gray-500 font-medium">
+                      {user.user_type}
+                    </span>
+                  </PopoverClose>
+                  {selected?.username === user.username && (
+                    <CheckIcon className="ml-auto" />
+                  )}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};
