@@ -200,53 +200,52 @@ export default function LocationView({ id, facilityId }: Props) {
               />
             </div>
           </div>
-        </div>
-
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <CardGridSkeleton count={6} />
-          </div>
-        ) : (
-          <div className="space-y-6">
+          {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {children?.results?.length ? (
-                children.results.map((childLocation: LocationList) => (
-                  <LocationCard
-                    key={childLocation.id}
-                    location={childLocation}
-                    onEdit={handleEditLocation}
+              <CardGridSkeleton count={6} />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {children?.results?.length ? (
+                  children.results.map((childLocation: LocationList) => (
+                    <LocationCard
+                      key={childLocation.id}
+                      location={childLocation}
+                      onEdit={handleEditLocation}
+                    />
+                  ))
+                ) : (
+                  <Card className="col-span-full">
+                    <CardContent className="p-6 text-center text-gray-500">
+                      {searchQuery
+                        ? t("no_locations_found")
+                        : t("no_child_locations_found")}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+              {children && children.count > limit && (
+                <div className="flex justify-center">
+                  <Pagination
+                    data={{ totalCount: children.count }}
+                    onChange={(page, _) => setPage(page)}
+                    defaultPerPage={limit}
+                    cPage={page}
                   />
-                ))
-              ) : (
-                <Card className="col-span-full">
-                  <CardContent className="p-6 text-center text-gray-500">
-                    {searchQuery
-                      ? t("no_locations_found")
-                      : t("no_child_locations_found")}
-                  </CardContent>
-                </Card>
+                </div>
               )}
             </div>
-            {children && children.count > limit && (
-              <div className="flex justify-center">
-                <Pagination
-                  data={{ totalCount: children.count }}
-                  onChange={(page, _) => setPage(page)}
-                  defaultPerPage={limit}
-                  cPage={page}
-                />
-              </div>
-            )}
-          </div>
-        )}
+          )}
 
-        <LocationSheet
-          open={isSheetOpen}
-          onOpenChange={handleSheetClose}
-          facilityId={facilityId}
-          location={selectedLocation || undefined}
-          parentId={id}
-        />
+          <LocationSheet
+            open={isSheetOpen}
+            onOpenChange={handleSheetClose}
+            facilityId={facilityId}
+            location={selectedLocation || undefined}
+            parentId={id}
+          />
+        </div>
       </Page>
     </>
   );
