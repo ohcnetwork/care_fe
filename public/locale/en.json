@@ -349,6 +349,7 @@
   "administered_on": "Administered on",
   "administration_dosage_range_error": "Dosage should be between start and target dosage",
   "administration_notes": "Administration Notes",
+  "administrator": "Administrator",
   "admission_source": "Admission Source",
   "admit_source": "Admit Source",
   "admitted": "Admitted",

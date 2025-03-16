@@ -64,8 +64,10 @@ export default function UserForm({
   const userFormSchema = z
     .object({
       user_type: isEditMode
-        ? z.enum(["doctor", "nurse", "staff", "volunteer"]).optional()
-        : z.enum(["doctor", "nurse", "staff", "volunteer"]),
+        ? z
+            .enum(["doctor", "nurse", "staff", "volunteer", "administrator"])
+            .optional()
+        : z.enum(["doctor", "nurse", "staff", "volunteer", "administrator"]),
       username: isEditMode
         ? z.string().optional()
         : z
@@ -97,9 +99,7 @@ export default function UserForm({
       /* qualification: z.string().optional(),
       doctor_experience_commenced_on: z.string().optional(),
       doctor_medical_council_registration: z.string().optional(), */
-      geo_organization: isEditMode
-        ? z.string().optional()
-        : z.string().min(1, t("field_required")),
+      geo_organization: z.string().optional(),
     })
     .refine(
       (data) => {
@@ -299,6 +299,9 @@ export default function UserForm({
                     <SelectItem value="nurse">{t("nurse")}</SelectItem>
                     <SelectItem value="staff">{t("staff")}</SelectItem>
                     <SelectItem value="volunteer">{t("volunteer")}</SelectItem>
+                    <SelectItem value="administrator">
+                      {t("administrator")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -640,7 +643,7 @@ export default function UserForm({
                     onChange={(value) =>
                       form.setValue("geo_organization", value)
                     }
-                    required={!isEditMode}
+                    required={false}
                   />
                 </FormControl>
                 <FormMessage />
