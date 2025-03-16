@@ -52,7 +52,7 @@ export default function UserDashboard() {
   ];
 
   const [activeTab, setActiveTab] = useState<DashboardTabs | null>(
-    availableTabs.length > 1 ? availableTabs[0] : null,
+    availableTabs.length > 0 ? availableTabs[0] : null,
   );
 
   return (
