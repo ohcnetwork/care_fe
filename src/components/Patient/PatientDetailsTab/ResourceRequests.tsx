@@ -81,7 +81,7 @@ export const ResourceRequests = (props: PatientProps) => {
       </div>
 
       <div className="rounded-lg border bg-white">
-        <Table>
+        <Table data-cy="resource-requests-table">
           <TableHeader>
             <TableRow>
               <TableHead>{t("resource_type")}</TableHead>
@@ -100,21 +100,34 @@ export const ResourceRequests = (props: PatientProps) => {
                 </TableCell>
               </TableRow>
             ) : resourceRequests?.results?.length ? (
-              resourceRequests.results.map((request) => (
-                <TableRow key={request.id}>
-                  <TableCell className="font-medium">
+              resourceRequests.results.map((request, index) => (
+                <TableRow key={index} data-cy={`row-${index}`}>
+                  <TableCell
+                    data-cy={`resource-type-${index}`}
+                    className="font-medium"
+                  >
                     {RESOURCE_CATEGORY_CHOICES.find(
                       (item) => item.id === request.category,
                     )?.text || "--"}
                   </TableCell>
-                  <TableCell>{request.title}</TableCell>
-                  <TableCell>{getStatusBadge(request.status)}</TableCell>
-                  <TableCell>{formatDateTime(request.created_date)}</TableCell>
+                  <TableCell data-cy={`title-${index}`}>
+                    {request.title}
+                  </TableCell>
+                  <TableCell data-cy={`status-${index}`}>
+                    {getStatusBadge(t(request.status))}
+                  </TableCell>
+                  <TableCell data-cy={`created-on-${index}`}>
+                    {formatDateTime(request.created_date)}
+                  </TableCell>
                   <TableCell>{formatDateTime(request.modified_date)}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell
+                    data-cy={`actions-${index}`}
+                    className="text-right"
+                  >
                     <Button variant="outline" size="sm" asChild>
                       <Link
-                        href={`/facility/${request.origin_facility.id}/resource/${request.id}`}
+                        href={`/facility/${request.origin_facility?.id}/resource/${index}`}
+                        data-cy={`view-button-${index}`}
                       >
                         <CareIcon icon="l-eye" className="mr-2" />
                         {t("view")}
@@ -124,8 +137,12 @@ export const ResourceRequests = (props: PatientProps) => {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
+              <TableRow data-cy="empty-state-row">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-4"
+                  data-cy="empty-state"
+                >
                   {t("no_resource_requests_found")}
                 </TableCell>
               </TableRow>

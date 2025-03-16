@@ -189,6 +189,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                             title,
                           })
                         }
+                        data-cy="tab-outgoing"
                       >
                         {t("outgoing")}
                       </TabsTrigger>
@@ -201,6 +202,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                             title,
                           })
                         }
+                        data-cy="tab-incoming"
                       >
                         {t("incoming")}
                       </TabsTrigger>
@@ -254,6 +256,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       key={statusOption}
                       value={statusOption}
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      data-cy={`tab-${statusOption}`}
                       onClick={() =>
                         updateQuery({
                           status: statusOption,
@@ -290,18 +293,25 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
             </div>
           ) : (
             <>
-              {resources.map((resource: ResourceRequest) => (
+              {resources.map((resource: ResourceRequest, index) => (
                 <Card
-                  key={resource.id}
+                  key={index}
                   className="hover:shadow-lg transition-shadow group flex flex-col justify-between"
+                  data-cy={`resource-card-${index}`}
                 >
                   <CardHeader className="space-y-1 pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="group-hover:text-primary transition-colors">
+                      <CardTitle
+                        className="group-hover:text-primary transition-colors"
+                        data-cy={`resource-title-${index}`}
+                      >
                         {resource.title}
                       </CardTitle>
                     </div>
-                    <CardDescription className="line-clamp-2">
+                    <CardDescription
+                      className="line-clamp-2"
+                      data-cy={`resource-reason-${index}`}
+                    >
                       {resource.reason}
                     </CardDescription>
                   </CardHeader>
@@ -311,6 +321,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         <Badge
                           variant="outline"
                           className="bg-red-100 text-red-800"
+                          data-cy={`resource-emergency-${index}`}
                         >
                           {t("emergency")}
                         </Badge>
@@ -318,6 +329,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       <Badge
                         variant="outline"
                         className="bg-gray-100 text-gray-800"
+                        data-cy={`resource-category-${index}`}
                       >
                         {
                           RESOURCE_CATEGORY_CHOICES.find(
@@ -330,6 +342,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       <Badge
                         variant="outline"
                         className="bg-gray-100 text-gray-800"
+                        data-cy={`resource-facility-${index}`}
                       >
                         {resource.origin_facility?.name}
                         <CareIcon
@@ -345,6 +358,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <Link
                       href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
                       className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
+                      data-cy={`resource-view-${index}`}
                     >
                       View Details
                       <CareIcon icon="l-arrow-right" className="ml-1 h-4 w-4" />
