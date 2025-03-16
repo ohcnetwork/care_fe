@@ -95,7 +95,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     variant="destructive"
                     className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
                   >
-                    <h3 className="text-sm font-medium">
+                    <h3 className="text-xs font-normal sm:text-sm sm:font-medium">
                       {t("time_of_death")}
                       {": "}
                       {dayjs(patient.death_datetime).format(
