@@ -149,98 +149,96 @@ export default function LocationView({ id, facilityId }: Props) {
 
       <Page title={location?.name || t("location")}>
         <div className="space-y-6">
-          <div className="flex justify-between">
-            <div className="flex flex-col justify-between items-start gap-4">
-              <div className="flex items-center gap-4">
-                <h2 className="text-lg font-semibold">{t("locations")}</h2>
-                <Badge variant="outline">
-                  {t(`location_form__${location?.form}`)}
-                </Badge>
-                <Badge
-                  variant={
-                    location?.status === "active" ? "default" : "secondary"
-                  }
-                >
-                  {location?.status}
-                </Badge>
-                {location && "mode" in location && location.mode === "kind" && (
-                  <Button variant="default" onClick={handleAddLocation}>
-                    <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
-                    {t("add_location")}
-                  </Button>
-                )}
-              </div>
-              <div className="w-72">
-                <Input
-                  placeholder={t("search_by_name")}
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full"
-                />
-              </div>
-            </div>
-            {locationOrganizations && (
-              <LinkDepartmentsSheet
-                entityType="location"
-                entityId={id}
-                currentOrganizations={locationOrganizations.results}
-                facilityId={facilityId}
-                trigger={
-                  <Button variant="outline">
-                    <CareIcon icon="l-building" className="h-4 w-4 mr-2" />
-                    {t("manage_organizations")}
-                  </Button>
+          <div className="flex flex-col justify-between items-start gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <h2 className="text-lg font-semibold">{t("locations")}</h2>
+              <Badge variant="outline">
+                {t(`location_form__${location?.form}`)}
+              </Badge>
+              <Badge
+                variant={
+                  location?.status === "active" ? "default" : "secondary"
                 }
-                onUpdate={() => {
-                  queryClient.invalidateQueries({
-                    queryKey: ["location", facilityId, id],
-                  });
-                }}
-              />
-            )}
-          </div>
-
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <CardGridSkeleton count={6} />
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {children?.results?.length ? (
-                  children.results.map((childLocation: LocationList) => (
-                    <LocationCard
-                      key={childLocation.id}
-                      location={childLocation}
-                      onEdit={handleEditLocation}
-                    />
-                  ))
-                ) : (
-                  <Card className="col-span-full">
-                    <CardContent className="p-6 text-center text-gray-500">
-                      {searchQuery
-                        ? t("no_locations_found")
-                        : t("no_child_locations_found")}
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-              {children && children.count > limit && (
-                <div className="flex justify-center">
-                  <Pagination
-                    data={{ totalCount: children.count }}
-                    onChange={(page, _) => setPage(page)}
-                    defaultPerPage={limit}
-                    cPage={page}
-                  />
-                </div>
+              >
+                {location?.status}
+              </Badge>
+              {location && "mode" in location && location.mode === "kind" && (
+                <Button variant="default" onClick={handleAddLocation}>
+                  <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
+                  {t("add_location")}
+                </Button>
+              )}
+              {locationOrganizations && (
+                <LinkDepartmentsSheet
+                  entityType="location"
+                  entityId={id}
+                  currentOrganizations={locationOrganizations.results}
+                  facilityId={facilityId}
+                  trigger={
+                    <Button variant="outline">
+                      <CareIcon icon="l-building" className="h-4 w-4 mr-2" />
+                      {t("manage_organizations")}
+                    </Button>
+                  }
+                  onUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: ["location", facilityId, id],
+                    });
+                  }}
+                />
               )}
             </div>
-          )}
+            <div className="w-72">
+              <Input
+                placeholder={t("search_by_name")}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full"
+              />
+            </div>
+          </div>
         </div>
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardGridSkeleton count={6} />
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {children?.results?.length ? (
+                children.results.map((childLocation: LocationList) => (
+                  <LocationCard
+                    key={childLocation.id}
+                    location={childLocation}
+                    onEdit={handleEditLocation}
+                  />
+                ))
+              ) : (
+                <Card className="col-span-full">
+                  <CardContent className="p-6 text-center text-gray-500">
+                    {searchQuery
+                      ? t("no_locations_found")
+                      : t("no_child_locations_found")}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+            {children && children.count > limit && (
+              <div className="flex justify-center">
+                <Pagination
+                  data={{ totalCount: children.count }}
+                  onChange={(page, _) => setPage(page)}
+                  defaultPerPage={limit}
+                  cPage={page}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         <LocationSheet
           open={isSheetOpen}
