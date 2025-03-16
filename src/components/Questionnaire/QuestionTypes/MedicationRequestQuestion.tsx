@@ -364,6 +364,7 @@ export function MedicationRequestQuestion({
                   const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
                     medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
                   );
+
                   return (
                     <React.Fragment key={index}>
                       {!desktopLayout ? (
@@ -379,9 +380,7 @@ export function MedicationRequestQuestion({
                           <div
                             className={cn(
                               "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-sm text-sm",
-                              isInactive || disabled
-                                ? "opacity-40"
-                                : "hover:bg-gray-50/50",
+                              isInactive ? "opacity-40" : "hover:bg-gray-50/50",
                               expandedMedicationIndex === index
                                 ? "bg-gray-50"
                                 : "bg-gray-100",
@@ -389,7 +388,9 @@ export function MedicationRequestQuestion({
                           >
                             <CollapsibleTrigger className="flex-1 text-left">
                               <div
-                                className={`font-medium text-gray-900 ${isInactive || disabled ? "line-through" : ""}`}
+                                className={cn("font-medium text-gray-900", {
+                                  "line-through": isInactive,
+                                })}
                               >
                                 {medication.medication?.display}
                               </div>
@@ -452,7 +453,7 @@ export function MedicationRequestQuestion({
                       ) : (
                         <MedicationRequestGridRow
                           medication={medication}
-                          disabled={isInactive || disabled}
+                          disabled={disabled || isInactive}
                           onUpdate={(updates) =>
                             handleUpdateMedication(index, updates)
                           }
@@ -632,7 +633,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       {/* Medicine Name */}
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
         <span
-          className={`break-words line-clamp-2 hidden lg:block ${disabled ? "line-through" : ""}`}
+          className={cn("break-words line-clamp-2 hidden lg:block", {
+            "line-through": disabled,
+          })}
         >
           {medication.medication?.display}
         </span>
