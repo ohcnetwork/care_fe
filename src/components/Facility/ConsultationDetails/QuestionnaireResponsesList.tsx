@@ -71,7 +71,6 @@ export function formatValue(
 
 function QuestionResponseValue({ question, response }: QuestionResponseProps) {
   if (!response) return null;
-
   return (
     <div>
       <div className="text-xs text-gray-500">{question.text}</div>
@@ -79,7 +78,6 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
         {response.values.map((valueObj, index) => {
           const value = valueObj.value || valueObj.value_quantity?.value;
           if (!value) return null;
-
           return (
             <div
               key={index}
@@ -119,11 +117,10 @@ function QuestionGroup({
     group.questions?.some((q) => q.id === r.question_id),
   );
 
-  if (!hasResponses) return null;
+  if (!hasResponses && !group.questions) return null;
 
   const containerClass = group.styling_metadata?.containerClasses || "";
   const classes = group.styling_metadata?.classes || "";
-
   return (
     <div className={`space-y-2 ${classes}`}>
       {group.text && (
@@ -263,7 +260,6 @@ function ResponseCard({
         <div className="mt-4 space-y-4">
           {item.questionnaire?.questions.map((question: Question) => {
             if (question.type === "structured") return null;
-
             if (question.type === "group") {
               return (
                 <QuestionGroup
@@ -319,7 +315,6 @@ export default function QuestionnaireResponsesList({
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
     }),
   });
-
   return (
     <div className="mt-4 gap-4">
       <div className="max-w-full">
