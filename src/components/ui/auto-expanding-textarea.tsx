@@ -11,20 +11,21 @@ interface AutoExpandingTextareaProps
 const AutoExpandingTextarea = forwardRef<
   HTMLTextAreaElement,
   AutoExpandingTextareaProps
->(({ value, onChange, onKeyDown, placeholder, ...rest }) => {
+>(({ value, onChange, onKeyDown, placeholder, className, ...rest }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const maxHeight = 400;
-  const minHeight = 50;
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = `${minHeight}px`;
+      textareaRef.current.style.height = "auto";
       const scrollHeight = textareaRef.current.scrollHeight;
+      const computedStyle = window.getComputedStyle(textareaRef.current);
+      const maxHeight = parseInt(computedStyle.getPropertyValue("max-height"));
+
       if (scrollHeight > maxHeight) {
         textareaRef.current.style.height = `${maxHeight}px`;
-        textareaRef.current.style.overflowY = "auto";
+        textareaRef.current.style.overflowY = "scroll";
       } else {
-        textareaRef.current.style.height = `${Math.max(scrollHeight, minHeight)}px`;
+        textareaRef.current.style.height = `${scrollHeight}px`;
         textareaRef.current.style.overflowY = "hidden";
       }
     }
@@ -37,15 +38,10 @@ const AutoExpandingTextarea = forwardRef<
       onChange={onChange}
       onKeyDown={onKeyDown}
       placeholder={placeholder}
-      {...rest}
       rows={1}
-      style={{
-        overflow: "hidden",
-        resize: "none",
-        maxHeight: `${maxHeight}px`,
-        minHeight: `${minHeight}px`,
-      }}
-      className="flex-1 p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
+      style={{ overflow: "hidden", resize: "none" }}
+      className={`flex-1 p-2 rounded-md border border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 placeholder:text-gray-500 ${className || ""}`}
+      {...rest}
     />
   );
 });

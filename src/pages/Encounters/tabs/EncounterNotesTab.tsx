@@ -666,7 +666,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                               }
                             }
                           }}
-                          className="flex-1 min-h-10 max-h-48"
+                          className="flex-1 min-h-20 max-h-[50vh]"
                         />
                         <Button
                           type="submit"
