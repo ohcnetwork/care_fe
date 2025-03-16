@@ -415,10 +415,10 @@ const DiagnosisTableRow = ({
   return (
     <>
       <TableRow className={rowClassName}>
-        <TableCell className="min-w-[220px] font-medium py-1 pl-1">
+        <TableCell className="font-medium py-1 pl-1">
           {diagnosis.code.display}
         </TableCell>
-        <TableCell className="min-w-[100px] py-1 px-1">
+        <TableCell className="py-1 px-1">
           <Input
             type="date"
             value={diagnosis.onset?.onset_datetime || ""}
@@ -431,7 +431,7 @@ const DiagnosisTableRow = ({
             className="h-7"
           />
         </TableCell>
-        <TableCell className="min-w-[80px] py-1 px-0.5">
+        <TableCell className="py-1 px-0.5">
           <Select
             value={diagnosis.clinical_status}
             onValueChange={(value) =>
@@ -453,7 +453,7 @@ const DiagnosisTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[80px] py-1 px-0.5">
+        <TableCell className="py-1 px-0.5">
           <Select
             value={diagnosis.verification_status}
             onValueChange={(value) =>
@@ -476,7 +476,7 @@ const DiagnosisTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[35px] py-1 px-0">
+        <TableCell className="py-1 px-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

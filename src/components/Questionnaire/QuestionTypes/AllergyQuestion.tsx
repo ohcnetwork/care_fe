@@ -488,7 +488,7 @@ const AllergyTableRow = ({
   return (
     <>
       <TableRow className={rowClassName}>
-        <TableCell className="min-w-[40px] py-1 pr-0">
+        <TableCell className="py-1 pr-0">
           <Select
             value={allergy.category}
             onValueChange={(value) => onUpdate?.({ category: value })}
@@ -520,10 +520,10 @@ const AllergyTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[220px] font-medium py-1 pl-1">
+        <TableCell className="font-medium py-1 pl-1">
           {allergy.code.display}
         </TableCell>
-        <TableCell className="min-w-[65px] py-1 px-0.5">
+        <TableCell className="py-1 px-0.5">
           <Select
             value={allergy.criticality}
             onValueChange={(value) => onUpdate?.({ criticality: value })}
@@ -576,7 +576,7 @@ const AllergyTableRow = ({
             className="h-7"
           />
         </TableCell>
-        <TableCell className="min-w-[35px] py-1 px-0">
+        <TableCell className="py-1 px-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
