@@ -1,5 +1,4 @@
 import { Map, Marker, ZoomControl } from "pigeon-maps";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -22,18 +21,11 @@ export default function LocationPicker({
   onGetCurrentLocation,
 }: LocationPickerProps) {
   const { t } = useTranslation();
-
   // Default to TVM
-  const defaultPosition: [number, number] = [8.5241391, 76.9366376];
-  const [center, setCenter] = useState<[number, number]>(
-    latitude && longitude ? [latitude, longitude] : defaultPosition,
-  );
-
-  useEffect(() => {
-    if (latitude && longitude) {
-      setCenter([latitude, longitude]);
-    }
-  }, [latitude, longitude]);
+  const position: [number, number] = [
+    latitude ?? 8.5241391,
+    longitude ?? 76.9366376,
+  ];
 
   return (
     <div className="space-y-4">
@@ -63,20 +55,16 @@ export default function LocationPicker({
           </Button>
         )}
       </div>
-      <div className="h-[400px] w-full rounded-lg border overflow-hidden relative">
+      <div className="h-[400px] w-full rounded-lg border overflow-hidden">
         <Map
           height={400}
-          center={center}
-          defaultZoom={17}
+          center={position}
+          defaultZoom={15}
           onClick={({ latLng: [lat, lng] }) => onLocationSelect(lat, lng)}
         >
           <ZoomControl />
           {latitude && longitude && (
-            <Marker
-              width={40}
-              anchor={[latitude, longitude]}
-              onClick={() => {}}
-            />
+            <Marker width={40} anchor={position} onClick={() => {}} />
           )}
         </Map>
       </div>

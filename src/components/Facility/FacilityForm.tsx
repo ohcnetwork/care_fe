@@ -410,64 +410,6 @@ export default function FacilityForm({
             isGettingLocation={isGettingLocation}
             onGetCurrentLocation={handleGetCurrentLocation}
           />
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="latitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("latitude")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      onChange={(e) => {
-                        form.setValue(
-                          "latitude",
-                          e.target.value ? Number(e.target.value) : undefined,
-                          { shouldDirty: true },
-                        );
-                      }}
-                      data-cy="facility-latitude"
-                      placeholder={t("enter_latitude")}
-                      disabled={isGettingLocation}
-                      className={isGettingLocation ? "animate-pulse" : ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="longitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("longitude")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      onChange={(e) => {
-                        form.setValue(
-                          "longitude",
-                          e.target.value ? Number(e.target.value) : undefined,
-                          { shouldDirty: true },
-                        );
-                      }}
-                      data-cy="facility-longitude"
-                      placeholder={t("enter_longitude")}
-                      disabled={isGettingLocation}
-                      className={isGettingLocation ? "animate-pulse" : ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
         </div>
 
         {/* Visibility Settings */}
