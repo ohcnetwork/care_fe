@@ -137,6 +137,29 @@ h6 {
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.4);
 }
+input[type="date"] {
+  position: relative;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 1;
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+}
+@media (max-width: 640px) {
+  input[type="date"] {
+    font-size: 0.875rem; /* Smaller font on mobile */
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+}
 
 /* for gmaps search dropdown */
 .pac-container {
