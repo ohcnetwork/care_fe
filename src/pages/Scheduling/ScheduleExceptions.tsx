@@ -58,7 +58,7 @@ export default function ScheduleExceptions({
     return (
       <div className="flex flex-col items-center text-center text-gray-500 py-16">
         <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
-        <p>{t("exceptions_can_be_created_only_after_creating_a_schedule")}</p>
+        <p>{t("exception_for_non_schedulable_resource_warning")}</p>
       </div>
     );
   }
