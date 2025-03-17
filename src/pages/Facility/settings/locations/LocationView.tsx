@@ -159,11 +159,25 @@ export default function LocationView({ id, facilityId }: Props) {
                 variant={
                   location?.status === "active" ? "default" : "secondary"
                 }
+                className="capitalize"
               >
                 {location?.status}
               </Badge>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="w-72">
+                <Input
+                  placeholder={t("search_by_name")}
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full"
+                />
+              </div>
               {location && "mode" in location && location.mode === "kind" && (
-                <Button variant="default" onClick={handleAddLocation}>
+                <Button variant="primary" onClick={handleAddLocation}>
                   <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
                   {t("add_location")}
                 </Button>
@@ -187,17 +201,6 @@ export default function LocationView({ id, facilityId }: Props) {
                   }}
                 />
               )}
-            </div>
-            <div className="w-72">
-              <Input
-                placeholder={t("search_by_name")}
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full"
-              />
             </div>
           </div>
           {isLoading ? (
