@@ -244,9 +244,7 @@ const ScheduleTemplateEditor = ({
                   <FormLabel required>{t("valid_from")}</FormLabel>
                   <Input
                     type="date"
-                    value={
-                      field.value ? field.value.toISOString().split("T")[0] : ""
-                    }
+                    value={dateQueryString(field.value)}
                     onChange={(e) => {
                       const date = e.target.value
                         ? new Date(e.target.value)

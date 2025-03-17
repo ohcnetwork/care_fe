@@ -1,5 +1,6 @@
 import { MinusCircledIcon, Pencil2Icon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
+import { format, parseISO } from "date-fns";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
@@ -976,11 +977,11 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           type="datetime-local"
           value={
             medication.authored_on
-              ? new Date(medication.authored_on).toISOString().slice(0, 16)
+              ? format(new Date(medication.authored_on), "yyyy-MM-dd'T'HH:mm")
               : ""
           }
           onChange={(e) => {
-            const newDate = new Date(e.target.value);
+            const newDate = parseISO(e.target.value);
             if (isNaN(newDate.getTime())) return;
             onUpdate?.({ authored_on: newDate.toISOString() });
           }}

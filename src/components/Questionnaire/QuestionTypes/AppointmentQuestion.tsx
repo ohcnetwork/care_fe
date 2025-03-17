@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -179,15 +179,21 @@ export function AppointmentQuestion({
                 "border border-red-500",
             )}
           >
-            <DatePicker
-              date={selectedDate}
-              onChange={(date) => {
+            <Input
+              type="date"
+              value={dateQueryString(selectedDate)}
+              onChange={(e) => {
+                const date = e.target.value
+                  ? new Date(e.target.value)
+                  : undefined;
                 setSelectedDate(date);
                 if (value.slot_id) {
                   handleUpdate({ slot_id: undefined });
                 }
               }}
-              disabled={(date) => isBefore(date, startOfToday())}
+              disabled={
+                selectedDate ? isBefore(selectedDate, startOfToday()) : false
+              }
             />
           </div>
         </div>
