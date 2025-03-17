@@ -31,7 +31,7 @@ export function OrganizationSwitcher({
   organizations,
   selectedOrganization,
 }: Props) {
-  const { isMobile, setOpenMobile } = useSidebar();
+  const { isMobile } = useSidebar();
   const { t } = useTranslation();
 
   return (
@@ -80,9 +80,6 @@ export function OrganizationSwitcher({
             key={org.id}
             onClick={() => {
               navigate(`/organization/${org.id}`);
-              if (isMobile) {
-                setOpenMobile(false);
-              }
             }}
             className={cn(
               "gap-2 p-2",

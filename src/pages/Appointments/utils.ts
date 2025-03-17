@@ -4,6 +4,7 @@ import {
   compareAsc,
   eachDayOfInterval,
   format,
+  isBefore,
   max,
   startOfToday,
 } from "date-fns";
@@ -17,13 +18,19 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
-export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
+export const groupSlotsByAvailability = (
+  slots: TokenSlot[],
+  future_only = false,
+) => {
   const result: {
     availability: TokenSlot["availability"];
     slots: Omit<TokenSlot, "availability">[];
   }[] = [];
 
   for (const slot of slots) {
+    if (future_only && isBefore(slot.start_datetime, new Date())) {
+      continue;
+    }
     const availability = slot.availability;
     const existing = result.find(
       (r) => r.availability.name === availability.name,
