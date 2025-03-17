@@ -9,8 +9,6 @@ import App from "@/App";
 import "@/i18n";
 import "@/style/index.css";
 
-import BrowserWarning from "./components/ErrorPages/BrowserWarning";
-
 // Extend Window interface to include CARE_API_URL
 declare global {
   interface Window {
@@ -37,7 +35,6 @@ if (import.meta.env.PROD) {
 const root = createRoot(document.getElementById("root") as HTMLElement);
 root.render(
   <React.StrictMode>
-    <BrowserWarning />
     <App />
   </React.StrictMode>,
 );

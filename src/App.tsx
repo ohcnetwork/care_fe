@@ -21,6 +21,7 @@ import { handleHttpError } from "@/Utils/request/errorHandler";
 import { HTTPError } from "@/Utils/request/types";
 
 import { PubSubProvider } from "./Utils/pubsubContext";
+import BrowserWarning from "./components/ErrorPages/BrowserWarning";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,6 +51,7 @@ const App = () => {
   return (
     <>
       <QueryClientProvider client={queryClient}>
+        <BrowserWarning />
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
             <PluginEngine>

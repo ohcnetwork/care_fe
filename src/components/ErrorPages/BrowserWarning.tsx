@@ -3,9 +3,17 @@ import React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import supportedBrowsers from "@/supportedBrowsers";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-import UnsupportedBrowserDialog from "./UnsupportedBrowserAlertDialog";
+import supportedBrowsers from "@/supportedBrowsers";
 
 const BrowserWarning = () => {
   const { t } = useTranslation();
@@ -32,10 +40,27 @@ const BrowserWarning = () => {
   return (
     <>
       {showUnsupportedBrowserDialog && (
-        <UnsupportedBrowserDialog
-          showUnsupportedBrowserDialog={showUnsupportedBrowserDialog}
-          setShowUnsupportedBrowserDialog={setShowUnsupportedBrowserDialog}
-        />
+        <AlertDialog
+          open={showUnsupportedBrowserDialog}
+          onOpenChange={setShowUnsupportedBrowserDialog}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Unsupported Browser</AlertDialogTitle>
+              <AlertDialogDescription>
+                Your browser is unsupported. Please switch to a supported
+                browser for the best experience.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction
+                onClick={() => setShowUnsupportedBrowserDialog(false)}
+              >
+                Dismiss
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
       <div className="fixed left-0 top-0 z-50 flex h-20 w-full items-center justify-center bg-gray-800 bg-opacity-60 text-center text-gray-300">
         <div>
