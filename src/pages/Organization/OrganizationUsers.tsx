@@ -174,7 +174,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                       <div className="flex flex-col min-w-0 flex-1">
                         <div className="flex flex-col gap-1">
                           <div className="flex items-start justify-between">
-                            <h1 className="text-base font-bold break-words pr-2">
+                            <h1 className="text-base font-bold break-words truncate">
                               {userRole.user.first_name}{" "}
                               {userRole.user.last_name}
                             </h1>
@@ -186,10 +186,10 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                             {userRole.user.username}
                           </span>
                         </div>
-                        <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
+                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                           <div>
                             <div className="text-gray-500">{t("role")}</div>
-                            <div className="font-medium truncate">
+                            <div className="font-medium break-words text-sm">
                               {userRole.role.name ?? "-"}
                             </div>
                           </div>

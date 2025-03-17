@@ -100,8 +100,8 @@ export const EncounterShow = (props: Props) => {
     }`;
 
   return (
-    <div>
-      <nav className="relative flex flex-wrap items-start justify-between">
+    <div className="overflow-x-hidden w-full">
+      <nav className="flex flex-wrap items-start justify-between overflow-x-auto w-full">
         <PageTitle title={t("encounter")} />
         <div
           className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center"
@@ -140,7 +140,7 @@ export const EncounterShow = (props: Props) => {
       </nav>
       <div className="mt-4 xl:mt-0 w-full border-b-2 border-secondary-200">
         <div className="mt-2 xl:mt-0 flex w-full flex-col md:flex-row">
-          <div className="size-full rounded-lg border bg-white text-black shadow">
+          <div className="w-full max-w-full overflow-hidden">
             <PatientInfoCard
               patient={encounterData.patient}
               encounter={encounterData}

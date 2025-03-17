@@ -117,11 +117,11 @@ export default function OrganizationFacilities({
                     </div>
                   )}
                 </div>
-                <CardContent className="p-6">
+                <CardContent className="p-3 flex flex-col justify-between h-full">
                   <div className="flex flex-col h-full">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-md font-medium text-gray-900">
+                        <h3 className="text-md font-medium text-gray-900 break-words truncate">
                           {facility.name}
                         </h3>
                         <div className="font-medium">
@@ -137,11 +137,7 @@ export default function OrganizationFacilities({
                       organizationId={id}
                       facilityId={facility.id}
                       trigger={
-                        <Button
-                          variant="link"
-                          size="icon"
-                          className="text-primary"
-                        >
+                        <Button>
                           <CareIcon icon="l-pen" className="h-4 w-4" />
                           <span className="">{t("edit_facility")}</span>
                         </Button>
