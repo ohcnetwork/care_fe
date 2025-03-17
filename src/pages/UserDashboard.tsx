@@ -31,7 +31,6 @@ enum DashboardTabs {
 type TabContentProps = {
   tabId: string;
   tabItems: UserFacilityModel[] | Organization[];
-  emptyMessage: string;
   description: string;
   renderChild: (item: UserFacilityModel | Organization) => JSX.Element;
 };
@@ -46,12 +45,19 @@ export default function UserDashboard() {
   const associations = organizations.filter((org) => org.org_type === "role");
   const governance = organizations.filter((org) => org.org_type === "govt");
 
-  const [activeTab, setActiveTab] = useState(DashboardTabs.TAB_FACILITIES);
-  const tabs = [
-    DashboardTabs.TAB_FACILITIES,
-    DashboardTabs.TAB_ASSOCIATIONS,
-    DashboardTabs.TAB_GOVERNANCE,
+  const tabsData = [
+    { id: DashboardTabs.TAB_FACILITIES, items: facilities },
+    { id: DashboardTabs.TAB_ASSOCIATIONS, items: associations },
+    { id: DashboardTabs.TAB_GOVERNANCE, items: governance },
   ];
+
+  const availableTabs = tabsData
+    .filter((tab) => tab.items.length > 0)
+    .map((tab) => tab.id);
+
+  const [activeTab, setActiveTab] = useState<DashboardTabs | null>(
+    availableTabs.length > 0 ? availableTabs[0] : null,
+  );
 
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
@@ -146,140 +152,142 @@ export default function UserDashboard() {
         </div>
       </div>
 
-      {/* Tabs Section */}
-      <div className="w-full">
-        {/* Tabs Headings */}
-        <div
-          className="flex border-b border-gray-200"
-          role="tablist"
-          aria-label="Dashboard Sections"
-        >
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              role="tab"
-              id={`${tab.toLowerCase()}-tab`}
-              aria-selected={activeTab === tab}
-              aria-controls={`${tab.toLowerCase()}-panel`}
-              className={`px-4 py-2 text-sm md:text-base font-medium transition-all duration-75 ${
-                activeTab === tab
-                  ? "border-b-2 border-green-600 text-green-700"
-                  : "text-gray-500"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+      {availableTabs.length > 0 && (
+        <div className="w-full">
+          <div
+            className="flex border-b border-gray-200"
+            role="tablist"
+            aria-label="Dashboard Sections"
+          >
+            {availableTabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                role="tab"
+                id={`${tab.toLowerCase()}-tab`}
+                aria-selected={activeTab === tab}
+                aria-controls={`${tab.toLowerCase()}-panel`}
+                className={`px-4 py-2 text-sm md:text-base font-medium transition-all duration-75 ${
+                  activeTab === tab
+                    ? "border-b-2 border-green-600 text-green-700"
+                    : "text-gray-500"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Tabs Content */}
+          <div className="mt-4">
+            {activeTab === DashboardTabs.TAB_FACILITIES && (
+              <TabContent
+                tabId="facilities-panel"
+                tabItems={facilities}
+                description={t("dashboard_tab_facilities")}
+                renderChild={(facility) => {
+                  return (
+                    <Link
+                      key={facility.id}
+                      href={`/facility/${facility.id}/overview`}
+                    >
+                      <Card className="transition-all hover:shadow-md hover:border-primary/20">
+                        <CardContent className="flex items-center gap-3 p-3 md:p-4">
+                          <Avatar
+                            name={facility.name}
+                            className="h-12 w-12 md:h-14 md:w-14"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium truncate text-sm md:text-base">
+                              {facility.name}
+                            </h3>
+                            <p className="text-xs md:text-sm text-gray-500 truncate">
+                              {t("view_facility_details")}
+                            </p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                }}
+              />
+            )}
+
+            {activeTab === DashboardTabs.TAB_ASSOCIATIONS && (
+              <TabContent
+                tabId="associations-panel"
+                tabItems={associations}
+                description={t("dashboard_tab_associations")}
+                renderChild={(association) => (
+                  <Link
+                    key={association.id}
+                    href={`/organization/${association.id}`}
+                  >
+                    <Card className="transition-all hover:shadow-md hover:border-primary/20">
+                      <CardContent className="flex items-center gap-3 p-3 md:p-4">
+                        <Avatar
+                          name={association.name}
+                          className="h-12 w-12 md:h-14 md:w-14"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium truncate text-sm md:text-base">
+                            {association.name}
+                          </h3>
+                          <p className="text-xs md:text-sm text-gray-500 truncate">
+                            {"org_type" in association &&
+                              getOrgLabel(
+                                association.org_type,
+                                association.metadata,
+                              )}
+                          </p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )}
+              />
+            )}
+
+            {activeTab === DashboardTabs.TAB_GOVERNANCE && (
+              <TabContent
+                tabId="governance-panel"
+                tabItems={governance}
+                description={t("dashboard_tab_governance")}
+                renderChild={(governanceOrg) => (
+                  <Link
+                    key={governanceOrg.id}
+                    href={`/organization/${governanceOrg.id}`}
+                  >
+                    <Card className="transition-all hover:shadow-md hover:border-primary/20">
+                      <CardContent className="flex items-center gap-3 p-3 md:p-4">
+                        <Avatar
+                          name={governanceOrg.name}
+                          className="h-12 w-12 md:h-14 md:w-14"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium truncate text-sm md:text-base">
+                            {governanceOrg.name}
+                          </h3>
+                          <p className="text-xs md:text-sm text-gray-500 truncate">
+                            {"org_type" in governanceOrg &&
+                              getOrgLabel(
+                                governanceOrg.org_type,
+                                governanceOrg.metadata,
+                              )}
+                          </p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )}
+              />
+            )}
+          </div>
         </div>
-
-        {/* Tabs Content */}
-        <div className="mt-4">
-          {activeTab === DashboardTabs.TAB_FACILITIES &&
-            TabContent({
-              tabId: "facilities-panel",
-              tabItems: facilities,
-              emptyMessage: t("no_facilities_found"),
-              description: t("dashboard_tab_facilities"),
-              renderChild: (facility) => (
-                <Link
-                  key={facility.id}
-                  href={`/facility/${facility.id}/overview`}
-                >
-                  <Card className="transition-all hover:shadow-md hover:border-primary/20">
-                    <CardContent className="flex items-center gap-3 p-3 md:p-4">
-                      <Avatar
-                        name={facility.name}
-                        className="h-12 w-12 md:h-14 md:w-14"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium truncate text-sm md:text-base">
-                          {facility.name}
-                        </h3>
-                        <p className="text-xs md:text-sm text-gray-500 truncate">
-                          {t("view_facility_details")}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
-                    </CardContent>
-                  </Card>
-                </Link>
-              ),
-            })}
-
-          {activeTab === DashboardTabs.TAB_ASSOCIATIONS &&
-            TabContent({
-              tabId: "associations-panel",
-              tabItems: associations,
-              emptyMessage: t("no_associations_found"),
-              description: t("dashboard_tab_associations"),
-              renderChild: (association) => (
-                <Link
-                  key={association.id}
-                  href={`/organization/${association.id}`}
-                >
-                  <Card className="transition-all hover:shadow-md hover:border-primary/20">
-                    <CardContent className="flex items-center gap-3 p-3 md:p-4">
-                      <Avatar
-                        name={association.name}
-                        className="h-12 w-12 md:h-14 md:w-14"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium truncate text-sm md:text-base">
-                          {association.name}
-                        </h3>
-                        <p className="text-xs md:text-sm text-gray-500 truncate">
-                          {"org_type" in association &&
-                            getOrgLabel(
-                              association.org_type,
-                              association.metadata,
-                            )}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
-                    </CardContent>
-                  </Card>
-                </Link>
-              ),
-            })}
-
-          {activeTab === DashboardTabs.TAB_GOVERNANCE &&
-            TabContent({
-              tabId: "governance-panel",
-              tabItems: governance,
-              emptyMessage: t("no_governance_found"),
-              description: t("dashboard_tab_governance"),
-              renderChild: (governanceOrg) => (
-                <Link
-                  key={governanceOrg.id}
-                  href={`/organization/${governanceOrg.id}`}
-                >
-                  <Card className="transition-all hover:shadow-md hover:border-primary/20">
-                    <CardContent className="flex items-center gap-3 p-3 md:p-4">
-                      <Avatar
-                        name={governanceOrg.name}
-                        className="h-12 w-12 md:h-14 md:w-14"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium truncate text-sm md:text-base">
-                          {governanceOrg.name}
-                        </h3>
-                        <p className="text-xs md:text-sm text-gray-500 truncate">
-                          {"org_type" in governanceOrg &&
-                            getOrgLabel(
-                              governanceOrg.org_type,
-                              governanceOrg.metadata,
-                            )}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
-                    </CardContent>
-                  </Card>
-                </Link>
-              ),
-            })}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -287,7 +295,6 @@ export default function UserDashboard() {
 const TabContent = ({
   tabId,
   tabItems,
-  emptyMessage,
   description,
   renderChild,
 }: TabContentProps) => {
@@ -299,20 +306,15 @@ const TabContent = ({
       aria-labelledby={tabId}
     >
       <p className="text-sm text-gray-800 font-normal px-1">{description}</p>
-      {tabItems.length === 0 ? (
-        <div className="text-center py-6 text-gray-500">
-          <p>{emptyMessage}</p>
-        </div>
-      ) : (
-        <div
-          className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-          data-cy={`${tabId}-list`}
-        >
-          {tabItems.map((item: UserFacilityModel | Organization) =>
-            renderChild(item),
-          )}
-        </div>
-      )}
+
+      <div
+        className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        data-cy={`${tabId}-list`}
+      >
+        {tabItems.map((item: UserFacilityModel | Organization) => {
+          return renderChild(item);
+        })}
+      </div>
     </section>
   );
 };
