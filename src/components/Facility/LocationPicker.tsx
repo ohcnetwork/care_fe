@@ -171,6 +171,21 @@ export default function LocationPicker({
     }
   };
 
+  const handleClearInput = useCallback(() => {
+    setSearchState((prev) => ({
+      ...prev,
+      query: "",
+      showResults: false,
+      results: [],
+      noResultsFound: false,
+    }));
+
+    // Focus the input after clearing
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   const handleInputFocus = () => {
     // Show previous results if we have a search query and results
     if (
@@ -219,18 +234,30 @@ export default function LocationPicker({
             value={searchState.query}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
-            className="w-full text-sm"
+            className="w-full text-sm pr-10"
             data-cy="location-search"
             aria-label={t("search_for_location")}
           />
-          {searchState.isSearching && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            {searchState.isSearching ? (
               <CareIcon
                 icon="l-spinner"
                 className="h-4 w-4 animate-spin text-primary"
               />
-            </div>
-          )}
+            ) : (
+              searchState.query && (
+                <button
+                  type="button"
+                  onClick={handleClearInput}
+                  className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                  aria-label={t("clear_search")}
+                  data-cy="clear-search-button"
+                >
+                  <CareIcon icon="l-times" className="h-4 w-4" />
+                </button>
+              )
+            )}
+          </div>
           {searchState.showResults && searchState.query.trim() && (
             <div className="absolute z-10 mt-1 w-full rounded-md border bg-white shadow-lg">
               {searchState.noResultsFound ? (
