@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 
 import Loading from "@/components/Common/Loading";
 import { PrintQuestionnaireQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
+import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import TreatmentSummary from "@/components/Patient/TreatmentSummary";
@@ -30,6 +31,17 @@ const consultationRoutes: AppRoutes = {
           encounterId={encounterId}
           patientId={patientId}
           questionnaireId={questionnaireId}
+          facilityId={facilityId}
+        />
+      );
+    },
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print":
+    ({ encounterId, patientId, questionnaireResponseId, facilityId }) => {
+      return (
+        <PrintQuestionnaireResponse
+          encounterId={encounterId}
+          patientId={patientId}
+          questionnaireResponseId={questionnaireResponseId}
           facilityId={facilityId}
         />
       );

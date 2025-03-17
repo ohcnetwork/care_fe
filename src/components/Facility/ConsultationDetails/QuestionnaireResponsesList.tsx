@@ -259,12 +259,20 @@ function ResponseCard({
         </div>
       </div>
 
-      <Link
-        href={`questionnaire/${item.questionnaire?.id}/responses/print`}
-        className="text-xs text-blue-600 underline mt-2"
-      >
-        {t("print_questionnaire_responses")}
-      </Link>
+      <div className="flex gap-2 mt-2 max-sm:flex-col">
+        <Link
+          href={`questionnaire_response/${item.id}/print`}
+          className="text-xs text-blue-600 underline"
+        >
+          {t("print_this_questionnaire_response")}
+        </Link>
+        <Link
+          href={`questionnaire/${item.questionnaire?.id}/responses/print`}
+          className="text-xs text-blue-600 underline"
+        >
+          {t("print_all_questionnaire_responses")}
+        </Link>
+      </div>
 
       {item.questionnaire && (
         <div className="mt-4 space-y-4">

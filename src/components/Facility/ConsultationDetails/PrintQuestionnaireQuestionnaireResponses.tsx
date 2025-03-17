@@ -14,8 +14,8 @@ import { Separator } from "@/components/ui/separator";
 import api from "@/Utils/request/api";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatDisplayName, formatPatientAge } from "@/Utils/utils";
 import { formatDateTime, properCase } from "@/Utils/utils";
+import { formatDisplayName, formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -65,8 +65,6 @@ export function PrintQuestionnaireQuestionnaireResponses({
     return questionnaireResponses?.results?.[0]?.questionnaire;
   }, [questionnaireResponses]);
 
-  console.log(questionnaire, questionnaireResponses);
-
   return (
     <PrintPreview
       title={t("encounter_questionnaire_logs")}
@@ -90,42 +88,7 @@ export function PrintQuestionnaireQuestionnaireResponses({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
-            <div className="space-y-3">
-              <DetailRow
-                label={t("patient")}
-                value={encounter?.patient.name}
-                isStrong
-              />
-              <DetailRow
-                label={`${t("age")} / ${t("sex")}`}
-                value={
-                  encounter?.patient
-                    ? `${formatPatientAge(encounter.patient, true)}, ${t(`GENDER__${encounter.patient.gender}`)}`
-                    : undefined
-                }
-                isStrong
-              />
-            </div>
-            <div className="space-y-3">
-              <DetailRow
-                label={t("encounter_date")}
-                value={
-                  encounter?.period?.start &&
-                  format(new Date(encounter.period.start), "dd MMM yyyy, EEEE")
-                }
-                isStrong
-              />
-              <DetailRow
-                label={t("mobile_number")}
-                value={
-                  encounter?.patient.phone_number &&
-                  formatPhoneNumber(encounter.patient.phone_number)
-                }
-                isStrong
-              />
-            </div>
-          </div>
+          <EncounterDetails encounter={encounter} />
 
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
             <div className="text-center sm:text-left sm:order-1">
@@ -169,10 +132,56 @@ const DetailRow = ({
   );
 };
 
-export function formatValue(
-  value: ResponseValue["value"],
-  type: string,
-): string {
+interface EncounterDetailsProps {
+  encounter?: Encounter;
+}
+
+export function EncounterDetails({ encounter }: EncounterDetailsProps) {
+  const { t } = useTranslation();
+
+  if (!encounter) return null;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
+      <div className="space-y-3">
+        <DetailRow
+          label={t("patient")}
+          value={encounter?.patient.name}
+          isStrong
+        />
+        <DetailRow
+          label={`${t("age")} / ${t("sex")}`}
+          value={
+            encounter?.patient
+              ? `${formatPatientAge(encounter.patient, true)}, ${t(`GENDER__${encounter.patient.gender}`)}`
+              : undefined
+          }
+          isStrong
+        />
+      </div>
+      <div className="space-y-3">
+        <DetailRow
+          label={t("encounter_date")}
+          value={
+            encounter?.period?.start &&
+            format(new Date(encounter.period.start), "dd MMM yyyy, EEEE")
+          }
+          isStrong
+        />
+        <DetailRow
+          label={t("mobile_number")}
+          value={
+            encounter?.patient.phone_number &&
+            formatPhoneNumber(encounter.patient.phone_number)
+          }
+          isStrong
+        />
+      </div>
+    </div>
+  );
+}
+
+function formatValue(value: ResponseValue["value"], type: string): string {
   if (!value) return "";
 
   if (
@@ -300,21 +309,27 @@ function QuestionGroup({
   );
 }
 
-function ResponseCard({ item }: { item: QuestionnaireResponse }) {
+interface ResponseCardProps {
+  item?: QuestionnaireResponse;
+}
+
+export function ResponseCard({ item }: ResponseCardProps) {
+  const { t } = useTranslation();
+
+  if (!item) return null;
+
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
 
   if (isStructured && structuredType) return null;
 
-  // TODO: have a header for each entry with the date and user who submitted the response
-
   return (
-    <div className="flex flex-col py-3 transition-colors hover:bg-muted/50">
-      <div className="text-xs text-gray-500">
-        {formatDateTime(item.created_date)}
-      </div>
-      <div className="text-xs text-gray-500">
-        {formatDisplayName(item.created_by)}
+    <div className="flex flex-col py-3 transition-colors hover:bg-muted/50 print:break-after-page">
+      <div className="text-sm m-1">
+        <p>
+          {t("created_by")}: {formatDisplayName(item.created_by)}
+        </p>
+        <p>{formatDateTime(item.created_date)}</p>
       </div>
 
       <div className="ml-4">
