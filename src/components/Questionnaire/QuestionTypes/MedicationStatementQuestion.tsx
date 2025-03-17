@@ -24,6 +24,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -35,7 +36,6 @@ import {
 } from "@/components/ui/select";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { DatePickerRange } from "@/components/Common/DatePickerRange";
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -558,7 +558,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
               "border border-red-500 rounded-md",
           )}
         >
-          <DatePickerRange
+          <DateRangePicker
             date={{
               from: medication.effective_period?.start
                 ? new Date(medication.effective_period?.start)
