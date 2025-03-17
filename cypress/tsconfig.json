@@ -15,7 +15,7 @@
     "typeRoots": ["./support"],
     "resolveJsonModule": true,
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./*"]
     }
   },
   "include": ["**/*.cy.ts", "support/commands.ts", "**/*.ts"]
