@@ -74,7 +74,10 @@ export const PractitionerSelector = ({
           <CaretDownIcon className="ml-auto" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0" align="start">
+      <PopoverContent
+        className="p-0 w-[var(--radix-popover-trigger-width)]"
+        align="start"
+      >
         <Command>
           <CommandInput
             placeholder={t("search")}

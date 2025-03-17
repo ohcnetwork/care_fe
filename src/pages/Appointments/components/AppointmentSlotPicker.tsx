@@ -25,6 +25,7 @@ interface AppointmentSlotPickerProps {
   resourceId?: string;
   onSlotSelect: (slotId: string | undefined) => void;
   selectedSlotId?: string;
+  onSlotDetailsChange?: (slot: TokenSlot) => void;
 }
 
 export function AppointmentSlotPicker({
@@ -32,6 +33,7 @@ export function AppointmentSlotPicker({
   resourceId,
   onSlotSelect,
   selectedSlotId,
+  onSlotDetailsChange,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -55,6 +57,19 @@ export function AppointmentSlotPicker({
     enabled: !!resourceId && !!selectedDate,
   });
 
+  // Update slot details when a slot is selected
+  const handleSlotSelect = (slotId: string | undefined) => {
+    onSlotSelect(slotId);
+    if (slotId && onSlotDetailsChange) {
+      const allSlots = slotsQuery.data?.results || [];
+      const selectedSlot = allSlots.find((slot) => slot.id === slotId);
+
+      if (selectedSlot) {
+        onSlotDetailsChange(selectedSlot);
+      }
+    }
+  };
+
   const renderDay = (date: Date) => {
     const isSelected = isSameDay(date, selectedDate);
     const isBeforeToday = isBefore(date, startOfToday());
@@ -71,7 +86,6 @@ export function AppointmentSlotPicker({
           disabled
           onClick={() => {
             setSelectedDate(date);
-            onSlotSelect(undefined);
           }}
           className={cn(
             "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border border-gray-200",
@@ -95,7 +109,6 @@ export function AppointmentSlotPicker({
         disabled={isBeforeToday || isFullyBooked}
         onClick={() => {
           setSelectedDate(date);
-          onSlotSelect(undefined);
         }}
         className={cn(
           "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border-2 hover:scale-105 hover:shadow-md transition-all",
@@ -144,7 +157,6 @@ export function AppointmentSlotPicker({
           month={selectedMonth}
           onMonthChange={(month) => {
             setSelectedMonth(month);
-            onSlotSelect(undefined);
           }}
           renderDay={renderDay}
           className="mb-6"
@@ -187,7 +199,7 @@ export function AppointmentSlotPicker({
                           availability={availability}
                           selectedSlotId={selectedSlotId}
                           onClick={() => {
-                            onSlotSelect(
+                            handleSlotSelect(
                               selectedSlotId === slot.id ? undefined : slot.id,
                             );
                           }}
