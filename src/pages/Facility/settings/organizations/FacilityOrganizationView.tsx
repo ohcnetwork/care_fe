@@ -18,6 +18,7 @@ import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrgan
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
+import EditFacilityOrganizationSheet from "./components/EditFacilityOrganizationSheet";
 import FacilityOrganizationLayout from "./components/FacilityOrganizationLayout";
 
 interface Props {
@@ -27,6 +28,7 @@ interface Props {
 
 function OrganizationCard({
   org,
+  facilityId,
 }: {
   org: FacilityOrganization;
   facilityId: string;
@@ -49,11 +51,22 @@ function OrganizationCard({
                 </Badge>
               </div>
             </div>
-            <Button variant="white" size="sm" className="font-semibold" asChild>
-              <Link href={`/departments/${org.id}/users`}>
-                {t("see_details")}
-              </Link>
-            </Button>
+            <div className="flex flex-row items-center gap-2">
+              <EditFacilityOrganizationSheet
+                facilityId={facilityId}
+                organization={org}
+              />
+              <Button
+                variant="white"
+                size="sm"
+                className="font-semibold"
+                asChild
+              >
+                <Link href={`/departments/${org.id}/users`}>
+                  {t("see_details")}
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>

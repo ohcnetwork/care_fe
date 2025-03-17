@@ -34,9 +34,11 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
+import EditFacilityOrganizationSheet from "./components/EditFacilityOrganizationSheet";
 
 export default function FacilityOrganizationIndex({
   facilityId,
@@ -114,20 +116,10 @@ export default function FacilityOrganizationIndex({
     getChildren,
     indent,
   }: {
-    org: {
-      id: string;
-      name: string;
-      parent?: { id: string };
-      org_type: string;
-    };
+    org: FacilityOrganization;
     expandedRows: Record<string, boolean>;
     toggleRow: (id: string) => void;
-    getChildren: (parentId: string) => {
-      id: string;
-      name: string;
-      parent?: { id: string };
-      org_type: string;
-    }[];
+    getChildren: (parentId: string) => FacilityOrganization[];
     indent: number;
   }) => {
     const children = getChildren(org.id);
@@ -218,6 +210,20 @@ export default function FacilityOrganizationIndex({
                   </TooltipProvider>
                 </div>
               )}
+
+              <div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <EditFacilityOrganizationSheet
+                        facilityId={facilityId}
+                        organization={org}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>{t("edit")}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <div className="ml-auto">
                 <TooltipProvider>
                   <Tooltip>
