@@ -148,9 +148,9 @@ export default function LocationView({ id, facilityId }: Props) {
       </Breadcrumb>
 
       <Page title={location?.name || t("location")}>
-        <div className="space-y-6">
+        <div className="space-y-6 ml-3 md:ml-0">
           <div className="flex flex-col justify-between items-start gap-4">
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-lg font-semibold">{t("locations")}</h2>
               <Badge variant="outline">
                 {t(`location_form__${location?.form}`)}
@@ -164,8 +164,8 @@ export default function LocationView({ id, facilityId }: Props) {
                 {location?.status}
               </Badge>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="w-72">
+            <div className="flex flex-col md:flex-row flex-wrap items-center gap-2">
+              <div className="w-full md:w-72">
                 <Input
                   placeholder={t("search_by_name")}
                   value={searchQuery}
@@ -176,31 +176,37 @@ export default function LocationView({ id, facilityId }: Props) {
                   className="w-full"
                 />
               </div>
-              {location && "mode" in location && location.mode === "kind" && (
-                <Button variant="primary" onClick={handleAddLocation}>
-                  <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
-                  {t("add_location")}
-                </Button>
-              )}
-              {locationOrganizations && (
-                <LinkDepartmentsSheet
-                  entityType="location"
-                  entityId={id}
-                  currentOrganizations={locationOrganizations.results}
-                  facilityId={facilityId}
-                  trigger={
-                    <Button variant="outline">
-                      <CareIcon icon="l-building" className="h-4 w-4 mr-2" />
-                      {t("manage_organizations")}
-                    </Button>
-                  }
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: ["location", facilityId, id],
-                    });
-                  }}
-                />
-              )}
+              <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                {location && "mode" in location && location.mode === "kind" && (
+                  <Button
+                    variant="primary"
+                    onClick={handleAddLocation}
+                    className="w-full md:w-auto"
+                  >
+                    <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
+                    {t("add_location")}
+                  </Button>
+                )}
+                {locationOrganizations && (
+                  <LinkDepartmentsSheet
+                    entityType="location"
+                    entityId={id}
+                    currentOrganizations={locationOrganizations.results}
+                    facilityId={facilityId}
+                    trigger={
+                      <Button variant="outline" className="w-full md:w-auto">
+                        <CareIcon icon="l-building" className="h-4 w-4 mr-2" />
+                        {t("manage_organizations")}
+                      </Button>
+                    }
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["location", facilityId, id],
+                      });
+                    }}
+                  />
+                )}
+              </div>
             </div>
           </div>
           {isLoading ? (
