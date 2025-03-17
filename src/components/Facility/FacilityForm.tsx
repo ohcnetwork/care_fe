@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import LocationPicker from "@/components/Facility/LocationPicker";
+import LocationPicker from "@/components/Common/GeoLocationPicker";
 import { FacilityModel } from "@/components/Facility/models";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
