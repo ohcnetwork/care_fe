@@ -1,11 +1,12 @@
+import { useQuery } from "@tanstack/react-query";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 interface LocationPickerProps {
   latitude?: number;
@@ -21,12 +22,10 @@ interface SearchResult {
   lon: string;
 }
 
-interface SearchState {
+interface LocationSearchState {
   query: string;
-  results: SearchResult[];
-  isSearching: boolean;
-  showResults: boolean;
-  noResultsFound: boolean;
+  debouncedQuery: string;
+  selectedLocationText: string;
 }
 
 export default function LocationPicker({
@@ -37,164 +36,103 @@ export default function LocationPicker({
   onGetCurrentLocation,
 }: LocationPickerProps) {
   const { t } = useTranslation();
-  const [searchState, setSearchState] = useState<SearchState>({
+  const [searchState, setSearchState] = useState<LocationSearchState>({
     query: "",
-    results: [],
-    isSearching: false,
-    showResults: false,
-    noResultsFound: false,
+    debouncedQuery: "",
+    selectedLocationText: "",
   });
 
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Hide results when search query is empty
   useEffect(() => {
-    if (!searchState.query.trim()) {
-      setSearchState((prev) => ({
-        ...prev,
-        showResults: false,
-        results: [],
-        noResultsFound: false,
-      }));
-    }
-  }, [searchState.query]);
-
-  // Handle clicks outside the search container
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(event.target as Node)
-      ) {
-        setSearchState((prev) => ({ ...prev, showResults: false }));
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
+    if (searchState.query.trim().length < 3) {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
       }
-    };
-  }, []);
 
-  const performSearch = useCallback(async (query: string) => {
-    if (!query.trim()) {
       setSearchState((prev) => ({
         ...prev,
-        showResults: false,
-        results: [],
-        noResultsFound: false,
+        debouncedQuery: "",
       }));
+
       return;
     }
 
-    setSearchState((prev) => ({
-      ...prev,
-      isSearching: true,
-      showResults: true,
-      noResultsFound: false,
-    }));
-
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          query,
-        )}&limit=5`,
-      );
-
-      const data = await response.json();
+    searchTimeoutRef.current = setTimeout(() => {
       setSearchState((prev) => ({
         ...prev,
-        results: data,
-        noResultsFound: data.length === 0,
-        isSearching: false,
+        debouncedQuery: prev.query,
       }));
-    } catch (error) {
-      console.error("Search error:", error);
-      setSearchState((prev) => ({
-        ...prev,
-        noResultsFound: true,
-        isSearching: false,
-      }));
-    }
-  }, []);
+    }, 500);
 
-  const debouncedSearch = useCallback(
-    (query: string) => {
+    return () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
+    };
+  }, [searchState.query]);
 
-      searchTimeoutRef.current = setTimeout(() => {
-        performSearch(query);
-      }, 500); // 500ms debounce delay
+  // Search query using TanStack Query
+  const { data: searchResults = [], isLoading } = useQuery({
+    queryKey: ["locationSearch", searchState.debouncedQuery],
+    queryFn: async () => {
+      if (!searchState.debouncedQuery.trim()) return [];
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          searchState.debouncedQuery,
+        )}&limit=5`,
+        {
+          headers: {
+            "User-Agent": "OHCN-Care-Application/1.0",
+          },
+        },
+      );
+
+      if (!response.ok) throw new Error("Network response was not ok");
+      return response.json() as Promise<SearchResult[]>;
     },
-    [performSearch],
+    enabled: searchState.debouncedQuery.trim().length >= 3,
+    staleTime: 1000 * 60 * 5, // Cache results for 5 minutes
+    retry: 1,
+  });
+
+  const handleLocationSelect = useCallback(
+    (value: string) => {
+      const selectedResult = searchResults.find(
+        (result) => result.display_name === value,
+      );
+
+      if (selectedResult) {
+        onLocationSelect(
+          parseFloat(selectedResult.lat),
+          parseFloat(selectedResult.lon),
+        );
+
+        setSearchState((prev) => ({
+          ...prev,
+          query: selectedResult.display_name,
+          selectedLocationText: selectedResult.display_name,
+        }));
+      }
+    },
+    [searchResults, onLocationSelect],
   );
 
-  const handleResultClick = useCallback(
-    (result: SearchResult) => {
-      onLocationSelect(parseFloat(result.lat), parseFloat(result.lon));
-      setSearchState((prev) => ({
-        ...prev,
-        query: result.display_name,
-        showResults: false,
-      }));
-    },
-    [onLocationSelect],
-  );
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleLocationSearch = useCallback((query: string) => {
     setSearchState((prev) => ({
       ...prev,
-      query: value,
-      ...(value.trim() === "" && {
-        showResults: false,
-        results: [],
-        noResultsFound: false,
-      }),
+      query,
+      selectedLocationText: "",
     }));
-
-    if (value.trim().length >= 3) {
-      debouncedSearch(value);
-    }
-  };
-
-  const handleClearInput = useCallback(() => {
-    setSearchState((prev) => ({
-      ...prev,
-      query: "",
-      showResults: false,
-      results: [],
-      noResultsFound: false,
-    }));
-
-    // Focus the input after clearing
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
   }, []);
 
-  const handleInputFocus = () => {
-    // Show previous results if we have a search query and results
-    if (
-      searchState.query.trim() &&
-      (searchState.results.length > 0 || searchState.noResultsFound)
-    ) {
-      setSearchState((prev) => ({ ...prev, showResults: true }));
-    }
-  };
+  // Convert search results to autocomplete options
+  const locationOptions = searchResults.map((result) => ({
+    label: result.display_name,
+    value: result.display_name,
+  }));
 
   return (
     <div className="space-y-4">
@@ -226,62 +164,20 @@ export default function LocationPicker({
       </div>
 
       <div className="relative w-full">
-        <div ref={searchContainerRef} className="relative w-full">
-          <Input
-            ref={inputRef}
-            type="text"
-            placeholder={t("search_for_location")}
-            value={searchState.query}
-            onChange={handleInputChange}
-            onFocus={handleInputFocus}
-            className="w-full text-sm pr-10"
-            data-cy="location-search"
-            aria-label={t("search_for_location")}
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-            {searchState.isSearching ? (
-              <CareIcon
-                icon="l-spinner"
-                className="h-4 w-4 animate-spin text-primary"
-              />
-            ) : (
-              searchState.query && (
-                <button
-                  type="button"
-                  onClick={handleClearInput}
-                  className="text-gray-400 hover:text-gray-600 focus:outline-none"
-                  aria-label={t("clear_search")}
-                  data-cy="clear-search-button"
-                >
-                  <CareIcon icon="l-times" className="h-4 w-4" />
-                </button>
-              )
-            )}
-          </div>
-          {searchState.showResults && searchState.query.trim() && (
-            <div className="absolute z-10 mt-1 w-full rounded-md border bg-white shadow-lg">
-              {searchState.noResultsFound ? (
-                <div className="px-4 py-3 text-sm text-gray-500">
-                  {t("no_locations_found")}
-                </div>
-              ) : (
-                searchState.results.length > 0 && (
-                  <ul className="max-h-60 overflow-auto py-1 text-sm">
-                    {searchState.results.map((result, index) => (
-                      <li
-                        key={index}
-                        className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-                        onClick={() => handleResultClick(result)}
-                      >
-                        {result.display_name}
-                      </li>
-                    ))}
-                  </ul>
-                )
-              )}
-            </div>
-          )}
-        </div>
+        <Autocomplete
+          options={locationOptions}
+          value={searchState.selectedLocationText || ""}
+          onChange={handleLocationSelect}
+          onSearch={handleLocationSearch}
+          placeholder={t("search_for_location")}
+          noOptionsMessage={
+            searchState.debouncedQuery && !isLoading
+              ? t("no_locations_found")
+              : t("type_to_search")
+          }
+          disabled={isGettingLocation}
+          data-cy="location-search"
+        />
       </div>
 
       <div className="h-[400px] w-full rounded-lg border overflow-hidden">
@@ -293,11 +189,7 @@ export default function LocationPicker({
         >
           <ZoomControl />
           {latitude && longitude && (
-            <Marker
-              width={40}
-              anchor={[latitude, longitude]}
-              onClick={() => {}}
-            />
+            <Marker width={40} anchor={[latitude, longitude]} />
           )}
         </Map>
       </div>
