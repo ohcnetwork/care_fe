@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandDialog,
+  CommandDrawer,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -62,6 +62,7 @@ export default function Autocomplete({
         disabled={disabled}
         onValueChange={onSearch}
         className="outline-none border-none ring-0 shadow-none"
+        autoFocus
       />
       <CommandList>
         <CommandEmpty>{noOptionsMessage}</CommandEmpty>
@@ -117,9 +118,9 @@ export default function Autocomplete({
           </span>
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
-        <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandDrawer open={open} onOpenChange={setOpen}>
           {commandContent}
-        </CommandDialog>
+        </CommandDrawer>
       </>
     );
   }

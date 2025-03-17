@@ -240,7 +240,8 @@ export function AppointmentQuestion({
                           >
                             <div className="flex items-center justify-between">
                               <span>
-                                {format(slot.start_datetime, "HH:mm")}
+                                {format(slot.start_datetime, "HH:mm")} -{" "}
+                                {format(slot.end_datetime, "HH:mm")}
                               </span>
                               <span className="pl-1 text-xs text-gray-500">
                                 {availability.tokens_per_slot - slot.allocated}{" "}
