@@ -1159,201 +1159,83 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsContent>
 
         <TabsContent value="preview">
-          {id ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("preview")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <QuestionnaireForm
-                  questionnaireSlug={id}
-                  patientId="preview"
-                  subjectType={questionnaire.subject_type}
-                  encounterId="preview"
-                  facilityId="preview"
-                />
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="flex flex-col md:flex-row gap-2">
-              <div className="space-y-4 md:w-60">
-                <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
-                  <CardHeader className="p-0">
-                    <CardTitle>{t("navigation")}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <nav className="space-y-1">
-                      {questionnaire.questions.map((question, index) => {
-                        const hasSubQuestions =
-                          question.type === "group" &&
-                          question.questions &&
-                          question.questions.length > 0;
-                        return (
-                          <div key={question.id} className="space-y-1">
-                            <button
-                              onClick={() => {
-                                const element = document.getElementById(
-                                  `question-${question.id}`,
-                                );
-                                if (element) {
-                                  element.scrollIntoView({
-                                    behavior: "smooth",
-                                  });
-                                  toggleQuestionExpanded(question.id);
-                                }
-                              }}
-                              className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                                expandedQuestions.has(question.id)
-                                  ? "bg-accent"
-                                  : ""
-                              }`}
-                            >
-                              <span className="font-medium text-gray-500">
-                                {index + 1}.
-                              </span>
-                              <span className="flex-1 truncate">
-                                {question.text || "Untitled Question"}
-                              </span>
-                            </button>
-                            {hasSubQuestions && question.questions && (
-                              <div className="ml-6 border-l-2 border-muted pl-2 space-y-1">
-                                {question.questions.map(
-                                  (subQuestion, subIndex) => (
-                                    <button
-                                      key={subQuestion.id}
-                                      onClick={() => {
-                                        const element = document.getElementById(
-                                          `question-${subQuestion.id}`,
-                                        );
-                                        if (element) {
-                                          element.scrollIntoView({
-                                            behavior: "smooth",
-                                          });
-                                          toggleQuestionExpanded(question.id);
-                                        }
-                                      }}
-                                      className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2"
-                                    >
-                                      <span className="font-medium text-gray-500">
-                                        {index + 1}.{subIndex + 1}
-                                      </span>
-                                      <span className="flex-1 truncate">
-                                        {subQuestion.text ||
-                                          "Untitled Question"}
-                                      </span>
-                                    </button>
-                                  ),
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </nav>
-                  </CardContent>
-                </Card>
-                <div className="space-y-4 max-w-sm lg:hidden">
-                  <QuestionnaireProperties
-                    questionnaire={questionnaire}
-                    updateQuestionnaireField={updateQuestionnaireField}
-                    id={id}
-                    organizations={organizations}
-                    organizationSelection={{
-                      selectedIds: selectedOrgIds,
-                      onToggle: handleToggleOrganization,
-                      searchQuery: orgSearchQuery,
-                      setSearchQuery: setOrgSearchQuery,
-                      available: availableOrganizations,
-                      isLoading: isLoadingAvailableOrganizations,
-                    }}
-                    tags={questionnaire.tags}
-                    tagSelection={{
-                      selectedIds: selectedTagIds,
-                      onToggle: handleToggleTag,
-                      searchQuery: tagSearchQuery,
-                      setSearchQuery: setTagSearchQuery,
-                      available: availableTags,
-                      isLoading: isLoadingAvailableTags,
-                    }}
-                    activeTab={activeTab}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1 flex-1">
-                <p className="text-sm text-gray-700">
-                  {t("questionnaire_title_description")}
-                </p>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{questionnaire.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-sm text-gray-700">
-                      {questionnaire.description}
-                    </p>
-                    {selectedOrgIds?.length > 0 && (
-                      <>
-                        <CardTitle>{t("organizations")}</CardTitle>
-                        {selectedOrgIds.map((orgId) => {
-                          const org = availableOrganizations?.results.find(
-                            (org) => org.id === orgId,
-                          );
-                          return org ? (
-                            <Badge key={orgId} variant="secondary">
-                              {org.name}
-                            </Badge>
-                          ) : null;
-                        })}
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-                <Card className="border-none bg-transparent shadow-none">
-                  <CardHeader className="flex justify-between px-0 py-2">
-                    <div>
-                      <CardTitle className="flex justify-between items-center w-full">
-                        <p className="text-sm text-gray-700 font-medium mt-1">
-                          {questionnaire.questions?.length || 0}{" "}
-                          {questionnaire.questions?.length === 1
-                            ? t("question_one")
-                            : t("question_other")}
-                        </p>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <span className="w-3 h-3 bg-purple-500 rounded-sm"></span>
-                            <span className="text-gray-700 font-medium">
-                              {questionnaire.questions?.filter(
-                                (q) => q.required,
-                              ).length || 0}{" "}
-                              {t("required")}
+          <div className="flex flex-col md:flex-row gap-2">
+            <div className="space-y-4 md:w-60">
+              <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
+                <CardHeader className="p-0">
+                  <CardTitle>{t("navigation")}</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <nav className="space-y-1">
+                    {questionnaire.questions.map((question, index) => {
+                      const hasSubQuestions =
+                        question.type === "group" &&
+                        question.questions &&
+                        question.questions.length > 0;
+                      return (
+                        <div key={question.id} className="space-y-1">
+                          <button
+                            onClick={() => {
+                              const element = document.getElementById(
+                                `question-${question.id}`,
+                              );
+                              if (element) {
+                                element.scrollIntoView({
+                                  behavior: "smooth",
+                                });
+                                toggleQuestionExpanded(question.id);
+                              }
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
+                              expandedQuestions.has(question.id)
+                                ? "bg-accent"
+                                : ""
+                            }`}
+                          >
+                            <span className="font-medium text-gray-500">
+                              {index + 1}.
                             </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="w-3 h-3 bg-gray-400 rounded-sm"></span>
-                            <span className="text-gray-700 font-medium">
-                              {questionnaire.questions?.filter(
-                                (q) => !q.required,
-                              ).length || 0}{" "}
-                              {t("optional")}
+                            <span className="flex-1 truncate">
+                              {question.text || "Untitled Question"}
                             </span>
-                          </div>
+                          </button>
+                          {hasSubQuestions && question.questions && (
+                            <div className="ml-6 border-l-2 border-muted pl-2 space-y-1">
+                              {question.questions.map(
+                                (subQuestion, subIndex) => (
+                                  <button
+                                    key={subQuestion.id}
+                                    onClick={() => {
+                                      const element = document.getElementById(
+                                        `question-${subQuestion.id}`,
+                                      );
+                                      if (element) {
+                                        element.scrollIntoView({
+                                          behavior: "smooth",
+                                        });
+                                        toggleQuestionExpanded(question.id);
+                                      }
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2"
+                                  >
+                                    <span className="font-medium text-gray-500">
+                                      {index + 1}.{subIndex + 1}
+                                    </span>
+                                    <span className="flex-1 truncate">
+                                      {subQuestion.text || "Untitled Question"}
+                                    </span>
+                                  </button>
+                                ),
+                              )}
+                            </div>
+                          )}
                         </div>
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="bg-white py-4">
-                    <div className="space-y-6">
-                      {questionnaire.questions.map((question) => (
-                        <div key={question.id} id={`question-${question.id}`}>
-                          <QuestionPreview question={question} depth={0} />
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="space-y-4 w-60 hidden lg:block">
+                      );
+                    })}
+                  </nav>
+                </CardContent>
+              </Card>
+              <div className="space-y-4 max-w-sm lg:hidden">
                 <QuestionnaireProperties
                   questionnaire={questionnaire}
                   updateQuestionnaireField={updateQuestionnaireField}
@@ -1380,7 +1262,115 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 />
               </div>
             </div>
-          )}
+
+            <div className="space-y-1 flex-1">
+              <p className="text-sm text-gray-700">
+                {t("questionnaire_title_description")}
+              </p>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{questionnaire.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-gray-700">
+                    {questionnaire.description}
+                  </p>
+                  {selectedOrgIds?.length > 0 && (
+                    <>
+                      <CardTitle>{t("organizations")}</CardTitle>
+                      {selectedOrgIds.map((orgId) => {
+                        const org = availableOrganizations?.results.find(
+                          (org) => org.id === orgId,
+                        );
+                        return org ? (
+                          <Badge key={orgId} variant="secondary">
+                            {org.name}
+                          </Badge>
+                        ) : null;
+                      })}
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+              <Card className="border-none bg-transparent shadow-none">
+                <CardHeader className="flex justify-between px-0 py-2">
+                  <div>
+                    <CardTitle className="flex justify-between items-center w-full">
+                      <p className="text-sm text-gray-700 font-medium mt-1">
+                        {questionnaire.questions?.length || 0}{" "}
+                        {questionnaire.questions?.length === 1
+                          ? t("question_one")
+                          : t("question_other")}
+                      </p>
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-1">
+                          <span className="w-3 h-3 bg-purple-500 rounded-sm"></span>
+                          <span className="text-gray-700 font-medium">
+                            {questionnaire.questions?.filter((q) => q.required)
+                              .length || 0}{" "}
+                            {t("required")}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="w-3 h-3 bg-gray-400 rounded-sm"></span>
+                          <span className="text-gray-700 font-medium">
+                            {questionnaire.questions?.filter((q) => !q.required)
+                              .length || 0}{" "}
+                            {t("optional")}
+                          </span>
+                        </div>
+                      </div>
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="bg-white py-4">
+                  <div className="space-y-6">
+                    {id ? (
+                      <QuestionnaireForm
+                        questionnaireSlug={id}
+                        patientId="preview"
+                        subjectType={questionnaire.subject_type}
+                        encounterId="preview"
+                        facilityId="preview"
+                      />
+                    ) : (
+                      questionnaire.questions.map((question) => (
+                        <div key={question.id} id={`question-${question.id}`}>
+                          <QuestionPreview question={question} depth={0} />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="space-y-4 w-60 hidden lg:block">
+              <QuestionnaireProperties
+                questionnaire={questionnaire}
+                updateQuestionnaireField={updateQuestionnaireField}
+                id={id}
+                organizations={organizations}
+                organizationSelection={{
+                  selectedIds: selectedOrgIds,
+                  onToggle: handleToggleOrganization,
+                  searchQuery: orgSearchQuery,
+                  setSearchQuery: setOrgSearchQuery,
+                  available: availableOrganizations,
+                  isLoading: isLoadingAvailableOrganizations,
+                }}
+                tags={questionnaire.tags}
+                tagSelection={{
+                  selectedIds: selectedTagIds,
+                  onToggle: handleToggleTag,
+                  searchQuery: tagSearchQuery,
+                  setSearchQuery: setTagSearchQuery,
+                  available: availableTags,
+                  isLoading: isLoadingAvailableTags,
+                }}
+                activeTab={activeTab}
+              />
+            </div>
+          </div>
           <DebugPreview
             data={questionnaire}
             title={t("questionnaire_one")}
