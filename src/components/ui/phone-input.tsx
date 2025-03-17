@@ -32,25 +32,31 @@ type PhoneInputProps = Omit<
     onChange?: (value: RPNInput.Value) => void;
   };
 
+const getCountryFromNumber = (
+  phoneNumber: string | undefined,
+): RPNInput.Country => {
+  if (!phoneNumber) {
+    return careConfig.defaultCountry as RPNInput.Country;
+  }
+  const parsedNumber = RPNInput.parsePhoneNumber(phoneNumber);
+  return (
+    parsedNumber?.country || (careConfig.defaultCountry as RPNInput.Country)
+  );
+};
+
 const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
   React.forwardRef<React.ElementRef<typeof RPNInput.default>, PhoneInputProps>(
     ({ className, onChange, ...props }, ref) => {
-      const getCountryFromNumber = (phoneNumber: string) => {
-        const parsedNumber = RPNInput.parsePhoneNumber(phoneNumber);
-        return parsedNumber?.country || careConfig.defaultCountry;
-      };
-
       const [selectedCountry, setSelectedCountry] =
         React.useState<RPNInput.Country>(
-          props.value
-            ? (getCountryFromNumber(props.value as string) as RPNInput.Country)
-            : (careConfig.defaultCountry as RPNInput.Country),
+          getCountryFromNumber(props.value as string | undefined),
         );
+
       React.useEffect(() => {
         if (props.value) {
           const detectedCountry = getCountryFromNumber(props.value as string);
           if (detectedCountry && detectedCountry !== selectedCountry) {
-            setSelectedCountry(detectedCountry as RPNInput.Country);
+            setSelectedCountry(detectedCountry);
           }
         }
       }, [props.value]);
