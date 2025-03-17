@@ -123,7 +123,9 @@ export function DiagnosisQuestion({
 
   const handleAddDiagnosis = (code: Code) => {
     const isDuplicate = diagnoses.some(
-      (diagnosis) => diagnosis.code.code === code.code,
+      (diagnosis) =>
+        diagnosis.code.code === code.code &&
+        diagnosis.verification_status !== "entered_in_error",
     );
 
     if (isDuplicate) {

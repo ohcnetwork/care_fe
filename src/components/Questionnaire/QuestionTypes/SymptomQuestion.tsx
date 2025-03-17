@@ -317,7 +317,9 @@ export function SymptomQuestion({
 
   const handleAddSymptom = (code: Code) => {
     const isDuplicate = symptoms.some(
-      (symptom) => symptom.code.code === code.code,
+      (symptom) =>
+        symptom.code.code === code.code &&
+        symptom.verification_status !== "entered_in_error",
     );
 
     if (isDuplicate) {
