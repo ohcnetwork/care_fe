@@ -531,7 +531,7 @@ function QuestionnaireProperties({
           trigger={
             <Button variant="outline" className="w-full justify-start">
               <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
-              Clone Questionnaire
+              {t("clone_questionnaire")}
             </Button>
           }
         />
@@ -700,7 +700,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     onSuccess: (data: QuestionnaireDetail) => {
       toast.success("Questionnaire created successfully");
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
-      navigate(`/admin/questionnaire/${data.slug}`);
+      navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
     onError: (_error) => {
       toast.error("Failed to create questionnaire");
@@ -711,10 +711,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mutationFn: mutate(questionnaireApi.update, {
       pathParams: { id: id! },
     }),
-    onSuccess: (data: QuestionnaireDetail) => {
+    onSuccess: () => {
       toast.success("Questionnaire updated successfully");
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
-      navigate(`/admin/questionnaire/${data.slug}`);
     },
     onError: (_error) => {
       toast.error("Failed to update questionnaire");
@@ -790,7 +789,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         <CareIcon icon="l-info-circle" className="h-4 w-4" />
         <AlertTitle>Not Found</AlertTitle>
         <AlertDescription>
-          The requested questionnaire could not be found.
+          {t("no_requested_questionnaires_found")}
         </AlertDescription>
       </Alert>
     );
@@ -820,7 +819,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleCancel = () => {
-    navigate(id ? `/admin/questionnaire/${id}` : "/admin/questionnaire");
+    navigate("/admin/questionnaire");
   };
 
   const toggleQuestionExpanded = (questionId: string) => {
@@ -998,7 +997,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     />
                   </div>
                 </div>
-
                 <div className="space-y-4 flex-1">
                   <Card>
                     <CardHeader>
@@ -1329,11 +1327,11 @@ function QuestionEditor({
             </div>
             <div className="flex gap-2 mt-1">
               <Badge variant="secondary">{type}</Badge>
-              {required && <Badge variant="secondary">Required</Badge>}
-              {repeats && <Badge variant="secondary">Repeatable</Badge>}
+              {required && <Badge variant="secondary">{t("required")}</Badge>}
+              {repeats && <Badge variant="secondary">{t("repeatable")}</Badge>}
               {type === "group" && questions && questions.length > 0 && (
                 <Badge variant="secondary">
-                  {questions.length} sub-questions
+                  {t("sub_questions_count", { count: questions.length })}
                 </Badge>
               )}
             </div>
@@ -1359,7 +1357,7 @@ function QuestionEditor({
                 }}
               >
                 <ChevronUp className="mr-2 h-4 w-4" />
-                Move Up
+                {t("move_up")}
               </DropdownMenuItem>
             )}
             {!isLast && (
@@ -1370,7 +1368,7 @@ function QuestionEditor({
                 }}
               >
                 <ChevronDown className="mr-2 h-4 w-4" />
-                Move Down
+                {t("move_down")}
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
@@ -1382,7 +1380,7 @@ function QuestionEditor({
               className="text-destructive"
             >
               <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
-              Delete
+              {t("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -1409,7 +1407,7 @@ function QuestionEditor({
           </div>
 
           <div>
-            <Label>Description</Label>
+            <Label>{t("description")}</Label>
             <Textarea
               value={question.description || ""}
               onChange={(e) => updateField("description", e.target.value)}
@@ -1421,7 +1419,7 @@ function QuestionEditor({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Type</Label>
+                <Label>{t("type")}</Label>
                 <Select
                   value={type}
                   onValueChange={(val: QuestionType) => {
@@ -1447,7 +1445,7 @@ function QuestionEditor({
 
               {type === "structured" && (
                 <div>
-                  <Label>Structured Type</Label>
+                  <Label>{t("structured_type")}</Label>
                   <Select
                     value={structured_type ?? "allergy_intolerance"}
                     onValueChange={(val: StructuredQuestionType) =>
@@ -1493,7 +1491,7 @@ function QuestionEditor({
                       id={`required-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`required-${getQuestionPath()}`}>
-                      Required
+                      {t("required")}
                     </Label>
                   </div>
 
@@ -1504,7 +1502,7 @@ function QuestionEditor({
                       id={`repeats-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`repeats-${getQuestionPath()}`}>
-                      Repeatable
+                      {t("repeatable")}
                     </Label>
                   </div>
 
@@ -1541,7 +1539,7 @@ function QuestionEditor({
                       id={`collect_time-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_time-${getQuestionPath()}`}>
-                      Collect Time
+                      {t("collect_time")}
                     </Label>
                   </div>
 
@@ -1554,7 +1552,7 @@ function QuestionEditor({
                       id={`collect_performer-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_performer-${getQuestionPath()}`}>
-                      Collect Performer
+                      {t("collect_performer")}
                     </Label>
                   </div>
 
@@ -1567,7 +1565,7 @@ function QuestionEditor({
                       id={`collect_body_site-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_body_site-${getQuestionPath()}`}>
-                      Collect Body Site
+                      {t("collect_body_site")}
                     </Label>
                   </div>
 
@@ -1580,7 +1578,7 @@ function QuestionEditor({
                       id={`collect_method-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_method-${getQuestionPath()}`}>
-                      Collect Method
+                      {t("collect_method")}
                     </Label>
                   </div>
                 </div>
@@ -1594,9 +1592,8 @@ function QuestionEditor({
                 <h3 className="text-sm font-medium mb-2">
                   Group Layout Options
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  Choose the layout style that best fits your sub-questions from
-                  the available options.
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t("choose_layout_style")}
                 </p>
                 <RadioGroup
                   value={
@@ -1734,7 +1731,7 @@ function QuestionEditor({
                       }}
                     >
                       <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-                      Add Option
+                      {t("add_option")}
                     </Button>
                   </CardContent>
                 ) : (
@@ -1796,7 +1793,7 @@ function QuestionEditor({
                   }}
                 >
                   <CareIcon icon="l-plus" className="h-4 w-4" />
-                  Add Sub-Question
+                  {t("add_sub_question")}
                 </Button>
               </div>
               <div className="space-y-4">
@@ -1989,8 +1986,8 @@ function QuestionEditor({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="true">True</SelectItem>
-                            <SelectItem value="false">False</SelectItem>
+                            <SelectItem value="true">{t("true")}</SelectItem>
+                            <SelectItem value="false">{t("false")}</SelectItem>
                           </SelectContent>
                         </Select>
                       ) : (
@@ -2079,7 +2076,7 @@ function QuestionEditor({
                 }}
               >
                 <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-                Add Condition
+                {t("add_condition")}
               </Button>
             </div>
           </div>

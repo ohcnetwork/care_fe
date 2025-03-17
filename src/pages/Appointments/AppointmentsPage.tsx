@@ -1,6 +1,5 @@
 import careConfig from "@careConfig";
 import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
-import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDays,
@@ -13,8 +12,8 @@ import {
   subDays,
 } from "date-fns";
 import { Edit3Icon } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { Link, navigate } from "raviger";
+import { useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -57,21 +56,22 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
+  formatDateTime,
   formatDisplayName,
-  formatName,
   formatPatientAge,
 } from "@/Utils/utils";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
@@ -83,14 +83,6 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-
-interface QueryParams {
-  practitioner: string | null;
-  slot: string | null;
-  date_from: string | null;
-  date_to: string | null;
-  search: string | null;
-}
 
 interface DateRangeDisplayProps {
   dateFrom: string | null;
@@ -242,15 +234,16 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
 export default function AppointmentsPage(props: { facilityId?: string }) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-
-  const [qParams, setQParams] = useQueryParams<QueryParams>();
+  const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
+    limit: 15,
+  });
 
   const facilityId = props.facilityId ?? authUser.home_facility!;
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
 
   const schedulableUsersQuery = useQuery({
-    queryKey: ["schedulable-users", facilityId],
+    queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
@@ -267,8 +260,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       return;
     }
 
-    const updates: Partial<QueryParams> = {};
-
     // Sets the practitioner filter to the current user if they are in the list of
     // schedulable users and no practitioner was selected.
     if (
@@ -277,7 +268,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         (r) => r.username === authUser.username,
       )
     ) {
-      updates.practitioner = authUser.username;
+      qParams.practitioner = authUser.username;
     }
 
     // Set default date range if no dates are present
@@ -287,25 +278,24 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
       if (defaultDays === 0) {
         // Today only
-        updates.date_from = dateQueryString(today);
-        updates.date_to = dateQueryString(today);
+        qParams.date_from = dateQueryString(today);
+        qParams.date_to = dateQueryString(today);
       } else {
         // Past or future days based on configuration
         const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
         const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
-        updates.date_from = dateQueryString(fromDate);
-        updates.date_to = dateQueryString(toDate);
+        qParams.date_from = dateQueryString(fromDate);
+        qParams.date_to = dateQueryString(toDate);
       }
     }
 
     // Only update if there are changes
-    if (Object.keys(updates).length > 0) {
-      setQParams({
+    if (Object.keys(qParams).length > 0) {
+      updateQuery({
         ...qParams,
-        ...updates,
       });
     }
-  }, [schedulableUsersQuery.isLoading, qParams]);
+  }, [schedulableUsersQuery.isLoading]);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
@@ -361,96 +351,17 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             <Label className="mb-2 text-black">
               {t("select_practitioner")}
             </Label>
-            <Popover>
-              <PopoverTrigger
-                asChild
-                disabled={schedulableUsersQuery.isLoading}
-              >
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className="min-w-60 justify-start"
-                >
-                  {practitioner ? (
-                    <div className="flex items-center gap-2">
-                      <Avatar
-                        imageUrl={practitioner.profile_picture_url}
-                        name={formatName(practitioner)}
-                        className="size-6 rounded-full"
-                      />
-                      <span>{formatName(practitioner)}</span>
-                    </div>
-                  ) : (
-                    <span>{t("show_all")}</span>
-                  )}
-                  <CaretDownIcon className="ml-auto" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0" align="start">
-                <Command>
-                  <CommandInput
-                    placeholder={t("search")}
-                    className="outline-none border-none ring-0 shadow-none"
-                  />
-                  <CommandList>
-                    <CommandEmpty>
-                      {schedulableUsersQuery.isFetching
-                        ? t("searching")
-                        : t("no_results")}
-                    </CommandEmpty>
-                    <CommandGroup>
-                      <CommandItem
-                        value="all"
-                        onSelect={() =>
-                          setQParams({
-                            ...qParams,
-                            practitioner: null,
-                            slot: null,
-                          })
-                        }
-                        className="cursor-pointer w-full"
-                      >
-                        <PopoverClose className="w-full flex items-start">
-                          <span>{t("show_all")}</span>
-                          {!qParams.practitioner && (
-                            <CheckIcon className="ml-auto" />
-                          )}
-                        </PopoverClose>
-                      </CommandItem>
-                      {schedulableUsersQuery.data?.users.map((user) => (
-                        <CommandItem
-                          key={user.id}
-                          value={formatName(user)}
-                          onSelect={() =>
-                            setQParams({
-                              ...qParams,
-                              practitioner: user.username,
-                              slot: null,
-                            })
-                          }
-                          className="cursor-pointer w-full"
-                        >
-                          <PopoverClose className="flex items-center gap-2 w-full">
-                            <Avatar
-                              imageUrl={user.profile_picture_url}
-                              name={formatName(user)}
-                              className="size-6 rounded-full"
-                            />
-                            <span>{formatName(user)}</span>
-                            <span className="text-xs text-gray-500 font-medium">
-                              {user.user_type}
-                            </span>
-                          </PopoverClose>
-                          {qParams.practitioner === user.username && (
-                            <CheckIcon className="ml-auto" />
-                          )}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <PractitionerSelector
+              facilityId={facilityId}
+              selected={practitioner ?? null}
+              onSelect={(user) =>
+                updateQuery({
+                  practitioner: user?.username ?? null,
+                  slot: null,
+                })
+              }
+              clearSelection={t("show_all")}
+            />
           </div>
 
           <div>
@@ -475,8 +386,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(subDays(today, 7)),
                             date_to: dateQueryString(today),
                             slot: null,
@@ -491,8 +401,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(subDays(today, 1)),
                             date_to: dateQueryString(subDays(today, 1)),
                             slot: null,
@@ -507,8 +416,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(today),
                             slot: null,
@@ -523,8 +431,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(addDays(today, 7)),
                             slot: null,
@@ -539,8 +446,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(addDays(today, 30)),
                             slot: null,
@@ -561,8 +467,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           : undefined,
                       }}
                       onChange={(date) =>
-                        setQParams({
-                          ...qParams,
+                        updateQuery({
                           date_from: date?.from
                             ? dateQueryString(date.from)
                             : null,
@@ -582,9 +487,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 selectedSlot={slot}
                 onSelect={(slot) => {
                   if (slot === "all") {
-                    setQParams({ ...qParams, slot: null });
+                    updateQuery({ slot: null });
                   } else {
-                    setQParams({ ...qParams, slot });
+                    updateQuery({ slot });
                   }
                 }}
               />
@@ -597,7 +502,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             className="w-[300px]"
             placeholder={t("search")}
             value={qParams.search ?? ""}
-            onChange={(e) => setQParams({ ...qParams, search: e.target.value })}
+            onChange={(e) => updateQuery({ search: e.target.value })}
           />
         </div>
       </div>
@@ -631,11 +536,16 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       ) : (
         <AppointmentRow
           facilityId={facilityId}
+          updateQuery={updateQuery}
           practitioner={practitioner?.id ?? null}
           slot={qParams.slot}
+          page={qParams.page}
           date_from={qParams.date_from}
           date_to={qParams.date_to}
           search={qParams.search?.toLowerCase()}
+          resultsPerPage={resultsPerPage}
+          status={qParams.status}
+          Pagination={Pagination}
         />
       )}
     </Page>
@@ -754,6 +664,12 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
             {formatPatientAge(patient as any, true)},{" "}
             {t(`GENDER__${patient.gender}`)}
           </p>
+          <p className="text-xs text-gray-500 mt-1">
+            {formatDateTime(
+              appointment.token_slot.start_datetime,
+              "ddd, DD MMM YYYY, HH:mm",
+            )}
+          </p>
         </div>
 
         <div className="bg-gray-100 px-2 py-1 rounded text-center">
@@ -767,22 +683,34 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
     </div>
   );
 }
+
 function AppointmentRow(props: {
   facilityId: string;
+  page: number | null;
   practitioner: string | null;
+  Pagination: ({
+    totalCount,
+    noMargin,
+  }: {
+    totalCount: number;
+    noMargin?: boolean;
+  }) => JSX.Element;
+  updateQuery: (filter: FilterState) => void;
+  resultsPerPage: number;
   slot: string | null;
+  status: string | null;
   date_from: string | null;
   date_to: string | null;
   search?: string;
 }) {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<Appointment["status"]>("booked");
 
   const { data } = useQuery({
     queryKey: [
       "appointments",
       props.facilityId,
-      status,
+      props.status,
+      props.page,
       props.practitioner,
       props.slot,
       props.date_from,
@@ -791,12 +719,13 @@ function AppointmentRow(props: {
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: props.facilityId },
       queryParams: {
-        status: status,
-        limit: 100,
+        status: props.status ?? "booked",
         slot: props.slot,
         user: props.practitioner ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
+        limit: props.resultsPerPage,
+        offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
       },
     }),
     enabled: !!props.date_from && !!props.date_to,
@@ -813,9 +742,9 @@ function AppointmentRow(props: {
     <>
       <div className={cn(!data && "animate-pulse")}>
         <Tabs
-          value={status}
+          value={props.status ?? "booked"}
           className="w-full overflow-scroll"
-          onValueChange={(value) => setStatus(value as Appointment["status"])}
+          onValueChange={(value) => props.updateQuery({ status: value })}
         >
           <TabsList>
             <TabsTrigger value="booked">{t("booked")}</TabsTrigger>
@@ -869,6 +798,7 @@ function AppointmentRow(props: {
             </TableBody>
           </Table>
         )}
+        {props.Pagination({ totalCount: data?.count ?? 0 })}
       </div>
     </>
   );

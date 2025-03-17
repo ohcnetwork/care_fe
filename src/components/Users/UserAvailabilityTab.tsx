@@ -35,6 +35,7 @@ import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
 import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
+import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import {
   computeAppointmentSlots,
   filterAvailabilitiesByDayOfWeek,
@@ -85,6 +86,11 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     }),
   });
 
+  const { data: isSchedulableResource } = useIsUserSchedulableResource(
+    facilityId,
+    user.id,
+  );
+
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
   }
@@ -107,9 +113,11 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
           );
 
           const unavailableExceptions =
-            exceptionsQuery.data?.results.filter((exception) =>
-              isDateInRange(date, exception.valid_from, exception.valid_to),
-            ) ?? [];
+            exceptionsQuery.data?.results
+              .filter((exception) =>
+                isDateInRange(date, exception.valid_from, exception.valid_to),
+              )
+              .sort((a, b) => a.start_time.localeCompare(b.start_time)) ?? [];
 
           const isFullDayUnavailable = unavailableExceptions.some(
             (exception) =>
@@ -125,6 +133,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                     "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
                     templatesQuery.isLoading &&
                       "opacity-50 pointer-events-none",
+                    !isSchedulableResource && "pointer-events-none",
                     "transition-all duration-200 ease-in-out",
                     "relative overflow-hidden",
                   )}
@@ -175,12 +184,15 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
       />
 
       <div className="space-y-4">
-        <div className="flex items-end justify-between">
-          <div className="flex bg-gray-100 rounded-lg p-1 gap-1 max-w-min">
+        <div className="flex items-end justify-between gap-3 md:gap-0">
+          <div className="flex bg-gray-100 rounded-lg p-0 md:p-1 gap-1 max-w-min">
             <Button
               variant={view === "schedule" ? "outline" : "ghost"}
               onClick={() => setQParams({ tab: "schedule" })}
-              className={cn(view === "schedule" && "shadow", "hover:bg-white")}
+              className={cn(
+                view === "schedule" && "shadow",
+                "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
+              )}
             >
               {t("schedule")}
             </Button>
@@ -189,7 +201,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
               onClick={() => setQParams({ tab: "exceptions" })}
               className={cn(
                 view === "exceptions" && "shadow",
-                "hover:bg-white",
+                "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
               )}
             >
               {t("exceptions")}

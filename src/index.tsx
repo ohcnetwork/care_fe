@@ -2,6 +2,7 @@ import careConfig from "@careConfig";
 import * as Sentry from "@sentry/browser";
 import React from "react";
 import { createRoot } from "react-dom/client";
+import "reactflow/dist/style.css";
 import { registerSW } from "virtual:pwa-register";
 
 import App from "@/App";
