@@ -124,12 +124,17 @@ function PatientIndex() {
             <span>{t("view_details")}</span>
           </Button>
         </CardHeader>
+
         <CardContent className="mt-2 pt-2 px-6 pb-3">
           <div className="flex flex-col md:flex-row gap-2 justify-between md:justify-start">
-            <div className="flex flex-row md:flex-col gap-2 md:gap-0 md:flex-grow md:mr-8">
+            <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start md:flex-grow md:mr-8 ">
               <span className="text-xs font-medium">{t("location")}: </span>
               <span className="text-sm">
-                {appointment.facility?.name}
+                <Link href={`/facility/${appointment.facility.id}`}>
+                  <span className="text-sm underline hover:cursor-pointer">
+                    {appointment.facility?.name}
+                  </span>
+                </Link>
               </span>
             </div>
             <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start md:flex-none md:w-[80px] md:mr-8">
@@ -137,11 +142,11 @@ function PatientIndex() {
               <span>{getStatusChip(appointment.status)}</span>
             </div>
             <div className="flex flex-row gap-3 justify-between md:flex-none md:w-[170px]">
-              <div className="flex flex-row md:flex-col gap-2 md:gap-0">
+              <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start">
                 <span className="text-xs font-medium">{t("date")}: </span>
                 <span className="text-sm">{appointmentDate}</span>
               </div>
-              <div className="flex flex-row md:flex-col gap-2 md:gap-0">
+              <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start">
                 <span className="text-xs font-medium">{t("time_slot")}: </span>
                 <span className="text-sm">{appointmentTimeSlot}</span>
               </div>
