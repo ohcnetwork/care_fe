@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import useSlug from "@/hooks/useSlug";
-
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
@@ -49,6 +47,7 @@ interface FollowUpVisitQuestionProps {
   ) => void;
   disabled?: boolean;
   errors: QuestionValidationError[];
+  facilityId: string;
 }
 
 const APPOINTMENT_FIELDS: FieldDefinitions = {
@@ -79,11 +78,11 @@ export function AppointmentQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   errors,
+  facilityId,
 }: FollowUpVisitQuestionProps) {
   const { t } = useTranslation();
   const [resource, setResource] = useState<UserBase>();
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const facilityId = useSlug("facility");
   const { hasError } = useFieldError(question.id, errors);
 
   const values =
