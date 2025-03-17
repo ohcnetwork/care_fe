@@ -1988,6 +1988,7 @@
   "question_other": "{{count}} Questions",
   "question_settings": "Question Settings",
   "question_text": "Question Text",
+  "questionnaire_appointment_no_encounter": "Appointment cannot be recorded without an active encounter",
   "questionnaire_diagnosis_no_encounter": "Diagnosis cannot be recorded without an active encounter",
   "questionnaire_error_loading": "Error loading questionnaire",
   "questionnaire_medication_request_no_encounter": "Medication requests cannot be recorded without an active encounter",
