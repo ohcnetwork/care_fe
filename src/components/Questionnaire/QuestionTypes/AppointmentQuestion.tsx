@@ -5,14 +5,14 @@ import { Trans, useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
 import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
@@ -103,7 +103,7 @@ export function AppointmentQuestion({
   // Update slot details when a slot is selected
   const handleSlotSelect = (slotId: string | undefined) => {
     handleUpdate({ slot_id: slotId });
-    // Only close the dialog if a slot was actually selected
+    // Only close the sheet if a slot was actually selected
     if (slotId) {
       setOpen(false);
     }
@@ -173,8 +173,8 @@ export function AppointmentQuestion({
               "ring-1 ring-red-500",
           )}
         >
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
               {value.slot_id && selectedSlot ? (
                 <Button variant="outline" className="w-full justify-start">
                   <span className="font-normal">
@@ -210,22 +210,24 @@ export function AppointmentQuestion({
                   </span>
                 </Button>
               )}
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>{t("select_appointment_slot")}</DialogTitle>
-              </DialogHeader>
-              {resource && (
-                <AppointmentSlotPicker
-                  facilityId={facilityId}
-                  resourceId={resource.id}
-                  onSlotSelect={handleSlotSelect}
-                  selectedSlotId={value.slot_id}
-                  onSlotDetailsChange={setSelectedSlot}
-                />
-              )}
-            </DialogContent>
-          </Dialog>
+            </SheetTrigger>
+            <SheetContent side="right" className="sm:max-w-xl overflow-auto">
+              <SheetHeader>
+                <SheetTitle>{t("select_appointment_slot")}</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6">
+                {resource && (
+                  <AppointmentSlotPicker
+                    facilityId={facilityId}
+                    resourceId={resource.id}
+                    onSlotSelect={handleSlotSelect}
+                    selectedSlotId={value.slot_id}
+                    onSlotDetailsChange={setSelectedSlot}
+                  />
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
           <FieldError
             fieldKey={APPOINTMENT_FIELDS.SLOT.key}
             questionId={question.id}

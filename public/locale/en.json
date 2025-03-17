@@ -2300,7 +2300,7 @@
   "selected_organizations": "Selected Organizations",
   "selected_slot_not_found": "Selected Slot Not Found",
   "selected_tags": "Selected Tags",
-  "selected_token_slot_display": "on <strong>{{date}}</strong> between <strong>{{startTime}}</strong> and <strong>{{endTime}}</strong>",
+  "selected_token_slot_display": "on <strong>{{date}}</strong> between <strong>{{startTime}}</strong> & <strong>{{endTime}}</strong>",
   "self_booked": "Self-booked",
   "send": "Send",
   "send_email": "Send Email",
