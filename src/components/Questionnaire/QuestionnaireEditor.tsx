@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
@@ -12,7 +13,11 @@ import {
 import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { Form } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { cn } from "@/lib/utils";
 
@@ -42,6 +47,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -76,6 +88,7 @@ import {
 } from "@/types/questionnaire/question";
 import {
   QuestionStatus,
+  QuestionnaireCreate,
   QuestionnaireDetail,
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
@@ -726,6 +739,33 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       return null;
     });
 
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        title: z.string().min(1, t("title_is_required")),
+        slug: z
+          .string()
+          .min(5, t("slug_is_required_min_5_characters"))
+          .regex(
+            /^[-\w]+$/,
+            t("slug_can_only_contain_letters_numbers_hyphens_and_underscores"),
+          ),
+        organizations: z
+          .array(z.string())
+          .nonempty(t("at_least_one_organization_is_required")),
+      }),
+    [],
+  );
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      slug: "",
+      organizations: [],
+    },
+  });
+
   useEffect(() => {
     if (initialQuestionnaire) {
       setQuestionnaire(initialQuestionnaire);
@@ -763,14 +803,19 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     setQuestionnaire((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
-  const handleSave = () => {
+  const handleSave = (values: z.infer<typeof formSchema>) => {
+    const updatedQuestionnaire = {
+      ...questionnaire,
+      title: values.title,
+      slug: values.slug,
+      organizations:
+        values.organizations.length > 0 ? values.organizations : [],
+    };
+
     if (id) {
-      updateQuestionnaire(questionnaire);
+      updateQuestionnaire(updatedQuestionnaire as QuestionnaireDetail);
     } else {
-      createQuestionnaire({
-        ...questionnaire,
-        organizations: selectedOrgIds,
-      });
+      createQuestionnaire(updatedQuestionnaire as QuestionnaireCreate);
     }
   };
 
@@ -807,340 +852,391 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">
-            {id
-              ? t("edit") + " " + questionnaire.title
-              : "Create Questionnaire"}
-          </h1>
-          <p className="text-sm text-gray-500">{questionnaire.description}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleCancel}>
-            <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={isCreating || isUpdating}>
-            <CareIcon icon="l-save" className="mr-2 h-4 w-4" />
-            {id ? "Save" : "Create"}
-          </Button>
-        </div>
-      </div>
-
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as "edit" | "preview")}
-      >
-        <TabsList className="mb-4">
-          <TabsTrigger value="edit">
-            <ViewIcon className="w-4 h-4 mr-2" />
-            Edit form
-          </TabsTrigger>
-          <TabsTrigger value="preview">
-            <SquarePenIcon className="w-4 h-4 mr-2" />
-            Preview form
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="edit">
-          <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 md:w-60">
-              <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
-                <CardHeader className="p-0">
-                  <CardTitle>{t("navigation")}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <nav className="space-y-1">
-                    {questionnaire.questions.map((question, index) => {
-                      const hasSubQuestions =
-                        question.type === "group" &&
-                        question.questions &&
-                        question.questions.length > 0;
-                      return (
-                        <div key={question.id} className="space-y-1">
-                          <button
-                            onClick={() => {
-                              const element = document.getElementById(
-                                `question-${question.id}`,
-                              );
-                              if (element) {
-                                element.scrollIntoView({ behavior: "smooth" });
-                                toggleQuestionExpanded(question.id);
-                              }
-                            }}
-                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                              expandedQuestions.has(question.id)
-                                ? "bg-accent"
-                                : ""
-                            }`}
-                          >
-                            <span className="font-medium text-gray-500">
-                              {index + 1}.
-                            </span>
-                            <span className="flex-1 truncate">
-                              {question.text || "Untitled Question"}
-                            </span>
-                          </button>
-                          {hasSubQuestions && question.questions && (
-                            <div className="ml-6 border-l-2 border-muted pl-2 space-y-1">
-                              {question.questions.map(
-                                (subQuestion, subIndex) => (
-                                  <button
-                                    key={subQuestion.id}
-                                    onClick={() => {
-                                      const element = document.getElementById(
-                                        `question-${subQuestion.id}`,
-                                      );
-                                      if (element) {
-                                        element.scrollIntoView({
-                                          behavior: "smooth",
-                                        });
-                                        toggleQuestionExpanded(question.id);
-                                      }
-                                    }}
-                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2"
-                                  >
-                                    <span className="font-medium text-gray-500">
-                                      {index + 1}.{subIndex + 1}
-                                    </span>
-                                    <span className="flex-1 truncate">
-                                      {subQuestion.text || "Untitled Question"}
-                                    </span>
-                                  </button>
-                                ),
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </nav>
-                </CardContent>
-              </Card>
-              <div className="space-y-4 max-w-sm lg:hidden">
-                <QuestionnaireProperties
-                  questionnaire={questionnaire}
-                  updateQuestionnaireField={updateQuestionnaireField}
-                  id={id}
-                  organizations={organizations}
-                  organizationSelection={{
-                    selectedIds: selectedOrgIds,
-                    onToggle: handleToggleOrganization,
-                    searchQuery: orgSearchQuery,
-                    setSearchQuery: setOrgSearchQuery,
-                    available: availableOrganizations,
-                    isLoading: isLoadingAvailableOrganizations,
-                  }}
-                  tags={questionnaire.tags}
-                  tagSelection={{
-                    selectedIds: selectedTagIds,
-                    onToggle: handleToggleTag,
-                    searchQuery: tagSearchQuery,
-                    setSearchQuery: setTagSearchQuery,
-                    available: availableTags,
-                    isLoading: isLoadingAvailableTags,
-                  }}
-                />
-              </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSave)}>
+        <div className="container mx-auto px-4 py-6">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">
+                {id
+                  ? t("edit") + " " + questionnaire.title
+                  : "Create Questionnaire"}
+              </h1>
+              <p className="text-sm text-gray-500">
+                {questionnaire.description}
+              </p>
             </div>
-
-            <div className="space-y-4 flex-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Basic Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Title</Label>
-                    <Input
-                      id="title"
-                      value={questionnaire.title}
-                      onChange={(e) =>
-                        updateQuestionnaireField("title", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="slug">Slug</Label>
-                    <Input
-                      id="slug"
-                      value={questionnaire.slug}
-                      onChange={(e) =>
-                        updateQuestionnaireField("slug", e.target.value)
-                      }
-                      placeholder="unique-identifier-for-questionnaire"
-                      className="font-mono"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      A unique URL-friendly identifier for this questionnaire
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="desc">Description</Label>
-                    <Textarea
-                      id="desc"
-                      value={questionnaire.description || ""}
-                      onChange={(e) =>
-                        updateQuestionnaireField("description", e.target.value)
-                      }
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-none bg-transparent shadow-none">
-                <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
-                  <div>
-                    <CardTitle>
-                      <p className="text-sm text-gray-700 font-medium mt-1">
-                        {questionnaire.questions?.length || 0} Question
-                        {questionnaire.questions?.length !== 1 ? "s" : ""}
-                      </p>
-                    </CardTitle>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newQuestion: Question = {
-                        id: crypto.randomUUID(),
-                        link_id: `${questionnaire.questions.length + 1}`,
-                        text: "New Question",
-                        type: "string",
-                        questions: [],
-                      };
-                      updateQuestionnaireField("questions", [
-                        ...questionnaire.questions,
-                        newQuestion,
-                      ]);
-                      setExpandedQuestions(
-                        (prev) => new Set([...prev, newQuestion.id]),
-                      );
-                    }}
-                  >
-                    <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-                    Add Question
-                  </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="space-y-6">
-                    {questionnaire.questions.map((question, index) => (
-                      <div
-                        key={question.id}
-                        id={`question-${question.id}`}
-                        className="relative bg-white rounded-lg shadow-md"
-                      >
-                        <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
-                        <QuestionEditor
-                          index={index}
-                          key={question.id}
-                          question={question}
-                          onChange={(updatedQuestion) => {
-                            const newQuestions = [...questionnaire.questions];
-                            newQuestions[index] = updatedQuestion;
-                            updateQuestionnaireField("questions", newQuestions);
-                          }}
-                          onDelete={() => {
-                            const newQuestions = questionnaire.questions.filter(
-                              (_, i) => i !== index,
-                            );
-                            updateQuestionnaireField("questions", newQuestions);
-                          }}
-                          isExpanded={expandedQuestions.has(question.id)}
-                          onToggleExpand={() =>
-                            toggleQuestionExpanded(question.id)
-                          }
-                          depth={0}
-                          onMoveUp={() => {
-                            if (index > 0) {
-                              const newQuestions = [...questionnaire.questions];
-                              [newQuestions[index - 1], newQuestions[index]] = [
-                                newQuestions[index],
-                                newQuestions[index - 1],
-                              ];
-                              updateQuestionnaireField(
-                                "questions",
-                                newQuestions,
-                              );
-                            }
-                          }}
-                          onMoveDown={() => {
-                            if (index < questionnaire.questions.length - 1) {
-                              const newQuestions = [...questionnaire.questions];
-                              [newQuestions[index], newQuestions[index + 1]] = [
-                                newQuestions[index + 1],
-                                newQuestions[index],
-                              ];
-                              updateQuestionnaireField(
-                                "questions",
-                                newQuestions,
-                              );
-                            }
-                          }}
-                          isFirst={index === 0}
-                          isLast={index === questionnaire.questions.length - 1}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            <div className="space-y-4 w-60 hidden lg:block">
-              <QuestionnaireProperties
-                questionnaire={questionnaire}
-                updateQuestionnaireField={updateQuestionnaireField}
-                id={id}
-                organizations={organizations}
-                organizationSelection={{
-                  selectedIds: selectedOrgIds,
-                  onToggle: handleToggleOrganization,
-                  searchQuery: orgSearchQuery,
-                  setSearchQuery: setOrgSearchQuery,
-                  available: availableOrganizations,
-                  isLoading: isLoadingAvailableOrganizations,
-                }}
-                tags={questionnaire.tags}
-                tagSelection={{
-                  selectedIds: selectedTagIds,
-                  onToggle: handleToggleTag,
-                  searchQuery: tagSearchQuery,
-                  setSearchQuery: setTagSearchQuery,
-                  available: availableTags,
-                  isLoading: isLoadingAvailableTags,
-                }}
-              />
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleCancel}>
+                <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
+                Cancel
+              </Button>
+              <Button disabled={isCreating || isUpdating}>
+                <CareIcon icon="l-save" className="mr-2 h-4 w-4" />
+                {id ? "Save" : "Create"}
+              </Button>
             </div>
           </div>
-          <DebugPreview
-            data={questionnaire}
-            title="Questionnaire"
-            className="mt-4"
-          />
-        </TabsContent>
 
-        <TabsContent value="preview">
-          <Card>
-            <CardHeader>
-              <CardTitle>Preview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <QuestionnaireForm
-                questionnaireSlug={id}
-                patientId="preview"
-                subjectType={questionnaire.subject_type}
-                encounterId="preview"
-                facilityId="preview"
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as "edit" | "preview")}
+          >
+            <TabsList className="mb-4">
+              <TabsTrigger value="edit">
+                <ViewIcon className="w-4 h-4 mr-2" />
+                Edit form
+              </TabsTrigger>
+              <TabsTrigger value="preview">
+                <SquarePenIcon className="w-4 h-4 mr-2" />
+                Preview form
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="edit">
+              <div className="flex flex-col md:flex-row gap-2">
+                <div className="space-y-4 md:w-60">
+                  <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
+                    <CardHeader className="p-0">
+                      <CardTitle>{t("navigation")}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <nav className="space-y-1">
+                        {questionnaire.questions.map((question, index) => {
+                          const hasSubQuestions =
+                            question.type === "group" &&
+                            question.questions &&
+                            question.questions.length > 0;
+                          return (
+                            <div key={question.id} className="space-y-1">
+                              <button
+                                onClick={() => {
+                                  const element = document.getElementById(
+                                    `question-${question.id}`,
+                                  );
+                                  if (element) {
+                                    element.scrollIntoView({
+                                      behavior: "smooth",
+                                    });
+                                    toggleQuestionExpanded(question.id);
+                                  }
+                                }}
+                                className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
+                                  expandedQuestions.has(question.id)
+                                    ? "bg-accent"
+                                    : ""
+                                }`}
+                              >
+                                <span className="font-medium text-gray-500">
+                                  {index + 1}.
+                                </span>
+                                <span className="flex-1 truncate">
+                                  {question.text || "Untitled Question"}
+                                </span>
+                              </button>
+                              {hasSubQuestions && question.questions && (
+                                <div className="ml-6 border-l-2 border-muted pl-2 space-y-1">
+                                  {question.questions.map(
+                                    (subQuestion, subIndex) => (
+                                      <button
+                                        key={subQuestion.id}
+                                        onClick={() => {
+                                          const element =
+                                            document.getElementById(
+                                              `question-${subQuestion.id}`,
+                                            );
+                                          if (element) {
+                                            element.scrollIntoView({
+                                              behavior: "smooth",
+                                            });
+                                            toggleQuestionExpanded(question.id);
+                                          }
+                                        }}
+                                        className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2"
+                                      >
+                                        <span className="font-medium text-gray-500">
+                                          {index + 1}.{subIndex + 1}
+                                        </span>
+                                        <span className="flex-1 truncate">
+                                          {subQuestion.text ||
+                                            "Untitled Question"}
+                                        </span>
+                                      </button>
+                                    ),
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </nav>
+                    </CardContent>
+                  </Card>
+                  <div className="space-y-4 max-w-sm lg:hidden">
+                    <QuestionnaireProperties
+                      questionnaire={questionnaire}
+                      updateQuestionnaireField={updateQuestionnaireField}
+                      id={id}
+                      organizations={organizations}
+                      organizationSelection={{
+                        selectedIds: selectedOrgIds,
+                        onToggle: handleToggleOrganization,
+                        searchQuery: orgSearchQuery,
+                        setSearchQuery: setOrgSearchQuery,
+                        available: availableOrganizations,
+                        isLoading: isLoadingAvailableOrganizations,
+                      }}
+                      tags={questionnaire.tags}
+                      tagSelection={{
+                        selectedIds: selectedTagIds,
+                        onToggle: handleToggleTag,
+                        searchQuery: tagSearchQuery,
+                        setSearchQuery: setTagSearchQuery,
+                        available: availableTags,
+                        isLoading: isLoadingAvailableTags,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4 flex-1">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t("basic_info")}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required>{t("title")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                id="title"
+                                placeholder={t("Enter title")}
+                                data-cy="questionnaire-title-input"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="slug"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required>{t("slug")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                id="slug"
+                                placeholder="unique-identifier-for-questionnaire"
+                                className="font-mono"
+                                data-cy="questionnaire-slug-input"
+                              />
+                            </FormControl>
+                            <p className="text-sm text-gray-500 mt-1">
+                              A unique URL-friendly identifier for this
+                              questionnaire
+                            </p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-none bg-transparent shadow-none">
+                    <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
+                      <div>
+                        <CardTitle>
+                          <p className="text-sm text-gray-700 font-medium mt-1">
+                            {questionnaire.questions?.length || 0} Question
+                            {questionnaire.questions?.length !== 1 ? "s" : ""}
+                          </p>
+                        </CardTitle>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const newQuestion: Question = {
+                            id: crypto.randomUUID(),
+                            link_id: `${questionnaire.questions.length + 1}`,
+                            text: "New Question",
+                            type: "string",
+                            questions: [],
+                          };
+                          updateQuestionnaireField("questions", [
+                            ...questionnaire.questions,
+                            newQuestion,
+                          ]);
+                          setExpandedQuestions(
+                            (prev) => new Set([...prev, newQuestion.id]),
+                          );
+                        }}
+                      >
+                        <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                        Add Question
+                      </Button>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="space-y-6">
+                        {questionnaire.questions.map((question, index) => (
+                          <div
+                            key={question.id}
+                            id={`question-${question.id}`}
+                            className="relative bg-white rounded-lg shadow-md"
+                          >
+                            <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
+                            <QuestionEditor
+                              index={index}
+                              key={question.id}
+                              question={question}
+                              onChange={(updatedQuestion) => {
+                                const newQuestions = [
+                                  ...questionnaire.questions,
+                                ];
+                                newQuestions[index] = updatedQuestion;
+                                updateQuestionnaireField(
+                                  "questions",
+                                  newQuestions,
+                                );
+                              }}
+                              onDelete={() => {
+                                const newQuestions =
+                                  questionnaire.questions.filter(
+                                    (_, i) => i !== index,
+                                  );
+                                updateQuestionnaireField(
+                                  "questions",
+                                  newQuestions,
+                                );
+                              }}
+                              isExpanded={expandedQuestions.has(question.id)}
+                              onToggleExpand={() =>
+                                toggleQuestionExpanded(question.id)
+                              }
+                              depth={0}
+                              onMoveUp={() => {
+                                if (index > 0) {
+                                  const newQuestions = [
+                                    ...questionnaire.questions,
+                                  ];
+                                  [
+                                    newQuestions[index - 1],
+                                    newQuestions[index],
+                                  ] = [
+                                    newQuestions[index],
+                                    newQuestions[index - 1],
+                                  ];
+                                  updateQuestionnaireField(
+                                    "questions",
+                                    newQuestions,
+                                  );
+                                }
+                              }}
+                              onMoveDown={() => {
+                                if (
+                                  index <
+                                  questionnaire.questions.length - 1
+                                ) {
+                                  const newQuestions = [
+                                    ...questionnaire.questions,
+                                  ];
+                                  [
+                                    newQuestions[index],
+                                    newQuestions[index + 1],
+                                  ] = [
+                                    newQuestions[index + 1],
+                                    newQuestions[index],
+                                  ];
+                                  updateQuestionnaireField(
+                                    "questions",
+                                    newQuestions,
+                                  );
+                                }
+                              }}
+                              isFirst={index === 0}
+                              isLast={
+                                index === questionnaire.questions.length - 1
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                <div className="space-y-4 w-60 hidden lg:block">
+                  <FormField
+                    control={form.control}
+                    name="organizations"
+                    render={({ field }) => (
+                      <QuestionnaireProperties
+                        questionnaire={questionnaire}
+                        updateQuestionnaireField={updateQuestionnaireField}
+                        id={id}
+                        organizations={organizations}
+                        organizationSelection={{
+                          selectedIds: field.value,
+                          onToggle: (orgId) => {
+                            field.onChange(
+                              field.value.includes(orgId)
+                                ? field.value.filter((id) => id !== orgId)
+                                : [...field.value, orgId],
+                            );
+                          },
+                          searchQuery: orgSearchQuery,
+                          setSearchQuery: setOrgSearchQuery,
+                          available: availableOrganizations,
+                          isLoading: isLoadingAvailableOrganizations,
+                        }}
+                        tags={questionnaire.tags}
+                        tagSelection={{
+                          selectedIds: selectedTagIds,
+                          onToggle: handleToggleTag,
+                          searchQuery: tagSearchQuery,
+                          setSearchQuery: setTagSearchQuery,
+                          available: availableTags,
+                          isLoading: isLoadingAvailableTags,
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+              <DebugPreview
+                data={questionnaire}
+                title="Questionnaire"
+                className="mt-4"
               />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+            </TabsContent>
+
+            <TabsContent value="preview">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Preview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <QuestionnaireForm
+                    questionnaireSlug={id}
+                    patientId="preview"
+                    subjectType={questionnaire.subject_type}
+                    encounterId="preview"
+                    facilityId="preview"
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </form>
+    </Form>
   );
 }
 
