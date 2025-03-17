@@ -45,15 +45,15 @@ export default function UserDashboard() {
   const associations = organizations.filter((org) => org.org_type === "role");
   const governance = organizations.filter((org) => org.org_type === "govt");
 
-  const tabsMap = {
-    [DashboardTabs.TAB_FACILITIES]: facilities.length > 0,
-    [DashboardTabs.TAB_ASSOCIATIONS]: associations.length > 0,
-    [DashboardTabs.TAB_GOVERNANCE]: governance.length > 0,
-  };
+  const tabsData = [
+    { id: DashboardTabs.TAB_FACILITIES, items: facilities },
+    { id: DashboardTabs.TAB_ASSOCIATIONS, items: associations },
+    { id: DashboardTabs.TAB_GOVERNANCE, items: governance },
+  ];
 
-  const availableTabs = (Object.entries(tabsMap) as [DashboardTabs, boolean][])
-    .filter(([, isAvailable]) => isAvailable)
-    .map(([tab]) => tab);
+  const availableTabs = tabsData
+    .filter((tab) => tab.items.length > 0)
+    .map((tab) => tab.id);
 
   const [activeTab, setActiveTab] = useState<DashboardTabs | null>(
     availableTabs.length > 0 ? availableTabs[0] : null,
