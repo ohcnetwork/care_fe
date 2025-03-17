@@ -369,6 +369,23 @@ const MedicationAdministrationTable = ({
     return dates;
   }, [dateRange]);
 
+  const isMedicationAdministeredWithinDateRange = useMemo(() => {
+    for (const date of dates) {
+      if (
+        Object.values(administrations).some(
+          (dateWiseAdministrations) =>
+            !!dateWiseAdministrations[format(date, "yyyy-MM-dd")],
+        )
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }, [administrations, dates]);
+
+  if (!isMedicationAdministeredWithinDateRange) return null;
+
   const renderMedication = (
     dateWiseAdministrations: MedicationAdministrationTableProps["administrations"][string],
   ) => {
