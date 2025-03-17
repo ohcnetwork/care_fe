@@ -33,7 +33,7 @@ export default function FacilityOrganizationSelector(
   props: FacilityOrganizationSelectorProps,
 ) {
   const { t } = useTranslation();
-  const { onChange, facilityId = [] } = props;
+  const { onChange, facilityId } = props;
   const [selectedLevels, setSelectedLevels] = useState<FacilityOrganization[]>(
     [],
   );
@@ -77,7 +77,6 @@ export default function FacilityOrganizationSelector(
         : organizationQueries[level - 1]?.data?.results;
 
     if (!orgList) return;
-
     const selectedOrgs = orgList.filter((org) => values.includes(org.id));
     const newLevels = [...selectedLevels.slice(0, level), ...selectedOrgs];
 
@@ -96,9 +95,12 @@ export default function FacilityOrganizationSelector(
     }));
   };
 
-  const handleRemoveOrganization = () => {
-    setSelectedLevels([]);
-    onChange([]);
+  const handleRemoveOrganizationAtLevel = (level: number) => {
+    // Keep only organizations before the removed level
+    const newLevels = selectedLevels.slice(0, level);
+
+    setSelectedLevels(newLevels);
+    onChange(newLevels.map((org) => org.id));
   };
 
   const handleOrganizationViewChange = (value: string) => {
@@ -114,7 +116,10 @@ export default function FacilityOrganizationSelector(
         : organizationQueries[level - 1]?.data?.results;
 
     if (!orgList) return null;
-
+    const lastSelected = selectedLevels[level - 1];
+    if (level > 0 && lastSelected && !lastSelected.has_children) {
+      return null;
+    }
     return (
       <div className="group flex items-center gap-1.5">
         {level > 0 && (
@@ -135,6 +140,16 @@ export default function FacilityOrganizationSelector(
             onSearch={(value) => setFacilityOrgSearch(value)}
           />
         </div>
+        {level < selectedLevels.length && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900"
+            onClick={() => handleRemoveOrganizationAtLevel(level)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     );
   };
@@ -165,18 +180,6 @@ export default function FacilityOrganizationSelector(
             <div key={index}>{renderOrganizationLevel(index)}</div>
           ))}
         </div>
-
-        {selectedLevels.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900"
-            onClick={handleRemoveOrganization}
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">{t("remove_organization")}</span>
-          </Button>
-        )}
       </div>
     </div>
   );
