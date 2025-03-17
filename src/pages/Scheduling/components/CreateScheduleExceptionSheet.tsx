@@ -10,7 +10,6 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -32,7 +31,7 @@ import {
 } from "@/components/ui/sheet";
 
 import mutate from "@/Utils/request/mutate";
-import { Time } from "@/Utils/types";
+import type { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -212,9 +211,19 @@ export default function CreateScheduleExceptionSheet({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel required>{t("valid_from")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
+                        <Input
+                          type="date"
+                          value={
+                            field.value
+                              ? field.value.toISOString().split("T")[0]
+                              : ""
+                          }
+                          onChange={(e) => {
+                            const date = e.target.value
+                              ? new Date(e.target.value)
+                              : undefined;
+                            field.onChange(date);
+                          }}
                         />
                         <FormMessage />
                       </FormItem>
@@ -227,9 +236,19 @@ export default function CreateScheduleExceptionSheet({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel required>{t("valid_to")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
+                        <Input
+                          type="date"
+                          value={
+                            field.value
+                              ? field.value.toISOString().split("T")[0]
+                              : ""
+                          }
+                          onChange={(e) => {
+                            const date = e.target.value
+                              ? new Date(e.target.value)
+                              : undefined;
+                            field.onChange(date);
+                          }}
                         />
                         <FormMessage />
                       </FormItem>

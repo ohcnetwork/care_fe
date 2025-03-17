@@ -30,7 +30,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -243,9 +242,17 @@ const ScheduleTemplateEditor = ({
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel required>{t("valid_from")}</FormLabel>
-                  <DatePicker
-                    date={field.value}
-                    onChange={(date) => field.onChange(date)}
+                  <Input
+                    type="date"
+                    value={
+                      field.value ? field.value.toISOString().split("T")[0] : ""
+                    }
+                    onChange={(e) => {
+                      const date = e.target.value
+                        ? new Date(e.target.value)
+                        : undefined;
+                      field.onChange(date);
+                    }}
                   />
                   <FormMessage />
                 </FormItem>
@@ -258,9 +265,17 @@ const ScheduleTemplateEditor = ({
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel required>{t("valid_to")}</FormLabel>
-                  <DatePicker
-                    date={field.value}
-                    onChange={(date) => field.onChange(date)}
+                  <Input
+                    type="date"
+                    value={
+                      field.value ? field.value.toISOString().split("T")[0] : ""
+                    }
+                    onChange={(e) => {
+                      const date = e.target.value
+                        ? new Date(e.target.value)
+                        : undefined;
+                      field.onChange(date);
+                    }}
                   />
                   <FormMessage />
                 </FormItem>

@@ -15,7 +15,6 @@ import WeekdayCheckbox, {
 } from "@/CAREUI/interactive/WeekdayCheckbox";
 
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -311,9 +310,19 @@ export default function CreateScheduleTemplateSheet({
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel required>{t("valid_from")}</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={(date) => field.onChange(date)}
+                      <Input
+                        type="date"
+                        value={
+                          field.value
+                            ? field.value.toISOString().split("T")[0]
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const date = e.target.value
+                            ? new Date(e.target.value)
+                            : undefined;
+                          field.onChange(date);
+                        }}
                       />
                       <FormMessage />
                     </FormItem>
@@ -326,9 +335,19 @@ export default function CreateScheduleTemplateSheet({
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel required>{t("valid_to")}</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={(date) => field.onChange(date)}
+                      <Input
+                        type="date"
+                        value={
+                          field.value
+                            ? field.value.toISOString().split("T")[0]
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const date = e.target.value
+                            ? new Date(e.target.value)
+                            : undefined;
+                          field.onChange(date);
+                        }}
                       />
                       <FormMessage />
                     </FormItem>

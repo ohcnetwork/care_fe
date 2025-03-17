@@ -21,7 +21,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -973,17 +972,20 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("authored_on")}
         </Label>
-        <DateTimePicker
+        <Input
+          type="datetime-local"
           value={
             medication.authored_on
-              ? new Date(medication.authored_on)
-              : undefined
+              ? new Date(medication.authored_on).toISOString().slice(0, 16)
+              : ""
           }
-          onChange={(date) => {
-            if (!date) return;
-            onUpdate?.({ authored_on: date.toISOString() });
+          onChange={(e) => {
+            const newDate = new Date(e.target.value);
+            if (isNaN(newDate.getTime())) return;
+            onUpdate?.({ authored_on: newDate.toISOString() });
           }}
           disabled={disabled || isReadOnly}
+          className="px-0"
         />
       </div>
       {/* Notes */}
