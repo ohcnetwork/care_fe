@@ -15,6 +15,7 @@ export type UserBase = {
   gender: (typeof GENDER_TYPES)[number]["id"];
   suffix: string | null;
   prefix: string | null;
+  mfa_enabled: boolean;
 };
 
 export type CreateUserModel = {

@@ -1,5 +1,5 @@
 import { DashboardIcon } from "@radix-ui/react-icons";
-import { Link, usePathParams } from "raviger";
+import { Link, useLocationChange, usePathParams } from "raviger";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { AdminNav } from "@/components/ui/sidebar/admin-nav";
 import { FacilityNav } from "@/components/ui/sidebar/facility-nav";
@@ -55,7 +56,7 @@ export function AppSidebar({
   const facilitySidebar = sidebarFor === SidebarFor.FACILITY;
   const patientSidebar = sidebarFor === SidebarFor.PATIENT;
   const adminSidebar = sidebarFor === SidebarFor.ADMIN;
-
+  const { isMobile, setOpenMobile } = useSidebar();
   const [selectedFacility, setSelectedFacility] =
     React.useState<UserFacilityModel | null>(null);
 
@@ -76,6 +77,12 @@ export function AppSidebar({
 
   const hasFacilities = user?.facilities && user.facilities.length > 0;
   const hasOrganizations = user?.organizations && user.organizations.length > 0;
+
+  useLocationChange(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  });
 
   return (
     <Sidebar
