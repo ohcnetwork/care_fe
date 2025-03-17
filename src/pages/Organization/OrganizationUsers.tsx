@@ -182,7 +182,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                               <UserStatusIndicator user={userRole.user} />
                             </span>
                           </div>
-                          <span className="text-sm text-gray-500 mr-2 break-words truncate">
+                          <span className="text-sm mr-2 text-gray-500 break-words truncate">
                             {userRole.user.username}
                           </span>
                         </div>
