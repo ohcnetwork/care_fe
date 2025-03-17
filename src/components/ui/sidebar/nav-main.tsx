@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -24,8 +23,6 @@ export function NavMain({
     visibility?: boolean;
   }[];
 }) {
-  const { isMobile, setOpenMobile } = useSidebar();
-
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -39,11 +36,6 @@ export function NavMain({
                 className={
                   "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                 }
-                onClick={() => {
-                  if (isMobile) {
-                    setOpenMobile(false);
-                  }
-                }}
               >
                 <ActiveLink
                   href={link.url}
