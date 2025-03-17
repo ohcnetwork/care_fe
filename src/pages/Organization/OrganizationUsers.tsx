@@ -162,10 +162,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
               </Card>
             ) : (
               users?.results?.map((userRole) => (
-                <Card
-                  key={userRole.id}
-                  className="flex flex-col max-w-full overflow-hidden"
-                >
+                <Card key={userRole.id} className="flex flex-col max-w-full">
                   <CardContent className="p-3 flex flex-col gap-3 flex-grow sm:p-4">
                     <div className="flex items-start gap-2">
                       <Avatar
@@ -185,7 +182,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                               <UserStatusIndicator user={userRole.user} />
                             </span>
                           </div>
-                          <span className="text-sm text-gray-500 mr-2 break-words">
+                          <span className="text-sm text-gray-500 mr-2 break-words truncate">
                             {userRole.user.username}
                           </span>
                         </div>
@@ -212,7 +209,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                       </div>
                     </div>
 
-                    <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
+                    <div className="mt-4  bg-gray-50 rounded-md flex justify-end gap-2 ">
                       <EditUserRoleSheet
                         organizationId={id}
                         userRole={userRole}
