@@ -650,8 +650,8 @@ export function QuestionnaireForm({
                       value: value.value.toISOString(),
                     };
                   }
-                  if (value.value_code) {
-                    return { coding: value.value_code };
+                  if (value.coding) {
+                    return { coding: value.coding };
                   }
                   return { value: String(value.value) };
                 }),

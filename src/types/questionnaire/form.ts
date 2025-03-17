@@ -13,7 +13,6 @@ import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
  * A short hand for defining response value types
  */
 type RV<T extends string, V> = {
-  value_code?: Code;
   coding?: Code;
   value_quantity?: Quantity;
   type: T;
