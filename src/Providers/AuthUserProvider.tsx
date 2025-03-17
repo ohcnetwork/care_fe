@@ -9,16 +9,31 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import routes, { JwtTokenObtainPair, Type } from "@/Utils/request/api";
+import routes, {
+  JwtTokenObtainPair,
+  LoginResponse,
+  Type,
+} from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { TokenData } from "@/types/auth/otpToken";
+import authApi from "@/types/auth/authApi";
+import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
 
 interface Props {
   children: React.ReactNode;
   unauthorized: React.ReactNode;
   otpAuthorized: React.ReactNode;
 }
+
+const isMFAResponse = (data: LoginResponse): data is MFAAuthenticationToken => {
+  return "temp_token" in data;
+};
+
+const isJwtTokenResponse = (
+  data: LoginResponse,
+): data is JwtTokenObtainPair => {
+  return "access" in data && "refresh" in data;
+};
 
 export default function AuthUserProvider({
   children,
@@ -70,15 +85,40 @@ export default function AuthUserProvider({
 
   const { mutateAsync: signIn, isPending: isAuthenticating } = useMutation({
     mutationFn: mutate(routes.login),
-    onSuccess: (data: JwtTokenObtainPair) => {
+    onSuccess: async (data: LoginResponse) => {
+      if (isMFAResponse(data)) {
+        localStorage.setItem("mfa_temp_token", data.temp_token);
+        const redirectURL = getRedirectURL();
+        navigate(redirectURL ? `/2fa?redirect=${redirectURL}` : "/2fa");
+        return;
+      }
+
+      if (isJwtTokenResponse(data)) {
+        setAccessToken(data.access);
+        localStorage.setItem(LocalStorageKeys.accessToken, data.access);
+        localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
+
+        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+
+        if (location.pathname === "/" || location.pathname === "/login") {
+          navigate(getRedirectOr("/"));
+        }
+      }
+    },
+  });
+
+  const { mutateAsync: verifyMFA, isPending: isVerifyingMFA } = useMutation({
+    mutationFn: mutate(authApi.mfa.login),
+    onSuccess: async (data: JwtTokenObtainPair) => {
+      localStorage.removeItem("mfa_temp_token");
+
       setAccessToken(data.access);
       localStorage.setItem(LocalStorageKeys.accessToken, data.access);
       localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 
-      if (location.pathname === "/" || location.pathname === "/login") {
-        navigate(getRedirectOr("/"));
-      }
+      await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+
+      navigate(getRedirectOr("/"));
     },
   });
 
@@ -150,7 +190,9 @@ export default function AuthUserProvider({
       value={{
         signIn,
         signOut,
+        verifyMFA,
         isAuthenticating,
+        isVerifyingMFA,
         user,
         patientLogin,
         patientToken,
