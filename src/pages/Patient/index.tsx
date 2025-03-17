@@ -126,27 +126,29 @@ function PatientIndex() {
         </CardHeader>
 
         <CardContent className="mt-2 pt-2 px-6 pb-3">
-          <div className="flex flex-col md:flex-row gap-2 justify-between md:justify-start">
-            <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start md:flex-grow md:mr-8 ">
-              <span className="text-xs font-medium">{t("location")}: </span>
-              <span className="text-sm">
-                <Link href={`/facility/${appointment.facility.id}`}>
-                  <span className="text-sm underline underline-offset-2 hover:cursor-pointer">
-                    {appointment.facility?.name}
-                  </span>
-                </Link>
-              </span>
+          <div className="flex flex-col md:flex-row gap-2 justify-between">
+            <div className="flex flex-row gap-3 justify-between md:flex-row md:flex-grow md:mr-6">
+              <div className="flex flex-col gap-0 items-start md:flex-grow md:mr-4">
+                <span className="text-xs font-medium">{t("location")}: </span>
+                <span className="text-sm">
+                  <Link href={`/facility/${appointment.facility.id}`}>
+                    <span className="text-sm underline underline-offset-2 hover:cursor-pointer">
+                      {appointment.facility?.name}
+                    </span>
+                  </Link>
+                </span>
+              </div>
+              <div className="flex flex-col gap-0 items-start md:flex-none w-[80px]">
+                <span className="text-xs font-medium">{t("status")}: </span>
+                <span>{getStatusChip(appointment.status)}</span>
+              </div>
             </div>
-            <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start md:flex-none md:w-[80px] md:mr-8">
-              <span className="text-xs font-medium">{t("status")}: </span>
-              <span>{getStatusChip(appointment.status)}</span>
-            </div>
-            <div className="flex flex-row gap-3 justify-between md:flex-none md:w-[170px]">
-              <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start">
+            <div className="flex flex-row gap-3 justify-between md:flex-none">
+              <div className="flex flex-col gap-0 items-start w-[130px]">
                 <span className="text-xs font-medium">{t("date")}: </span>
                 <span className="text-sm">{appointmentDate}</span>
               </div>
-              <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start">
+              <div className="flex flex-col gap-0 items-start w-[80px]">
                 <span className="text-xs font-medium">{t("time_slot")}: </span>
                 <span className="text-sm">{appointmentTimeSlot}</span>
               </div>
