@@ -623,6 +623,7 @@
   "click_manage_sub_locations": "Click <strong>See Details</strong><ArrowIcon/> to manage sub-locations.",
   "click_manage_sub_locations_mobile": "Click <PenLine/>to edit and <ArrowIcon/> to manage sub-locations.",
   "click_on": "Click on",
+  "click_on_map_to_select_location": "Click on the map to select the location",
   "clone_questionnaire": "Clone Questionnaire",
   "close": "Close",
   "close_scanner": "Close Scanner",
