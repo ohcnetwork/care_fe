@@ -53,18 +53,21 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     },
   ];
 
-  const handleSearch = useCallback((key: string, value: string) => {
-    const searchParams = {
-      name: key === "username" ? value : "",
-      phone_number:
-        key === "phone_number"
-          ? isValidPhoneNumber(value)
-            ? value
-            : undefined
-          : undefined,
-    };
-    updateQuery(searchParams);
-  }, []);
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      const searchParams = {
+        name: key === "username" ? value : "",
+        phone_number:
+          key === "phone_number"
+            ? isValidPhoneNumber(value)
+              ? value
+              : undefined
+            : undefined,
+      };
+      updateQuery(searchParams);
+    },
+    [updateQuery],
+  );
 
   const handleFieldChange = () => {
     updateQuery({
@@ -103,9 +106,10 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
 
   return (
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
-      <div className="space-y-6">
-        <div className="justify-between items-center flex flex-wrap">
-          <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
+      <div className="space-y-4 md:space-y-6">
+        {/* Header section with title and action buttons */}
+        <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center">
+          <div className="flex items-center">
             <EntityBadge
               title={t("users")}
               count={users?.count}
@@ -113,7 +117,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
               translationParams={{ entity: "User" }}
             />
           </div>
-          <div className="gap-2 flex flex-wrap mt-2">
+          <div className="flex flex-wrap gap-2">
             <AddUserSheet
               open={openAddUserSheet}
               setOpen={(open) => {
@@ -134,67 +138,71 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             />
           </div>
         </div>
-        <div className="flex gap-2">
-          <SearchByMultipleFields
-            id="user-search"
-            options={searchOptions}
-            initialOptionIndex={Math.max(
-              searchOptions.findIndex((option) => option.value !== ""),
-              0,
-            )}
-            onSearch={handleSearch}
-            onFieldChange={handleFieldChange}
-            className="w-full"
-            data-cy="search-user"
-          />
-        </div>
+
+        {/* Search section */}
+        <SearchByMultipleFields
+          id="user-search"
+          options={searchOptions}
+          initialOptionIndex={Math.max(
+            searchOptions.findIndex((option) => option.value !== ""),
+            0,
+          )}
+          onSearch={handleSearch}
+          onFieldChange={handleFieldChange}
+          className="w-full"
+          data-cy="search-user"
+        />
+
+        {/* User cards grid */}
         {isFetchingUsers ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <CardGridSkeleton count={6} />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {users?.results?.length === 0 ? (
               <Card className="col-span-full">
-                <CardContent className="p-6 text-center text-gray-500">
+                <CardContent className="p-4 sm:p-6 text-center text-gray-500">
                   {t("no_users_found")}
                 </CardContent>
               </Card>
             ) : (
               users?.results?.map((userRole) => (
                 <Card key={userRole.id} className="h-full">
-                  <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
+                  <CardContent className="p-4 flex flex-col h-full justify-between">
                     <div className="flex items-start gap-3">
                       <Avatar
                         name={`${userRole.user.first_name} ${userRole.user.last_name}`}
                         imageUrl={userRole.user.profile_picture_url}
-                        className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl flex-shrink-0"
+                        className="h-8 w-8 sm:h-10 sm:w-10 text-xl flex-shrink-0"
                       />
 
                       <div className="flex flex-col min-w-0 flex-1">
+                        {/* Status indicator first, then name below */}
                         <div className="flex flex-col gap-1">
-                          <div className="flex items-start justify-between">
-                            <h1 className="text-base font-bold break-words pr-2">
-                              {userRole.user.first_name}{" "}
-                              {userRole.user.last_name}
-                            </h1>
-                            <span className="text-sm text-gray-500">
-                              <UserStatusIndicator user={userRole.user} />
-                            </span>
-                          </div>
-                          <span className="text-sm text-gray-500 mr-2 break-words">
+                          <span className="text-sm text-gray-500">
+                            <UserStatusIndicator user={userRole.user} />
+                          </span>
+                          <h1 className="text-[15px] font-bold break-words max-w-full">
+                            {userRole.user.first_name} {userRole.user.last_name}
+                          </h1>
+                          <span className="text-sm text-gray-500 break-words max-w-full">
                             {userRole.user.username}
                           </span>
                         </div>
-                        <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
+
+                        {/* Role and phone info stacked vertically */}
+                        <div className="mt-3 space-y-3 text-sm">
                           <div>
-                            <div className="text-gray-500">{t("role")}</div>
+                            <div className="text-gray-500 font-medium">
+                              {t("role")}
+                            </div>
                             <div className="font-medium truncate">
                               {userRole.role.name ?? "-"}
                             </div>
                           </div>
                           <div>
-                            <div className="text-gray-500">
+                            <div className="text-gray-500 font-medium">
                               {t("phone_number")}
                             </div>
                             <div className="font-medium truncate">
@@ -209,21 +217,31 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                       </div>
                     </div>
 
-                    <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
+                    {/* Action buttons section with fixed width */}
+                    <div className="mt-4 -mx-6 -mb-4 rounded-b-md py-3 px-3 bg-transparent flex flex-col sm:flex-row gap-1">
                       <EditUserRoleSheet
                         organizationId={id}
                         userRole={userRole}
                         trigger={
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-center"
+                          >
                             <span>{t("edit_role")}</span>
                           </Button>
                         }
                       />
-                      <Button asChild variant="outline" size="sm">
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-center"
+                      >
                         <Link href={`/users/${userRole.user.username}`}>
                           <CareIcon
                             icon="l-arrow-up-right"
-                            className="text-lg mr-1"
+                            className="text-lg"
                           />
                           <span>{t("see_details")}</span>
                         </Link>

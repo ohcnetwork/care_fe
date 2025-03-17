@@ -1,10 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 
 import Page from "@/components/Common/Page";
@@ -42,6 +49,7 @@ export default function OrganizationLayout({
   const path = usePath() || "";
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
@@ -64,7 +72,7 @@ export default function OrganizationLayout({
   if (isLoading) {
     return <OrganizationLayoutSkeleton />;
   }
-  // add loading state
+
   if (!org) {
     return <div>{t("organization_not_found")}</div>;
   }
@@ -72,29 +80,32 @@ export default function OrganizationLayout({
   const navItems: NavItem[] = [
     {
       path: `${baseUrl}/${id}`,
-      title: "Organizations",
+      title: t("organizations"),
       icon: "d-hospital",
       visibility: hasPermission("can_view_organization", org.permissions),
     },
     {
       path: `${baseUrl}/${id}/users`,
-      title: "Users",
+      title: t("users"),
       icon: "d-people",
       visibility: hasPermission("can_list_organization_users", org.permissions),
     },
     {
       path: `${baseUrl}/${id}/patients`,
-      title: "Patients",
+      title: t("patients"),
       icon: "d-patient",
       visibility: hasPermission("can_list_patients", org.permissions),
     },
     {
       path: `${baseUrl}/${id}/facilities`,
-      title: "Facilities",
+      title: t("facilities"),
       icon: "d-hospital",
       visibility: hasPermission("can_read_facility", org.permissions),
     },
   ];
+
+  const visibleNavItems = navItems.filter((item) => item.visibility);
+  const activeNavItem = visibleNavItems.find((item) => path === item.path);
 
   const orgParents: OrganizationParent[] = [];
   let currentParent = org.parent;
@@ -107,12 +118,65 @@ export default function OrganizationLayout({
 
   return (
     <Page title={`${org.name}`}>
-      {/* Navigation */}
-      <div className="mt-4 flex min-w-0">
-        <Menubar className="w-full h-full overflow-x-auto">
-          {navItems
-            .filter((item) => item.visibility)
-            .map((item) => (
+      {/* Responsive Navigation */}
+      <div className="mt-4">
+        {/* Mobile/Tablet Dropdown Navigation - Shows on smaller screens */}
+        <div className="block md:hidden">
+          <DropdownMenu
+            open={isMobileMenuOpen}
+            onOpenChange={setIsMobileMenuOpen}
+          >
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center py-2 px-4"
+              >
+                <div className="flex items-center">
+                  {activeNavItem && (
+                    <CareIcon
+                      icon={activeNavItem.icon}
+                      className="mr-2 h-5 w-5"
+                    />
+                  )}
+                  <span className="font-medium">
+                    {activeNavItem ? activeNavItem.title : t("navigation")}
+                  </span>
+                </div>
+                <CareIcon
+                  icon={isMobileMenuOpen ? "l-angle-up" : "l-angle-down"}
+                  className="ml-2 h-4 w-4"
+                />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[200px]">
+              {visibleNavItems.map((item) => (
+                <DropdownMenuItem
+                  key={item.path}
+                  className={`${
+                    path === item.path
+                      ? "font-medium text-primary-700 bg-gray-100"
+                      : "text-gray-700"
+                  }`}
+                  asChild
+                >
+                  <Link
+                    href={item.path}
+                    className="flex items-center w-full"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
+                    {item.title}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Desktop Navigation - Shows on medium+ screens */}
+        <div className="hidden md:block">
+          <Menubar className="w-full h-full overflow-x-auto">
+            {visibleNavItems.map((item) => (
               <MenubarMenu key={item.path}>
                 <MenubarTrigger
                   data-cy={`org-nav-${item.title.toLowerCase()}`}
@@ -130,10 +194,12 @@ export default function OrganizationLayout({
                 </MenubarTrigger>
               </MenubarMenu>
             ))}
-        </Menubar>
+          </Menubar>
+        </div>
       </div>
-      {/* Page Content */}
-      <div className="mt-4">{children}</div>
+
+      {/* Page Content with proper spacing */}
+      <div className="mt-4 md:mt-6">{children}</div>
     </Page>
   );
 }
