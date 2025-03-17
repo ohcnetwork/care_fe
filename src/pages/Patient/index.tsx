@@ -131,7 +131,7 @@ function PatientIndex() {
               <span className="text-xs font-medium">{t("location")}: </span>
               <span className="text-sm">
                 <Link href={`/facility/${appointment.facility.id}`}>
-                  <span className="text-sm underline hover:cursor-pointer">
+                  <span className="text-sm underline underline-offset-2 hover:cursor-pointer">
                     {appointment.facility?.name}
                   </span>
                 </Link>
