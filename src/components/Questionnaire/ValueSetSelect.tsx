@@ -133,7 +133,7 @@ export default function ValueSetSelect({
               icon="l-plus"
               className="mr-2 text-5xl text-primary-700 font-normal"
             />
-            <span className="text-primary-700 flex items-center font-semibold text-lg">
+            <span className="text-primary-700 flex items-center font-semibold text-base text-wrap">
               {value?.display || placeholder}
             </span>
           </div>

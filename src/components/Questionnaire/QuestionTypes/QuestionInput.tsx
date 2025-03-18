@@ -199,7 +199,7 @@ export function QuestionInput({
       : questionnaireResponse.values;
 
     return (
-      <div className="">
+      <div className="bg-gray-50 px-2 py-3">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 && (
