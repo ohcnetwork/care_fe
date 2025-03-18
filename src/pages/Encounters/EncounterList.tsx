@@ -459,7 +459,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        {t("all")}
+                        {t("All Status")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="planned"
@@ -551,7 +551,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      {t("all")}
+                      {t("All Types")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="imp"
