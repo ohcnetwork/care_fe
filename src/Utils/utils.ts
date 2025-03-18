@@ -46,9 +46,12 @@ export const formatName = (user: {
   suffix?: string | null;
   username: string;
 }) => {
-  return user.first_name
-    ? `${user.prefix ? `${user.prefix} ` : ""}${user.first_name} ${user.last_name}${user.suffix ? ` ${user.suffix}` : ""}`
-    : user.username;
+  return (
+    [user.prefix, user.first_name, user.last_name, user.suffix]
+      .map((s) => s?.trim())
+      .filter(Boolean)
+      .join(" ") || user.username
+  );
 };
 
 export const relativeTime = (time?: DateLike) => {

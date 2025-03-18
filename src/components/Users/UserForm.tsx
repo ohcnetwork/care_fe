@@ -8,6 +8,7 @@ import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,7 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { FreeInputCombobox } from "@/components/ui/free-input-combobox";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/input-password";
 import { PhoneInput } from "@/components/ui/phone-input";
@@ -319,15 +319,19 @@ export default function UserForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("prefix")}</FormLabel>
-                <FreeInputCombobox
+                <Autocomplete
                   options={NAME_PREFIXES.map((prefix) => ({
                     label: prefix,
                     value: prefix,
                   }))}
+                  freeInput
+                  icon={null}
                   value={field.value || ""}
                   onChange={field.onChange}
+                  noOptionsMessage=""
                   className="w-28"
                   placeholder={t("select_or_type")}
+                  inputPlaceholder={t("select_or_type")}
                 />
                 <FormMessage />
               </FormItem>
@@ -373,15 +377,19 @@ export default function UserForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("suffix")}</FormLabel>
-                <FreeInputCombobox
+                <Autocomplete
                   options={NAME_SUFFIXES.map((suffix) => ({
                     label: suffix,
                     value: suffix,
                   }))}
                   value={field.value || ""}
                   onChange={field.onChange}
+                  freeInput
+                  icon={null}
+                  noOptionsMessage=""
                   className="w-28"
                   placeholder={t("select_or_type")}
+                  inputPlaceholder={t("select_or_type")}
                 />
                 <FormMessage />
               </FormItem>
