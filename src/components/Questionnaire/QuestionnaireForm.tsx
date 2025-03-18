@@ -18,6 +18,8 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
+import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import {
   DetailedValidationError,
   QuestionValidationError,
@@ -30,8 +32,12 @@ import type {
 import type { Question } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import { QuestionRenderer } from "./QuestionRenderer";
+import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
+import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
+import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
@@ -273,6 +279,29 @@ function ValidationErrorDisplay({
   );
 }
 
+const STRUCTURED_TYPE_VALIDATORS = {
+  appointment: (response: ResponseValue | undefined, questionId: string) => {
+    const appointmentData =
+      (response?.value as CreateAppointmentQuestion[]) || [];
+    return validateAppointmentQuestion(appointmentData[0], questionId);
+  },
+  medication_statement: (
+    response: ResponseValue | undefined,
+    questionId: string,
+  ) => {
+    const medicationData =
+      (response?.value as MedicationStatementRequest[]) || [];
+    return validateMedicationStatementQuestion(medicationData, questionId);
+  },
+  medication_request: (
+    response: ResponseValue | undefined,
+    questionId: string,
+  ) => {
+    const medicationData = (response?.value as MedicationRequest[]) || [];
+    return validateMedicationRequestQuestion(medicationData, questionId);
+  },
+} as const;
+
 export function QuestionnaireForm({
   questionnaireSlug,
   patientId,
@@ -508,7 +537,6 @@ export function QuestionnaireForm({
     // Validate all required fields
     const formsWithValidation = formsWithClearedErrors.map((form) => {
       const errors: QuestionValidationError[] = [];
-
       const validateQuestion = (q: Question) => {
         // Handle nested questions in groups
         if (q.type === "group" && q.questions) {
@@ -517,9 +545,14 @@ export function QuestionnaireForm({
         }
 
         if (q.required) {
+          // Handle appointment validation
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
-            (v) => v.value !== undefined && v.value !== null && v.value !== "",
+            (v) =>
+              v.value !== undefined &&
+              v.value !== null &&
+              v.value !== "" &&
+              (Array.isArray(v.value) ? v.value.length > 0 : true),
           );
 
           if (!hasValue) {
@@ -532,6 +565,22 @@ export function QuestionnaireForm({
             firstErrorId = firstErrorId ? firstErrorId : q.id;
           }
         }
+
+        if (q.type === "structured" && q.structured_type) {
+          const response = form.responses.find((r) => r.question_id === q.id);
+          const validator =
+            STRUCTURED_TYPE_VALIDATORS[
+              q.structured_type as keyof typeof STRUCTURED_TYPE_VALIDATORS
+            ];
+
+          if (validator) {
+            const validationErrors = validator(response?.values?.[0], q.id);
+            errors.push(...validationErrors);
+            if (validationErrors.length > 0) {
+              firstErrorId = firstErrorId ? firstErrorId : q.id;
+            }
+          }
+        }
       };
 
       form.questionnaire.questions.forEach(validateQuestion);
@@ -541,15 +590,12 @@ export function QuestionnaireForm({
     setQuestionnaireForms(formsWithValidation);
 
     if (firstErrorId) {
-      const element = document.querySelector(
-        `[data-question-id="${firstErrorId}"]`,
-      );
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-
-    if (formsWithValidation.some((form) => form.errors.length > 0)) {
+      setTimeout(() => {
+        const element = document.querySelector(
+          `[data-question-id="${firstErrorId}"]`,
+        );
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
       return;
     }
 
