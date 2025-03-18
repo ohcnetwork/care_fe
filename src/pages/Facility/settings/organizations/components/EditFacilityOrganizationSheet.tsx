@@ -118,7 +118,7 @@ export default function EditFacilityOrganizationSheet({
         </SheetHeader>
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Name</label>
+            <label className="text-sm font-medium">{t("name")}</label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
