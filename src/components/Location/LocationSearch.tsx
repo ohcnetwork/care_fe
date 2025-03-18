@@ -17,12 +17,17 @@ import {
 
 import query from "@/Utils/request/query";
 import { stringifyNestedObject } from "@/Utils/utils";
-import { LocationList } from "@/types/location/location";
+import {
+  LocationForm,
+  LocationList,
+  LocationMode,
+} from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface LocationSearchProps {
   facilityId: string;
-  mode?: "kind" | "instance";
+  mode?: LocationMode;
+  form?: LocationForm;
   onSelect: (location: LocationList) => void;
   disabled?: boolean;
   value?: LocationList | null;
@@ -31,6 +36,7 @@ interface LocationSearchProps {
 export function LocationSearch({
   facilityId,
   mode,
+  form,
   onSelect,
   disabled,
   value,
@@ -42,7 +48,7 @@ export function LocationSearch({
     queryKey: ["locations", facilityId, mode, search],
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode, name: search, form: "bd", available: "true" },
+      queryParams: { mode, name: search, form, available: "true" },
     }),
     enabled: facilityId !== "preview",
   });

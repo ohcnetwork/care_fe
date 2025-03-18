@@ -1781,6 +1781,7 @@
   "organizations": "Organizations",
   "organizations_fetch_error": "Error while fetching organizations",
   "origin_facility": "Current facility",
+  "other": "Other",
   "other_details": "Other details",
   "otp_verification_error": "Failed to verify OTP. Please try again later.",
   "otp_verification_success": "OTP has been verified successfully.",
