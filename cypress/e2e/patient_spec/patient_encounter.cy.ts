@@ -17,7 +17,7 @@ describe("Patient Encounter Questionnaire", () => {
       pco2: "120",
       po2: "80",
     };
-    facilityCreation.selectFacility("GHC payyanur");
+    facilityCreation.selectFacility("GHC Payyanur");
 
     // Chain the methods instead of multiple separate calls
     patientEncounter
