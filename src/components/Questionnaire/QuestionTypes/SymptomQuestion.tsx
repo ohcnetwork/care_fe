@@ -155,7 +155,7 @@ const SymptomRow = React.memo(function SymptomRow({
   onRemove,
 }: SymptomRowProps) {
   const [showNotes, setShowNotes] = useState(Boolean(symptom.note));
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(!symptom.id);
 
   const handleDateChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
