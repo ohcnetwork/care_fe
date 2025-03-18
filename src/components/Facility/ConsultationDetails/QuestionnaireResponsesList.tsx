@@ -113,11 +113,19 @@ function QuestionGroup({
   }[];
   level?: number;
 }) {
+  const checkResponse = (group: Question, r_id: string) => {
+    if (group.id === r_id) return true;
+    if (!group.questions) return false;
+    const response_found = group.questions.some((q: Question) =>
+      checkResponse(q, r_id),
+    );
+    return response_found;
+  };
   const hasResponses = responses.some((r) =>
-    group.questions?.some((q) => q.id === r.question_id),
+    group.questions?.some((q) => checkResponse(q, r.question_id)),
   );
 
-  if (!hasResponses && !group.questions) return null;
+  if (!hasResponses) return null;
 
   const containerClass = group.styling_metadata?.containerClasses || "";
   const classes = group.styling_metadata?.classes || "";
