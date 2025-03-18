@@ -75,7 +75,7 @@ const RenderCard = ({ valuesets }: { valuesets: ValuesetBase[] }) => {
                 {valueset.name && valueset.name.length > 20 ? (
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger className="turncate">
+                      <TooltipTrigger className="truncate">
                         <p className="mt-2 text-xl font-bold text-gray-900 truncate">
                           {valueset.name}
                         </p>
