@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -35,6 +37,8 @@ import {
   ValuesetLookupResponse,
 } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
+
+import { ValueSetPreview } from "./ValueSetPreview";
 
 // Create a schema for form validation
 
@@ -426,6 +430,24 @@ export function ValueSetForm({
 
   return (
     <Form {...form}>
+      <div className="flex justify-end">
+        <ValueSetPreview
+          valueset={form.getValues()}
+          trigger={
+            <Button
+              variant="outline_primary"
+              disabled={!form.formState.isValid}
+            >
+              <CareIcon
+                icon={form.formState.isValid ? "l-eye" : "l-eye-slash"}
+                className="h-4 w-4"
+              />
+              {t("valueset_preview")}
+            </Button>
+          }
+          disabled={!form.formState.isValid}
+        />
+      </div>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
