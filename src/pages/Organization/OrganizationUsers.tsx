@@ -163,18 +163,17 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             ) : (
               users?.results?.map((userRole) => (
                 <Card key={userRole.id} className="flex flex-col max-w-full">
-                  <CardContent className="p-3 flex flex-col gap-3 flex-grow sm:p-4">
+                  <CardContent className="p-3 flex flex-col gap-3 sm:p-4">
                     <div className="flex items-start gap-2">
                       <Avatar
                         name={`${userRole.user.first_name} ${userRole.user.last_name}`}
                         imageUrl={userRole.user.profile_picture_url}
                         className="h-10 w-10 flex-shrink-0 sm:h-12 sm:w-12 lg:h-14 lg:w-14 text-lg sm:text-xl lg:text-2xl"
                       />
-
                       <div className="flex flex-col min-w-0 flex-1">
                         <div className="flex flex-col gap-1">
                           <div className="flex items-start justify-between gap-2">
-                            <h1 className="text-base font-bold leading-tight truncate">
+                            <h1 className="text-base font-bold truncate">
                               {userRole.user.first_name}{" "}
                               {userRole.user.last_name}
                             </h1>
@@ -182,11 +181,11 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                               <UserStatusIndicator user={userRole.user} />
                             </span>
                           </div>
-                          <span className="text-sm mr-2 text-gray-500 break-words truncate">
+                          <span className="text-sm text-gray-500 truncate">
                             {userRole.user.username}
                           </span>
                         </div>
-                        <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
+                        <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
                           <div>
                             <div className="text-gray-500">{t("role")}</div>
                             <div className="font-medium truncate">
@@ -208,8 +207,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                         </div>
                       </div>
                     </div>
-
-                    <div className="mt-4  bg-gray-50 rounded-md flex justify-end gap-2 ">
+                    <div className="mt-4 bg-gray-50 rounded-md flex justify-end gap-2">
                       <EditUserRoleSheet
                         organizationId={id}
                         userRole={userRole}
