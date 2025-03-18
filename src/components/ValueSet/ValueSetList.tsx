@@ -160,9 +160,6 @@ const RenderTable = ({ valuesets }: { valuesets: ValuesetBase[] }) => {
               {t("description")}
             </TableHead>
             <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              {t("system")}
-            </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
               {t("actions")}
             </TableHead>
           </TableRow>
@@ -214,9 +211,6 @@ const RenderTable = ({ valuesets }: { valuesets: ValuesetBase[] }) => {
                   <div className="max-w-md truncate text-sm text-gray-900 break-words whitespace-normal">
                     {valueset.description}
                   </div>
-                </TableCell>
-                <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {valueset.is_system_defined ? t("yes") : t("no")}
                 </TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
                   {!valueset.is_system_defined && (
