@@ -121,7 +121,7 @@ function SymptomActionsMenu({
           variant="ghost"
           size="icon"
           disabled={disabled}
-          className="h-8 w-8"
+          className="h-8 w-8 p-2 border border-gray-200 bg-white shadow"
         >
           <DotsVerticalIcon className="h-4 w-4" />
         </Button>
@@ -265,29 +265,35 @@ const SymptomRow = React.memo(function SymptomRow({
 
       {/* Mobile View - Card Layout */}
       <div className="md:hidden">
-        <Card className="mb-2">
+        <Card className="mb-2 bg-white">
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <CardHeader className="p-3 pb-2 bg-gray-100">
+            <CardHeader className={cn("p-3 pb-2", { "bg-gray-100": !isOpen })}>
               <div className="flex flex-col space-y-1">
                 <div className="flex items-center justify-between">
-                  <CardTitle
-                    className="text-base truncate"
-                    title={symptom.code.display}
-                  >
+                  <CardTitle className="text-base" title={symptom.code.display}>
                     {symptom.code.display}
                   </CardTitle>
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-2">
                     {isOpen && (
-                      <SymptomActionsMenu
-                        showNotes={showNotes}
-                        verificationStatus={symptom.verification_status}
-                        disabled={disabled}
-                        onToggleNotes={handleToggleNotes}
-                        onRemove={handleRemove}
-                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={
+                          disabled ||
+                          symptom.verification_status === "entered_in_error"
+                        }
+                        onClick={handleRemove}
+                        className="h-8 w-8 p-2 border border-gray-200 bg-white shadow text-destructive"
+                      >
+                        <MinusCircledIcon className="h-4 w-4" />
+                      </Button>
                     )}
                     <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 border border-gray-200 bg-white shadow p-2"
+                      >
                         {isOpen ? (
                           <ChevronsDownUp className="h-4 w-4" />
                         ) : (
@@ -379,20 +385,19 @@ const SymptomRow = React.memo(function SymptomRow({
                     onRemove={handleRemove}
                   />
                 </div> */}
-                {showNotes && (
-                  <div>
-                    <div className="block text-sm font-medium text-gray-500 mb-1">
-                      {t("notes")}
-                    </div>
-                    <Input
-                      type="text"
-                      placeholder={t("add_notes_about_symptom")}
-                      value={symptom.note || ""}
-                      onChange={handleNotesChange}
-                      disabled={disabled}
-                    />
+
+                <div>
+                  <div className="block text-sm font-medium text-gray-500 mb-1">
+                    {t("notes")}
                   </div>
-                )}
+                  <Input
+                    type="text"
+                    placeholder={t("add_notes_about_symptom")}
+                    value={symptom.note || ""}
+                    onChange={handleNotesChange}
+                    disabled={disabled}
+                  />
+                </div>
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
