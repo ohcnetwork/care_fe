@@ -1,19 +1,8 @@
 import { format } from "date-fns";
-import { t } from "i18next";
 import * as React from "react";
 import { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 type DateRangePickerProps = Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -29,44 +18,57 @@ export function DateRangePicker({
   onChange,
   className,
 }: DateRangePickerProps) {
+  const inputClasses =
+    "border border-gray-200 bg-white shadow-sm rounded-md px-3 py-2 w-full hover:bg-gray-100 hover:text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 focus:outline-none ";
+
+  const handleChange =
+    (field: "from" | "to") => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedDate = e.target.value
+        ? new Date(e.target.value)
+        : undefined;
+      onChange?.(
+        field === "from"
+          ? { from: selectedDate, to: date?.to }
+          : { from: date?.from, to: selectedDate },
+      );
+    };
   return (
     <div className={cn("grid gap-2", className)}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={"outline"}
-            className={cn(
-              "justify-center text-left font-normal",
-              !date && "text-gray-500",
-            )}
+      <div className="flex space-x-2">
+        <div className="flex flex-col w-full">
+          <label
+            htmlFor="from-date"
+            className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
-                </>
-              ) : (
-                format(date.from, "LLL dd, y")
-              )
-            ) : (
-              <span>{t("pick_a_date")}</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={onChange}
-            numberOfMonths={2}
+            From Date
+          </label>
+          <input
+            id="from-date"
+            type="date"
+            className={inputClasses}
+            value={date?.from ? format(date.from, "yyyy-MM-dd") : ""}
+            max={date?.to ? format(date.to, "yyyy-MM-dd") : undefined}
+            onChange={handleChange("from")}
           />
-        </PopoverContent>
-      </Popover>
+        </div>
+
+        <div className="flex flex-col w-full">
+          <label
+            htmlFor="to-date"
+            className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            To Date
+          </label>
+          <input
+            type="date"
+            placeholder="To Date"
+            className={inputClasses}
+            value={date?.to ? format(date.to, "yyyy-MM-dd") : ""}
+            min={date?.from ? format(date.from, "yyyy-MM-dd") : undefined}
+            onChange={handleChange("to")}
+          />
+        </div>
+      </div>
     </div>
   );
 }
