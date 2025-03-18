@@ -52,6 +52,14 @@ export interface DeviceList extends DeviceBase {
   care_metadata: Record<string, unknown>;
 }
 
+export interface DeviceEncounterHistory {
+  id: string;
+  encounter: Encounter;
+  created_by: UserBase;
+  start: string;
+  end: string;
+}
+
 export interface DeviceLocationHistory {
   id: string;
   created_by: UserBase;

@@ -13,6 +13,7 @@ import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
+import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
@@ -35,6 +36,7 @@ const defaultTabs = {
   medicines: EncounterMedicinesTab,
   files: EncounterFilesTab,
   notes: EncounterNotesTab,
+  devices: EncounterDevicesTab,
   drawings: EncounterDrawingsTab,
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,

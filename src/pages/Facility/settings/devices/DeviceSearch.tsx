@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -16,39 +17,30 @@ import {
 } from "@/components/ui/popover";
 
 import query from "@/Utils/request/query";
-import { stringifyNestedObject } from "@/Utils/utils";
-import {
-  LocationForm,
-  LocationList,
-  LocationMode,
-} from "@/types/location/location";
-import locationApi from "@/types/location/locationApi";
+import { DeviceList } from "@/types/device/device";
+import deviceApi from "@/types/device/deviceApi";
 
-interface LocationSearchProps {
+interface DeviceSearchProps {
   facilityId: string;
-  mode?: LocationMode;
-  form?: LocationForm;
-  onSelect: (location: LocationList) => void;
+  onSelect: (device: DeviceList) => void;
   disabled?: boolean;
-  value?: LocationList | null;
+  value?: DeviceList | null;
 }
 
-export function LocationSearch({
+export function DeviceSearch({
   facilityId,
-  mode,
-  form,
   onSelect,
   disabled,
   value,
-}: LocationSearchProps) {
+}: DeviceSearchProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { data: locations } = useQuery({
-    queryKey: ["locations", facilityId, mode, search],
-    queryFn: query.debounced(locationApi.list, {
+  const { data: devices, isPending } = useQuery({
+    queryKey: ["devices", facilityId, search],
+    queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode, name: search, form, available: "true" },
+      queryParams: { search_text: search },
     }),
     enabled: facilityId !== "preview",
   });
@@ -60,29 +52,33 @@ export function LocationSearch({
           role="combobox"
           aria-expanded={open}
         >
-          {stringifyNestedObject(value || { name: "" }) || "Select location..."}
+          {value?.registered_name || t("select_device")}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] max-h-[calc(100vh-12rem)] overflow-y-auto">
         <Command className="pt-1">
           <CommandInput
-            placeholder="Search locations..."
+            placeholder={t("search_devices")}
             value={search}
             className="outline-none border-none ring-0 shadow-none"
             onValueChange={setSearch}
           />
-          <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
+          {isPending ? (
+            <Loader2 className="h-5 w-5 animate-spin mx-auto my-6" />
+          ) : (
+            <CommandEmpty>{t("no_devices_found")}</CommandEmpty>
+          )}
           <CommandGroup>
-            {locations?.results.map((location) => (
+            {devices?.results.map((device) => (
               <CommandItem
-                key={location.id}
-                value={location.name}
+                key={device.id}
+                value={device.registered_name}
                 onSelect={() => {
-                  onSelect(location);
+                  onSelect(device);
                   setOpen(false);
                 }}
               >
-                {stringifyNestedObject(location)}
+                {device.registered_name}
               </CommandItem>
             ))}
           </CommandGroup>

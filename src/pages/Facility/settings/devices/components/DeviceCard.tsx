@@ -13,12 +13,14 @@ import {
 
 import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import { DeviceList } from "@/types/device/device";
+import { Encounter } from "@/types/emr/encounter";
 
 interface Props {
   device: DeviceList;
+  encounter?: Encounter;
 }
 
-export default function DeviceCard({ device }: Props) {
+export default function DeviceCard({ device, encounter }: Props) {
   const { t } = useTranslation();
   const deviceTypes = usePluginDevices();
 
@@ -58,7 +60,11 @@ export default function DeviceCard({ device }: Props) {
   };
 
   return (
-    <Link href={`/devices/${device.id}`} className="block h-[160px]">
+    <Link
+      href={`/devices/${device.id}`}
+      basePath={encounter ? `/facility/${encounter.facility.id}/settings` : ""}
+      className="block h-[160px]"
+    >
       <Card className="hover:shadow-md transition-shadow h-full">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
