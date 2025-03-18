@@ -264,10 +264,14 @@ const SymptomRow = React.memo(function SymptomRow({
       </div>
 
       {/* Mobile View - Card Layout */}
-      <div className="md:hidden">
-        <Card className={cn("mb-2", { "border border-primary": isOpen })}>
+      <div className="md:hidden rounded-lg">
+        <Card
+          className={cn("mb-2 rounded-lg", { "border border-primary": isOpen })}
+        >
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <CardHeader className={cn("p-3 pb-2", { "bg-gray-100": !isOpen })}>
+            <CardHeader
+              className={cn("p-3 pb-2 rounded-lg", { "bg-gray-100": !isOpen })}
+            >
               <div className="flex flex-col space-y-1">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base" title={symptom.code.display}>
@@ -321,7 +325,7 @@ const SymptomRow = React.memo(function SymptomRow({
               </div>
             </CardHeader>
             <CollapsibleContent>
-              <CardContent className="p-3 pt-2 space-y-3">
+              <CardContent className="p-3 pt-2 space-y-3 rounded-lg">
                 <div>
                   <div className="block text-sm font-medium text-gray-500 mb-1">
                     {t("onset_date")}
@@ -505,7 +509,7 @@ export function SymptomQuestion({
             <div className="col-span-2 text-center">{t("severity")}</div>
             <div className="col-span-1 text-center">{t("action")}</div>
           </div>
-          <div className="divide-y divide-gray-200">
+          <div className="md:divide-y md:divide-gray-200">
             {symptoms.map((symptom, index) => (
               <SymptomRow
                 key={index}
