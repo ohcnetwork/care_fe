@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns from "@/components/Common/UserColumns";
+import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
 import UserResetPassword from "@/components/Users/UserResetPassword";
@@ -161,6 +162,12 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
         )}
         {authUser.username === userData.username && (
           <>
+            <UserColumns
+              heading={t("two_factor_authentication")}
+              note={t("two_factor_authentication_note")}
+              Child={TwoFactorAuth}
+              childProps={userColumnsData}
+            />
             <UserColumns
               heading={t("language_selection")}
               note={t("set_your_local_language")}
