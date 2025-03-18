@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -10,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+
+import useFilters from "@/hooks/useFilters";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
@@ -27,32 +27,46 @@ interface Props {
   navOrganizationId?: string;
 }
 
-export default function OrganizationView({ id, navOrganizationId }: Props) {
+export default function OrganizationFacilities({
+  id,
+  navOrganizationId,
+}: Props) {
   const { t } = useTranslation();
 
-  const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const { data: children, isFetching } = useQuery({
-    queryKey: ["organization", id, "children", page, searchQuery],
-    queryFn: query.debounced(organizationApi.list, {
-      queryParams: {
-        parent: id,
-        offset: (page - 1) * RESULTS_PER_PAGE_LIMIT,
-        limit: RESULTS_PER_PAGE_LIMIT,
-        name: searchQuery || undefined,
-      },
-    }),
+  const {
+    qParams,
+    Pagination: FiltersPagination,
+    advancedFilter,
+    resultsPerPage,
+    updateQuery,
+  } = useFilters({
+    limit: RESULTS_PER_PAGE_LIMIT,
+    disableCache: true,
   });
 
-  useEffect(() => {
-    setPage(1);
-  }, [id, searchQuery]);
+  const { data: children, isFetching } = useQuery({
+    queryKey: ["organization", id, qParams],
+    queryFn: query.debounced(organizationApi.list, {
+      queryParams: {
+        page: qParams.page,
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        parent: id,
+        name: qParams.name,
+        ...advancedFilter.filter,
+      },
+    }),
+    enabled: !!id,
+  });
 
   // Hack for the sidebar to work
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}`
     : `/organization/${id}`;
+
+  if (!id) {
+    return null;
+  }
 
   return (
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
@@ -69,11 +83,13 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
           <div className="w-72">
             <Input
               placeholder="Search by name..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1); // Reset to first page on search
-              }}
+              value={qParams.name || ""}
+              onChange={(e) =>
+                updateQuery({
+                  name: e.target.value,
+                  page: 1,
+                })
+              }
               className="w-full"
             />
           </div>
@@ -127,21 +143,16 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               ) : (
                 <Card className="col-span-full">
                   <CardContent className="p-6 text-center text-gray-500">
-                    {searchQuery
+                    {qParams.name
                       ? t("no_organizations_found")
                       : t("no_sub_organizations_found")}
                   </CardContent>
                 </Card>
               )}
             </div>
-            {children && children.count > RESULTS_PER_PAGE_LIMIT && (
+            {children && children.count > resultsPerPage && (
               <div className="flex justify-center">
-                <Pagination
-                  data={{ totalCount: children.count }}
-                  onChange={(page, _) => setPage(page)}
-                  defaultPerPage={RESULTS_PER_PAGE_LIMIT}
-                  cPage={page}
-                />
+                <FiltersPagination totalCount={children.count} />
               </div>
             )}
           </div>
