@@ -32,7 +32,6 @@ interface AutocompleteProps {
   onChange: (value: string) => void;
   onSearch?: (value: string) => void;
   placeholder?: string;
-  icon?: React.ReactNode;
   inputPlaceholder?: string;
   noOptionsMessage?: string;
   disabled?: boolean;
@@ -52,7 +51,6 @@ export default function Autocomplete({
   inputPlaceholder = "Search option...",
   noOptionsMessage = "No options found",
   disabled,
-  icon,
   align = "center",
   className,
   popoverClassName,
@@ -63,6 +61,7 @@ export default function Autocomplete({
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Maintain an internal state for the input text when freeInput is enabled.
+  // TODO : Find a better way to handle this, maybe as a seperate component
   const [inputValue, setInputValue] = React.useState(value);
 
   // Find a matching option from the options list (for non freeInput or when value matches an option)
@@ -114,7 +113,6 @@ export default function Autocomplete({
         // Control the input when freeInput is true.
         {...(freeInput ? { value: inputValue } : {})}
         className="outline-none border-none ring-0 shadow-none"
-        icon={icon}
         autoFocus
       />
       <CommandList>

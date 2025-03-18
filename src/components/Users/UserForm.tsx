@@ -325,7 +325,6 @@ export default function UserForm({
                     value: prefix,
                   }))}
                   freeInput
-                  icon={null}
                   value={field.value || ""}
                   onChange={field.onChange}
                   noOptionsMessage=""
@@ -385,7 +384,6 @@ export default function UserForm({
                   value={field.value || ""}
                   onChange={field.onChange}
                   freeInput
-                  icon={null}
                   noOptionsMessage=""
                   className="w-28"
                   placeholder={t("select_or_type")}
