@@ -8,11 +8,18 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
+import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -148,6 +155,7 @@ const SymptomRow = React.memo(function SymptomRow({
   onRemove,
 }: SymptomRowProps) {
   const [showNotes, setShowNotes] = useState(Boolean(symptom.note));
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleDateChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -189,7 +197,8 @@ const SymptomRow = React.memo(function SymptomRow({
           symptom.verification_status === "entered_in_error",
       })}
     >
-      <div className="py-1 px-2 space-y-2 md:space-y-0 md:grid md:grid-cols-12 md:items-center md:gap-4">
+      {/* Desktop View */}
+      <div className="hidden md:grid md:grid-cols-12 md:items-center md:gap-4 py-1 px-2">
         <div className="flex items-center justify-between md:col-span-5">
           <div
             className="font-medium text-sm truncate"
@@ -199,9 +208,6 @@ const SymptomRow = React.memo(function SymptomRow({
           </div>
         </div>
         <div className="col-span-2">
-          <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
-            {t("date")}
-          </div>
           <Input
             type="date"
             value={symptom.onset?.onset_datetime || ""}
@@ -211,9 +217,6 @@ const SymptomRow = React.memo(function SymptomRow({
           />
         </div>
         <div className="col-span-2">
-          <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
-            {t("status")}
-          </div>
           <Select
             value={symptom.clinical_status}
             onValueChange={handleStatusChange}
@@ -232,9 +235,6 @@ const SymptomRow = React.memo(function SymptomRow({
           </Select>
         </div>
         <div className="col-span-2">
-          <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
-            {t("severity")}
-          </div>
           <Select
             value={symptom.severity}
             onValueChange={handleSeverityChange}
@@ -262,8 +262,146 @@ const SymptomRow = React.memo(function SymptomRow({
           />
         </div>
       </div>
+
+      {/* Mobile View - Card Layout */}
+      <div className="md:hidden">
+        <Card className="mb-2">
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <CardHeader className="p-3 pb-2 bg-gray-100">
+              <div className="flex flex-col space-y-1">
+                <div className="flex items-center justify-between">
+                  <CardTitle
+                    className="text-base truncate"
+                    title={symptom.code.display}
+                  >
+                    {symptom.code.display}
+                  </CardTitle>
+                  <div className="flex items-center">
+                    {isOpen && (
+                      <SymptomActionsMenu
+                        showNotes={showNotes}
+                        verificationStatus={symptom.verification_status}
+                        disabled={disabled}
+                        onToggleNotes={handleToggleNotes}
+                        onRemove={handleRemove}
+                      />
+                    )}
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        {isOpen ? (
+                          <ChevronsDownUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronsUpDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </CollapsibleTrigger>
+                  </div>
+                </div>
+                {!isOpen && (
+                  <div className="text-sm text-gray-500">
+                    Onset{" "}
+                    {symptom.onset?.onset_datetime
+                      ? format(
+                          new Date(symptom.onset.onset_datetime),
+                          "MMMM d, yyyy",
+                        )
+                      : ""}
+                    {" · "}
+                    {t(symptom.clinical_status)}
+                    {" · "}
+                    {t(symptom.severity)} {t("severity")}
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="p-3 pt-2 space-y-3">
+                <div>
+                  <div className="block text-sm font-medium text-gray-500 mb-1">
+                    {t("onset_date")}
+                  </div>
+                  <Input
+                    type="date"
+                    value={symptom.onset?.onset_datetime || ""}
+                    onChange={handleDateChange}
+                    disabled={disabled || !!symptom.id}
+                    className="h-9"
+                  />
+                </div>
+                <div>
+                  <div className="block text-sm font-medium text-gray-500 mb-1">
+                    {t("status")}
+                  </div>
+                  <Select
+                    value={symptom.clinical_status}
+                    onValueChange={handleStatusChange}
+                    disabled={disabled}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SYMPTOM_CLINICAL_STATUS.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {t(status)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <div className="block text-sm font-medium text-gray-500 mb-1">
+                    {t("severity")}
+                  </div>
+                  <Select
+                    value={symptom.severity}
+                    onValueChange={handleSeverityChange}
+                    disabled={disabled}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SYMPTOM_SEVERITY.map((severity) => (
+                        <SelectItem key={severity} value={severity}>
+                          {t(severity)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* <div className="flex justify-end">
+                  <SymptomActionsMenu
+                    showNotes={showNotes}
+                    verificationStatus={symptom.verification_status}
+                    disabled={disabled}
+                    onToggleNotes={handleToggleNotes}
+                    onRemove={handleRemove}
+                  />
+                </div> */}
+                {showNotes && (
+                  <div>
+                    <div className="block text-sm font-medium text-gray-500 mb-1">
+                      {t("notes")}
+                    </div>
+                    <Input
+                      type="text"
+                      placeholder={t("add_notes_about_symptom")}
+                      value={symptom.note || ""}
+                      onChange={handleNotesChange}
+                      disabled={disabled}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+      </div>
+
+      {/* Notes for Desktop */}
       {showNotes && (
-        <div className="px-3 pb-3">
+        <div className="hidden md:block px-3 pb-3">
           <Input
             type="text"
             placeholder={t("add_notes_about_symptom")}
