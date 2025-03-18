@@ -12,10 +12,10 @@ import { getResponseBody, makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
 export async function callApi<Route extends ApiRoute<unknown, unknown>>(
-  { path, method, noAuth }: Route,
+  { baseUrl, path, method, noAuth }: Route,
   options?: ApiCallOptions<Route>,
 ): Promise<Route["TRes"]> {
-  const url = `${careConfig.apiUrl}${makeUrl(path, options?.queryParams, options?.pathParams)}`;
+  const url = `${baseUrl ?? careConfig.apiUrl}${makeUrl(path, options?.queryParams, options?.pathParams)}`;
 
   const fetchOptions: RequestInit = {
     method,

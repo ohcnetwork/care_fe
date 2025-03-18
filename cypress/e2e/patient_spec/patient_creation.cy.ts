@@ -103,7 +103,7 @@ describe("Patient Creation and modification", () => {
 
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
-      facilityCreation.selectFacility("GHC payyanur");
+      facilityCreation.selectFacility("GHC Payyanur");
       patientCreation
         .clickSearchPatients()
         .clickCreateNewPatient()
@@ -138,7 +138,7 @@ describe("Patient Creation and modification", () => {
       address: generateAddress(true),
     };
 
-    facilityCreation.selectFacility("GHC payyanur");
+    facilityCreation.selectFacility("GHC Payyanur");
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()
@@ -161,10 +161,10 @@ describe("Patient Creation and modification", () => {
   describe("Patient Search and Encounter Creation", () => {
     it("Search patient with phone number and create a new encounter", () => {
       const patientDetail = {
-        name: "Nihal",
-        phone: "8199210687",
+        name: "Jumanji - Dont Change Name",
+        phone: "8744582225",
       };
-      facilityCreation.selectFacility("GHC payyanur");
+      facilityCreation.selectFacility("GHC Payyanur");
       patientCreation
         .clickSearchPatients()
         .searchPatient(patientDetail.phone)
