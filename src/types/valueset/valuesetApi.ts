@@ -1,5 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { Code } from "@/types/questionnaire/code";
 
 import {
   CreateValuesetModel,
@@ -45,5 +46,11 @@ export default {
     TBody: Type<{
       search: string;
     }>(),
+  },
+  preview_search: {
+    path: "/api/v1/valueset/preview_search/",
+    method: HttpMethod.POST,
+    TRes: Type<{ results: Code[] }>(),
+    TBody: Type<CreateValuesetModel>(),
   },
 } as const;
