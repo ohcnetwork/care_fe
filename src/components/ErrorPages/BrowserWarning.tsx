@@ -39,29 +39,27 @@ const BrowserWarning = () => {
 
   return (
     <>
-      {showUnsupportedBrowserDialog && (
-        <AlertDialog
-          open={showUnsupportedBrowserDialog}
-          onOpenChange={setShowUnsupportedBrowserDialog}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Unsupported Browser</AlertDialogTitle>
-              <AlertDialogDescription>
-                Your browser is unsupported. Please switch to a supported
-                browser for the best experience.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction
-                onClick={() => setShowUnsupportedBrowserDialog(false)}
-              >
-                Dismiss
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <AlertDialog
+        open={showUnsupportedBrowserDialog}
+        onOpenChange={setShowUnsupportedBrowserDialog}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("unsupported_browser")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("unsupported_browser_description", notSupported)}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => setShowUnsupportedBrowserDialog(false)}
+            >
+              {t("close")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="fixed left-0 top-0 z-50 flex h-20 w-full items-center justify-center bg-gray-800 bg-opacity-60 text-center text-gray-300">
         <div>
           <h2 className="text-lg font-medium">{t("unsupported_browser")}</h2>
