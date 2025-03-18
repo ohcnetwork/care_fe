@@ -357,8 +357,8 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
 
                             <LocationSheet
                               facilityId={props.encounter.facility.id}
-                              encounterId={props.encounter.id}
                               history={encounter.location_history}
+                              encounter={encounter}
                               trigger={
                                 <div>
                                   <CareIcon
@@ -382,7 +382,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           <div className="border-b border-dashed border-gray-200 my-2" />
                           <LocationSheet
                             facilityId={props.encounter.facility.id}
-                            encounterId={props.encounter.id}
                             trigger={
                               <Button
                                 variant="outline"
@@ -392,6 +391,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               </Button>
                             }
                             history={encounter.location_history}
+                            encounter={encounter}
                           />
                         </div>
                       </PopoverContent>
@@ -401,7 +401,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       <Badge variant="outline">
                         <LocationSheet
                           facilityId={props.encounter.facility.id}
-                          encounterId={props.encounter.id}
                           trigger={
                             <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
                               <CareIcon
@@ -412,6 +411,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             </div>
                           }
                           history={encounter.location_history}
+                          encounter={encounter}
                         />
                       </Badge>
                     )
