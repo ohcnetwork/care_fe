@@ -76,7 +76,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               >
                 <Link
                   href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
-                  className="text-gray-950 font-semibold flex items-start gap-0.5"
+                  className="text-gray-950 font-semibold flex items-start leading-tight"
                   id="patient-details"
                   data-cy="patient-details-button"
                 >

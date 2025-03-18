@@ -82,7 +82,7 @@ export const PatientHome = (props: {
                       <div className="flex flex-col md:flex-row gap-x-4">
                         <h1
                           id="patient-name"
-                          className="text-base md:text-xl font-semibold capitalize text-gray-950 mb-1"
+                          className="text-base md:text-xl font-semibold capitalize text-gray-950 mb-2 leading-tight"
                         >
                           {patientData.name}
                         </h1>
