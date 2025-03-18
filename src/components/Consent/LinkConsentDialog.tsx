@@ -149,12 +149,26 @@ export default function LinkConsentDialog({
     enabled: isOpen,
   });
 
+  const handleSuccess = () => {
+    toast.success(t("consent_created_successfully"));
+    queryClient.invalidateQueries({ queryKey: ["consents", patientId] });
+    setIsOpen(false);
+    onSuccess?.();
+    form.reset();
+    fileUpload.clearFiles();
+  };
+
   const { mutate: createConsent, isPending } = useMutation({
     mutationFn: (data: CreateConsentRequest) =>
       mutate(routes.consent.create, {
         pathParams: { patientId },
       })(data),
     onSuccess: async (response) => {
+      if (form.getValues("source_attachments")?.length === 0) {
+        handleSuccess();
+        return;
+      }
+
       setAssociatingId(response.id);
       setOpenUploadDialog(true);
     },
@@ -266,13 +280,9 @@ export default function LinkConsentDialog({
 
   const handleUploadDialogClose = (open: boolean) => {
     setOpenUploadDialog(open);
+
     if (!open) {
-      toast.success(t("consent_and_files_uploaded"));
-      queryClient.invalidateQueries({ queryKey: ["consents", patientId] });
-      setIsOpen(false);
-      onSuccess?.();
-      form.reset();
-      fileUpload.clearFiles();
+      handleSuccess();
     }
   };
 
@@ -364,7 +374,7 @@ export default function LinkConsentDialog({
                             form.setValue("existingConsent", value)
                           }
                         >
-                          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-h-96 overflow-auto">
                             {existingConsents?.results
                               ?.filter((consent) =>
                                 CONSENT_CATEGORY_TYPES.find(
