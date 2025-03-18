@@ -268,7 +268,7 @@ export function ValueSetList() {
           <h1 className="text-2xl font-bold">{t("valuesets")}</h1>
           <p className="text-gray-600">{t("manage_and_view_valuesets")}</p>
         </div>
-        <div className="flex flex-col md:flex-row items-center justify-between mt-8 gap-4">
+        <div className="flex flex-col md:flex-row flex-wrap items-center justify-between mt-8 gap-4">
           <div className="flex flex-col md:flex-row items-center gap-4">
             <Tabs
               defaultValue="active"
