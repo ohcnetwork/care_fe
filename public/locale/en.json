@@ -330,7 +330,7 @@
   "add_questionnaire": "Add Questionnaire",
   "add_remarks": "Add remarks",
   "add_schedule_exceptions": "Add Schedule Exceptions",
-  "add_schedule_exceptions_description": "Configure absences or add availability beyond the regular schedule.",
+  "add_schedule_exceptions_description": "Configure absences by adding unavailability beyond the regular schedule.",
   "add_skill": "Add Skill",
   "add_spoke": "Add Spoke Facility",
   "add_sub_question": "Add Sub-Question",
