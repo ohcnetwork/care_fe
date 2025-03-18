@@ -11,7 +11,7 @@ import {
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { properCase } from "@/Utils/utils";
-import { Code } from "@/types/questionnaire/code";
+import { Code, ValueSetSystem } from "@/types/questionnaire/code";
 import type {
   QuestionnaireResponse,
   ResponseValue,
@@ -86,7 +86,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       {question.answer_value_set ? (
         <ValueSetSelect
           value={currentCode}
-          system={question.answer_value_set}
+          system={question.answer_value_set as ValueSetSystem}
           placeholder="Search and Select an option"
           onSelect={handleValuesetSelectChange}
           disabled={disabled}

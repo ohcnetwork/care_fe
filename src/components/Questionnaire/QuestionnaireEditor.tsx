@@ -1658,8 +1658,8 @@ function QuestionEditor({
                           ? ""
                           : (question.answer_value_set ?? "")
                       }
-                      onChange={(val: ValueSetSystem) =>
-                        updateField("answer_value_set", val)
+                      onChange={(val: string) =>
+                        updateField("answer_value_set", val as ValueSetSystem)
                       }
                       onSearch={setValueSetSearchQuery}
                       placeholder={t("select_a_value_set")}
