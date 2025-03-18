@@ -521,7 +521,7 @@ export function SymptomQuestion({
       )}
       <ValueSetSelect
         system="system-condition-code"
-        placeholder={t("search_for_symptoms_to_add")}
+        placeholder={t("add_another_symptom")}
         onSelect={handleAddSymptom}
         disabled={disabled}
       />
