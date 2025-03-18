@@ -265,7 +265,7 @@ const SymptomRow = React.memo(function SymptomRow({
 
       {/* Mobile View - Card Layout */}
       <div className="md:hidden">
-        <Card className="mb-2 bg-white">
+        <Card className={cn("mb-2", { "border border-primary": isOpen })}>
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <CardHeader className={cn("p-3 pb-2", { "bg-gray-100": !isOpen })}>
               <div className="flex flex-col space-y-1">
@@ -283,21 +283,21 @@ const SymptomRow = React.memo(function SymptomRow({
                           symptom.verification_status === "entered_in_error"
                         }
                         onClick={handleRemove}
-                        className="h-8 w-8 p-2 border border-gray-200 bg-white shadow text-destructive"
+                        className="h-8 w-8 p-2 border border-gray-400 bg-white shadow text-destructive"
                       >
-                        <MinusCircledIcon className="h-4 w-4" />
+                        <MinusCircledIcon className="h-5 w-5" />
                       </Button>
                     )}
                     <CollapsibleTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 border border-gray-200 bg-white shadow p-2"
+                        className="h-8 w-8 border border-gray-400 bg-white shadow p-4"
                       >
                         {isOpen ? (
-                          <ChevronsDownUp className="h-4 w-4" />
+                          <ChevronsDownUp className="h-5 w-5" />
                         ) : (
-                          <ChevronsUpDown className="h-4 w-4" />
+                          <ChevronsUpDown className="h-5 w-5" />
                         )}
                       </Button>
                     </CollapsibleTrigger>
@@ -376,16 +376,6 @@ const SymptomRow = React.memo(function SymptomRow({
                     </SelectContent>
                   </Select>
                 </div>
-                {/* <div className="flex justify-end">
-                  <SymptomActionsMenu
-                    showNotes={showNotes}
-                    verificationStatus={symptom.verification_status}
-                    disabled={disabled}
-                    onToggleNotes={handleToggleNotes}
-                    onRemove={handleRemove}
-                  />
-                </div> */}
-
                 <div>
                   <div className="block text-sm font-medium text-gray-500 mb-1">
                     {t("notes")}
@@ -507,7 +497,7 @@ export function SymptomQuestion({
   return (
     <div className="space-y-2">
       {symptoms.length > 0 && (
-        <div className="rounded-lg border">
+        <div className="md:rounded-lg md:border">
           <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
             <div className="col-span-5">{t("symptom")}</div>
             <div className="col-span-2 text-center">{t("date")}</div>
