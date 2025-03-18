@@ -361,7 +361,7 @@ export default function CreateScheduleTemplateSheet({
                 />
                 <div className="col-span-2">
                   {ShowPastDateWarning && (
-                    <Callout variant="warning" badge={t("warning")}>
+                    <Callout variant="alert" badge={t("alert")}>
                       <Trans i18nKey="schedule_dates_in_past_callout" />
                     </Callout>
                   )}
