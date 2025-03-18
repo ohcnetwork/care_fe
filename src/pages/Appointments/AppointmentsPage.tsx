@@ -743,7 +743,7 @@ function AppointmentRow(props: {
       <div className={cn(!data && "animate-pulse")}>
         <Tabs
           value={props.status ?? "booked"}
-          className="overflow-x-auto whitespace-nowrap"
+          className="overflow-x-auto"
           onValueChange={(value) => props.updateQuery({ status: value })}
         >
           <TabsList>
