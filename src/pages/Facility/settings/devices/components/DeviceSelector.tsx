@@ -1,8 +1,9 @@
+import { CaretSortIcon, CubeIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -16,7 +17,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import query from "@/Utils/request/query";
+import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import { DeviceList } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
@@ -44,27 +48,37 @@ export function DeviceSearch({
     }),
     enabled: facilityId !== "preview",
   });
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={disabled}>
-        <div
-          className="w-full h-9 px-3 rounded-md border text-sm flex items-center justify-between cursor-pointer"
+        <Button
+          title={value?.registered_name || t("select_device")}
+          variant="outline"
           role="combobox"
           aria-expanded={open}
+          className="w-full justify-between"
+          disabled={disabled}
+          onClick={() => setOpen(!open)}
         >
-          {value?.registered_name || t("select_device")}
-        </div>
+          {value ? (
+            <DeviceItem device={value} />
+          ) : (
+            <span className="text-gray-500">{t("select_device")}</span>
+          )}
+          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+        </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] max-h-[calc(100vh-12rem)] overflow-y-auto">
-        <Command className="pt-1">
+      <PopoverContent className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]">
+        <Command>
           <CommandInput
             placeholder={t("search_devices")}
             value={search}
-            className="outline-none border-none ring-0 shadow-none"
             onValueChange={setSearch}
+            className="outline-none border-none ring-0 shadow-none"
           />
           {isPending ? (
-            <Loader2 className="h-5 w-5 animate-spin mx-auto my-6" />
+            <CardListSkeleton count={3} />
           ) : (
             <CommandEmpty>{t("no_devices_found")}</CommandEmpty>
           )}
@@ -78,7 +92,7 @@ export function DeviceSearch({
                   setOpen(false);
                 }}
               >
-                {device.registered_name}
+                <DeviceItem device={device} />
               </CommandItem>
             ))}
           </CommandGroup>
@@ -87,3 +101,16 @@ export function DeviceSearch({
     </Popover>
   );
 }
+
+const DeviceItem = ({ device }: { device: DeviceList }) => {
+  const deviceManifests = usePluginDevices();
+  const deviceConfig = deviceManifests.find((c) => c.type === device.care_type);
+  const DeviceIcon = deviceConfig?.icon || CubeIcon;
+
+  return (
+    <div className="flex items-center gap-2">
+      {DeviceIcon && <DeviceIcon className="size-4" />}
+      {device.registered_name}
+    </div>
+  );
+};

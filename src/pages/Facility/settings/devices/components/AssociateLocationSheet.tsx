@@ -60,7 +60,7 @@ export default function AssociateLocationSheet({
     associateLocation({ location: selectedLocation.id });
   };
   return (
-    <Sheet modal={false} open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent>
         <SheetHeader>

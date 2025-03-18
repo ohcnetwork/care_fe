@@ -76,7 +76,7 @@ export type PluginComponentMap = {
 };
 
 export type PluginDeviceManifest = {
-  type: string;
+  type: string; // This matches the `care_type` of the device
   icon?: React.FC<React.HTMLAttributes<HTMLElement>>;
   configureForm?: React.FC<{
     facilityId: string;
@@ -84,6 +84,7 @@ export type PluginDeviceManifest = {
     onChange: (metadata: Record<string, unknown>) => void;
   }>;
   showPageCard?: React.FC<{ device: DeviceDetail; facilityId: string }>;
+  encounterOverview?: React.FC<{ encounter: Encounter }>;
 };
 
 type SupportedPluginExtensions =

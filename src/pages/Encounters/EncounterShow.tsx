@@ -16,8 +16,8 @@ import { formatDateTime, keysOf } from "@/Utils/utils";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
+import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
-import { EncounterUpdatesTab } from "@/pages/Encounters/tabs/EncounterUpdatesTab";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
@@ -30,8 +30,7 @@ export interface EncounterTabProps {
 }
 
 const defaultTabs = {
-  // feed: EncounterFeedTab,
-  updates: EncounterUpdatesTab,
+  updates: EncounterOverviewTab,
   plots: EncounterPlotsTab,
   medicines: EncounterMedicinesTab,
   files: EncounterFilesTab,

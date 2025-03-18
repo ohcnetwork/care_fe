@@ -63,7 +63,7 @@ export function LocationSearch({
           {stringifyNestedObject(value || { name: "" }) || "Select location..."}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] max-h-[calc(100vh-12rem)] overflow-y-auto">
+      <PopoverContent className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]">
         <Command className="pt-1">
           <CommandInput
             placeholder="Search locations..."
