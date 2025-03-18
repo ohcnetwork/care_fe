@@ -71,7 +71,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
             </div>
             <div className="flex justify-center">
               <div
-                className="mb-2 flex flex-col text-xl font-semibold capitalize lg:hidden"
+                className="mb-2 flex flex-col text-base md:text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
                 <Link
@@ -86,7 +86,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     className="w-3 h-3 opacity-50 mt-1"
                   />
                 </Link>
-                <div className="mt-[6px] text-sm font-semibold text-secondary-600">
+                <div className="my-[2px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
