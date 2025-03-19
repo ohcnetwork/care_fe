@@ -41,6 +41,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import { MultiValueSetSelect } from "@/components/Medicine/MultiValueSetSelect";
+import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -58,11 +59,14 @@ import {
   parseMedicationStringToRequest,
 } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
 import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
+import { useFieldError } from "@/types/questionnaire/validation";
+import { validateFields } from "@/types/questionnaire/validation";
 
 interface MedicationRequestQuestionProps {
   patientId: string;
@@ -74,6 +78,96 @@ interface MedicationRequestQuestionProps {
   ) => void;
   disabled?: boolean;
   encounterId: string;
+  errors?: QuestionValidationError[];
+}
+
+const MEDICATION_REQUEST_FIELDS = {
+  DOSAGE: {
+    key: "dosage_instruction.dose",
+    required: true,
+    validate: (value: unknown) => {
+      const dosageInstruction =
+        value as MedicationRequest["dosage_instruction"][0];
+      return !!(
+        dosageInstruction?.dose_and_rate?.dose_quantity ||
+        dosageInstruction?.dose_and_rate?.dose_range
+      );
+    },
+  },
+  FREQUENCY: {
+    key: "dosage_instruction.frequency",
+    required: true,
+    validate: (value: unknown) => {
+      const dosageInstruction =
+        value as MedicationRequest["dosage_instruction"][0];
+      return !!(
+        dosageInstruction?.timing || dosageInstruction?.as_needed_boolean
+      );
+    },
+  },
+  DURATION: {
+    key: "dosage_instruction.duration",
+    required: false,
+    validate: (value: unknown) => {
+      const dosageInstruction =
+        value as MedicationRequest["dosage_instruction"][0];
+      if (dosageInstruction?.timing) {
+        const duration = dosageInstruction.timing.repeat.bounds_duration;
+        return !!(duration?.value && duration?.unit);
+      }
+      return true;
+    },
+  },
+} as const;
+
+export function validateMedicationRequestQuestion(
+  values: MedicationRequest[],
+  questionId: string,
+): QuestionValidationError[] {
+  return values.reduce((errors: QuestionValidationError[], value, index) => {
+    // Skip validation for medications marked as entered_in_error
+    if (value.status === "entered_in_error") return errors;
+
+    // Validate each dosage instruction
+    const dosageInstruction = value.dosage_instruction[0];
+    if (!dosageInstruction) {
+      return [
+        ...errors,
+        {
+          question_id: questionId,
+          error: t("field_required"),
+          type: "validation_error",
+          field_key: "dosage_instruction",
+          index,
+        },
+      ];
+    }
+
+    // Validate using the fields
+    const fieldErrors = validateFields(
+      {
+        [MEDICATION_REQUEST_FIELDS.DOSAGE.key]: dosageInstruction,
+        [MEDICATION_REQUEST_FIELDS.FREQUENCY.key]: dosageInstruction,
+        [MEDICATION_REQUEST_FIELDS.DURATION.key]: dosageInstruction,
+      },
+      questionId,
+      MEDICATION_REQUEST_FIELDS,
+      index,
+    );
+
+    // Map error messages to be more specific
+    return [
+      ...errors,
+      ...fieldErrors.map((error) => ({
+        ...error,
+        error: (["DOSAGE", "FREQUENCY", "DURATION"] as const).some(
+          (attr) => MEDICATION_REQUEST_FIELDS[attr].key === error.field_key,
+        )
+          ? t("field_required")
+          : error.error,
+      })),
+    ];
+  }, []);
 }
 
 export function MedicationRequestQuestion({
@@ -82,6 +176,7 @@ export function MedicationRequestQuestion({
   disabled,
   patientId,
   encounterId,
+  errors,
 }: MedicationRequestQuestionProps) {
   const isPreview = patientId === "preview";
   const medications =
@@ -221,9 +316,11 @@ export function MedicationRequestQuestion({
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("dosage")}
+                  <span className="text-red-500 ml-0.5">*</span>
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("frequency")}
+                  <span className="text-red-500 ml-0.5">*</span>
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("duration")}
@@ -333,6 +430,9 @@ export function MedicationRequestQuestion({
                                 handleUpdateMedication(index, updates)
                               }
                               onRemove={() => handleRemoveMedication(index)}
+                              index={index}
+                              questionId={questionnaireResponse.question_id}
+                              errors={errors}
                             />
                           </div>
                         </CollapsibleContent>
@@ -345,6 +445,9 @@ export function MedicationRequestQuestion({
                           handleUpdateMedication(index, updates)
                         }
                         onRemove={() => handleRemoveMedication(index)}
+                        index={index}
+                        questionId={questionnaireResponse.question_id}
+                        errors={errors}
                       />
                     )}
                   </React.Fragment>
@@ -372,6 +475,9 @@ interface MedicationRequestGridRowProps {
   disabled?: boolean;
   onUpdate?: (medication: Partial<MedicationRequest>) => void;
   onRemove?: () => void;
+  index: number;
+  questionId: string;
+  errors?: QuestionValidationError[];
 }
 
 const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
@@ -379,11 +485,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   disabled,
   onUpdate,
   onRemove,
+  index,
+  questionId,
+  errors,
 }) => {
   const [showDosageDialog, setShowDosageDialog] = useState(false);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
   const dosageInstruction = medication.dosage_instruction[0];
   const isReadOnly = !!medication.id;
+  const { hasError } = useFieldError(questionId, errors, index);
 
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
@@ -515,7 +625,10 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Dosage */}
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">{t("dosage")}</Label>
+        <Label className="mb-1.5 block text-sm lg:hidden">
+          {t("dosage")}
+          <span className="text-red-500 ml-0.5">*</span>
+        </Label>
         <div>
           {dosageInstruction?.dose_and_rate?.dose_range ? (
             <Input
@@ -524,27 +637,38 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 dosageInstruction.dose_and_rate.dose_range,
               )}
               onClick={() => setShowDosageDialog(true)}
-              className="h-9 text-sm cursor-pointer mb-3"
+              className={cn(
+                "h-9 text-sm cursor-pointer mb-3",
+                hasError(MEDICATION_REQUEST_FIELDS.DOSAGE.key) &&
+                  "border-red-500",
+              )}
             />
           ) : (
             <>
-              <ComboboxQuantityInput
-                quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
-                onChange={(value) => {
-                  if (!value.value || !value.unit) return;
-                  handleUpdateDosageInstruction({
-                    dose_and_rate: {
-                      type: "ordered",
-                      dose_quantity: {
-                        value: value.value,
-                        unit: value.unit,
+              <div
+                className={cn(
+                  hasError(MEDICATION_REQUEST_FIELDS.DOSAGE.key) &&
+                    "border border-red-500 rounded-md",
+                )}
+              >
+                <ComboboxQuantityInput
+                  quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
+                  onChange={(value) => {
+                    if (!value.value || !value.unit) return;
+                    handleUpdateDosageInstruction({
+                      dose_and_rate: {
+                        type: "ordered",
+                        dose_quantity: {
+                          value: value.value,
+                          unit: value.unit,
+                        },
+                        dose_range: undefined,
                       },
-                      dose_range: undefined,
-                    },
-                  });
-                }}
-                disabled={disabled || isReadOnly}
-              />
+                    });
+                  }}
+                  disabled={disabled || isReadOnly}
+                />
+              </div>
               <div className="flex justify-end">
                 <Button
                   variant="ghost"
@@ -558,6 +682,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               </div>
             </>
           )}
+          <FieldError
+            fieldKey={MEDICATION_REQUEST_FIELDS.DOSAGE.key}
+            questionId={questionId}
+            errors={errors}
+            index={index}
+          />
         </div>
 
         {dosageInstruction?.dose_and_rate?.dose_range &&
@@ -586,6 +716,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("frequency")}
+          <span className="text-red-500 ml-0.5">*</span>
         </Label>
         <Select
           value={
@@ -613,7 +744,13 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           }}
           disabled={disabled || isReadOnly}
         >
-          <SelectTrigger className="h-9 text-sm">
+          <SelectTrigger
+            className={cn(
+              "h-9 text-sm",
+              hasError(MEDICATION_REQUEST_FIELDS.FREQUENCY.key) &&
+                "border-red-500",
+            )}
+          >
             <SelectValue placeholder={t("select_frequency")} />
           </SelectTrigger>
           <SelectContent>
@@ -627,13 +764,25 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             )}
           </SelectContent>
         </Select>
+        <FieldError
+          fieldKey={MEDICATION_REQUEST_FIELDS.FREQUENCY.key}
+          questionId={questionId}
+          errors={errors}
+          index={index}
+        />
       </div>
       {/* Duration */}
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("duration")}
         </Label>
-        <div className="flex gap-2">
+        <div
+          className={cn(
+            "flex gap-2",
+            hasError(MEDICATION_REQUEST_FIELDS.DURATION.key) &&
+              "border border-red-500 rounded-md p-1",
+          )}
+        >
           {dosageInstruction?.timing && (
             <Input
               type="number"
@@ -705,6 +854,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             </SelectContent>
           </Select>
         </div>
+        <FieldError
+          fieldKey={MEDICATION_REQUEST_FIELDS.DURATION.key}
+          questionId={questionId}
+          errors={errors}
+          index={index}
+        />
       </div>
       {/* Instructions */}
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
