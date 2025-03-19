@@ -41,7 +41,7 @@ interface AutocompleteProps {
   align?: "start" | "center" | "end";
   className?: string;
   popoverClassName?: string;
-  freeInput?: boolean;
+  freeInput: boolean;
   "data-cy"?: string;
 }
 
@@ -58,7 +58,7 @@ export default function Autocomplete({
   align = "center",
   className,
   popoverClassName,
-  freeInput,
+  freeInput = false,
   "data-cy": dataCy,
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
