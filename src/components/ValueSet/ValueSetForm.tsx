@@ -351,7 +351,7 @@ export function ValueSetForm({
     slug: z
       .string()
       .trim()
-      .min(5, t("field_required"))
+      .min(5, t("min_character_validation", { length: 5 }))
       .max(25, t("max_character_validation", { length: 25 }))
       .regex(/^[-\w]+$/, {
         message: t("slug_format_message"),
