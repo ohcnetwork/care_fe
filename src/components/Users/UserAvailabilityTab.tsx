@@ -35,6 +35,7 @@ import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
 import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
+import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import {
   computeAppointmentSlots,
   filterAvailabilitiesByDayOfWeek,
@@ -85,6 +86,11 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     }),
   });
 
+  const { data: isSchedulableResource } = useIsUserSchedulableResource(
+    facilityId,
+    user.id,
+  );
+
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
   }
@@ -107,9 +113,11 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
           );
 
           const unavailableExceptions =
-            exceptionsQuery.data?.results.filter((exception) =>
-              isDateInRange(date, exception.valid_from, exception.valid_to),
-            ) ?? [];
+            exceptionsQuery.data?.results
+              .filter((exception) =>
+                isDateInRange(date, exception.valid_from, exception.valid_to),
+              )
+              .sort((a, b) => a.start_time.localeCompare(b.start_time)) ?? [];
 
           const isFullDayUnavailable = unavailableExceptions.some(
             (exception) =>
@@ -125,6 +133,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                     "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
                     templatesQuery.isLoading &&
                       "opacity-50 pointer-events-none",
+                    !isSchedulableResource && "pointer-events-none",
                     "transition-all duration-200 ease-in-out",
                     "relative overflow-hidden",
                   )}

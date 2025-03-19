@@ -85,17 +85,6 @@ const consultationRoutes: AppRoutes = {
           facilityId={identifier === "facility" ? id : undefined}
         />
       );
-    acc[
-      `/${identifier}/:id/patient/:patientId/encounter/:encounterId/:tab/:subPage`
-    ] = ({ id, encounterId, patientId, tab, subPage }) => (
-      <EncounterShow
-        patientId={patientId}
-        encounterId={encounterId}
-        tab={tab}
-        facilityId={identifier === "facility" ? id : undefined}
-        subPage={subPage}
-      />
-    );
     return acc;
   }, {}),
   "/facility/:facilityId/patient/:patientId/consultation": ({
