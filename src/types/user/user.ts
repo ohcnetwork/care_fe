@@ -13,6 +13,7 @@ export type UserBase = {
   profile_picture_url: string;
   phone_number: string;
   gender: (typeof GENDER_TYPES)[number]["id"];
+  mfa_enabled: boolean;
 };
 
 export type CreateUserModel = {

@@ -16,7 +16,7 @@ cy.get('[data-cy="element"]').should("be.visible").click();
 
 ```typescript
 // Good
-navigateToOrganization(orgName: string) {
+navigateToGovernance(orgName: string) {
   cy.verifyAndClickElement('[data-cy="organization-list"]', orgName);
 }
 
@@ -48,7 +48,7 @@ describe("Feature Name", () => {
   });
 
   it("should perform action", () => {
-    page.navigateToOrganization("Kerala");
+    page.navigateToGovernance("Kerala");
     page.navigateToFacilitiesList();
   });
 });

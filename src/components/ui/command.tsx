@@ -6,6 +6,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -34,6 +35,21 @@ const CommandDialog = ({ children, ...props }: DialogProps) => {
   );
 };
 
+const CommandDrawer = ({
+  children,
+  ...props
+}: React.ComponentProps<typeof Drawer>) => {
+  return (
+    <Drawer {...props}>
+      <DrawerContent className="max-h-[85vh] mx-2 rounded-t-md">
+        <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-gray-500 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 dark:[&_[cmdk-group-heading]]:text-gray-400">
+          {children}
+        </Command>
+      </DrawerContent>
+    </Drawer>
+  );
+};
+
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
@@ -44,7 +60,7 @@ const CommandInput = React.forwardRef<
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        "flex h-10 w-full focus:border-none rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-gray-400",
+        "flex h-10 w-full focus:border-none rounded-md bg-transparent py-3 text-base sm:text-sm outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-gray-400",
         className,
       )}
       {...props}
@@ -143,6 +159,7 @@ CommandShortcut.displayName = "CommandShortcut";
 export {
   Command,
   CommandDialog,
+  CommandDrawer,
   CommandInput,
   CommandList,
   CommandEmpty,

@@ -64,8 +64,10 @@ export default function UserForm({
   const userFormSchema = z
     .object({
       user_type: isEditMode
-        ? z.enum(["doctor", "nurse", "staff", "volunteer"]).optional()
-        : z.enum(["doctor", "nurse", "staff", "volunteer"]),
+        ? z
+            .enum(["doctor", "nurse", "staff", "volunteer", "administrator"])
+            .optional()
+        : z.enum(["doctor", "nurse", "staff", "volunteer", "administrator"]),
       username: isEditMode
         ? z.string().optional()
         : z
@@ -97,9 +99,7 @@ export default function UserForm({
       /* qualification: z.string().optional(),
       doctor_experience_commenced_on: z.string().optional(),
       doctor_medical_council_registration: z.string().optional(), */
-      geo_organization: isEditMode
-        ? z.string().optional()
-        : z.string().min(1, t("field_required")),
+      geo_organization: z.string().optional(),
     })
     .refine(
       (data) => {
@@ -299,6 +299,9 @@ export default function UserForm({
                     <SelectItem value="nurse">{t("nurse")}</SelectItem>
                     <SelectItem value="staff">{t("staff")}</SelectItem>
                     <SelectItem value="volunteer">{t("volunteer")}</SelectItem>
+                    <SelectItem value="administrator">
+                      {t("administrator")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -370,38 +373,40 @@ export default function UserForm({
                         className="text-small mt-2 pl-2 text-secondary-500"
                         aria-live="polite"
                       >
-                        <ValidationHelper
-                          isInputEmpty={!field.value}
-                          successMessage={t("username_success_message")}
-                          validations={[
-                            {
-                              description: "username_min_length_validation",
-                              fulfilled: (field.value || "").length >= 4,
-                            },
-                            {
-                              description: "username_max_length_validation",
-                              fulfilled: (field.value || "").length <= 16,
-                            },
-                            {
-                              description: "username_characters_validation",
-                              fulfilled: /^[a-z0-9._-]*$/.test(
-                                field.value || "",
-                              ),
-                            },
-                            {
-                              description: "username_start_end_validation",
-                              fulfilled: /^[a-z0-9].*[a-z0-9]$/.test(
-                                field.value || "",
-                              ),
-                            },
-                            {
-                              description: "username_consecutive_validation",
-                              fulfilled: !/(?:[._-]{2,})/.test(
-                                field.value || "",
-                              ),
-                            },
-                          ]}
-                        />
+                        {(isUsernameChecking || !isUsernameTaken) && (
+                          <ValidationHelper
+                            isInputEmpty={!field.value}
+                            successMessage={t("username_success_message")}
+                            validations={[
+                              {
+                                description: "username_min_length_validation",
+                                fulfilled: (field.value || "").length >= 4,
+                              },
+                              {
+                                description: "username_max_length_validation",
+                                fulfilled: (field.value || "").length <= 16,
+                              },
+                              {
+                                description: "username_characters_validation",
+                                fulfilled: /^[a-z0-9._-]*$/.test(
+                                  field.value || "",
+                                ),
+                              },
+                              {
+                                description: "username_start_end_validation",
+                                fulfilled: /^[a-z0-9].*[a-z0-9]$/.test(
+                                  field.value || "",
+                                ),
+                              },
+                              {
+                                description: "username_consecutive_validation",
+                                fulfilled: !/(?:[._-]{2,})/.test(
+                                  field.value || "",
+                                ),
+                              },
+                            ]}
+                          />
+                        )}
                       </div>
                       <div className="pl-2">
                         {renderUsernameFeedback(usernameInput || "")}
@@ -638,7 +643,7 @@ export default function UserForm({
                     onChange={(value) =>
                       form.setValue("geo_organization", value)
                     }
-                    required={!isEditMode}
+                    required={false}
                   />
                 </FormControl>
                 <FormMessage />
