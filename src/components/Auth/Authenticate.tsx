@@ -131,11 +131,13 @@ export const Authenticate = () => {
                           <FormControl>
                             <div className="flex justify-center">
                               <InputOTP
+                                key={`otp-input-${currentMethod}`}
                                 maxLength={currentMethod === "backup" ? 8 : 6}
                                 pattern={REGEXP_ONLY_DIGITS}
                                 value={field.value}
                                 onChange={field.onChange}
                                 autoComplete="one-time-code"
+                                autoFocus
                               >
                                 <InputOTPGroup>
                                   {[
