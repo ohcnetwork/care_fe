@@ -1109,7 +1109,6 @@
   "facility_updated_successfully": "Facility updated successfully",
   "failed_to_create_appointment": "Failed to create an appointment",
   "failed_to_link_abha_number": "Failed to link ABHA Number. Please try again later.",
-  "failed_to_save_preferred_device_to_localstorage": "Failed to save preferred device to localstorage",
   "failed_to_send_message": "Failed to send message",
   "false": "False",
   "fast_track_testing_reason": "Fast track testing reason",
