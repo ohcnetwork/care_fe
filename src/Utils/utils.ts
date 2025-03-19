@@ -47,14 +47,14 @@ export const formatName = (
     suffix?: string | null;
     username: string;
   },
-  noPrefixSuffix?: boolean,
+  hidePrefixSuffix: boolean = false,
 ) => {
   return (
     [
-      noPrefixSuffix ? undefined : user.prefix,
+      hidePrefixSuffix ? undefined : user.prefix,
       user.first_name,
       user.last_name,
-      noPrefixSuffix ? undefined : user.suffix,
+      hidePrefixSuffix ? undefined : user.suffix,
     ]
       .map((s) => s?.trim())
       .filter(Boolean)
