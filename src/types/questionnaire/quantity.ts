@@ -1,5 +1,3 @@
-import { Code } from "./code";
-
 export interface Quantity {
   value: number;
   unit: string;
@@ -7,10 +5,4 @@ export interface Quantity {
   code?: string;
   // TODO: Add support for meta parameter for quantity
   // meta?: {};
-}
-
-export interface QuestionnaireQuantity {
-  value: number;
-  unit: Code;
-  coding: Code;
 }

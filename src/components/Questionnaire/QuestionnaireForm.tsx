@@ -658,11 +658,15 @@ export function QuestionnaireForm({
                       value: value.value.toISOString(),
                     };
                   }
+                  if (value.unit) {
+                    return {
+                      value: value.value?.toString(),
+                      unit: value.unit,
+                      coding: value.coding,
+                    };
+                  }
                   if (value.coding) {
                     return { coding: value.coding };
-                  }
-                  if (value.unit) {
-                    return { unit: value.unit };
                   }
                   return { value: String(value.value) };
                 }),

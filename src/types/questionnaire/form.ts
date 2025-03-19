@@ -5,7 +5,6 @@ import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireQuantity } from "@/types/questionnaire/quantity";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
@@ -38,7 +37,7 @@ export type ResponseValue =
   | RV<"number", number | undefined>
   | RV<"boolean", boolean | undefined>
   | RV<"dateTime", Date | undefined>
-  | RV<"quantity", QuestionnaireQuantity | undefined>
+  | RV<"quantity", number | undefined>
   | RV<"allergy_intolerance", AllergyIntoleranceRequest[]>
   | RV<"medication_request", MedicationRequest[]>
   | RV<"medication_statement", MedicationStatementRequest[]>
