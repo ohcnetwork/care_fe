@@ -73,10 +73,10 @@ const RenderCard = ({
                 <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   {t("title")}
                 </h3>
-                {questionnaire.title && questionnaire.title.length > 20 ? (
+                {questionnaire.title && (
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger className="truncate">
+                      <TooltipTrigger className="w-full">
                         <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
                           {questionnaire.title}
                         </p>
@@ -86,10 +86,6 @@ const RenderCard = ({
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                ) : (
-                  <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
-                    {questionnaire.title}
-                  </p>
                 )}
               </div>
 
@@ -167,7 +163,7 @@ const RenderTable = ({
                 }
               >
                 <TableCell className="px-6 py-2">
-                  {questionnaire.title && questionnaire.title.length > 20 ? (
+                  {questionnaire.title && (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
@@ -180,10 +176,6 @@ const RenderTable = ({
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                  ) : (
-                    <span className="text-sm text-left font-semibold text-gray-950 truncate">
-                      {questionnaire.title}
-                    </span>
                   )}
                 </TableCell>
                 <TableCell className="px-6 py-2">
