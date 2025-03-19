@@ -16,15 +16,13 @@ import { z } from "zod";
 
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 
-const pdfWorkerPath = path
-  .join(
-    path.dirname(
-      createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
-    ),
-    "build",
-    "pdf.worker.min.mjs",
-  )
-  .replace(/\\/g, "/");
+const pdfWorkerPath = path.join(
+  path.dirname(
+    createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
+  ),
+  "build",
+  "pdf.worker.min.mjs",
+);
 
 // Convert goal description markdown to HTML
 function getDescriptionHtml(description: string) {
