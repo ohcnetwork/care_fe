@@ -1793,6 +1793,7 @@
   "password_lowercase_validation": "Include at least <strong>one lowercase letter</strong> (a-z)",
   "password_mismatch": "Passwords do not match",
   "password_number_validation": "Include at least <strong>one number</strong> (0-9)",
+  "password_optional_info": "Leave blank to receive an email to set your password.",
   "password_required": "Password is required",
   "password_reset_failure": "Password Reset Failed",
   "password_reset_success": "Password Reset successfully",

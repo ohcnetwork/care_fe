@@ -80,15 +80,8 @@ export default function UserForm({
               (val) => !val.match(/(?:[._-]{2,})/),
               t("username_not_valid"),
             ),
-      password: isEditMode
-        ? z.string().optional()
-        : z
-            .string()
-            .min(8, t("field_required"))
-            .regex(/[a-z]/, t("new_password_validation"))
-            .regex(/[A-Z]/, t("new_password_validation"))
-            .regex(/[0-9]/, t("new_password_validation")),
-      c_password: isEditMode ? z.string().optional() : z.string(),
+      password: z.string().optional(),
+      c_password: z.string().optional(),
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
       email: z.string().email(t("invalid_email_address")),
@@ -103,7 +96,7 @@ export default function UserForm({
     })
     .refine(
       (data) => {
-        if (!isEditMode) {
+        if (data.password) {
           return data.password === data.c_password;
         }
         return true;
@@ -425,7 +418,7 @@ export default function UserForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("password")}</FormLabel>
+                    <FormLabel>{t("password")}</FormLabel>
                     <FormControl>
                       <PasswordInput
                         data-cy="password-input"
@@ -435,7 +428,7 @@ export default function UserForm({
                         onBlur={() => setIsPasswordFieldFocused(false)}
                       />
                     </FormControl>
-                    {isPasswordFieldFocused ? (
+                    {isPasswordFieldFocused && (
                       <div
                         className="text-small mt-2 pl-2 text-secondary-500"
                         aria-live="polite"
@@ -463,8 +456,11 @@ export default function UserForm({
                           ]}
                         />
                       </div>
-                    ) : (
-                      <FormMessage />
+                    )}
+                    {!isEditMode && (
+                      <p className="text-sm text-gray-500">
+                        {t("password_optional_info")}
+                      </p>
                     )}
                   </FormItem>
                 )}
@@ -475,7 +471,7 @@ export default function UserForm({
                 name="c_password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("confirm_password")}</FormLabel>
+                    <FormLabel>{t("confirm_password")}</FormLabel>
                     <FormControl>
                       <PasswordInput
                         data-cy="confirm-password-input"
