@@ -44,7 +44,7 @@ export function UserCard({ user, className, facilityId }: Props) {
           <div className="flex flex-col sm:flex-row gap-4">
             <Avatar
               imageUrl={user.read_profile_picture_url}
-              name={name}
+              name={formatName(user, true)}
               className="h-32 w-32 rounded-lg"
             />
 
