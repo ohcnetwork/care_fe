@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/sheet";
 
 import mutate from "@/Utils/request/mutate";
-import type { Time } from "@/Utils/types";
+import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import scheduleApis from "@/types/scheduling/scheduleApi";
