@@ -44,7 +44,7 @@ const RenderCard = ({ valuesets }: { valuesets: ValuesetBase[] }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="xl:hidden lg:hidden space-y-4 px-4">
+    <div className="lg:hidden space-y-4 px-4">
       {valuesets.length > 0 ? (
         valuesets.map((valueset) => (
           <Card
@@ -143,7 +143,7 @@ const RenderTable = ({ valuesets }: { valuesets: ValuesetBase[] }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="hidden xl:block lg:block overflow-hidden rounded-lg bg-white shadow">
+    <div className="hidden lg:block overflow-hidden rounded-lg bg-white shadow">
       <Table className="min-w-full divide-y divide-gray-200">
         <TableHeader className="bg-gray-50">
           <TableRow>
