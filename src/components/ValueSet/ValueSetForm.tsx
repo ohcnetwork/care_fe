@@ -33,6 +33,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 import mutate from "@/Utils/request/mutate";
 import {
   TERMINOLOGY_SYSTEMS,
+  UpdateValuesetModel,
   ValuesetFormType,
   ValuesetLookupResponse,
 } from "@/types/valueset/valueset";
@@ -43,7 +44,7 @@ import { ValueSetPreview } from "./ValueSetPreview";
 // Create a schema for form validation
 
 interface ValueSetFormProps {
-  initialData?: ValuesetFormType;
+  initialData?: UpdateValuesetModel;
   onSubmit: (data: ValuesetFormType) => void;
   isSubmitting?: boolean;
 }
@@ -428,25 +429,29 @@ export function ValueSetForm({
     },
   });
 
+  console.log("INITIAL DATA", initialData);
+
   return (
     <Form {...form}>
       <div className="flex justify-end">
-        <ValueSetPreview
-          valueset={form.getValues()}
-          trigger={
-            <Button
-              variant="outline_primary"
-              disabled={!form.formState.isValid}
-            >
-              <CareIcon
-                icon={form.formState.isValid ? "l-eye" : "l-eye-slash"}
-                className="h-4 w-4"
-              />
-              {t("valueset_preview")}
-            </Button>
-          }
-          disabled={!form.formState.isValid}
-        />
+        {!initialData?.id && (
+          <ValueSetPreview
+            valueset={form.getValues()}
+            trigger={
+              <Button
+                variant="outline_primary"
+                disabled={!form.formState.isValid}
+              >
+                <CareIcon
+                  icon={form.formState.isValid ? "l-eye" : "l-eye-slash"}
+                  className="h-4 w-4"
+                />
+                {t("valueset_preview")}
+              </Button>
+            }
+            disabled={!form.formState.isValid}
+          />
+        )}
       </div>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField

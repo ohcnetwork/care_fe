@@ -2655,7 +2655,7 @@
   "value": "Value",
   "value_set": "Value Set",
   "valueset_preview": "Valueset Preview",
-  "valueset_preview_description": "Test the valueset before saving it",
+  "valueset_preview_description": "Preview the valueset before saving it",
   "valuesets": "ValueSets",
   "vehicle_preference": "Vehicle preference",
   "vendor_name": "Vendor Name",
