@@ -41,11 +41,13 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 interface Props {
   questionnaire: QuestionnaireDetail;
   trigger?: React.ReactNode;
+  tags: string[];
 }
 
 export default function CloneQuestionnaireSheet({
   questionnaire,
   trigger,
+  tags,
 }: Props) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -95,6 +97,7 @@ export default function CloneQuestionnaireSheet({
       status: "draft" as const,
       title: `${questionnaire.title} (Clone)`,
       organizations: selectedIds,
+      tags,
     };
 
     cloneQuestionnaire(clonedQuestionnaire);

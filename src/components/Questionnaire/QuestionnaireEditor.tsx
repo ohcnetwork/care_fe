@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -117,10 +117,6 @@ interface OrganizationResponse {
   results: Organization[];
 }
 
-interface TagResponse {
-  results: QuestionnaireTagModel[];
-}
-
 interface QuestionnairePropertiesProps {
   questionnaire: QuestionnaireDetail;
   updateQuestionnaireField: <K extends keyof QuestionnaireDetail>(
@@ -130,8 +126,8 @@ interface QuestionnairePropertiesProps {
   id?: string;
   organizations?: OrganizationResponse;
   organizationSelection: {
-    selectedIds: string[];
-    onToggle: (orgId: string) => void;
+    selectedOrgs: Organization[];
+    onToggle: (org: Organization) => void;
     searchQuery: string;
     setSearchQuery: (query: string) => void;
     available?: OrganizationResponse;
@@ -139,11 +135,11 @@ interface QuestionnairePropertiesProps {
   };
   tags?: QuestionnaireTagModel[];
   tagSelection: {
-    selectedIds: string[];
-    onToggle: (tagId: string) => void;
+    selectedTags: QuestionnaireTagModel[];
+    onToggle: (tag: QuestionnaireTagModel) => void;
     searchQuery: string;
     setSearchQuery: (query: string) => void;
-    available?: TagResponse;
+    available?: QuestionnaireTagModel[];
     isLoading?: boolean;
   };
 }
@@ -275,26 +271,24 @@ function OrganizationSelector({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {selection.selectedIds.length > 0 ? (
-          selection.available?.results
-            .filter((org) => selection.selectedIds.includes(org.id))
-            .map((org) => (
-              <Badge
-                key={org.id}
-                variant="secondary"
-                className="flex items-center gap-1"
+        {selection.selectedOrgs.length > 0 ? (
+          selection.selectedOrgs.map((org) => (
+            <Badge
+              key={org.id}
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              {org.name}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-4 w-4 p-0 hover:bg-transparent"
+                onClick={() => selection.onToggle(org)}
               >
-                {org.name}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => selection.onToggle(org.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          ))
         ) : (
           <p className="text-sm text-gray-500">
             {t("no_organizations_selected")}
@@ -331,7 +325,7 @@ function OrganizationSelector({
                     <CommandItem
                       key={org.id}
                       value={org.id}
-                      onSelect={() => selection.onToggle(org.id)}
+                      onSelect={() => selection.onToggle(org)}
                     >
                       <div className="flex flex-1 items-center gap-2">
                         <Building className="h-4 w-4" />
@@ -342,7 +336,7 @@ function OrganizationSelector({
                           </span>
                         )}
                       </div>
-                      {selection.selectedIds.includes(org.id) && (
+                      {selection.selectedOrgs.includes(org) && (
                         <Check className="h-4 w-4" />
                       )}
                     </CommandItem>
@@ -374,7 +368,7 @@ function TagSelector({
       queryClient.invalidateQueries({
         queryKey: ["questionnaire_tags"],
       });
-      selection.onToggle(tagData.id);
+      selection.onToggle(tagData);
       toast.success("Tag created successfully");
       selection.setSearchQuery("");
     },
@@ -430,26 +424,24 @@ function TagSelector({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {selection.selectedIds.length > 0 ? (
-          selection.available?.results
-            .filter((tag) => selection.selectedIds.includes(tag.id))
-            .map((tag) => (
-              <Badge
-                key={tag.id}
-                variant="secondary"
-                className="flex items-center gap-1"
+        {selection.selectedTags.length > 0 ? (
+          selection.selectedTags.map((tag) => (
+            <Badge
+              key={tag.id}
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              {tag.name}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-4 w-4 p-0 hover:bg-transparent"
+                onClick={() => selection.onToggle(tag)}
               >
-                {tag.name}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => selection.onToggle(tag.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          ))
         ) : (
           <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
         )}
@@ -479,24 +471,24 @@ function TagSelector({
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : (
-                selection.available?.results.map((tag) => (
+                selection.available?.map((tag) => (
                   <CommandItem
                     key={tag.id}
                     value={tag.name}
-                    onSelect={() => selection.onToggle(tag.id)}
+                    onSelect={() => selection.onToggle(tag)}
                   >
                     <div className="flex flex-1 items-center gap-2">
                       <Building className="h-4 w-4" />
                       <span>{tag.name}</span>
                     </div>
-                    {selection.selectedIds.includes(tag.id) && (
+                    {selection.selectedTags.some((t) => t.id === tag.id) && (
                       <Check className="h-4 w-4" />
                     )}
                   </CommandItem>
                 ))
               )}
               {selection.searchQuery &&
-                selection.available?.results.filter(
+                selection.available?.filter(
                   (r) => r.name === selection.searchQuery,
                 ).length === 0 && (
                   <CommandItem
@@ -532,6 +524,11 @@ function QuestionnaireProperties({
   organizationSelection,
   tagSelection,
 }: QuestionnairePropertiesProps) {
+  const selectedTags =
+    tagSelection.available
+      ?.filter((t) => questionnaire.tags.map((o) => o.slug).includes(t.slug))
+      .map((t) => t.id) ?? [];
+
   return (
     <Card className="border-none bg-transparent shadow-none space-y-4 mt-2 ml-2">
       <CardHeader className="p-0">
@@ -567,6 +564,7 @@ function QuestionnaireProperties({
         </div>
         <CloneQuestionnaireSheet
           questionnaire={questionnaire}
+          tags={selectedTags}
           trigger={
             <Button variant="outline" className="w-full justify-start">
               <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
@@ -686,8 +684,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set(),
   );
-  const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [selectedOrgs, setSelectedOrgs] = useState<Organization[]>([]);
+  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const queryClient = useQueryClient();
@@ -733,6 +731,23 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       },
     }),
   });
+
+  // Simple merge of selected tags with available tags
+  const tagOptions = useMemo(() => {
+    if (!availableTags?.results) return selectedTags;
+    if (tagSearchQuery) return availableTags.results;
+
+    const availableSlugs = new Set(
+      availableTags.results.map((tag) => tag.slug),
+    );
+
+    // Add selected tags that aren't in availableTags
+    const selectedNotInAvailable = selectedTags.filter(
+      (selectedTag) => !availableSlugs.has(selectedTag.slug),
+    );
+
+    return [...availableTags.results, ...selectedNotInAvailable];
+  }, [availableTags, selectedTags, tagSearchQuery]);
 
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.create),
@@ -820,7 +835,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     } else {
       createQuestionnaire({
         ...questionnaire,
-        organizations: selectedOrgIds,
+        organizations: selectedOrgs.map((o) => o.id),
+        tags: selectedTags.map((t) => t.id),
       });
     }
   };
@@ -841,19 +857,19 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     });
   };
 
-  const handleToggleOrganization = (orgId: string) => {
-    setSelectedOrgIds((current) =>
-      current.includes(orgId)
-        ? current.filter((id) => id !== orgId)
-        : [...current, orgId],
+  const handleToggleOrganization = (org: Organization) => {
+    setSelectedOrgs((current) =>
+      current.some((o) => o.id === org.id)
+        ? current.filter((o) => o.id !== org.id)
+        : [...current, org],
     );
   };
 
-  const handleToggleTag = (tagId: string) => {
-    setSelectedTagIds((current) =>
-      current.includes(tagId)
-        ? current.filter((id) => id !== tagId)
-        : [...current, tagId],
+  const handleToggleTag = (tag: QuestionnaireTagModel) => {
+    setSelectedTags((current) =>
+      current.some((t) => t.id === tag.id)
+        ? current.filter((t) => t.id !== tag.id)
+        : [...current, tag],
     );
   };
 
@@ -975,7 +991,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   id={id}
                   organizations={organizations}
                   organizationSelection={{
-                    selectedIds: selectedOrgIds,
+                    selectedOrgs,
                     onToggle: handleToggleOrganization,
                     searchQuery: orgSearchQuery,
                     setSearchQuery: setOrgSearchQuery,
@@ -984,11 +1000,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   }}
                   tags={questionnaire.tags}
                   tagSelection={{
-                    selectedIds: selectedTagIds,
+                    selectedTags,
                     onToggle: handleToggleTag,
                     searchQuery: tagSearchQuery,
                     setSearchQuery: setTagSearchQuery,
-                    available: availableTags,
+                    available: tagOptions,
                     isLoading: isLoadingAvailableTags,
                   }}
                 />
@@ -1146,7 +1162,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 id={id}
                 organizations={organizations}
                 organizationSelection={{
-                  selectedIds: selectedOrgIds,
+                  selectedOrgs,
                   onToggle: handleToggleOrganization,
                   searchQuery: orgSearchQuery,
                   setSearchQuery: setOrgSearchQuery,
@@ -1155,11 +1171,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 }}
                 tags={questionnaire.tags}
                 tagSelection={{
-                  selectedIds: selectedTagIds,
+                  selectedTags,
                   onToggle: handleToggleTag,
                   searchQuery: tagSearchQuery,
                   setSearchQuery: setTagSearchQuery,
-                  available: availableTags,
+                  available: tagOptions,
                   isLoading: isLoadingAvailableTags,
                 }}
               />
