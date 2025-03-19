@@ -89,9 +89,7 @@ export default function QuestionnaireResponseView({
                     );
                     if (!questionResponse) return null;
 
-                    const value =
-                      questionResponse.values[0]?.value ||
-                      questionResponse.values[0]?.value_quantity?.value;
+                    const value = questionResponse.values[0]?.value;
 
                     return (
                       <div key={question.id} className="grid grid-cols-2 gap-4">
