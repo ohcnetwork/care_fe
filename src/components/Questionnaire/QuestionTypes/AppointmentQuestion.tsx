@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format, isBefore, startOfToday } from "date-fns";
+import { format } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -191,9 +191,7 @@ export function AppointmentQuestion({
                   handleUpdate({ slot_id: undefined });
                 }
               }}
-              disabled={
-                selectedDate ? isBefore(selectedDate, startOfToday()) : false
-              }
+              min={format(new Date(), "yyyy-MM-dd")}
             />
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { differenceInMinutes, isAfter, isBefore, parse } from "date-fns";
+import { differenceInMinutes, format, isBefore, parse } from "date-fns";
 import { useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -77,10 +77,10 @@ export default function CreateScheduleTemplateSheet({
   const formSchema = z
     .object({
       name: z.string().min(1, t("field_required")),
-      valid_from: z.date({
+      valid_from: z.string({
         required_error: t("field_required"),
       }),
-      valid_to: z.date({
+      valid_to: z.string({
         required_error: t("field_required"),
       }),
       weekdays: z
@@ -139,10 +139,15 @@ export default function CreateScheduleTemplateSheet({
         )
         .min(1, t("schedule_sessions_min_error")),
     })
-    .refine((data) => !isAfter(data.valid_from, data.valid_to), {
-      message: t("from_date_must_be_before_to_date"),
-      path: ["valid_from"],
-    });
+    .refine(
+      (data) => {
+        return isBefore(new Date(data.valid_from), new Date(data.valid_to));
+      },
+      {
+        message: t("from_date_must_be_before_to_date"),
+        path: ["valid_from"],
+      },
+    );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -312,13 +317,13 @@ export default function CreateScheduleTemplateSheet({
                       <FormLabel required>{t("valid_from")}</FormLabel>
                       <Input
                         type="date"
-                        value={dateQueryString(field.value)}
-                        onChange={(e) => {
-                          const date = e.target.value
-                            ? new Date(e.target.value)
-                            : undefined;
-                          field.onChange(date);
-                        }}
+                        min={format(new Date(), "yyyy-MM-dd")}
+                        {...field}
+                        value={
+                          field.value
+                            ? format(new Date(field.value), "yyyy-MM-dd")
+                            : ""
+                        }
                       />
                       <FormMessage />
                     </FormItem>
@@ -333,13 +338,20 @@ export default function CreateScheduleTemplateSheet({
                       <FormLabel required>{t("valid_to")}</FormLabel>
                       <Input
                         type="date"
-                        value={dateQueryString(field.value)}
-                        onChange={(e) => {
-                          const date = e.target.value
-                            ? new Date(e.target.value)
-                            : undefined;
-                          field.onChange(date);
-                        }}
+                        min={
+                          form.watch("valid_from")
+                            ? format(
+                                new Date(form.watch("valid_from")),
+                                "yyyy-MM-dd",
+                              )
+                            : format(new Date(), "yyyy-MM-dd")
+                        }
+                        {...field}
+                        value={
+                          field.value
+                            ? format(new Date(field.value), "yyyy-MM-dd")
+                            : ""
+                        }
                       />
                       <FormMessage />
                     </FormItem>

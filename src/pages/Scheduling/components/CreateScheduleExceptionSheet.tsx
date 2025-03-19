@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isAfter, isBefore, parse } from "date-fns";
+import { format, isAfter, isBefore, parse } from "date-fns";
 import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -222,13 +222,13 @@ export default function CreateScheduleExceptionSheet({
                         <FormLabel required>{t("valid_from")}</FormLabel>
                         <Input
                           type="date"
-                          value={dateQueryString(field.value)}
-                          onChange={(e) => {
-                            const date = e.target.value
-                              ? new Date(e.target.value)
-                              : undefined;
-                            field.onChange(date);
-                          }}
+                          min={format(new Date(), "yyyy-MM-dd")}
+                          {...field}
+                          value={
+                            field.value
+                              ? format(new Date(field.value), "yyyy-MM-dd")
+                              : ""
+                          }
                         />
                         <FormMessage />
                       </FormItem>
@@ -243,13 +243,20 @@ export default function CreateScheduleExceptionSheet({
                         <FormLabel required>{t("valid_to")}</FormLabel>
                         <Input
                           type="date"
-                          value={dateQueryString(field.value)}
-                          onChange={(e) => {
-                            const date = e.target.value
-                              ? new Date(e.target.value)
-                              : undefined;
-                            field.onChange(date);
-                          }}
+                          min={
+                            form.watch("valid_from")
+                              ? format(
+                                  new Date(form.watch("valid_from")),
+                                  "yyyy-MM-dd",
+                                )
+                              : format(new Date(), "yyyy-MM-dd")
+                          }
+                          {...field}
+                          value={
+                            field.value
+                              ? format(new Date(field.value), "yyyy-MM-dd")
+                              : ""
+                          }
                         />
                         <FormMessage />
                       </FormItem>
