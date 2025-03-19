@@ -1,3 +1,6 @@
+import { TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { Tooltip } from "@radix-ui/react-tooltip";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useState } from "react";
@@ -191,31 +194,86 @@ export default function FacilityOrganizationIndex({
             <div className="flex justify-between gap-5">
               {isTopLevel && children.length > 0 && (
                 <div>
-                  <Button
-                    variant="white"
-                    size={isMobile ? "xs" : "sm"}
-                    onClick={toggleAllChildren}
-                  >
-                    <CareIcon
-                      icon={allExpanded ? "l-minus" : "l-plus"}
-                      className="h-4 w-4 sm:h-2 sm:w-2"
-                    />
-                    <span className="hidden sm:inline">
-                      {t(allExpanded ? "collapse_all" : "expand_all")}
-                    </span>
-                  </Button>
+                  <TooltipProvider>
+                    {isMobile ? (
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Button
+                            variant="white"
+                            size={isMobile ? "xs" : "sm"}
+                            onClick={toggleAllChildren}
+                          >
+                            <CareIcon
+                              icon={allExpanded ? "l-minus" : "l-plus"}
+                              className="h-4 w-4 sm:h-2 sm:w-2"
+                            />
+                            <span className="hidden sm:inline">
+                              {t(allExpanded ? "collapse_all" : "expand_all")}
+                            </span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {t(allExpanded ? "collapse_all" : "expand_all")}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <Button
+                        variant="white"
+                        size="sm"
+                        onClick={toggleAllChildren}
+                      >
+                        <CareIcon
+                          icon={allExpanded ? "l-minus" : "l-plus"}
+                          className="h-4 w-4 sm:h-2 sm:w-2"
+                        />
+                        <span className="hidden sm:inline">
+                          {t(allExpanded ? "collapse_all" : "expand_all")}
+                        </span>
+                      </Button>
+                    )}
+                  </TooltipProvider>
                 </div>
               )}
               <div className="ml-auto">
-                <Button variant="white" size={isMobile ? "xs" : "sm"} asChild>
-                  <Link
-                    href={`/departments/${org.id}/users`}
-                    className="text-gray-900 flex items-center"
-                  >
-                    <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
-                    <span className="hidden sm:inline">{t("see_details")}</span>
-                  </Link>
-                </Button>
+                <TooltipProvider>
+                  {isMobile ? (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          variant="white"
+                          size={isMobile ? "xs" : "sm"}
+                          asChild
+                        >
+                          <Link
+                            href={`/departments/${org.id}/users`}
+                            className="text-gray-900 flex items-center"
+                          >
+                            <CareIcon
+                              icon="l-arrow-up-right"
+                              className="h-4 w-4"
+                            />
+                            <span className="hidden sm:inline">
+                              {t("see_details")}
+                            </span>
+                          </Link>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{t("see_details")}</TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <Button variant="white" size="sm" asChild>
+                      <Link
+                        href={`/departments/${org.id}/users`}
+                        className="text-gray-900 flex items-center"
+                      >
+                        <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                        <span className="hidden sm:inline">
+                          {t("see_details")}
+                        </span>
+                      </Link>
+                    </Button>
+                  )}
+                </TooltipProvider>
               </div>
             </div>
           </TableCell>
