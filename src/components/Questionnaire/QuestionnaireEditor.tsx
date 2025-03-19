@@ -1573,6 +1573,7 @@ function QuestionEditor({
                           updateField(
                             "answer_value_set",
                             val === "custom" ? undefined : "valueset",
+                            { answer_option: [] },
                           )
                         }
                       >
@@ -1626,9 +1627,7 @@ function QuestionEditor({
                                   ...opt,
                                   value: e.target.value,
                                 };
-                                updateField("answer_option", newOptions, {
-                                  answer_option: [],
-                                });
+                                updateField("answer_option", newOptions);
                               }}
                               placeholder="Option value"
                             />
