@@ -154,12 +154,16 @@ export default function PatientRegistration(
               ? dayjs(data.date_of_birth)
               : dayjs().subtract(data.age || 0, "years");
 
-            return dob.isValid() && dob.isBefore(deathDate);
+            return data.date_of_birth
+              ? dob.isBefore(deathDate)
+              : dob.year() < deathDate.year();
           },
-          {
-            message: t("death_date_must_be_after_dob"),
+          (data) => ({
+            message: dayjs(data.death_datetime).isValid()
+              ? t("death_date_must_be_after_dob")
+              : t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
             path: ["death_datetime"],
-          },
+          }),
         ),
 
     [], // eslint-disable-line react-hooks/exhaustive-deps
