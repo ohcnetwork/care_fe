@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,6 +67,7 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
@@ -81,6 +83,7 @@ import {
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
+import { ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
@@ -1185,12 +1188,17 @@ function QuestionEditor({
     new Set(),
   );
 
-  const { data: valuesetResponse } = useQuery({
-    queryKey: ["valuesets"],
-    queryFn: query(valuesetApi.list),
+  const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
+  const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
+    queryKey: ["valuesets", valueSetSearchQuery],
+    queryFn: query.debounced(valuesetApi.list, {
+      queryParams: {
+        name: valueSetSearchQuery,
+        status: "active",
+      },
+    }),
+    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
   });
-
-  const valuesets = valuesetResponse?.results || [];
 
   const updateField = <K extends keyof Question>(
     field: K,
@@ -1639,27 +1647,24 @@ function QuestionEditor({
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <Select
+                    <Autocomplete
+                      options={(valuesets ?? []).map((valueset) => ({
+                        label: valueset.name,
+                        value: valueset.slug,
+                      }))}
                       value={
                         question.answer_value_set === "valueset"
-                          ? undefined
-                          : question.answer_value_set
+                          ? ""
+                          : (question.answer_value_set ?? "")
                       }
-                      onValueChange={(val: string) =>
+                      onChange={(val: string) =>
                         updateField("answer_value_set", val)
                       }
-                    >
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder={t("select_a_value_set")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {valuesets.map((valueset) => (
-                          <SelectItem key={valueset.id} value={valueset.slug}>
-                            {valueset.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onSearch={setValueSetSearchQuery}
+                      placeholder={t("select_a_value_set")}
+                      isLoading={isFetchingValuesets}
+                      noOptionsMessage={t("no_valuesets_found")}
+                    />
                   </CardContent>
                 )}
               </Card>
