@@ -23,14 +23,14 @@ import { DiagnosisTable } from "./DiagnosisTable";
 interface DiagnosisListProps {
   patientId: string;
   className?: string;
-  hideFullViewButton?: boolean;
+  dialogView?: boolean;
   encounter?: Encounter;
   readOnly?: boolean;
 }
 
 export function DiagnosisList({
   patientId,
-  hideFullViewButton = false,
+  dialogView = false,
   encounter,
   className = "",
   readOnly = false,
@@ -72,7 +72,7 @@ export function DiagnosisList({
       <DiagnosisListLayout
         className={className}
         readOnly={readOnly}
-        hideFullViewButton={hideFullViewButton}
+        dialogView={dialogView}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -97,7 +97,7 @@ export function DiagnosisList({
       <DiagnosisListLayout
         className={className}
         readOnly={readOnly}
-        hideFullViewButton={hideFullViewButton}
+        dialogView={dialogView}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
@@ -110,7 +110,7 @@ export function DiagnosisList({
     <DiagnosisListLayout
       className={className}
       readOnly={readOnly}
-      hideFullViewButton={hideFullViewButton}
+      dialogView={dialogView}
     >
       <>
         <DiagnosisTable
@@ -120,7 +120,7 @@ export function DiagnosisList({
                 return false;
               }
 
-              if (!hideFullViewButton) {
+              if (!dialogView) {
                 return (
                   diagnosis.clinical_status !== "inactive" &&
                   diagnosis.clinical_status !== "resolved"
@@ -134,14 +134,14 @@ export function DiagnosisList({
 
         {hasInActiveRecords && (
           <>
-            {!hideFullViewButton && encounter?.id && (
+            {!dialogView && encounter?.id && (
               <FullViewDialog
                 patientId={patientId}
                 initialTab="diagnoses"
                 encounter={encounter}
               />
             )}
-            {hideFullViewButton && hasMorePages && (
+            {dialogView && hasMorePages && (
               <div>
                 <div className="border-b border-dashed border-gray-200 my-2" />
                 <div className="flex justify-center">
@@ -167,12 +167,12 @@ export function DiagnosisList({
 const DiagnosisListLayout = ({
   children,
   className,
-  hideFullViewButton = false,
+  dialogView = false,
   readOnly = false,
 }: {
   children: ReactNode;
   className?: string;
-  hideFullViewButton?: boolean;
+  dialogView?: boolean;
   readOnly?: boolean;
 }) => {
   return (
@@ -181,7 +181,7 @@ const DiagnosisListLayout = ({
         className={cn("px-4 pt-4 pb-2 flex justify-between flex-row")}
       >
         <CardTitle>{t("diagnoses")}</CardTitle>
-        {!hideFullViewButton && (
+        {!dialogView && (
           <div className="flex items-center gap-x-2">
             {!readOnly && (
               <Link

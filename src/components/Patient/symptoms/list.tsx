@@ -23,7 +23,7 @@ import { SymptomTable } from "./SymptomTable";
 interface SymptomsListProps {
   patientId: string;
   className?: string;
-  hideFullViewButton?: boolean;
+  dialogView?: boolean;
   encounter?: Encounter;
   readOnly?: boolean;
 }
@@ -32,7 +32,7 @@ export function SymptomsList({
   patientId,
   className,
   encounter,
-  hideFullViewButton = false,
+  dialogView = false,
   readOnly = false,
 }: SymptomsListProps) {
   const [allSymptoms, setAllSymptoms] = useState<Symptom[]>([]);
@@ -72,7 +72,7 @@ export function SymptomsList({
       <SymptomListLayout
         readOnly={readOnly}
         className={className}
-        hideFullViewButton={hideFullViewButton}
+        dialogView={dialogView}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -95,7 +95,7 @@ export function SymptomsList({
   if (!filteredSymptoms?.length) {
     return (
       <SymptomListLayout
-        hideFullViewButton={hideFullViewButton}
+        dialogView={dialogView}
         className={className}
         readOnly={readOnly}
       >
@@ -109,7 +109,7 @@ export function SymptomsList({
   return (
     <SymptomListLayout
       className={className}
-      hideFullViewButton={hideFullViewButton}
+      dialogView={dialogView}
       readOnly={readOnly}
     >
       <SymptomTable
@@ -119,7 +119,7 @@ export function SymptomsList({
               return false;
             }
 
-            if (!hideFullViewButton) {
+            if (!dialogView) {
               return (
                 symptom.clinical_status !== "inactive" &&
                 symptom.clinical_status !== "resolved"
@@ -133,14 +133,14 @@ export function SymptomsList({
 
       {hasInActiveRecords && (
         <>
-          {!hideFullViewButton && encounter?.id && (
+          {!dialogView && encounter?.id && (
             <FullViewDialog
               patientId={patientId}
               initialTab="symptoms"
               encounter={encounter}
             />
           )}
-          {hideFullViewButton && hasMorePages && (
+          {dialogView && hasMorePages && (
             <div>
               <div className="border-b border-dashed border-gray-200 my-2" />
               <div className="flex justify-center">
@@ -165,19 +165,19 @@ export function SymptomsList({
 const SymptomListLayout = ({
   children,
   className,
-  hideFullViewButton = false,
+  dialogView = false,
   readOnly = false,
 }: {
   children: ReactNode;
   className?: string;
-  hideFullViewButton?: boolean;
+  dialogView?: boolean;
   readOnly?: boolean;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
       <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
         <CardTitle>{t("symptoms")}</CardTitle>
-        {!hideFullViewButton && (
+        {!dialogView && (
           <div className="flex items-center gap-x-2">
             {!readOnly && (
               <Link

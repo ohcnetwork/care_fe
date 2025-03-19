@@ -128,7 +128,7 @@ export function FullViewDialog({
                 <AllergyList
                   patientId={patientId}
                   encounter={encounter}
-                  hideFullViewButton={true}
+                  dialogView={true}
                 />
               </div>
             </TabsContent>
@@ -138,7 +138,7 @@ export function FullViewDialog({
                 <SymptomsList
                   patientId={patientId}
                   encounter={encounter}
-                  hideFullViewButton={true}
+                  dialogView={true}
                 />
               </div>
             </TabsContent>
@@ -148,7 +148,7 @@ export function FullViewDialog({
                 <DiagnosisList
                   patientId={patientId}
                   encounter={encounter}
-                  hideFullViewButton={true}
+                  dialogView={true}
                 />
               </div>
             </TabsContent>

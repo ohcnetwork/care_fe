@@ -49,7 +49,7 @@ import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 interface AllergyListProps {
   patientId: string;
   className?: string;
-  hideFullViewButton?: boolean;
+  dialogView?: boolean;
   encounter?: Encounter;
   readOnly?: boolean;
 }
@@ -72,7 +72,7 @@ export function AllergyList({
   className = "",
   readOnly = false,
   encounter,
-  hideFullViewButton = false,
+  dialogView = false,
 }: AllergyListProps) {
   const [allAllergies, setAllAllergies] = useState<AllergyIntolerance[]>([]);
   const [page, setPage] = useState(1);
@@ -113,7 +113,7 @@ export function AllergyList({
   if (isLoading) {
     return (
       <AllergyListLayout
-        hideFullViewButton={hideFullViewButton}
+        dialogView={dialogView}
         readOnly={readOnly}
         className={className}
       >
@@ -138,7 +138,7 @@ export function AllergyList({
   if (!filteredAllergies?.length) {
     return (
       <AllergyListLayout
-        hideFullViewButton={hideFullViewButton}
+        dialogView={dialogView}
         readOnly={readOnly}
         className={className}
       >
@@ -238,7 +238,7 @@ export function AllergyList({
     <AllergyListLayout
       className={className}
       readOnly={readOnly}
-      hideFullViewButton={hideFullViewButton}
+      dialogView={dialogView}
     >
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
@@ -271,7 +271,7 @@ export function AllergyList({
                 return false;
               }
 
-              if (!hideFullViewButton) {
+              if (!dialogView) {
                 return (
                   allergy.clinical_status !== "inactive" &&
                   allergy.clinical_status !== "resolved"
@@ -287,14 +287,14 @@ export function AllergyList({
       </Table>
       {hasInActiveRecords && (
         <>
-          {!hideFullViewButton && (
+          {!dialogView && (
             <FullViewDialog
               patientId={patientId}
               initialTab="allergies"
               encounter={encounter}
             />
           )}
-          {hideFullViewButton && hasMorePages && (
+          {dialogView && hasMorePages && (
             <div>
               <div className="border-b border-dashed border-gray-200 my-2" />
               <div className="flex justify-center">
@@ -319,19 +319,19 @@ export function AllergyList({
 const AllergyListLayout = ({
   children,
   className,
-  hideFullViewButton = false,
+  dialogView = false,
   readOnly = false,
 }: {
   children: ReactNode;
   className?: string;
-  hideFullViewButton?: boolean;
+  dialogView?: boolean;
   readOnly?: boolean;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
       <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
         <CardTitle>{t("allergies")}</CardTitle>
-        {!hideFullViewButton && (
+        {!dialogView && (
           <div className="flex items-center gap-x-2">
             {!readOnly && (
               <Link
