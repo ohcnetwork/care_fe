@@ -270,6 +270,9 @@ function OrganizationSelector({
               {t("no_organizations_selected")}
             </p>
           )}
+          {selection.error && (
+            <p className="text-sm text-red-500">{selection.error}</p>
+          )}
         </div>
         <ManageQuestionnaireOrganizationsSheet
           questionnaireId={id}
@@ -825,14 +828,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const validateOrganizations = (): boolean => {
     if (id) {
       if (!organizations?.results || organizations.results.length === 0) {
-        toast.error(t("organization_selection_required"));
+        setOrgError(t("organization_selection_required"));
         return false;
       }
       return true;
     }
     if (selectedOrgIds.length === 0) {
       setOrgError(t("organization_selection_required"));
-      toast.error(t("organization_selection_required"));
       return false;
     }
     setOrgError(undefined);
