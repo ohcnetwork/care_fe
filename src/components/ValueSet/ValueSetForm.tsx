@@ -436,18 +436,11 @@ export function ValueSetForm({
           <ValueSetPreview
             valueset={form.getValues()}
             trigger={
-              <Button
-                variant="outline_primary"
-                disabled={!form.formState.isValid}
-              >
-                <CareIcon
-                  icon={form.formState.isValid ? "l-eye" : "l-eye-slash"}
-                  className="h-4 w-4"
-                />
+              <Button variant="outline_primary">
+                <CareIcon icon={"l-eye"} className="h-4 w-4" />
                 {t("valueset_preview")}
               </Button>
             }
-            disabled={!form.formState.isValid}
           />
         )}
       </div>
