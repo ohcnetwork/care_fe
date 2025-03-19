@@ -76,7 +76,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between gap-2 w-full overflow-hidden">
-                <h1 className="text-base font-bold truncate pr-2 max-w-[60%]">
+                <h1 className="text-base font-bold  pr-2 max-w-[60%]">
                   {user.first_name} {user.last_name}
                 </h1>
                 <UserStatusIndicator user={user} className="flex-shrink-0" />
