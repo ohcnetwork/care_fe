@@ -554,6 +554,7 @@ const Login = (props: LoginProps) => {
                               maxLength={5}
                               pattern={REGEXP_ONLY_DIGITS}
                               autoComplete="one-time-code"
+                              autoFocus
                               onChange={(value) => {
                                 setOtp(value);
                                 setOtpValidationError("");
