@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -16,7 +17,11 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
@@ -111,7 +116,7 @@ export const Authenticate = () => {
           <div className="w-full max-w-[400px] space-y-6">
             <Card className="mx-4">
               <CardHeader className="space-y-1 px-4">
-                <CardTitle className="text-3xl font-bold w-15 text-black">
+                <CardTitle className="text-3xl font-bold w-15 text-black text-center">
                   {t("authenticate_your_account")}
                 </CardTitle>
               </CardHeader>
@@ -124,19 +129,27 @@ export const Authenticate = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input
-                              placeholder={
-                                currentMethod === "backup"
-                                  ? "XXXXXXXX"
-                                  : "XXXXXX"
-                              }
-                              {...field}
-                              maxLength={currentMethod === "backup" ? 8 : 6}
-                              autoComplete="one-time-code"
-                              className="tracking-[0.1em] placeholder:text-gray-500/50"
-                            />
+                            <div className="flex justify-center">
+                              <InputOTP
+                                maxLength={currentMethod === "backup" ? 8 : 6}
+                                pattern={REGEXP_ONLY_DIGITS}
+                                value={field.value}
+                                onChange={field.onChange}
+                                autoComplete="one-time-code"
+                              >
+                                <InputOTPGroup>
+                                  {[
+                                    ...Array(
+                                      currentMethod === "backup" ? 8 : 6,
+                                    ),
+                                  ].map((_, index) => (
+                                    <InputOTPSlot key={index} index={index} />
+                                  ))}
+                                </InputOTPGroup>
+                              </InputOTP>
+                            </div>
                           </FormControl>
-                          <FormLabel className="mt-3">
+                          <FormLabel className="mt-3 text-center">
                             {currentMethod === "backup"
                               ? t("enter_recovery_code")
                               : t("enter_2fa_code")}

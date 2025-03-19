@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Lock, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -19,7 +20,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/input-password";
+import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -60,6 +63,7 @@ export default function UserForm({
   const isEditMode = !!existingUsername;
   const queryClient = useQueryClient();
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
   const userFormSchema = z
     .object({
@@ -80,15 +84,9 @@ export default function UserForm({
               (val) => !val.match(/(?:[._-]{2,})/),
               t("username_not_valid"),
             ),
-      password: isEditMode
-        ? z.string().optional()
-        : z
-            .string()
-            .min(8, t("field_required"))
-            .regex(/[a-z]/, t("new_password_validation"))
-            .regex(/[A-Z]/, t("new_password_validation"))
-            .regex(/[0-9]/, t("new_password_validation")),
-      c_password: isEditMode ? z.string().optional() : z.string(),
+      password_setup_method: z.enum(["immediate", "email"]),
+      password: z.string().optional(),
+      c_password: z.string().optional(),
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
       email: z.string().email(t("invalid_email_address")),
@@ -103,14 +101,35 @@ export default function UserForm({
     })
     .refine(
       (data) => {
-        if (!isEditMode) {
-          return data.password === data.c_password;
+        if (!isEditMode && data.password_setup_method === "immediate") {
+          return data.password && data.password === data.c_password;
         }
         return true;
       },
       {
         message: t("password_mismatch"),
         path: ["c_password"],
+      },
+    )
+    .refine(
+      (data) => {
+        if (
+          !isEditMode &&
+          data.password_setup_method === "immediate" &&
+          data.password
+        ) {
+          return (
+            data.password.length >= 8 &&
+            /[a-z]/.test(data.password) &&
+            /[A-Z]/.test(data.password) &&
+            /[0-9]/.test(data.password)
+          );
+        }
+        return true;
+      },
+      {
+        message: t("new_password_validation"),
+        path: ["password"],
       },
     );
 
@@ -127,6 +146,7 @@ export default function UserForm({
       last_name: "",
       email: "",
       phone_number: "",
+      password_setup_method: "immediate",
     },
   });
 
@@ -151,7 +171,6 @@ export default function UserForm({
     }
   }, [userData, form, isEditMode]);
 
-  const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
   const [isUsernameFieldFocused, setIsUsernameFieldFocused] = useState(false);
 
   //const userType = form.watch("user_type");
@@ -255,7 +274,14 @@ export default function UserForm({
     } else {
       createUser({
         ...data,
-        password: data.password,
+        password:
+          data.password_setup_method === "immediate"
+            ? data.password
+            : undefined,
+        c_password:
+          data.password_setup_method === "immediate"
+            ? data.c_password
+            : undefined,
         profile_picture_url: "",
       } as CreateUserModel);
     }
@@ -419,67 +445,18 @@ export default function UserForm({
               )}
             />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {!isEditMode && (
               <FormField
                 control={form.control}
-                name="password"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("password")}</FormLabel>
+                    <FormLabel required>{t("email")}</FormLabel>
                     <FormControl>
-                      <PasswordInput
-                        data-cy="password-input"
-                        placeholder={t("password")}
-                        {...field}
-                        onFocus={() => setIsPasswordFieldFocused(true)}
-                        onBlur={() => setIsPasswordFieldFocused(false)}
-                      />
-                    </FormControl>
-                    {isPasswordFieldFocused ? (
-                      <div
-                        className="text-small mt-2 pl-2 text-secondary-500"
-                        aria-live="polite"
-                      >
-                        <ValidationHelper
-                          isInputEmpty={!field.value}
-                          successMessage={t("password_success_message")}
-                          validations={[
-                            {
-                              description: "password_length_validation",
-                              fulfilled: (field.value || "").length >= 8,
-                            },
-                            {
-                              description: "password_lowercase_validation",
-                              fulfilled: /[a-z]/.test(field.value || ""),
-                            },
-                            {
-                              description: "password_uppercase_validation",
-                              fulfilled: /[A-Z]/.test(field.value || ""),
-                            },
-                            {
-                              description: "password_number_validation",
-                              fulfilled: /\d/.test(field.value || ""),
-                            },
-                          ]}
-                        />
-                      </div>
-                    ) : (
-                      <FormMessage />
-                    )}
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="c_password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>{t("confirm_password")}</FormLabel>
-                    <FormControl>
-                      <PasswordInput
-                        data-cy="confirm-password-input"
-                        placeholder={t("confirm_password")}
+                      <Input
+                        data-cy="email-input"
+                        type="email"
+                        placeholder={t("email")}
                         {...field}
                       />
                     </FormControl>
@@ -487,29 +464,154 @@ export default function UserForm({
                   </FormItem>
                 )}
               />
-            </div>
-          </>
-        )}
-
-        {!isEditMode && (
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required>{t("email")}</FormLabel>
-                <FormControl>
-                  <Input
-                    data-cy="email-input"
-                    type="email"
-                    placeholder={t("email")}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
             )}
-          />
+
+            <FormField
+              control={form.control}
+              name="password_setup_method"
+              render={({ field }) => (
+                <FormItem className="border rounded-lg p-4 bg-gray-50">
+                  <FormLabel className="text-base font-medium mb-3 block">
+                    {t("password_setup_method")}
+                  </FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="space-y-3"
+                    >
+                      <div
+                        className={`flex items-start space-x-3 rounded-md border p-3 ${
+                          field.value === "immediate"
+                            ? "bg-white border-primary"
+                            : "bg-transparent"
+                        }`}
+                      >
+                        <RadioGroupItem
+                          value="immediate"
+                          id="immediate"
+                          className="mt-1"
+                        />
+                        <div className="space-y-1.5">
+                          <Label
+                            htmlFor="immediate"
+                            className="text-base font-medium cursor-pointer flex items-center"
+                          >
+                            <Lock className="h-4 w-4 mr-2" />
+                            {t("set_password_now")}
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            {t("set_password_now_description")}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`flex items-start space-x-3 rounded-md border p-3 ${
+                          field.value === "email"
+                            ? "bg-white border-primary"
+                            : "bg-transparent"
+                        }`}
+                      >
+                        <RadioGroupItem
+                          value="email"
+                          id="email"
+                          className="mt-1"
+                        />
+                        <div className="space-y-1.5">
+                          <Label
+                            htmlFor="email"
+                            className="text-base font-medium cursor-pointer flex items-center"
+                          >
+                            <Mail className="h-4 w-4 mr-2" />
+                            {t("send_email_invitation")}
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            {t("send_email_invitation_description")}
+                          </p>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {form.watch("password_setup_method") === "immediate" && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel required>{t("password")}</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <PasswordInput
+                            data-cy="password-input"
+                            placeholder={t("password")}
+                            {...field}
+                            onFocus={() => setIsPasswordFieldFocused(true)}
+                            onBlur={() => setIsPasswordFieldFocused(false)}
+                          />
+                        </div>
+                      </FormControl>
+                      {isPasswordFieldFocused ? (
+                        <div
+                          className="text-small mt-2 pl-2 text-secondary-500"
+                          aria-live="polite"
+                        >
+                          <ValidationHelper
+                            isInputEmpty={!field.value}
+                            successMessage={t("password_success_message")}
+                            validations={[
+                              {
+                                description: "password_length_validation",
+                                fulfilled: (field.value || "").length >= 8,
+                              },
+                              {
+                                description: "password_lowercase_validation",
+                                fulfilled: /[a-z]/.test(field.value || ""),
+                              },
+                              {
+                                description: "password_uppercase_validation",
+                                fulfilled: /[A-Z]/.test(field.value || ""),
+                              },
+                              {
+                                description: "password_number_validation",
+                                fulfilled: /\d/.test(field.value || ""),
+                              },
+                            ]}
+                          />
+                        </div>
+                      ) : (
+                        <FormMessage />
+                      )}
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="c_password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel required>{t("confirm_password")}</FormLabel>
+                      <FormControl>
+                        <PasswordInput
+                          data-cy="confirm-password-input"
+                          placeholder={t("confirm_password")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+          </>
         )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
