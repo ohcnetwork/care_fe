@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
@@ -20,6 +21,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { PasswordInput } from "@/components/ui/input-password";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
@@ -539,38 +545,36 @@ const Login = (props: LoginProps) => {
 
                       {isOtpSent && (
                         <div className="space-y-2">
-                          <Label htmlFor="otp">{t("enter_otp")}</Label>
-                          <Input
-                            id="otp"
-                            name="otp"
-                            type="text"
-                            value={otp}
-                            autoComplete="one-time-code"
-                            onChange={(e) => {
-                              setOtp(e.target.value);
-                              setOtpValidationError("");
-                            }}
-                            maxLength={5}
-                            placeholder="Enter 5-digit OTP"
-                            autoFocus
-                          />
+                          <Label htmlFor="otp" className="mb-4">
+                            {t("enter_otp")}
+                          </Label>
+                          <div className="flex justify-center">
+                            <InputOTP
+                              value={otp}
+                              maxLength={5}
+                              pattern={REGEXP_ONLY_DIGITS}
+                              autoComplete="one-time-code"
+                              onChange={(value) => {
+                                setOtp(value);
+                                setOtpValidationError("");
+                              }}
+                            >
+                              <InputOTPGroup>
+                                {[...Array(5)].map((_, index) => (
+                                  <InputOTPSlot
+                                    key={index}
+                                    index={index}
+                                    className="w-10 h-10"
+                                  />
+                                ))}
+                              </InputOTPGroup>
+                            </InputOTP>
+                          </div>
                           {otpValidationError && (
-                            <p className="text-sm text-red-500">
+                            <p className="text-sm text-red-500 text-center">
                               {otpValidationError}
                             </p>
                           )}
-                          <Button
-                            variant="link"
-                            type="button"
-                            onClick={() => {
-                              setIsOtpSent(false);
-                              setOtpError("");
-                              setOtpValidationError("");
-                            }}
-                            className="px-0"
-                          >
-                            {t("change_phone_number")}
-                          </Button>
                         </div>
                       )}
 
@@ -592,13 +596,13 @@ const Login = (props: LoginProps) => {
                           t("send_otp")
                         )}
                       </Button>
-                      {isOtpSent &&
-                        (resendOtpCountdown <= 0 ? (
-                          <div className="flex justify-center">
+                      {isOtpSent && (
+                        <div className="flex flex-col items-center gap-2 text-center">
+                          {resendOtpCountdown <= 0 ? (
                             <Button
                               variant="link"
                               type="button"
-                              className=" text-center cursor-pointer hover:underline inline-block "
+                              className="h-auto p-0"
                               onClick={() => {
                                 sendOtp({ phone_number: phone });
                                 setResendOtpCountdown(resendOtpTimeout);
@@ -606,14 +610,29 @@ const Login = (props: LoginProps) => {
                             >
                               {t("resend_otp")}
                             </Button>
+                          ) : (
+                            <p className="text-sm text-gray-500">
+                              {t("resend_otp_timer", {
+                                time: resendOtpCountdown,
+                              })}
+                            </p>
+                          )}
+                          <div className="flex items-center text-sm">
+                            <Button
+                              variant="link"
+                              type="button"
+                              className="h-auto p-0 text-primary-600"
+                              onClick={() => {
+                                setIsOtpSent(false);
+                                setOtpError("");
+                                setOtpValidationError("");
+                              }}
+                            >
+                              {t("change_phone_number")}
+                            </Button>
                           </div>
-                        ) : (
-                          <p className=" text-gray-500 text-center mt-5 ">
-                            {t("resend_otp_timer", {
-                              time: resendOtpCountdown,
-                            })}
-                          </p>
-                        ))}
+                        </div>
+                      )}
                     </form>
                   </TabsContent>
                 </Tabs>
