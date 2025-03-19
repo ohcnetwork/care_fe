@@ -41,10 +41,7 @@ export function LocationCardList({
               </Badge>
             </div>
             <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm font-medium">{location.name}</p>
-                <p className="text-xs text-gray-500">{location.description}</p>
-              </div>
+              <p className="text-sm font-medium">{location.name}</p>
               <ChevronRight className="h-5 w-5" />
             </div>
           </CardHeader>
