@@ -335,7 +335,7 @@ const AllergyListLayout = ({
           <div className="flex items-center gap-x-2">
             {!readOnly && (
               <Link
-                href={`questionnaire/allergy`}
+                href={`questionnaire/allergy_intolerance`}
                 className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
               >
                 <CareIcon icon="l-pen" className="w-4 h-4" />
