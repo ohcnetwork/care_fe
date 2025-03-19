@@ -555,7 +555,15 @@ export function QuestionnaireForm({
               (Array.isArray(v.value) ? v.value.length > 0 : true),
           );
 
-          if (!hasValue) {
+          const hasCoding = response?.values?.some(
+            (v) => v.coding !== undefined && v.coding !== null,
+          );
+
+          const hasUnit = response?.values?.some(
+            (v) => v.unit !== undefined && v.unit !== null,
+          );
+
+          if (!hasValue && !hasCoding && !hasUnit) {
             errors.push({
               question_id: q.id,
               error: t("field_required"),
@@ -650,8 +658,11 @@ export function QuestionnaireForm({
                       value: value.value.toISOString(),
                     };
                   }
-                  if (value.value_code) {
-                    return { value_code: value.value_code };
+                  if (value.coding) {
+                    return { coding: value.coding };
+                  }
+                  if (value.unit) {
+                    return { unit: value.unit };
                   }
                   return { value: String(value.value) };
                 }),
