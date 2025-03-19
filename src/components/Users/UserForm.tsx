@@ -37,7 +37,7 @@ import {
   validateRule,
 } from "@/components/Users/UserFormValidations";
 
-import { GENDER_TYPES, NAME_PREFIXES, NAME_SUFFIXES } from "@/common/constants";
+import { GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
@@ -268,6 +268,8 @@ export default function UserForm({
     },
   });
 
+  console.log(form.formState.errors);
+
   const onSubmit = async (data: UserFormValues) => {
     if (isEditMode) {
       updateUser({
@@ -354,7 +356,7 @@ export default function UserForm({
                   value={field.value || ""}
                   onChange={field.onChange}
                   noOptionsMessage=""
-                  className="w-28"
+                  className="md:w-28"
                   placeholder={t("select_or_type")}
                   inputPlaceholder={t("select_or_type")}
                 />
@@ -402,19 +404,12 @@ export default function UserForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("suffix")}</FormLabel>
-                <Autocomplete
-                  options={NAME_SUFFIXES.map((suffix) => ({
-                    label: suffix,
-                    value: suffix,
-                  }))}
-                  value={field.value || ""}
-                  onChange={field.onChange}
-                  freeInput
-                  noOptionsMessage=""
-                  className="w-28"
-                  placeholder={t("select_or_type")}
-                  inputPlaceholder={t("select_or_type")}
+                <Input
+                  data-cy="suffix-input"
+                  placeholder={t("suffix")}
+                  {...field}
                 />
+
                 <FormMessage />
               </FormItem>
             )}
