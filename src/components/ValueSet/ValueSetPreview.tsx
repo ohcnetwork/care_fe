@@ -30,12 +30,12 @@ import query from "@/Utils/request/query";
 import { CreateValuesetModel } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
-interface LocationSheetProps {
+interface ValueSetPreviewProps {
   valueset: CreateValuesetModel;
   trigger: React.ReactNode;
 }
 
-export function ValueSetPreview({ valueset, trigger }: LocationSheetProps) {
+export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
