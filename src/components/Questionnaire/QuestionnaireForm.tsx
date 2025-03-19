@@ -555,13 +555,11 @@ export function QuestionnaireForm({
               (Array.isArray(v.value) ? v.value.length > 0 : true),
           );
 
-          const hasCoding = response?.values?.some(
-            (v) => v.coding !== undefined && v.coding !== null,
-          );
+          const hasProperty = (arr: any[] | undefined, prop: string) =>
+            Array.isArray(arr) && arr.some((item) => item?.[prop] != null);
 
-          const hasUnit = response?.values?.some(
-            (v) => v.unit !== undefined && v.unit !== null,
-          );
+          const hasCoding = hasProperty(response?.values, "coding");
+          const hasUnit = hasProperty(response?.values, "unit");
 
           if (!hasValue && !hasCoding && !hasUnit) {
             errors.push({

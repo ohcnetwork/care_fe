@@ -94,17 +94,14 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
             <SelectValue placeholder="Select an option" />
           </SelectTrigger>
           <SelectContent>
-            {options
-              // TODO: Temporary fix to remove empty options
-              .filter((option) => option.value !== "")
-              .map((option: AnswerOption) => (
-                <SelectItem
-                  key={option.value.toString()}
-                  value={option.value.toString()}
-                >
-                  {properCase(option.display || option.value)}
-                </SelectItem>
-              ))}
+            {options.map((option: AnswerOption) => (
+              <SelectItem
+                key={option.value.toString()}
+                value={option.value.toString()}
+              >
+                {properCase(option.display || option.value)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       )}

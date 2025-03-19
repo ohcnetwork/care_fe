@@ -18,20 +18,6 @@ type RV<T extends string, V> = {
   value?: V;
 };
 
-// type RVValue<T extends string, V> = RVBase<T, V> & {
-//   value: V;
-// };
-
-// type RVCode<T extends string> = RVBase<T, Code> & {
-//   value: Code;
-// };
-
-// type RVQuantity<T extends string> = RVBase<T, QuestionnaireQuantity> & {
-//   value: QuestionnaireQuantity;
-// };
-
-// type RV<T extends string, V> = RVValue<T, V> | RVCode<T> | RVQuantity<T>;
-
 export type ResponseValue =
   | RV<"string", string | undefined>
   | RV<"number", number | undefined>
