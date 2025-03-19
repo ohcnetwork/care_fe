@@ -1,3 +1,4 @@
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -14,7 +15,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 import { TOTPSetupResponse } from "@/types/auth/otp";
 
@@ -131,15 +136,19 @@ export function TOTPSetupDialog({
               <label className="text-sm font-medium">
                 {t("enter_verification_code")}
               </label>
-              <Input
+              <InputOTP
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                placeholder="XXXXXX"
+                onChange={(value) => setVerificationCode(value)}
                 maxLength={6}
-                pattern="\d*"
-                inputMode="numeric"
-                className="tracking-[0.1em] placeholder:text-gray-500/50"
-              />
+                pattern={REGEXP_ONLY_DIGITS}
+                autoComplete="one-time-code"
+              >
+                <InputOTPGroup>
+                  {[...Array(6)].map((_, index) => (
+                    <InputOTPSlot key={index} index={index} />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
               {verificationError && (
                 <p className="text-sm text-red-500">{verificationError}</p>
               )}
@@ -147,7 +156,7 @@ export function TOTPSetupDialog({
             <DialogFooter className="mt-4">
               <Button
                 type="submit"
-                disabled={isVerifying || !verificationCode}
+                disabled={isVerifying || verificationCode.length !== 6}
                 className="w-full bg-emerald-600 hover:bg-emerald-700"
               >
                 {isVerifying ? (
