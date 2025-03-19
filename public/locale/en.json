@@ -1776,6 +1776,7 @@
   "organization_permission_info": "The selected department will be granted access to view and manage this encounter",
   "organization_removed_successfully": "Organization removed successfully",
   "organization_required": "Organization is required",
+  "organization_selection_required": "At least one organization must be selected",
   "organizations": "Organizations",
   "organizations_fetch_error": "Error while fetching organizations",
   "origin_facility": "Current facility",

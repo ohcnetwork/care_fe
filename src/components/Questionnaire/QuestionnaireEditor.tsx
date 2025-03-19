@@ -823,22 +823,18 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const validateOrganizations = (): boolean => {
-    // For existing questionnaires, check if organizations exist
     if (id) {
       if (!organizations?.results || organizations.results.length === 0) {
-        toast.error("At least one organization must be selected");
+        toast.error(t("organization_selection_required"));
         return false;
       }
       return true;
     }
-
-    // For new questionnaires, check selectedOrgIds
     if (selectedOrgIds.length === 0) {
-      setOrgError("At least one organization must be selected");
-      toast.error("At least one organization must be selected");
+      setOrgError(t("organization_selection_required"));
+      toast.error(t("organization_selection_required"));
       return false;
     }
-
     setOrgError(undefined);
     return true;
   };
