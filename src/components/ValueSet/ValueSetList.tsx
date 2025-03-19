@@ -263,50 +263,55 @@ export function ValueSetList() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mb-4">
+      <div className="mb-4 px-4 md:px-0">
         <div className="mb-2">
           <h1 className="text-2xl font-bold">{t("valuesets")}</h1>
           <p className="text-gray-600">{t("manage_and_view_valuesets")}</p>
         </div>
-        <div className="flex flex-col md:flex-row flex-wrap items-center justify-between mt-8 gap-4">
-          <div className="flex flex-col md:flex-row items-center gap-4">
+
+        <div className="mt-8 mb-4">
+          <div className="w-full overflow-x-auto pb-1">
             <Tabs
               defaultValue="active"
               value={qParams.status || "active"}
               onValueChange={(value) => updateQuery({ status: value })}
-              className="w-full"
             >
-              <TabsList className="flex gap-2 w-full">
-                <TabsTrigger value="active">
-                  <FileCheckIcon className="w-4 h-4 mr-2" />
-                  {t("active")}
-                </TabsTrigger>
-                <TabsTrigger value="draft">
-                  <NotepadTextDashedIcon className="w-4 h-4 mr-2" />
-                  {t("draft")}
-                </TabsTrigger>
-                <TabsTrigger value="retired">
-                  <ArchiveIcon className="w-4 h-4 mr-2" />
-                  {t("retired")}
-                </TabsTrigger>
-                <TabsTrigger value="unknown">
-                  <HelpCircle className="w-4 h-4 mr-2" />
-                  {t("unknown")}
-                </TabsTrigger>
-              </TabsList>
+              <div className="min-w-[480px]">
+                <TabsList className="flex w-full">
+                  <TabsTrigger value="active" className="flex-1">
+                    <FileCheckIcon className="w-4 h-4 mr-2" />
+                    {t("active")}
+                  </TabsTrigger>
+                  <TabsTrigger value="draft" className="flex-1">
+                    <NotepadTextDashedIcon className="w-4 h-4 mr-2" />
+                    {t("draft")}
+                  </TabsTrigger>
+                  <TabsTrigger value="retired" className="flex-1">
+                    <ArchiveIcon className="w-4 h-4 mr-2" />
+                    {t("retired")}
+                  </TabsTrigger>
+                  <TabsTrigger value="unknown" className="flex-1">
+                    <HelpCircle className="w-4 h-4 mr-2" />
+                    {t("unknown")}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             </Tabs>
-            <div className="relative md:min-w-80 w-full">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-              <Input
-                placeholder={t("search_valuesets")}
-                className="pl-10"
-                value={qParams.name || ""}
-                onChange={(e) => updateQuery({ name: e.target.value })}
-              />
-            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder={t("search_valuesets")}
+              className="pl-10 w-full"
+              value={qParams.name || ""}
+              onChange={(e) => updateQuery({ name: e.target.value })}
+            />
           </div>
 
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Link
               href="/admin/valuesets/create"
               className="flex items-center gap-2"
