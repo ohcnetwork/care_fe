@@ -1,6 +1,6 @@
 {
-  "admin": {
-    "username": "devsuperadmin",
+  "orgadmin": {
+    "username": "development-ad",
     "password": "Test@123"
   },
   "nurse": {
@@ -16,15 +16,15 @@
     "password": "Test@123"
   },
   "devnurse": {
-    "username": "dev-nurse",
+    "username": "development-nur",
     "password": "Test@123"
   },
   "devdoctor": {
-    "username": "developdoctor",
+    "username": "development-doc",
     "password": "Test@123"
   },
-  "teststaff4": {
-    "username": "teststaff4",
+  "devadmin": {
+    "username": "development-adm",
     "password": "Test@123"
   }
 }
