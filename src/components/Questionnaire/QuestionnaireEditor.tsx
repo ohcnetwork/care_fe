@@ -146,6 +146,8 @@ interface QuestionnairePropertiesProps {
     setSearchQuery: (query: string) => void;
     available?: OrganizationResponse;
     isLoading?: boolean;
+    error?: string;
+    setError?: (error: string | undefined) => void;
   };
   tags?: QuestionnaireTagModel[];
   tagSelection: {
@@ -312,12 +314,19 @@ function OrganizationSelector({
         )}
       </div>
 
+      {selection.error && (
+        <p className="text-sm text-red-500">{selection.error}</p>
+      )}
+
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
-            className="w-full justify-between"
+            className={cn(
+              "w-full justify-between",
+              selection.error && "border-red-500",
+            )}
           >
             <span className="truncate">{t("select_organizations")}</span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -652,6 +661,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
+  const [orgError, setOrgError] = useState<string | undefined>();
   const queryClient = useQueryClient();
 
   const {
@@ -812,12 +822,35 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     });
   };
 
+  const validateOrganizations = (): boolean => {
+    // For existing questionnaires, check if organizations exist
+    if (id) {
+      if (!organizations?.results || organizations.results.length === 0) {
+        toast.error("At least one organization must be selected");
+        return false;
+      }
+      return true;
+    }
+
+    // For new questionnaires, check selectedOrgIds
+    if (selectedOrgIds.length === 0) {
+      setOrgError("At least one organization must be selected");
+      toast.error("At least one organization must be selected");
+      return false;
+    }
+
+    setOrgError(undefined);
+    return true;
+  };
+
   const handleSave = async () => {
     const isValid = await form.trigger();
+    const hasOrganizations = validateOrganizations();
 
-    if (!isValid) {
+    if (!isValid || !hasOrganizations) {
       return;
     }
+
     if (id) {
       updateQuestionnaire(questionnaire);
     } else {
@@ -845,11 +878,18 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleToggleOrganization = (orgId: string) => {
-    setSelectedOrgIds((current) =>
-      current.includes(orgId)
+    setSelectedOrgIds((current) => {
+      const newSelection = current.includes(orgId)
         ? current.filter((id) => id !== orgId)
-        : [...current, orgId],
-    );
+        : [...current, orgId];
+
+      // Clear error if at least one organization is selected
+      if (newSelection.length > 0) {
+        setOrgError(undefined);
+      }
+
+      return newSelection;
+    });
   };
 
   const handleToggleTag = (tagId: string) => {
@@ -984,6 +1024,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     setSearchQuery: setOrgSearchQuery,
                     available: availableOrganizations,
                     isLoading: isLoadingAvailableOrganizations,
+                    error: orgError,
+                    setError: setOrgError,
                   }}
                   tags={questionnaire.tags}
                   tagSelection={{
@@ -1186,6 +1228,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   setSearchQuery: setOrgSearchQuery,
                   available: availableOrganizations,
                   isLoading: isLoadingAvailableOrganizations,
+                  error: orgError,
+                  setError: setOrgError,
                 }}
                 tags={questionnaire.tags}
                 tagSelection={{
@@ -1656,7 +1700,9 @@ function QuestionEditor({
                           updateField(
                             "answer_value_set",
                             val === "custom" ? undefined : "valueset",
-                            { answer_option: [] },
+                            {
+                              answer_option: [],
+                            },
                           )
                         }
                       >
