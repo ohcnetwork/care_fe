@@ -145,7 +145,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex flex-wrap gap-3 justify-center lg:justify-between w-full">
         <PageTitle title={device.registered_name} />
         <div className="flex flex-wrap justify-center gap-3">
@@ -396,6 +396,22 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
           </CardContent>
         </Card>
 
+        {device.contact?.length > 0 && (
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>{t("contact_information")}</CardTitle>
+              <CardDescription>
+                {t("device_contact_description")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {device.contact.map(renderContactInfo)}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {device.care_type && (
           <ErrorBoundary
             fallback={
@@ -420,22 +436,6 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
               facilityId={facilityId}
             />
           </ErrorBoundary>
-        )}
-
-        {device.contact?.length > 0 && (
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>{t("contact_information")}</CardTitle>
-              <CardDescription>
-                {t("device_contact_description")}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {device.contact.map(renderContactInfo)}
-              </div>
-            </CardContent>
-          </Card>
         )}
       </div>
     </div>
