@@ -90,7 +90,7 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
   return (
     <div className="container mx-auto p-4">
       <Tabs defaultValue={currentTab} className="w-full" value={currentTab}>
-        <TabsList className="w-full justify-evenly sm:justify-start border-b bg-transparent p-0 h-auto">
+        <TabsList className="w-full justify-evenly sm:justify-start border-b bg-transparent p-0 h-auto  overflow-x-auto">
           {settingsTabs.map((tab) => (
             <Link key={tab.value} href={tab.href}>
               <TabsTrigger
