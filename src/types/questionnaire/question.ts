@@ -40,7 +40,8 @@ export type StructuredQuestionType =
   | "symptom"
   | "diagnosis"
   | "encounter"
-  | "appointment";
+  | "appointment"
+  | "files";
 
 type EnableWhenNumeric = {
   operator: "greater" | "less" | "greater_or_equals" | "less_or_equals";

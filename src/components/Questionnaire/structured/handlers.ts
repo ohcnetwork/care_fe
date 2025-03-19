@@ -157,6 +157,21 @@ export const structuredHandlers: {
       ];
     },
   },
+  files: {
+    getRequests: (files, { encounterId }) => {
+      return [
+        {
+          url: `/api/v1/files/upload-file/`,
+          method: "POST",
+          body: {
+            ...files,
+            encounter: encounterId,
+          },
+          reference_id: "files",
+        },
+      ];
+    },
+  },
 };
 
 export const getStructuredRequests = <T extends StructuredQuestionType>(

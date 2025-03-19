@@ -22,6 +22,7 @@ import { ChoiceQuestion } from "./ChoiceQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
 import { DiagnosisQuestion } from "./DiagnosisQuestion";
 import { EncounterQuestion } from "./EncounterQuestion";
+import { FilesQuestion } from "./FileQuestion";
 import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
 import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
@@ -182,6 +183,17 @@ export function QuestionInput({
               );
             }
             return <span>{t("questionnaire_no_encounter")}</span>;
+          case "files":
+            if (encounterId && facilityId) {
+              return (
+                <FilesQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                  facilityId={facilityId}
+                />
+              );
+            }
+            return <span>{t("questionnaire_files_no_encounter")}</span>;
         }
         return null;
 
