@@ -142,6 +142,7 @@ export function TOTPSetupDialog({
                 maxLength={6}
                 pattern={REGEXP_ONLY_DIGITS}
                 autoComplete="one-time-code"
+                autoFocus
               >
                 <InputOTPGroup>
                   {[...Array(6)].map((_, index) => (
