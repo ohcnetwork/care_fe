@@ -459,7 +459,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        {t("All Status")}
+                        {t("all_status")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="planned"
@@ -475,7 +475,6 @@ export function EncounterList({
                         {t("encounter_status__planned")}
                       </TabsTrigger>
                       <TabsTrigger
-                        data-cy="in-progress-filter"
                         value="in_progress"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                         onClick={() =>
@@ -551,7 +550,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      {t("All Types")}
+                      {t("all_types")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="imp"
