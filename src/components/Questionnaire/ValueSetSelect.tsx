@@ -135,6 +135,7 @@ export default function ValueSetSelect({
     },
   });
 
+  // Combine recents and search results, but only show each result once
   const resultsWithRecents = [
     ...(recentsQuery.data?.filter((recent) =>
       recent.display?.toLowerCase().includes(search.toLowerCase()),
@@ -144,6 +145,7 @@ export default function ValueSetSelect({
     ) || []),
   ];
 
+  // Filter favourites based on search
   const favourites = favouritesQuery.data?.filter((favourite) =>
     favourite.display?.toLowerCase().includes(search.toLowerCase()),
   );
