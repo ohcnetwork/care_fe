@@ -429,8 +429,6 @@ export function ValueSetForm({
     },
   });
 
-  console.log("INITIAL DATA", initialData);
-
   return (
     <Form {...form}>
       <div className="flex justify-end">
