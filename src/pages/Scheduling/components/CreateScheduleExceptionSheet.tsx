@@ -63,8 +63,8 @@ export default function CreateScheduleExceptionSheet({
   const formSchema = z
     .object({
       reason: z.string().min(1, t("field_required")),
-      valid_from: z.date({ required_error: t("field_required") }),
-      valid_to: z.date({ required_error: t("field_required") }),
+      valid_from: z.string({ required_error: t("field_required") }),
+      valid_to: z.string({ required_error: t("field_required") }),
       start_time: z
         .string()
         .min(1, t("field_required")) as unknown as z.ZodType<Time>,
@@ -108,13 +108,13 @@ export default function CreateScheduleExceptionSheet({
 
   useEffect(() => {
     if (qParams.valid_from) {
-      form.setValue("valid_from", new Date(qParams.valid_from));
+      form.setValue("valid_from", qParams.valid_from);
     }
   }, [qParams.valid_from, form]);
 
   useEffect(() => {
     if (qParams.valid_to) {
-      form.setValue("valid_to", new Date(qParams.valid_to));
+      form.setValue("valid_to", qParams.valid_to);
     }
   }, [qParams.valid_to, form]);
 
