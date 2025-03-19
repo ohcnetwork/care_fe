@@ -118,9 +118,8 @@ export default function OrganizationLayout({
 
   return (
     <Page title={`${org.name}`}>
-      {/* Responsive Navigation */}
+      {/* Navigation */}
       <div className="mt-4">
-        {/* Mobile/Tablet Dropdown Navigation - Shows on smaller screens */}
         <div className="block md:hidden">
           <DropdownMenu
             open={isMobileMenuOpen}
@@ -198,7 +197,7 @@ export default function OrganizationLayout({
         </div>
       </div>
 
-      {/* Page Content with proper spacing */}
+      {/* Page Content */}
       <div className="mt-4 md:mt-6">{children}</div>
     </Page>
   );
