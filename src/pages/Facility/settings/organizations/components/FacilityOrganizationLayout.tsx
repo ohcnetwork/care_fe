@@ -45,19 +45,19 @@ export default function FacilityOrganizationLayout({
 
   const navItems: NavItem[] = [
     {
-      path: `/departments/${id}`,
-      title: t("departments_or_teams"),
-      value: "departments",
-    },
-    {
       path: `/departments/${id}/users`,
       title: t("users"),
       value: "users",
     },
+    {
+      path: `/departments/${id}`,
+      title: t("departments_or_teams"),
+      value: "departments",
+    },
   ];
 
   const currentTab =
-    navItems.find((item) => item.path === path)?.value || "departments";
+    navItems.find((item) => item.path === path)?.value || "users";
 
   const { data: org, isLoading } = useQuery<FacilityOrganization>({
     queryKey: ["facilityOrganization", id],
@@ -138,7 +138,7 @@ export default function FacilityOrganizationLayout({
       >
         <div className="mt-2">
           {org.description && (
-            <p className="text-sm text-gray-500 line-clamp-2">
+            <p className="text-sm text-gray-500 break-all whitespace-normal">
               {org.description}
             </p>
           )}

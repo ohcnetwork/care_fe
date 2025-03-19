@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandDialog,
+  CommandDrawer,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -19,6 +19,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 interface AutoCompleteOption {
@@ -28,6 +30,7 @@ interface AutoCompleteOption {
 
 interface AutocompleteProps {
   options: AutoCompleteOption[];
+  isLoading?: boolean;
   value: string;
   onChange: (value: string) => void;
   onSearch?: (value: string) => void;
@@ -41,6 +44,7 @@ interface AutocompleteProps {
 
 export default function Autocomplete({
   options,
+  isLoading = false,
   value,
   onChange,
   onSearch,
@@ -62,9 +66,14 @@ export default function Autocomplete({
         disabled={disabled}
         onValueChange={onSearch}
         className="outline-none border-none ring-0 shadow-none"
+        autoFocus
       />
       <CommandList>
-        <CommandEmpty>{noOptionsMessage}</CommandEmpty>
+        {isLoading ? (
+          <CardListSkeleton count={3} />
+        ) : (
+          <CommandEmpty>{noOptionsMessage}</CommandEmpty>
+        )}
         <CommandGroup>
           {options.map((option) => (
             <CommandItem
@@ -117,9 +126,9 @@ export default function Autocomplete({
           </span>
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
-        <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandDrawer open={open} onOpenChange={setOpen}>
           {commandContent}
-        </CommandDialog>
+        </CommandDrawer>
       </>
     );
   }
@@ -146,7 +155,7 @@ export default function Autocomplete({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="sm:w-full p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]"
+        className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]"
         align={align}
       >
         <Command>{commandContent}</Command>
