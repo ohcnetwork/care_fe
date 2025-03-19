@@ -22,8 +22,6 @@ interface Props {
 }
 
 export function UserCard({ user, className, facilityId }: Props) {
-  const name = formatName(user);
-
   const { patientToken: tokenData } = useAuthContext();
 
   const returnLink = useMemo(() => {
@@ -49,7 +47,9 @@ export function UserCard({ user, className, facilityId }: Props) {
             />
 
             <div className="flex grow flex-col min-w-0">
-              <h3 className="truncate text-xl font-semibold">{name}</h3>
+              <h3 className="truncate text-xl font-semibold">
+                {formatName(user)}
+              </h3>
               <p className="text-sm text-gray-500">{user.user_type}</p>
 
               {user.qualification && (

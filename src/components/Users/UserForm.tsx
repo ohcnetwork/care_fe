@@ -268,8 +268,6 @@ export default function UserForm({
     },
   });
 
-  console.log(form.formState.errors);
-
   const onSubmit = async (data: UserFormValues) => {
     if (isEditMode) {
       updateUser({
