@@ -18,7 +18,7 @@ export default function UserBanner({ userData }: { userData: UserBase }) {
         <div className="flex flex-row gap-2 self-center">
           <Avatar
             imageUrl={userData?.profile_picture_url}
-            name={formatName(userData)}
+            name={formatName(userData, true)}
             className="h-20 w-20 md:mr-2 shrink-0"
           />
           <div className="grid grid-cols-1 self-center">

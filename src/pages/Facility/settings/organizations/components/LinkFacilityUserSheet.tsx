@@ -140,7 +140,7 @@ export default function LinkFacilityUserSheet({
                 <div className="flex gap-4 flex-row">
                   <Avatar
                     imageUrl={selectedUser.profile_picture_url}
-                    name={formatName(selectedUser)}
+                    name={formatName(selectedUser, true)}
                     className="h-12 w-12"
                   />
                   <div className="w-3/4">

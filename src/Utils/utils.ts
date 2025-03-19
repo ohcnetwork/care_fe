@@ -39,15 +39,23 @@ export const relativeDate = (date: DateLike, withoutSuffix = false) => {
   } at ${obj.format(TIME_FORMAT)}`;
 };
 
-export const formatName = (user: {
-  first_name?: string | null;
-  last_name?: string | null;
-  prefix?: string | null;
-  suffix?: string | null;
-  username: string;
-}) => {
+export const formatName = (
+  user: {
+    first_name: string;
+    last_name: string;
+    prefix?: string | null;
+    suffix?: string | null;
+    username: string;
+  },
+  noPrefixSuffix?: boolean,
+) => {
   return (
-    [user.prefix, user.first_name, user.last_name, user.suffix]
+    [
+      noPrefixSuffix ? undefined : user.prefix,
+      user.first_name,
+      user.last_name,
+      noPrefixSuffix ? undefined : user.suffix,
+    ]
       .map((s) => s?.trim())
       .filter(Boolean)
       .join(" ") || user.username

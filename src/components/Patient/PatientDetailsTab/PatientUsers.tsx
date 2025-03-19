@@ -132,7 +132,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
               <div className="rounded-lg border p-4 space-y-4">
                 <div className="flex items-start gap-4">
                   <Avatar
-                    name={formatName(selectedUser)}
+                    name={formatName(selectedUser, true)}
                     imageUrl={selectedUser.profile_picture_url}
                     className="h-12 w-12"
                   />
@@ -258,7 +258,7 @@ export const PatientUsers = (props: PatientProps) => {
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">
                 <Avatar
-                  name={formatName(user)}
+                  name={formatName(user, true)}
                   className="h-10 w-10"
                   imageUrl={user.profile_picture_url}
                 />
