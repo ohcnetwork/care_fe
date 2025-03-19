@@ -137,7 +137,7 @@ export const Authenticate = () => {
                                 value={field.value}
                                 onChange={field.onChange}
                                 autoComplete="one-time-code"
-                                autoFocus={true}
+                                autoFocus
                               >
                                 <InputOTPGroup>
                                   {[
