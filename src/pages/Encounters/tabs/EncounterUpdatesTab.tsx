@@ -18,26 +18,17 @@ export const EncounterUpdatesTab = ({
         <div className="flex-1 space-y-4" data-cy="encounter-overview">
           {/* Allergies Section */}
           <div>
-            <AllergyList
-              patientId={patient.id}
-              encounterId={encounter.id}
-              encounterStatus={encounter.status}
-              encounter={encounter}
-            />
+            <AllergyList patientId={patient.id} encounter={encounter} />
           </div>
 
           {/* Symptoms Section */}
           <div>
-            <SymptomsList patientId={patient.id} encounterId={encounter.id} />
+            <SymptomsList patientId={patient.id} encounter={encounter} />
           </div>
 
           {/* Diagnoses Section */}
           <div>
-            <DiagnosisList
-              patientId={patient.id}
-              encounterId={encounter.id}
-              encounter={encounter}
-            />
+            <DiagnosisList patientId={patient.id} encounter={encounter} />
           </div>
 
           {/* Questionnaire Responses Section */}

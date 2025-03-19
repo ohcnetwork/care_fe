@@ -16,14 +16,12 @@ import { Encounter } from "@/types/emr/encounter";
 
 interface FullViewDialogProps {
   patientId: string;
-  encounterId: string;
   initialTab?: "allergies" | "symptoms" | "diagnoses" | "questionnaire";
   encounter?: Encounter;
 }
 
 export function FullViewDialog({
   patientId,
-  encounterId,
   initialTab = "symptoms",
   encounter,
 }: FullViewDialogProps) {
@@ -129,9 +127,8 @@ export function FullViewDialog({
               <div className="mt-4">
                 <AllergyList
                   patientId={patientId}
-                  encounterId={encounterId}
+                  encounter={encounter}
                   hideFullViewButton={true}
-                  overviewSection={false}
                 />
               </div>
             </TabsContent>
@@ -140,9 +137,8 @@ export function FullViewDialog({
               <div className="mt-4">
                 <SymptomsList
                   patientId={patientId}
-                  encounterId={encounterId}
+                  encounter={encounter}
                   hideFullViewButton={true}
-                  overviewSection={false}
                 />
               </div>
             </TabsContent>
@@ -151,9 +147,8 @@ export function FullViewDialog({
               <div className="mt-4">
                 <DiagnosisList
                   patientId={patientId}
-                  encounterId={encounterId}
+                  encounter={encounter}
                   hideFullViewButton={true}
-                  overviewSection={false}
                 />
               </div>
             </TabsContent>

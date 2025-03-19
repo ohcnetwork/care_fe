@@ -48,13 +48,10 @@ import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 
 interface AllergyListProps {
   patientId: string;
-  encounterId?: string;
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
   readOnly?: boolean;
-  encounterStatus?: Encounter["status"];
-  overviewSection?: boolean;
 }
 
 export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
@@ -72,10 +69,8 @@ export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
 
 export function AllergyList({
   patientId,
-  encounterId,
   className = "",
   readOnly = false,
-  encounterStatus,
   encounter,
   hideFullViewButton = false,
 }: AllergyListProps) {
@@ -88,12 +83,14 @@ export function AllergyList({
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["allergies", patientId, encounterId, encounterStatus, page],
+    queryKey: ["allergies", patientId, encounter?.id, encounter?.status, page],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: {
-        encounter: completedEncounterStatus.includes(encounterStatus as string)
-          ? encounterId
+        encounter: completedEncounterStatus.includes(
+          encounter?.status as string,
+        )
+          ? encounter?.id
           : undefined,
         limit: limit,
         offset: (page - 1) * limit,
@@ -293,7 +290,6 @@ export function AllergyList({
           {!hideFullViewButton && (
             <FullViewDialog
               patientId={patientId}
-              encounterId={encounterId ?? ""}
               initialTab="allergies"
               encounter={encounter}
             />

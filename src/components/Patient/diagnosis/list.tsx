@@ -22,17 +22,14 @@ import { DiagnosisTable } from "./DiagnosisTable";
 
 interface DiagnosisListProps {
   patientId: string;
-  encounterId?: string;
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
   readOnly?: boolean;
-  overviewSection?: boolean;
 }
 
 export function DiagnosisList({
   patientId,
-  encounterId,
   hideFullViewButton = false,
   encounter,
   className = "",
@@ -47,11 +44,11 @@ export function DiagnosisList({
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["diagnosis", patientId, encounterId],
+    queryKey: ["diagnosis", patientId, encounter?.id],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
-      queryParams: encounterId
-        ? { encounter: encounterId, limit: limit }
+      queryParams: encounter?.id
+        ? { encounter: encounter.id, limit: limit }
         : { limit: limit },
     }),
   });
@@ -88,7 +85,7 @@ export function DiagnosisList({
     (diagnosis) => diagnosis.verification_status !== "entered_in_error",
   );
 
-  const hasInActiveRecords = diagnoses?.results?.some(
+  const hasInActiveRecords = allDiagnoses.some(
     (diagnose) =>
       diagnose.verification_status === "entered_in_error" ||
       diagnose.clinical_status === "inactive" ||
@@ -137,10 +134,9 @@ export function DiagnosisList({
 
         {hasInActiveRecords && (
           <>
-            {!hideFullViewButton && encounterId && (
+            {!hideFullViewButton && encounter?.id && (
               <FullViewDialog
                 patientId={patientId}
-                encounterId={encounterId}
                 initialTab="diagnoses"
                 encounter={encounter}
               />

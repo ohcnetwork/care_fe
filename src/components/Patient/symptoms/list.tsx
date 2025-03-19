@@ -22,17 +22,14 @@ import { SymptomTable } from "./SymptomTable";
 
 interface SymptomsListProps {
   patientId: string;
-  encounterId?: string;
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
   readOnly?: boolean;
-  overviewSection?: boolean;
 }
 
 export function SymptomsList({
   patientId,
-  encounterId,
   className,
   encounter,
   hideFullViewButton = false,
@@ -47,11 +44,11 @@ export function SymptomsList({
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["symptoms", patientId, encounterId],
+    queryKey: ["symptoms", patientId, encounter?.id],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
-      queryParams: encounterId
-        ? { encounter: encounterId, limit: limit }
+      queryParams: encounter?.id
+        ? { encounter: encounter.id, limit: limit }
         : { limit: limit },
     }),
   });
@@ -74,6 +71,7 @@ export function SymptomsList({
     return (
       <SymptomListLayout
         readOnly={readOnly}
+        className={className}
         hideFullViewButton={hideFullViewButton}
       >
         <CardContent className="px-2 pb-2">
@@ -87,7 +85,7 @@ export function SymptomsList({
     (symptom) => symptom.verification_status !== "entered_in_error",
   );
 
-  const hasInActiveRecords = symptoms?.results?.some(
+  const hasInActiveRecords = allSymptoms.some(
     (symptom) =>
       symptom.verification_status === "entered_in_error" ||
       symptom.clinical_status === "inactive" ||
@@ -98,6 +96,7 @@ export function SymptomsList({
     return (
       <SymptomListLayout
         hideFullViewButton={hideFullViewButton}
+        className={className}
         readOnly={readOnly}
       >
         <CardContent className="px-2 pb-3 pt-2">
@@ -134,10 +133,9 @@ export function SymptomsList({
 
       {hasInActiveRecords && (
         <>
-          {!hideFullViewButton && encounterId && (
+          {!hideFullViewButton && encounter?.id && (
             <FullViewDialog
               patientId={patientId}
-              encounterId={encounterId}
               initialTab="symptoms"
               encounter={encounter}
             />
