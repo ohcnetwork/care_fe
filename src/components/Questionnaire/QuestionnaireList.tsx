@@ -139,7 +139,7 @@ const RenderTable = ({
                 }
               >
                 <TableCell className="px-6 py-2">
-                  {questionnaire.title && questionnaire.title.length > 20 ? (
+                  {questionnaire.title && (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
@@ -152,10 +152,6 @@ const RenderTable = ({
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                  ) : (
-                    <span className="text-sm text-left font-semibold text-gray-950 truncate">
-                      {questionnaire.title}
-                    </span>
                   )}
                 </TableCell>
                 <TableCell className="px-6 py-2">
