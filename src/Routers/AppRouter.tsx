@@ -99,12 +99,23 @@ export default function AppRouter() {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "auto";
     }
-    setTimeout(() => {
-      window.scrollTo({
-        top: 0,
-        behavior: "auto",
-      });
-    }, 50);
+
+    const savedPosition = sessionStorage.getItem(`scroll-${currentPath}`);
+    if (savedPosition) {
+      window.scrollTo({ top: parseInt(savedPosition, 10), behavior: "auto" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+
+    const handleScroll = () => {
+      sessionStorage.setItem(
+        `scroll-${currentPath}`,
+        window.scrollY.toString(),
+      );
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [currentPath]);
 
   return (
