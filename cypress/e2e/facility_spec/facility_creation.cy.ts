@@ -24,7 +24,7 @@ describe("Facility Management", () => {
     const testFacility = generateFacilityData();
     const phoneNumber = generatePhoneNumber();
 
-    facilityPage.navigateToOrganization("Kerala");
+    facilityPage.navigateToGovernance("Kerala");
     facilityPage.navigateToFacilitiesList();
     facilityPage.clickAddFacility();
     facilityPage.submitFacilityCreationForm();
@@ -47,10 +47,7 @@ describe("Facility Management", () => {
 
     facilityPage.fillLocationHierarchy(LOCATION_HIERARCHY);
 
-    facilityPage.fillLocationDetails(
-      testFacility.coordinates.latitude,
-      testFacility.coordinates.longitude,
-    );
+    facilityPage.fillLocationDetails("Ernakulam");
 
     // Submit and verify
     facilityPage.makePublicFacility();
