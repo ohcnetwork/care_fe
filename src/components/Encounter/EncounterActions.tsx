@@ -88,15 +88,16 @@ export default function EncounterActions({
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/files/discharge_summary`}
-            >
+            <Link href="files?file=discharge_summary">
               {t("discharge_summary")}
             </Link>
           </DropdownMenuItem>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <DropdownMenuItem
+                onSelect={(e) => e.preventDefault()}
+                data-cy="mark-encounter-as-complete"
+              >
                 {t("mark_as_complete")}
               </DropdownMenuItem>
             </AlertDialogTrigger>
@@ -118,7 +119,7 @@ export default function EncounterActions({
                 <AlertDialogAction
                   className={cn(buttonVariants({ variant: "primary" }))}
                   onClick={handleMarkAsComplete}
-                  data-cy="mark-encounter-as-complete"
+                  data-cy="encounter-complete-dropdown"
                 >
                   {t("mark_as_complete")}
                 </AlertDialogAction>
@@ -149,15 +150,14 @@ export default function EncounterActions({
           className="w-full justify-start"
           asChild
         >
-          <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/files/discharge_summary`}
-          >
+          <Link href="files?file=discharge_summary">
             {t("discharge_summary")}
           </Link>
         </Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
+              data-cy="mark-encounter-complete"
               variant={variant}
               size={size}
               className="w-full justify-start"
@@ -183,7 +183,7 @@ export default function EncounterActions({
               <AlertDialogAction
                 className={cn(buttonVariants({ variant: "primary" }))}
                 onClick={handleMarkAsComplete}
-                data-cy="mark-encounter-as-complete"
+                data-cy="confirm-encounter-complete"
               >
                 {t("mark_as_complete")}
               </AlertDialogAction>
