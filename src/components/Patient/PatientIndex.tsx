@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
 
@@ -54,19 +55,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     });
   }, [facilityId, phoneNumber]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.shiftKey && event.key === "P") {
-        event.preventDefault();
-        handleCreatePatient();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleCreatePatient]);
+  useKeyboardShortcut(["shift", "p"], handleCreatePatient, {
+    ignoreInputFields: false,
+  });
 
   function AddPatientButton({ outline }: { outline?: boolean }) {
     return (
