@@ -23,7 +23,7 @@ export function QuestionLabel({
   const defaultClass = groupLabel ? defaultGroupClass : defaultInputClass;
   return (
     <Label className={className ?? defaultClass}>
-      <div className="flex flex-col gap-3 bg-gray-50 sm:bg-transparent">
+      <div className="flex flex-col gap-3 bg-gray-100 sm:bg-transparent">
         <div className="flex gap-3 items-center">
           {/* {groupLabel && (
             <div

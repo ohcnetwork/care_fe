@@ -270,7 +270,9 @@ const SymptomRow = React.memo(function SymptomRow({
         >
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <CardHeader
-              className={cn("p-3 pb-2 rounded-lg", { "bg-gray-100": !isOpen })}
+              className={cn("p-3 pb-2 rounded-lg", {
+                "bg-gray-200 border border-gray-300": !isOpen,
+              })}
             >
               <div className="flex flex-col space-y-1">
                 <div className="flex items-center justify-between">
