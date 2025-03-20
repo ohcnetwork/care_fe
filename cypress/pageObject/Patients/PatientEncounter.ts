@@ -233,6 +233,7 @@ export class PatientEncounter {
   // **6️⃣ Logout**
   logout() {
     cy.visit("/");
+    cy.get('[data-cy="user-dashboard-dropdown"]').click();
     cy.verifyAndClickElement('[data-cy="sign-out-button"]', "Sign out");
     return this;
   }

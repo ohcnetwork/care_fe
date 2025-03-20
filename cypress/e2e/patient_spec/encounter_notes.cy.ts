@@ -33,7 +33,7 @@ describe("Encounter Notes", () => {
     const role = Cypress.env("role") || "devdoctor";
     cy.loginByApi(role);
     cy.visit("/");
-    facilityCreation.selectFacility("GHC payyanur");
+    facilityCreation.selectFacility("GHC Payyanur");
   });
 
   it("Should create multiple threads and ensure chats remain within their respective threads", () => {
