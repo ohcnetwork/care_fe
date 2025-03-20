@@ -41,7 +41,7 @@ interface AutocompleteProps {
   align?: "start" | "center" | "end";
   className?: string;
   popoverClassName?: string;
-  freeInput: boolean;
+  freeInput?: boolean;
   "data-cy"?: string;
 }
 
