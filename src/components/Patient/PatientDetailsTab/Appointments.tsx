@@ -127,14 +127,16 @@ export const Appointments = (props: PatientProps) => {
                   </TableCell>
                   <TableCell>{getStatusBadge(appointment.status)}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link
-                        href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
-                      >
-                        <CareIcon icon="l-eye" className="mr-1" />
-                        {t("view")}
-                      </Link>
-                    </Button>
+                    {facilityId && (
+                      <Button variant="outline" size="sm" asChild>
+                        <Link
+                          href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
+                        >
+                          <CareIcon icon="l-eye" className="mr-1" />
+                          {t("view")}
+                        </Link>
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
