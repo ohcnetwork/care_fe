@@ -9,6 +9,7 @@ import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -36,7 +37,7 @@ import {
   validateRule,
 } from "@/components/Users/UserFormValidations";
 
-import { GENDER_TYPES } from "@/common/constants";
+import { GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
@@ -92,6 +93,8 @@ export default function UserForm({
       email: z.string().email(t("invalid_email_address")),
       phone_number: validators().phoneNumber.required,
       gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
+      prefix: z.string().optional(),
+      suffix: z.string().optional(),
       /* TODO: Userbase doesn't currently support these, neither does BE
       but we will probably need these */
       /* qualification: z.string().optional(),
@@ -146,6 +149,8 @@ export default function UserForm({
       last_name: "",
       email: "",
       phone_number: "",
+      prefix: "",
+      suffix: "",
       password_setup_method: "immediate",
     },
   });
@@ -166,6 +171,8 @@ export default function UserForm({
         email: userData.email,
         phone_number: userData.phone_number || "",
         gender: userData.gender || undefined,
+        prefix: userData.prefix || "",
+        suffix: userData.suffix || "",
       };
       form.reset(formData);
     }
@@ -250,18 +257,13 @@ export default function UserForm({
     }),
     onSuccess: (resp: UserBase) => {
       toast.success(t("user_updated_successfully"));
-      queryClient.invalidateQueries({
-        queryKey: ["facilityUsers"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["organizationUsers"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["facilityOrganizationUsers"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["getUserDetails", resp.username],
-      });
+      [
+        ["facilityUsers"],
+        ["organizationUsers"],
+        ["facilityOrganizationUsers"],
+        ["getUserDetails", resp.username],
+        ["currentUser"],
+      ].forEach((key) => queryClient.invalidateQueries({ queryKey: key }));
       onSubmitSuccess?.(resp);
     },
   });
@@ -336,12 +338,35 @@ export default function UserForm({
           />
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="md:flex gap-2 grid grid-cols-2">
+          <FormField
+            control={form.control}
+            name="prefix"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("prefix")}</FormLabel>
+                <Autocomplete
+                  options={NAME_PREFIXES.map((prefix) => ({
+                    label: prefix,
+                    value: prefix,
+                  }))}
+                  freeInput
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  noOptionsMessage=""
+                  className="md:w-28"
+                  placeholder={t("select_or_type")}
+                  inputPlaceholder={t("select_or_type")}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="first_name"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex-1">
                 <FormLabel required>{t("first_name")}</FormLabel>
                 <FormControl>
                   <Input
@@ -354,12 +379,11 @@ export default function UserForm({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="last_name"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex-1">
                 <FormLabel required>{t("last_name")}</FormLabel>
                 <FormControl>
                   <Input
@@ -368,6 +392,22 @@ export default function UserForm({
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="suffix"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("suffix")}</FormLabel>
+                <Input
+                  data-cy="suffix-input"
+                  placeholder={t("suffix")}
+                  {...field}
+                />
+
                 <FormMessage />
               </FormItem>
             )}
