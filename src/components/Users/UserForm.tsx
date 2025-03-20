@@ -92,7 +92,10 @@ export default function UserForm({
       last_name: z.string().min(1, t("field_required")),
       email: z.string().email(t("invalid_email_address")),
       phone_number: validators().phoneNumber.required,
-      gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
+      gender: z
+        .string()
+        .min(1, { message: t("field_required") })
+        .pipe(z.enum(GENDERS)),
       prefix: z.string().optional(),
       suffix: z.string().optional(),
       /* TODO: Userbase doesn't currently support these, neither does BE
