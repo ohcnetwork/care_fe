@@ -321,6 +321,18 @@ const Login = (props: LoginProps) => {
     (logo) => logo?.light || logo?.dark,
   );
 
+  useEffect(() => {
+    if ("OTPCredential" in window && isOtpSent) {
+      navigator.credentials
+        .get({ otp: { transport: ["sms"] } } as any)
+        .then((otpCredential: any) => {
+          setOtp(otpCredential.code); // Autofill OTP
+          setOtpValidationError(""); // Clear any validation errors
+        })
+        .catch((err) => console.log("OTP Autofill Failed:", err));
+    }
+  }, [isOtpSent]);
+
   return (
     <div className="relative flex min-h-screen flex-col md:h-screen md:flex-row">
       <AuthHero />
