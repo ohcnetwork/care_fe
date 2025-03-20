@@ -125,6 +125,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         isActive && "ring-2 ring-primary",
         question.styling_metadata?.classes && question.styling_metadata.classes,
       )}
+      id={`question-${question.id}`}
     >
       {question.text && (
         <div className="space-y-1">

@@ -1338,7 +1338,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       />
                     ) : (
                       questionnaire.questions.map((question) => (
-                        <div key={question.id} id={`question-${question.id}`}>
+                        <div key={question.id}>
                           <QuestionPreview question={question} depth={0} />
                         </div>
                       ))
@@ -1900,11 +1900,10 @@ function QuestionEditor({
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div>
                       <CardTitle className="text-base font-medium">
-                        Quantity
+                        {t("quantity")}
                       </CardTitle>
                       <p className="text-sm text-gray-500">
-                        Select the valueset of options for this quantity
-                        question
+                        {t("select_valueset_quantity_question")}
                       </p>
                     </div>
                   </CardHeader>

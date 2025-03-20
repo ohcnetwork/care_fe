@@ -296,6 +296,7 @@ export function QuestionInput({
     <div
       className="space-y-2"
       data-cy={`question-${question.text?.toLowerCase().replace(/\s+/g, "-")}`}
+      id={`question-${question.id}`}
     >
       {renderInput()}
       {error && <p className="text-sm font-medium text-red-500">{error}</p>}

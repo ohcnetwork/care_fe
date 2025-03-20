@@ -4,8 +4,6 @@ import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -143,7 +141,7 @@ function ValidationErrorDisplay({
             icon="l-exclamation-circle"
             className="h-5 w-5 text-red-500"
           />
-          <h3 className="font-medium text-red-700">Validation Errors</h3>
+          <h3 className="font-medium text-red-700">{t("validation_errors")}</h3>
         </div>
 
         {/* Server-level errors */}
@@ -316,9 +314,6 @@ export function QuestionnaireForm({
     QuestionnaireFormState[]
   >([]);
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
-  const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
-
-  const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
 
   const {
@@ -680,66 +675,8 @@ export function QuestionnaireForm({
     submitBatch({ requests });
   };
 
-  const scrollToQuestion = (questionnaireId: string, groupId?: string) => {
-    setActiveQuestionnaireId(questionnaireId);
-    setActiveGroupId(groupId);
-
-    let element: Element | null;
-
-    if (groupId) {
-      element = document.querySelector(`[data-group-id="${groupId}"]`);
-    } else {
-      element = document.querySelector(
-        `[data-questionnaire-id="${questionnaireId}"]`,
-      );
-    }
-
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
   return (
     <div className="flex gap-4">
-      {/* Left Navigation */}
-      <div className="w-64 border-r p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
-        {questionnaireForms.map((form) => (
-          <div key={form.questionnaire.id} className="space-y-2">
-            <button
-              className={cn(
-                "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
-                activeQuestionnaireId === form.questionnaire.id &&
-                  "bg-gray-100 text-green-600",
-              )}
-              onClick={() => scrollToQuestion(form.questionnaire.id)}
-              disabled={isPending}
-            >
-              {form.questionnaire.title}
-            </button>
-            <div className="pl-4 space-y-1">
-              {form.questionnaire.questions
-                .filter((q) => q.type === "group")
-                .map((group) => (
-                  <button
-                    key={group.id}
-                    className={cn(
-                      "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
-                      activeGroupId === group.id &&
-                        "bg-gray-100 text-green-600",
-                    )}
-                    onClick={() =>
-                      scrollToQuestion(form.questionnaire.id, group.id)
-                    }
-                    disabled={isPending}
-                  >
-                    {group.text}
-                  </button>
-                ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
         {/* Questionnaire Forms */}
@@ -780,7 +717,6 @@ export function QuestionnaireForm({
                 </Button>
               )}
             </div>
-
             <QuestionRenderer
               facilityId={facilityId}
               encounterId={encounterId}
@@ -811,7 +747,6 @@ export function QuestionnaireForm({
                 }
               }}
               disabled={isPending}
-              activeGroupId={activeGroupId}
               errors={form.errors}
               patientId={patientId}
               clearError={(questionId: string) => {
