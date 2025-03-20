@@ -575,6 +575,7 @@ const NewAvailabilityCard = ({
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
+      auto_fill_duration: z.boolean().optional(),
     })
     .refine(
       (data) => {
@@ -601,6 +602,7 @@ const NewAvailabilityCard = ({
       tokens_per_slot: null,
       reason: "",
       weekdays: [],
+      auto_fill_duration: false,
     },
   });
 
