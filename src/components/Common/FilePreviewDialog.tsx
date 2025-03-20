@@ -1,6 +1,3 @@
-import { TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { Tooltip } from "@radix-ui/react-tooltip";
 import {
   Dispatch,
   ReactNode,
@@ -24,12 +21,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FileUploadModel } from "@/components/Patient/models";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
-
 export const zoom_values = [
   "scale-25",
   "scale-50",
@@ -40,7 +37,6 @@ export const zoom_values = [
   "scale-175",
   "scale-200",
 ];
-
 export interface StateInterface {
   open: boolean;
   isImage: boolean;
@@ -53,7 +49,6 @@ export interface StateInterface {
   id?: string;
   associating_id?: string;
 }
-
 type FilePreviewProps = {
   title?: ReactNode;
   description?: ReactNode;
@@ -70,7 +65,6 @@ type FilePreviewProps = {
   loadFile?: (file: FileUploadModel, associating_id: string) => void;
   currentIndex: number;
 };
-
 const previewExtensions = [
   ".html",
   ".htm",
@@ -98,10 +92,8 @@ const calculateClampedPosition = (
 ) => {
   const maxX = Math.max(0, (imageRect.width - containerRect.width) / 2);
   const maxY = Math.max(0, (imageRect.height - containerRect.height) / 2);
-
   const newX = e.clientX - dragStart.x;
   const newY = e.clientY - dragStart.y;
-
   return {
     x: Math.max(-maxX, Math.min(maxX, newX)),
     y: Math.max(-maxY, Math.min(maxY, newY)),
@@ -127,7 +119,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     currentIndex,
   } = props;
   const { t } = useTranslation();
-
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [index, setIndex] = useState<number>(currentIndex);
@@ -152,7 +143,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     });
     setScale((prevScale) => Math.min(prevScale + 0.25, 2));
   };
-
   const handleZoomOut = () => {
     const checkFull = file_state.zoom === 1;
     setFileState({
@@ -161,7 +151,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     });
     setScale((prevScale) => Math.max(prevScale - 0.25, 0.5));
   };
-
   const handleRotate = (angle: number) => {
     setFileState((prev: any) => {
       const newRotation = (prev.rotation + angle + 360) % 360;
@@ -189,6 +178,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const fileName = file_state?.name
     ? file_state.name + "." + file_state.extension
     : "";
+
   const fileNameTooltip =
     fileName.length > 30 ? fileName.slice(0, 30) + "..." : fileName;
 
@@ -203,7 +193,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     }
     const nextFile = uploadedFiles[newIndex];
     if (!nextFile?.id) return;
-
     const associating_id = nextFile.associating_id || "";
     loadFile(nextFile, associating_id);
     setIndex(newIndex);
@@ -218,6 +207,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   };
 
   useKeyboardShortcut(["ArrowLeft"], () => index > 0 && handleNext(index - 1));
+
   useKeyboardShortcut(
     ["ArrowRight"],
     () => index < (uploadedFiles?.length || 0) - 1 && handleNext(index + 1),
@@ -321,20 +311,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
           <>
             <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
               <div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <p className="text-2xl font-bold text-gray-800 truncate">
-                        {fileNameTooltip}
-                      </p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm text-white truncate bg-red rounded-md p-2">
-                        {fileName}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <TooltipComponent content={fileName}>
+                  <p className="text-2xl font-bold text-gray-800 truncate">
+                    {fileNameTooltip}
+                  </p>
+                </TooltipComponent>
                 {uploadedFiles &&
                   uploadedFiles[index] &&
                   uploadedFiles[index].created_date && (
@@ -381,7 +362,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               )}
               <div
                 className={cn(
-                  "flex h-[75vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200 touch-none",
+                  "flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200 touch-none",
                   dragState.isDragging ? "cursor-grabbing" : "cursor-grab",
                 )}
                 onMouseDown={handleMouseDown}
@@ -571,5 +552,4 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     </Dialog>
   );
 };
-
 export default FilePreviewDialog;
