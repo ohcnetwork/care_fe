@@ -99,7 +99,6 @@ function LocationRow({
   });
 
   const allExpanded = children.every((child) => expandedRows[child.id]);
-
   return (
     <>
       <TableRow
@@ -139,7 +138,7 @@ function LocationRow({
           </div>
           {isTopLevel && (
             <div className="flex justify-between items-center gap-2">
-              <div className="flex-1 mr-20">
+              <div className="flex-1">
                 {children.length > 0 && displayExpandAll && (
                   <Button
                     variant="white"
@@ -158,41 +157,42 @@ function LocationRow({
                 )}
               </div>
               <div>
-                {!location.has_children && !location.current_encounter ? (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="white"
-                        size={isMobile ? "xs" : "sm"}
-                        className="gap-2"
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="white"
+                      size={isMobile ? "xs" : "sm"}
+                      className="gap-2"
+                      disabled={
+                        !(!location.has_children && !location.current_encounter)
+                      }
+                    >
+                      <CareIcon icon={"l-trash"} className="h-4 w-4" />
+                      <span className="hidden lg:inline">{t("delete")}</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t("remove_location", { name: location.name })}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("are_you_sure_want_to_delete", {
+                          name: location.name,
+                        })}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => removeLocation({})}
+                        className={buttonVariants({ variant: "destructive" })}
                       >
-                        <CareIcon icon={"l-trash"} className="h-4 w-4" />
-                        <span className="hidden lg:inline">{t("delete")}</span>
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("remove_location", { name: location.name })}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {t("are_you_sure_want_to_delete", {
-                            name: location.name,
-                          })}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => removeLocation({})}
-                          className={buttonVariants({ variant: "destructive" })}
-                        >
-                          {t("remove")}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                ) : null}
+                        {t("remove")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
 
               <div className="flex items-center gap-2 ml-auto">
