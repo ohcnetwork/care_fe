@@ -44,7 +44,7 @@ const RecordMeta = ({
           <span className="flex items-center gap-1">
             by
             <CareIcon icon="l-user" />
-            {formatName({ ...user, username: "User" })}
+            {formatName(user)}
             {isOnline && (
               <div className="h-1.5 w-1.5 rounded-full bg-primary-400" />
             )}
@@ -62,9 +62,7 @@ const RecordMeta = ({
         {user && inlineUser && <span>by</span>}
         {user && !inlineUser && <CareIcon icon="l-user" />}
         {user && inlineUser && (
-          <span className="font-medium">
-            {formatName({ ...user, username: "User" })}
-          </span>
+          <span className="font-medium">{formatName(user)}</span>
         )}
       </div>
     );
