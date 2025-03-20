@@ -269,3 +269,32 @@ export const mergeAutocompleteOptions = (
   if (options.find((o) => o.value === value.value)) return options;
   return [value, ...options];
 };
+
+export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
+  if (!pastDate) {
+    return [];
+  }
+
+  const intervals = [];
+  let current = new Date(pastDate);
+  let currentEnd = new Date();
+
+  while (currentEnd >= current) {
+    let currentStart = new Date(currentEnd);
+    currentStart.setDate(currentStart.getDate() - 6);
+
+    if (currentStart < current) {
+      currentStart = current;
+    }
+
+    intervals.push({
+      start: currentStart,
+      end: currentEnd,
+    });
+
+    currentEnd = new Date(currentStart);
+    currentEnd.setDate(currentEnd.getDate() - 1);
+  }
+
+  return intervals;
+}

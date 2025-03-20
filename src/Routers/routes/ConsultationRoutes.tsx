@@ -4,6 +4,7 @@ import Loading from "@/components/Common/Loading";
 import { PrintQuestionnaireQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
 import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
+import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
@@ -46,6 +47,14 @@ const consultationRoutes: AppRoutes = {
         />
       );
     },
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/medicines/administrations/print":
+    ({ facilityId, encounterId, patientId }) => (
+      <PrintMedicationAdministration
+        facilityId={facilityId}
+        encounterId={encounterId}
+        patientId={patientId}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/treatment_summary":
     ({ facilityId, encounterId, patientId }) => (
       <TreatmentSummary

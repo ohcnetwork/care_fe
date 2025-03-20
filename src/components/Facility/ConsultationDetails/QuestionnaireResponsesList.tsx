@@ -77,8 +77,15 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
       <div className="text-xs text-gray-500">{question.text}</div>
       <div className="space-y-1">
         {response.values.map((valueObj, index) => {
-          const value = valueObj.value || valueObj.value_quantity?.value;
-          if (!value) return null;
+          const value = valueObj.value;
+
+          const coding = valueObj.coding;
+
+          const unit = valueObj.unit;
+
+          if (!value && !coding) return null;
+
+          const precedentUnit = unit ? unit : question.unit;
 
           return (
             <div
@@ -86,8 +93,13 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
               className="text-sm font-medium whitespace-pre-wrap"
             >
               {formatValue(value, question.type)}
-              {question.unit?.code && (
-                <span className="ml-1 text-xs">{question.unit.code}</span>
+              {precedentUnit && (
+                <span className="ml-1 text-xs">{precedentUnit.code}</span>
+              )}
+              {coding && (
+                <span className="ml-1 text-xs">
+                  {coding.display} ({coding.code})
+                </span>
               )}
               {index === response.values.length - 1 && response.note && (
                 <span className="ml-2 text-xs text-gray-500">
