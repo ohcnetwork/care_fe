@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+import { Link, navigate, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -6,7 +6,9 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import EncounterActions from "@/components/Encounter/EncounterActions";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
+import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
@@ -20,11 +22,13 @@ interface QuickAccessProps {
 export default function QuickAccess({ encounter }: QuickAccessProps) {
   const { t } = useTranslation();
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityId = subpathMatch?.facilityId;
 
   return (
     <div className="flex flex-col gap-6">
       {/* Questionnaire Section */}
-      {encounter.status !== "completed" && (
+      {encounter.status !== "completed" && facilityId && (
         <section className="space-y-2 p-2">
           <h3 className="text-lg font-semibold mb-3">{t("questionnaire")}</h3>
           <div className="space-y-3 p-2 font-semibold">
@@ -40,9 +44,27 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
               </Link>
             ))}
           </div>
+          <QuestionnaireSearch
+            placeholder={t("choose_questionnaire")}
+            subjectType="encounter"
+            onSelect={(selected) =>
+              navigate(
+                `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/${selected.slug}`,
+              )
+            }
+          />
           <div className="w-full border-t border-dashed border-gray-300" />
         </section>
       )}
+
+      {/* Encounter Actions */}
+      <section>
+        <h3 className="text-lg font-medium text-gray-950 mb-1">
+          {t("actions")}
+        </h3>
+
+        <EncounterActions encounter={encounter} />
+      </section>
 
       {/* Departments and Teams */}
       <section>
