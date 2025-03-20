@@ -198,6 +198,8 @@ export default function LinkConsentDialog({
     form.setValue("source_attachments", fileUpload.files);
   }, [fileUpload.files, form]);
 
+  console.log(authUser);
+
   const onSubmit = (values: ConsentFormValues) => {
     const verifier: UserBase = {
       id: authUser.external_id,
@@ -208,6 +210,9 @@ export default function LinkConsentDialog({
       gender: authUser.gender || "non_binary",
       username: authUser.username,
       email: authUser.email || "",
+      prefix: authUser.prefix || "",
+      suffix: authUser.suffix || "",
+      mfa_enabled: authUser.mfa_enabled || false,
       last_login: authUser.last_login || new Date().toISOString(),
       profile_picture_url: authUser.read_profile_picture_url || "",
     };

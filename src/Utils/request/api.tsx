@@ -16,6 +16,7 @@ import {
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
+import { MFAAuthenticationToken } from "@/types/auth/otp";
 import {
   ConsentListResponse,
   ConsentModel,
@@ -23,7 +24,6 @@ import {
   UpdateConsentRequest,
   VerificationType,
 } from "@/types/consent/consent";
-import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
