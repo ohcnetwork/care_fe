@@ -8,17 +8,14 @@ import {
   isUserOnline,
   relativeTime,
 } from "@/Utils/utils";
+import { UserBase } from "@/types/user/user";
 
 interface Props {
   time?: string;
   prefix?: ReactNode;
   className?: string;
   inlineClassName?: string;
-  user?: {
-    first_name: string;
-    last_name: string;
-    last_login: string | undefined;
-  };
+  user?: UserBase;
   inlineUser?: boolean;
 }
 

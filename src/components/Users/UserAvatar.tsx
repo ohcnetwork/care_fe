@@ -112,7 +112,7 @@ export default function UserAvatar({ username }: { username: string }) {
         <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex justify-between">
           <div className="flex items-center">
             <Avatar
-              name={formatName(userData)}
+              name={formatName(userData, true)}
               imageUrl={userData?.profile_picture_url}
               className="h-20 w-20"
             />

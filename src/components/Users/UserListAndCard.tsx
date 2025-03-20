@@ -65,7 +65,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
       <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
         <div className="flex items-start gap-3">
           <Avatar
-            name={formatName(user)}
+            name={formatName(user, true)}
             imageUrl={
               "profile_picture_url" in user ? user.profile_picture_url : ""
             }
@@ -155,7 +155,7 @@ const UserListRow = ({ user }: { user: UserBase }) => {
             imageUrl={
               "profile_picture_url" in user ? user.profile_picture_url : ""
             }
-            name={formatName(user) ?? ""}
+            name={formatName(user, true) ?? ""}
             className="h-10 w-10 text-lg"
           />
           <div className="flex flex-col">

@@ -26,6 +26,7 @@ import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
 import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
 import { NumberQuestion } from "./NumberQuestion";
+import { QuantityQuestion } from "./QuantityQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
 import { TextQuestion } from "./TextQuestion";
 
@@ -95,6 +96,7 @@ export function QuestionInput({
       clearError,
       index,
       patientId,
+      errors,
     };
 
     switch (question.type) {
@@ -104,6 +106,9 @@ export function QuestionInput({
       case "decimal":
       case "integer":
         return <NumberQuestion {...commonProps} />;
+
+      case "quantity":
+        return <QuantityQuestion {...commonProps} />;
 
       case "choice":
         return <ChoiceQuestion {...commonProps} />;
@@ -164,7 +169,12 @@ export function QuestionInput({
             }
             return <span>{t("questionnaire_diagnosis_no_encounter")}</span>;
           case "appointment":
-            return <AppointmentQuestion {...commonProps} />;
+            if (facilityId) {
+              return (
+                <AppointmentQuestion {...commonProps} facilityId={facilityId} />
+              );
+            }
+            return <span>{t("questionnaire_appointment_no_encounter")}</span>;
           case "encounter":
             if (encounterId && facilityId) {
               return (

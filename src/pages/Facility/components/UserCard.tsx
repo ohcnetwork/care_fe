@@ -22,8 +22,6 @@ interface Props {
 }
 
 export function UserCard({ user, className, facilityId }: Props) {
-  const name = formatName(user);
-
   const { patientToken: tokenData } = useAuthContext();
 
   const returnLink = useMemo(() => {
@@ -44,12 +42,14 @@ export function UserCard({ user, className, facilityId }: Props) {
           <div className="flex flex-col sm:flex-row gap-4">
             <Avatar
               imageUrl={user.read_profile_picture_url}
-              name={name}
+              name={formatName(user, true)}
               className="h-32 w-32 rounded-lg"
             />
 
             <div className="flex grow flex-col min-w-0">
-              <h3 className="truncate text-xl font-semibold">{name}</h3>
+              <h3 className="truncate text-xl font-semibold">
+                {formatName(user)}
+              </h3>
               <p className="text-sm text-gray-500">{user.user_type}</p>
 
               {user.qualification && (
