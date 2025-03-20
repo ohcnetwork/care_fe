@@ -864,6 +864,8 @@
   "disable_2fa_confirmation": "Disabling 2FA will remove the extra layer of protection that helps prevent unauthorized access to your account.",
   "disable_transfer": "Disable Transfer",
   "disable_two_factor_authentication": "Disable two-factor authentication",
+  "disassociate": "Disassociate",
+  "disassociate_device_from_encounter": "Disassociate device from encounter",
   "discard": "Discard",
   "discard_changes": "Discard Changes",
   "discharge": "Discharge",

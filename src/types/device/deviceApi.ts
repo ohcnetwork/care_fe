@@ -54,7 +54,7 @@ export default {
     path: "/api/v1/facility/{facilityId}/device/{deviceId}/associate_encounter/",
     method: HttpMethod.POST,
     TRes: Type<DeviceDetail>(),
-    TBody: Type<{ encounter: string }>(),
+    TBody: Type<{ encounter: string | null }>(),
   },
   encounterHistory: {
     path: "/api/v1/facility/{facilityId}/device/{deviceId}/encounter_history/",
