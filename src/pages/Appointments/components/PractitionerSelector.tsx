@@ -63,7 +63,7 @@ export const PractitionerSelector = ({
             <div className="flex items-center gap-2">
               <Avatar
                 imageUrl={selected.profile_picture_url}
-                name={formatName(selected)}
+                name={formatName(selected, true)}
                 className="size-6 rounded-full"
               />
               <span>{formatName(selected)}</span>
@@ -107,7 +107,7 @@ export const PractitionerSelector = ({
                   <PopoverClose className="flex items-center gap-2 w-full">
                     <Avatar
                       imageUrl={user.profile_picture_url}
-                      name={formatName(user)}
+                      name={formatName(user, true)}
                       className="size-6 rounded-full"
                     />
                     <span>{formatName(user)}</span>

@@ -23,6 +23,7 @@ import {
   UpdateConsentRequest,
   VerificationType,
 } from "@/types/consent/consent";
+import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
@@ -65,6 +66,8 @@ export interface JwtTokenObtainPair {
   refresh: string;
 }
 
+export type LoginResponse = JwtTokenObtainPair | MFAAuthenticationToken;
+
 export interface LoginCredentials {
   username: string;
   password: string;
@@ -96,7 +99,7 @@ const routes = {
     path: "/api/v1/auth/login/",
     method: "POST",
     noAuth: true,
-    TRes: Type<JwtTokenObtainPair>(),
+    TRes: Type<LoginResponse>(),
     TBody: Type<LoginCredentials>(),
   },
 

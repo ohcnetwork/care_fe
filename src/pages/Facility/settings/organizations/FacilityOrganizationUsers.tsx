@@ -17,6 +17,7 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import AddUserSheet from "@/pages/Organization/components/AddUserSheet";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { OrganizationUserRole } from "@/types/organization/organization";
@@ -132,8 +133,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
                           <div className="flex flex-col gap-1">
                             <div className="flex items-start justify-between">
                               <h1 className="text-base font-bold break-words pr-2">
-                                {userRole.user.first_name}{" "}
-                                {userRole.user.last_name}
+                                {formatName(userRole.user)}
                               </h1>
                               <span className="text-sm text-gray-500">
                                 <UserStatusIndicator user={userRole.user} />
