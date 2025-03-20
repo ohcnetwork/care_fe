@@ -88,6 +88,7 @@ const formSchema = z
         }
       });
     }),
+    metadata: z.record(z.string(), z.unknown()).optional(),
   })
   .refine(
     (data) => {
@@ -114,6 +115,7 @@ const defaultValues: z.infer<typeof formSchema> = {
   manufacture_date: undefined,
   registered_name: "",
   contact: [],
+  metadata: {},
 };
 
 export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
@@ -130,7 +132,6 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   });
 
   const [careType, setCareType] = useState<string>();
-  const [metadata, setMetadata] = useState<Record<string, unknown>>({});
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -168,7 +169,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
       });
 
       setCareType(device.care_type);
-      setMetadata(device.care_metadata);
+      form.setValue("metadata", device.care_metadata);
     } else {
       const pluginDevice = pluginDevices.find(
         (pluginDevice) => pluginDevice.type === qParams.type,
@@ -194,6 +195,8 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   }, [device, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    const metadata = values.metadata;
+    delete values.metadata;
     submitForm({ ...metadata, ...values, care_type: careType });
   }
 
@@ -528,11 +531,20 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </div>
             }
           >
-            <PluginDeviceConfigureForm
-              type={careType}
-              facilityId={facilityId}
-              metadata={metadata}
-              onChange={(metadata) => setMetadata(metadata)}
+            <FormField
+              control={form.control}
+              name="metadata"
+              render={({ field }) => (
+                <FormItem className="space-y-0">
+                  <PluginDeviceConfigureForm
+                    type={careType}
+                    facilityId={facilityId}
+                    metadata={field.value ?? {}}
+                    onChange={(metadata) => field.onChange(metadata)}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </ErrorBoundary>
         )}
