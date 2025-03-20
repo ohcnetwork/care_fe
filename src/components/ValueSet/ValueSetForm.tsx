@@ -72,7 +72,7 @@ function ConceptFields({
           (concept) => concept.code === response.metadata.code,
         );
 
-        if (conceptIndex && conceptIndex !== -1) {
+        if ((conceptIndex || conceptIndex === 0) && conceptIndex !== -1) {
           parentForm.setValue(
             `compose.${type}.${nestIndex}.concept.${conceptIndex}.display`,
             response.metadata.display,
