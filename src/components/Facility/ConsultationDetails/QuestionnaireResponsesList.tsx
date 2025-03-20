@@ -282,7 +282,9 @@ function ResponseCard({
           href={`questionnaire/${item.questionnaire?.id}/responses/print`}
           className="text-xs text-blue-600 underline"
         >
-          {t("print_all_questionnaire_responses")}
+          {t("print_all_questionnaire_responses", {
+            title: item.questionnaire?.title,
+          })}
         </Link>
       </div>
 

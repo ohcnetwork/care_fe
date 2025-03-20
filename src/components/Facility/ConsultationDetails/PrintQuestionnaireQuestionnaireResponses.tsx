@@ -221,8 +221,13 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
       <div className="font-medium text-base">{question.text}</div>
       <div className="space-y-1">
         {response.values.map((valueObj, index) => {
-          const value = valueObj.value || valueObj.value_quantity?.value;
-          if (!value) return null;
+          const value = valueObj.value;
+          const coding = valueObj.coding;
+          const unit = valueObj.unit;
+
+          if (!value && !coding) return null;
+
+          const precedentUnit = unit ? unit : question.unit;
 
           return (
             <div
@@ -230,7 +235,14 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
               className="text-sm whitespace-pre-wrap flex items-center gap-2 text-secondary-800"
             >
               {formatValue(value, question.type)}
-              {question.unit?.code && <span>{question.unit.code}</span>}
+              {precedentUnit && (
+                <span className="ml-1 text-xs">{precedentUnit.code}</span>
+              )}
+              {coding && (
+                <span className="ml-1 text-xs">
+                  {coding.display} ({coding.code})
+                </span>
+              )}
               {index === response.values.length - 1 && response.note && (
                 <span className="text-gray-500">({response.note})</span>
               )}
@@ -324,7 +336,7 @@ export function ResponseCard({ item }: ResponseCardProps) {
   if (isStructured && structuredType) return null;
 
   return (
-    <div className="flex flex-col py-3 transition-colors hover:bg-muted/50 print:break-after-page">
+    <div className="flex flex-col py-3 transition-colors hover:bg-muted/50">
       <div className="text-sm m-1">
         <p>
           {t("created_by")}: {formatDisplayName(item.created_by)}

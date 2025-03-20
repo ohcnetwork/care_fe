@@ -1974,7 +1974,7 @@
   "principal": "Principal",
   "principal_diagnosis": "Principal diagnosis",
   "print": "Print",
-  "print_all_questionnaire_responses": "Print all questionnaire responses",
+  "print_all_questionnaire_responses": "Print all `{{title}}` questionnaire responses",
   "print_prescriptions": "Print Prescriptions",
   "print_referral_letter": "Print Referral Letter",
   "print_this_questionnaire_response": "Print this questionnaire response",
