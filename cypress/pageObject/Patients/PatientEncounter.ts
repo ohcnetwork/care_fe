@@ -28,14 +28,11 @@ export class PatientEncounter {
 
   // Questionnaire actions
   addQuestionnaire(questionnaireName: string) {
-    cy.get('[data-cy="add-questionnaire-button"]').click();
-    cy.get('[role="dialog"] input')
-      .should("be.visible")
-      .type(questionnaireName);
-    cy.get('[role="dialog"] button')
-      .contains(questionnaireName)
-      .should("be.visible")
-      .click();
+    cy.typeAndSelectOption(
+      '[data-cy="add-questionnaire-button"]',
+      questionnaireName,
+      false,
+    );
     return this;
   }
 

@@ -116,7 +116,7 @@ export const Appointments = (props: PatientProps) => {
                       <div className="flex items-center gap-2">
                         <Avatar
                           imageUrl={appointment.booked_by?.profile_picture_url}
-                          name={formatName(appointment.booked_by)}
+                          name={formatName(appointment.booked_by, true)}
                           className="size-6 rounded-full"
                         />
                         <span>{formatName(appointment.booked_by)}</span>
