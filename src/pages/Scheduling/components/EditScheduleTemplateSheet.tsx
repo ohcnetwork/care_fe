@@ -699,7 +699,7 @@ const NewAvailabilityCard = ({
       </div>
     );
   }
-  const setSlotDuration = () => {
+  const updateSlotDuration = () => {
     let duration = calculateSlotDuration({
       isAutoFill: form.watch("auto_fill_duration"),
       startTime: form.watch("start_time"),
@@ -784,7 +784,7 @@ const NewAvailabilityCard = ({
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
-                        setSlotDuration();
+                        updateSlotDuration();
                       }}
                     />
                   </FormControl>
@@ -805,7 +805,7 @@ const NewAvailabilityCard = ({
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
-                        setSlotDuration();
+                        updateSlotDuration();
                       }}
                     />
                   </FormControl>
@@ -834,7 +834,7 @@ const NewAvailabilityCard = ({
                     onCheckedChange={(checked) => {
                       form.setValue("auto_fill_duration", checked);
                       if (checked) {
-                        setSlotDuration();
+                        updateSlotDuration();
                       }
                     }}
                   />

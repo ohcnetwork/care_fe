@@ -243,7 +243,7 @@ export default function CreateScheduleTemplateSheet({
     );
   };
 
-  const setSlotDuration = (index: number) => {
+  const updateSlotDuration = (index: number) => {
     let duration = calculateSlotDuration({
       isAutoFill: form.watch(`availabilities.${index}.auto_fill_duration`),
       startTime: form.watch(`availabilities.${index}.start_time`),
@@ -469,7 +469,7 @@ export default function CreateScheduleTemplateSheet({
                                   {...field}
                                   onChange={(e) => {
                                     field.onChange(e);
-                                    setSlotDuration(index);
+                                    updateSlotDuration(index);
                                   }}
                                 />
                               </FormControl>
@@ -490,7 +490,7 @@ export default function CreateScheduleTemplateSheet({
                                   {...field}
                                   onChange={(e) => {
                                     field.onChange(e);
-                                    setSlotDuration(index);
+                                    updateSlotDuration(index);
                                   }}
                                 />
                               </FormControl>
@@ -528,7 +528,7 @@ export default function CreateScheduleTemplateSheet({
                                     checked,
                                   );
                                   if (checked) {
-                                    setSlotDuration(index);
+                                    updateSlotDuration(index);
                                   }
                                 }}
                               />
