@@ -266,7 +266,9 @@ const SymptomRow = React.memo(function SymptomRow({
       {/* Mobile View - Card Layout */}
       <div className="md:hidden rounded-lg">
         <Card
-          className={cn("mb-2 rounded-lg", { "border border-primary": isOpen })}
+          className={cn("mb-2 rounded-lg shadow-none", {
+            "border border-primary-500": isOpen,
+          })}
         >
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <CardHeader
@@ -276,7 +278,10 @@ const SymptomRow = React.memo(function SymptomRow({
             >
               <div className="flex flex-col space-y-1">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base" title={symptom.code.display}>
+                  <CardTitle
+                    className="text-base text-gray-950 pr-1"
+                    title={symptom.code.display}
+                  >
                     {symptom.code.display}
                   </CardTitle>
                   <div className="flex items-center gap-2">
