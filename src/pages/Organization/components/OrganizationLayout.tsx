@@ -114,7 +114,6 @@ export default function OrganizationLayout({
 
   return (
     <Page title={`${org.name}`}>
-      {/* Navigation */}
       {orgParents.length > 0 && (
         <div className="flex items-center gap-2 mt-4">
           <Breadcrumb>
@@ -145,7 +144,8 @@ export default function OrganizationLayout({
           </Breadcrumb>
         </div>
       )}
-      <div className="mt-4">
+      {/* Navigation */}
+      <div className="mt-4 flex min-w-0">
         <Menubar className="w-full h-full overflow-x-auto">
           {navItems
             .filter((item) => item.visibility)
@@ -170,7 +170,7 @@ export default function OrganizationLayout({
         </Menubar>
       </div>
       {/* Page Content */}
-      <div className="mt-2">{children}</div>
+      <div className="mt-4">{children}</div>
     </Page>
   );
 }
