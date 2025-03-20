@@ -4,8 +4,7 @@
     <meta charset="utf-8" />
     <meta
       name="viewport"
-      content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, interactive-widget=resizes-content"
-    />
+      content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, interactive-widget=resizes-content" />
     <title>%REACT_APP_TITLE%</title>
     <meta name="description" content="%REACT_APP_META_DESCRIPTION%" />
     <meta property="og:title" content="%REACT_APP_TITLE%" />
@@ -24,12 +23,40 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     <link
       rel="apple-touch-icon"
-      href="/images/icons/apple-touch-icon-180x180.png"
-    />
+      href="/images/icons/apple-touch-icon-180x180.png" />
   </head>
 
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>
+      <div style="
+        font-family: sans-serif;
+        color: #d32f2f;
+        font-size: 16px;
+        text-align: center;
+        padding: 20px;
+        background-color: #ffebee;
+        border: 1px solid #d32f2f;
+        border-radius: 8px;
+        margin: 20px;
+        max-width: 500px;
+        margin: 40px auto;
+      ">
+        <h2 style="margin-bottom: 10px;">🚫 JavaScript is Disabled</h2>
+        <p>
+          This application requires JavaScript to function properly. It looks like JavaScript is either 
+          <strong>disabled</strong> or <strong>blocked</strong> in your browser.
+        </p>
+        <p style="margin-top: 10px;">
+          🔧 <strong>How to Enable JavaScript:</strong>
+        </p>
+          <ul style="text-align: left; display: inline-block; margin: 10px auto;">
+            <li>Go to your browser settings.</li>
+            <li>Find the "JavaScript" section.</li>
+            <li>Enable JavaScript and refresh this page.</li>
+          </ul>
+        <p>If you are using a script blocker, allow scripts from this site.</p>
+      </div>
+    </noscript>
     <div id="root">
       <style nonce="7e14cf80">
         .App-logo {
