@@ -1,4 +1,5 @@
 export interface FileUploadQuestion {
+  id?: string;
   original_name: string;
   file_data: string; // base64 encoded file data
   name: string;

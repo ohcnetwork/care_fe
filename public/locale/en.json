@@ -2745,5 +2745,6 @@
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "questionnaire_files_no_encounter": "Create an encounter first to upload files"
+  "questionnaire_files_no_encounter": "Create an encounter first to upload files",
+  "add_file": "Add File"
 }

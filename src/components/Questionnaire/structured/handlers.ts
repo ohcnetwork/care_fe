@@ -158,19 +158,16 @@ export const structuredHandlers: {
     },
   },
   files: {
-    getRequests: (files, { encounterId }) => {
-      return [
-        {
-          url: `/api/v1/files/upload-file/`,
-          method: "POST",
-          body: {
-            ...files,
-            encounter: encounterId,
-          },
-          reference_id: "files",
+    getRequests: (files, { encounterId }) =>
+      files.map((file) => ({
+        url: `/api/v1/files/upload-file/`,
+        method: "POST",
+        body: {
+          ...file,
+          encounter: encounterId,
         },
-      ];
-    },
+        reference_id: "files",
+      })),
   },
 };
 

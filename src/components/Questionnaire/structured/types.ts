@@ -32,7 +32,7 @@ export interface StructuredRequestMap {
   medication_statement: { datapoints: MedicationStatementRequest[] };
   encounter: EncounterEditRequest;
   appointment: AppointmentCreateRequest;
-  files: FileUploadQuestion[];
+  files: FileUploadQuestion;
 }
 
 export type RequestTypeFor<T extends StructuredQuestionType> =
