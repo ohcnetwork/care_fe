@@ -100,7 +100,7 @@ const CountrySelect = ({
 }: CountrySelectProps) => {
   const { t } = useTranslation();
   return (
-    <Popover>
+    <Popover modal>
       <PopoverTrigger asChild>
         <Button
           type="button"
