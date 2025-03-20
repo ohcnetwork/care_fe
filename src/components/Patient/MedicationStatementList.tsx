@@ -99,7 +99,7 @@ function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
       <TableCell className="last:rounded-r-md">
         <div className="flex items-center gap-2">
           <Avatar
-            name={formatName(statement.created_by)}
+            name={formatName(statement.created_by, true)}
             className="w-4 h-4"
             imageUrl={statement.created_by.read_profile_picture_url}
           />
