@@ -38,7 +38,6 @@ interface FilesQuestionProps {
   disabled?: boolean;
   errors: QuestionValidationError[];
   encounterId: string;
-  facilityId: string;
 }
 
 const FILE_UPLOAD_FIELDS = {
@@ -73,9 +72,6 @@ export function validateFileUploadQuestion(
   questionId: string,
 ): QuestionValidationError[] {
   return values.reduce((errors: QuestionValidationError[], value, index) => {
-    // Validate each dosage instruction
-
-    // Validate using the fields
     const fieldErrors = validateFields(
       {
         [FILE_UPLOAD_FIELDS.FILE_DATA.key]: value.file_data,
@@ -87,7 +83,6 @@ export function validateFileUploadQuestion(
       index,
     );
 
-    // Map error messages to be more specific
     return [
       ...errors,
       ...fieldErrors.map((error) => ({

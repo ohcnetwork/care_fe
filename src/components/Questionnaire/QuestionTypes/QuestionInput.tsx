@@ -186,11 +186,7 @@ export function QuestionInput({
           case "files":
             if (encounterId && facilityId) {
               return (
-                <FilesQuestion
-                  {...commonProps}
-                  encounterId={encounterId}
-                  facilityId={facilityId}
-                />
+                <FilesQuestion {...commonProps} encounterId={encounterId} />
               );
             }
             return <span>{t("questionnaire_files_no_encounter")}</span>;

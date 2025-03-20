@@ -39,7 +39,10 @@ import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
-import { FILE_EXTENSIONS } from "@/common/constants";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FILE_EXTENSIONS,
+} from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -137,31 +140,7 @@ export const FilesTab = (props: FilesTabProps) => {
   const fileUpload = useFileUpload({
     type: type,
     multiple: true,
-    allowedExtensions: [
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "bmp",
-      "tiff",
-      "mp4",
-      "mov",
-      "avi",
-      "wmv",
-      "mp3",
-      "wav",
-      "ogg",
-      "txt",
-      "csv",
-      "rtf",
-      "doc",
-      "odt",
-      "pdf",
-      "xls",
-      "xlsx",
-      "ods",
-      "pdf",
-    ],
+    allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
     onUpload: () => {
       refetch();
