@@ -81,7 +81,7 @@ export function LocationSearch({
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="min-w-[250px] max-w-[400px] w-full p-0">
+      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
         <Command className="pt-1">
           <CommandInput
             placeholder="Search locations..."
