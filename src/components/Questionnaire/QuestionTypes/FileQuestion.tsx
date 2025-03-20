@@ -1,20 +1,23 @@
 import { t } from "i18next";
-import { Trash2Icon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-import { FileUploadModel } from "@/components/Patient/models";
+import useFileUpload from "@/hooks/useFileUpload";
 
 import { BACKEND_ALLOWED_EXTENSIONS } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { FileUploadQuestion } from "@/types/files/files";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
@@ -100,26 +103,10 @@ export function validateFileUploadQuestion(
 }
 
 export function FilesQuestion(props: FilesQuestionProps) {
-  const {
-    question,
-    questionnaireResponse,
-    updateQuestionnaireResponseCB,
-    disabled,
-    errors,
-    encounterId,
-    facilityId,
-  } = props;
+  const { questionnaireResponse, updateQuestionnaireResponseCB, encounterId } =
+    props;
 
   const { t } = useTranslation();
-
-  const initialValue: FileUploadQuestion = {
-    name: "",
-    file_data: "",
-    original_name: "",
-    file_type: "encounter",
-    file_category: "unspecified",
-    associating_id: encounterId,
-  };
 
   const values =
     (questionnaireResponse.values?.[0]?.value as FileUploadQuestion[]) || [];
@@ -140,88 +127,126 @@ export function FilesQuestion(props: FilesQuestionProps) {
     );
   };
 
-  const addFile = () => {
-    updateQuestionnaireResponseCB(
-      [
-        {
-          type: "files",
-          value: [...values, initialValue],
-        },
-      ],
-      questionnaireResponse.question_id,
-      questionnaireResponse.note,
-    );
+  const fileUpload = useFileUpload({
+    type: "encounter",
+    allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
+    multiple: true,
+    allowNameFallback: false,
+    compress: false,
+  });
+
+  const getFileData = async (files: File[]) => {
+    const filePromises = files.map((file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          const base64 = (reader?.result as string)?.split(",")[1];
+          resolve({
+            name: "",
+            file_data: base64,
+            original_name: file.name,
+            file_type: "encounter",
+            file_category: "unspecified",
+            associating_id: encounterId,
+          });
+        };
+        reader.onerror = (error) => reject(error);
+      });
+    });
+    const filesData = (await Promise.all(filePromises)) as FileUploadQuestion[];
+    return filesData;
   };
+
+  useEffect(() => {
+    (async () => {
+      const files = await getFileData(fileUpload.files);
+      updateQuestionnaireResponseCB(
+        [
+          {
+            type: "files",
+            value: files,
+          },
+        ],
+        questionnaireResponse.question_id,
+        questionnaireResponse.note,
+      );
+    })();
+  }, [fileUpload.files]);
 
   return (
     <div className="flex flex-col gap-2">
       {values.map((value, index) => (
-        <div key={index} className="flex items-center gap-2">
+        <div key={index} className="flex items-stretch gap-2">
           <Input
             placeholder={t("file_name")}
             className="flex-1"
             value={value.name}
             onChange={(e) => handleUpdate({ name: e.target.value }, index)}
           />
-          {!value.file_data ? (
-            <label
-              className={cn(
-                buttonVariants({ variant: "secondary" }),
-                "border border-secondary-300 cursor-pointer",
-              )}
-            >
-              {t("choose_file")}
-              <input
-                type="file"
-                className="hidden"
-                onChange={(e) => {
-                  // get base64 encoded file data
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.addEventListener("load", (e) => {
-                    console.log("file", file);
-                    const base64 = e.target?.result as string;
-                    handleUpdate(
-                      {
-                        file_data: base64.split(",")[1],
-                        original_name: file.name,
-                      },
-                      index,
-                    );
-                  });
-                  reader.readAsDataURL(file);
-                }}
-                accept={BACKEND_ALLOWED_EXTENSIONS.join(",")}
-              />
-            </label>
-          ) : (
-            <div className="bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 flex items-center gap-2">
-              <span>{value.original_name}</span>
-              <button>
-                <XIcon
-                  className="w-4"
-                  onClick={() =>
-                    handleUpdate(
-                      {
-                        file_data: undefined,
-                        original_name: undefined,
-                      },
-                      index,
-                    )
-                  }
-                />
-              </button>
-            </div>
-          )}
-          <Button>
-            <Trash2Icon onClick={() => deleteFile(value)} />
+          <div className="bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 flex items-center gap-2 max-w-[150px]">
+            <span className="text-sm truncate">{value.original_name}</span>
+          </div>
+          <Button
+            variant={"outline"}
+            className="border border-secondary-300"
+            onClick={() => fileUpload.removeFile(index)}
+          >
+            <CareIcon icon="l-trash" className="w-4 h-4" />
           </Button>
         </div>
       ))}
-      <Button variant={"secondary"} onClick={addFile}>
-        {t("add_file")}
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant={"secondary"} className="border border-secondary-300">
+            <CareIcon icon="l-file-upload-alt" />
+            {t("add_files")}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-[calc(100vw-2.5rem)] sm:w-full"
+        >
+          <DropdownMenuItem
+            className="flex flex-row items-center"
+            onSelect={(e) => {
+              e.preventDefault();
+            }}
+          >
+            <Label
+              htmlFor="file_upload_patient"
+              className="py-1 flex flex-row items-center cursor-pointer text-primary-900  w-full"
+            >
+              <CareIcon icon="l-file-upload-alt" className="mr-1" />
+              <span>{t("choose_file")}</span>
+            </Label>
+            {fileUpload.Input({ className: "hidden" })}
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => fileUpload.handleCameraCapture()}
+              className="flex flex-row justify-stretch items-center w-full text-primary-900"
+            >
+              <CareIcon icon="l-camera" />
+              <span>{t("open_camera")}</span>
+            </Button>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => fileUpload.handleAudioCapture()}
+              className="flex flex-row justify-stretch items-center w-full text-primary-900"
+            >
+              <CareIcon icon="l-microphone" />
+              <span>{t("record")}</span>
+            </Button>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {fileUpload.Dialogues}
     </div>
   );
 }
