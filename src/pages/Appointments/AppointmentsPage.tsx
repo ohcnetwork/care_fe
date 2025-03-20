@@ -30,7 +30,6 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -457,25 +456,49 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                       </Button>
                     </div>
 
-                    <DateRangePicker
-                      date={{
-                        from: qParams.date_from
-                          ? new Date(qParams.date_from)
-                          : undefined,
-                        to: qParams.date_to
-                          ? new Date(qParams.date_to)
-                          : undefined,
-                      }}
-                      onChange={(date) =>
-                        updateQuery({
-                          date_from: date?.from
-                            ? dateQueryString(date.from)
-                            : null,
-                          date_to: date?.to ? dateQueryString(date?.to) : null,
-                          slot: null,
-                        })
-                      }
-                    />
+                    <div className="flex space-x-2">
+                      <div className="flex flex-col w-full">
+                        <label
+                          htmlFor="from-date"
+                          className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                          {t("from_date")}
+                        </label>
+                        <Input
+                          id="from-date"
+                          type="date"
+                          value={qParams.date_from ?? ""}
+                          max={qParams.date_to ?? undefined}
+                          onChange={(e) =>
+                            updateQuery({
+                              date_from: e.target.value || null,
+                              slot: null,
+                            })
+                          }
+                        />
+                      </div>
+
+                      <div className="flex flex-col w-full">
+                        <label
+                          htmlFor="to-date"
+                          className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                          {t("to_date")}
+                        </label>
+                        <Input
+                          id="to-date"
+                          type="date"
+                          value={qParams.date_to ?? ""}
+                          min={qParams.date_from ?? ""}
+                          onChange={(e) =>
+                            updateQuery({
+                              date_to: e.target.value || null,
+                              slot: null,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
                   </div>
                 </PopoverContent>
               </Popover>
