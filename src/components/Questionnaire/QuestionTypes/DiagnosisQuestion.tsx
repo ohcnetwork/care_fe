@@ -204,7 +204,7 @@ export function DiagnosisQuestion({
             <div className="col-span-2 text-center">{t("verification")}</div>
             <div className="col-span-1 text-center">{t("action")}</div>
           </div>
-          <div className="divide-y divide-gray-200">
+          <div className="md:divide-y md:divide-gray-200">
             {diagnoses.map((diagnosis, index) => (
               <DiagnosisItem
                 key={index}
@@ -357,7 +357,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
         >
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <CardHeader
-              className={cn("p-3 pb-2 rounded-lg", {
+              className={cn("p-2 rounded-lg shadow-none", {
                 "bg-gray-200 border border-gray-300": !isOpen,
               })}
             >
@@ -379,7 +379,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                           diagnosis.verification_status === "entered_in_error"
                         }
                         onClick={onRemove}
-                        className="h-8 w-8 p-2 border border-gray-400 bg-white shadow text-destructive"
+                        className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
                       >
                         <MinusCircledIcon className="h-5 w-5" />
                       </Button>
@@ -388,7 +388,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 border border-gray-400 bg-white shadow p-4"
+                        className="h-10 w-10 border border-gray-400 bg-white shadow p-4"
                       >
                         {isOpen ? (
                           <ChevronsDownUp className="h-5 w-5" />
