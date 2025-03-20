@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { t } from "i18next";
 import { useState } from "react";
+import "react-day-picker/style.css";
 
 import { cn } from "@/lib/utils";
 
@@ -69,6 +70,7 @@ export function DateQuestion({
 
   return (
     <div className="flex sm:gap-2 flex-wrap">
+      {/* <Input type="date" value={currentValue} onChange={handleSelect} /> */}
       <Popover>
         <PopoverTrigger asChild>
           <Button

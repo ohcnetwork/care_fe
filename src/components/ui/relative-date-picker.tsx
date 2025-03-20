@@ -3,9 +3,15 @@
 import { format, subDays, subMonths, subWeeks, subYears } from "date-fns";
 import { useEffect, useState } from "react";
 
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
-import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
 type TimeUnit = "days" | "weeks" | "months" | "years";
 
@@ -25,7 +31,6 @@ export function RelativeDatePicker({
   const [resultDate, setResultDate] = useState<Date>(new Date());
 
   const timeUnits: TimeUnit[] = ["days", "weeks", "months", "years"];
-  const currentIndex = timeUnits.indexOf(unit);
 
   useEffect(() => {
     const now = new Date();
@@ -59,39 +64,34 @@ export function RelativeDatePicker({
   return (
     <div className="flex flex-col h-[200px]">
       {/* Input and Unit Selection */}
-      <div className="flex items-center border-b h-[120px]">
-        <div className="w-24 h-full">
-          <Input
-            type="number"
-            min={0}
-            value={value}
-            onChange={(e) => setValue(Number.parseInt(e.target.value) || 0)}
-            className="h-full rounded-none border-0 focus-visible:ring-0 text-end px-0 text-lg font-medium"
-          />
-        </div>
+      <div className="flex flex-col gap-2 p-2 items-center border-b">
+        <div className="w-full h-full"></div>
 
-        <div className="flex-1 h-full overflow-hidden">
-          <div className="h-full relative">
-            <div
-              className="absolute w-full transition-transform duration-200 ease-in-out"
-              style={{ transform: `translateY(${40 + -currentIndex * 40}px)` }}
-            >
-              {timeUnits.map((timeUnit) => (
-                <button
-                  key={timeUnit}
-                  onClick={() => handleUnitChange(timeUnit)}
-                  className={cn(
-                    "h-[40px] flex items-center justify-center text-base font-medium transition-colors",
-                    unit === timeUnit
-                      ? "text-primary font-semibold"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {timeUnit.charAt(0).toUpperCase() + timeUnit.slice(1)}
-                </button>
+        <div className="grid grid-cols-2 gap-2">
+          <Select
+            value={value.toString()}
+            onValueChange={(value) => setValue(Number.parseInt(value) || 0)}
+          >
+            <SelectTrigger className="col-span-2">
+              <SelectValue placeholder="Select a fruit" />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((timeUnit) => (
+                <SelectItem key={timeUnit} value={timeUnit.toString()}>
+                  {timeUnit}
+                </SelectItem>
               ))}
-            </div>
-          </div>
+            </SelectContent>
+          </Select>
+          {timeUnits.map((timeUnit) => (
+            <Badge
+              key={timeUnit}
+              onClick={() => handleUnitChange(timeUnit)}
+              variant={unit === timeUnit ? "default" : "outline"}
+            >
+              {timeUnit.charAt(0).toUpperCase() + timeUnit.slice(1)}
+            </Badge>
+          ))}
         </div>
       </div>
 
