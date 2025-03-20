@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 
 import Loading from "@/components/Common/Loading";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
+import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
@@ -17,6 +18,14 @@ const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/prescriptions/print":
     ({ facilityId, encounterId, patientId }) => (
       <PrintPrescription
+        facilityId={facilityId}
+        encounterId={encounterId}
+        patientId={patientId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/medicines/administrations/print":
+    ({ facilityId, encounterId, patientId }) => (
+      <PrintMedicationAdministration
         facilityId={facilityId}
         encounterId={encounterId}
         patientId={patientId}
