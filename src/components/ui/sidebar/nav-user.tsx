@@ -27,6 +27,8 @@ import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
+import { formatName } from "@/Utils/utils";
+
 export function FacilityNavUser({
   selectedFacilityId,
 }: {
@@ -34,7 +36,7 @@ export function FacilityNavUser({
 }) {
   const { t } = useTranslation();
   const user = useAuthUser();
-  const { isMobile, open, setOpenMobile } = useSidebar();
+  const { isMobile, open } = useSidebar();
   const { signOut } = useAuthContext();
 
   return (
@@ -55,7 +57,7 @@ export function FacilityNavUser({
                   />
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
-                      {user.first_name} {user.last_name}
+                      {formatName(user)}
                     </span>
                     <span className="truncate text-xs">{user.username}</span>
                   </div>
@@ -88,7 +90,7 @@ export function FacilityNavUser({
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {user.first_name} {user.last_name}
+                    {formatName(user)}
                   </span>
                   <span className="truncate text-xs">{user.username}</span>
                 </div>
@@ -102,9 +104,6 @@ export function FacilityNavUser({
                     ? `/facility/${selectedFacilityId}/users/${user.username}`
                     : `/users/${user.username}`;
                   navigate(profileUrl);
-                  if (isMobile) {
-                    setOpenMobile(false);
-                  }
                 }}
               >
                 <BadgeCheck />

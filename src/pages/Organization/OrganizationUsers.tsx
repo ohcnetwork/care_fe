@@ -18,6 +18,7 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import organizationApi from "@/types/organization/organizationApi";
 
 import AddUserSheet from "./components/AddUserSheet";
@@ -34,7 +35,7 @@ interface Props {
 export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["name", "phone_number"],
+    disableCache: true,
   });
   const { t } = useTranslation();
 
@@ -175,8 +176,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                         <div className="flex flex-col gap-1">
                           <div className="flex items-start justify-between">
                             <h1 className="text-base font-bold break-words pr-2">
-                              {userRole.user.first_name}{" "}
-                              {userRole.user.last_name}
+                              {formatName(userRole.user)}
                             </h1>
                             <span className="text-sm text-gray-500">
                               <UserStatusIndicator user={userRole.user} />

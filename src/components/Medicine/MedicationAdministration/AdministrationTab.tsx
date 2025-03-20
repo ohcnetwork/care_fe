@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { t } from "i18next";
+import { Link } from "raviger";
 import React, { useCallback, useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -800,6 +801,17 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         >
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
           {t("administer_medicine")}
+        </Button>
+        <Button
+          variant="outline"
+          disabled={!activeMedications?.results?.length}
+          size="sm"
+          className="text-gray-950 hover:text-gray-700 h-9"
+        >
+          <Link href={`medicines/administrations/print`}>
+            <CareIcon icon="l-print" className="mr-2" />
+            {t("print")}
+          </Link>
         </Button>
       </div>
 

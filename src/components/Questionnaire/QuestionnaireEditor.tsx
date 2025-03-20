@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,6 +67,7 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
@@ -81,6 +83,7 @@ import {
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
+import { ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
@@ -1185,12 +1188,17 @@ function QuestionEditor({
     new Set(),
   );
 
-  const { data: valuesetResponse } = useQuery({
-    queryKey: ["valuesets"],
-    queryFn: query(valuesetApi.list),
+  const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
+  const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
+    queryKey: ["valuesets", valueSetSearchQuery],
+    queryFn: query.debounced(valuesetApi.list, {
+      queryParams: {
+        name: valueSetSearchQuery,
+        status: "active",
+      },
+    }),
+    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
   });
-
-  const valuesets = valuesetResponse?.results || [];
 
   const updateField = <K extends keyof Question>(
     field: K,
@@ -1433,6 +1441,21 @@ function QuestionEditor({
               </p>
               <div className="">
                 <div className="flex flex-wrap gap-4">
+                  {type === "group" && (
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={question.is_component ?? false}
+                        onCheckedChange={(val) =>
+                          updateField("is_component", val)
+                        }
+                        id={`is_component-${getQuestionPath()}`}
+                      />
+                      <Label htmlFor={`is_component-${getQuestionPath()}`}>
+                        {t("is_component")}
+                      </Label>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={question.collect_time ?? false}
@@ -1528,40 +1551,63 @@ function QuestionEditor({
             </div>
           )}
 
-          {type === "choice" && (
+          {(type === "choice" || type === "quantity") && (
             <div className="space-y-4">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div>
-                    <CardTitle className="text-base font-medium">
-                      Answer Options
-                    </CardTitle>
-                    <p className="text-sm text-gray-500">
-                      Define possible answers for this question
-                    </p>
-                  </div>
-                  <Select
-                    value={question.answer_value_set ? "valueset" : "custom"}
-                    onValueChange={(val: string) =>
-                      updateField(
-                        "answer_value_set",
-                        val === "custom" ? undefined : "valueset",
-                      )
-                    }
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder={t("select_a_value_set")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="custom">
-                        {t("custom_options")}
-                      </SelectItem>
-                      <SelectItem value="valueset">{t("value_set")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </CardHeader>
+                {question.type === "choice" && (
+                  <>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <div>
+                        <CardTitle className="text-base font-medium">
+                          Answer Options
+                        </CardTitle>
+                        <p className="text-sm text-gray-500">
+                          Define possible answers for this question
+                        </p>
+                      </div>
+                      <Select
+                        value={
+                          question.answer_value_set ? "valueset" : "custom"
+                        }
+                        onValueChange={(val: string) =>
+                          updateField(
+                            "answer_value_set",
+                            val === "custom" ? undefined : "valueset",
+                            { answer_option: [] },
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder={t("select_a_value_set")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="custom">
+                            {t("custom_options")}
+                          </SelectItem>
+                          <SelectItem value="valueset">
+                            {t("value_set")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </CardHeader>
+                  </>
+                )}
 
-                {!question.answer_value_set ? (
+                {question.type === "quantity" && (
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div>
+                      <CardTitle className="text-base font-medium">
+                        Quantity
+                      </CardTitle>
+                      <p className="text-sm text-gray-500">
+                        Select the valueset of options for this quantity
+                        question
+                      </p>
+                    </div>
+                  </CardHeader>
+                )}
+
+                {question.type === "choice" && !question.answer_value_set ? (
                   <CardContent className="space-y-4">
                     {(answer_option || []).map((opt, idx) => (
                       <div
@@ -1639,27 +1685,24 @@ function QuestionEditor({
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <Select
+                    <Autocomplete
+                      options={(valuesets ?? []).map((valueset) => ({
+                        label: valueset.name,
+                        value: valueset.slug,
+                      }))}
                       value={
                         question.answer_value_set === "valueset"
-                          ? undefined
-                          : question.answer_value_set
+                          ? ""
+                          : (question.answer_value_set ?? "")
                       }
-                      onValueChange={(val: string) =>
+                      onChange={(val: string) =>
                         updateField("answer_value_set", val)
                       }
-                    >
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder={t("select_a_value_set")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {valuesets.map((valueset) => (
-                          <SelectItem key={valueset.id} value={valueset.slug}>
-                            {valueset.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onSearch={setValueSetSearchQuery}
+                      placeholder={t("select_a_value_set")}
+                      isLoading={isFetchingValuesets}
+                      noOptionsMessage={t("no_valuesets_found")}
+                    />
                   </CardContent>
                 )}
               </Card>
