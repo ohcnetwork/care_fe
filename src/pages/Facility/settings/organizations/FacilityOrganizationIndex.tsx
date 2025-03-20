@@ -194,13 +194,13 @@ export default function FacilityOrganizationIndex({
             <div className="flex justify-between gap-5">
               {isTopLevel && children.length > 0 && (
                 <div>
-                  <TooltipProvider>
-                    {isMobile ? (
+                  {isMobile ? (
+                    <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
                           <Button
                             variant="white"
-                            size={isMobile ? "xs" : "sm"}
+                            size="xs"
                             onClick={toggleAllChildren}
                           >
                             <CareIcon
@@ -216,34 +216,31 @@ export default function FacilityOrganizationIndex({
                           {t(allExpanded ? "collapse_all" : "expand_all")}
                         </TooltipContent>
                       </Tooltip>
-                    ) : (
-                      <Button
-                        variant="white"
-                        size="sm"
-                        onClick={toggleAllChildren}
-                      >
-                        <CareIcon
-                          icon={allExpanded ? "l-minus" : "l-plus"}
-                          className="h-4 w-4 sm:h-2 sm:w-2"
-                        />
-                        <span className="hidden sm:inline">
-                          {t(allExpanded ? "collapse_all" : "expand_all")}
-                        </span>
-                      </Button>
-                    )}
-                  </TooltipProvider>
+                    </TooltipProvider>
+                  ) : (
+                    <Button
+                      variant="white"
+                      size="sm"
+                      onClick={toggleAllChildren}
+                    >
+                      <CareIcon
+                        icon={allExpanded ? "l-minus" : "l-plus"}
+                        className="h-4 w-4 sm:h-2 sm:w-2"
+                      />
+                      <span className="hidden sm:inline">
+                        {t(allExpanded ? "collapse_all" : "expand_all")}
+                      </span>
+                    </Button>
+                  )}
                 </div>
               )}
+
               <div className="ml-auto">
-                <TooltipProvider>
-                  {isMobile ? (
+                {isMobile ? (
+                  <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Button
-                          variant="white"
-                          size={isMobile ? "xs" : "sm"}
-                          asChild
-                        >
+                        <Button variant="white" size="xs" asChild>
                           <Link
                             href={`/departments/${org.id}/users`}
                             className="text-gray-900 flex items-center"
@@ -260,20 +257,20 @@ export default function FacilityOrganizationIndex({
                       </TooltipTrigger>
                       <TooltipContent>{t("see_details")}</TooltipContent>
                     </Tooltip>
-                  ) : (
-                    <Button variant="white" size="sm" asChild>
-                      <Link
-                        href={`/departments/${org.id}/users`}
-                        className="text-gray-900 flex items-center"
-                      >
-                        <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
-                        <span className="hidden sm:inline">
-                          {t("see_details")}
-                        </span>
-                      </Link>
-                    </Button>
-                  )}
-                </TooltipProvider>
+                  </TooltipProvider>
+                ) : (
+                  <Button variant="white" size="sm" asChild>
+                    <Link
+                      href={`/departments/${org.id}/users`}
+                      className="text-gray-900 flex items-center"
+                    >
+                      <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                      <span className="hidden sm:inline">
+                        {t("see_details")}
+                      </span>
+                    </Link>
+                  </Button>
+                )}
               </div>
             </div>
           </TableCell>
