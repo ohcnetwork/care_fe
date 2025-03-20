@@ -70,35 +70,38 @@ const RenderCard = ({
   const navigate = useNavigate();
 
   return (
-    <div className="xl:hidden space-y-4 px-4">
-      {isLoading ? (
-        <CardGridSkeleton count={5} />
-      ) : valuesets.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <>
-          {valuesets.map((valueset) => (
-            <Card
-              key={valueset.id}
-              className="overflow-hidden bg-white rounded-lg transition-shadow hover:shadow-lg"
-            >
-              <CardContent className="p-6 relative">
-                <div className="absolute top-4 right-4">
-                  <Badge
-                    className={
-                      {
-                        active:
-                          "bg-green-100 text-green-800 hover:bg-green-200",
-                        draft:
-                          "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-                        retired: "bg-red-100 text-red-800 hover:bg-red-200",
-                        unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                      }[valueset.status]
-                    }
-                  >
-                    {t(valueset.status)}
-                  </Badge>
-                </div>
+    <div className="lg:hidden space-y-4 px-4">
+      {valuesets.length > 0 ? (
+        valuesets.map((valueset) => (
+          <Card
+            key={valueset.id}
+            className="overflow-hidden bg-white rounded-lg transition-shadow hover:shadow-lg"
+          >
+            <CardContent className="p-6 relative">
+              <div className="absolute top-4 right-4">
+                <Badge
+                  className={
+                    {
+                      active: "bg-green-100 text-green-800 hover:bg-green-200",
+                      draft:
+                        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+                      retired: "bg-red-100 text-red-800 hover:bg-red-200",
+                      unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+                    }[valueset.status]
+                  }
+                >
+                  {t(valueset.status)}
+                </Badge>
+              </div>
+
+              <div className="mb-4 border-b pb-2">
+                <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  {t("name")}
+                </h3>
+                <p className="mt-2 text-xl font-bold text-gray-900 truncate">
+                  {valueset.name}
+                </p>
+              </div>
 
                 <div className="mb-4 border-b pb-2">
                   <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -142,15 +145,16 @@ const RenderCard = ({
                     </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="mb-4">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("description")}
-                  </h3>
-                  <p className="text-sm text-gray-900 line-clamp-2">
-                    {valueset.description}
-                  </p>
-                </div>
+              <div className="mb-4">
+                <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  {t("description")}
+                </h3>
+                <p className="text-sm text-gray-900 line-clamp-2">
+                  {valueset.description}
+                </p>
+              </div>
 
                 {!valueset.is_system_defined && (
                   <div className="mt-4 flex justify-end">
@@ -186,37 +190,30 @@ const RenderTable = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow">
-      {isLoading ? (
-        <TableSkeleton count={5} />
-      ) : valuesets.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <Table className="min-w-full divide-y divide-gray-200">
-          <TableHeader className="bg-gray-50">
-            <TableRow>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {t("name")}
-              </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {t("slug")}
-              </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {t("status")}
-              </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {t("description")}
-              </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {t("system")}
-              </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {t("actions")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="divide-y divide-gray-200 bg-white">
-            {valuesets.map((valueset) => (
+    <div className="hidden lg:block overflow-hidden rounded-lg bg-white shadow">
+      <Table className="min-w-full divide-y divide-gray-200">
+        <TableHeader className="bg-gray-50">
+          <TableRow>
+            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              {t("name")}
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              {t("slug")}
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              {t("status")}
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              {t("description")}
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              {t("actions")}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="divide-y divide-gray-200 bg-white">
+          {valuesets.length > 0 ? (
+            valuesets.map((valueset) => (
               <TableRow key={valueset.id} className="hover:bg-gray-50">
                 <TableCell className="whitespace-nowrap px-6 py-4">
                   {valueset.name && valueset.name.length > 20 ? (
@@ -261,9 +258,6 @@ const RenderTable = ({
                   <div className="max-w-md truncate text-sm text-gray-900 break-words whitespace-normal">
                     {valueset.description}
                   </div>
-                </TableCell>
-                <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {valueset.is_system_defined ? t("yes") : t("no")}
                 </TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
                   {!valueset.is_system_defined && (
@@ -310,50 +304,55 @@ export function ValueSetList() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mb-4">
+      <div className="mb-4 px-4 md:px-0">
         <div className="mb-2">
           <h1 className="text-2xl font-bold">{t("valuesets")}</h1>
           <p className="text-gray-600">{t("manage_and_view_valuesets")}</p>
         </div>
-        <div className="flex flex-col md:flex-row items-center justify-between mt-8 gap-4">
-          <div className="flex flex-col md:flex-row items-center gap-4">
+
+        <div className="mt-8 mb-4">
+          <div className="w-full overflow-x-auto pb-1">
             <Tabs
               defaultValue="active"
               value={qParams.status || "active"}
               onValueChange={(value) => updateQuery({ status: value })}
-              className="w-full"
             >
-              <TabsList className="flex gap-2 w-full">
-                <TabsTrigger value="active">
-                  <FileCheckIcon className="w-4 h-4 mr-2" />
-                  {t("active")}
-                </TabsTrigger>
-                <TabsTrigger value="draft">
-                  <NotepadTextDashedIcon className="w-4 h-4 mr-2" />
-                  {t("draft")}
-                </TabsTrigger>
-                <TabsTrigger value="retired">
-                  <ArchiveIcon className="w-4 h-4 mr-2" />
-                  {t("retired")}
-                </TabsTrigger>
-                <TabsTrigger value="unknown">
-                  <HelpCircle className="w-4 h-4 mr-2" />
-                  {t("unknown")}
-                </TabsTrigger>
-              </TabsList>
+              <div className="min-w-[480px]">
+                <TabsList className="flex w-full">
+                  <TabsTrigger value="active" className="flex-1">
+                    <FileCheckIcon className="w-4 h-4 mr-2" />
+                    {t("active")}
+                  </TabsTrigger>
+                  <TabsTrigger value="draft" className="flex-1">
+                    <NotepadTextDashedIcon className="w-4 h-4 mr-2" />
+                    {t("draft")}
+                  </TabsTrigger>
+                  <TabsTrigger value="retired" className="flex-1">
+                    <ArchiveIcon className="w-4 h-4 mr-2" />
+                    {t("retired")}
+                  </TabsTrigger>
+                  <TabsTrigger value="unknown" className="flex-1">
+                    <HelpCircle className="w-4 h-4 mr-2" />
+                    {t("unknown")}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             </Tabs>
-            <div className="relative md:min-w-80 w-full">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-              <Input
-                placeholder={t("search_valuesets")}
-                className="pl-10"
-                value={qParams.name || ""}
-                onChange={(e) => updateQuery({ name: e.target.value })}
-              />
-            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder={t("search_valuesets")}
+              className="pl-10 w-full"
+              value={qParams.name || ""}
+              onChange={(e) => updateQuery({ name: e.target.value })}
+            />
           </div>
 
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Link
               href="/admin/valuesets/create"
               className="flex items-center gap-2"
