@@ -227,9 +227,7 @@ export function QuestionInput({
                 className={cn("space-y-1", { "flex-1": removeButton })}
                 data-question-id={question.id}
               >
-                {index === 0 && (
-                  <QuestionLabel question={question} isChildQuestion={true} />
-                )}
+                {index === 0 && <QuestionLabel question={question} />}
                 <div
                   className={cn({
                     "flex w-full": !question.structured_type,
