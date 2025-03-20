@@ -154,11 +154,6 @@ export default function LocationList({ facilityId }: Props) {
   };
 
   useEffect(() => {
-    if (!searchQuery) {
-      setExpandedRows((prevExpandedRows) => ({ ...prevExpandedRows }));
-      return;
-    }
-
     const allLocations = data?.results || [];
     const matchesSearch = createSearchMatcher(searchQuery);
 
