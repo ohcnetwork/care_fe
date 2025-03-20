@@ -351,7 +351,9 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
       {/* Mobile View - Card Layout */}
       <div className="md:hidden rounded-lg">
         <Card
-          className={cn("mb-2 rounded-lg", { "border border-primary": isOpen })}
+          className={cn("mb-2 rounded-lg", {
+            "border border-primary-500": isOpen,
+          })}
         >
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <CardHeader
@@ -362,7 +364,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
               <div className="flex flex-col space-y-1">
                 <div className="flex items-center justify-between">
                   <CardTitle
-                    className="text-base"
+                    className="text-base text-gray-950"
                     title={diagnosis.code.display}
                   >
                     {diagnosis.code.display}

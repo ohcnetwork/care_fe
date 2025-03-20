@@ -44,6 +44,7 @@ interface QuestionInputProps {
   disabled?: boolean;
   facilityId?: string;
   patientId: string;
+  isSubQuestion?: boolean;
 }
 
 export function QuestionInput({
@@ -56,6 +57,7 @@ export function QuestionInput({
   disabled,
   facilityId,
   patientId,
+  isSubQuestion,
 }: QuestionInputProps) {
   const { t } = useTranslation();
   const questionnaireResponse = questionnaireResponses.find(
@@ -203,7 +205,7 @@ export function QuestionInput({
       : questionnaireResponse.values;
 
     return (
-      <div className="bg-gray-100 sm:bg-transparent px-2 py-3">
+      <div className="bg-gray-100 md:bg-transparent px-2 py-3">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 && (
@@ -221,13 +223,18 @@ export function QuestionInput({
           return (
             <div
               key={index}
-              className={cn("mt-2", removeButton && "gap-2 flex items-end")}
+              className={cn("", removeButton && "gap-2 flex items-end")}
             >
               <div
                 className={cn("space-y-1", { "flex-1": removeButton })}
                 data-question-id={question.id}
               >
-                {index === 0 && <QuestionLabel question={question} />}
+                {index === 0 && (
+                  <QuestionLabel
+                    question={question}
+                    isSubQuestion={isSubQuestion}
+                  />
+                )}
                 <div
                   className={cn({
                     "flex w-full": !question.structured_type,

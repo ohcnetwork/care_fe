@@ -6,6 +6,7 @@ interface QuestionLabelProps {
   question: Question;
   className?: string;
   groupLabel?: boolean;
+  isSubQuestion?: boolean;
 }
 
 const defaultGroupClass = "text-lg font-medium text-gray-900";
@@ -15,15 +16,30 @@ export function QuestionLabel({
   question,
   className,
   groupLabel,
+  isSubQuestion = false,
 }: QuestionLabelProps) {
   const defaultClass = groupLabel ? defaultGroupClass : defaultInputClass;
+
   return (
     <Label className={className ?? defaultClass}>
-      <div className="flex flex-col gap-3">
-        {groupLabel && <div className="h-1 w-4 rounded-full bg-indigo-600" />}
-        <div className="flex gap-3 items-center bg-gray-100 md:bg-transparent">
+      <div className="flex flex-col gap-3 bg-gray-100 md:bg-transparent">
+        {(groupLabel || question.type === "structured" || !isSubQuestion) && (
+          <div className="hidden md:block h-1 w-4 rounded-full bg-indigo-600" />
+        )}
+        <div className="flex gap-3 items-center">
+          {(groupLabel || question.type === "structured" || !isSubQuestion) && (
+            <div className="md:hidden absolute w-1 h-5 rounded-r-sm bg-indigo-500 left-3.5" />
+          )}
           <span>
-            {question.text}
+            <span
+              className={
+                question.type === "structured" || groupLabel || !isSubQuestion
+                  ? "text-gray-950 font-semibold"
+                  : ""
+              }
+            >
+              {question.text}
+            </span>
             {question.required && <span className="ml-1 text-red-500">*</span>}
           </span>
           {question.unit?.code && (
