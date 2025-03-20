@@ -326,8 +326,8 @@ const Login = (props: LoginProps) => {
       navigator.credentials
         .get({ otp: { transport: ["sms"] } } as any)
         .then((otpCredential: any) => {
-          setOtp(otpCredential.code); // Autofill OTP
-          setOtpValidationError(""); // Clear any validation errors
+          setOtp(otpCredential.code);
+          setOtpValidationError("");
         })
         .catch((err) => console.log("OTP Autofill Failed:", err));
     }
