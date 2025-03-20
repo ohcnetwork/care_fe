@@ -16,7 +16,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatDateTime, properCase } from "@/Utils/utils";
+import { formatDateTime, formatName, properCase } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -258,7 +258,7 @@ function ResponseCard({
               <Trans
                 i18nKey="by_name"
                 values={{
-                  by: `${item.created_by?.first_name || ""} ${item.created_by?.last_name || ""}${
+                  by: `${formatName(item.created_by)}${
                     item.created_by?.user_type
                       ? ` (${item.created_by.user_type})`
                       : ""

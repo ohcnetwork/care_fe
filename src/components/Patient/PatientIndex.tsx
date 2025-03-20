@@ -55,7 +55,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     });
   }, [facilityId, phoneNumber]);
 
-  useKeyboardShortcut(["shift", "p"], handleCreatePatient);
+  useKeyboardShortcut(["shift", "p"], handleCreatePatient, {
+    ignoreInputFields: false,
+  });
 
   function AddPatientButton({ outline }: { outline?: boolean }) {
     return (
@@ -151,6 +153,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                 options={searchOptions}
                 onSearch={handleSearch}
                 className="w-full"
+                autoFocus
               />
 
               <div className="min-h-[200px]" id="patient-search-results">
