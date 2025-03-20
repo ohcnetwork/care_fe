@@ -21,7 +21,7 @@ export function QuestionLabel({
     <Label className={className ?? defaultClass}>
       <div className="flex flex-col gap-3">
         {groupLabel && <div className="h-1 w-4 rounded-full bg-indigo-600" />}
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center bg-gray-100 md:bg-transparent">
           <span>
             {question.text}
             {question.required && <span className="ml-1 text-red-500">*</span>}
