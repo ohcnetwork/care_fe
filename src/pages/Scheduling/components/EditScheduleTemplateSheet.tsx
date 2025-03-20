@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { differenceInMinutes, isBefore, parse } from "date-fns";
+import { isBefore, parse } from "date-fns";
 import { Loader2, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -57,7 +57,11 @@ import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
-import { getSlotsPerSession, getTokenDuration } from "@/pages/Scheduling/utils";
+import {
+  calculateSlotDuration,
+  getSlotsPerSession,
+  getTokenDuration,
+} from "@/pages/Scheduling/utils";
 import {
   AvailabilityDateTime,
   ScheduleAvailability,
@@ -695,21 +699,13 @@ const NewAvailabilityCard = ({
       </div>
     );
   }
-  const calculateDuration = (startTime: string, endTime: string) => {
-    const start = parse(startTime, "HH:mm", new Date());
-    const end = parse(endTime, "HH:mm", new Date());
-    return differenceInMinutes(end, start);
-  };
-
-  const updateSlotDuration = () => {
-    const isAutoFill = form.watch("auto_fill_duration");
-    if (!isAutoFill) return;
-
-    const startTime = form.watch("start_time");
-    const endTime = form.watch("end_time");
-
-    if (startTime && endTime) {
-      const duration = calculateDuration(startTime, endTime);
+  const setSlotDuration = () => {
+    let duration = calculateSlotDuration({
+      isAutoFill: form.watch("auto_fill_duration"),
+      startTime: form.watch("start_time"),
+      endTime: form.watch("end_time"),
+    });
+    if (duration) {
       form.setValue("slot_size_in_minutes", duration);
     }
   };
@@ -788,7 +784,7 @@ const NewAvailabilityCard = ({
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
-                        updateSlotDuration();
+                        setSlotDuration();
                       }}
                     />
                   </FormControl>
@@ -809,7 +805,7 @@ const NewAvailabilityCard = ({
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
-                        updateSlotDuration();
+                        setSlotDuration();
                       }}
                     />
                   </FormControl>
@@ -838,7 +834,7 @@ const NewAvailabilityCard = ({
                     onCheckedChange={(checked) => {
                       form.setValue("auto_fill_duration", checked);
                       if (checked) {
-                        updateSlotDuration();
+                        setSlotDuration();
                       }
                     }}
                   />
