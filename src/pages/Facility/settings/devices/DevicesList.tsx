@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import Page from "@/components/Common/Page";
 import PageTitle from "@/components/Common/PageTitle";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { LocationSearch } from "@/components/Location/LocationSearch";
@@ -58,98 +59,102 @@ export default function DevicesList({ facilityId }: Props) {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-        <div className="flex items-center gap-4">
-          <PageTitle title={t("devices")} />
-        </div>
-        <div className="flex flex-wrap sm:flex-row items-center gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-            <div className="flex w-full sm:w-full items-center rounded-lg bg-gray-50">
-              <Select
-                value={searchType}
-                onValueChange={(value: "name" | "location") => {
-                  setSearchType(value);
-                  updateQuery({
-                    [value === "name" ? "current_location" : "search_text"]: "",
-                  });
-                  setSelectedLocation(null);
-                }}
-              >
-                <SelectTrigger className="w-24 sm:w-36 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base rounded-r-none">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">{t("name")}</SelectItem>
-                  <SelectItem value="location">{t("location")}</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="w-full sm:w-64">
-                {searchType === "name" ? (
-                  <Input
-                    placeholder={t("search_by_name")}
-                    value={qParams.search_text || ""}
-                    onChange={(e) => {
-                      updateQuery({
-                        search_text: e.target.value,
-                        current_location: "",
-                      });
-                      setSelectedLocation(null);
-                    }}
-                    className="w-full h-9 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base shadow-sm focus:ring-2 focus:ring-primary focus:border-primary rounded-l-none"
-                  />
-                ) : (
-                  <LocationSearch
-                    facilityId={facilityId}
-                    onSelect={(location: LocationList | null) => {
-                      updateQuery({
-                        current_location: location?.id || "",
-                        search_text: "",
-                      });
-                      setSelectedLocation(location);
-                    }}
-                    value={selectedLocation}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base shadow-sm focus:ring-2 focus:ring-primary focus:border-primary rounded-l-none"
-                  />
-                )}
+    <Page title={t("devices")} hideTitleOnPage className="p-0">
+      <div className="space-y-6">
+        <div className="flex flex-col lg:flex-row justify-between gap-4 w-full">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <PageTitle title={t("devices")} />
+          </div>
+          <div className="flex flex-wrap sm:flex-row items-center gap-4">
+            <div className="flex flex-col lg:flex-row items-center gap-2 w-full sm:w-auto">
+              <div className="flex w-full items-center rounded-lg bg-gray-50">
+                <Select
+                  value={searchType}
+                  onValueChange={(value: "name" | "location") => {
+                    setSearchType(value);
+                    updateQuery({
+                      search_text: value === "name" ? "" : qParams.search_text,
+                      current_location:
+                        value === "location" ? "" : qParams.current_location,
+                    });
+                    setSelectedLocation(null);
+                  }}
+                >
+                  <SelectTrigger className="w-24 sm:w-36 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base rounded-r-none">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">{t("name")}</SelectItem>
+                    <SelectItem value="location">{t("location")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="w-full sm:w-64">
+                  {searchType === "name" ? (
+                    <Input
+                      placeholder={t("search_by_name")}
+                      value={qParams.search_text || ""}
+                      onChange={(e) => {
+                        updateQuery({
+                          search_text: e.target.value,
+                          current_location: "",
+                        });
+                        setSelectedLocation(null);
+                      }}
+                      className="w-full h-9 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base shadow-sm focus:ring-2 focus:ring-primary focus:border-primary rounded-l-none"
+                    />
+                  ) : (
+                    <LocationSearch
+                      facilityId={facilityId}
+                      onSelect={(location: LocationList | null) => {
+                        updateQuery({
+                          current_location: location?.id || "",
+                          search_text: "",
+                        });
+                        setSelectedLocation(location);
+                      }}
+                      value={selectedLocation}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base shadow-sm focus:ring-2 focus:ring-primary focus:border-primary rounded-l-none"
+                    />
+                  )}
+                </div>
               </div>
             </div>
+            <Button
+              variant="primary"
+              asChild
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
+              <Link href="/devices/create">
+                <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
+                {t("add_device")}
+              </Link>
+            </Button>
           </div>
-          <Button
-            variant="primary"
-            asChild
-            className="w-full sm:w-auto text-sm sm:text-base"
-          >
-            <Link href="/devices/create">
-              <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
-              {t("add_device")}
-            </Link>
-          </Button>
         </div>
-      </div>
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <CardGridSkeleton count={6} />
-        </div>
-      ) : (
-        <div className="space-y-6">
+        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data?.results?.length ? (
-              data.results.map((device) => (
-                <DeviceCard key={device.id} device={device} />
-              ))
-            ) : (
-              <Card className="col-span-full border border-gray-200 shadow-sm">
-                <CardContent className="p-8 text-center text-gray-500">
-                  {t("no_devices_available")}
-                </CardContent>
-              </Card>
-            )}
+            <CardGridSkeleton count={6} />
           </div>
-          <Pagination totalCount={data?.count ?? 0} />
-        </div>
-      )}
-    </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {data?.results?.length ? (
+                data.results.map((device) => (
+                  <DeviceCard key={device.id} device={device} />
+                ))
+              ) : (
+                <Card className="col-span-full border border-gray-200 shadow-sm">
+                  <CardContent className="p-8 text-center text-gray-500">
+                    {t("no_devices_available")}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+            <Pagination totalCount={data?.count ?? 0} />
+          </div>
+        )}
+      </div>
+    </Page>
   );
 }
