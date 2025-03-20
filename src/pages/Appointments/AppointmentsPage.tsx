@@ -68,7 +68,7 @@ import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
   formatDateTime,
-  formatDisplayName,
+  formatName,
   formatPatientAge,
 } from "@/Utils/utils";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
@@ -833,7 +833,7 @@ function AppointmentRowItem({
       </TableCell>
       {/* TODO: Replace with relevant information */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        {formatDisplayName(appointment.user)}
+        {formatName(appointment.user)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         <AppointmentStatusDropdown

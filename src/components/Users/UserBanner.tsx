@@ -2,7 +2,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { formatDisplayName, formatName } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
 import { UserStatusIndicator } from "./UserListAndCard";
@@ -18,7 +18,7 @@ export default function UserBanner({ userData }: { userData: UserBase }) {
         <div className="flex flex-row gap-2 self-center">
           <Avatar
             imageUrl={userData?.profile_picture_url}
-            name={formatDisplayName(userData)}
+            name={formatName(userData, true)}
             className="h-20 w-20 md:mr-2 shrink-0"
           />
           <div className="grid grid-cols-1 self-center">
