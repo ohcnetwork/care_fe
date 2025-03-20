@@ -21,7 +21,7 @@ describe("Resources Management", () => {
   });
 
   it("Create a new resource", () => {
-    facilityCreation.selectFacility("GHC payyanur");
+    facilityCreation.selectFacility("GHC Payyanur");
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()
@@ -41,7 +41,7 @@ describe("Resources Management", () => {
   });
 
   it("Verify created resource", () => {
-    facilityCreation.selectFacility("GHC payyanur");
+    facilityCreation.selectFacility("GHC Payyanur");
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()
