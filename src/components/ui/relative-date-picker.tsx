@@ -1,6 +1,16 @@
 "use client";
 
-import { format, subDays, subMonths, subWeeks, subYears } from "date-fns";
+import {
+  differenceInDays,
+  differenceInMonths,
+  differenceInWeeks,
+  differenceInYears,
+  format,
+  subDays,
+  subMonths,
+  subWeeks,
+  subYears,
+} from "date-fns";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,39 +25,85 @@ import {
 
 type TimeUnit = "days" | "weeks" | "months" | "years";
 
+interface TimeUnitState {
+  unit: TimeUnit;
+  value: number;
+}
+
 interface RelativeDatePickerProps {
   onDateChange: (date: Date) => void;
-  initialValue?: number;
-  initialUnit?: TimeUnit;
+  value?: Date;
 }
+
+const computeTimeUnits = (date?: Date): TimeUnitState => {
+  const now = new Date();
+  console.log(date);
+  if (!date) {
+    return {
+      unit: "days",
+      value: 1,
+    };
+  }
+  const daysDiff = differenceInDays(now, date);
+  const weeksDiff = differenceInWeeks(now, date);
+  const monthsDiff = differenceInMonths(now, date);
+  const yearsDiff = differenceInYears(now, date);
+  if (yearsDiff > 0) {
+    return {
+      unit: "years",
+      value: yearsDiff,
+    };
+  } else if (monthsDiff > 0) {
+    return {
+      unit: "months",
+      value: monthsDiff,
+    };
+  } else if (weeksDiff > 0) {
+    return {
+      unit: "weeks",
+      value: weeksDiff,
+    };
+  } else {
+    return {
+      unit: "days",
+      value: daysDiff,
+    };
+  }
+};
 
 export function RelativeDatePicker({
   onDateChange,
-  initialValue = 1,
-  initialUnit = "days",
+  value,
 }: RelativeDatePickerProps) {
-  const [value, setValue] = useState<number>(initialValue);
-  const [unit, setUnit] = useState<TimeUnit>(initialUnit);
+  const [selected, setSelected] = useState(() => {
+    const initialState = computeTimeUnits(value);
+    console.log(initialState);
+    return {
+      unit: initialState.unit,
+      value: initialState.value,
+    };
+  });
   const [resultDate, setResultDate] = useState<Date>(new Date());
 
   const timeUnits: TimeUnit[] = ["days", "weeks", "months", "years"];
 
+  // Update result date when value or unit changes
   useEffect(() => {
     const now = new Date();
     let newDate: Date;
 
-    switch (unit) {
+    switch (selected.unit) {
       case "days":
-        newDate = subDays(now, value);
+        newDate = subDays(now, selected.value);
         break;
       case "weeks":
-        newDate = subWeeks(now, value);
+        newDate = subWeeks(now, selected.value);
         break;
       case "months":
-        newDate = subMonths(now, value);
+        newDate = subMonths(now, selected.value);
         break;
       case "years":
-        newDate = subYears(now, value);
+        newDate = subYears(now, selected.value);
         break;
       default:
         newDate = now;
@@ -55,10 +111,10 @@ export function RelativeDatePicker({
 
     setResultDate(newDate);
     onDateChange(newDate);
-  }, [value, unit, onDateChange]);
+  }, [selected, onDateChange]);
 
   const handleUnitChange = (newUnit: TimeUnit) => {
-    setUnit(newUnit);
+    setSelected((prev) => ({ ...prev, unit: newUnit }));
   };
 
   return (
@@ -69,11 +125,16 @@ export function RelativeDatePicker({
 
         <div className="grid grid-cols-2 gap-2">
           <Select
-            value={value.toString()}
-            onValueChange={(value) => setValue(Number.parseInt(value) || 0)}
+            value={selected.value.toString()}
+            onValueChange={(value) =>
+              setSelected((prev) => ({
+                ...prev,
+                value: Number.parseInt(value) || 0,
+              }))
+            }
           >
             <SelectTrigger className="col-span-2">
-              <SelectValue placeholder="Select a fruit" />
+              <SelectValue placeholder="Select a number" />
             </SelectTrigger>
             <SelectContent>
               {Array.from({ length: 31 }, (_, i) => i + 1).map((timeUnit) => (
@@ -87,7 +148,7 @@ export function RelativeDatePicker({
             <Badge
               key={timeUnit}
               onClick={() => handleUnitChange(timeUnit)}
-              variant={unit === timeUnit ? "default" : "outline"}
+              variant={selected.unit === timeUnit ? "default" : "outline"}
             >
               {timeUnit.charAt(0).toUpperCase() + timeUnit.slice(1)}
             </Badge>

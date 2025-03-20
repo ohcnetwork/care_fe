@@ -100,11 +100,13 @@ export function DateQuestion({
                 mode="single"
                 selected={currentValue}
                 onSelect={handleSelect}
-                initialFocus
               />
             </TabsContent>
             <TabsContent value="relative" className="p-0">
-              <RelativeDatePicker onDateChange={handleRelativeDateChange} />
+              <RelativeDatePicker
+                value={currentValue}
+                onDateChange={handleRelativeDateChange}
+              />
             </TabsContent>
           </Tabs>
         </PopoverContent>
