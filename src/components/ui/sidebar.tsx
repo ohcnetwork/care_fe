@@ -112,10 +112,6 @@ const SidebarProvider = React.forwardRef<
       toggleSidebar,
     );
 
-    React.useEffect(() => {
-      _setOpen(defaultOpen);
-    }, [defaultOpen]);
-
     // We add a state so that we can do data-state="expanded" or "collapsed".
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed";
