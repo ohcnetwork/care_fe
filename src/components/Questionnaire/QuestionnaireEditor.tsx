@@ -686,28 +686,39 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
-    mutationFn: mutate(questionnaireApi.create),
+    mutationFn: mutate(questionnaireApi.create, {
+      silent: true,
+    }),
     onSuccess: (data: QuestionnaireDetail) => {
       toast.success("Questionnaire created successfully");
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
       navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
-    onError: (_error) => {
-      toast.error("Failed to create questionnaire");
+    onError: (error) => {
+      const errorData = error.cause as { errors: { msg: string }[] };
+      errorData.errors.forEach((er) => {
+        toast.error(er.msg);
+      });
+      toast.error("Failed to Create Questionnaire");
     },
   });
 
   const { mutate: updateQuestionnaire, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.update, {
       pathParams: { id: id! },
+      silent: true,
     }),
     onSuccess: (data: QuestionnaireDetail) => {
       toast.success("Questionnaire updated successfully");
       navigate(`/admin/questionnaire/${data.slug}/edit`);
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
-    onError: (_error) => {
-      toast.error("Failed to update questionnaire");
+    onError: (error) => {
+      const errorData = error.cause as { errors: { msg: string }[] };
+      errorData.errors.forEach((er) => {
+        toast.error(er.msg);
+      });
+      toast.error("Failed to Update Questionnaire");
     },
   });
 
