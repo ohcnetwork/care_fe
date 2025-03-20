@@ -1342,12 +1342,22 @@ function QuestionEditor({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select question type" />
+                    <SelectValue placeholder="Select question type">
+                      {
+                        SUPPORTED_QUESTION_TYPES.find((t) => t.value === type)
+                          ?.name
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
-                        {type.name}
+                        <div className="flex flex-col items-start">
+                          <span>{type.name}</span>
+                          <span className="text-xs max-w-xs text-muted-foreground whitespace-normal">
+                            {type.description}
+                          </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>

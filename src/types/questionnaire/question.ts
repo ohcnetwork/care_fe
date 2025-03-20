@@ -17,20 +17,84 @@ export type QuestionType =
   | "structured";
 
 export const SUPPORTED_QUESTION_TYPES = [
-  { name: "Group", value: "group" },
-  { name: "Display", value: "display" },
-  { name: "Boolean", value: "boolean" },
-  { name: "Decimal", value: "decimal" },
-  { name: "Integer", value: "integer" },
-  { name: "Date", value: "date" },
-  { name: "DateTime", value: "dateTime" },
-  { name: "Time", value: "time" },
-  { name: "String", value: "string" },
-  { name: "Text", value: "text" },
-  { name: "URL", value: "url" },
-  { name: "Choice", value: "choice" },
-  { name: "Quantity", value: "quantity" },
-  { name: "Structured", value: "structured" },
+  {
+    name: "Group",
+    value: "group",
+    description:
+      "A container for organizing related questions together. Must contain at least one question.",
+  },
+  {
+    name: "Display",
+    value: "display",
+    description:
+      "Shows text or instructions to users without collecting any answers.",
+  },
+  {
+    name: "Boolean",
+    value: "boolean",
+    description:
+      "A simple yes/no question that users can answer with a single click.",
+  },
+  {
+    name: "Decimal",
+    value: "decimal",
+    description: "Collects numbers with decimal points (like 3.14 or 2.5).",
+  },
+  {
+    name: "Integer",
+    value: "integer",
+    description: "Collects whole numbers (like 1, 2, 3).",
+  },
+  {
+    name: "Date",
+    value: "date",
+    description: "Lets users select a specific date from a calendar.",
+  },
+  {
+    name: "Date Time",
+    value: "dateTime",
+    description: "Lets users select both a date and time.",
+  },
+  {
+    name: "Time",
+    value: "time",
+    description: "Lets users select a specific time of day.",
+  },
+  {
+    name: "String",
+    value: "string",
+    description:
+      "A short text field for brief answers like names or single-line responses.",
+  },
+  {
+    name: "Text",
+    value: "text",
+    description:
+      "A larger text area for longer responses like descriptions or detailed explanations.",
+  },
+  {
+    name: "URL",
+    value: "url",
+    description: "Collects website addresses or links.",
+  },
+  {
+    name: "Choice",
+    value: "choice",
+    description:
+      "Presents a list of predefined options for users to choose from.",
+  },
+  {
+    name: "Quantity",
+    value: "quantity",
+    description:
+      "Collects a number with its unit of measurement (like 5 kg or 2 hours).",
+  },
+  {
+    name: "Structured",
+    value: "structured",
+    description:
+      "A specialized question type for collecting specific types of medical data.",
+  },
 ];
 
 export type StructuredQuestionType =
