@@ -1560,7 +1560,7 @@
   "middleware_hostname_sourced_from": "Middleware hostname sourced from {{ source }}",
   "mild": "Mild",
   "min_char_length_error": "Must be at least {{ min_length }} characters",
-  "min_character_validation": "Minimum {{length}} characters allowed",
+  "min_character_validation": "Minimum {{length}} characters required",
   "min_password_len_8": "Minimum password length 8",
   "min_time_bw_doses": "Min. time b/w doses",
   "minimize": "Minimize",
