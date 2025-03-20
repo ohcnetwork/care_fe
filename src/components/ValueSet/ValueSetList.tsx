@@ -71,37 +71,43 @@ const RenderCard = ({
 
   return (
     <div className="lg:hidden space-y-4 px-4">
-      {valuesets.length > 0 ? (
-        valuesets.map((valueset) => (
-          <Card
-            key={valueset.id}
-            className="overflow-hidden bg-white rounded-lg transition-shadow hover:shadow-lg"
-          >
-            <CardContent className="p-6 relative">
-              <div className="absolute top-4 right-4">
-                <Badge
-                  className={
-                    {
-                      active: "bg-green-100 text-green-800 hover:bg-green-200",
-                      draft:
-                        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-                      retired: "bg-red-100 text-red-800 hover:bg-red-200",
-                      unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                    }[valueset.status]
-                  }
-                >
-                  {t(valueset.status)}
-                </Badge>
-              </div>
+      {isLoading ? (
+        <CardGridSkeleton count={5} />
+      ) : valuesets.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <>
+          {valuesets.map((valueset) => (
+            <Card
+              key={valueset.id}
+              className="overflow-hidden bg-white rounded-lg transition-shadow hover:shadow-lg"
+            >
+              <CardContent className="p-6 relative">
+                <div className="absolute top-4 right-4">
+                  <Badge
+                    className={
+                      {
+                        active:
+                          "bg-green-100 text-green-800 hover:bg-green-200",
+                        draft:
+                          "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+                        retired: "bg-red-100 text-red-800 hover:bg-red-200",
+                        unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+                      }[valueset.status]
+                    }
+                  >
+                    {t(valueset.status)}
+                  </Badge>
+                </div>
 
-              <div className="mb-4 border-b pb-2">
-                <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  {t("name")}
-                </h3>
-                <p className="mt-2 text-xl font-bold text-gray-900 truncate">
-                  {valueset.name}
-                </p>
-              </div>
+                <div className="mb-4 border-b pb-2">
+                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    {t("name")}
+                  </h3>
+                  <p className="mt-2 text-xl font-bold text-gray-900 truncate">
+                    {valueset.name}
+                  </p>
+                </div>
 
                 <div className="mb-4 border-b pb-2">
                   <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -145,16 +151,15 @@ const RenderCard = ({
                     </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="mb-4">
-                <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  {t("description")}
-                </h3>
-                <p className="text-sm text-gray-900 line-clamp-2">
-                  {valueset.description}
-                </p>
-              </div>
+                <div className="mb-4">
+                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    {t("description")}
+                  </h3>
+                  <p className="text-sm text-gray-900 line-clamp-2">
+                    {valueset.description}
+                  </p>
+                </div>
 
                 {!valueset.is_system_defined && (
                   <div className="mt-4 flex justify-end">
@@ -191,29 +196,33 @@ const RenderTable = ({
   const navigate = useNavigate();
   return (
     <div className="hidden lg:block overflow-hidden rounded-lg bg-white shadow">
-      <Table className="min-w-full divide-y divide-gray-200">
-        <TableHeader className="bg-gray-50">
-          <TableRow>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              {t("name")}
-            </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              {t("slug")}
-            </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              {t("status")}
-            </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              {t("description")}
-            </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              {t("actions")}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="divide-y divide-gray-200 bg-white">
-          {valuesets.length > 0 ? (
-            valuesets.map((valueset) => (
+      {isLoading ? (
+        <TableSkeleton count={5} />
+      ) : valuesets.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <Table className="min-w-full divide-y divide-gray-200">
+          <TableHeader className="bg-gray-50">
+            <TableRow>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                {t("name")}
+              </TableHead>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                {t("slug")}
+              </TableHead>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                {t("status")}
+              </TableHead>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                {t("description")}
+              </TableHead>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                {t("actions")}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-gray-200 bg-white">
+            {valuesets.map((valueset) => (
               <TableRow key={valueset.id} className="hover:bg-gray-50">
                 <TableCell className="whitespace-nowrap px-6 py-4">
                   {valueset.name && valueset.name.length > 20 ? (
