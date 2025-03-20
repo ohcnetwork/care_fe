@@ -19,6 +19,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 interface AutoCompleteOption {
@@ -28,6 +30,7 @@ interface AutoCompleteOption {
 
 interface AutocompleteProps {
   options: AutoCompleteOption[];
+  isLoading?: boolean;
   value: string;
   onChange: (value: string) => void;
   onSearch?: (value: string) => void;
@@ -41,6 +44,7 @@ interface AutocompleteProps {
 
 export default function Autocomplete({
   options,
+  isLoading = false,
   value,
   onChange,
   onSearch,
@@ -65,7 +69,11 @@ export default function Autocomplete({
         autoFocus
       />
       <CommandList>
-        <CommandEmpty>{noOptionsMessage}</CommandEmpty>
+        {isLoading ? (
+          <CardListSkeleton count={3} />
+        ) : (
+          <CommandEmpty>{noOptionsMessage}</CommandEmpty>
+        )}
         <CommandGroup>
           {options.map((option) => (
             <CommandItem
@@ -147,7 +155,7 @@ export default function Autocomplete({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="sm:w-full p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]"
+        className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]"
         align={align}
       >
         <Command>{commandContent}</Command>

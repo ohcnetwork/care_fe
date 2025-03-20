@@ -87,6 +87,7 @@ export interface Question {
     containerClasses?: string;
   };
   required?: boolean;
+  is_component?: boolean;
   collect_time?: boolean;
   collect_performer?: boolean;
   collect_body_site?: boolean;
