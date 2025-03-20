@@ -458,12 +458,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
                     <div className="flex space-x-2">
                       <div className="flex flex-col w-full">
-                        <label
-                          htmlFor="from-date"
-                          className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                          {t("from_date")}
-                        </label>
+                        <Label className="mb-1">{t("from_date")}</Label>
                         <Input
                           id="from-date"
                           type="date"
@@ -479,12 +474,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                       </div>
 
                       <div className="flex flex-col w-full">
-                        <label
-                          htmlFor="to-date"
-                          className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                          {t("to_date")}
-                        </label>
+                        <Label className="mb-1">{t("to_date")}</Label>
                         <Input
                           id="to-date"
                           type="date"
