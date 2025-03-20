@@ -43,9 +43,11 @@ export function LandingPage() {
     organization.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const orgType = t(
-    `SYSTEM__govt_org_type__${organizations[0]?.metadata?.govt_org_type || "district"}`,
-  ).toLowerCase();
+  const orgType = organizations[0]?.metadata?.govt_org_type
+    ? t(
+        `SYSTEM__govt_org_type__${organizations[0]?.metadata?.govt_org_type}`,
+      ).toLowerCase()
+    : "unknown";
 
   const inputRef = useRef<HTMLInputElement>(null);
 
