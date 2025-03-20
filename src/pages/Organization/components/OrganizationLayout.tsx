@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -50,6 +50,7 @@ export default function OrganizationLayout({
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dropdownContainerRef = useRef<HTMLDivElement>(null);
 
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
@@ -120,7 +121,7 @@ export default function OrganizationLayout({
     <Page title={`${org.name}`}>
       {/* Navigation */}
       <div className="mt-4">
-        <div className="block md:hidden">
+        <div className="block lg:hidden">
           <DropdownMenu
             open={isMobileMenuOpen}
             onOpenChange={setIsMobileMenuOpen}
@@ -147,7 +148,15 @@ export default function OrganizationLayout({
                 />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[200px]">
+            <DropdownMenuContent
+              align="start"
+              sideOffset={5}
+              className="w-[var(--radix-dropdown-menu-trigger-width)]"
+              style={{
+                width: dropdownContainerRef.current?.clientWidth || "auto",
+                maxWidth: "100vw",
+              }}
+            >
               {visibleNavItems.map((item) => (
                 <DropdownMenuItem
                   key={item.path}
@@ -173,7 +182,7 @@ export default function OrganizationLayout({
         </div>
 
         {/* Desktop Navigation - Shows on medium+ screens */}
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <Menubar className="w-full h-full overflow-x-auto">
             {visibleNavItems.map((item) => (
               <MenubarMenu key={item.path}>
