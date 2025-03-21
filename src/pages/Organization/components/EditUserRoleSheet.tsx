@@ -43,6 +43,7 @@ import { editUserPermissions } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { OrganizationUserRole } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -154,7 +155,7 @@ export default function EditUserRoleSheet({
                 />
                 <div className="flex flex-col flex-1">
                   <span className="font-medium text-lg">
-                    {userRole.user.first_name} {userRole.user.last_name}
+                    {formatName(userRole.user)}
                   </span>
                   <span className="text-sm text-gray-500">
                     {userRole.user.email}
