@@ -75,6 +75,10 @@ interface LoginProps {
   forgot?: boolean;
 }
 
+interface OTPCredential {
+  code: string;
+}
+
 const Login = (props: LoginProps) => {
   const { signIn, patientLogin, isAuthenticating } = useAuthContext();
   const {
@@ -134,6 +138,23 @@ const Login = (props: LoginProps) => {
       setIsOtpSent(true);
       setOtpError("");
       toast.success(t("send_otp_success"));
+
+      if ("OTPCredential" in window) {
+        navigator.credentials
+          .get({ otp: { transport: ["sms"] } } as CredentialRequestOptions)
+          .then((otpCredential) => {
+            const otp = otpCredential as OTPCredential | null;
+            if (otp) {
+              setOtp(otp.code);
+              setOtpValidationError("");
+            }
+          })
+          .catch(() => {
+            setOtpValidationError(
+              t("failed_to_autofill_OTP_Please_enter_manually"),
+            );
+          });
+      }
     },
     onError: (error: any) => {
       const errors = error?.data || [];
@@ -320,18 +341,6 @@ const Login = (props: LoginProps) => {
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,
   );
-
-  useEffect(() => {
-    if ("OTPCredential" in window && isOtpSent) {
-      navigator.credentials
-        .get({ otp: { transport: ["sms"] } } as any)
-        .then((otpCredential: any) => {
-          setOtp(otpCredential.code);
-          setOtpValidationError("");
-        })
-        .catch((err) => console.log("OTP Autofill Failed:", err));
-    }
-  }, [isOtpSent]);
 
   return (
     <div className="relative flex min-h-screen flex-col md:h-screen md:flex-row">
