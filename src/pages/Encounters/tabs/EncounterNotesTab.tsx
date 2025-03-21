@@ -52,12 +52,16 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 
@@ -321,6 +325,12 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   // points to the first message fetched in the last page or the newly created message
   const recentMessageRef = useRef<HTMLDivElement | null>(null);
   const { ref, inView } = useInView();
+  const { hasPermission } = usePermissions();
+  const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
+    getPermissions(hasPermission, encounter.permissions);
+  const canAccess = canViewClinicalData || canViewEncounter;
+  const canWriteCurrentEncounter =
+    canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
   const [commentAdded, setCommentAdded] = useState(false);
 
   // Fetch threads
@@ -330,6 +340,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       pathParams: { patientId: encounter.patient.id },
       queryParams: { encounter: encounter.id },
     }),
+    enabled: canAccess,
   });
 
   // Fetch messages with infinite scroll
@@ -359,7 +370,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       const currentOffset = allPages.length * MESSAGES_LIMIT;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    enabled: !!selectedThread,
+    enabled: !!selectedThread && canAccess,
   });
 
   // Create thread mutation
@@ -475,15 +486,17 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                 {t("encounter_notes__discussions")}
               </h3>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowNewThreadDialog(true)}
-              className="h-8"
-            >
-              <Plus className="h-4 w-4" />
-              {t("encounter_notes__new")}
-            </Button>
+            {canWriteCurrentEncounter && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowNewThreadDialog(true)}
+                className="h-8"
+              >
+                <Plus className="h-4 w-4" />
+                {t("encounter_notes__new")}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -651,41 +664,43 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                     </div>
                   </ScrollArea>
                   {/* Message Input */}
-                  <div className="border-t p-4 sticky bottom-0">
-                    <form onSubmit={handleSendMessage}>
-                      <div className="flex gap-2">
-                        <AutoExpandingTextarea
-                          placeholder={t("encounter_notes__type_message")}
-                          value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && !e.shiftKey) {
-                              e.preventDefault();
-                              if (newMessage.trim()) {
-                                handleSendMessage(e);
+                  {canWriteCurrentEncounter && (
+                    <div className="border-t p-4 sticky bottom-0">
+                      <form onSubmit={handleSendMessage}>
+                        <div className="flex gap-2">
+                          <AutoExpandingTextarea
+                            placeholder={t("encounter_notes__type_message")}
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                if (newMessage.trim()) {
+                                  handleSendMessage(e);
+                                }
                               }
+                            }}
+                            className="flex-1 min-h-20 max-h-[50vh]"
+                          />
+                          <Button
+                            type="submit"
+                            size="icon"
+                            disabled={
+                              !newMessage.trim() ||
+                              createMessageMutation.isPending
                             }
-                          }}
-                          className="flex-1 min-h-20 max-h-[50vh]"
-                        />
-                        <Button
-                          type="submit"
-                          size="icon"
-                          disabled={
-                            !newMessage.trim() ||
-                            createMessageMutation.isPending
-                          }
-                          className="h-10 w-10 shrink-0"
-                        >
-                          {createMessageMutation.isPending ? (
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                          ) : (
-                            <Send className="h-5 w-5" />
-                          )}
-                        </Button>
-                      </div>
-                    </form>
-                  </div>
+                            className="h-10 w-10 shrink-0"
+                          >
+                            {createMessageMutation.isPending ? (
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                            ) : (
+                              <Send className="h-5 w-5" />
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
                 </>
               )}
             </>
@@ -701,10 +716,18 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
               <Button
                 onClick={() => setShowNewThreadDialog(true)}
                 className="shadow-lg"
+                disabled={!canWriteCurrentEncounter}
               >
                 <MessageSquarePlus className="h-5 w-5 mr-2" />
                 {t("encounter_notes__start_new_discussion")}
               </Button>
+              {!canWriteCurrentEncounter && (
+                <p className="text-sm text-gray-500 mt-4">
+                  {t("encounter_notes__inactive_encounter", {
+                    encounterStatus: t(`encounter_status__${encounter.status}`),
+                  })}
+                </p>
+              )}
             </div>
           )}
         </div>

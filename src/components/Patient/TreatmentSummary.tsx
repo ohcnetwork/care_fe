@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { Loader } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
@@ -14,9 +16,14 @@ import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetail
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { getPermissions } from "@/common/Permissions";
+
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { completedEncounterStatus } from "@/types/emr/encounter";
@@ -69,6 +76,22 @@ export default function TreatmentSummary({
     enabled: !!encounterId && !!facilityId,
   });
 
+  const { goBack } = useAppHistory();
+  const { hasPermission } = usePermissions();
+  const { canViewEncounter, canViewClinicalData } = getPermissions(
+    hasPermission,
+    encounter?.permissions ?? [],
+  );
+
+  const canAccess = canViewEncounter || canViewClinicalData;
+
+  useEffect(() => {
+    if (!canAccess) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canAccess]);
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query.paginated(allergyIntoleranceApi.getAllergy, {
@@ -487,6 +510,7 @@ export default function TreatmentSummary({
               patientId={encounter.patient.id}
               isPrintPreview={true}
               onlyUnstructured={true}
+              canAccess={canAccess}
             />
           </div>
         </div>
