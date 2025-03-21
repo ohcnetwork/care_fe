@@ -3,8 +3,8 @@ export interface LocationData {
   name: string;
   bedsCount?: string;
   description?: string;
-  status: "Active" | "Inactive" | "Unknown";
-  opStatus: string;
+  status?: "Active" | "Inactive" | "Unknown";
+  opStatus?: string;
 }
 
 export class PatientLocation {
@@ -12,22 +12,23 @@ export class PatientLocation {
     locationForm: '[data-cy="location-form-options"]',
     addLocationButton: '[data-cy="add-location-button"]',
     sidebarContent: '[data-sidebar="content"]',
-    locationTab: '[data-cy="settings-location-tab"]',
+    locationTab: '[data-cy="settings-locations-tab"]',
     nameInput: '[data-cy="location-name-input"]',
     bedCountsSelect: '[data-cy="bed-counts-select"]',
     locationDescription: '[data-cy="location-description"]',
     locationStatus: '[data-cy="location-status"]',
     operationalStatus: '[data-cy="operational-status"]',
+    enableBulkCreation: '[data-cy="enable-bulk-creation-checkbox"]',
   };
 
   // Navigation
   navigateToSettings() {
-    cy.get(this.selectors.sidebarContent).contains("Settings").click();
+    cy.get('[data-sidebar="content"]').contains("Settings").click();
     return this;
   }
 
   clickLocationTab() {
-    cy.get(this.selectors.locationTab).contains("Location").click();
+    cy.verifyAndClickElement(this.selectors.locationTab, "Location");
     return this;
   }
 
@@ -43,6 +44,13 @@ export class PatientLocation {
 
   enterLocationName(name: string, clearBeforeTyping: boolean = false) {
     cy.typeIntoField(this.selectors.nameInput, name, { clearBeforeTyping });
+    return this;
+  }
+
+  enableBulkCreation(enableBulkCreation: boolean) {
+    if (enableBulkCreation) {
+      cy.get(this.selectors.enableBulkCreation).click();
+    }
     return this;
   }
 
@@ -77,10 +85,22 @@ export class PatientLocation {
   fillLocationData(data: LocationData) {
     this.selectLocationForm(data.form)
       .enterLocationName(data.name)
+      .enableBulkCreation(data.form === "Bed")
       .selectBedCounts(data.bedsCount)
       .enterDescription(data.description)
       .selectLocationStatus(data.status)
       .selectOperationalStatus(data.opStatus);
+    return this;
+  }
+
+  interceptLocationCreationRequest() {
+    cy.intercept("POST", `**/api/v1/facility/**`).as("createLocation");
+    return this;
+  }
+
+  verifyLocationCreationAPICall() {
+    cy.wait("@createLocation").its("response.statusCode").should("eq", 200);
+    return this;
   }
 
   submitLocationForm() {

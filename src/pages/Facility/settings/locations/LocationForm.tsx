@@ -327,6 +327,7 @@ export default function LocationForm({
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    data-cy="enable-bulk-creation-checkbox"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
