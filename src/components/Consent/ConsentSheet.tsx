@@ -139,7 +139,7 @@ function ConsentCard({ consent }: ConsentCardProps) {
 
   const fileManager = useFileManager({
     type: "consent",
-    uploadedFiles: consentFile ? [consentFile] : [],
+    uploadedFiles: consentFile ? [consentFile] : [attachment],
   });
 
   return (
@@ -254,6 +254,18 @@ function ConsentCard({ consent }: ConsentCardProps) {
                 </span>
               </p>
             </div>
+
+            <Button
+              className="w-full sm:hidden"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                fileManager.viewFile(attachment, attachment.associating_id!);
+              }}
+            >
+              {loadPreview && <Loader2 className="mr-2 animate-spin" />}
+              {t("view")}
+            </Button>
           </div>
         </CardFooter>
       </Card>
