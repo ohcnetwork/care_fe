@@ -9,6 +9,8 @@ import QuickAccess from "./QuickAccess";
 
 interface Props {
   encounter: Encounter;
+  canAccess: boolean;
+  canEdit: boolean;
 }
 
 export default function SideOverview(props: Props) {
@@ -28,10 +30,13 @@ export default function SideOverview(props: Props) {
 
         <div>
           <TabsContent value="quick_access" className="p-2">
-            <QuickAccess encounter={props.encounter} />
+            <QuickAccess encounter={props.encounter} canEdit={props.canEdit} />
           </TabsContent>
           <TabsContent value="observations" className="p-2">
-            <ObservationsList encounter={props.encounter} />
+            <ObservationsList
+              encounter={props.encounter}
+              canAccess={props.canAccess}
+            />
           </TabsContent>
         </div>
       </Tabs>
