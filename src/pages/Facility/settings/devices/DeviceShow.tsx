@@ -314,6 +314,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                         {device.managing_organization ? t("change") : t("add")}
                       </Button>
                     }
+                    orgType="managing_organization"
                   />
                 </div>
               </div>

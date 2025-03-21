@@ -28,6 +28,7 @@ interface Props {
   facilityId: string;
   trigger?: React.ReactNode;
   onUpdate?: () => void;
+  orgType?: "organization" | "managing_organization";
 }
 
 type MutationRoute =
@@ -179,33 +180,22 @@ export default function LinkDepartmentsSheet({
   facilityId,
   trigger,
   onUpdate,
+  orgType = "organization",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const queryClient = useQueryClient();
-
-  const orgType =
-    entityType === "device" ? "managing_organization" : "organization";
+  const { route, pathParams } = getMutationParams(
+    entityType,
+    entityId,
+    facilityId,
+    true,
+  );
 
   const { mutate: addOrganization, isPending: isAdding } = useMutation({
-    mutationFn: (organizationId: string) => {
-      const { route, pathParams } = getMutationParams(
-        entityType,
-        entityId,
-        facilityId,
-        true,
-      );
-      return mutate(route, {
-        pathParams,
-        body: { [orgType]: organizationId } as Record<
-          typeof orgType,
-          typeof organizationId
-        >,
-      })({ [orgType]: organizationId } as Record<
-        typeof orgType,
-        typeof organizationId
-      >);
-    },
+    mutationFn: mutate(route, {
+      pathParams,
+    }),
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
@@ -260,7 +250,13 @@ export default function LinkDepartmentsSheet({
 
               <Button
                 className="w-full"
-                onClick={() => selectedOrg && addOrganization(selectedOrg)}
+                onClick={() =>
+                  selectedOrg &&
+                  addOrganization({ [orgType]: selectedOrg } as Record<
+                    typeof orgType,
+                    string
+                  >)
+                }
                 disabled={!selectedOrg || isAdding}
               >
                 {isAdding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
