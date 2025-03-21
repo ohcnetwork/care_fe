@@ -1,4 +1,6 @@
+import { CubeIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
+import { PlusIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,6 +9,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import PageTitle from "@/components/Common/PageTitle";
 import Pagination from "@/components/Common/Pagination";
@@ -14,6 +22,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
+import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import deviceApi from "@/types/device/deviceApi";
 
 interface Props {
@@ -23,6 +32,8 @@ interface Props {
 export default function DevicesList({ facilityId }: Props) {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
+
+  const pluginDevices = usePluginDevices();
 
   const limit = 12;
 
@@ -44,12 +55,46 @@ export default function DevicesList({ facilityId }: Props) {
           <PageTitle title={t("devices")} />
         </div>
 
-        <Button variant="primary" asChild>
-          <Link href="/devices/create">
-            <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
-            {t("add_device")}
-          </Link>
-        </Button>
+        {pluginDevices.length > 0 ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="white" className="flex items-center gap-2">
+                {t("add_device")}
+                <CareIcon icon="l-angle-down" className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {pluginDevices.map((pluginDevice) => {
+                const DeviceIcon = pluginDevice.icon || CubeIcon;
+                return (
+                  <DropdownMenuItem
+                    key={pluginDevice.type}
+                    className="capitalize"
+                    asChild
+                  >
+                    <Link href={`/devices/create?type=${pluginDevice.type}`}>
+                      <DeviceIcon className="h-4 w-4 mr-1" />
+                      {pluginDevice.type}
+                    </Link>
+                  </DropdownMenuItem>
+                );
+              })}
+              <DropdownMenuItem asChild>
+                <Link href="/devices/create">
+                  <CubeIcon className="h-4 w-4 mr-1" />
+                  {t("other")}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button variant="white" asChild>
+            <Link href="/devices/create">
+              <PlusIcon className="h-4 w-4" />
+              {t("add_device")}
+            </Link>
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
