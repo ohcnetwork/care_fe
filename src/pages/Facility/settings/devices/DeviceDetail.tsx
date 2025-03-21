@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { Building, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -147,26 +147,6 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
       <div className="flex items-center justify-between">
         <PageTitle title={device.registered_name} />
         <div className="flex items-center gap-2">
-          <LinkDepartmentsSheet
-            entityType="device"
-            entityId={deviceId}
-            facilityId={facilityId}
-            currentOrganizations={
-              device.managing_organization ? [device.managing_organization] : []
-            }
-            onUpdate={() => {
-              queryClient.invalidateQueries({
-                queryKey: ["device", facilityId, deviceId],
-              });
-            }}
-            trigger={
-              <Button variant="outline">
-                <Building className="mr-2 h-4 w-4" />
-                {device.managing_organization?.name ||
-                  t("manage_organization", { count: 1 })}
-              </Button>
-            }
-          />
           <Link href={`/devices/${deviceId}/locationHistory`}>
             <Button variant="outline_primary" className="mr-3">
               <CareIcon icon="l-location-point" className="h-4 w-4" />

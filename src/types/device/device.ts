@@ -45,7 +45,7 @@ export interface DeviceDetail extends DeviceBase {
   current_location: LocationList | undefined;
   created_by: UserBase;
   updated_by: UserBase;
-  managing_organization: FacilityOrganization;
+  managing_organization: FacilityOrganization | null;
 }
 
 export interface DeviceList extends DeviceBase {
