@@ -102,12 +102,12 @@ export default function LocationView({ id, facilityId }: Props) {
   const generateBreadcrumbs = (location: any) => {
     const breadcrumbs = [];
     let current = location;
-    while (current) {
+    while (current && current.id && current.name) {
       breadcrumbs.unshift({
         name: current.name,
         id: current.id,
       });
-      current = current.parent;
+      current = current.parent || null;
     }
     return breadcrumbs;
   };
@@ -126,7 +126,7 @@ export default function LocationView({ id, facilityId }: Props) {
             </BreadcrumbLink>
           </BreadcrumbItem>
           {breadcrumbs.map((breadcrumb, index) => (
-            <BreadcrumbItem key={breadcrumb.id}>
+            <BreadcrumbItem key={breadcrumb.id ?? `breadcrumb-${index}`}>
               {index === breadcrumbs.length - 1 ? (
                 <span className="font-semibold text-gray-900">
                   {breadcrumb.name}

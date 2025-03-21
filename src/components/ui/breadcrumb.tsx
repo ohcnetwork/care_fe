@@ -31,7 +31,7 @@ const BreadcrumbItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentPropsWithoutRef<"li">
 >(({ className, ...props }, ref) => (
-  <li
+  <span
     ref={ref}
     className={cn("inline-flex items-center gap-1.5", className)}
     {...props}
@@ -80,14 +80,14 @@ const BreadcrumbSeparator = ({
   className,
   ...props
 }: React.ComponentProps<"li">) => (
-  <li
+  <span
     role="presentation"
     aria-hidden="true"
     className={cn("[&>svg]:w-3.5 [&>svg]:h-3.5", className)}
     {...props}
   >
     {children ?? <ChevronRightIcon />}
-  </li>
+  </span>
 );
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator";
 
