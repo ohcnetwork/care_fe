@@ -210,7 +210,7 @@ export function DiagnosisQuestion({
                   <TableHead className="w-21 text-center px-0.5">
                     {t("verification")}
                   </TableHead>
-                  <TableHead className="w-9"></TableHead>
+                  <TableHead className="w-9">{t("action")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -476,7 +476,7 @@ const DiagnosisTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="py-1 px-0">
+        <TableCell className="py-1 px-0 flex justify-center items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

@@ -252,7 +252,7 @@ const SymptomRow = React.memo(function SymptomRow({
           </Select>
         </TableCell>
 
-        <TableCell className="py-1 px-0">
+        <TableCell className="py-1 px-0 flex justify-center items-center">
           <SymptomActionsMenu
             showNotes={showNotes}
             verificationStatus={symptom.verification_status}

@@ -215,7 +215,7 @@ export function AllergyQuestion({
                   <TableHead className="w-20 text-center px-0.5 pr-6">
                     {t("occurrence")}
                   </TableHead>
-                  <TableHead className="w-9"></TableHead>
+                  <TableHead className="w-9">{t("action")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -576,7 +576,7 @@ const AllergyTableRow = ({
             className="h-7"
           />
         </TableCell>
-        <TableCell className="py-1 px-0">
+        <TableCell className="py-1 px-0 flex justify-center items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
