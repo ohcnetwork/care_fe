@@ -76,7 +76,6 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
       <div className="text-xs text-gray-500">{question.text}</div>
       <div className="space-y-1">
         {response.values.map((valueObj, index) => {
-
           const value = valueObj.value;
 
           const coding = valueObj.coding;
