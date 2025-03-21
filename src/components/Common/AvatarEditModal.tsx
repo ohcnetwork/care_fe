@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import React, {
   ChangeEventHandler,
   useCallback,
@@ -610,7 +611,7 @@ const AvatarEditModal = ({
       };
 
       // Create object URL from the selected file
-      img.src = URL.createObjectURL(selectedFile);
+      img.src = DOMPurify.sanitize(URL.createObjectURL(selectedFile));
     } catch (error) {
       console.error("Avatar upload preparation error:", error);
       setErrorMessage(t("AVATAR_EDIT__UPLOAD_ERROR"));
@@ -738,14 +739,14 @@ const AvatarEditModal = ({
                           />
                         ) : (
                           <img
-                            src={preview || imageUrl || ""}
+                            src={DOMPurify.sanitize(preview || imageUrl || "")}
                             alt={t("preview")}
                             className="h-auto w-full object-contain"
                           />
                         )}
                       </div>
                     </div>
-                    <p className="text-center font-medium text-secondary-700">
+                    <p className="text-center font-medium text-secondary-700 text-xs sm:text-sm">
                       {hintMessage}
                     </p>
                   </>
@@ -796,7 +797,7 @@ const AvatarEditModal = ({
                         ? dragProps.fileDropError
                         : t("drag_drop_image_to_upload")}
                     </p>
-                    <p className="mt-4 text-center font-medium text-secondary-700">
+                    <p className="mt-4 text-center font-medium text-secondary-700 text-xs sm:text-sm">
                       {t("no_image_found")}. {hintMessage}
                     </p>
                   </div>
@@ -972,7 +973,7 @@ const AvatarEditModal = ({
                       ) : (
                         <div className="aspect-square max-w-[720px] w-full overflow-hidden">
                           <img
-                            src={previewImage || ""}
+                            src={DOMPurify.sanitize(previewImage || "")}
                             className="h-full w-full object-cover"
                             alt={t("preview")}
                           />
