@@ -1,6 +1,8 @@
 import { Suspense, lazy } from "react";
 
 import Loading from "@/components/Common/Loading";
+import { PrintQuestionnaireQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
+import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
@@ -23,6 +25,28 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId/responses/print":
+    ({ encounterId, patientId, questionnaireId, facilityId }) => {
+      return (
+        <PrintQuestionnaireQuestionnaireResponses
+          encounterId={encounterId}
+          patientId={patientId}
+          questionnaireId={questionnaireId}
+          facilityId={facilityId}
+        />
+      );
+    },
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print":
+    ({ encounterId, patientId, questionnaireResponseId, facilityId }) => {
+      return (
+        <PrintQuestionnaireResponse
+          encounterId={encounterId}
+          patientId={patientId}
+          questionnaireResponseId={questionnaireResponseId}
+          facilityId={facilityId}
+        />
+      );
+    },
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/medicines/administrations/print":
     ({ facilityId, encounterId, patientId }) => (
       <PrintMedicationAdministration
