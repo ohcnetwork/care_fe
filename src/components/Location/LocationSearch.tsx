@@ -17,12 +17,17 @@ import {
 
 import query from "@/Utils/request/query";
 import { stringifyNestedObject } from "@/Utils/utils";
-import { LocationList } from "@/types/location/location";
+import {
+  LocationForm,
+  LocationList,
+  LocationMode,
+} from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface LocationSearchProps {
   facilityId: string;
-  mode?: "kind" | "instance";
+  mode?: LocationMode;
+  form?: LocationForm;
   onSelect: (location: LocationList) => void;
   disabled?: boolean;
   value?: LocationList | null;
@@ -31,6 +36,7 @@ interface LocationSearchProps {
 export function LocationSearch({
   facilityId,
   mode,
+  form,
   onSelect,
   disabled,
   value,
@@ -40,9 +46,9 @@ export function LocationSearch({
 
   const { data: locations } = useQuery({
     queryKey: ["locations", facilityId, mode, search],
-    queryFn: query(locationApi.list, {
+    queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode, name: search, form: "bd", available: "true" },
+      queryParams: { mode, name: search, form, available: "true" },
     }),
     enabled: facilityId !== "preview",
   });
@@ -57,7 +63,7 @@ export function LocationSearch({
           {stringifyNestedObject(value || { name: "" }) || "Select location..."}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0">
+      <PopoverContent className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]">
         <Command className="pt-1">
           <CommandInput
             placeholder="Search locations..."

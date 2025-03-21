@@ -17,7 +17,7 @@ describe("Patient Management", () => {
   it("Assign users to a patient", () => {
     const userName = "nihal-nurse";
     const userRole = "Nurse";
-    facilityCreation.selectFacility("GHC payyanur");
+    facilityCreation.selectFacility("GHC Payyanur");
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()
