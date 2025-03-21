@@ -56,6 +56,7 @@ export const MultiSelect = React.forwardRef<
   ) => {
     const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+
     React.useEffect(() => {
       setSelectedValues(value);
     }, [value]);
@@ -87,6 +88,14 @@ export const MultiSelect = React.forwardRef<
         setSelectedValues(allValues);
         onValueChange(allValues);
       }
+    };
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+      e.stopPropagation();
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+      e.stopPropagation();
     };
 
     return (
@@ -164,9 +173,15 @@ export const MultiSelect = React.forwardRef<
             align="center"
             onEscapeKeyDown={() => setIsPopoverOpen(false)}
             onWheel={(e) => e.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
           >
             <Command>
-              <CommandList>
+              <CommandList
+                className="max-h-64 overflow-y-auto overflow-x-hidden touch-auto"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+              >
                 <CommandGroup>
                   <CommandItem
                     key="all"
