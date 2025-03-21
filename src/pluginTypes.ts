@@ -4,6 +4,7 @@ import { UseFormReturn } from "react-hook-form";
 import { UserAssignedModel } from "@/components/Users/models";
 
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { DeviceDetail } from "@/types/device/device";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
@@ -74,17 +75,29 @@ export type PluginComponentMap = {
   >;
 };
 
+export type PluginDeviceManifest = {
+  type: string; // This matches the `care_type` of the device
+  icon?: React.FC<React.HTMLAttributes<HTMLElement>>;
+  configureForm?: React.FC<{
+    facilityId: string;
+    metadata: Record<string, unknown>;
+    onChange: (metadata: Record<string, unknown>) => void;
+  }>;
+  showPageCard?: React.FC<{ device: DeviceDetail; facilityId: string }>;
+  encounterOverview?: React.FC<{ encounter: Encounter }>;
+};
+
 type SupportedPluginExtensions =
   | "DoctorConnectButtons"
   | "PatientExternalRegistration";
 
 export type PluginManifest = {
   plugin: string;
-  routes: AppRoutes;
-  extends: SupportedPluginExtensions[];
-  components: PluginComponentMap;
-  // navItems: INavItem[];
+  routes?: AppRoutes;
+  extends?: readonly SupportedPluginExtensions[];
+  components?: PluginComponentMap;
   encounterTabs?: Record<string, LazyComponent<React.FC<EncounterTabProps>>>;
+  devices?: readonly PluginDeviceManifest[];
 };
 
 export { pluginMap };
