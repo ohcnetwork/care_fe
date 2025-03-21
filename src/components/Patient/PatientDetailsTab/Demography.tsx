@@ -2,7 +2,6 @@ import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -10,10 +9,12 @@ import { Button } from "@/components/ui/button";
 
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
+import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   Organization,
   OrganizationParent,
@@ -21,8 +22,14 @@ import {
 } from "@/types/organization/organization";
 
 export const Demography = (props: PatientProps) => {
-  const { patientData, facilityId, patientId } = props;
+  const { patientData, facilityId } = props;
+  const patientId = patientData.id;
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+  const { canWritePatient } = getPermissions(
+    hasPermission,
+    patientData.permissions,
+  );
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
 
@@ -45,11 +52,6 @@ export const Demography = (props: PatientProps) => {
     } else {
       navigate(`/patient/${patientId}/update?section=${sectionId}`);
     }
-  };
-
-  const hasEditPermission = () => {
-    // Todo: Wire updated Permissions
-    return true;
   };
 
   const EmergencyContact = (props: { number?: string; name?: string }) => (
@@ -97,14 +99,6 @@ export const Demography = (props: PatientProps) => {
     </div>
   );
 
-  const withPermissionCheck = (action: () => void) => () => {
-    if (!hasEditPermission()) {
-      toast.error(t("permission_denied"));
-      return;
-    }
-    action();
-  };
-
   type Data = {
     id: string;
     hidden?: boolean;
@@ -138,7 +132,7 @@ export const Demography = (props: PatientProps) => {
   const data: Data[] = [
     {
       id: "general-info",
-      allowEdit: true,
+      allowEdit: canWritePatient,
       details: [
         <PLUGIN_Component
           key="patient_details_tab__demography__general_info"
@@ -263,9 +257,8 @@ export const Demography = (props: PatientProps) => {
                       <Button
                         data-cy="edit-patient-button"
                         variant="outline"
-                        onClick={withPermissionCheck(() =>
-                          handleEditClick(subtab.id),
-                        )}
+                        disabled={!!patientData.death_datetime}
+                        onClick={() => handleEditClick(subtab.id)}
                       >
                         <CareIcon icon="l-edit-alt" className="text-md pr-1" />
                         {t("edit")}

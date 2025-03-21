@@ -19,10 +19,13 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
+import { getPermissions } from "@/common/Permissions";
+
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import { usePermissions } from "@/context/PermissionContext";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 
 interface EncounterActionsProps {
   encounter: Encounter;
@@ -43,6 +46,13 @@ export default function EncounterActions({
 }: EncounterActionsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
+  const { canWriteEncounter } = getPermissions(
+    hasPermission,
+    encounter.permissions,
+  );
+  const canWrite =
+    canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
 
   const { mutate: updateEncounter } = useMutation({
     mutationFn: mutate(routes.encounter.update, {
@@ -92,7 +102,7 @@ export default function EncounterActions({
               {t("discharge_summary")}
             </Link>
           </DropdownMenuItem>
-          {!completedEncounterStatus.includes(encounter.status) && (
+          {canWrite && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <DropdownMenuItem
@@ -156,48 +166,50 @@ export default function EncounterActions({
             {t("discharge_summary")}
           </Link>
         </Button>
-        {!completedEncounterStatus.includes(encounter.status) && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                data-cy="mark-encounter-complete"
-                variant={variant}
-                size={size}
-                className="w-full justify-start"
-              >
-                {t("mark_as_complete")}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t("mark_encounter_as_complete_confirmation")}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-
-              <PLUGIN_Component
-                __name="PatientInfoCardMarkAsComplete"
-                encounter={encounter}
-              />
-
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                <AlertDialogAction
-                  className={buttonVariants({ variant: "primary" })}
-                  onClick={handleMarkAsComplete}
-                  data-cy="mark-encounter-as-complete"
+        {canWrite && (
+          <>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  data-cy="mark-encounter-complete"
+                  variant={variant}
+                  size={size}
+                  className="w-full justify-start"
                 >
                   {t("mark_as_complete")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("mark_encounter_as_complete_confirmation")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <PLUGIN_Component
+                  __name="PatientInfoCardMarkAsComplete"
+                  encounter={encounter}
+                />
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    className={cn(buttonVariants({ variant: "primary" }))}
+                    onClick={handleMarkAsComplete}
+                    data-cy="confirm-encounter-complete"
+                  >
+                    {t("mark_as_complete")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <PLUGIN_Component
+              __name="PatientInfoCardActions"
+              encounter={encounter}
+            />
+          </>
         )}
-        <PLUGIN_Component
-          __name="PatientInfoCardActions"
-          encounter={encounter}
-        />
       </div>
     );
   };
