@@ -138,7 +138,7 @@ function ConsentCard({ consent }: ConsentCardProps) {
   });
 
   const fileManager = useFileManager({
-    type: "patient",
+    type: "consent",
     uploadedFiles: consentFile ? [consentFile] : [],
   });
 
