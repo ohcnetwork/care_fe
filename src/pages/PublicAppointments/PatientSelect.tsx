@@ -117,7 +117,7 @@ export default function PatientSelect({
     return (
       <>
         {/* Mobile View (Cards) */}
-        <div className="space-y-4 overflow-auto max-h-[600px] p-0 sm:p-4 md:hidden">
+        <div className="space-y-4 p-0 sm:p-4 md:hidden">
           {patients?.map((patient) => (
             <Card
               key={patient.id}
@@ -289,7 +289,23 @@ export default function PatientSelect({
         </Button>
       </div>
       <div className="flex flex-col justify-center space-y-4 bg-white rounded-lg shadow-md p-8">
-        <h3 className="text-lg font-medium">{t("select_register_patient")}</h3>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <h3 className="text-lg font-medium">
+            {t("select_register_patient")}
+          </h3>
+          <Button
+            variant="primary_gradient"
+            className="mt-4 sm:mt-0 sm:w-auto"
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
+              )
+            }
+          >
+            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+            {t("add_new_patient")}
+          </Button>
+        </div>
         {isLoading ? (
           <div className="flex justify-center items-center">
             <Loading />
@@ -299,18 +315,6 @@ export default function PatientSelect({
         ) : (
           renderNoPatientFound()
         )}
-        <Button
-          variant="primary_gradient"
-          className="w-1/2 self-center"
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
-            )
-          }
-        >
-          <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-          {t("add_new_patient")}
-        </Button>
       </div>
     </div>
   );
