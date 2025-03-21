@@ -411,3 +411,5 @@ export const PREVIEWABLE_FILE_EXTENSIONS = [
   "gif",
   "webp",
 ] as const;
+
+export const NAME_PREFIXES = ["Dr.", "Mr.", "Mrs.", "Ms.", "Miss", "Prof."];

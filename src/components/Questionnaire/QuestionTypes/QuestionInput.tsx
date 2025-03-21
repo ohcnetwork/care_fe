@@ -27,6 +27,7 @@ import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
 import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
 import { NumberQuestion } from "./NumberQuestion";
+import { QuantityQuestion } from "./QuantityQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
 import { TextQuestion } from "./TextQuestion";
 
@@ -106,6 +107,9 @@ export function QuestionInput({
       case "decimal":
       case "integer":
         return <NumberQuestion {...commonProps} />;
+
+      case "quantity":
+        return <QuantityQuestion {...commonProps} />;
 
       case "choice":
         return <ChoiceQuestion {...commonProps} />;
