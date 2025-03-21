@@ -126,11 +126,11 @@ function QuestionGroup({
   }[];
   level?: number;
 }) {
-  const getHasResponse = (question: Question): boolean | undefined => {
+  const getHasResponse = (question: Question): boolean => {
     // Recursively check if a question or any of its nested sub-questions have responses
     // This ensures grouped fields are displayed even when only sub-questions have responses
     if (question.type === "group") {
-      return question.questions?.some((q) => getHasResponse(q) ?? false);
+      return question.questions?.some((q) => getHasResponse(q)) ?? false;
     }
     return responses.some((r) => r.question_id === question.id);
   };
