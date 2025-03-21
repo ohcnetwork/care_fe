@@ -13,10 +13,11 @@ import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
+import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
+import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
-import { EncounterUpdatesTab } from "@/pages/Encounters/tabs/EncounterUpdatesTab";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
@@ -26,16 +27,15 @@ import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 export interface EncounterTabProps {
   encounter: Encounter;
   patient: Patient;
-  subPage?: string;
 }
 
 const defaultTabs = {
-  // feed: EncounterFeedTab,
-  updates: EncounterUpdatesTab,
+  updates: EncounterOverviewTab,
   plots: EncounterPlotsTab,
   medicines: EncounterMedicinesTab,
   files: EncounterFilesTab,
   notes: EncounterNotesTab,
+  devices: EncounterDevicesTab,
   drawings: EncounterDrawingsTab,
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
@@ -47,11 +47,10 @@ interface Props {
   encounterId: string;
   facilityId?: string;
   tab?: string;
-  subPage?: string;
 }
 
 export const EncounterShow = (props: Props) => {
-  const { encounterId, patientId, facilityId, subPage } = props;
+  const { encounterId, patientId, facilityId } = props;
   const { t } = useTranslation();
   const pluginTabs = useCareAppEncounterTabs();
 
@@ -82,7 +81,6 @@ export const EncounterShow = (props: Props) => {
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
     patient: encounterData.patient,
-    subPage: subPage,
   };
 
   if (!props.tab) {

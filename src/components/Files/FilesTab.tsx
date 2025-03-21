@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
-import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -55,11 +54,10 @@ export interface FilesTabProps {
   patientId?: string;
   encounter?: Encounter;
   patient?: Patient;
-  subPage?: string;
 }
 
 export const FilesTab = (props: FilesTabProps) => {
-  const { patientId, type, encounter, subPage = "all" } = props;
+  const { patientId, type, encounter } = props;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
   });
@@ -104,7 +102,7 @@ export const FilesTab = (props: FilesTabProps) => {
     isLoading: filesLoading,
     refetch,
   } = useQuery({
-    queryKey: ["files", type, associatingId, qParams, subPage],
+    queryKey: ["files", type, associatingId, qParams],
     queryFn: query(routes.viewUpload, {
       queryParams: {
         file_type: type,
@@ -114,7 +112,9 @@ export const FilesTab = (props: FilesTabProps) => {
         ...(qParams.is_archived !== undefined && {
           is_archived: qParams.is_archived,
         }),
-        ...(subPage !== "all" && { file_category: subPage }),
+        ...(qParams.file !== "all" && {
+          file_category: qParams.file,
+        }),
       },
     }),
   });
@@ -607,7 +607,7 @@ export const FilesTab = (props: FilesTabProps) => {
   );
 
   return (
-    <div className="mt-5 space-y-4">
+    <div className="space-y-4">
       <div className="z-40">
         {fileUpload.Dialogues}
         {fileManager.Dialogues}
@@ -635,30 +635,35 @@ export const FilesTab = (props: FilesTabProps) => {
         fileUpload={fileUpload}
         associatingId={associatingId}
       />
-      <Tabs defaultValue={subPage}>
+      <Tabs
+        value={qParams.file || "all"}
+        onValueChange={(value) =>
+          updateQuery({
+            file: value,
+            is_archived: undefined,
+            page: undefined,
+          })
+        }
+      >
         {type === "encounter" && (
-          <TabsList className="grid w-auto grid-cols-2 sm:w-fit">
-            <TabsTrigger value="all" asChild>
-              <Link
-                className="text-gray-600"
-                href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/all`}
-              >
-                {t("all")}
-              </Link>
+          <TabsList className="bg-gray-200 py-0 w-fit">
+            <TabsTrigger
+              value="all"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            >
+              {t("all")}
             </TabsTrigger>
-            <TabsTrigger value="discharge_summary" asChild>
-              <Link
-                className="text-gray-600"
-                href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/discharge_summary`}
-              >
-                {t("discharge_summary")}
-              </Link>
+            <TabsTrigger
+              value="discharge_summary"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            >
+              {t("discharge_summary")}
             </TabsTrigger>
           </TabsList>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
           <FilterButton />
-          {type === "encounter" && subPage === "discharge_summary" && (
+          {type === "encounter" && qParams.file === "discharge_summary" && (
             <>
               <Button
                 variant="outline_primary"
