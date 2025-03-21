@@ -145,8 +145,8 @@ function ConsentCard({ consent }: ConsentCardProps) {
   return (
     <div className="relative">
       <Card className="overflow-hidden transition-all h-full flex flex-col">
-        <CardContent className="p-0 group">
-          <div className="relative aspect-[3/1] sm:aspect-video">
+        <CardContent className="p-0 group max-sm:hidden">
+          <div className="relative aspect-video">
             <div className="absolute top-1/2 left-1/2 -translate-x-3 -translate-y-3">
               {!consentFile && attachmentId && loadPreview === false && (
                 <Download
