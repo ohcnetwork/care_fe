@@ -51,7 +51,6 @@ interface AllergyListProps {
   encounterId?: string;
   className?: string;
   readOnly?: boolean;
-
   encounterStatus?: Encounter["status"];
 }
 

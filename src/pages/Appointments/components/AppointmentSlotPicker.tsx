@@ -10,6 +10,7 @@ import Calendar from "@/CAREUI/interactive/Calendar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -25,6 +26,7 @@ interface AppointmentSlotPickerProps {
   resourceId?: string;
   onSlotSelect: (slotId: string | undefined) => void;
   selectedSlotId?: string;
+  onSlotDetailsChange?: (slot: TokenSlot) => void;
 }
 
 export function AppointmentSlotPicker({
@@ -32,6 +34,7 @@ export function AppointmentSlotPicker({
   resourceId,
   onSlotSelect,
   selectedSlotId,
+  onSlotDetailsChange,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -55,6 +58,19 @@ export function AppointmentSlotPicker({
     enabled: !!resourceId && !!selectedDate,
   });
 
+  // Update slot details when a slot is selected
+  const handleSlotSelect = (slotId: string | undefined) => {
+    onSlotSelect(slotId);
+    if (slotId && onSlotDetailsChange) {
+      const allSlots = slotsQuery.data?.results || [];
+      const selectedSlot = allSlots.find((slot) => slot.id === slotId);
+
+      if (selectedSlot) {
+        onSlotDetailsChange(selectedSlot);
+      }
+    }
+  };
+
   const renderDay = (date: Date) => {
     const isSelected = isSameDay(date, selectedDate);
     const isBeforeToday = isBefore(date, startOfToday());
@@ -71,7 +87,6 @@ export function AppointmentSlotPicker({
           disabled
           onClick={() => {
             setSelectedDate(date);
-            onSlotSelect(undefined);
           }}
           className={cn(
             "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border border-gray-200",
@@ -95,7 +110,6 @@ export function AppointmentSlotPicker({
         disabled={isBeforeToday || isFullyBooked}
         onClick={() => {
           setSelectedDate(date);
-          onSlotSelect(undefined);
         }}
         className={cn(
           "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border-2 hover:scale-105 hover:shadow-md transition-all",
@@ -144,7 +158,6 @@ export function AppointmentSlotPicker({
           month={selectedMonth}
           onMonthChange={(month) => {
             setSelectedMonth(month);
-            onSlotSelect(undefined);
           }}
           renderDay={renderDay}
           className="mb-6"
@@ -156,51 +169,61 @@ export function AppointmentSlotPicker({
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium">{t("available_time_slots")}</h3>
         </div>
-        <ScrollArea>
-          <div className="max-h-96">
-            {slotsQuery.data == null && (
-              <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
-                <p className="text-gray-400">
-                  {t("to_view_available_slots_select_resource_and_date")}
-                </p>
-              </div>
-            )}
-            {slotsQuery.data?.results.length === 0 && (
-              <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
-                <p className="text-gray-400">
-                  {t("no_slots_available_for_this_date")}
-                </p>
-              </div>
-            )}
-            {!!slotsQuery.data?.results.length &&
-              groupSlotsByAvailability(slotsQuery.data.results).map(
-                ({ availability, slots }) => (
-                  <div key={availability.name}>
-                    <h4 className="text-lg font-semibold mb-3">
-                      {availability.name}
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {slots.map((slot) => (
-                        <TokenSlotButton
-                          key={slot.id}
-                          slot={slot}
-                          availability={availability}
-                          selectedSlotId={selectedSlotId}
-                          onClick={() => {
-                            onSlotSelect(
-                              selectedSlotId === slot.id ? undefined : slot.id,
-                            );
-                          }}
-                          selectedDate={selectedDate}
-                        />
-                      ))}
-                    </div>
-                    <Separator className="my-6" />
-                  </div>
-                ),
-              )}
+        {slotsQuery.isFetching ? (
+          <div className="flex flex-wrap gap-4">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Skeleton key={index} className="h-10 w-20" />
+            ))}
           </div>
-        </ScrollArea>
+        ) : (
+          <ScrollArea>
+            <div className="max-h-96">
+              {slotsQuery.data == null && (
+                <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
+                  <p className="text-gray-400">
+                    {t("to_view_available_slots_select_resource_and_date")}
+                  </p>
+                </div>
+              )}
+              {slotsQuery.data?.results.length === 0 && (
+                <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
+                  <p className="text-gray-400">
+                    {t("no_slots_available_for_this_date")}
+                  </p>
+                </div>
+              )}
+              {!!slotsQuery.data?.results.length &&
+                groupSlotsByAvailability(slotsQuery.data.results).map(
+                  ({ availability, slots }) => (
+                    <div key={availability.name}>
+                      <h4 className="text-lg font-semibold mb-3">
+                        {availability.name}
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {slots.map((slot) => (
+                          <TokenSlotButton
+                            key={slot.id}
+                            slot={slot}
+                            availability={availability}
+                            selectedSlotId={selectedSlotId}
+                            onClick={() => {
+                              handleSlotSelect(
+                                selectedSlotId === slot.id
+                                  ? undefined
+                                  : slot.id,
+                              );
+                            }}
+                            selectedDate={selectedDate}
+                          />
+                        ))}
+                      </div>
+                      <Separator className="my-6" />
+                    </div>
+                  ),
+                )}
+            </div>
+          </ScrollArea>
+        )}
       </div>
     </>
   );
