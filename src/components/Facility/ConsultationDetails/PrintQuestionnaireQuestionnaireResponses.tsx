@@ -15,7 +15,7 @@ import api from "@/Utils/request/api";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
-import { formatDisplayName, formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -339,7 +339,7 @@ export function ResponseCard({ item }: ResponseCardProps) {
     <div className="flex flex-col py-3 transition-colors hover:bg-muted/50">
       <div className="text-sm m-1">
         <p>
-          {t("created_by")}: {formatDisplayName(item.created_by)}
+          {t("created_by")}: {formatName(item.created_by)}
         </p>
         <p>{formatDateTime(item.created_date)}</p>
       </div>
