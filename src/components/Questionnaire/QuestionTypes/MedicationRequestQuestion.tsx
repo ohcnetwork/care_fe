@@ -460,7 +460,7 @@ export function MedicationRequestQuestion({
       <div className="max-w-4xl">
         <ValueSetSelect
           system="system-medication"
-          placeholder={t("search_for_medications_to_add")}
+          placeholder={t("add_another_medication")}
           onSelect={handleAddMedication}
           disabled={disabled}
           searchPostFix=" clinical drug"
