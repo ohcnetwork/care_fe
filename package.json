@@ -106,7 +106,7 @@
     "qrcode.react": "^4.1.0",
     "raviger": "^4.1.2",
     "react": "18.3.1",
-    "react-day-picker": "^8.10.1",
+    "react-day-picker": "^9.6.3",
     "react-dom": "18.3.1",
     "react-google-recaptcha": "^3.1.0",
     "react-hook-form": "^7.53.2",

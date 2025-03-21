@@ -32,10 +32,12 @@ import {
 import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 
+import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import { PartialPatientModel } from "@/types/emr/newPatient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
@@ -46,6 +48,19 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     useState<PartialPatientModel | null>(null);
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
+
+  const { canCreatePatient } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
 
   const handleCreatePatient = useCallback(() => {
     const queryParams = phoneNumber ? { phone_number: phoneNumber } : {};
@@ -134,15 +149,21 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   return (
     <div>
       <div className="container max-w-5xl mx-auto py-6">
-        <div className="flex justify-center md:justify-end">
-          <AddPatientButton />
-        </div>
+        {canCreatePatient && (
+          <div className="flex justify-center md:justify-end">
+            <AddPatientButton />
+          </div>
+        )}
         <div className="space-y-6 mt-6">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">
               {t("search_patients")}
             </h1>
-            <p className="text-gray-500">{t("search_patient_page_text")}</p>
+            <p className="text-gray-500">
+              {canCreatePatient
+                ? t("search_patient_page_text")
+                : t("search_only_patient_page_text")}
+            </p>
           </div>
 
           <div>
