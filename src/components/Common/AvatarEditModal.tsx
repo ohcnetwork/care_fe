@@ -23,6 +23,7 @@ import {
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
+// Props definition for the AvatarEditModal component
 interface Props {
   title: string;
   open: boolean;
@@ -37,6 +38,7 @@ interface Props {
   hint?: React.ReactNode;
 }
 
+// Video constraints for the webcam (user-facing and environment-facing)
 const VideoConstraints = {
   user: {
     width: 1280,
@@ -50,7 +52,26 @@ const VideoConstraints = {
   },
 } as const;
 
+// Constants for file validation
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
+const ALLOWED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+
+// Utility function to check if a file is an image
 const isImageFile = (file?: File) => file?.type.split("/")[0] === "image";
+
+// File validation function to check type and size
+const validateFile = (
+  file: File,
+  t: (key: string, options?: any) => string,
+): string | null => {
+  if (!ALLOWED_FORMATS.includes(file.type)) {
+    return t("allowed_formats_are", { formats: "jpg, png, jpeg" });
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" });
+  }
+  return null;
+};
 
 type IVideoConstraint =
   (typeof VideoConstraints)[keyof typeof VideoConstraints];
@@ -64,12 +85,13 @@ const AvatarEditModal = ({
   handleDelete,
   hint,
 }: Props) => {
+  // State declarations
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File>();
-  const [preview, setPreview] = useState<string>();
+  const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
+  const [preview, setPreview] = useState<string | undefined>(undefined);
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
-  const webRef = useRef<Webcam>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [captureError, setCaptureError] = useState<string | null>(null); // Error state for camera capture
+  const [previewImage, setPreviewImage] = useState<string | null>(null); // Preview for captured image
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
   const [constraint, setConstraint] = useState<IVideoConstraint>(
@@ -77,31 +99,48 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
+  const webRef = useRef<Webcam>(null);
+  const dragProps = useDragAndDrop();
 
+  // Switch camera between user-facing and environment-facing
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
       constraint.facingMode === "user"
         ? VideoConstraints.environment
         : VideoConstraints.user,
     );
-  }, []);
+  }, [constraint.facingMode]);
 
+  // Capture image from webcam and validate it
   const captureImage = () => {
     if (webRef.current) {
-      setPreviewImage(webRef.current.getScreenshot());
-    }
-    const canvas = webRef.current?.getCanvas();
-    canvas?.toBlob((blob) => {
-      if (blob) {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
+      const screenshot = webRef.current.getScreenshot();
+      if (screenshot) {
+        setPreviewImage(screenshot);
+        const canvas = webRef.current.getCanvas();
+        canvas?.toBlob((blob) => {
+          if (blob) {
+            const myFile = new File([blob], "image.png", {
+              type: blob.type,
+            });
+            const validationError = validateFile(myFile, t);
+            if (validationError) {
+              setCaptureError(validationError);
+              setSelectedFile(undefined);
+              toast.warning(validationError);
+            } else {
+              setCaptureError(null);
+              setSelectedFile(myFile);
+            }
+          } else {
+            toast.error(t("failed_to_capture_image"));
+          }
         });
-        setSelectedFile(myFile);
-      } else {
-        toast.error(t("failed_to_capture_image"));
       }
-    });
+    }
   };
+
+  // Stop the camera stream
   const stopCamera = useCallback(() => {
     try {
       if (webRef.current) {
@@ -116,13 +155,18 @@ const AvatarEditModal = ({
       setIsCameraOpen(false);
     }
   }, []);
+
+  // Close the modal and reset states
   const closeModal = () => {
     setPreview(undefined);
     setIsProcessing(false);
     setSelectedFile(undefined);
+    setCaptureError(null);
+    setPreviewImage(null);
     onOpenChange(false);
   };
 
+  // Generate preview URL for selected file
   useEffect(() => {
     if (!isImageFile(selectedFile)) {
       return;
@@ -132,6 +176,7 @@ const AvatarEditModal = ({
     return () => URL.revokeObjectURL(objectUrl);
   }, [selectedFile]);
 
+  // Handle file selection via input
   const onSelectFile: ChangeEventHandler<HTMLInputElement> = (e) => {
     if (!e.target.files || e.target.files.length === 0) {
       setSelectedFile(undefined);
@@ -142,16 +187,22 @@ const AvatarEditModal = ({
       toast.warning(t("please_upload_an_image_file"));
       return;
     }
+    const validationError = validateFile(file, t);
+    if (validationError) {
+      toast.warning(validationError);
+      setSelectedFile(undefined);
+      return;
+    }
     setSelectedFile(file);
   };
 
+  // Handle file upload
   const uploadAvatar = async () => {
     try {
       if (!selectedFile) {
         closeModal();
         return;
       }
-
       setIsProcessing(true);
       setIsCaptureImgBeingUploaded(true);
       await handleUpload(
@@ -174,6 +225,7 @@ const AvatarEditModal = ({
     }
   };
 
+  // Handle avatar deletion
   const deleteAvatar = async () => {
     setIsProcessing(true);
     await handleDelete(
@@ -186,15 +238,26 @@ const AvatarEditModal = ({
     );
   };
 
-  const dragProps = useDragAndDrop();
+  // Handle drag-and-drop file upload
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     dragProps.setDragOver(false);
     setIsDragging(false);
     const droppedFile = e?.dataTransfer?.files[0];
-    if (!isImageFile(droppedFile))
-      return dragProps.setFileDropError("Please drop an image file to upload!");
+    if (!isImageFile(droppedFile)) {
+      toast.warning(t("please_upload_an_image_file"));
+      dragProps.setFileDropError("Please drop an image file to upload!");
+      return;
+    }
+    const validationError = validateFile(droppedFile, t);
+    if (validationError) {
+      toast.warning(validationError);
+      dragProps.setFileDropError(validationError);
+      setSelectedFile(undefined);
+      return;
+    }
     setSelectedFile(droppedFile);
+    dragProps.setFileDropError("");
   };
 
   const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -209,6 +272,7 @@ const AvatarEditModal = ({
     setIsDragging(false);
   };
 
+  // Default hint message
   const defaultHint = (
     <>
       {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
@@ -320,7 +384,7 @@ const AvatarEditModal = ({
                         <input
                           title="changeFile"
                           type="file"
-                          accept="image/*"
+                          accept="image/jpeg,image/png,image/jpg"
                           className="hidden"
                           onChange={onSelectFile}
                         />
@@ -399,11 +463,15 @@ const AvatarEditModal = ({
                     </>
                   ) : (
                     <>
-                      <img src={previewImage} />
+                      <img src={previewImage} alt="Captured preview" />
+                      {captureError && (
+                        <p className="text-red-500 text-center">
+                          {captureError}
+                        </p>
+                      )}
                     </>
                   )}
                 </div>
-                {/* buttons for mobile screens */}
                 <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                   {!previewImage ? (
                     <>
@@ -427,13 +495,15 @@ const AvatarEditModal = ({
                         variant="primary"
                         onClick={() => {
                           setPreviewImage(null);
+                          setCaptureError(null);
+                          setSelectedFile(undefined);
                         }}
                       >
                         {t("retake")}
                       </Button>
                       <Button
                         variant="primary"
-                        disabled={isProcessing}
+                        disabled={isProcessing || !!captureError}
                         onClick={uploadAvatar}
                       >
                         {isCaptureImgBeingUploaded ? (
@@ -458,6 +528,7 @@ const AvatarEditModal = ({
                       setPreviewImage(null);
                       setIsCameraOpen(false);
                       stopCamera();
+                      setCaptureError(null);
                     }}
                     disabled={isProcessing}
                   >
