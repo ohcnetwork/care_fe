@@ -119,6 +119,10 @@ const AvatarEditModal = ({
   const captureImage = () => {
     if (webRef.current) {
       const screenshot = webRef.current.getScreenshot();
+      if (!screenshot) {
+        toast.error(t("failed_to_capture_image"));
+        return;
+      }
       setPreviewImage(screenshot);
 
       // Reset crop state when capturing a new image
@@ -128,20 +132,139 @@ const AvatarEditModal = ({
         zoom: 1,
         croppedAreaPixels: null,
         croppedImage: null,
+        isCropping: true, // Automatically enter cropping mode when capturing an image
       }));
-    }
 
-    const canvas = webRef.current?.getCanvas();
-    canvas?.toBlob((blob) => {
-      if (blob) {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
-        });
-        setSelectedFile(myFile);
-      } else {
-        toast.error(t("failed_to_capture_image"));
-      }
-    });
+      // Create an image element to process
+      const img = new Image();
+      img.onload = () => {
+        // Create a canvas to resize and process the image
+        const canvas = document.createElement("canvas");
+
+        // Make sure dimensions meet backend requirements (min 400x400, max 1024x1024)
+        let width = Math.max(400, Math.min(img.width, 1024));
+        let height = Math.max(400, Math.min(img.height, 1024));
+
+        // Maintain aspect ratio for the largest dimension
+        if (img.width > img.height) {
+          height = Math.round(img.height * (width / img.width));
+          // Ensure height is at least 400px
+          if (height < 400) {
+            height = 400;
+            width = Math.round(img.width * (height / img.height));
+          }
+        } else {
+          width = Math.round(img.width * (height / img.height));
+          // Ensure width is at least 400px
+          if (width < 400) {
+            width = 400;
+            height = Math.round(img.height * (width / img.width));
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        // Draw resized image to canvas with proper quality
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          toast.error(t("failed_to_process_image"));
+          return;
+        }
+
+        // Use higher quality rendering
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to PNG blob - using PNG ensures we don't lose quality in compression
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              // Check size limits
+              if (blob.size < 1024) {
+                // If image is too small, try again with no compression
+                canvas.toBlob(
+                  (blob2) => {
+                    if (blob2 && blob2.size >= 1024) {
+                      const myFile = new File([blob2], "camera_image.png", {
+                        type: "image/png",
+                      });
+                      setSelectedFile(myFile);
+                    } else {
+                      toast.error(t("image_too_small_in_size"));
+                    }
+                  },
+                  "image/png",
+                  1.0,
+                );
+              } else if (blob.size > 2 * 1024 * 1024) {
+                // If image is too large, compress more
+                canvas.toBlob(
+                  (blob2) => {
+                    if (blob2 && blob2.size <= 2 * 1024 * 1024) {
+                      const myFile = new File([blob2], "camera_image.jpg", {
+                        type: "image/jpeg",
+                      });
+                      setSelectedFile(myFile);
+                    } else {
+                      // If still too large, use lower resolution
+                      const smallerCanvas = document.createElement("canvas");
+                      smallerCanvas.width = width * 0.8;
+                      smallerCanvas.height = height * 0.8;
+                      const smallerCtx = smallerCanvas.getContext("2d");
+                      smallerCtx?.drawImage(
+                        img,
+                        0,
+                        0,
+                        smallerCanvas.width,
+                        smallerCanvas.height,
+                      );
+                      smallerCanvas.toBlob(
+                        (blob3) => {
+                          if (blob3) {
+                            const myFile = new File(
+                              [blob3],
+                              "camera_image.jpg",
+                              {
+                                type: "image/jpeg",
+                              },
+                            );
+                            setSelectedFile(myFile);
+                          } else {
+                            toast.error(t("failed_to_process_image"));
+                          }
+                        },
+                        "image/jpeg",
+                        0.7,
+                      );
+                    }
+                  },
+                  "image/jpeg",
+                  0.85,
+                );
+              } else {
+                // Size is within the acceptable range
+                const myFile = new File([blob], "camera_image.png", {
+                  type: "image/png",
+                });
+                setSelectedFile(myFile);
+              }
+            } else {
+              toast.error(t("failed_to_capture_image"));
+            }
+          },
+          "image/png",
+          0.9,
+        );
+      };
+
+      img.onerror = () => {
+        toast.error(t("failed_to_process_image"));
+      };
+      img.src = screenshot;
+    } else {
+      toast.error(t("camera_not_available"));
+    }
   };
 
   const handleCropImage = async () => {
@@ -157,6 +280,8 @@ const AvatarEditModal = ({
         toast.error(t("AVATAR_EDIT__NO_AREA_SELECTED"));
         return;
       }
+
+      // Set a maximum size for cropped images to ensure they don't exceed server limits
       const croppedImage = await getCroppedImg(
         imageSrc as string,
         cropState.croppedAreaPixels,
@@ -169,9 +294,13 @@ const AvatarEditModal = ({
       }
 
       setCropState((prev) => ({ ...prev, croppedImage }));
-    } catch (_e) {
+      // Clear any previous error messages when cropping succeeds
+      setErrorMessage(null);
+    } catch (error) {
+      console.error("Cropping error:", error);
       toast.error(t("AVATAR_EDIT__UNABLE_TO_CROP"));
       setCropState((prev) => ({ ...prev, croppedImage: null }));
+      setErrorMessage(t("AVATAR_EDIT__CROPPING_ERROR"));
     } finally {
       setIsProcessing(false);
       setCropState((prev) => ({ ...prev, isCropping: false }));
@@ -182,15 +311,167 @@ const AvatarEditModal = ({
     if (cropState.croppedImage) {
       const processCroppedImage = async () => {
         try {
-          const res = await fetch(cropState.croppedImage!);
-          const blob = await res.blob();
-          const myFile = new File([blob], "cropped_image.png", {
-            type: blob.type,
-          });
-          setSelectedFile(myFile);
-          setPreview(cropState.croppedImage!);
-          setCropState((prev) => ({ ...prev, croppedImage: null }));
-        } catch (_error) {
+          // Create an Image element to ensure consistent processing
+          const img = new Image();
+          img.onload = async () => {
+            try {
+              // Create a canvas for resizing and format conversion
+              const canvas = document.createElement("canvas");
+              // Ensure minimum dimensions of 400x400 and maximum of 1024x1024
+              const MIN_DIMENSION = 400;
+              const MAX_DIMENSION = 1024;
+              // Calculate optimal dimensions while maintaining aspect ratio
+              let size = Math.min(
+                MAX_DIMENSION,
+                Math.max(MIN_DIMENSION, img.width, img.height),
+              );
+              let width = size;
+              let height = size;
+
+              // Adjust for non-square images while maintaining aspect ratio
+              if (img.width !== img.height) {
+                if (img.width > img.height) {
+                  height = Math.round(img.height * (width / img.width));
+                  if (height < MIN_DIMENSION) {
+                    height = MIN_DIMENSION;
+                    width = Math.round(img.width * (height / img.height));
+                  }
+                } else {
+                  width = Math.round(img.width * (height / img.height));
+                  if (width < MIN_DIMENSION) {
+                    width = MIN_DIMENSION;
+                    height = Math.round(img.height * (width / img.width));
+                  }
+                }
+              }
+              canvas.width = width;
+              canvas.height = height;
+
+              const ctx = canvas.getContext("2d");
+              if (!ctx) {
+                throw new Error("Failed to get canvas context");
+              }
+
+              // Use high quality rendering
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = "high";
+
+              // Draw the image centered
+              ctx.drawImage(
+                img,
+                0,
+                0,
+                width,
+                height, // Use full canvas
+              );
+
+              // Try PNG first (better quality)
+              canvas.toBlob(
+                (blob) => {
+                  if (!blob) {
+                    throw new Error("Failed to create blob");
+                  }
+
+                  // Check size constraints
+                  if (blob.size < 1024) {
+                    // Less than 1KB
+                    // Try with no compression
+                    canvas.toBlob(
+                      (blob2) => {
+                        if (blob2 && blob2.size >= 1024) {
+                          createFileFromBlob(blob2, "image/png");
+                        } else {
+                          setErrorMessage(t("image_too_small_in_size"));
+                        }
+                      },
+                      "image/png",
+                      1.0, // No compression
+                    );
+                  } else if (blob.size > 2 * 1024 * 1024) {
+                    // Greater than 2MB
+                    // Try JPEG with compression
+                    canvas.toBlob(
+                      (blob2) => {
+                        if (blob2 && blob2.size <= 2 * 1024 * 1024) {
+                          createFileFromBlob(blob2, "image/jpeg");
+                        } else {
+                          // If still too large, reduce dimensions
+                          const smallerCanvas =
+                            document.createElement("canvas");
+                          smallerCanvas.width = Math.round(width * 0.8);
+                          smallerCanvas.height = Math.round(height * 0.8);
+                          const smallerCtx = smallerCanvas.getContext("2d");
+
+                          if (smallerCtx) {
+                            smallerCtx.imageSmoothingEnabled = true;
+                            smallerCtx.imageSmoothingQuality = "high";
+                            smallerCtx.drawImage(
+                              img,
+                              0,
+                              0,
+                              smallerCanvas.width,
+                              smallerCanvas.height,
+                            );
+
+                            smallerCanvas.toBlob(
+                              (blob3) => {
+                                if (blob3) {
+                                  createFileFromBlob(blob3, "image/jpeg");
+                                } else {
+                                  setErrorMessage(
+                                    t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
+                                  );
+                                }
+                              },
+                              "image/jpeg",
+                              0.7, // Higher compression
+                            );
+                          } else {
+                            setErrorMessage(
+                              t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
+                            );
+                          }
+                        }
+                      },
+                      "image/jpeg",
+                      0.85, // Moderate compression
+                    );
+                  } else {
+                    // Size is within acceptable range
+                    createFileFromBlob(blob, "image/png");
+                  }
+                },
+                "image/png",
+                0.9, // Light compression
+              );
+
+              // Helper function to create a file from blob and update state
+              function createFileFromBlob(blob: Blob, mimeType: string) {
+                const extension = mimeType === "image/png" ? "png" : "jpg";
+                const myFile = new File([blob], `cropped_image.${extension}`, {
+                  type: mimeType,
+                });
+                setSelectedFile(myFile);
+                setPreview(cropState.croppedImage!);
+                setCropState((prev) => ({ ...prev, croppedImage: null }));
+                // Reset loading states to ensure they only appear when submitting
+                setIsCaptureImgBeingUploaded(false);
+                setIsProcessing(false);
+                setErrorMessage(null);
+              }
+            } catch (err) {
+              console.error("Canvas processing error:", err);
+              setErrorMessage(t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"));
+            }
+          };
+
+          img.onerror = () => {
+            setErrorMessage(t("AVATAR_EDIT__ERROR_LOADING_IMAGE"));
+          };
+
+          img.src = cropState.croppedImage!;
+        } catch (error) {
+          console.error("Image processing error:", error);
           toast.error(t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"));
         }
       };
@@ -203,6 +484,7 @@ const AvatarEditModal = ({
     setIsProcessing(false);
     setSelectedFile(undefined);
     setPreviewImage(null);
+    setIsCaptureImgBeingUploaded(false);
     setCropState({
       crop: { x: 0, y: 0 },
       zoom: 1,
@@ -250,26 +532,90 @@ const AvatarEditModal = ({
         return;
       }
 
-      setErrorMessage(null);
-      setIsProcessing(true);
-      setIsCaptureImgBeingUploaded(true);
-      await handleUpload(
-        selectedFile,
-        () => {
-          setPreview(undefined);
-        },
-        () => {
-          setPreview(undefined);
-          setPreviewImage(null);
+      // Check if file size is greater than 2MB (2 * 1024 * 1024 bytes)
+      if (selectedFile.size > 2 * 1024 * 1024) {
+        setErrorMessage(t("file_too_large", { maxSize: "2MB" }));
+        setIsProcessing(false);
+        setIsCaptureImgBeingUploaded(false);
+        return;
+      }
+
+      // Check if file size is less than 1KB (1024 bytes)
+      if (selectedFile.size < 1024) {
+        setErrorMessage(t("file_too_small", { minSize: "1KB" }));
+        setIsProcessing(false);
+        setIsCaptureImgBeingUploaded(false);
+        return;
+      }
+
+      // Create an image object to verify dimensions
+      const img = new Image();
+      img.onload = async () => {
+        URL.revokeObjectURL(img.src); // Clean up
+
+        // Check image dimensions
+        if (img.width < 400 || img.height < 400) {
+          setErrorMessage(t("image_too_small", { minDimension: "400x400" }));
+          setIsProcessing(false);
+          setIsCaptureImgBeingUploaded(false);
+          return;
+        }
+
+        if (img.width > 1024 || img.height > 1024) {
+          setErrorMessage(t("image_too_large", { maxDimension: "1024x1024" }));
+          setIsProcessing(false);
+          setIsCaptureImgBeingUploaded(false);
+          return;
+        }
+
+        // If all validations pass, proceed with upload
+        setErrorMessage(null);
+
+        try {
+          await handleUpload(
+            selectedFile,
+            () => {
+              // Success callback - clear all states and close modal
+              setPreview(undefined);
+              setIsCaptureImgBeingUploaded(false);
+              setIsProcessing(false);
+              setSelectedFile(undefined);
+
+              // Close modal on success after a small delay to show the success state
+              setTimeout(() => {
+                closeModal();
+              }, 500);
+            },
+            () => {
+              // Error callback
+              setPreview(undefined);
+              setPreviewImage(null);
+              setIsCaptureImgBeingUploaded(false);
+              setIsProcessing(false);
+              setErrorMessage(t("upload_failed_try_cropping"));
+            },
+          );
+        } catch (error) {
+          console.error("Avatar upload error:", error);
+          setErrorMessage(t("AVATAR_EDIT__UPLOAD_ERROR"));
           setIsCaptureImgBeingUploaded(false);
           setIsProcessing(false);
-        },
-      );
-    } finally {
-      setPreview(undefined);
-      setIsCaptureImgBeingUploaded(false);
+        }
+      };
+
+      img.onerror = () => {
+        setErrorMessage(t("AVATAR_EDIT__INVALID_IMAGE"));
+        setIsProcessing(false);
+        setIsCaptureImgBeingUploaded(false);
+      };
+
+      // Create object URL from the selected file
+      img.src = URL.createObjectURL(selectedFile);
+    } catch (error) {
+      console.error("Avatar upload preparation error:", error);
+      setErrorMessage(t("AVATAR_EDIT__UPLOAD_ERROR"));
       setIsProcessing(false);
-      setSelectedFile(undefined);
+      setIsCaptureImgBeingUploaded(false);
     }
   };
 
@@ -328,6 +674,23 @@ const AvatarEditModal = ({
 
   const hintMessage = hint || defaultHint;
 
+  // Clean up effect to handle unmounting
+  useEffect(() => {
+    return () => {
+      // Reset loading states when component unmounts
+      setIsProcessing(false);
+      setIsCaptureImgBeingUploaded(false);
+    };
+  }, []);
+
+  // Reset loading states when dialog is closed
+  useEffect(() => {
+    if (!open) {
+      setIsProcessing(false);
+      setIsCaptureImgBeingUploaded(false);
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={closeModal}>
       <DialogContent className="md:max-w-4xl">
@@ -376,7 +739,7 @@ const AvatarEditModal = ({
                         ) : (
                           <img
                             src={preview || imageUrl || ""}
-                            alt="cover-photo"
+                            alt={t("preview")}
                             className="h-auto w-full object-contain"
                           />
                         )}
@@ -431,7 +794,7 @@ const AvatarEditModal = ({
                     >
                       {dragProps.fileDropError !== ""
                         ? dragProps.fileDropError
-                        : `${t("drag_drop_image_to_upload")}`}
+                        : t("drag_drop_image_to_upload")}
                     </p>
                     <p className="mt-4 text-center font-medium text-secondary-700">
                       {t("no_image_found")}. {hintMessage}
@@ -454,8 +817,7 @@ const AvatarEditModal = ({
                         />
                         {t("upload_an_image")}
                         <input
-                          // eslint-disable-next-line i18next/no-literal-string
-                          title="changeFile"
+                          title={t("change_file")}
                           type="file"
                           accept="image/*"
                           className="hidden"
@@ -471,7 +833,7 @@ const AvatarEditModal = ({
                       setIsCameraOpen(true);
                     }}
                   >
-                    {`${t("open_camera")}`}
+                    {t("open_camera")}
                   </Button>
                   {cropState.isCropping && (
                     <div className="flex gap-4 relative justify-center md:absolute md:bottom-5 md:left-1/2 md:transform md:-translate-x-1/2">
@@ -490,7 +852,7 @@ const AvatarEditModal = ({
                         {t("cancel")}
                       </Button>
                       <Button onClick={handleCropImage} variant="primary">
-                        {t("Crop")}
+                        {t("crop")}
                       </Button>
                     </div>
                   )}
@@ -507,7 +869,7 @@ const AvatarEditModal = ({
                         }))
                       }
                     >
-                      {t("Crop")}
+                      {t("crop")}
                     </Button>
                   )}
                   <div className="sm:flex-1" />
@@ -535,20 +897,29 @@ const AvatarEditModal = ({
                   <Button
                     id="save-cover-image"
                     variant="outline"
-                    onClick={uploadAvatar}
-                    disabled={isProcessing || !selectedFile}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsProcessing(false);
+                      setIsCaptureImgBeingUploaded(true);
+                      setTimeout(() => {
+                        uploadAvatar();
+                      }, 10);
+                    }}
+                    disabled={isCaptureImgBeingUploaded || !selectedFile}
                     data-cy="save-cover-image"
                   >
-                    {isProcessing ? (
+                    {isCaptureImgBeingUploaded ? (
                       <CareIcon
                         icon="l-spinner"
-                        className="animate-spin text-lg"
+                        className="animate-spin text-lg mr-1"
                       />
                     ) : (
                       <CareIcon icon="l-save" className="text-lg" />
                     )}
                     <span>
-                      {isProcessing ? `${t("uploading")}...` : `${t("save")}`}
+                      {isCaptureImgBeingUploaded
+                        ? t("uploading") + "..."
+                        : t("save")}
                     </span>
                   </Button>
                 </div>
@@ -616,7 +987,7 @@ const AvatarEditModal = ({
                     <>
                       <Button variant="primary" onClick={handleSwitchCamera}>
                         <CareIcon icon="l-camera-change" className="text-lg" />
-                        {`${t("switch")} ${t("camera")}`}
+                        {t("switch_camera")}
                       </Button>
                       <Button
                         variant="primary"
@@ -687,19 +1058,25 @@ const AvatarEditModal = ({
                           </Button>
                           <Button
                             variant="primary"
-                            disabled={isProcessing}
-                            onClick={uploadAvatar}
+                            disabled={isCaptureImgBeingUploaded}
+                            onClick={(_e) => {
+                              setIsProcessing(false);
+                              setIsCaptureImgBeingUploaded(true);
+                              setTimeout(() => {
+                                uploadAvatar();
+                              }, 10);
+                            }}
                           >
                             {isCaptureImgBeingUploaded ? (
                               <>
                                 <CareIcon
                                   icon="l-spinner"
-                                  className="animate-spin text-lg"
+                                  className="animate-spin text-lg mr-1"
                                 />
-                                {`${t("submitting")}...`}
+                                {t("submitting") + "..."}
                               </>
                             ) : (
-                              <> {t("submit")}</>
+                              <>{t("submit")}</>
                             )}
                           </Button>
                         </>
