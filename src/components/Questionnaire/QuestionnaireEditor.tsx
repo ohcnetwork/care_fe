@@ -12,6 +12,7 @@ import {
 import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -1173,6 +1174,7 @@ function QuestionEditor({
   isLast,
   index,
 }: QuestionEditorProps) {
+  const { t } = useTranslation();
   const {
     text,
     type,
@@ -1355,7 +1357,7 @@ function QuestionEditor({
                         <div className="flex flex-col items-start">
                           <span>{type.name}</span>
                           <span className="text-xs max-w-xs text-muted-foreground whitespace-normal">
-                            {type.description}
+                            {t(type.description)}
                           </span>
                         </div>
                       </SelectItem>
