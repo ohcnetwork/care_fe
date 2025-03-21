@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -50,7 +50,6 @@ export default function OrganizationLayout({
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const dropdownContainerRef = useRef<HTMLDivElement>(null);
 
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
@@ -152,10 +151,6 @@ export default function OrganizationLayout({
               align="start"
               sideOffset={5}
               className="w-[var(--radix-dropdown-menu-trigger-width)]"
-              style={{
-                width: dropdownContainerRef.current?.clientWidth || "auto",
-                maxWidth: "100vw",
-              }}
             >
               {visibleNavItems.map((item) => (
                 <DropdownMenuItem
