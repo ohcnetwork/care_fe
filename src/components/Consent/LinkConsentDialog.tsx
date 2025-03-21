@@ -61,6 +61,7 @@ import {
   CreateConsentRequest,
   VERIFICATION_TYPES,
 } from "@/types/consent/consent";
+import consentApi from "@/types/consent/consentApi";
 import { UserBase } from "@/types/user/user";
 
 const consentFormSchema = z
@@ -139,7 +140,7 @@ export default function LinkConsentDialog({
 
   const { data: existingConsents } = useQuery({
     queryKey: ["consents", patientId],
-    queryFn: query(routes.consent.list, {
+    queryFn: query(consentApi.list, {
       pathParams: { patientId },
     }),
     enabled: isOpen,
@@ -156,7 +157,7 @@ export default function LinkConsentDialog({
 
   const { mutate: createConsent, isPending } = useMutation({
     mutationFn: (data: CreateConsentRequest) =>
-      mutate(routes.consent.create, {
+      mutate(consentApi.create, {
         pathParams: { patientId },
       })(data),
     onSuccess: async (response) => {
@@ -776,6 +777,7 @@ function PreviewFile({ file }: PreviewFileProps) {
       src={file.read_signed_url}
       title={file.name}
       className="object-cover w-full h-full"
+      sandbox="allow-same-origin"
     />
   );
 }
