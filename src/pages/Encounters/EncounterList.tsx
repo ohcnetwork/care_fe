@@ -459,8 +459,6 @@ export function EncounterList({
                           })
                         }
                       >
-                        {t("All Status")}
-
                         {t("all_status")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -553,8 +551,6 @@ export function EncounterList({
                         })
                       }
                     >
-                      {t("All Status")}
-                      =======
                       {t("all_types")}
                     </TabsTrigger>
                     <TabsTrigger
