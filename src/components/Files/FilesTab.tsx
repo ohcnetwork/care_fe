@@ -39,6 +39,7 @@ import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
+import { getPermissions } from "@/common/Permissions";
 import { FILE_EXTENSIONS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
@@ -46,18 +47,17 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
 export interface FilesTabProps {
   type: "encounter" | "patient";
-  patientId?: string;
   encounter?: Encounter;
   patient?: Patient;
 }
 
 export const FilesTab = (props: FilesTabProps) => {
-  const { patientId, type, encounter } = props;
+  const { patient, type, encounter } = props;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
   });
@@ -69,11 +69,33 @@ export const FilesTab = (props: FilesTabProps) => {
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
+  const {
+    canViewClinicalData,
+    canViewEncounter,
+    canWritePatient,
+    canWriteEncounter,
+  } = getPermissions(
+    hasPermission,
+    encounter?.permissions ?? patient?.permissions ?? [],
+  );
+  const canAccess =
+    type === "encounter"
+      ? canViewClinicalData || canViewEncounter
+      : canViewClinicalData;
+
+  const canWriteCurrentEncounter =
+    canWriteEncounter &&
+    encounter &&
+    !inactiveEncounterStatus.includes(encounter.status);
+
+  const canEdit =
+    type === "encounter" ? canWriteCurrentEncounter : canWritePatient;
+
   const queryClient = useQueryClient();
 
   const associatingId =
     {
-      patient: patientId,
+      patient: patient?.id,
       encounter: encounter?.id,
     }[type] || "";
 
@@ -117,6 +139,7 @@ export const FilesTab = (props: FilesTabProps) => {
         }),
       },
     }),
+    enabled: canAccess,
   });
 
   const fileManager = useFileManager({
@@ -224,24 +247,6 @@ export const FilesTab = (props: FilesTabProps) => {
     );
   };
 
-  const editPermission = () => {
-    if (type === "encounter") {
-      return (
-        encounter &&
-        ![
-          "completed",
-          "cancelled",
-          "entered_in_error",
-          "discontinued",
-        ].includes(encounter.status) &&
-        hasPermission("can_write_encounter")
-      );
-    } else if (type === "patient") {
-      return hasPermission("can_write_patient");
-    }
-    return false;
-  };
-
   const DetailButtons = ({ file }: { file: FileUploadModel }) => {
     const filetype = getFileType(file);
     return (
@@ -290,7 +295,7 @@ export const FilesTab = (props: FilesTabProps) => {
                   <span>{t("download")}</span>
                 </Button>
               </DropdownMenuItem>
-              {editPermission() && (
+              {canEdit && (
                 <>
                   <DropdownMenuItem asChild className="text-primary-900">
                     <Button
@@ -380,7 +385,7 @@ export const FilesTab = (props: FilesTabProps) => {
   };
 
   const FileUploadButtons = (): JSX.Element => {
-    if (!editPermission()) return <></>;
+    if (!canEdit) return <></>;
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -506,16 +511,16 @@ export const FilesTab = (props: FilesTabProps) => {
       <Table className="border-separate border-spacing-y-3 mx-2 lg:max-w-[calc(100%-16px)]">
         <TableHeader>
           <TableRow className="shadow rounded overflow-hidden">
-            <TableHead className="w-[30%] bg-white rounded-l">
+            <TableHead className="w-[20%] bg-white rounded-l">
               {t("file_name")}
             </TableHead>
-            <TableHead className="w-[15%] rounded-y bg-white">
+            <TableHead className="w-[20%] rounded-y bg-white">
               {t("file_type")}
             </TableHead>
             <TableHead className="w-[25%] rounded-y bg-white">
               {t("date")}
             </TableHead>
-            <TableHead className="w-[15%] rounded-y bg-white">
+            <TableHead className="w-[20%] rounded-y bg-white">
               {t("shared_by")}
             </TableHead>
             <TableHead className="w-[15%] text-right rounded-r bg-white"></TableHead>
@@ -569,7 +574,15 @@ export const FilesTab = (props: FilesTabProps) => {
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
                   >
-                    {dayjs(file.created_date).format("DD MMM YYYY, hh:mm A")}
+                    <TooltipComponent
+                      content={dayjs(file.created_date).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    >
+                      <span>
+                        {dayjs(file.created_date).format("DD MMM YYYY ")}
+                      </span>
+                    </TooltipComponent>
                   </TableCell>
                   <TableCell
                     className={cn(

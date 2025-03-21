@@ -7,8 +7,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
-import DeviceDetail from "@/pages/Facility/settings/devices/DeviceDetail";
 import DeviceLocationHistory from "@/pages/Facility/settings/devices/DeviceLocationHistory";
+import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
 import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 
