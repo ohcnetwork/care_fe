@@ -108,11 +108,17 @@ interface Props {
 }
 
 const defaultValues: z.infer<typeof formSchema> = {
-  identifier: undefined,
+  identifier: "",
   status: "active",
   availability_status: "available",
-  manufacturer: undefined,
-  manufacture_date: undefined,
+  manufacturer: "",
+  manufacture_date: "",
+  expiration_date: "",
+  lot_number: "",
+  serial_number: "",
+  model_number: "",
+  part_number: "",
+  user_friendly_name: "",
   registered_name: "",
   contact: [],
   metadata: {},
@@ -156,15 +162,15 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     if (device) {
       form.reset({
         ...device,
-        user_friendly_name: device.user_friendly_name || undefined,
-        identifier: device.identifier || undefined,
-        manufacturer: device.manufacturer || undefined,
-        manufacture_date: device.manufacture_date || undefined,
-        expiration_date: device.expiration_date || undefined,
-        lot_number: device.lot_number || undefined,
-        serial_number: device.serial_number || undefined,
-        model_number: device.model_number || undefined,
-        part_number: device.part_number || undefined,
+        user_friendly_name: device.user_friendly_name || "",
+        identifier: device.identifier || "",
+        manufacturer: device.manufacturer || "",
+        manufacture_date: device.manufacture_date || "",
+        expiration_date: device.expiration_date || "",
+        lot_number: device.lot_number || "",
+        serial_number: device.serial_number || "",
+        model_number: device.model_number || "",
+        part_number: device.part_number || "",
         contact: Array.isArray(device.contact) ? device.contact : [],
       });
 
