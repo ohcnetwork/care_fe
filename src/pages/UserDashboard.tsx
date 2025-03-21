@@ -19,7 +19,7 @@ import { UserFacilityModel } from "@/components/Users/models";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 
-import { formatDisplayName } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
 
 enum DashboardTabs {
@@ -66,7 +66,7 @@ export default function UserDashboard() {
         <div className="flex justify-between gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm w-full  mx-auto">
           <div className="flex flex-auto items-center gap-4">
             <Avatar
-              name={formatDisplayName(user)}
+              name={formatName(user, true)}
               imageUrl={user.read_profile_picture_url}
               className="h-20 w-20 md:h-24 md:w-24 rounded-full"
             />
@@ -76,9 +76,7 @@ export default function UserDashboard() {
                   {t("welcome_back")}
                 </p>
                 <h1 className="text-xl md:text-2xl">
-                  {user.user_type === "doctor"
-                    ? t("welcome_dr", { name: user.first_name })
-                    : user.first_name}
+                  {(user.prefix ? user.prefix + " " : "") + user.first_name}
                 </h1>
               </div>
               <p className="text-sm md:text-base text-gray-500">

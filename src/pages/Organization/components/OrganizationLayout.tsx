@@ -1,17 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
-import { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 
 import Page from "@/components/Common/Page";
@@ -118,6 +116,36 @@ export default function OrganizationLayout({
 
   return (
     <Page title={`${org.name}`}>
+      {orgParents.length > 0 && (
+        <div className="flex items-center gap-2 mt-4">
+          <Breadcrumb>
+            <BreadcrumbList>
+              {orgParents.reverse().map((parent) => (
+                <React.Fragment key={parent.id}>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink
+                      asChild
+                      className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                    >
+                      <Link href={path.replace(id, parent.id)}>
+                        {parent.name}
+                      </Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                  </BreadcrumbItem>
+                </React.Fragment>
+              ))}
+              <BreadcrumbItem key={org.id}>
+                <span className="text-sm font-semibold text-gray-900">
+                  {org.name}
+                </span>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      )}
       {/* Navigation */}
       <div className="mt-4">
         <div className="block lg:hidden">

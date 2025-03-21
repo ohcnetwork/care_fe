@@ -27,6 +27,7 @@ import UserSelector from "@/components/Common/UserSelector";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import organizationApi from "@/types/organization/organizationApi";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
@@ -143,7 +144,7 @@ export default function LinkUserSheet({
                   />
                   <div className="w-3/4">
                     <p className="font-medium text-lg truncate">
-                      {selectedUser.first_name} {selectedUser.last_name}
+                      {formatName(selectedUser)}
                     </p>
                     <span className="text-sm text-gray-500">
                       {selectedUser.email}
