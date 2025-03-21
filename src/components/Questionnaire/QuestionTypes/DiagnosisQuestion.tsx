@@ -7,7 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -126,6 +129,16 @@ export function DiagnosisQuestion({
   }, [patientDiagnoses]);
 
   const handleAddDiagnosis = (code: Code) => {
+    const isDuplicate = diagnoses.some(
+      (diagnosis) =>
+        diagnosis.code.code === code.code &&
+        diagnosis.verification_status !== "entered_in_error",
+    );
+
+    if (isDuplicate) {
+      toast.warning(t("diagnosis_already_exist_warning"));
+      return;
+    }
     const newDiagnoses = [
       ...diagnoses,
       { ...DIAGNOSIS_INITIAL_VALUE, code },
