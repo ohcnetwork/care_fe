@@ -1,6 +1,6 @@
 export interface FileUploadQuestion {
   original_name: string;
-  file_data: string; // base64 encoded file data
+  file_data: File;
   name: string;
   associating_id: string;
   file_type: string;

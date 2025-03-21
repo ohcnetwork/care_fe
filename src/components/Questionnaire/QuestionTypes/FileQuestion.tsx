@@ -130,37 +130,20 @@ export function FilesQuestion(props: FilesQuestionProps) {
     compress: false,
   });
 
-  const getFileData = async (files: File[]) => {
-    const filePromises = files.map((file) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-          const base64 = (reader?.result as string)?.split(",")[1];
-          resolve({
-            name: "",
-            file_data: base64,
-            original_name: file.name,
-            file_type: "encounter",
-            file_category: "unspecified",
-            associating_id: encounterId,
-          });
-        };
-        reader.onerror = (error) => reject(error);
-      });
-    });
-    const filesData = (await Promise.all(filePromises)) as FileUploadQuestion[];
-    return filesData;
-  };
-
   useEffect(() => {
     (async () => {
-      const files = await getFileData(fileUpload.files);
       updateQuestionnaireResponseCB(
         [
           {
             type: "files",
-            value: files,
+            value: fileUpload.files.map((file, i) => ({
+              name: values[i]?.name || "",
+              file_data: file,
+              original_name: file.name,
+              file_type: "encounter",
+              file_category: "unspecified",
+              associating_id: encounterId,
+            })),
           },
         ],
         questionnaireResponse.question_id,

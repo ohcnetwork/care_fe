@@ -611,11 +611,11 @@ export function QuestionnaireForm({
       const context = { facilityId, patientId, encounterId };
       // First, collect all structured data requests if encounterId is provided
       formsWithValidation.forEach((form) => {
-        form.responses.forEach((response) => {
+        form.responses.forEach(async (response) => {
           if (response.structured_type) {
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
-              const structuredRequests = getStructuredRequests(
+              const structuredRequests = await getStructuredRequests(
                 response.structured_type,
                 structuredData,
                 context,
