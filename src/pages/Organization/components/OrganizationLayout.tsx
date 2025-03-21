@@ -29,7 +29,7 @@ interface Props {
   // NavOrganizationId is used to show the organization switcher in the sidebar, it may not the parent organization
   navOrganizationId?: string;
   id: string;
-  children: React.ReactNode;
+  children: (props: { orgPermissions: string[] }) => React.ReactNode;
   setOrganization?: (org: Organization) => void;
 }
 
@@ -170,7 +170,9 @@ export default function OrganizationLayout({
         </Menubar>
       </div>
       {/* Page Content */}
-      <div className="mt-4">{children}</div>
+      <div className="mt-4">
+        {children({ orgPermissions: org.permissions })}
+      </div>
     </Page>
   );
 }

@@ -1,25 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
-import { format, isBefore, startOfToday } from "date-fns";
+import { format } from "date-fns";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { DatePicker } from "@/components/ui/date-picker";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
-import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
@@ -31,13 +28,15 @@ import {
   useFieldError,
   validateFields,
 } from "@/types/questionnaire/validation";
-import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApi";
+import {
+  CreateAppointmentQuestion,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
 import { FieldError } from "./FieldError";
 
-interface FollowUpVisitQuestionProps {
+interface AppointmentQuestionProps {
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
@@ -79,10 +78,10 @@ export function AppointmentQuestion({
   disabled,
   errors,
   facilityId,
-}: FollowUpVisitQuestionProps) {
+}: AppointmentQuestionProps) {
   const { t } = useTranslation();
   const [resource, setResource] = useState<UserBase>();
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
 
   const values =
@@ -98,27 +97,17 @@ export function AppointmentQuestion({
     );
   };
 
-  const slotsQuery = useQuery({
-    queryKey: [
-      "slots",
-      facilityId,
-      resource?.id,
-      dateQueryString(selectedDate),
-    ],
-    queryFn: query(scheduleApis.slots.getSlotsForDay, {
-      pathParams: { facility_id: facilityId },
-      body: {
-        user: resource?.id ?? "",
-        day: dateQueryString(selectedDate),
-      },
-    }),
-    enabled: !!resource && !!selectedDate,
-  });
+  // Query to get slot details for display
+  const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
 
-  const slots = slotsQuery.data?.results ?? [];
-  const availableSlots = groupSlotsByAvailability(slots, true);
-  const hasSlots = availableSlots.length > 0;
-  const showNoSlotsMessage = !hasSlots && selectedDate && resource;
+  // Update slot details when a slot is selected
+  const handleSlotSelect = (slotId: string | undefined) => {
+    handleUpdate({ slot_id: slotId });
+    // Only close the sheet if a slot was actually selected
+    if (slotId) {
+      setOpen(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -159,107 +148,86 @@ export function AppointmentQuestion({
           <PractitionerSelector
             facilityId={facilityId}
             selected={resource ?? null}
-            onSelect={(user) => setResource(user ?? undefined)}
+            onSelect={(user) => {
+              setResource(user ?? undefined);
+              if (value.slot_id) {
+                handleUpdate({ slot_id: undefined });
+                setSelectedSlot(undefined);
+              }
+            }}
             clearSelection={t("show_all")}
           />
         </div>
       </div>
 
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <Label className="block mb-2">
-            {t("select_date")}
-            <span className="text-red-500 ml-0.5">*</span>
-          </Label>
-          <div
-            className={cn(
-              "rounded-md w-fit",
-              !selectedDate &&
-                hasError(APPOINTMENT_FIELDS.SLOT.key) &&
-                "border border-red-500",
-            )}
-          >
-            <DatePicker
-              date={selectedDate}
-              onChange={(date) => {
-                setSelectedDate(date);
-                if (value.slot_id) {
-                  handleUpdate({ slot_id: undefined });
-                }
-              }}
-              disabled={(date) => isBefore(date, startOfToday())}
-            />
-          </div>
-        </div>
-
-        <div className="flex-1">
-          <Label className="block mb-2">
-            {t("select_time")}
-            <span className="text-red-500 ml-0.5">*</span>
-          </Label>
-          {showNoSlotsMessage ? (
-            <div
-              className={cn(
-                "rounded-md border border-input px-3 py-2 text-sm text-gray-500",
-                hasError(APPOINTMENT_FIELDS.SLOT.key) && "border-red-500",
-              )}
-            >
-              {t("no_slots_available")}
-            </div>
-          ) : (
-            <Select
-              disabled={
-                !selectedDate || !resource || slotsQuery.isLoading || disabled
-              }
-              value={value.slot_id}
-              onValueChange={(slotId) => handleUpdate({ slot_id: slotId })}
-            >
-              <SelectTrigger
-                className={cn(
-                  hasError(APPOINTMENT_FIELDS.SLOT.key) && "border-red-500",
-                )}
-              >
-                <SelectValue placeholder={t("select_time_slot")} />
-              </SelectTrigger>
-              <SelectContent>
-                {hasSlots ? (
-                  availableSlots.map(({ availability, slots }) => (
-                    <div key={availability.name}>
-                      <div className="px-2 py-1.5 text-sm font-semibold">
-                        {availability.name}
-                      </div>
-                      {slots.map((slot) => {
-                        const isFullyBooked =
-                          slot.allocated >= availability.tokens_per_slot;
-                        return (
-                          <SelectItem
-                            key={slot.id}
-                            value={slot.id}
-                            disabled={isFullyBooked}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span>
-                                {format(slot.start_datetime, "HH:mm")} -{" "}
-                                {format(slot.end_datetime, "HH:mm")}
-                              </span>
-                              <span className="pl-1 text-xs text-gray-500">
-                                {availability.tokens_per_slot - slot.allocated}{" "}
-                                {t("slots_left")}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-2 py-4 text-center text-sm text-gray-500">
-                    {t("no_slots_available")}
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
+      <div>
+        <Label className="block mb-2">
+          {t("appointment_slot")}
+          <span className="text-red-500 ml-0.5">*</span>
+        </Label>
+        <div
+          className={cn(
+            "rounded-md",
+            !value.slot_id &&
+              hasError(APPOINTMENT_FIELDS.SLOT.key) &&
+              "ring-1 ring-red-500",
           )}
+        >
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              {value.slot_id && selectedSlot ? (
+                <Button variant="outline" className="w-full justify-start">
+                  <span className="font-normal">
+                    <Trans
+                      i18nKey="selected_token_slot_display"
+                      values={{
+                        date: format(
+                          selectedSlot.start_datetime,
+                          "dd MMM, yyyy",
+                        ),
+                        startTime: format(
+                          selectedSlot.start_datetime,
+                          "h:mm a",
+                        ),
+                        endTime: format(selectedSlot.end_datetime, "h:mm a"),
+                      }}
+                      components={{
+                        strong: <span className="font-semibold" />,
+                      }}
+                    />
+                  </span>
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  disabled={disabled || !resource}
+                >
+                  <span className="text-gray-500">
+                    {resource
+                      ? t("select_appointment_slot")
+                      : t("select_practitioner_first")}
+                  </span>
+                </Button>
+              )}
+            </SheetTrigger>
+            <SheetContent side="right" className="sm:max-w-xl overflow-auto">
+              <SheetHeader>
+                <SheetTitle>{t("select_appointment_slot")}</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6">
+                {resource && (
+                  <AppointmentSlotPicker
+                    facilityId={facilityId}
+                    resourceId={resource.id}
+                    onSlotSelect={handleSlotSelect}
+                    selectedSlotId={value.slot_id}
+                    onSlotDetailsChange={setSelectedSlot}
+                  />
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
           <FieldError
             fieldKey={APPOINTMENT_FIELDS.SLOT.key}
             questionId={question.id}
