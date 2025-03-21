@@ -65,16 +65,18 @@ export class UserCreation {
 
   verifyValidationErrors() {
     cy.verifyErrorMessages([
-      { label: "First Name", message: "Required" },
-      { label: "Last Name", message: "Required" },
-      { label: "Username", message: "Required" },
-      { label: "Password", message: "Required" },
-      { label: "Confirm Password", message: "Required" },
+      { label: "First Name", message: "This field is required" },
+      { label: "Last Name", message: "This field is required" },
+      { label: "Username", message: "This field is required" },
+      { label: "Password", message: "This field is required" },
       {
         label: "Phone Number",
         message: "This field is required",
       },
-      { label: "State", message: "Required" },
+      {
+        label: "Gender",
+        message: "Gender is required",
+      },
     ]);
     return this;
   }
