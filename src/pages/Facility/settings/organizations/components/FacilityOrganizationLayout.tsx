@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -99,8 +100,8 @@ export default function FacilityOrganizationLayout({
           <Breadcrumb>
             <BreadcrumbList>
               {orgParents.reverse().map((parent) => (
-                <>
-                  <BreadcrumbItem key={parent.id}>
+                <React.Fragment key={parent.id}>
+                  <BreadcrumbItem>
                     <BreadcrumbLink
                       asChild
                       className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
@@ -110,10 +111,10 @@ export default function FacilityOrganizationLayout({
                       </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbItem key={`ellipsis-${parent.id}`}>
+                  <BreadcrumbItem>
                     <BreadcrumbSeparator />
                   </BreadcrumbItem>
-                </>
+                </React.Fragment>
               ))}
               <BreadcrumbItem key={org.id}>
                 <span className="text-sm font-semibold text-gray-900">
@@ -138,7 +139,7 @@ export default function FacilityOrganizationLayout({
       >
         <div className="mt-2">
           {org.description && (
-            <p className="text-sm text-gray-500 line-clamp-2">
+            <p className="text-sm text-gray-500 break-all whitespace-normal">
               {org.description}
             </p>
           )}

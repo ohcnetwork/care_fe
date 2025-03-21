@@ -12,7 +12,7 @@ import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
@@ -170,7 +170,7 @@ export const PrintPrescription = (props: {
                 return (
                   <div key={prescriberId} className="text-center">
                     <p className="text-sm text-gray-600 font-semibold">
-                      Dr. {prescriber.first_name} {prescriber.last_name}
+                      {formatName(prescriber)}
                     </p>
                   </div>
                 );
