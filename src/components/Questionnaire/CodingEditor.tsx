@@ -1,5 +1,6 @@
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -31,6 +32,7 @@ interface CodingEditorProps {
 }
 
 export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
+  const { t } = useTranslation();
   const { mutate: verifyCode, isPending } = useMutation({
     mutationFn: mutate(valuesetApi.lookup),
     onSuccess: (response: ValuesetLookupResponse) => {
@@ -65,7 +67,7 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
           }}
         >
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          Add {isUnit ? "Unit" : "Coding"}
+          {isUnit ? t("add_unit") : t("add_coding")}
         </Button>
       </div>
     );
@@ -76,7 +78,7 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center w-full justify-between">
           <Label className="text-base font-medium">
-            {isUnit ? "Unit" : "Coding"} Details
+            {isUnit ? t("unit_details") : t("coding_details")}
           </Label>
           <Button
             variant="ghost"
@@ -86,14 +88,14 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
             }}
           >
             <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
-            Remove {isUnit ? "Unit" : "Coding"}
+            {isUnit ? t("remove_unit") : t("remove_coding")}
           </Button>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
         <div>
-          <Label>System</Label>
+          <Label>{t("system")}</Label>
           <Select
             value={code.system}
             onValueChange={(value) => {
@@ -121,7 +123,7 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
 
         <div className="grid grid-cols-[1fr,1fr,auto] gap-4 items-start">
           <div>
-            <Label>Code</Label>
+            <Label>{t("code")}</Label>
             <Input
               value={code.code}
               onChange={(e) => {
@@ -135,7 +137,7 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
             />
           </div>
           <div>
-            <Label>Display</Label>
+            <Label>{t("display")}</Label>
             <Input
               value={code.display}
               placeholder="Unverified"
