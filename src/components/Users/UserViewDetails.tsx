@@ -63,6 +63,11 @@ export const BasicInfoDetails = ({ user }: UserViewDetailsProps) => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <LabelValue id="username" label={t("username")} value={user.username} />
         <LabelValue
+          id="prefix"
+          label={t("prefix")}
+          value={user.prefix || "-"}
+        />
+        <LabelValue
           id="first_name"
           label={t("first_name")}
           value={user.first_name}
@@ -71,6 +76,11 @@ export const BasicInfoDetails = ({ user }: UserViewDetailsProps) => {
           id="last_name"
           label={t("last_name")}
           value={user.last_name}
+        />
+        <LabelValue
+          id="suffix"
+          label={t("suffix")}
+          value={user.suffix || "-"}
         />
         <LabelValue id="gender" label={t("gender")} value={user.gender} />
       </div>

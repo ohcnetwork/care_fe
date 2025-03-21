@@ -350,6 +350,7 @@ export function LocationSheet({
               <div className="space-y-4 rounded-lg border p-4 bg-card">
                 <LocationSearch
                   mode="instance"
+                  form="bd"
                   facilityId={facilityId}
                   onSelect={(location) => setSelectedLocation(location)}
                   value={selectedLocation}
