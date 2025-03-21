@@ -10,12 +10,18 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { patientTabs as tabs } from "@/components/Patient/PatientDetailsTab";
+import {
+  getTabs,
+  patientTabs as tabs,
+} from "@/components/Patient/PatientDetailsTab";
+
+import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge, relativeTime } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { Patient } from "@/types/emr/newPatient";
 
 export const PatientHome = (props: {
@@ -26,6 +32,7 @@ export const PatientHome = (props: {
   const { facilityId, id, page } = props;
 
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
 
   const { data: patientData, isLoading } = useQuery<Patient>({
     queryKey: ["patient", id],
@@ -37,9 +44,21 @@ export const PatientHome = (props: {
     enabled: !!id,
   });
 
+  const { getPatientTabs } = getTabs(
+    patientData?.permissions ?? [],
+    hasPermission,
+  );
+
+  const { canCreateAppointment } = getPermissions(
+    hasPermission,
+    patientData?.permissions ?? [],
+  );
+
   if (isLoading) {
     return <Loading />;
   }
+
+  const tabs = getPatientTabs;
 
   const Tab = tabs.find((t) => t.route === page)?.component;
 
@@ -52,7 +71,7 @@ export const PatientHome = (props: {
       title={t("patient_details")}
       options={
         <>
-          {facilityId && (
+          {facilityId && canCreateAppointment && (
             <Button asChild variant="primary">
               <Link
                 href={`/facility/${facilityId}/patient/${id}/book-appointment`}
