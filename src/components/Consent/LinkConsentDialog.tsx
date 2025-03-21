@@ -105,6 +105,9 @@ export default function LinkConsentDialog({
     allowNameFallback: false,
     compress: false,
     onUpload: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["consents", patientId, encounterId],
+      });
       setOpenUploadDialog(false);
       setIsOpen(false);
     },
