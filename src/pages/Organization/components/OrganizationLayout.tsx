@@ -2,7 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -47,7 +49,6 @@ export default function OrganizationLayout({
   const path = usePath() || "";
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
@@ -70,7 +71,7 @@ export default function OrganizationLayout({
   if (isLoading) {
     return <OrganizationLayoutSkeleton />;
   }
-
+  // add loading state
   if (!org) {
     return <div>{t("organization_not_found")}</div>;
   }
@@ -78,32 +79,29 @@ export default function OrganizationLayout({
   const navItems: NavItem[] = [
     {
       path: `${baseUrl}/${id}`,
-      title: t("organizations"),
+      title: "Organizations",
       icon: "d-hospital",
       visibility: hasPermission("can_view_organization", org.permissions),
     },
     {
       path: `${baseUrl}/${id}/users`,
-      title: t("users"),
+      title: "Users",
       icon: "d-people",
       visibility: hasPermission("can_list_organization_users", org.permissions),
     },
     {
       path: `${baseUrl}/${id}/patients`,
-      title: t("patients"),
+      title: "Patients",
       icon: "d-patient",
       visibility: hasPermission("can_list_patients", org.permissions),
     },
     {
       path: `${baseUrl}/${id}/facilities`,
-      title: t("facilities"),
+      title: "Facilities",
       icon: "d-hospital",
       visibility: hasPermission("can_read_facility", org.permissions),
     },
   ];
-
-  const visibleNavItems = navItems.filter((item) => item.visibility);
-  const activeNavItem = visibleNavItems.find((item) => path === item.path);
 
   const orgParents: OrganizationParent[] = [];
   let currentParent = org.parent;
@@ -147,67 +145,11 @@ export default function OrganizationLayout({
         </div>
       )}
       {/* Navigation */}
-      <div className="mt-4">
-        <div className="block lg:hidden">
-          <DropdownMenu
-            open={isMobileMenuOpen}
-            onOpenChange={setIsMobileMenuOpen}
-          >
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full flex justify-between items-center py-2 px-4"
-              >
-                <div className="flex items-center">
-                  {activeNavItem && (
-                    <CareIcon
-                      icon={activeNavItem.icon}
-                      className="mr-2 h-5 w-5"
-                    />
-                  )}
-                  <span className="font-medium">
-                    {activeNavItem ? activeNavItem.title : t("navigation")}
-                  </span>
-                </div>
-                <CareIcon
-                  icon={isMobileMenuOpen ? "l-angle-up" : "l-angle-down"}
-                  className="ml-2 h-4 w-4"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              sideOffset={5}
-              className="w-[var(--radix-dropdown-menu-trigger-width)]"
-            >
-              {visibleNavItems.map((item) => (
-                <DropdownMenuItem
-                  key={item.path}
-                  className={`${
-                    path === item.path
-                      ? "font-medium text-primary-700 bg-gray-100"
-                      : "text-gray-700"
-                  }`}
-                  asChild
-                >
-                  <Link
-                    href={item.path}
-                    className="flex items-center w-full"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
-                    {item.title}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Desktop Navigation - Shows on medium+ screens */}
-        <div className="hidden lg:block">
-          <Menubar className="w-full h-full overflow-x-auto">
-            {visibleNavItems.map((item) => (
+      <div className="mt-4 flex min-w-0">
+        <Menubar className="w-full h-full overflow-x-auto">
+          {navItems
+            .filter((item) => item.visibility)
+            .map((item) => (
               <MenubarMenu key={item.path}>
                 <MenubarTrigger
                   data-cy={`org-nav-${item.title.toLowerCase()}`}
@@ -225,12 +167,10 @@ export default function OrganizationLayout({
                 </MenubarTrigger>
               </MenubarMenu>
             ))}
-          </Menubar>
-        </div>
+        </Menubar>
       </div>
-
       {/* Page Content */}
-      <div className="mt-4 md:mt-6">{children}</div>
+      <div className="mt-4">{children}</div>
     </Page>
   );
 }
