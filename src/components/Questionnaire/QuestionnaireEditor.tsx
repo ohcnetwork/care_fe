@@ -308,60 +308,6 @@ function OrganizationSelector({
         <p className="text-sm text-red-500">{selection.error}</p>
       )}
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className={cn(
-              "w-full justify-between",
-              selection.error && "border-red-500",
-            )}
-          >
-            <span className="truncate">{t("select_organizations")}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput
-              placeholder={t("search_organizations")}
-              onValueChange={selection.setSearchQuery}
-            />
-            <CommandList>
-              <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
-              <CommandGroup>
-                {selection.isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  selection.available?.results.map((org) => (
-                    <CommandItem
-                      key={org.id}
-                      value={org.id}
-                      onSelect={() => selection.onToggle(org.id)}
-                    >
-                      <div className="flex flex-1 items-center gap-2">
-                        <Building className="h-4 w-4" />
-                        <span>{org.name}</span>
-                        {org.description && (
-                          <span className="text-xs text-gray-500">
-                            - {org.description}
-                          </span>
-                        )}
-                      </div>
-                      {selection.selectedIds.includes(org.id) && (
-                        <Check className="h-4 w-4" />
-                      )}
-                    </CommandItem>
-                  ))
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
       <Autocomplete
         options={(selection.available?.results ?? []).map((org) => ({
           label: org.name,
