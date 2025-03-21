@@ -92,7 +92,9 @@ export const Appointments = (props: PatientProps) => {
               <TableHead>{t("date_and_time")}</TableHead>
               <TableHead>{t("booked_by")}</TableHead>
               <TableHead>{t("status")}</TableHead>
-              <TableHead className="text-right">{t("actions")}</TableHead>
+              {facilityId && (
+                <TableHead className="text-right">{t("actions")}</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -126,16 +128,18 @@ export const Appointments = (props: PatientProps) => {
                     )}
                   </TableCell>
                   <TableCell>{getStatusBadge(appointment.status)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link
-                        href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
-                      >
-                        <CareIcon icon="l-eye" className="mr-1" />
-                        {t("view")}
-                      </Link>
-                    </Button>
-                  </TableCell>
+                  {facilityId && (
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link
+                          href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
+                        >
+                          <CareIcon icon="l-eye" className="mr-1" />
+                          {t("view")}
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             ) : (
