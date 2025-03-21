@@ -34,6 +34,7 @@ export interface Patient {
   geo_organization: Organization;
   created_by: UserBareMinimum | null;
   updated_by: UserBareMinimum | null;
+  permissions: string[];
 }
 
 export interface PartialPatientModel {

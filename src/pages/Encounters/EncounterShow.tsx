@@ -10,15 +10,18 @@ import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
 import { EncounterDrawingsTab } from "./tabs/EncounterDrawingsTab";
@@ -52,12 +55,26 @@ interface Props {
 export const EncounterShow = (props: Props) => {
   const { encounterId, patientId, facilityId } = props;
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
   const pluginTabs = useCareAppEncounterTabs();
 
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
     ...defaultTabs,
     ...pluginTabs,
   };
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId ?? "" },
+    }),
+    enabled: !!facilityId,
+  });
+
+  const { canListEncounters, canWriteEncounter } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
 
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -71,8 +88,12 @@ export const EncounterShow = (props: Props) => {
             patient: patientId,
           },
     }),
-    enabled: !!encounterId,
+    enabled: !!encounterId && canListEncounters,
   });
+
+  const canWrite =
+    canWriteEncounter &&
+    !inactiveEncounterStatus.includes(encounterData?.status ?? "");
 
   if (isLoading || !encounterData) {
     return <Loading />;
@@ -146,6 +167,7 @@ export const EncounterShow = (props: Props) => {
               patient={encounterData.patient}
               encounter={encounterData}
               fetchPatientData={() => {}}
+              canWrite={canWrite}
             />
 
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
