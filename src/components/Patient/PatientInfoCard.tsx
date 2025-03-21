@@ -71,12 +71,12 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
             </div>
             <div className="flex justify-center">
               <div
-                className="mb-2 flex flex-col text-xl font-semibold capitalize lg:hidden"
+                className="mb-2 flex flex-col text-base md:text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
                 <Link
                   href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
-                  className="text-gray-950 font-semibold flex items-start gap-0.5"
+                  className="text-gray-950 font-semibold flex items-start leading-tight"
                   id="patient-details"
                   data-cy="patient-details-button"
                 >
@@ -86,14 +86,17 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     className="w-3 h-3 opacity-50 mt-1"
                   />
                 </Link>
-                <div className="mt-[6px] text-sm font-semibold text-secondary-600">
+                <div className="my-[2px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
                 {patient.death_datetime && (
-                  <Badge variant="destructive">
-                    <h3 className="text-sm font-medium">
-                      {t("expired_on")}
+                  <Badge
+                    variant="destructive"
+                    className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                  >
+                    <h3 className="text-xs font-normal sm:text-sm sm:font-medium">
+                      {t("time_of_death")}
                       {": "}
                       {dayjs(patient.death_datetime).format(
                         "DD MMM YYYY, hh:mm A",
@@ -127,9 +130,12 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {t(`GENDER__${patient.gender}`)}
                 </div>
                 {patient.death_datetime && (
-                  <Badge variant="destructive">
+                  <Badge
+                    variant="destructive"
+                    className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                  >
                     <h3 className="text-sm font-medium">
-                      {t("expired_on")}
+                      {t("time_of_death")}
                       {": "}
                       {dayjs(patient.death_datetime).format(
                         "DD MMM YYYY, hh:mm A",

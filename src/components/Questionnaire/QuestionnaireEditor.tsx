@@ -9,7 +9,7 @@ import {
   Tags,
   ViewIcon,
 } from "lucide-react";
-import { Building, Check, Loader2, X } from "lucide-react";
+import { Building, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -29,14 +29,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -45,11 +37,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -301,57 +288,19 @@ function OrganizationSelector({
         )}
       </div>
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className="w-full justify-between"
-          >
-            <span className="truncate">{t("select_organizations")}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput
-              placeholder={t("search_organizations")}
-              onValueChange={selection.setSearchQuery}
-            />
-            <CommandList>
-              <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
-              <CommandGroup>
-                {selection.isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  selection.available?.results.map((org) => (
-                    <CommandItem
-                      key={org.id}
-                      value={org.id}
-                      onSelect={() => selection.onToggle(org.id)}
-                    >
-                      <div className="flex flex-1 items-center gap-2">
-                        <Building className="h-4 w-4" />
-                        <span>{org.name}</span>
-                        {org.description && (
-                          <span className="text-xs text-gray-500">
-                            - {org.description}
-                          </span>
-                        )}
-                      </div>
-                      {selection.selectedIds.includes(org.id) && (
-                        <Check className="h-4 w-4" />
-                      )}
-                    </CommandItem>
-                  ))
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      <Autocomplete
+        options={(selection.available?.results ?? []).map((org) => ({
+          label: org.name,
+          value: org.id,
+          description: org.description,
+        }))}
+        value=""
+        onChange={selection.onToggle}
+        onSearch={selection.setSearchQuery}
+        placeholder={t("select_organizations")}
+        isLoading={selection.isLoading}
+        noOptionsMessage={t("no_organizations_found")}
+      />
     </div>
   );
 }
@@ -424,52 +373,18 @@ function TagSelector({
         )}
       </div>
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className="w-full justify-between"
-          >
-            <span className="truncate">{t("select_tags")}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput
-              placeholder={t("search_tags")}
-              onValueChange={selection.setSearchQuery}
-            />
-            <CommandList>
-              <CommandEmpty>{t("no_tags_found")}</CommandEmpty>
-              <CommandGroup>
-                {selection.isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  selection.available?.results.map((tag) => (
-                    <CommandItem
-                      key={tag.id}
-                      value={tag.id}
-                      onSelect={() => selection.onToggle(tag.id)}
-                    >
-                      <div className="flex flex-1 items-center gap-2">
-                        <Building className="h-4 w-4" />
-                        <span>{tag.name}</span>
-                      </div>
-                      {selection.selectedIds.includes(tag.id) && (
-                        <Check className="h-4 w-4" />
-                      )}
-                    </CommandItem>
-                  ))
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      <Autocomplete
+        options={(selection.available?.results ?? []).map((tag) => ({
+          label: tag.name,
+          value: tag.id,
+        }))}
+        value=""
+        onChange={selection.onToggle}
+        onSearch={selection.setSearchQuery}
+        placeholder={t("select_tags")}
+        isLoading={selection.isLoading}
+        noOptionsMessage={t("no_tags_found")}
+      />
     </div>
   );
 }
@@ -1441,6 +1356,21 @@ function QuestionEditor({
               </p>
               <div className="">
                 <div className="flex flex-wrap gap-4">
+                  {type === "group" && (
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={question.is_component ?? false}
+                        onCheckedChange={(val) =>
+                          updateField("is_component", val)
+                        }
+                        id={`is_component-${getQuestionPath()}`}
+                      />
+                      <Label htmlFor={`is_component-${getQuestionPath()}`}>
+                        {t("is_component")}
+                      </Label>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={question.collect_time ?? false}
@@ -1536,40 +1466,63 @@ function QuestionEditor({
             </div>
           )}
 
-          {type === "choice" && (
+          {(type === "choice" || type === "quantity") && (
             <div className="space-y-4">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div>
-                    <CardTitle className="text-base font-medium">
-                      Answer Options
-                    </CardTitle>
-                    <p className="text-sm text-gray-500">
-                      Define possible answers for this question
-                    </p>
-                  </div>
-                  <Select
-                    value={question.answer_value_set ? "valueset" : "custom"}
-                    onValueChange={(val: string) =>
-                      updateField(
-                        "answer_value_set",
-                        val === "custom" ? undefined : "valueset",
-                      )
-                    }
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder={t("select_a_value_set")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="custom">
-                        {t("custom_options")}
-                      </SelectItem>
-                      <SelectItem value="valueset">{t("value_set")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </CardHeader>
+                {question.type === "choice" && (
+                  <>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <div>
+                        <CardTitle className="text-base font-medium">
+                          Answer Options
+                        </CardTitle>
+                        <p className="text-sm text-gray-500">
+                          Define possible answers for this question
+                        </p>
+                      </div>
+                      <Select
+                        value={
+                          question.answer_value_set ? "valueset" : "custom"
+                        }
+                        onValueChange={(val: string) =>
+                          updateField(
+                            "answer_value_set",
+                            val === "custom" ? undefined : "valueset",
+                            { answer_option: [] },
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder={t("select_a_value_set")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="custom">
+                            {t("custom_options")}
+                          </SelectItem>
+                          <SelectItem value="valueset">
+                            {t("value_set")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </CardHeader>
+                  </>
+                )}
 
-                {!question.answer_value_set ? (
+                {question.type === "quantity" && (
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div>
+                      <CardTitle className="text-base font-medium">
+                        Quantity
+                      </CardTitle>
+                      <p className="text-sm text-gray-500">
+                        Select the valueset of options for this quantity
+                        question
+                      </p>
+                    </div>
+                  </CardHeader>
+                )}
+
+                {question.type === "choice" && !question.answer_value_set ? (
                   <CardContent className="space-y-4">
                     {(answer_option || []).map((opt, idx) => (
                       <div
