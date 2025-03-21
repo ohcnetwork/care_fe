@@ -250,10 +250,7 @@ export default function CreateScheduleTemplateSheet({
         form.watch(`availabilities.${index}.start_time`),
         form.watch(`availabilities.${index}.end_time`),
       );
-      form.setValue(
-        `availabilities.${index}.slot_size_in_minutes`,
-        duration ?? 0,
-      );
+      form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
     }
   };
 

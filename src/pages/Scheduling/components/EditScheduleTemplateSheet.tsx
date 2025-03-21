@@ -706,7 +706,7 @@ const NewAvailabilityCard = ({
         form.watch("start_time"),
         form.watch("end_time"),
       );
-      form.setValue("slot_size_in_minutes", duration ?? 0);
+      form.setValue("slot_size_in_minutes", duration);
     }
   };
 
