@@ -10,7 +10,7 @@ import {
   Tags,
   ViewIcon,
 } from "lucide-react";
-import { Building, Check, Loader2, X } from "lucide-react";
+import { Building, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -32,14 +32,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -56,11 +48,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -375,6 +362,19 @@ function OrganizationSelector({
           </Command>
         </PopoverContent>
       </Popover>
+      <Autocomplete
+        options={(selection.available?.results ?? []).map((org) => ({
+          label: org.name,
+          value: org.id,
+          description: org.description,
+        }))}
+        value=""
+        onChange={selection.onToggle}
+        onSearch={selection.setSearchQuery}
+        placeholder={t("select_organizations")}
+        isLoading={selection.isLoading}
+        noOptionsMessage={t("no_organizations_found")}
+      />
     </div>
   );
 }
@@ -447,52 +447,18 @@ function TagSelector({
         )}
       </div>
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className="w-full justify-between"
-          >
-            <span className="truncate">{t("select_tags")}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput
-              placeholder={t("search_tags")}
-              onValueChange={selection.setSearchQuery}
-            />
-            <CommandList>
-              <CommandEmpty>{t("no_tags_found")}</CommandEmpty>
-              <CommandGroup>
-                {selection.isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  selection.available?.results.map((tag) => (
-                    <CommandItem
-                      key={tag.id}
-                      value={tag.id}
-                      onSelect={() => selection.onToggle(tag.id)}
-                    >
-                      <div className="flex flex-1 items-center gap-2">
-                        <Building className="h-4 w-4" />
-                        <span>{tag.name}</span>
-                      </div>
-                      {selection.selectedIds.includes(tag.id) && (
-                        <Check className="h-4 w-4" />
-                      )}
-                    </CommandItem>
-                  ))
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      <Autocomplete
+        options={(selection.available?.results ?? []).map((tag) => ({
+          label: tag.name,
+          value: tag.id,
+        }))}
+        value=""
+        onChange={selection.onToggle}
+        onSearch={selection.setSearchQuery}
+        placeholder={t("select_tags")}
+        isLoading={selection.isLoading}
+        noOptionsMessage={t("no_tags_found")}
+      />
     </div>
   );
 }
