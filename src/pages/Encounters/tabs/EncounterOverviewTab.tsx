@@ -13,9 +13,10 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
 import { inactiveEncounterStatus } from "@/types/emr/encounter";
 
-export const EncounterUpdatesTab = ({
+export const EncounterOverviewTab = ({
   encounter,
   patient,
 }: EncounterTabProps) => {
@@ -45,6 +46,9 @@ export const EncounterUpdatesTab = ({
       <div className="flex flex-col-reverse xl:flex-row gap-4">
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
         <div className="flex-1 space-y-4" data-cy="encounter-overview">
+          {/* Associated Devices Section */}
+          <EncounterOverviewDevices encounter={encounter} />
+
           {/* Allergies Section */}
           <div>
             <AllergyList

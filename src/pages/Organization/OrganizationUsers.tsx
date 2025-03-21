@@ -20,6 +20,7 @@ import useFilters from "@/hooks/useFilters";
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -189,8 +190,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                             <div className="flex flex-col gap-1">
                               <div className="flex items-start justify-between">
                                 <h1 className="text-base font-bold break-words pr-2">
-                                  {userRole.user.first_name}{" "}
-                                  {userRole.user.last_name}
+                                  {formatName(userRole.user)}
                                 </h1>
                                 <span className="text-sm text-gray-500">
                                   <UserStatusIndicator user={userRole.user} />

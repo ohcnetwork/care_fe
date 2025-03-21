@@ -23,6 +23,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import { AutoExpandingTextarea } from "@/components/ui/auto-expanding-textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +44,6 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -668,7 +668,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                     <div className="border-t p-4 sticky bottom-0">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
-                          <Textarea
+                          <AutoExpandingTextarea
                             placeholder={t("encounter_notes__type_message")}
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
@@ -680,6 +680,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                                 }
                               }
                             }}
+                            className="flex-1 min-h-20 max-h-[50vh]"
                           />
                           <Button
                             type="submit"

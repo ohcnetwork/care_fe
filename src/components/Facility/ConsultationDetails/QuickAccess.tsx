@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+import { Link, navigate, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 
 import EncounterActions from "@/components/Encounter/EncounterActions";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
+import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
@@ -25,11 +26,13 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
     "encounter_actions",
     canEdit,
   );
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityId = subpathMatch?.facilityId;
 
   return (
     <div className="flex flex-col gap-6">
       {/* Questionnaire Section */}
-      {canEdit && (
+      {canEdit && facilityId && (
         <section className="space-y-2 p-2">
           <h3 className="text-lg font-semibold mb-3">
             {t("questionnaire_one")}
@@ -47,6 +50,15 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
               </Link>
             ))}
           </div>
+          <QuestionnaireSearch
+            placeholder={t("choose_questionnaire")}
+            subjectType="encounter"
+            onSelect={(selected) =>
+              navigate(
+                `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/${selected.slug}`,
+              )
+            }
+          />
           <div className="w-full border-t border-dashed border-gray-300" />
         </section>
       )}
