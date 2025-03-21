@@ -74,6 +74,14 @@ Authenticate to staging API with any of the following credentials
   role: Doctor
 ```
 
+#### 📱 Patient Login in Staging
+
+For patient login via phone number:
+
+- In production, an actual SMS with OTP is sent to the provided phone number
+- In staging environment, to save costs, SMS messages are not actually sent
+- For testing purposes in staging, use the hardcoded OTP: `45612`
+
 #### Contributing to CARE
 
 - Create a branch with branch name of the format `issues/{issue#}/{short-name}` (example `issues/7001/edit-prescriptions`) from the latest [`develop`](https://github.com/ohcnetwork/care_fe/tree/develop) branch when starting to work on an issue.

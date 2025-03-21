@@ -84,7 +84,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
       }
     >
       <hr className="mt-4"></hr>
-      <div className="flex items-center justify-between gap-4 m-5 ml-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 m-5 ml-0">
         <Input
           id="search-by-username"
           name="username"
@@ -96,7 +96,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
         <Tabs
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as "card" | "list")}
-          className="ml-auto"
+          className="mr-auto sm:mr-0 sm:ml-auto"
         >
           <TabsList className="flex">
             <TabsTrigger value="card" id="user-card-view">
@@ -114,7 +114,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
           </TabsList>
         </Tabs>
       </div>
-      <div>{usersList}</div>
+      <div className="overflow-x-auto overflow-y-hidden">{usersList}</div>
     </Page>
   );
 }

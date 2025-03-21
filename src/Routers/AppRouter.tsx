@@ -13,6 +13,7 @@ import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { usePluginRoutes } from "@/hooks/useCareApps";
+import useSidebarState from "@/hooks/useSidebarState";
 
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
@@ -117,9 +118,10 @@ export default function AppRouter() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [currentPath]);
+  const sidebarOpen = useSidebarState();
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={sidebarOpen}>
       <PermissionProvider
         userPermissions={user?.permissions || []}
         isSuperAdmin={user?.is_superuser || false}
