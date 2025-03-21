@@ -1,4 +1,5 @@
-import { t } from "i18next";
+import { createTranslatableData } from "@/Utils/translation";
+import i18n from "@/i18n";
 
 import { Code } from "./code";
 
@@ -18,78 +19,80 @@ export type QuestionType =
   | "quantity"
   | "structured";
 
-export const SUPPORTED_QUESTION_TYPES = [
+const questionTypeData = createTranslatableData(() => [
   {
     name: "Group",
     value: "group",
-    description: t("question_type_group_description"),
+    description: i18n.t("question_type_group_description"),
   },
   {
     name: "Display",
     value: "display",
-    description: t("question_type_display_description"),
+    description: i18n.t("question_type_display_description"),
   },
   {
     name: "Boolean",
     value: "boolean",
-    description: t("question_type_boolean_description"),
+    description: i18n.t("question_type_boolean_description"),
   },
   {
     name: "Decimal",
     value: "decimal",
-    description: t("question_type_decimal_description"),
+    description: i18n.t("question_type_decimal_description"),
   },
   {
     name: "Integer",
     value: "integer",
-    description: t("question_type_integer_description"),
+    description: i18n.t("question_type_integer_description"),
   },
   {
     name: "Date",
     value: "date",
-    description: t("question_type_date_description"),
+    description: i18n.t("question_type_date_description"),
   },
   {
     name: "Date Time",
     value: "dateTime",
-    description: t("question_type_date_time_description"),
+    description: i18n.t("question_type_date_time_description"),
   },
   {
     name: "Time",
     value: "time",
-    description: t("question_type_time_description"),
+    description: i18n.t("question_type_time_description"),
   },
   {
     name: "String",
     value: "string",
-    description: t("question_type_string_description"),
+    description: i18n.t("question_type_string_description"),
   },
   {
     name: "Text",
     value: "text",
-    description: t("question_type_text_description"),
+    description: i18n.t("question_type_text_description"),
   },
   {
     name: "URL",
     value: "url",
-    description: t("question_type_url_description"),
+    description: i18n.t("question_type_url_description"),
   },
   {
     name: "Choice",
     value: "choice",
-    description: t("question_type_choice_description"),
+    description: i18n.t("question_type_choice_description"),
   },
   {
     name: "Quantity",
     value: "quantity",
-    description: t("question_type_quantity_description"),
+    description: i18n.t("question_type_quantity_description"),
   },
   {
     name: "Structured",
     value: "structured",
-    description: t("question_type_structured_description"),
+    description: i18n.t("question_type_structured_description"),
   },
-];
+]);
+
+export const SUPPORTED_QUESTION_TYPES = questionTypeData;
 
 export type StructuredQuestionType =
   | "allergy_intolerance"
