@@ -78,18 +78,21 @@ export const PatientHome = (props: {
                       />
                     </div>
 
-                    <div>
-                      <div className="flex flex-row gap-x-4">
+                    <div className="space-y-1">
+                      <div className="flex flex-col md:flex-row gap-x-4">
                         <h1
                           id="patient-name"
-                          className="text-xl font-bold capitalize text-gray-950"
+                          className="text-base md:text-xl font-semibold capitalize text-gray-950 mb-2 leading-tight"
                         >
                           {patientData.name}
                         </h1>
                         {patientData.death_datetime && (
-                          <Badge variant="destructive">
-                            <h3 className="text-sm font-medium">
-                              {t("expired_on")}
+                          <Badge
+                            variant="destructive"
+                            className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                          >
+                            <h3 className="text-xs font-normal sm:text-sm sm:font-medium">
+                              {t("time_of_death")}
                               {": "}
                               {dayjs(patientData.death_datetime).format(
                                 "DD MMM YYYY, hh:mm A",
