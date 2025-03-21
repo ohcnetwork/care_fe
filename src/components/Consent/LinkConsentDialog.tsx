@@ -55,15 +55,11 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
   CONSENT_CATEGORIES,
-  CONSENT_CATEGORY_TYPES,
   CONSENT_DECISIONS,
-  CONSENT_DECISION_TYPES,
   CONSENT_STATUSES,
-  CONSENT_STATUS_TYPES,
   ConsentModel,
   CreateConsentRequest,
   VERIFICATION_TYPES,
-  VERIFICATION_TYPE_TYPES,
 } from "@/types/consent/consent";
 import { UserBase } from "@/types/user/user";
 
@@ -382,11 +378,8 @@ export default function LinkConsentDialog({
                           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-h-96 overflow-auto">
                             {existingConsents?.results
                               ?.filter((consent) =>
-                                CONSENT_CATEGORY_TYPES.find(
-                                  (category) =>
-                                    category.id === consent.category,
-                                )
-                                  ?.label.toLowerCase()
+                                t(`consent_category__${consent}`)
+                                  .toLowerCase()
                                   .includes(
                                     form
                                       .watch("existingConsentSearchQuery")
@@ -477,9 +470,9 @@ export default function LinkConsentDialog({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {CONSENT_DECISION_TYPES.map((decision) => (
-                            <SelectItem key={decision.id} value={decision.id}>
-                              {decision.label}
+                          {CONSENT_DECISIONS.map((decision) => (
+                            <SelectItem key={decision} value={decision}>
+                              {t(`consent_decision__${decision}`)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -508,21 +501,18 @@ export default function LinkConsentDialog({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {CONSENT_CATEGORY_TYPES.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              <p>{category.label}</p>
+                          {CONSENT_CATEGORIES.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              <p>{t(`consent_category__${category}`)}</p>
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <FormDescription>
                         <div className="text-xs text-blue-600 bg-blue-100 rounded-md p-2">
-                          {
-                            CONSENT_CATEGORY_TYPES.find(
-                              (category) =>
-                                category.id === form.watch("category"),
-                            )?.desc
-                          }
+                          {t(
+                            `consent_category__${form.watch("category")}_description`,
+                          )}
                         </div>
                       </FormDescription>
                       <FormMessage />
@@ -546,9 +536,9 @@ export default function LinkConsentDialog({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {CONSENT_STATUS_TYPES.map((status) => (
-                            <SelectItem key={status.id} value={status.id}>
-                              {status.label}
+                          {CONSENT_STATUSES.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {t(`consent_status__${status}`)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -576,9 +566,9 @@ export default function LinkConsentDialog({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {VERIFICATION_TYPE_TYPES.map((type) => (
-                            <SelectItem key={type.id} value={type.id}>
-                              {type.label}
+                          {VERIFICATION_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {t(`consent_verification_type__${type}`)}
                             </SelectItem>
                           ))}
                         </SelectContent>
