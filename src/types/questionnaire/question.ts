@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 import { Code } from "./code";
 
 export type QuestionType =
@@ -20,80 +22,72 @@ export const SUPPORTED_QUESTION_TYPES = [
   {
     name: "Group",
     value: "group",
-    description:
-      "A container for organizing related questions together. Must contain at least one question.",
+    description: t("question_type_group_description"),
   },
   {
     name: "Display",
     value: "display",
-    description:
-      "Shows text or instructions to users without collecting any answers.",
+    description: t("question_type_display_description"),
   },
   {
     name: "Boolean",
     value: "boolean",
-    description:
-      "A simple yes/no question that users can answer with a single click.",
+    description: t("question_type_boolean_description"),
   },
   {
     name: "Decimal",
     value: "decimal",
-    description: "Collects numbers with decimal points (like 3.14 or 2.5).",
+    description: t("question_type_decimal_description"),
   },
   {
     name: "Integer",
     value: "integer",
-    description: "Collects whole numbers (like 1, 2, 3).",
+    description: t("question_type_integer_description"),
   },
   {
     name: "Date",
     value: "date",
-    description: "Lets users select a specific date from a calendar.",
+    description: t("question_type_date_description"),
   },
   {
     name: "Date Time",
     value: "dateTime",
-    description: "Lets users select both a date and time.",
+    description: t("question_type_date_time_description"),
   },
   {
     name: "Time",
     value: "time",
-    description: "Lets users select a specific time of day.",
+    description: t("question_type_time_description"),
   },
   {
     name: "String",
     value: "string",
-    description:
-      "A short text field for brief answers like names or single-line responses.",
+    description: t("question_type_string_description"),
   },
   {
     name: "Text",
     value: "text",
-    description:
-      "A larger text area for longer responses like descriptions or detailed explanations.",
+    description: t("question_type_text_description"),
   },
   {
     name: "URL",
     value: "url",
-    description: "Collects website addresses or links.",
+    description: t("question_type_url_description"),
   },
   {
     name: "Choice",
     value: "choice",
-    description:
-      "Presents a list of predefined options for users to choose from.",
+    description: t("question_type_choice_description"),
   },
   {
     name: "Quantity",
     value: "quantity",
-    description:
-      "Collects a number with its unit of measurement (like 5 kg or 2 hours).",
+    description: t("question_type_quantity_description"),
   },
   {
     name: "Structured",
     value: "structured",
-    description:
-      "A specialized question type for collecting specific types of medical data.",
+    description: t("question_type_structured_description"),
   },
 ];
 
