@@ -365,7 +365,6 @@ export const BACKEND_ALLOWED_EXTENSIONS = [
   "xls",
   "xlsx",
   "ods",
-  "pdf",
 ];
 
 export const FILE_EXTENSIONS = {

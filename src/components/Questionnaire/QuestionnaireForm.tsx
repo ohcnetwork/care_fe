@@ -609,21 +609,29 @@ export function QuestionnaireForm({
     const requests: FormBatchRequest[] = [];
     if (encounterId && patientId) {
       const context = { facilityId, patientId, encounterId };
-      // First, collect all structured data requests if encounterId is provided
+      const structuredPromises: Promise<FormBatchRequest[]>[] = [];
+
       formsWithValidation.forEach((form) => {
-        form.responses.forEach(async (response) => {
+        form.responses.forEach((response) => {
           if (response.structured_type) {
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
-              const structuredRequests = await getStructuredRequests(
-                response.structured_type,
-                structuredData,
-                context,
+              structuredPromises.push(
+                getStructuredRequests(
+                  response.structured_type,
+                  structuredData,
+                  context,
+                ),
               );
-              requests.push(...structuredRequests);
             }
           }
         });
+      });
+
+      const structuredRequestsArrays = await Promise.all(structuredPromises);
+
+      structuredRequestsArrays.forEach((requestArray) => {
+        requests.push(...requestArray);
       });
     }
 
