@@ -17,20 +17,26 @@ import { Encounter } from "@/types/emr/encounter";
 
 interface QuickAccessProps {
   encounter: Encounter;
+  canEdit: boolean;
 }
 
-export default function QuickAccess({ encounter }: QuickAccessProps) {
+export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
   const { t } = useTranslation();
-  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
+  const questionnaireOptions = useQuestionnaireOptions(
+    "encounter_actions",
+    canEdit,
+  );
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityId = subpathMatch?.facilityId;
 
   return (
     <div className="flex flex-col gap-6">
       {/* Questionnaire Section */}
-      {encounter.status !== "completed" && facilityId && (
+      {canEdit && facilityId && (
         <section className="space-y-2 p-2">
-          <h3 className="text-lg font-semibold mb-3">{t("questionnaire")}</h3>
+          <h3 className="text-lg font-semibold mb-3">
+            {t("questionnaire_one")}
+          </h3>
           <div className="space-y-3 p-2 font-semibold">
             {questionnaireOptions.map((option) => (
               <Link
