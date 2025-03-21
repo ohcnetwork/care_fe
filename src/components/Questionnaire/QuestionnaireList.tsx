@@ -102,8 +102,7 @@ const RenderCard = ({
                     {t(questionnaire.status)}
                   </Badge>
                 </div>
-
-                {questionnaire.description?.trim() && (
+                {questionnaire.description?.trim() ? (
                   <div className="mb-4 flex-1">
                     <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                       {t("description")}
@@ -111,6 +110,13 @@ const RenderCard = ({
                     <p className="text-sm text-gray-900 line-clamp-2">
                       {questionnaire.description}
                     </p>
+                  </div>
+                ) : (
+                  <div className="mb-4 flex-1">
+                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      {t("description")}
+                    </h3>
+                    <p className="text-2xl font-light text-gray-500">-</p>
                   </div>
                 )}
 
