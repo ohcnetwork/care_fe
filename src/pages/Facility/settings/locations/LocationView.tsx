@@ -102,7 +102,7 @@ export default function LocationView({ id, facilityId }: Props) {
   const generateBreadcrumbs = (location: any) => {
     const breadcrumbs = [];
     let current = location;
-    while (current) {
+    while (current?.id) {
       breadcrumbs.unshift({
         name: current.name,
         id: current.id,

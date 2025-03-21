@@ -3,6 +3,7 @@ import { UserBase } from "@/types/user/user";
 export type userChildProps = {
   userData: UserBase;
   username: string;
+  permissions?: string[];
 };
 
 export default function UserColumns({
