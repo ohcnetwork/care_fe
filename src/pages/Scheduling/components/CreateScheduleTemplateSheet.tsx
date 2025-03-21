@@ -244,13 +244,16 @@ export default function CreateScheduleTemplateSheet({
   };
 
   const updateSlotDuration = (index: number) => {
-    let duration = calculateSlotDuration({
-      isAutoFill: form.watch(`availabilities.${index}.auto_fill_duration`),
-      startTime: form.watch(`availabilities.${index}.start_time`),
-      endTime: form.watch(`availabilities.${index}.end_time`),
-    });
-    if (duration) {
-      form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
+    const isAutoFill = form.watch(`availabilities.${index}.auto_fill_duration`);
+    if (isAutoFill) {
+      let duration = calculateSlotDuration(
+        form.watch(`availabilities.${index}.start_time`),
+        form.watch(`availabilities.${index}.end_time`),
+      );
+      form.setValue(
+        `availabilities.${index}.slot_size_in_minutes`,
+        duration ?? 0,
+      );
     }
   };
 

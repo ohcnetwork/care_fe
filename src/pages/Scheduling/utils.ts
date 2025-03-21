@@ -163,20 +163,10 @@ export const getFakeTokenNumber = (appointment: Appointment) => {
   return (hash % 90) + 10;
 };
 
-const calculateDuration = (startTime: string, endTime: string) => {
-  const start = parse(startTime, "HH:mm", new Date());
-  const end = parse(endTime, "HH:mm", new Date());
-  return differenceInMinutes(end, start);
-};
-
-type updateSlotDurationProps = {
-  isAutoFill: boolean | undefined;
-  startTime: string;
-  endTime: string;
-};
-
-export const calculateSlotDuration = (props: updateSlotDurationProps) => {
-  if (props.isAutoFill && props.startTime && props.endTime) {
-    return calculateDuration(props.startTime, props.endTime);
+export const calculateSlotDuration = (startTime: string, endTime: string) => {
+  if (startTime && endTime) {
+    const start = parse(startTime, "HH:mm", new Date());
+    const end = parse(endTime, "HH:mm", new Date());
+    return differenceInMinutes(end, start);
   }
 };

@@ -700,13 +700,13 @@ const NewAvailabilityCard = ({
     );
   }
   const updateSlotDuration = () => {
-    let duration = calculateSlotDuration({
-      isAutoFill: form.watch("auto_fill_duration"),
-      startTime: form.watch("start_time"),
-      endTime: form.watch("end_time"),
-    });
-    if (duration) {
-      form.setValue("slot_size_in_minutes", duration);
+    const isAutoFill = form.watch("auto_fill_duration");
+    if (isAutoFill) {
+      let duration = calculateSlotDuration(
+        form.watch("start_time"),
+        form.watch("end_time"),
+      );
+      form.setValue("slot_size_in_minutes", duration ?? 0);
     }
   };
 
