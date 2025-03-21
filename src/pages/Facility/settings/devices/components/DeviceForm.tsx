@@ -2,6 +2,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isBefore, startOfTomorrow } from "date-fns";
 import { useEffect } from "react";
+import { t } from "i18next";
+import { useQueryParams } from "raviger";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -27,10 +30,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import ErrorBoundary from "@/components/Common/ErrorBoundary";
+
 import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
+import {
+  usePluginDevice,
+  usePluginDevices,
+} from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import {
   ContactPointSystems,
   contactPointSchema,
@@ -42,16 +51,81 @@ import {
 } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
+const formSchema = z
+  .object({
+    identifier: z.string().optional(),
+    status: z.enum(DeviceStatuses),
+    availability_status: z.enum(DeviceAvailabilityStatuses),
+    manufacturer: z.string().optional(),
+    manufacture_date: z
+      .string()
+      .optional()
+      .refine(
+        (date) => !date || isBefore(new Date(date), startOfTomorrow()),
+        t("manufacture_date_cannot_be_in_future"),
+      ),
+    expiration_date: z.string().optional(),
+    lot_number: z.string().optional(),
+    serial_number: z.string().optional(),
+    registered_name: z.string().min(1, { message: t("required") }),
+    user_friendly_name: z.string().optional(),
+    model_number: z.string().optional(),
+    part_number: z.string().optional(),
+    contact: z.array(contactPointSchema).superRefine((contacts, ctx) => {
+      const valueMap = new Map();
+      contacts.forEach((contact, index) => {
+        //To take care of case sensitivity in URL
+        const normalizedValue = contact.value.trim().toLowerCase();
+        if (normalizedValue) {
+          if (valueMap.has(normalizedValue)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("duplicate_contact_values_not_allowed"),
+              path: [index, "value"],
+            });
+          } else {
+            valueMap.set(normalizedValue, true);
+          }
+        }
+      });
+    }),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+  })
+  .refine(
+    (data) => {
+      if (!data.expiration_date || !data.manufacture_date) return true;
+      return new Date(data.expiration_date) > new Date(data.manufacture_date);
+    },
+    {
+      message: t("expiration_date_must_be_after_manufacture_date"),
+      path: ["expiration_date"],
+    },
+  );
+
 interface Props {
   facilityId: string;
   device?: DeviceList;
   onSuccess?: () => void;
 }
 
+const defaultValues: z.infer<typeof formSchema> = {
+  identifier: undefined,
+  status: "active",
+  availability_status: "available",
+  manufacturer: undefined,
+  manufacture_date: undefined,
+  registered_name: "",
+  contact: [],
+  metadata: {},
+};
+
 export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const { goBack } = useAppHistory();
+  const [qParams] = useQueryParams<{ type?: string }>();
+
+  const queryClient = useQueryClient();
+  const pluginDevices = usePluginDevices();
 
   const formSchema = z
     .object({
@@ -118,6 +192,8 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     defaultValues,
   });
 
+  const [careType, setCareType] = useState<string>();
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "contact",
@@ -152,8 +228,19 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         part_number: device.part_number || undefined,
         contact: Array.isArray(device.contact) ? device.contact : [],
       });
+
+      setCareType(device.care_type);
+      form.setValue("metadata", device.care_metadata);
+    } else {
+      const pluginDevice = pluginDevices.find(
+        (pluginDevice) => pluginDevice.type === qParams.type,
+      );
+
+      if (pluginDevice) {
+        setCareType(pluginDevice.type);
+      }
     }
-  }, [device, form]);
+  }, [device, form, qParams.type]);
 
   useEffect(() => {
     if (device?.manufacture_date) {
@@ -169,7 +256,9 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   }, [device, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    submitForm({ ...values });
+    const metadata = values.metadata;
+    delete values.metadata;
+    submitForm({ ...metadata, ...values, care_type: careType });
   }
 
   return (
@@ -371,7 +460,6 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             )}
           />
         </div>
-
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-gray-500">
@@ -392,6 +480,12 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               {t("add_contact_point")}
             </Button>
           </div>
+
+          {fields.length === 0 && (
+            <div className="py-4 text-center text-sm text-muted-foreground">
+              {t("no_contact_points_added")}
+            </div>
+          )}
 
           {fields.map((field, index) => (
             <div
@@ -487,6 +581,35 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           ))}
         </div>
 
+        {careType && (
+          <ErrorBoundary
+            fallback={
+              <div className="p-4 rounded-md border border-red-200 bg-red-50 text-red-700">
+                <p className="font-medium">Oops, something went wrong</p>
+                <p className="text-sm mt-1">
+                  Failed to render the {careType} configure form
+                </p>
+              </div>
+            }
+          >
+            <FormField
+              control={form.control}
+              name="metadata"
+              render={({ field }) => (
+                <FormItem className="space-y-0">
+                  <PluginDeviceConfigureForm
+                    type={careType}
+                    facilityId={facilityId}
+                    metadata={field.value ?? {}}
+                    onChange={(metadata) => field.onChange(metadata)}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </ErrorBoundary>
+        )}
+
         <div className="flex items-center justify-end">
           <Button
             variant="outline"
@@ -509,3 +632,29 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     </Form>
   );
 }
+
+const PluginDeviceConfigureForm = ({
+  type,
+  facilityId,
+  metadata,
+  onChange,
+}: {
+  type: string;
+  facilityId: string;
+  metadata: Record<string, unknown>;
+  onChange: (metadata: Record<string, unknown>) => void;
+}) => {
+  const pluginDevice = usePluginDevice(type);
+
+  if (!pluginDevice.configureForm) {
+    return null;
+  }
+
+  return (
+    <pluginDevice.configureForm
+      facilityId={facilityId}
+      metadata={metadata}
+      onChange={onChange}
+    />
+  );
+};
