@@ -70,7 +70,6 @@ export function DateQuestion({
 
   return (
     <div className="flex sm:gap-2 flex-wrap">
-      {/* <Input type="date" value={currentValue} onChange={handleSelect} /> */}
       <Popover>
         <PopoverTrigger asChild>
           <Button
