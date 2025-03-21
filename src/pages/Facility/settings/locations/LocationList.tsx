@@ -272,6 +272,7 @@ export default function LocationList({ facilityId }: Props) {
                 variant="primary"
                 onClick={handleAddLocation}
                 className="w-full lg:w-auto"
+                data-cy="add-location-button"
               >
                 <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
                 {t("add_location")}

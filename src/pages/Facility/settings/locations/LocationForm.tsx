@@ -296,7 +296,10 @@ export default function LocationForm({
                 disabled={!!locationId}
               >
                 <FormControl>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger
+                    className="w-full"
+                    data-cy="location-form-options"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                 </FormControl>

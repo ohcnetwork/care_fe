@@ -26,5 +26,9 @@
   "devadmin": {
     "username": "development-adm",
     "password": "Test@123"
+  },
+  "raj": {
+    "username": "rajkumar",
+    "password": "test@123"
   }
 }
