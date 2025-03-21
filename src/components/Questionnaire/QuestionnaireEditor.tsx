@@ -1182,6 +1182,7 @@ function QuestionEditor({
     answer_option,
     questions,
     code,
+    unit,
   } = question;
 
   const [expandedSubQuestions, setExpandedSubQuestions] = useState<Set<string>>(
@@ -1379,10 +1380,17 @@ function QuestionEditor({
             </div>
 
             {type !== "structured" && type !== "group" && (
-              <CodingEditor
-                code={code}
-                onChange={(newCode) => updateField("code", newCode)}
-              />
+              <div className="flex flex-col gap-2">
+                <CodingEditor
+                  code={code}
+                  onChange={(newCode) => updateField("code", newCode)}
+                />
+                <CodingEditor
+                  code={unit}
+                  isUnit={true}
+                  onChange={(newCode) => updateField("unit", newCode)}
+                />
+              </div>
             )}
           </div>
 

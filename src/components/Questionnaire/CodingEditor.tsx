@@ -26,10 +26,11 @@ import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface CodingEditorProps {
   code?: Code;
+  isUnit?: boolean;
   onChange: (code: Code | undefined) => void;
 }
 
-export function CodingEditor({ code, onChange }: CodingEditorProps) {
+export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
   const { mutate: verifyCode, isPending } = useMutation({
     mutationFn: mutate(valuesetApi.lookup),
     onSuccess: (response: ValuesetLookupResponse) => {
@@ -55,14 +56,16 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
           size="sm"
           onClick={() => {
             onChange({
-              system: Object.values(TERMINOLOGY_SYSTEMS)[0],
+              system: isUnit
+                ? Object.values(TERMINOLOGY_SYSTEMS)[2]
+                : Object.values(TERMINOLOGY_SYSTEMS)[0],
               code: "",
               display: "",
             });
           }}
         >
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          Add Coding
+          Add {isUnit ? "Unit" : "Coding"}
         </Button>
       </div>
     );
@@ -72,7 +75,9 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center w-full justify-between">
-          <Label className="text-base font-medium">Coding Details</Label>
+          <Label className="text-base font-medium">
+            {isUnit ? "Unit" : "Coding"} Details
+          </Label>
           <Button
             variant="ghost"
             size="sm"
@@ -81,7 +86,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
             }}
           >
             <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
-            Remove Coding
+            Remove {isUnit ? "Unit" : "Coding"}
           </Button>
         </div>
       </CardHeader>
@@ -99,6 +104,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
                 display: "",
               });
             }}
+            disabled={isUnit}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select system" />
