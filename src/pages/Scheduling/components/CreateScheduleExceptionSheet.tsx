@@ -67,7 +67,7 @@ export default function CreateScheduleExceptionSheet({
       valid_from: z
         .date({ required_error: t("field_required") })
         .refine((date) => date >= startOfDay(new Date()), {
-          message: t("date_must_be_today_or_future"),
+          message: t("date_must_be_future"),
         }),
 
       // Ensure valid_to is strictly after valid_from
