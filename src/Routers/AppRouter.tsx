@@ -12,6 +12,7 @@ import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { usePluginRoutes } from "@/hooks/useCareApps";
+import useSidebarState from "@/hooks/useSidebarState";
 
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
@@ -94,8 +95,10 @@ export default function AppRouter() {
   const currentPath = window.location.pathname;
   const shouldShowSidebar = !PATHS_WITHOUT_SIDEBAR.includes(currentPath);
 
+  const sidebarOpen = useSidebarState();
+
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={sidebarOpen}>
       <PermissionProvider
         userPermissions={user?.permissions || []}
         isSuperAdmin={user?.is_superuser || false}
