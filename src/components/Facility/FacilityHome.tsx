@@ -19,6 +19,7 @@ import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 
+import { getPermissions } from "@/common/Permissions";
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -28,6 +29,7 @@ import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
@@ -93,6 +95,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -100,6 +103,23 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
     }),
   });
+
+  const { canUpdateFacility } = getPermissions(
+    hasPermission,
+    facilityData?.root_org_permissions ?? [],
+  );
+
+  /*   const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
+    mutationFn: mutate(routes.deleteFacility, {
+      pathParams: { id: facilityId },
+    }),
+    onSuccess: () => {
+      toast.success(
+        t("facility_deleted_successfully", { name: facilityData?.name }),
+      );
+      navigate("/facility");
+    },
+  }); */
 
   const { mutateAsync: deleteAvatar } = useMutation({
     mutationFn: mutate(routes.deleteFacilityCoverImage, {
@@ -162,10 +182,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   if (isLoading || !facilityData) {
     return <Loading />;
   }
-
-  const hasPermissionToEditCoverImage = true;
-
-  //  TODO: get permissions from backend to delete facility
 
   const coverImageHint = (
     <>
@@ -267,7 +283,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 </div>
               </div>
               <div className="absolute right-0 bottom-0 p-1 text-white [@media(max-width:55rem)]:top-0">
-                {hasPermissionToEditCoverImage && (
+                {canUpdateFacility && (
                   <Button
                     variant="link"
                     onClick={() => setEditCoverImage(true)}
@@ -288,26 +304,28 @@ export const FacilityHome = ({ facilityId }: Props) => {
             </div>
 
             <div className="mt-2 space-y-2">
-              <div className="flex justify-end gap-2 max-sm:flex-col sm:mt-4 mt-12 flex-wrap">
-                <PLUGIN_Component
-                  __name="FacilityHomeActions"
-                  facility={facilityData}
-                />
-                <EditFacilitySheet
-                  facilityId={facilityId}
-                  trigger={
-                    <Button
-                      className="cursor-pointer font-semibold"
-                      variant="outline"
-                      size="sm"
-                    >
-                      <CareIcon icon="l-pen" />
-                      {t("edit_facility_details")}
-                    </Button>
-                  }
-                />
-              </div>
-              <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-2">
+              {canUpdateFacility && (
+                <div className="flex justify-end gap-2 max-sm:flex-col sm:mt-4 mt-12 flex-wrap">
+                  <PLUGIN_Component
+                    __name="FacilityHomeActions"
+                    facility={facilityData}
+                  />
+                  <EditFacilitySheet
+                    facilityId={facilityId}
+                    trigger={
+                      <Button
+                        className="cursor-pointer font-semibold"
+                        variant="outline"
+                        size="sm"
+                      >
+                        <CareIcon icon="l-pen" />
+                        {t("edit_facility_details")}
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
+              <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
                 <Card className="basis-1/2">
                   <CardContent className="p-6 flex flex-col h-full">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
