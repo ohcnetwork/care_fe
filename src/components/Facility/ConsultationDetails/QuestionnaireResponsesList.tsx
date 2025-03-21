@@ -126,17 +126,14 @@ function QuestionGroup({
   }[];
   level?: number;
 }) {
-  const checkResponse = (group: Question, r_id: string) => {
-    if (group.id === r_id) return true;
-    if (!group.questions) return false;
-    const response_found = group.questions.some((q: Question) =>
-      checkResponse(q, r_id),
-    );
-    return response_found;
+  const getHasResponse = (question: Question): boolean | undefined => {
+    if (question.type === "group") {
+      return question.questions?.some((q) => getHasResponse(q) ?? false);
+    }
+    return responses.some((r) => r.question_id === question.id);
   };
-  const hasResponses = responses.some((r) =>
-    group.questions?.some((q) => checkResponse(q, r.question_id)),
-  );
+
+  const hasResponses = getHasResponse(group);
 
   if (!hasResponses) return null;
 
