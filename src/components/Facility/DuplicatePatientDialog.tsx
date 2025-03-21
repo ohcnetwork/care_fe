@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -33,14 +33,27 @@ const DuplicatePatientDialog = (props: Props) => {
   const { t } = useTranslation();
   const { open, onOpenChange, patientList, handleOk } = props;
   const [action, setAction] = useState("");
+  const [isOutside, setIsOutside] = useState(false);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => open && onOpenChange(open)}
-      modal
-    >
-      <DialogContent className="w-3/4 md:w-1/2">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        ref={dialogRef}
+        className={`[&>button:last-child]:hidden w-3/4 md:w-1/2 ${isOutside ? "border-4 border-red-500" : "border-none"}`}
+        onInteractOutside={(e) => {
+          e.preventDefault();
+          setIsOutside(true);
+        }}
+        onClick={(e) => {
+          if (
+            dialogRef.current &&
+            dialogRef.current.contains(e.target as Node)
+          ) {
+            setIsOutside(false);
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{t("patient_records_found")}</DialogTitle>
         </DialogHeader>
