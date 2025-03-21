@@ -43,7 +43,7 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
   return (
     <>
       {plugins.map((plugin) => {
-        const Component = plugin.components[
+        const Component = plugin.components?.[
           __name
         ] as React.ComponentType<unknown>;
 
