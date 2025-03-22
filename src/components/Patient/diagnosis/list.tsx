@@ -19,7 +19,6 @@ import { DiagnosisTable } from "./DiagnosisTable";
 interface DiagnosisListProps {
   patientId: string;
   encounterId?: string;
-  facilityId?: string;
   className?: string;
   readOnly?: boolean;
 }

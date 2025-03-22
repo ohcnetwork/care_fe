@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ExternalLink } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -31,14 +31,18 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { usePluginDevice } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import { ContactPoint } from "@/types/common/contactPoint";
+import { type DeviceDetail } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
+import DeviceEncounterHistory from "./DeviceEncounterHistory";
 import AssociateLocationSheet from "./components/AssociateLocationSheet";
 
 interface Props {
@@ -46,10 +50,9 @@ interface Props {
   deviceId: string;
 }
 
-export default function DeviceDetail({ facilityId, deviceId }: Props) {
+export default function DeviceShow({ facilityId, deviceId }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
 
   const { data: device, isLoading } = useQuery({
     queryKey: ["device", facilityId, deviceId],
@@ -143,42 +146,61 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap gap-3 justify-center lg:justify-between w-full">
         <PageTitle title={device.registered_name} />
-        <div className="flex items-center gap-2">
-          <Link href={`/devices/${deviceId}/locationHistory`}>
-            <Button variant="outline_primary" className="mr-3">
-              <CareIcon icon="l-location-point" className="h-4 w-4" />
-              {t("location_history")}
-            </Button>
-          </Link>
-          <Link href={`/devices/${deviceId}/edit`}>
-            <Button variant="outline">{t("edit")}</Button>
-          </Link>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">{t("delete")}</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("delete_device")}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t("delete_device_confirmation")}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => deleteDevice()}
-                  className={cn(buttonVariants({ variant: "destructive" }))}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? t("deleting") : t("delete")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+        <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex  gap-2 flex-wrap flex-col sm:flex-row">
+            <DeviceEncounterHistory
+              trigger={
+                <Button variant="outline_primary">
+                  <CareIcon icon="l-medkit" className="h-4 w-4" />
+                  {t("encounter_history")}
+                </Button>
+              }
+              facilityId={facilityId}
+              deviceId={deviceId}
+            />
+            <Link href={`/devices/${deviceId}/locationHistory`}>
+              <Button variant="outline_primary" className="sm:mr-3">
+                <CareIcon icon="l-location-point" className="h-4 w-4" />
+                {t("location_history")}
+              </Button>
+            </Link>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <Link href={`/devices/${deviceId}/edit`}>
+              <Button variant="outline">
+                <CareIcon icon="l-pen" className="w-4 h-4" />
+                {t("edit")}
+              </Button>
+            </Link>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <CareIcon icon="l-trash" className="h-4" />
+                  {t("delete")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("delete_device")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("delete_device_confirmation")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteDevice()}
+                    className={cn(buttonVariants({ variant: "destructive" }))}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? t("deleting") : t("delete")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </div>
 
@@ -221,13 +243,35 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                   ) : (
                     <span className="text-gray-500">{t("no_location")}</span>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsLocationSheetOpen(true)}
+                  <AssociateLocationSheet
+                    facilityId={facilityId}
+                    deviceId={deviceId}
                   >
-                    {device.current_location ? t("change") : t("add")}
-                  </Button>
+                    <Button variant="outline" size="sm">
+                      {device.current_location ? t("change") : t("add")}
+                    </Button>
+                  </AssociateLocationSheet>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">
+                  {t("encounter")}
+                </h4>
+                <div className="mt-1 flex items-center gap-6">
+                  {device.current_encounter ? (
+                    <>
+                      <Link
+                        href={`/encounter/${device.current_encounter.id}/updates`}
+                        basePath={`/facility/${device.current_encounter.facility.id}/patient/${device.current_encounter.patient.id}`}
+                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                      >
+                        {device.current_encounter.patient.name}
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    </>
+                  ) : (
+                    <span className="text-gray-500">{t("no_encounter")}</span>
+                  )}
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -367,14 +411,48 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
             </CardContent>
           </Card>
         )}
-      </div>
 
-      <AssociateLocationSheet
-        open={isLocationSheetOpen}
-        onOpenChange={setIsLocationSheetOpen}
-        facilityId={facilityId}
-        deviceId={deviceId}
-      />
+        {device.care_type && (
+          <ErrorBoundary
+            fallback={
+              <Card className="md:col-span-2 border-red-200 bg-red-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 text-red-600">
+                    <AlertCircle className="h-5 w-5" />
+                    <span>
+                      Couldn't load device type specific information.{" "}
+                      <strong className="font-semibold capitalize">
+                        {device.care_type.replace(/_-/g, " ")}
+                      </strong>{" "}
+                      is not supported.
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            }
+          >
+            <PluginDeviceShowCard
+              device={device as DeviceDetail & { care_type: string }}
+              facilityId={facilityId}
+            />
+          </ErrorBoundary>
+        )}
+      </div>
     </div>
   );
 }
+
+const PluginDeviceShowCard = ({
+  device,
+  facilityId,
+}: {
+  device: DeviceDetail & { care_type: string };
+  facilityId: string;
+}) => {
+  const pluginDevice = usePluginDevice(device.care_type);
+  if (!pluginDevice.showPageCard) {
+    return null;
+  }
+
+  return <pluginDevice.showPageCard device={device} facilityId={facilityId} />;
+};
