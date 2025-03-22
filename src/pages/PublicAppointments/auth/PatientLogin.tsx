@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -77,6 +78,7 @@ export default function PatientLogin({
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
     mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
+      toast.success(t("send_otp_success"));
       if (page === "send") {
         navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
       }
