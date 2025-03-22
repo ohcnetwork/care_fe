@@ -19,6 +19,14 @@ export class PatientLocation {
     locationStatus: '[data-cy="location-status"]',
     operationalStatus: '[data-cy="operational-status"]',
     enableBulkCreation: '[data-cy="enable-bulk-creation-checkbox"]',
+    currentLocationBadge: '[data-cy="current-location-badge"]',
+    addLocationBadge: '[data-cy="add-encounter-location"]',
+    updateLocationButton: '[data-cy="update-encounter-location-button"]',
+    associatedLocationStatus: '[data-cy="associated-location-status"]',
+    saveStatusButton: '[data-cy="update-associated-location-status-button"]',
+    locationSearchTrigger: '[data-cy="location-search-trigger"]',
+    submitLocationAssociation:
+      '[data-cy="submit-encounter-location-association"]',
   };
 
   // Navigation
@@ -115,6 +123,95 @@ export class PatientLocation {
 
   assertMultipleBedsCreationSuccess(bedCount: string) {
     cy.verifyNotification(`${bedCount} created successfully`);
+    return this;
+  }
+
+  navigateToEncounters() {
+    cy.get('[data-sidebar="content"]').contains("Encounters").click();
+    return this;
+  }
+
+  openFirstEncounterDetails() {
+    cy.get('[data-cy="encounter-list-cards"]')
+      .first()
+      .contains("View Details")
+      .click();
+    return this;
+  }
+
+  clickAssociatedLocationBadge() {
+    cy.get(this.selectors.currentLocationBadge).click();
+    return this;
+  }
+
+  clickAddLocationBadge() {
+    cy.get(this.selectors.addLocationBadge).click();
+    return this;
+  }
+
+  clickUpdateLocationButton() {
+    cy.verifyAndClickElement(
+      this.selectors.updateLocationButton,
+      "Update Location",
+    );
+    return this;
+  }
+
+  searchBedLocation(locationName: string) {
+    cy.typeAndSelectOption(this.selectors.locationSearchTrigger, locationName);
+    return this;
+  }
+
+  submitLocationAssociation() {
+    cy.verifyAndClickElement(
+      this.selectors.submitLocationAssociation,
+      "Create Location Association",
+    );
+    return this;
+  }
+
+  setStatusCompleted() {
+    cy.clickAndSelectOption(
+      this.selectors.associatedLocationStatus,
+      "Completed",
+    );
+    return this;
+  }
+
+  fillEndTime(dateTime: string) {
+    cy.get('[data-cy="location-end-date-time"]').clear().type(dateTime);
+    return this;
+  }
+
+  interceptLocationUpdationRequest() {
+    cy.intercept("PUT", `**/api/v1/facility/**`).as("updateLocation");
+    return this;
+  }
+
+  clickSaveStatusButton() {
+    cy.verifyAndClickElement(this.selectors.saveStatusButton, "Save");
+    return this;
+  }
+
+  verifyLocationUpdateAPICall() {
+    cy.wait("@updateLocation").its("response.statusCode").should("eq", 200);
+    return this;
+  }
+
+  verifyLocationAssociationFailAPICall() {
+    cy.wait("@createLocation").its("response.statusCode").should("eq", 400);
+    return this;
+  }
+
+  assertLocationStatusUpdateSuccess() {
+    this.verifyLocationUpdateAPICall();
+    cy.verifyNotification("Location association updated successfully");
+    return this;
+  }
+
+  assertLocationAssociationSuccess() {
+    this.verifyLocationCreationAPICall();
+    cy.verifyNotification("Location association created successfully");
     return this;
   }
 }

@@ -72,5 +72,32 @@ describe("Add a new Location and associate to an Encounter", () => {
       .assertMultipleBedsCreationSuccess(bedData.bedsCount);
   });
 
-  it("Dissociate existing Location from encounter and associate new location", () => {});
+  it("Dissociate existing Location from encounter and associate new location", () => {
+    const now = new Date();
+    now.setDate(now.getDate() + 1);
+    const endTime = now.toISOString().slice(0, 16);
+
+    // Dissociate Current Location
+    patientLocation
+      .navigateToEncounters()
+      .openFirstEncounterDetails()
+      .clickAssociatedLocationBadge()
+      .clickUpdateLocationButton()
+      .searchBedLocation("ICU 5")
+      .interceptLocationCreationRequest()
+      .submitLocationAssociation()
+      .verifyLocationAssociationFailAPICall()
+      .setStatusCompleted()
+      .fillEndTime(endTime)
+      .interceptLocationUpdationRequest()
+      .clickSaveStatusButton()
+      .assertLocationStatusUpdateSuccess()
+
+      // Associate New Location
+      .clickAddLocationBadge()
+      .searchBedLocation("ICU 5")
+      .interceptLocationCreationRequest()
+      .submitLocationAssociation()
+      .assertLocationAssociationSuccess();
+  });
 });

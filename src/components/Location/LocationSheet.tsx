@@ -229,7 +229,10 @@ export function LocationSheet({
               });
             }}
           >
-            <SelectTrigger className="w-[140px] h-8">
+            <SelectTrigger
+              className="w-[140px] h-8"
+              data-cy="associated-location-status"
+            >
               <SelectValue placeholder={t("select_a_status")} />
             </SelectTrigger>
             <SelectContent>
@@ -249,6 +252,7 @@ export function LocationSheet({
               })
             }
             disabled={updateAssociation.isPending}
+            data-cy="update-associated-location-status-button"
           >
             {updateAssociation.isPending ? t("saving") : t("save")}
           </Button>
@@ -299,6 +303,7 @@ export function LocationSheet({
                 })
               }
               className="h-9"
+              data-cy="location-end-date-time"
             />
           </div>
         )}
@@ -429,6 +434,7 @@ export function LocationSheet({
                         });
                       }}
                       className="w-full"
+                      data-cy="submit-encounter-location-association"
                       disabled={isPending}
                     >
                       {isPending
