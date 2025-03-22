@@ -11,6 +11,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import { LocationSearch } from "@/components/Location/LocationSearch";
@@ -20,23 +21,22 @@ import deviceApi from "@/types/device/deviceApi";
 import { LocationList } from "@/types/location/location";
 
 interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   facilityId: string;
   deviceId: string;
+  children?: React.ReactNode;
 }
 
 export default function AssociateLocationSheet({
-  open,
-  onOpenChange,
   facilityId,
   deviceId,
+  children,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
     null,
   );
+  const [open, setOpen] = useState(false);
 
   const { mutate: associateLocation, isPending } = useMutation({
     mutationFn: mutate(deviceApi.associateLocation, {
@@ -50,7 +50,7 @@ export default function AssociateLocationSheet({
         queryKey: ["deviceLocationHistory", facilityId, deviceId],
       });
       toast.success(t("location_associated_successfully"));
-      onOpenChange(false);
+      setOpen(false);
       setSelectedLocation(null);
     },
   });
@@ -59,9 +59,9 @@ export default function AssociateLocationSheet({
     if (!selectedLocation) return;
     associateLocation({ location: selectedLocation.id });
   };
-
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>{t("associate_location")}</SheetTitle>
