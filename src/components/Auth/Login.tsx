@@ -150,9 +150,7 @@ const Login = (props: LoginProps) => {
             }
           })
           .catch(() => {
-            setOtpValidationError(
-              t("failed_to_autofill_OTP_Please_enter_manually"),
-            );
+            setOtpValidationError(t("opt_validation_error"));
           });
       }
     },
