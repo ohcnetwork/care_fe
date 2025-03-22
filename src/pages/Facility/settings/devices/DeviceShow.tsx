@@ -288,7 +288,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                   )}
                 >
                   {t(
-                    `device_availability_status_${device.availability_status}`,
+                    `device_availability_status__${device.availability_status}`,
                   )}
                 </Badge>
               </div>
