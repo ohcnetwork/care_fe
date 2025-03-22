@@ -125,7 +125,6 @@ function PatientIndex() {
               <Button
                 variant="secondary"
                 className="border border-secondary-400"
-                // style={{ transform: " translatex(15cm)" }}
               >
                 <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
                 <span>{t("View Facilities")}</span>
