@@ -150,7 +150,6 @@ function ConceptFields({
                     {...field}
                     placeholder="Unverified"
                     className={!field.value ? "text-gray-500" : undefined}
-                    readOnly
                   />
                 </FormControl>
               </FormItem>
