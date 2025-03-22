@@ -163,95 +163,88 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                 data-cy="search-user"
               />
             </div>
-            {isFetchingUsers ? (
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+              {isFetchingUsers ? (
                 <CardGridSkeleton count={6} />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-                {users?.results?.length === 0 ? (
-                  <Card className="col-span-full">
-                    <CardContent className="p-6 text-center text-gray-500">
-                      {t("no_users_found")}
-                    </CardContent>
-                  </Card>
-                ) : (
-                  users?.results?.map((userRole) => (
-                    <Card
-                      key={userRole.id}
-                      className="flex flex-col max-w-full"
-                    >
-                      <CardContent className="p-3 flex flex-col gap-3 sm:p-4">
-                        <div className="flex items-start gap-2">
-                          <Avatar
-                            name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                            imageUrl={userRole.user.profile_picture_url}
-                            className="h-10 w-10 flex-shrink-0 sm:h-12 sm:w-12 lg:h-14 lg:w-14 text-lg sm:text-xl lg:text-2xl"
-                          />
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-start justify-between gap-2">
-                                <h1 className="text-base font-bold truncate">
-                                  {formatName(userRole.user)}
-                                </h1>
-                                <span className="text-sm text-gray-500 flex-shrink-0">
-                                  <UserStatusIndicator user={userRole.user} />
-                                </span>
-                              </div>
-                              <span className="text-sm text-gray-500 truncate">
-                                {userRole.user.username}
+              ) : users?.results?.length === 0 ? (
+                <Card className="col-span-full">
+                  <CardContent className="p-6 text-center text-gray-500">
+                    {t("no_users_found")}
+                  </CardContent>
+                </Card>
+              ) : (
+                users?.results?.map((userRole) => (
+                  <Card key={userRole.id} className="flex flex-col max-w-full">
+                    <CardContent className="p-3 flex flex-col gap-3 sm:p-4">
+                      <div className="flex items-start gap-2">
+                        <Avatar
+                          name={`${userRole.user.first_name} ${userRole.user.last_name}`}
+                          imageUrl={userRole.user.profile_picture_url}
+                          className="h-10 w-10 flex-shrink-0 sm:h-12 sm:w-12 lg:h-14 lg:w-14 text-lg sm:text-xl lg:text-2xl"
+                        />
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <h1 className="text-base font-bold truncate">
+                                {formatName(userRole.user)}
+                              </h1>
+                              <span className="text-sm text-gray-500 flex-shrink-0">
+                                <UserStatusIndicator user={userRole.user} />
                               </span>
                             </div>
-                            <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-                              <div>
-                                <div className="text-gray-500">{t("role")}</div>
-                                <div className="font-medium truncate">
-                                  {userRole.role.name ?? "-"}
-                                </div>
+                            <span className="text-sm text-gray-500 truncate">
+                              {userRole.user.username}
+                            </span>
+                          </div>
+                          <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <div className="text-gray-500">{t("role")}</div>
+                              <div className="font-medium truncate">
+                                {userRole.role.name ?? "-"}
                               </div>
-                              <div>
-                                <div className="text-gray-500">
-                                  {t("phone_number")}
-                                </div>
-                                <div className="font-medium truncate">
-                                  {userRole.user.phone_number
-                                    ? formatPhoneNumberIntl(
-                                        userRole.user.phone_number,
-                                      )
-                                    : "-"}
-                                </div>
+                            </div>
+                            <div>
+                              <div className="text-gray-500">
+                                {t("phone_number")}
+                              </div>
+                              <div className="font-medium truncate">
+                                {userRole.user.phone_number
+                                  ? formatPhoneNumberIntl(
+                                      userRole.user.phone_number,
+                                    )
+                                  : "-"}
                               </div>
                             </div>
                           </div>
                         </div>
-                        <div className="mt-4 bg-gray-50 rounded-md flex justify-end gap-2">
-                          {canManageOrganizationUsers && (
-                            <EditUserRoleSheet
-                              organizationId={id}
-                              userRole={userRole}
-                              trigger={
-                                <Button variant="outline" size="sm">
-                                  <span>{t("edit_role")}</span>
-                                </Button>
-                              }
+                      </div>
+                      <div className="mt-4 bg-gray-50 rounded-md flex justify-end gap-2">
+                        {canManageOrganizationUsers && (
+                          <EditUserRoleSheet
+                            organizationId={id}
+                            userRole={userRole}
+                            trigger={
+                              <Button variant="outline" size="sm">
+                                <span>{t("edit_role")}</span>
+                              </Button>
+                            }
+                          />
+                        )}
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/users/${userRole.user.username}`}>
+                            <CareIcon
+                              icon="l-arrow-up-right"
+                              className="text-lg mr-1"
                             />
-                          )}
-                          <Button asChild variant="outline" size="sm">
-                            <Link href={`/users/${userRole.user.username}`}>
-                              <CareIcon
-                                icon="l-arrow-up-right"
-                                className="text-lg mr-1"
-                              />
-                              <span>{t("see_details")}</span>
-                            </Link>
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-            )}
+                            <span>{t("see_details")}</span>
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
             <Pagination totalCount={users?.count || 0} />
           </div>
         );
