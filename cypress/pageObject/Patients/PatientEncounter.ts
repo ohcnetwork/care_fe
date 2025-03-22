@@ -1,3 +1,5 @@
+import { inactiveEncounterStatus } from "@/src/types/emr/encounter";
+
 export class PatientEncounter {
   private routes = {};
 
@@ -134,18 +136,20 @@ export class PatientEncounter {
   }
 
   // **2️⃣ Encounter Handling**
-  openEncounterAndSaveId() {
+  openActiveEncounterAndSaveId() {
     cy.get("[data-cy^='encounter-card-']")
+      .not((_, el) =>
+        inactiveEncounterStatus.includes(el.getAttribute("data-status")),
+      )
       .first()
-      .invoke("attr", "data-cy")
-      .then((attr) => {
-        if (attr) {
-          const encounterId = attr.replace("encounter-card-", "");
-          Cypress.env("encounterId", encounterId);
-        }
+      .then(($el) => {
+        const encounterId = $el.attr("data-cy")?.replace("encounter-card-", "");
+        if (!encounterId) throw new Error("Encounter ID is undefined!");
+
+        Cypress.env("encounterId", encounterId);
+        this.openEncounterById(encounterId);
       });
 
-    this.openFirstEncounterDetails();
     return this;
   }
 

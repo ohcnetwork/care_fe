@@ -691,6 +691,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                             className="flex-1 min-h-20 max-h-[50vh]"
                           />
                           <Button
+                            data-cy="send-chat-message-button"
                             type="submit"
                             size="icon"
                             disabled={

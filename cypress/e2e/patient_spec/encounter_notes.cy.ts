@@ -41,7 +41,7 @@ describe("Encounter Notes", () => {
 
     patientEncounter
       .navigateToEncounters()
-      .openEncounterAndSaveId()
+      .openActiveEncounterAndSaveId()
       .openEncounterNotesTab()
       .clickNewThreadButton()
       .typeThreadTitle(testData.firstThreadTitle)
