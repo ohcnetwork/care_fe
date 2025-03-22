@@ -10,9 +10,13 @@ import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm"
 
 import useAppHistory from "@/hooks/useAppHistory";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
+import { inactiveEncounterStatus } from "@/types/emr/encounter";
 
 interface Props {
   facilityId?: string;
@@ -38,6 +42,18 @@ export default function EncounterQuestionnaire({
     }),
     enabled: !!encounterId,
   });
+
+  const { hasPermission } = usePermissions();
+  const { canWriteEncounter } = getPermissions(
+    hasPermission,
+    encounterId ? (encounter?.patient.permissions ?? []) : [],
+  );
+
+  const canWrite = encounterId
+    ? canWriteEncounter &&
+      !inactiveEncounterStatus.includes(encounter?.status ?? "")
+    : false;
+
   return (
     <Page title={t("questionnaire_one")}>
       <div className="flex flex-col space-y-4 mt-4 overflow-y-auto">
@@ -48,6 +64,7 @@ export default function EncounterQuestionnaire({
               encounter={encounter}
               fetchPatientData={() => {}}
               disableButtons={true}
+              canWrite={canWrite}
             />
 
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">

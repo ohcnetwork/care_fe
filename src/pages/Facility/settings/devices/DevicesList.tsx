@@ -1,12 +1,21 @@
+import { CubeIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
+import { PlusIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -25,6 +34,7 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
+import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import deviceApi from "@/types/device/deviceApi";
 import { LocationList } from "@/types/location/location";
 
@@ -38,6 +48,8 @@ export default function DevicesList({ facilityId }: Props) {
   const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
     null,
   );
+
+  const pluginDevices = usePluginDevices();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
@@ -65,19 +77,15 @@ export default function DevicesList({ facilityId }: Props) {
           <div className="flex flex-col sm:flex-row gap-4">
             <PageTitle title={t("devices")} />
           </div>
-          <div className="flex flex-wrap sm:flex-row items-center gap-4">
-            <div className="flex flex-col lg:flex-row items-center gap-2 w-full sm:w-auto">
-              <div className="flex w-full items-center rounded-lg bg-gray-50">
+
+          <div className="flex flex-col lg:flex-row items-center gap-2 w-full sm:w-auto">
+            <div className="flex flex-col w-full rounded-lg bg-gray-50 p-2">
+              <div className="flex items-center w-full">
                 <Select
                   value={searchType}
                   onValueChange={(value: "name" | "location") => {
                     setSearchType(value);
-                    updateQuery({
-                      search_text: value === "name" ? "" : qParams.search_text,
-                      current_location:
-                        value === "location" ? "" : qParams.current_location,
-                    });
-                    setSelectedLocation(null);
+                    updateQuery({ search_type: value });
                   }}
                 >
                   <SelectTrigger className="w-24 sm:w-36 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base rounded-r-none">
@@ -93,23 +101,16 @@ export default function DevicesList({ facilityId }: Props) {
                     <Input
                       placeholder={t("search_by_name")}
                       value={qParams.search_text || ""}
-                      onChange={(e) => {
-                        updateQuery({
-                          search_text: e.target.value,
-                          current_location: "",
-                        });
-                        setSelectedLocation(null);
-                      }}
+                      onChange={(e) =>
+                        updateQuery({ search_text: e.target.value })
+                      }
                       className="w-full h-9 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base shadow-sm focus:ring-2 focus:ring-primary focus:border-primary rounded-l-none"
                     />
                   ) : (
                     <LocationSearch
                       facilityId={facilityId}
-                      onSelect={(location: LocationList | null) => {
-                        updateQuery({
-                          current_location: location?.id || "",
-                          search_text: "",
-                        });
+                      onSelect={(location) => {
+                        updateQuery({ current_location: location?.id || "" });
                         setSelectedLocation(location);
                       }}
                       value={selectedLocation}
@@ -118,17 +119,80 @@ export default function DevicesList({ facilityId }: Props) {
                   )}
                 </div>
               </div>
+
+              {(qParams.search_text || qParams.current_location) && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {qParams.search_text && (
+                    <Badge variant="outline" className="rounded-2xl">
+                      {t("name")}: {qParams.search_text}
+                      <span
+                        onClick={() => updateQuery({ search_text: "" })}
+                        className="ml-2 cursor-pointer"
+                      >
+                        <CareIcon icon="l-times" className="h-4 w-4" />
+                      </span>
+                    </Badge>
+                  )}
+                  {qParams.current_location && (
+                    <Badge variant="outline" className="rounded-2xl">
+                      {t("location")}: {selectedLocation?.name}
+                      <span
+                        onClick={() => {
+                          updateQuery({ current_location: "" });
+                          setSelectedLocation(null);
+                        }}
+                        className="ml-2 cursor-pointer"
+                      >
+                        <CareIcon icon="l-times" className="h-4 w-4" />
+                      </span>
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
-            <Button
-              variant="primary"
-              asChild
-              className="w-full sm:w-auto text-sm sm:text-base"
-            >
-              <Link href="/devices/create">
-                <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
-                {t("add_device")}
-              </Link>
-            </Button>
+
+            {pluginDevices.length > 0 ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="white" className="flex items-center gap-2">
+                    {t("add_device")}
+                    <CareIcon icon="l-angle-down" className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {pluginDevices.map((pluginDevice) => {
+                    const DeviceIcon = pluginDevice.icon || CubeIcon;
+                    return (
+                      <DropdownMenuItem
+                        key={pluginDevice.type}
+                        className="capitalize"
+                        asChild
+                      >
+                        <Link
+                          href={`/devices/create?type=${pluginDevice.type}`}
+                        >
+                          <DeviceIcon className="h-4 w-4 mr-1" />
+                          {pluginDevice.type}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  <DropdownMenuItem asChild>
+                    <Link href="/devices/create">
+                      <CubeIcon className="h-4 w-4 mr-1" />
+                      {t("other")}
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="white" asChild>
+                <Link href="/devices/create">
+                  <PlusIcon className="h-4 w-4" />
+                  {t("add_device")}
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
 
