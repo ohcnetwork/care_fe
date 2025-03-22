@@ -1,5 +1,7 @@
 import { t } from "i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,14 +59,27 @@ export function DiagnosisTable({ diagnoses }: DiagnosisTableProps) {
         {diagnoses.map((diagnosis) => (
           <TableRow
             key={diagnosis.id}
-            className={`rounded-md overflow-hidden bg-gray-50 ${
+            className={cn(
+              "rounded-md overflow-hidden",
               diagnosis.verification_status === "entered_in_error"
                 ? "opacity-50"
-                : ""
-            }`}
+                : diagnosis.category === "chronic_condition"
+                  ? "bg-yellow-50/50"
+                  : "bg-gray-50",
+            )}
           >
             <TableCell className="font-medium first:rounded-l-md">
-              {diagnosis.code.display}
+              <div className="flex items-center gap-2">
+                {diagnosis.code.display}
+                {diagnosis.category === "chronic_condition" && (
+                  <Badge
+                    variant="outline"
+                    className="bg-yellow-100 text-yellow-700 text-xs"
+                  >
+                    {t("chronic_condition")}
+                  </Badge>
+                )}
+              </div>
             </TableCell>
             <TableCell>
               <Badge

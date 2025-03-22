@@ -33,6 +33,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import query from "@/Utils/request/query";
 import {
+  DIAGNOSIS_CATEGORY,
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
@@ -57,10 +58,22 @@ interface DiagnosisQuestionProps {
   disabled?: boolean;
 }
 
+const DIAGNOSIS_CATEGORY_DESCRIPTIONS = {
+  chronic_condition: {
+    title: "Chronic Condition",
+    description: "Long-term diagnosis (e.g., Hypertension)",
+  },
+  encounter_diagnosis: {
+    title: "Diagnosis",
+    description: "Specific to this visit only",
+  },
+} as const;
+
 const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
   clinical_status: "active",
   verification_status: "confirmed",
+  category: "encounter_diagnosis",
   onset: { onset_datetime: new Date().toISOString().split("T")[0] },
 };
 
@@ -79,6 +92,7 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
         }
       : undefined,
     recorded_date: diagnosis.recorded_date,
+    category: diagnosis.category,
     note: diagnosis.note,
     encounter: "", // This will be set when submitting the form
   };
@@ -94,6 +108,30 @@ export function DiagnosisQuestion({
   const isPreview = patientId === "preview";
   const diagnoses =
     (questionnaireResponse.values?.[0]?.value as DiagnosisRequest[]) || [];
+  const [selectedCategory, setSelectedCategory] = useState<
+    DiagnosisRequest["category"]
+  >("encounter_diagnosis");
+  const [selectedCode, setSelectedCode] = useState<Code | null>(null);
+  const [showCategorySelection, setShowCategorySelection] = useState(false);
+  const [newDiagnosis, setNewDiagnosis] = useState<Partial<DiagnosisRequest>>({
+    ...DIAGNOSIS_INITIAL_VALUE,
+    onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+  });
+
+  // Sort diagnoses: chronic conditions first, then by date
+  const sortedDiagnoses = [...diagnoses].sort((a, b) => {
+    if (
+      a.category === "chronic_condition" &&
+      b.category !== "chronic_condition"
+    )
+      return -1;
+    if (
+      a.category !== "chronic_condition" &&
+      b.category === "chronic_condition"
+    )
+      return 1;
+    return 0;
+  });
 
   const { data: patientDiagnoses } = useQuery({
     queryKey: ["diagnoses", patientId],
@@ -102,6 +140,7 @@ export function DiagnosisQuestion({
       queryParams: {
         encounter: encounterId,
         limit: 100,
+        category: ["encounter_diagnosis", "chronic_condition"],
       },
     }),
     enabled: !isPreview,
@@ -121,10 +160,18 @@ export function DiagnosisQuestion({
     }
   }, [patientDiagnoses]);
 
-  const handleAddDiagnosis = (code: Code) => {
+  const handleCodeSelect = (code: Code) => {
+    setSelectedCode(code);
+    setNewDiagnosis((prev) => ({ ...prev, code }));
+    setShowCategorySelection(true);
+  };
+
+  const handleCategoryConfirm = () => {
+    if (!selectedCode) return;
+
     const isDuplicate = diagnoses.some(
       (diagnosis) =>
-        diagnosis.code.code === code.code &&
+        diagnosis.code.code === selectedCode.code &&
         diagnosis.verification_status !== "entered_in_error",
     );
 
@@ -132,10 +179,15 @@ export function DiagnosisQuestion({
       toast.warning(t("diagnosis_already_exist_warning"));
       return;
     }
+
     const newDiagnoses = [
       ...diagnoses,
-      { ...DIAGNOSIS_INITIAL_VALUE, code },
-    ] as DiagnosisRequest[];
+      {
+        ...newDiagnosis,
+        code: selectedCode,
+        category: selectedCategory,
+      } as DiagnosisRequest,
+    ];
     updateQuestionnaireResponseCB(
       [
         {
@@ -145,6 +197,15 @@ export function DiagnosisQuestion({
       ],
       questionnaireResponse.question_id,
     );
+
+    // Reset the selection state
+    setSelectedCode(null);
+    setShowCategorySelection(false);
+    setSelectedCategory("encounter_diagnosis");
+    setNewDiagnosis({
+      ...DIAGNOSIS_INITIAL_VALUE,
+      onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+    });
   };
 
   const handleRemoveDiagnosis = (index: number) => {
@@ -199,7 +260,7 @@ export function DiagnosisQuestion({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       {diagnoses.length > 0 && (
         <div className="rounded-lg border">
           <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
@@ -210,7 +271,7 @@ export function DiagnosisQuestion({
             <div className="col-span-1 text-center">{t("action")}</div>
           </div>
           <div className="divide-y divide-gray-200">
-            {diagnoses.map((diagnosis, index) => (
+            {sortedDiagnoses.map((diagnosis, index) => (
               <DiagnosisItem
                 key={index}
                 diagnosis={diagnosis}
@@ -222,12 +283,163 @@ export function DiagnosisQuestion({
           </div>
         </div>
       )}
-      <ValueSetSelect
-        system="system-condition-code"
-        placeholder={t("search_for_diagnoses_to_add")}
-        onSelect={handleAddDiagnosis}
-        disabled={disabled}
-      />
+
+      {showCategorySelection ? (
+        <div className="rounded-lg border p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              {selectedCode && (
+                <Label className="text-sm font-medium">
+                  {selectedCode.display}
+                </Label>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowCategorySelection(false);
+                setSelectedCode(null);
+                setSelectedCategory("encounter_diagnosis");
+                setNewDiagnosis({
+                  ...DIAGNOSIS_INITIAL_VALUE,
+                  onset: {
+                    onset_datetime: new Date().toISOString().split("T")[0],
+                  },
+                });
+              }}
+            >
+              {t("cancel")}
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {DIAGNOSIS_CATEGORY.map((category) => (
+              <div
+                key={category}
+                className={cn(
+                  "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
+                  selectedCategory === category
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50",
+                )}
+                onClick={() => setSelectedCategory(category)}
+              >
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1">
+                    <div className="font-medium">
+                      {DIAGNOSIS_CATEGORY_DESCRIPTIONS[category].title}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {DIAGNOSIS_CATEGORY_DESCRIPTIONS[category].description}
+                    </div>
+                  </div>
+                  {selectedCategory === category && (
+                    <div className="h-4 w-4 rounded-full bg-primary" />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label className="text-sm">{t("date")}</Label>
+              <Input
+                type="date"
+                value={newDiagnosis.onset?.onset_datetime || ""}
+                onChange={(e) =>
+                  setNewDiagnosis((prev) => ({
+                    ...prev,
+                    onset: { onset_datetime: e.target.value },
+                  }))
+                }
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm">{t("status")}</Label>
+              <Select
+                value={newDiagnosis.clinical_status}
+                onValueChange={(value) =>
+                  setNewDiagnosis((prev) => ({
+                    ...prev,
+                    clinical_status:
+                      value as DiagnosisRequest["clinical_status"],
+                  }))
+                }
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue
+                    placeholder={
+                      <span className="text-gray-500">
+                        {t("diagnosis_status_placeholder")}
+                      </span>
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
+                    <SelectItem
+                      key={status}
+                      value={status}
+                      className="capitalize"
+                    >
+                      {t(status)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm">{t("verification")}</Label>
+              <Select
+                value={newDiagnosis.verification_status}
+                onValueChange={(value) =>
+                  setNewDiagnosis((prev) => ({
+                    ...prev,
+                    verification_status:
+                      value as DiagnosisRequest["verification_status"],
+                  }))
+                }
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue
+                    placeholder={
+                      <span className="text-gray-500">
+                        {t("diagnosis_verification_placeholder")}
+                      </span>
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
+                    <SelectItem
+                      key={status}
+                      value={status}
+                      className="capitalize"
+                    >
+                      {t(status)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-2">
+            <Button onClick={handleCategoryConfirm}>
+              {t("add_diagnosis")}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <ValueSetSelect
+          system="system-condition-code"
+          placeholder={t("search_for_diagnoses_to_add")}
+          onSelect={handleCodeSelect}
+          disabled={disabled}
+        />
+      )}
     </div>
   );
 }
@@ -252,17 +464,30 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
       className={cn("group hover:bg-gray-50", {
         "opacity-40 pointer-events-none":
           diagnosis.verification_status === "entered_in_error",
+        "bg-yellow-50/50": diagnosis.category === "chronic_condition",
       })}
     >
       <div className="py-1 px-2 space-y-2 md:space-y-0 md:grid md:grid-cols-12 md:items-center md:gap-4">
         <div className="flex items-center justify-between md:col-span-5">
-          <div
-            className="font-medium text-sm truncate"
-            title={diagnosis.code.display}
-          >
-            {diagnosis.code.display}
+          <div className="flex items-center space-x-2 min-w-0">
+            <div
+              className="font-medium text-sm truncate flex-1"
+              title={diagnosis.code.display}
+            >
+              {diagnosis.code.display}
+            </div>
+            <div
+              className={cn(
+                "text-xs px-2 py-0.5 rounded-full shrink-0",
+                diagnosis.category === "chronic_condition"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-gray-100 text-gray-700",
+              )}
+            >
+              {DIAGNOSIS_CATEGORY_DESCRIPTIONS[diagnosis.category].title}
+            </div>
           </div>
-          <div className="md:hidden">
+          <div className="md:hidden shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
