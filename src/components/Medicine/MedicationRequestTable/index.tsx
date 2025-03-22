@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -15,7 +16,13 @@ import Loading from "@/components/Common/Loading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { getPermissions } from "@/common/Permissions";
+
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
@@ -53,27 +60,34 @@ export const EmptyState = ({
 interface Props {
   readonly?: boolean;
   patientId: string;
-  encounterId: string;
+  encounter: Encounter;
 }
 
 export default function MedicationRequestTable({
   patientId,
-  encounterId,
+  encounter,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
+  const { hasPermission } = usePermissions();
+  const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
+    getPermissions(hasPermission, encounter.permissions);
+  const canAccess = canViewClinicalData || canViewEncounter;
+  const { goBack } = useAppHistory();
 
+  const canWrite =
+    canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: encounterId,
+        encounter: encounter.id,
         limit: 100,
         status: ["active", "on-hold", "draft", "unknown"].join(","),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
 
   const { data: stoppedMedications, isLoading: loadingStopped } = useQuery({
@@ -81,15 +95,23 @@ export default function MedicationRequestTable({
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: encounterId,
+        encounter: encounter.id,
         limit: 100,
         status: ["ended", "completed", "cancelled", "entered_in_error"].join(
           ",",
         ),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
+
+  useEffect(() => {
+    if (!canAccess) {
+      toast.error("You do not have permission to view this encounter");
+      goBack();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canAccess]);
 
   const medications = showStopped
     ? [
@@ -153,17 +175,19 @@ export default function MedicationRequestTable({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="text-gray-950 hover:text-gray-700 h-9"
-                  >
-                    <Link href={`questionnaire/medication_request`}>
-                      <PencilIcon className="mr-2 h-4 w-4" />
-                      {t("edit")}
-                    </Link>
-                  </Button>
+                  {canWrite && (
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="text-gray-950 hover:text-gray-700 h-9"
+                    >
+                      <Link href={`questionnaire/medication_request`}>
+                        <PencilIcon className="mr-2 h-4 w-4" />
+                        {t("edit")}
+                      </Link>
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     disabled={!activeMedications?.results?.length}
@@ -220,7 +244,9 @@ export default function MedicationRequestTable({
           <TabsContent value="administration">
             <AdministrationTab
               patientId={patientId}
-              encounterId={encounterId}
+              encounterId={encounter.id}
+              canAccess={canAccess}
+              canWrite={canWrite}
             />
           </TabsContent>
         </Tabs>

@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { t } from "i18next";
+import { Link } from "raviger";
 import React, { useCallback, useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -91,6 +92,8 @@ function getAdministrationsForTimeSlot(
 interface AdministrationTabProps {
   patientId: string;
   encounterId: string;
+  canAccess: boolean;
+  canWrite: boolean;
 }
 
 interface TimeSlotHeaderProps {
@@ -118,6 +121,7 @@ interface MedicationRowProps {
     admin: MedicationAdministration,
   ) => void;
   onDiscontinue: (medication: MedicationRequestRead) => void;
+  canWrite: boolean;
 }
 
 // Utility Components
@@ -207,6 +211,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
   onAdminister,
   onEditAdministration,
   onDiscontinue,
+  canWrite,
 }) => {
   const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
     medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
@@ -308,7 +313,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                 </div>
               );
             })}
-            {isCurrentSlot && medication.status === "active" && (
+            {isCurrentSlot && medication.status === "active" && canWrite && (
               <Button
                 variant="outline"
                 size="sm"
@@ -327,30 +332,31 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
       >
         {ACTIVE_MEDICATION_STATUSES.includes(
           medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
-        ) && (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6">
-                <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-40 p-0">
-              <Button
-                variant="ghost"
-                className="w-full justify-start px-3 py-2 text-sm text-red-600 hover:text-red-600 hover:bg-red-50"
-                onClick={() => {
-                  onDiscontinue(medication);
-                  // Close the popover after clicking
-                  const button = document.activeElement as HTMLElement;
-                  button?.blur();
-                }}
-              >
-                <CareIcon icon="l-ban" className="mr-2 h-4 w-4" />
-                {t("discontinue")}
-              </Button>
-            </PopoverContent>
-          </Popover>
-        )}
+        ) &&
+          canWrite && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-40 p-0">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-3 py-2 text-sm text-red-600 hover:text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    onDiscontinue(medication);
+                    // Close the popover after clicking
+                    const button = document.activeElement as HTMLElement;
+                    button?.blur();
+                  }}
+                >
+                  <CareIcon icon="l-ban" className="mr-2 h-4 w-4" />
+                  {t("discontinue")}
+                </Button>
+              </PopoverContent>
+            </Popover>
+          )}
       </div>
     </React.Fragment>
   );
@@ -359,6 +365,8 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
 export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   patientId,
   encounterId,
+  canAccess,
+  canWrite,
 }) => {
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -402,7 +410,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: ACTIVE_MEDICATION_STATUSES.join(","),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
 
   const { data: stoppedMedications } = useQuery({
@@ -415,7 +423,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: INACTIVE_MEDICATION_STATUSES.join(","),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
 
   const { data: administrations } = useQuery({
@@ -443,7 +451,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         }),
       },
     }),
-    enabled: !!patientId && !!visibleSlots?.length,
+    enabled: !!patientId && !!visibleSlots?.length && canAccess,
   });
 
   // Get last administered date and last administered by for each medication
@@ -740,6 +748,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     onAdminister={handleAdminister}
                     onEditAdministration={handleEditAdministration}
                     onDiscontinue={handleDiscontinue}
+                    canWrite={canWrite}
                   />
                 ))}
               </div>
@@ -792,14 +801,27 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             )}
           </div>
         </div>
+        {canWrite && (
+          <Button
+            variant="outline"
+            className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
+            onClick={() => setIsSheetOpen(true)}
+            disabled={!activeMedications?.results.length}
+          >
+            <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+            {t("administer_medicine")}
+          </Button>
+        )}
         <Button
           variant="outline"
-          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
-          onClick={() => setIsSheetOpen(true)}
-          disabled={!activeMedications?.results.length}
+          disabled={!activeMedications?.results?.length}
+          size="sm"
+          className="text-gray-950 hover:text-gray-700 h-9"
         >
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          {t("administer_medicine")}
+          <Link href={`medicines/administrations/print`}>
+            <CareIcon icon="l-print" className="mr-2" />
+            {t("print")}
+          </Link>
         </Button>
       </div>
 

@@ -22,11 +22,13 @@ export default function FileUploadDialog({
   onOpenChange,
   fileUpload,
   associatingId,
+  type,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   fileUpload: FileUploadReturn;
   associatingId: string;
+  type: "patient" | "consent" | "encounter";
 }) {
   const handleDialogClose = (open: boolean) => {
     if (!open) {
@@ -163,13 +165,13 @@ export default function FileUploadDialog({
         {fileUpload.files.length > 1 && (
           <div className="flex items-center gap-2 mt-4">
             <Checkbox
-              id="file_upload_patient"
+              id={`file_upload_${type}`}
               checked={isPdf}
               onCheckedChange={(checked: boolean) => setIsPdf(checked)}
               disabled={fileUpload.uploading}
               className="cursor-pointer"
             />
-            <Label htmlFor="file_upload_patient" className="cursor-pointer">
+            <Label htmlFor={`file_upload_${type}`} className="cursor-pointer">
               {t("combine_files_pdf")}
             </Label>
           </div>

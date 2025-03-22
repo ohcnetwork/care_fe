@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
-import { useState } from "react";
+import dayjs from "dayjs";
+import { Link, usePathParams, useQueryParams } from "raviger";
+import { useCallback, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -22,8 +23,9 @@ import {
 } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
+import { userChildProps } from "@/components/Common/UserColumns";
 
-import useSlug from "@/hooks/useSlug";
+import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import {
@@ -31,10 +33,12 @@ import {
   formatTimeShort,
   humanizeStrings,
 } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
 import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
+import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import {
   computeAppointmentSlots,
   filterAvailabilitiesByDayOfWeek,
@@ -42,16 +46,13 @@ import {
   isDateInRange,
 } from "@/pages/Scheduling/utils";
 import {
+  Appointment,
+  AppointmentNonCancelledStatuses,
   AvailabilityDateTime,
   ScheduleException,
   ScheduleTemplate,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
-
-type Props = {
-  userData: UserBase;
-};
 
 type AvailabilityTabQueryParams = {
   tab?: "schedule" | "exceptions" | null;
@@ -60,13 +61,18 @@ type AvailabilityTabQueryParams = {
   valid_to?: string | null;
 };
 
-export default function UserAvailabilityTab({ userData: user }: Props) {
+export default function UserAvailabilityTab({
+  userData: user,
+  permissions,
+}: userChildProps) {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<AvailabilityTabQueryParams>();
   const view = qParams.tab || "schedule";
   const [month, setMonth] = useState(new Date());
+  const { hasPermission } = usePermissions();
+  const { canViewSchedule } = getPermissions(hasPermission, permissions ?? []);
 
-  const facilityId = useSlug("facility");
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
 
   const templatesQuery = useQuery({
     queryKey: ["user-schedule-templates", { facilityId, userId: user.id }],
@@ -74,7 +80,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
     }),
-    enabled: !!facilityId,
+    enabled: !!facilityId && canViewSchedule,
   });
 
   const exceptionsQuery = useQuery({
@@ -83,7 +89,43 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
     }),
+    enabled: !!facilityId && canViewSchedule,
   });
+
+  const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+  const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+  const appointmentsPageLink = `/facility/${facilityId}/appointments/?practitioner=${user.username}&limit=15`;
+
+  const { data: appoinmentsData } = useQuery({
+    queryKey: ["appointments", facilityId, user.id, monthStart],
+    queryFn: query(scheduleApis.appointments.list, {
+      pathParams: { facility_id: facilityId },
+      queryParams: {
+        limit: 100,
+        user: user.id,
+        date_from: dateQueryString(monthStart),
+        date_to: dateQueryString(monthEnd),
+      },
+    }),
+  });
+
+  const appoinments = appoinmentsData?.results.filter((appointment) =>
+    AppointmentNonCancelledStatuses.includes(appointment.status),
+  );
+
+  const getAppointmentsForDate = useCallback(
+    (date: Date) => {
+      return appoinments?.filter((appointment) =>
+        dayjs(appointment.token_slot.start_datetime).isSame(dayjs(date), "day"),
+      );
+    },
+    [appoinments],
+  );
+
+  const { data: isSchedulableResource } = useIsUserSchedulableResource(
+    facilityId,
+    user.id,
+  );
 
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
@@ -97,6 +139,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
         onMonthChange={setMonth}
         renderDay={(date: Date) => {
           const isToday = date.toDateString() === new Date().toDateString();
+          const currentDayAppointments = getAppointmentsForDate(date) ?? [];
 
           // TODO: handle for "Closed" schedule type once we have it...
           const templates = templatesQuery.data?.results.filter(
@@ -107,9 +150,11 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
           );
 
           const unavailableExceptions =
-            exceptionsQuery.data?.results.filter((exception) =>
-              isDateInRange(date, exception.valid_from, exception.valid_to),
-            ) ?? [];
+            exceptionsQuery.data?.results
+              .filter((exception) =>
+                isDateInRange(date, exception.valid_from, exception.valid_to),
+              )
+              .sort((a, b) => a.start_time.localeCompare(b.start_time)) ?? [];
 
           const isFullDayUnavailable = unavailableExceptions.some(
             (exception) =>
@@ -125,6 +170,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                     "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
                     templatesQuery.isLoading &&
                       "opacity-50 pointer-events-none",
+                    !isSchedulableResource && "pointer-events-none",
                     "transition-all duration-200 ease-in-out",
                     "relative overflow-hidden",
                   )}
@@ -168,6 +214,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                 templates={templates}
                 unavailableExceptions={unavailableExceptions}
                 setQParams={setQParams}
+                currentDayAppointments={currentDayAppointments}
+                appointmentsPageLink={appointmentsPageLink}
               />
             </Popover>
           );
@@ -251,11 +299,15 @@ function DayDetailsPopover({
   templates,
   unavailableExceptions,
   setQParams,
+  currentDayAppointments,
+  appointmentsPageLink,
 }: {
   date: Date;
   templates: ScheduleTemplate[];
   unavailableExceptions: ScheduleException[];
   setQParams: (params: AvailabilityTabQueryParams) => void;
+  currentDayAppointments: Appointment[];
+  appointmentsPageLink: string;
 }) {
   const { t } = useTranslation();
 
@@ -297,14 +349,47 @@ function DayDetailsPopover({
             </div>
 
             <div className="pl-5 py-2 space-y-4">
-              {template.availabilities.map((availability) => (
-                <ScheduleTemplateAvailabilityItem
-                  key={availability.id}
-                  availability={availability}
-                  unavailableExceptions={unavailableExceptions}
-                  date={date}
-                />
-              ))}
+              {template.availabilities.map((availability) => {
+                const currentDate = dayjs(date);
+                const availabilityDay = availability.availability.find(
+                  (a) => a.day_of_week + 1 === currentDate.get("day"),
+                );
+                const startTime = dayjs(
+                  `${currentDate.format("YYYY-MM-DD")} ${availabilityDay?.start_time}`,
+                  "YYYY-MM-DD HH:mm:ss",
+                );
+                const endTime = dayjs(
+                  `${currentDate.format("YYYY-MM-DD")} ${availabilityDay?.end_time}`,
+                  "YYYY-MM-DD HH:mm:ss",
+                );
+                let appointmentsInAvailability: Appointment[] = [];
+                if (
+                  currentDayAppointments.length > 0 &&
+                  startTime.isValid() &&
+                  endTime.isValid()
+                ) {
+                  appointmentsInAvailability = currentDayAppointments.filter(
+                    (appointment) =>
+                      dayjs(appointment.token_slot.start_datetime).isBetween(
+                        startTime,
+                        endTime,
+                        "minutes",
+                        "[]",
+                      ),
+                  );
+                }
+
+                return (
+                  <ScheduleTemplateAvailabilityItem
+                    key={availability.id}
+                    availability={availability}
+                    unavailableExceptions={unavailableExceptions}
+                    date={date}
+                    appointments={appointmentsInAvailability}
+                    appointmentsPageLink={appointmentsPageLink}
+                  />
+                );
+              })}
             </div>
           </div>
         ))}
@@ -340,13 +425,16 @@ function ScheduleTemplateAvailabilityItem({
   availability,
   unavailableExceptions,
   date,
+  appointments,
+  appointmentsPageLink,
 }: {
   availability: ScheduleTemplate["availabilities"][0];
   unavailableExceptions: ScheduleException[];
   date: Date;
+  appointments: Appointment[];
+  appointmentsPageLink: string;
 }) {
   const { t } = useTranslation();
-
   if (availability.slot_type !== "appointment") {
     return (
       <div key={availability.id}>
@@ -434,6 +522,11 @@ function ScheduleTemplateAvailabilityItem({
           )}
         </p>
       )}
+      {appointments.length > 0 && (
+        <p className="text-sm text-gray-600">
+          {formatAppointmentsNote(appointments, appointmentsPageLink, date)}
+        </p>
+      )}
     </div>
   );
 }
@@ -455,4 +548,32 @@ export const formatAvailabilityTime = (
   const startTime = availability[0].start_time;
   const endTime = availability[0].end_time;
   return `${formatTimeShort(startTime)} - ${formatTimeShort(endTime)}`;
+};
+
+export const formatAppointmentsNote = (
+  appointments: Appointment[],
+  appointmentsPageLink: string,
+  date: Date,
+) => {
+  const link = `${appointmentsPageLink}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`;
+  return (
+    <Trans
+      i18nKey={
+        dayjs(date).isBefore(dayjs())
+          ? "appointments_note_past"
+          : "appointments_note"
+      }
+      values={{ count: appointments.length }}
+      components={{
+        a: (
+          <Link
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            className="underline"
+          />
+        ),
+      }}
+    />
+  );
 };
