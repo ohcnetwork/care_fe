@@ -1,7 +1,11 @@
-import { inactiveEncounterStatus } from "@/src/types/emr/encounter";
-
 export class PatientEncounter {
-  private routes = {};
+  private inactiveEncounterStatus = [
+    "cancelled",
+    "entered_in_error",
+    "discontinued",
+    "completed",
+    "discharged",
+  ];
 
   // Navigation
   navigateToEncounters() {
@@ -139,7 +143,7 @@ export class PatientEncounter {
   openActiveEncounterAndSaveId() {
     cy.get("[data-cy^='encounter-card-']")
       .not((_, el) =>
-        inactiveEncounterStatus.includes(el.getAttribute("data-status")),
+        this.inactiveEncounterStatus.includes(el.getAttribute("data-status")),
       )
       .first()
       .then(($el) => {
