@@ -100,9 +100,16 @@ function PatientIndex() {
     const appointmentTime = dayjs(appointment.token_slot.start_datetime);
     const appointmentDate = appointmentTime.format("DD MMMM YYYY");
     const appointmentTimeSlot = appointmentTime.format("hh:mm a");
+    const queryParams = new URLSearchParams();
+    if (selectedPatient?.geo_organization?.parent) {
+      queryParams.set(
+        "organization",
+        String(selectedPatient.geo_organization.parent.id),
+      );
+    }
     return (
       <Card key={appointment.id} className="shadow overflow-hidden">
-        <CardHeader className="px-6 pb-3 bg-secondary-200 flex flex-col md:flex-row justify-between">
+        <CardHeader className="px-6 pb-4 bg-secondary-200 flex flex-col md:flex-row justify-between">
           <CardTitle>
             <div className="flex flex-col">
               <span className="text-xs font-medium">{t("practitioner")}: </span>
@@ -113,17 +120,29 @@ function PatientIndex() {
               </span>
             </div>
           </CardTitle>
-          <Button
-            variant="secondary"
-            className="border border-secondary-400"
-            onClick={() => {
-              setSelectedAppointment(appointment);
-              setAppointmentDialogOpen(true);
-            }}
-          >
-            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-            <span>{t("view_details")}</span>
-          </Button>
+          <div className="flex flex-row space-x-4">
+            <a href={`/nearby_facilities/?${queryParams.toString()}`}>
+              <Button
+                variant="secondary"
+                className="border border-secondary-400"
+                // style={{ transform: " translatex(15cm)" }}
+              >
+                <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+                <span>{t("View Facilities")}</span>
+              </Button>
+            </a>
+            <Button
+              variant="secondary"
+              className="border border-secondary-400"
+              onClick={() => {
+                setSelectedAppointment(appointment);
+                setAppointmentDialogOpen(true);
+              }}
+            >
+              <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+              <span>{t("view_details")}</span>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="mt-2 pt-2 px-6 pb-3">
           <div className="flex flex-col md:flex-row gap-2 justify-between">
