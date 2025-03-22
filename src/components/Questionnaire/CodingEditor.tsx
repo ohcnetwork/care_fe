@@ -59,8 +59,8 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
           onClick={() => {
             onChange({
               system: isUnit
-                ? Object.values(TERMINOLOGY_SYSTEMS)[2]
-                : Object.values(TERMINOLOGY_SYSTEMS)[0],
+                ? TERMINOLOGY_SYSTEMS.UCUM
+                : TERMINOLOGY_SYSTEMS.LOINC,
               code: "",
               display: "",
             });
