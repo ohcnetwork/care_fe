@@ -42,9 +42,6 @@ export default function DevicesList({ facilityId }: Props) {
   const { t } = useTranslation();
   const pluginDevices = usePluginDevices();
 
-  const { data: devices, isLoading } = useQuery({
-    queryKey: ["devices", facilityId, page, limit],
-    
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
   });
@@ -66,7 +63,7 @@ export default function DevicesList({ facilityId }: Props) {
   );
 
   // Use TanStack Query with query.debounced for API call
-  const { data, isLoading } = useQuery({
+  const { data: devices, isLoading } = useQuery({
     queryKey: ["devices", facilityId, qParams],
     queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
@@ -213,9 +210,9 @@ export default function DevicesList({ facilityId }: Props) {
               </Card>
             )}
           </div>
-          {data && data.count > resultsPerPage && (
+          {devices && devices.count > resultsPerPage && (
             <div className="flex justify-center">
-              <Pagination totalCount={data.count} />
+              <Pagination totalCount={devices.count} />
             </div>
           )}
         </div>
