@@ -121,7 +121,7 @@ function PatientIndex() {
             </div>
           </CardTitle>
           <div className="flex flex-row space-x-4">
-            <a href={`/nearby_facilities/?${queryParams.toString()}`}>
+            <a href={`/facilities/?${queryParams.toString()}`}>
               <Button
                 variant="secondary"
                 className="border border-secondary-400"
