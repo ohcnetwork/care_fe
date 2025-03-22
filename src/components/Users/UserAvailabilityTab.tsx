@@ -557,23 +557,70 @@ export const formatAppointmentsNote = (
 ) => {
   const link = `${appointmentsPageLink}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`;
   return (
-    <Trans
-      i18nKey={
-        dayjs(date).isBefore(dayjs())
-          ? "appointments_note_past"
-          : "appointments_note"
-      }
-      values={{ count: appointments.length }}
-      components={{
-        a: (
-          <Link
-            href={link}
-            target="_blank"
-            rel="noreferrer"
-            className="underline"
+    <>
+      {dayjs(date).isBefore(dayjs()) ? (
+        appointments.length == 1 ? (
+          <Trans
+            i18nKey="appointments_note_past_one"
+            values={{ count: appointments.length }}
+            components={{
+              a: (
+                <Link
+                  href={link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline"
+                />
+              ),
+            }}
           />
-        ),
-      }}
-    />
+        ) : (
+          <Trans
+            i18nKey="appointments_note_past_other"
+            values={{ count: appointments.length }}
+            components={{
+              a: (
+                <Link
+                  href={link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline"
+                />
+              ),
+            }}
+          />
+        )
+      ) : appointments.length == 1 ? (
+        <Trans
+          i18nKey="appointments_note_one"
+          values={{ count: appointments.length }}
+          components={{
+            a: (
+              <Link
+                href={link}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              />
+            ),
+          }}
+        />
+      ) : (
+        <Trans
+          i18nKey="appointments_note_other"
+          values={{ count: appointments.length }}
+          components={{
+            a: (
+              <Link
+                href={link}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              />
+            ),
+          }}
+        />
+      )}
+    </>
   );
 };
