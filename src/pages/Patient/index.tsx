@@ -109,7 +109,7 @@ function PatientIndex() {
     }
     return (
       <Card key={appointment.id} className="shadow overflow-hidden">
-        <CardHeader className="px-6 pb-4 bg-secondary-200 flex flex-col md:flex-row justify-between">
+        <CardHeader className="px-6 pb-3 bg-secondary-200 flex flex-col md:flex-row justify-between">
           <CardTitle>
             <div className="flex flex-col">
               <span className="text-xs font-medium">{t("practitioner")}: </span>
