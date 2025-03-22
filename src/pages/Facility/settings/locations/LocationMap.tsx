@@ -1,6 +1,5 @@
-import { ChevronDown, ChevronRight, ChevronUp, Folder } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronUp, Hospital } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import ReactFlow, {
   Background,
@@ -15,11 +14,18 @@ import ReactFlow, {
   Position,
   ReactFlowProvider,
   useReactFlow,
+  useViewport,
 } from "reactflow";
 
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import {
   LocationList as LocationListType,
@@ -29,20 +35,25 @@ import {
 // Constants
 const LEVEL_HEIGHT = 220;
 const NODE_WIDTH = 280;
-const ROOT_SPACING = 100;
+const ROOT_SPACING = 50;
 
 interface LocationMapProps {
   locations: LocationListType[];
   onLocationClick: (location: LocationListType) => void;
   facilityName: string;
   searchQuery?: string;
+  isEditing?: boolean;
 }
 
 const CustomNode = ({ data }: NodeProps) => {
   const { t } = useTranslation();
+  const { zoom } = useViewport();
   const hasChildren = data.childCount > 0;
   const Icon =
-    LocationTypeIcons[data.form as keyof typeof LocationTypeIcons] || Folder;
+    data.form === "facility"
+      ? Hospital
+      : LocationTypeIcons[data.form as keyof typeof LocationTypeIcons];
+  const showTooltip = zoom < 1 || data.name.length > 25;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -84,9 +95,20 @@ const CustomNode = ({ data }: NodeProps) => {
               <Icon className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 truncate">
-                {data.name}
-              </h3>
+              <TooltipProvider>
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <h3 className="font-medium text-gray-900 truncate">
+                      {data.name}
+                    </h3>
+                  </TooltipTrigger>
+                  {showTooltip && (
+                    <TooltipContent>
+                      <p>{data.name}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
               <p className="text-sm text-gray-500 truncate">{data.type}</p>
             </div>
           </div>
@@ -175,7 +197,6 @@ function createLocationNode(
   isExpanded: boolean,
   level: number,
   offsetX: number,
-  nodePositions: Record<string, { x: number; y: number }>,
   toggleNode: (id: string) => void,
   onLocationClick: (location: LocationListType) => void,
   t: (key: string) => string,
@@ -183,11 +204,7 @@ function createLocationNode(
   return {
     id: location.id,
     type: "custom",
-    position: nodePositions[location.id] || {
-      x: offsetX,
-      y: level * LEVEL_HEIGHT,
-    },
-    draggable: true,
+    position: { x: offsetX, y: level * LEVEL_HEIGHT },
     data: {
       name: location.name,
       type: t(`location_form__${location.form}`),
@@ -230,7 +247,6 @@ function processLocationHierarchy(
   level: number,
   offsetX: number,
   parentX: number | null,
-  nodePositions: Record<string, { x: number; y: number }>,
   toggleNode: (id: string) => void,
   onLocationClick: (location: LocationListType) => void,
   t: (key: string) => string,
@@ -248,7 +264,6 @@ function processLocationHierarchy(
     isExpanded,
     level,
     offsetX,
-    nodePositions,
     toggleNode,
     onLocationClick,
     t,
@@ -281,7 +296,6 @@ function processLocationHierarchy(
         level + 1,
         childX,
         offsetX,
-        nodePositions,
         toggleNode,
         onLocationClick,
         t,
@@ -300,15 +314,34 @@ function LocationMapContent({
   onLocationClick,
   facilityName,
   searchQuery,
+  isEditing,
 }: LocationMapProps) {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const { fitView } = useReactFlow();
+  const { fitView, setViewport, getViewport } = useReactFlow();
   const { t } = useTranslation();
   const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
-  const [nodePositions, setNodePositions] = useState<
-    Record<string, { x: number; y: number }>
-  >({});
+  const [savedViewport, setSavedViewport] = useState<{
+    x: number;
+    y: number;
+    zoom: number;
+  } | null>(null);
+
+  // Save viewport when opening edit
+  useEffect(() => {
+    if (isEditing) {
+      const currentViewport = getViewport();
+      setSavedViewport(currentViewport);
+    }
+  }, [isEditing, getViewport]);
+
+  // Restore viewport when closing edit
+  useEffect(() => {
+    if (!isEditing && savedViewport && nodes.length > 0) {
+      setViewport(savedViewport);
+      setSavedViewport(null); // Clear saved viewport after restoring
+    }
+  }, [isEditing, savedViewport, setViewport, nodes]);
 
   // Get root locations
   const rootLocations = useMemo(
@@ -321,9 +354,6 @@ function LocationMapContent({
 
   // Effect to handle search updates
   useEffect(() => {
-    // Reset positions
-    setNodePositions({});
-
     // Get all location IDs that match the search
     const matchedIds = new Set<string>();
 
@@ -336,7 +366,7 @@ function LocationMapContent({
         (loc) => loc.parent?.id === location.id,
       );
       children.forEach((child) => {
-        processLocation(child); // Recursively process each child
+        processLocation(child);
       });
     };
 
@@ -358,27 +388,42 @@ function LocationMapContent({
       }
     });
 
-    // Expand all nodes when there's a search query, collapse all when search is cleared
+    // Only update expanded nodes for search
     if (searchQuery && searchQuery.trim()) {
-      setExpandedNodes(Array.from(matchedIds));
-    } else {
-      setExpandedNodes([]); // Collapse all nodes when search is cleared
-    }
-
-    // Fit view after nodes are updated
-    setTimeout(() => {
-      fitView({
-        padding: 0.2,
-        minZoom: 0.2,
-        maxZoom: 0.7,
-        duration: 800,
+      setExpandedNodes((prev) => {
+        const newExpanded = Array.from(matchedIds);
+        return [...new Set([...prev, ...newExpanded])];
       });
-    }, 100);
+
+      // Only fit view when there's an actual search
+      setTimeout(() => {
+        fitView({
+          padding: 0.2,
+          minZoom: 0.2,
+          maxZoom: 0.7,
+          duration: 800,
+        });
+      }, 100);
+    }
   }, [locations, fitView, rootLocations, searchQuery]);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setExpandedNodes([]);
+      // Fit view when collapsing all nodes
+      setTimeout(() => {
+        fitView({
+          padding: 0.2,
+          minZoom: 0.2,
+          maxZoom: 0.7,
+          duration: 800,
+        });
+      }, 100);
+    }
+  }, [searchQuery, fitView]);
 
   const toggleNode = useCallback(
     (nodeId: string) => {
-      setNodePositions({});
       setExpandedNodes((prev) => {
         const isExpanding = !prev.includes(nodeId);
         const newExpandedNodes = isExpanding
@@ -419,7 +464,6 @@ function LocationMapContent({
   );
 
   const toggleAllNodes = useCallback(() => {
-    setNodePositions({});
     setExpandedNodes((prev) => {
       const isExpanding = prev.length !== locations.length;
       const newExpandedNodes = isExpanding
@@ -438,31 +482,6 @@ function LocationMapContent({
       return newExpandedNodes;
     });
   }, [locations, fitView]);
-
-  const onNodeDrag = useCallback((_: ReactMouseEvent, node: Node) => {
-    setNodePositions((prev) => ({
-      ...prev,
-      [node.id]: node.position,
-    }));
-  }, []);
-
-  const onNodeDragStop = useCallback(
-    (_: ReactMouseEvent, node: Node) => {
-      setNodePositions((prev) => ({
-        ...prev,
-        [node.id]: node.position,
-      }));
-      requestAnimationFrame(() => {
-        fitView({
-          padding: 0.2,
-          duration: 300,
-          minZoom: 0.2,
-          maxZoom: 1,
-        });
-      });
-    },
-    [fitView],
-  );
 
   // Generate nodes and edges
   useEffect(() => {
@@ -503,7 +522,6 @@ function LocationMapContent({
             1,
             locationX,
             null,
-            nodePositions,
             toggleNode,
             onLocationClick,
             t,
@@ -527,7 +545,6 @@ function LocationMapContent({
     toggleNode,
     onLocationClick,
     t,
-    nodePositions,
     rootLocations,
     facilityName,
   ]);
@@ -553,10 +570,7 @@ function LocationMapContent({
           },
         }}
         proOptions={{ hideAttribution: true }}
-        draggable={true}
-        onNodeDrag={onNodeDrag}
-        onNodeDragStop={onNodeDragStop}
-        fitView={true}
+        fitView={!savedViewport && !isEditing}
         fitViewOptions={{
           padding: 0.2,
           minZoom: 0.2,

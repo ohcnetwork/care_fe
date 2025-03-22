@@ -148,6 +148,7 @@ export interface Encounter {
   organizations: FacilityOrganization[];
   current_location: LocationList;
   location_history: LocationHistory[];
+  permissions: string[];
 }
 
 export interface EncounterEditRequest {
@@ -177,5 +178,5 @@ export interface EncounterRequest {
 export const completedEncounterStatus = ["completed", "discharged"];
 export const inactiveEncounterStatus = [
   ...["cancelled", "entered_in_error", "discontinued"],
-  ...(completedEncounterStatus as EncounterStatus[]),
+  ...completedEncounterStatus,
 ] as const;

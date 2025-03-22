@@ -25,7 +25,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
@@ -234,9 +234,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
                   <div className="flex grow flex-col px-4">
                     <h3 className="truncate text-xl font-semibold">
-                      {userData.user_type === "doctor"
-                        ? `Dr. ${userData.first_name} ${userData.last_name}`
-                        : `${userData.first_name} ${userData.last_name}`}
+                      {formatName(userData)}
                     </h3>
                     <p className="text-sm text-gray-500 truncate">
                       {userData.user_type}
@@ -265,9 +263,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 {appointmentId
                   ? t("reschedule_appointment_with")
                   : t("book_an_appointment_with")}{" "}
-                {userData.user_type === "doctor"
-                  ? `Dr. ${userData.first_name} ${userData.last_name}`
-                  : `${userData.first_name} ${userData.last_name}`}
+                {formatName(userData)}
               </span>
               <div>
                 <Label className="mb-2">{t("reason_for_visit")}</Label>

@@ -40,10 +40,13 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { Avatar } from "@/components/Common/Avatar";
 import UserSelector from "@/components/Common/UserSelector";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDisplayName } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { UserBase } from "@/types/user/user";
 
 import { PatientProps } from ".";
@@ -132,14 +135,14 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
               <div className="rounded-lg border p-4 space-y-4">
                 <div className="flex items-start gap-4">
                   <Avatar
-                    name={formatDisplayName(selectedUser)}
+                    name={formatName(selectedUser, true)}
                     imageUrl={selectedUser.profile_picture_url}
                     className="h-12 w-12"
                   />
                   <div className="flex flex-col flex-1">
-                    <TooltipComponent content={formatDisplayName(selectedUser)}>
+                    <TooltipComponent content={formatName(selectedUser)}>
                       <p className="font-medium text-gray-900 truncate max-w-56 sm:max-w-48 md:max-w-64 lg:max-w-64 xl:max-w-36">
-                        {formatDisplayName(selectedUser)}
+                        {formatName(selectedUser)}
                       </p>
                     </TooltipComponent>
                     <span className="text-sm text-gray-500">
@@ -210,8 +213,14 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 }
 
 export const PatientUsers = (props: PatientProps) => {
-  const { patientId } = props;
+  const { patientData } = props;
+  const patientId = patientData.id;
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
+  const { canWritePatient } = getPermissions(
+    hasPermission,
+    patientData.permissions,
+  );
 
   const { data: users } = useQuery({
     queryKey: ["patientUsers", patientId],
@@ -258,15 +267,15 @@ export const PatientUsers = (props: PatientProps) => {
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">
                 <Avatar
-                  name={formatDisplayName(user)}
+                  name={formatName(user, true)}
                   className="h-10 w-10"
                   imageUrl={user.profile_picture_url}
                 />
                 <div>
                   <h3 className="inline-flex">
-                    <TooltipComponent content={formatDisplayName(user)}>
+                    <TooltipComponent content={formatName(user)}>
                       <p className="text-sm font-medium text-gray-900 truncate max-w-32 sm:max-w-96 md:max-w-32 lg:max-w-28 xl:max-w-36">
-                        {formatDisplayName(user)}
+                        {formatName(user)}
                       </p>
                     </TooltipComponent>
                   </h3>
@@ -279,44 +288,48 @@ export const PatientUsers = (props: PatientProps) => {
                   </p>
                 </div>
               </div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    data-cy="patient-user-remove-button"
-                    className="absolute top-0 right-0"
-                  >
-                    <CareIcon icon="l-trash" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("remove_user")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      <Trans
-                        i18nKey="are_you_sure_want_to_remove"
-                        values={{ name: formatDisplayName(user) }}
-                        components={{
-                          strong: (
-                            <strong className="inline-block align-bottom truncate max-w-32 sm:max-w-96 md:max-w-32 lg:max-w-28 xl:max-w-36" />
-                          ),
-                        }}
-                      />
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      data-cy="patient-user-remove-confirm-button"
-                      onClick={() => removeUser(user.id)}
-                      className={cn(buttonVariants({ variant: "destructive" }))}
+              {canWritePatient && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      data-cy="patient-user-remove-button"
+                      className="absolute top-0 right-0"
                     >
-                      {t("remove")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                      <CareIcon icon="l-trash" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t("remove_user")}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        <Trans
+                          i18nKey="are_you_sure_want_to_remove"
+                          values={{ name: formatName(user) }}
+                          components={{
+                            strong: (
+                              <strong className="inline-block align-bottom truncate max-w-32 sm:max-w-96 md:max-w-32 lg:max-w-28 xl:max-w-36" />
+                            ),
+                          }}
+                        />
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        data-cy="patient-user-remove-confirm-button"
+                        onClick={() => removeUser(user.id)}
+                        className={cn(
+                          buttonVariants({ variant: "destructive" }),
+                        )}
+                      >
+                        {t("remove")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
             <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
               <div className="text-sm">
@@ -342,7 +355,7 @@ export const PatientUsers = (props: PatientProps) => {
             <div className="mr-4 text-xl font-bold text-secondary-900">
               {t("users")}
             </div>
-            <AddUserSheet patientId={patientId} />
+            {canWritePatient && <AddUserSheet patientId={patientId} />}
           </div>
           <ManageUsers />
         </div>

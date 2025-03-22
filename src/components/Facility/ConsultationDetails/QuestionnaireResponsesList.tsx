@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatDateTime, properCase } from "@/Utils/utils";
+import { formatDateTime, formatName, properCase } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -25,9 +25,9 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 interface Props {
   encounter?: Encounter;
   patientId: string;
-  facilityId?: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
+  canAccess?: boolean;
 }
 
 interface QuestionResponseProps {
@@ -77,8 +77,15 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
       <div className="text-xs text-gray-500">{question.text}</div>
       <div className="space-y-1">
         {response.values.map((valueObj, index) => {
-          const value = valueObj.value || valueObj.value_quantity?.value;
-          if (!value) return null;
+          const value = valueObj.value;
+
+          const coding = valueObj.coding;
+
+          const unit = valueObj.unit;
+
+          if (!value && !coding) return null;
+
+          const precedentUnit = unit ? unit : question.unit;
 
           return (
             <div
@@ -86,8 +93,13 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
               className="text-sm font-medium whitespace-pre-wrap"
             >
               {formatValue(value, question.type)}
-              {question.unit?.code && (
-                <span className="ml-1 text-xs">{question.unit.code}</span>
+              {precedentUnit && (
+                <span className="ml-1 text-xs">{precedentUnit.code}</span>
+              )}
+              {coding && (
+                <span className="ml-1 text-xs">
+                  {coding.display} ({coding.code})
+                </span>
               )}
               {index === response.values.length - 1 && response.note && (
                 <span className="ml-2 text-xs text-gray-500">
@@ -246,7 +258,7 @@ function ResponseCard({
               <Trans
                 i18nKey="by_name"
                 values={{
-                  by: `${item.created_by?.first_name || ""} ${item.created_by?.last_name || ""}${
+                  by: `${formatName(item.created_by)}${
                     item.created_by?.user_type
                       ? ` (${item.created_by.user_type})`
                       : ""
@@ -257,6 +269,23 @@ function ResponseCard({
             </span>
           </div>
         </div>
+      </div>
+
+      <div className="flex gap-2 mt-2 max-sm:flex-col">
+        <Link
+          href={`questionnaire_response/${item.id}/print`}
+          className="text-xs text-blue-600 underline"
+        >
+          {t("print_this_questionnaire_response")}
+        </Link>
+        <Link
+          href={`questionnaire/${item.questionnaire?.id}/responses/print`}
+          className="text-xs text-blue-600 underline"
+        >
+          {t("print_all_questionnaire_responses", {
+            title: item.questionnaire?.title,
+          })}
+        </Link>
       </div>
 
       {item.questionnaire && (
@@ -298,6 +327,7 @@ export default function QuestionnaireResponsesList({
   patientId,
   isPrintPreview = false,
   onlyUnstructured,
+  canAccess = true,
 }: Props) {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
@@ -318,6 +348,7 @@ export default function QuestionnaireResponsesList({
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
     }),
+    enabled: canAccess,
   });
 
   return (
