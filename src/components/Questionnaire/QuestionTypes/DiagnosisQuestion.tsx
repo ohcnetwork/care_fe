@@ -58,17 +58,6 @@ interface DiagnosisQuestionProps {
   disabled?: boolean;
 }
 
-const DIAGNOSIS_CATEGORY_DESCRIPTIONS = {
-  chronic_condition: {
-    title: "Chronic Condition",
-    description: "Long-term diagnosis (e.g., Hypertension)",
-  },
-  encounter_diagnosis: {
-    title: "Diagnosis",
-    description: "Specific to this visit only",
-  },
-} as const;
-
 const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
   clinical_status: "active",
@@ -106,8 +95,6 @@ export function DiagnosisQuestion({
   disabled,
 }: DiagnosisQuestionProps) {
   const isPreview = patientId === "preview";
-  const diagnoses =
-    (questionnaireResponse.values?.[0]?.value as DiagnosisRequest[]) || [];
   const [selectedCategory, setSelectedCategory] = useState<
     DiagnosisRequest["category"]
   >("encounter_diagnosis");
@@ -120,6 +107,8 @@ export function DiagnosisQuestion({
 
   // Sort diagnoses: chronic conditions first, then by date
   const sortedDiagnoses = useMemo(() => {
+    const diagnoses =
+      (questionnaireResponse.values?.[0]?.value as DiagnosisRequest[]) || [];
     return [...diagnoses].sort((a, b) => {
       // First sort by category (chronic conditions first)
       if (
@@ -133,16 +122,16 @@ export function DiagnosisQuestion({
       )
         return 1;
 
-      // Then sort by date within each category (this applies to both chronic and encounter diagnoses)
+      // Then sort by date within each category
       const dateA = a.onset?.onset_datetime
         ? new Date(a.onset.onset_datetime)
-        : new Date(0);
+        : new Date();
       const dateB = b.onset?.onset_datetime
         ? new Date(b.onset.onset_datetime)
-        : new Date(0);
+        : new Date();
       return dateA.getTime() - dateB.getTime();
     });
-  }, [diagnoses]);
+  }, [questionnaireResponse.values]);
 
   const { data: patientDiagnoses } = useQuery({
     queryKey: ["diagnoses", patientId],
@@ -338,10 +327,10 @@ export function DiagnosisQuestion({
                 <div className="flex items-center space-x-2">
                   <div className="flex-1">
                     <div className="font-medium">
-                      {DIAGNOSIS_CATEGORY_DESCRIPTIONS[category].title}
+                      {t(`Diagnosis_${category}__title`)}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {DIAGNOSIS_CATEGORY_DESCRIPTIONS[category].description}
+                      {t(`Diagnosis_${category}__description`)}
                     </div>
                   </div>
                   {selectedCategory === category && (
@@ -495,7 +484,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   : "bg-gray-100 text-gray-700",
               )}
             >
-              {DIAGNOSIS_CATEGORY_DESCRIPTIONS[diagnosis.category].title}
+              {t(`Diagnosis_${diagnosis.category}__title`)}
             </div>
           </div>
           <div className="md:hidden shrink-0">
