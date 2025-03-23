@@ -63,10 +63,19 @@ const formSchema = z
         (date) => !date || isBefore(new Date(date), startOfTomorrow()),
         t("manufacture_date_cannot_be_in_future"),
       ),
+    registered_name: z.preprocess(
+      (value) => (typeof value === "string" ? value.trim() : value),
+      z
+        .string()
+        .min(1, { message: t("enter_atleast_one_character") })
+        .regex(/^[a-zA-Z\s-_]+$/, {
+          message: t("registered_name_must_contain_only_letters_spaces"),
+        }),
+    ),
     expiration_date: z.string().optional(),
     lot_number: z.string().optional(),
     serial_number: z.string().optional(),
-    registered_name: z.string().min(1, { message: t("required") }),
+
     user_friendly_name: z.string().optional(),
     model_number: z.string().optional(),
     part_number: z.string().optional(),
