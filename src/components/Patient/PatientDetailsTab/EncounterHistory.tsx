@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -14,15 +16,27 @@ import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { EncounterCard } from "@/components/Facility/EncounterCard";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 
 const EncounterHistory = (props: PatientProps) => {
-  const { patientId, facilityId, patientData } = props;
+  const { patientData, facilityId } = props;
+  const patientId = patientData.id;
 
   const { t } = useTranslation();
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
+  const { hasPermission } = usePermissions();
+  const { canViewPatients } = getPermissions(
+    hasPermission,
+    patientData.permissions,
+  );
+  const { goBack } = useAppHistory();
 
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounterHistory", patientId, qParams],
@@ -33,7 +47,16 @@ const EncounterHistory = (props: PatientProps) => {
         offset: ((qParams.page ?? 1) - 1) * 5,
       },
     }),
+    enabled: canViewPatients,
   });
+
+  useEffect(() => {
+    if (!canViewPatients) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack(`/facility/${facilityId}/patient/${patientId}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canViewPatients]);
 
   return (
     <div className="mt-8">
@@ -107,6 +130,7 @@ const EncounterHistory = (props: PatientProps) => {
                     <EncounterCard
                       key={encounter.id}
                       encounter={encounter}
+                      permissions={patientData.permissions ?? []}
                       facilityId={facilityId}
                     />
                   </li>

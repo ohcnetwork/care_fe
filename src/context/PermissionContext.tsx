@@ -36,10 +36,10 @@ export function PermissionProvider({
       objectPermissions?: string[],
     ) => {
       if (isSuperAdmin) return true;
-      return (
-        userPermissions.includes(permission) ||
-        (objectPermissions?.includes(permission) ?? false)
-      );
+      if (objectPermissions) {
+        return objectPermissions.includes(permission);
+      }
+      return userPermissions.includes(permission);
     };
 
     return {
