@@ -74,21 +74,23 @@ export function DiagnosisList({
             <Skeleton className="h-[100px] w-full" />
           </CardContent>
         )}
-        {chronicConditions?.results.length && (
+        {chronicConditions?.results.length ? (
           <DiagnosisTable
             diagnoses={chronicConditions?.results}
-            title={t("chronic_conditions")}
+            title={t("chronic_condition", {
+              count: 2,
+            })}
           />
-        )}
+        ) : null}
         {isDiagnosesLoading && (
           <CardContent className="px-2 pb-2">
             <Skeleton className="h-[100px] w-full" />
             <Skeleton className="h-[100px] w-full" />
           </CardContent>
         )}
-        {diagnoses?.results?.length && (
+        {diagnoses?.results?.length ? (
           <DiagnosisTable diagnoses={diagnoses.results} />
-        )}
+        ) : null}
       </div>
     </DiagnosisListLayout>
   );
