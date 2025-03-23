@@ -128,7 +128,7 @@ export default function EncounterActions({
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
-                    className={cn(buttonVariants({ variant: "primary" }))}
+                    className={buttonVariants({ variant: "primary" })}
                     onClick={handleMarkAsComplete}
                     data-cy="encounter-complete-dropdown"
                   >
