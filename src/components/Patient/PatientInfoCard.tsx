@@ -6,6 +6,7 @@ import {
   CircleDashed,
   Clock,
   Droplet,
+  SignatureIcon,
 } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -19,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { ConsentSheet } from "@/components/Consent/ConsentSheet";
 import EncounterActions from "@/components/Encounter/EncounterActions";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
@@ -37,7 +38,11 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import {
+  Encounter,
+  completedEncounterStatus,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
@@ -436,6 +441,18 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   ) : (
                     <></>
                   )}
+                  <Badge variant="outline">
+                    <ConsentSheet
+                      patientId={props.encounter.patient.id}
+                      encounterId={props.encounter.id}
+                      trigger={
+                        <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                          <SignatureIcon className="h-4 w-4 text-green-600" />
+                          {t("manage_consents")}
+                        </div>
+                      }
+                    />
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -453,12 +470,13 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="primary">
-                    {t("update")}
+                    {inactiveEncounterStatus.includes(encounter.status)
+                      ? t("actions")
+                      : t("update")}
                     <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
                   <EncounterActions encounter={encounter} layout="dropdown" />
                   <PLUGIN_Component
                     __name="PatientInfoCardActions"
