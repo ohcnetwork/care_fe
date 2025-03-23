@@ -36,6 +36,7 @@ export function DiagnosisList({
       queryParams: {
         category: ["encounter_diagnosis"],
         clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+        exclude_verification_status: "entered_in_error",
         ...(encounterId ? { encounter: encounterId } : {}),
       },
     }),
@@ -49,6 +50,7 @@ export function DiagnosisList({
         queryParams: {
           category: "chronic_condition",
           clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+          exclude_verification_status: "entered_in_error",
         },
       }),
     });

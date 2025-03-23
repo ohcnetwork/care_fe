@@ -33,6 +33,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import query from "@/Utils/request/query";
 import {
+  ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_CATEGORY,
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
@@ -142,7 +143,8 @@ export function DiagnosisQuestion({
       queryParams: {
         encounter: encounterId,
         limit: 100,
-        category: ["encounter_diagnosis"],
+        category: "encounter_diagnosis",
+        exclude_verification_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
@@ -153,8 +155,10 @@ export function DiagnosisQuestion({
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
-        category: ["chronic_condition"],
+        category: "chronic_condition",
         limit: 100,
+        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+        exclude_verification_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
