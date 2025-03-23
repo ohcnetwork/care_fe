@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { Link, useQueryParams } from "raviger";
+import { Link, usePathParams, useQueryParams } from "raviger";
 import { useCallback, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -23,8 +23,9 @@ import {
 } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
+import { userChildProps } from "@/components/Common/UserColumns";
 
-import useSlug from "@/hooks/useSlug";
+import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import {
@@ -32,6 +33,7 @@ import {
   formatTimeShort,
   humanizeStrings,
 } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
@@ -51,11 +53,6 @@ import {
   ScheduleTemplate,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
-
-type Props = {
-  userData: UserBase;
-};
 
 type AvailabilityTabQueryParams = {
   tab?: "schedule" | "exceptions" | null;
@@ -64,13 +61,18 @@ type AvailabilityTabQueryParams = {
   valid_to?: string | null;
 };
 
-export default function UserAvailabilityTab({ userData: user }: Props) {
+export default function UserAvailabilityTab({
+  userData: user,
+  permissions,
+}: userChildProps) {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<AvailabilityTabQueryParams>();
   const view = qParams.tab || "schedule";
   const [month, setMonth] = useState(new Date());
+  const { hasPermission } = usePermissions();
+  const { canViewSchedule } = getPermissions(hasPermission, permissions ?? []);
 
-  const facilityId = useSlug("facility");
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
 
   const templatesQuery = useQuery({
     queryKey: ["user-schedule-templates", { facilityId, userId: user.id }],
@@ -78,7 +80,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
     }),
-    enabled: !!facilityId,
+    enabled: !!facilityId && canViewSchedule,
   });
 
   const exceptionsQuery = useQuery({
@@ -87,6 +89,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
     }),
+    enabled: !!facilityId && canViewSchedule,
   });
 
   const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
