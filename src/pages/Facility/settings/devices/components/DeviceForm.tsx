@@ -68,11 +68,8 @@ const formSchema = z
     serial_number: z.string().optional(),
     registered_name: z
       .string()
-      .min(1, { message: t("required") })
-      .transform((name) => name.trim()),
-    // .refine((name) => /^[^\s].*[^\s]$/.test(name), {
-    //   message: t("registered_name_invalid"),
-    // }),
+      .trim()
+      .min(1, { message: t("required") }),
     user_friendly_name: z.string().optional(),
     model_number: z.string().optional(),
     part_number: z.string().optional(),
