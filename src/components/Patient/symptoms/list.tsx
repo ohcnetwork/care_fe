@@ -70,7 +70,7 @@ export function SymptomsList({
   );
 
   const { data: inactiveCheckData } = useQuery({
-    queryKey: ["inactiveDiagnosesCheck", patientId, encounter?.id],
+    queryKey: ["inactiveSymptomsCheck", patientId, encounter?.id],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
       queryParams: {
@@ -86,7 +86,7 @@ export function SymptomsList({
   });
 
   const { data: resolvedCheckData } = useQuery({
-    queryKey: ["resolvedDiagnosesCheck", patientId, encounter?.id],
+    queryKey: ["resolvedSymptomsCheck", patientId, encounter?.id],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
       queryParams: {
