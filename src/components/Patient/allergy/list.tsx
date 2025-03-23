@@ -75,6 +75,7 @@ export function AllergyList({
   dialogView = false,
 }: AllergyListProps) {
   const [allAllergies, setAllAllergies] = useState<AllergyIntolerance[]>([]);
+  const [localDialogView, setLocalDialogView] = useState(dialogView);
   const [page, setPage] = useState(1);
   const limit = 14;
 
@@ -83,7 +84,14 @@ export function AllergyList({
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["allergies", patientId, encounter?.id, encounter?.status, page],
+    queryKey: [
+      "allergies",
+      patientId,
+      encounter?.id,
+      encounter?.status,
+      page,
+      localDialogView,
+    ],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: {
@@ -94,6 +102,7 @@ export function AllergyList({
           : undefined,
         limit: limit,
         offset: (page - 1) * limit,
+        clinical_status: localDialogView ? undefined : "active",
       },
     }),
   });
@@ -106,14 +115,55 @@ export function AllergyList({
     }
   }, [allergies, page]);
 
+  const filteredAllergies = allAllergies?.filter(
+    (allergy) => allergy.verification_status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorEntry = allAllergies.some(
+    (allergy) => allergy.verification_status === "entered_in_error",
+  );
+
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1);
   };
   const hasMorePages = (allergies?.count || 0) > page * limit;
+
+  const { data: inactiveCheckData } = useQuery({
+    queryKey: ["inactiveAllergiesCheck", patientId, encounter?.id],
+    queryFn: query(allergyIntoleranceApi.getAllergy, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: completedEncounterStatus.includes(
+          encounter?.status as string,
+        )
+          ? encounter?.id
+          : undefined,
+        limit: 1,
+        clinical_status: "inactive",
+      },
+    }),
+  });
+
+  const { data: resolvedCheckData } = useQuery({
+    queryKey: ["resolvedAllergiesCheck", patientId, encounter?.id],
+    queryFn: query(allergyIntoleranceApi.getAllergy, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: completedEncounterStatus.includes(
+          encounter?.status as string,
+        )
+          ? encounter?.id
+          : undefined,
+        limit: 1,
+        clinical_status: "resolved",
+      },
+    }),
+  });
+
   if (isLoading) {
     return (
       <AllergyListLayout
-        dialogView={dialogView}
+        dialogView={localDialogView}
         readOnly={readOnly}
         className={className}
       >
@@ -124,21 +174,15 @@ export function AllergyList({
     );
   }
 
-  const filteredAllergies = allAllergies?.filter(
-    (allergy) => allergy.verification_status !== "entered_in_error",
-  );
-
-  const hasInActiveRecords = allergies?.results?.some(
-    (allergy) =>
-      allergy.verification_status === "entered_in_error" ||
-      allergy.clinical_status === "inactive" ||
-      allergy.clinical_status === "resolved",
-  );
+  const hasInActiveRecords =
+    (inactiveCheckData?.results && inactiveCheckData.results.length > 0) ||
+    (resolvedCheckData?.results && resolvedCheckData.results.length > 0) ||
+    hasEnteredInErrorEntry;
 
   if (!filteredAllergies?.length) {
     return (
       <AllergyListLayout
-        dialogView={dialogView}
+        dialogView={localDialogView}
         readOnly={readOnly}
         className={className}
       >
@@ -238,7 +282,7 @@ export function AllergyList({
     <AllergyListLayout
       className={className}
       readOnly={readOnly}
-      dialogView={dialogView}
+      dialogView={localDialogView}
     >
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
@@ -265,36 +309,24 @@ export function AllergyList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredAllergies
-            .filter((allergy) => {
-              if (allergy.verification_status === "entered_in_error") {
-                return false;
-              }
-
-              if (!dialogView) {
-                return (
-                  allergy.clinical_status !== "inactive" &&
-                  allergy.clinical_status !== "resolved"
-                );
-              }
-
-              return true;
-            })
-            .map((allergy) => (
-              <AllergyRow key={allergy.id} allergy={allergy} />
-            ))}
+          {filteredAllergies.map((allergy) => (
+            <AllergyRow key={allergy.id} allergy={allergy} />
+          ))}
         </TableBody>
       </Table>
       {hasInActiveRecords && (
         <>
-          {!dialogView && (
+          {!localDialogView && (
             <FullViewDialog
               patientId={patientId}
               initialTab="allergies"
               encounter={encounter}
+              onClose={() => {
+                setLocalDialogView(false);
+              }}
             />
           )}
-          {dialogView && hasMorePages && (
+          {localDialogView && hasMorePages && (
             <div>
               <div className="border-b border-dashed border-gray-200 my-2" />
               <div className="flex justify-center">

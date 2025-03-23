@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -18,18 +18,28 @@ interface FullViewDialogProps {
   patientId: string;
   initialTab?: "allergies" | "symptoms" | "diagnoses" | "questionnaire";
   encounter?: Encounter;
+  onClose?: () => void;
 }
 
 export function FullViewDialog({
   patientId,
   initialTab = "symptoms",
   encounter,
+  onClose,
 }: FullViewDialogProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   type Tabkey = "allergies" | "symptoms" | "diagnoses" | "questionnaire";
   const [activeTab, setActiveTab] = useState<Tabkey>(initialTab);
   const tabOrder = ["allergies", "symptoms", "diagnoses", "questionnaire"];
+
+  useEffect(() => {
+    return () => {
+      if (onClose) {
+        onClose();
+      }
+    };
+  });
 
   // Function to navigate to the previous tab
   const navigateToPreviousTab = () => {

@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FullViewDialog } from "@/components/Patient/shared/FullViewDialog";
 
 import query from "@/Utils/request/query";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
@@ -36,6 +36,7 @@ export function SymptomsList({
   readOnly = false,
 }: SymptomsListProps) {
   const [allSymptoms, setAllSymptoms] = useState<Symptom[]>([]);
+  const [localDialogView, setLocalDialogView] = useState(dialogView);
   const [page, setPage] = useState(1);
   const limit = 14;
 
@@ -44,12 +45,59 @@ export function SymptomsList({
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["symptoms", patientId, encounter?.id],
+    queryKey: ["symptoms", patientId, encounter?.id, page, localDialogView],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
-      queryParams: encounter?.id
-        ? { encounter: encounter.id, limit: limit }
-        : { limit: limit },
+      queryParams: {
+        encounter: completedEncounterStatus.includes(
+          encounter?.status as string,
+        )
+          ? encounter?.id
+          : undefined,
+        limit: limit,
+        offset: (page - 1) * limit,
+        clinical_status: localDialogView ? undefined : "active",
+      },
+    }),
+  });
+
+  const filteredSymptoms = allSymptoms?.filter(
+    (symptom) => symptom.verification_status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorEntry = allSymptoms.some(
+    (symptom) => symptom.verification_status === "entered_in_error",
+  );
+
+  const { data: inactiveCheckData } = useQuery({
+    queryKey: ["inactiveDiagnosesCheck", patientId, encounter?.id],
+    queryFn: query(symptomApi.listSymptoms, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: completedEncounterStatus.includes(
+          encounter?.status as string,
+        )
+          ? encounter?.id
+          : undefined,
+        limit: 1,
+        clinical_status: "inactive",
+      },
+    }),
+  });
+
+  const { data: resolvedCheckData } = useQuery({
+    queryKey: ["resolvedDiagnosesCheck", patientId, encounter?.id],
+    queryFn: query(symptomApi.listSymptoms, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: completedEncounterStatus.includes(
+          encounter?.status as string,
+        )
+          ? encounter?.id
+          : undefined,
+        limit: 1,
+        clinical_status: "resolved",
+      },
     }),
   });
 
@@ -72,7 +120,7 @@ export function SymptomsList({
       <SymptomListLayout
         readOnly={readOnly}
         className={className}
-        dialogView={dialogView}
+        dialogView={localDialogView}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -81,21 +129,15 @@ export function SymptomsList({
     );
   }
 
-  const filteredSymptoms = allSymptoms?.filter(
-    (symptom) => symptom.verification_status !== "entered_in_error",
-  );
-
-  const hasInActiveRecords = allSymptoms.some(
-    (symptom) =>
-      symptom.verification_status === "entered_in_error" ||
-      symptom.clinical_status === "inactive" ||
-      symptom.clinical_status === "resolved",
-  );
+  const hasInActiveRecords =
+    (inactiveCheckData?.results && inactiveCheckData.results.length > 0) ||
+    (resolvedCheckData?.results && resolvedCheckData.results.length > 0) ||
+    hasEnteredInErrorEntry;
 
   if (!filteredSymptoms?.length) {
     return (
       <SymptomListLayout
-        dialogView={dialogView}
+        dialogView={localDialogView}
         className={className}
         readOnly={readOnly}
       >
@@ -109,7 +151,7 @@ export function SymptomsList({
   return (
     <SymptomListLayout
       className={className}
-      dialogView={dialogView}
+      dialogView={localDialogView}
       readOnly={readOnly}
     >
       <SymptomTable
@@ -119,13 +161,6 @@ export function SymptomsList({
               return false;
             }
 
-            if (!dialogView) {
-              return (
-                symptom.clinical_status !== "inactive" &&
-                symptom.clinical_status !== "resolved"
-              );
-            }
-
             return true;
           }),
         ]}
@@ -133,14 +168,17 @@ export function SymptomsList({
 
       {hasInActiveRecords && (
         <>
-          {!dialogView && encounter?.id && (
+          {!localDialogView && encounter?.id && (
             <FullViewDialog
               patientId={patientId}
               initialTab="symptoms"
               encounter={encounter}
+              onClose={() => {
+                setLocalDialogView(false);
+              }}
             />
           )}
-          {dialogView && hasMorePages && (
+          {localDialogView && hasMorePages && (
             <div>
               <div className="border-b border-dashed border-gray-200 my-2" />
               <div className="flex justify-center">

@@ -16,7 +16,7 @@ import { FullViewDialog } from "@/components/Patient/shared/FullViewDialog";
 import query from "@/Utils/request/query";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 
 import { DiagnosisTable } from "./DiagnosisTable";
 
@@ -36,6 +36,7 @@ export function DiagnosisList({
   readOnly = false,
 }: DiagnosisListProps) {
   const [allDiagnoses, setAllDiagnoses] = useState<Diagnosis[]>([]);
+  const [localDialogView, setLocalDialogView] = useState(dialogView);
   const [page, setPage] = useState(1);
   const limit = 14;
 
@@ -44,12 +45,59 @@ export function DiagnosisList({
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["diagnosis", patientId, encounter?.id],
+    queryKey: ["diagnosis", patientId, encounter?.id, page, localDialogView],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
-      queryParams: encounter?.id
-        ? { encounter: encounter.id, limit: limit }
-        : { limit: limit },
+      queryParams: {
+        encounter: completedEncounterStatus.includes(
+          encounter?.status as string,
+        )
+          ? encounter?.id
+          : undefined,
+        limit: limit,
+        offset: (page - 1) * limit,
+        clinical_status: localDialogView ? undefined : "active",
+      },
+    }),
+  });
+
+  const filteredDiagnoses = allDiagnoses?.filter(
+    (diagnosis) => diagnosis.verification_status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorEntry = allDiagnoses.some(
+    (diagnose) => diagnose.verification_status === "entered_in_error",
+  );
+
+  const { data: inactiveCheckData } = useQuery({
+    queryKey: ["inactiveDiagnosesCheck", patientId, encounter?.id],
+    queryFn: query(diagnosisApi.listDiagnosis, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: completedEncounterStatus.includes(
+          encounter?.status as string,
+        )
+          ? encounter?.id
+          : undefined,
+        limit: 1,
+        clinical_status: "inactive",
+      },
+    }),
+  });
+
+  const { data: resolvedCheckData } = useQuery({
+    queryKey: ["resolvedDiagnosesCheck", patientId, encounter?.id],
+    queryFn: query(diagnosisApi.listDiagnosis, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: completedEncounterStatus.includes(
+          encounter?.status as string,
+        )
+          ? encounter?.id
+          : undefined,
+        limit: 1,
+        clinical_status: "resolved",
+      },
     }),
   });
 
@@ -72,7 +120,7 @@ export function DiagnosisList({
       <DiagnosisListLayout
         className={className}
         readOnly={readOnly}
-        dialogView={dialogView}
+        dialogView={localDialogView}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -81,23 +129,17 @@ export function DiagnosisList({
     );
   }
 
-  const filteredDiagnoses = allDiagnoses?.filter(
-    (diagnosis) => diagnosis.verification_status !== "entered_in_error",
-  );
-
-  const hasInActiveRecords = allDiagnoses.some(
-    (diagnose) =>
-      diagnose.verification_status === "entered_in_error" ||
-      diagnose.clinical_status === "inactive" ||
-      diagnose.clinical_status === "resolved",
-  );
+  const hasInActiveRecords =
+    (inactiveCheckData?.results && inactiveCheckData.results.length > 0) ||
+    (resolvedCheckData?.results && resolvedCheckData.results.length > 0) ||
+    hasEnteredInErrorEntry;
 
   if (!filteredDiagnoses?.length) {
     return (
       <DiagnosisListLayout
         className={className}
         readOnly={readOnly}
-        dialogView={dialogView}
+        dialogView={localDialogView}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
@@ -110,7 +152,7 @@ export function DiagnosisList({
     <DiagnosisListLayout
       className={className}
       readOnly={readOnly}
-      dialogView={dialogView}
+      dialogView={localDialogView}
     >
       <>
         <DiagnosisTable
@@ -120,13 +162,6 @@ export function DiagnosisList({
                 return false;
               }
 
-              if (!dialogView) {
-                return (
-                  diagnosis.clinical_status !== "inactive" &&
-                  diagnosis.clinical_status !== "resolved"
-                );
-              }
-
               return true;
             }),
           ]}
@@ -134,14 +169,17 @@ export function DiagnosisList({
 
         {hasInActiveRecords && (
           <>
-            {!dialogView && encounter?.id && (
+            {!localDialogView && encounter?.id && (
               <FullViewDialog
                 patientId={patientId}
                 initialTab="diagnoses"
                 encounter={encounter}
+                onClose={() => {
+                  setLocalDialogView(false);
+                }}
               />
             )}
-            {dialogView && hasMorePages && (
+            {localDialogView && hasMorePages && (
               <div>
                 <div className="border-b border-dashed border-gray-200 my-2" />
                 <div className="flex justify-center">
