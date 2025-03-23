@@ -128,7 +128,7 @@ export default function LocationView({ id, facilityId }: Props) {
           <BreadcrumbSeparator />
           {breadcrumbs.map((breadcrumb, index) => (
             <React.Fragment key={breadcrumb.id}>
-              <BreadcrumbItem key={breadcrumb.id}>
+              <BreadcrumbItem>
                 {index === breadcrumbs.length - 1 ? (
                   <span className="font-semibold text-gray-900">
                     {breadcrumb.name}
