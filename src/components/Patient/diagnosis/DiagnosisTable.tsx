@@ -80,7 +80,7 @@ export function DiagnosisTable({
                     variant="outline"
                     className="bg-yellow-100 text-yellow-700 text-xs"
                   >
-                    {t("chronic_condition")}
+                    {t("chronic_condition", { count: 1 })}
                   </Badge>
                 )}
               </div>
