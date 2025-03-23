@@ -6,7 +6,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -58,17 +58,6 @@ interface DiagnosisQuestionProps {
   disabled?: boolean;
 }
 
-const DIAGNOSIS_CATEGORY_DESCRIPTIONS = {
-  chronic_condition: {
-    title: "Chronic Condition",
-    description: "Long-term diagnosis (e.g., Hypertension)",
-  },
-  encounter_diagnosis: {
-    title: "Diagnosis",
-    description: "Specific to this visit only",
-  },
-} as const;
-
 const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
   clinical_status: "active",
@@ -108,8 +97,6 @@ export function DiagnosisQuestion({
   disabled,
 }: DiagnosisQuestionProps) {
   const isPreview = patientId === "preview";
-  const diagnoses =
-    (questionnaireResponse.values?.[0]?.value as DiagnosisRequest[]) || [];
   const [selectedCategory, setSelectedCategory] = useState<
     DiagnosisRequest["category"]
   >("encounter_diagnosis");
@@ -121,19 +108,32 @@ export function DiagnosisQuestion({
   });
 
   // Sort diagnoses: chronic conditions first, then by date
-  const sortedDiagnoses = [...diagnoses].sort((a, b) => {
-    if (
-      a.category === "chronic_condition" &&
-      b.category !== "chronic_condition"
-    )
-      return -1;
-    if (
-      a.category !== "chronic_condition" &&
-      b.category === "chronic_condition"
-    )
-      return 1;
-    return 0;
-  });
+  const sortedDiagnoses = useMemo(() => {
+    const diagnoses =
+      (questionnaireResponse.values?.[0]?.value as DiagnosisRequest[]) || [];
+    return [...diagnoses].sort((a, b) => {
+      // First sort by category (chronic conditions first)
+      if (
+        a.category === "chronic_condition" &&
+        b.category !== "chronic_condition"
+      )
+        return -1;
+      if (
+        a.category !== "chronic_condition" &&
+        b.category === "chronic_condition"
+      )
+        return 1;
+
+      // Then sort by date within each category
+      const dateA = a.onset?.onset_datetime
+        ? new Date(a.onset.onset_datetime)
+        : new Date();
+      const dateB = b.onset?.onset_datetime
+        ? new Date(b.onset.onset_datetime)
+        : new Date();
+      return dateA.getTime() - dateB.getTime();
+    });
+  }, [questionnaireResponse.values]);
 
   const { data: patientDiagnoses } = useQuery({
     queryKey: ["diagnoses", patientId],
@@ -186,7 +186,7 @@ export function DiagnosisQuestion({
   const handleCategoryConfirm = () => {
     if (!selectedCode) return;
 
-    const isDuplicate = diagnoses.some(
+    const isDuplicate = sortedDiagnoses.some(
       (diagnosis) =>
         diagnosis.code.code === selectedCode.code &&
         diagnosis.verification_status !== "entered_in_error",
@@ -198,7 +198,7 @@ export function DiagnosisQuestion({
     }
 
     const newDiagnoses = [
-      ...diagnoses,
+      ...sortedDiagnoses,
       {
         ...newDiagnosis,
         code: selectedCode,
@@ -226,10 +226,10 @@ export function DiagnosisQuestion({
   };
 
   const handleRemoveDiagnosis = (index: number) => {
-    const diagnosis = diagnoses[index];
+    const diagnosis = sortedDiagnoses[index];
     if (diagnosis.id) {
       // For existing records, update verification status to entered_in_error
-      const newDiagnoses = diagnoses.map((d, i) =>
+      const newDiagnoses = sortedDiagnoses.map((d, i) =>
         i === index
           ? { ...d, verification_status: "entered_in_error" as const }
           : d,
@@ -245,7 +245,7 @@ export function DiagnosisQuestion({
       );
     } else {
       // For new records, remove them completely
-      const newDiagnoses = diagnoses.filter((_, i) => i !== index);
+      const newDiagnoses = sortedDiagnoses.filter((_, i) => i !== index);
       updateQuestionnaireResponseCB(
         [
           {
@@ -262,7 +262,7 @@ export function DiagnosisQuestion({
     index: number,
     updates: Partial<DiagnosisRequest>,
   ) => {
-    const newDiagnoses = diagnoses.map((diagnosis, i) =>
+    const newDiagnoses = sortedDiagnoses.map((diagnosis, i) =>
       i === index ? { ...diagnosis, ...updates, dirty: true } : diagnosis,
     );
     updateQuestionnaireResponseCB(
@@ -278,7 +278,7 @@ export function DiagnosisQuestion({
 
   return (
     <div className="space-y-4">
-      {diagnoses.length > 0 && (
+      {sortedDiagnoses.length > 0 && (
         <div className="rounded-lg border">
           <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
             <div className="col-span-5">{t("diagnosis")}</div>
@@ -344,10 +344,10 @@ export function DiagnosisQuestion({
                 <div className="flex items-center space-x-2">
                   <div className="flex-1">
                     <div className="font-medium">
-                      {DIAGNOSIS_CATEGORY_DESCRIPTIONS[category].title}
+                      {t(`Diagnosis_${category}__title`)}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {DIAGNOSIS_CATEGORY_DESCRIPTIONS[category].description}
+                      {t(`Diagnosis_${category}__description`)}
                     </div>
                   </div>
                   {selectedCategory === category && (
@@ -501,7 +501,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   : "bg-gray-100 text-gray-700",
               )}
             >
-              {DIAGNOSIS_CATEGORY_DESCRIPTIONS[diagnosis.category].title}
+              {t(`Diagnosis_${diagnosis.category}__title`)}
             </div>
           </div>
           <div className="md:hidden shrink-0">
