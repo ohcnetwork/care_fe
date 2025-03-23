@@ -1,5 +1,6 @@
 import { useRoutes } from "raviger";
 
+import { Authenticate } from "@/components/Auth/Authenticate";
 import Login from "@/components/Auth/Login";
 import ResetPassword from "@/components/Auth/ResetPassword";
 import InvalidReset from "@/components/ErrorPages/InvalidReset";
@@ -25,6 +26,7 @@ export const routes = {
     page: string;
   }) => <PatientLogin facilityId={facilityId} staffId={staffId} page={page} />,
   "/login": () => <Login />,
+  "/2fa": () => <Authenticate />,
   "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: { token: string }) => (
     <ResetPassword token={token} />

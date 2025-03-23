@@ -12,7 +12,7 @@ describe("User Creation", () => {
   const userRole = "Doctor";
 
   beforeEach(() => {
-    cy.loginByApi("admin");
+    cy.loginByApi("orgadmin");
     cy.visit("/");
   });
 
@@ -38,7 +38,7 @@ describe("User Creation", () => {
       ward: "4",
     };
 
-    facilityCreation.navigateToOrganization("Kerala");
+    facilityCreation.navigateToGovernance("Kerala");
 
     userCreation
       .navigateToUsersTab()
