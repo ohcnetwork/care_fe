@@ -14,9 +14,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FullViewDialog } from "@/components/Patient/shared/FullViewDialog";
 
 import query from "@/Utils/request/query";
-import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
+import {
+  ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
+  Diagnosis,
+  INACTIVE_DIAGNOSIS_CLINICAL_STATUS,
+} from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter";
 
 import { DiagnosisTable } from "./DiagnosisTable";
 
@@ -45,58 +49,52 @@ export function DiagnosisList({
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["diagnosis", patientId, encounter?.id, page, localDialogView],
+    queryKey: [
+      "encounter_diagnosis",
+      patientId,
+      encounter?.id,
+      page,
+      localDialogView,
+    ],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
-        encounter: completedEncounterStatus.includes(
-          encounter?.status as string,
-        )
-          ? encounter?.id
-          : undefined,
+        category: ["encounter_diagnosis"],
         limit: limit,
         offset: (page - 1) * limit,
-        clinical_status: localDialogView ? undefined : "active",
+        clinical_status: localDialogView
+          ? undefined
+          : ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+        exclude_verification_status: "entered_in_error",
+        ...(encounter?.id ? { encounter: encounter?.id } : {}),
       },
     }),
   });
 
-  const filteredDiagnoses = allDiagnoses?.filter(
-    (diagnosis) => diagnosis.verification_status !== "entered_in_error",
-  );
-
-  const hasEnteredInErrorEntry = allDiagnoses.some(
-    (diagnose) => diagnose.verification_status === "entered_in_error",
-  );
+  const { data: chronicConditions, isLoading: isChronicConditionsLoading } =
+    useQuery({
+      queryKey: ["chronic_condition", patientId, encounter?.id],
+      queryFn: query(diagnosisApi.listDiagnosis, {
+        pathParams: { patientId },
+        queryParams: {
+          category: "chronic_condition",
+          clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+          exclude_verification_status: "entered_in_error",
+        },
+      }),
+    });
 
   const { data: inactiveCheckData } = useQuery({
     queryKey: ["inactiveDiagnosesCheck", patientId, encounter?.id],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
-        encounter: completedEncounterStatus.includes(
-          encounter?.status as string,
-        )
-          ? encounter?.id
-          : undefined,
         limit: 1,
-        clinical_status: "inactive",
-      },
-    }),
-  });
-
-  const { data: resolvedCheckData } = useQuery({
-    queryKey: ["resolvedDiagnosesCheck", patientId, encounter?.id],
-    queryFn: query(diagnosisApi.listDiagnosis, {
-      pathParams: { patientId },
-      queryParams: {
-        encounter: completedEncounterStatus.includes(
-          encounter?.status as string,
-        )
-          ? encounter?.id
-          : undefined,
-        limit: 1,
-        clinical_status: "resolved",
+        clinical_status: (
+          INACTIVE_DIAGNOSIS_CLINICAL_STATUS as unknown as string[]
+        ).join(","),
+        exclude_verification_status: "entered_in_error",
+        ...(encounter?.id ? { encounter: encounter?.id } : {}),
       },
     }),
   });
@@ -130,11 +128,9 @@ export function DiagnosisList({
   }
 
   const hasInActiveRecords =
-    (inactiveCheckData?.results && inactiveCheckData.results.length > 0) ||
-    (resolvedCheckData?.results && resolvedCheckData.results.length > 0) ||
-    hasEnteredInErrorEntry;
+    inactiveCheckData?.results && inactiveCheckData.results.length > 0;
 
-  if (!filteredDiagnoses?.length) {
+  if (!allDiagnoses?.length && !chronicConditions?.results.length) {
     return (
       <DiagnosisListLayout
         className={className}
@@ -154,18 +150,30 @@ export function DiagnosisList({
       readOnly={readOnly}
       dialogView={localDialogView}
     >
-      <>
-        <DiagnosisTable
-          diagnoses={[
-            ...filteredDiagnoses.filter((diagnosis) => {
-              if (diagnosis.verification_status === "entered_in_error") {
-                return false;
-              }
-
-              return true;
-            }),
-          ]}
-        />
+      <div className="space-y-2">
+        {isChronicConditionsLoading && (
+          <CardContent className="px-2 pb-2">
+            <Skeleton className="h-[100px] w-full" />
+            <Skeleton className="h-[100px] w-full" />
+          </CardContent>
+        )}
+        {chronicConditions?.results.length ? (
+          <DiagnosisTable
+            diagnoses={chronicConditions?.results}
+            title={t("chronic_condition", {
+              count: 2,
+            })}
+          />
+        ) : null}
+        {isLoading && (
+          <CardContent className="px-2 pb-2">
+            <Skeleton className="h-[100px] w-full" />
+            <Skeleton className="h-[100px] w-full" />
+          </CardContent>
+        )}
+        {diagnoses?.results?.length ? (
+          <DiagnosisTable diagnoses={allDiagnoses} />
+        ) : null}
 
         {hasInActiveRecords && (
           <>
@@ -197,7 +205,24 @@ export function DiagnosisList({
             )}
           </>
         )}
-      </>
+        {chronicConditions?.results.length ? (
+          <DiagnosisTable
+            diagnoses={chronicConditions?.results}
+            title={t("chronic_condition", {
+              count: 2,
+            })}
+          />
+        ) : null}
+        {isLoading && (
+          <CardContent className="px-2 pb-2">
+            <Skeleton className="h-[100px] w-full" />
+            <Skeleton className="h-[100px] w-full" />
+          </CardContent>
+        )}
+        {diagnoses?.results?.length ? (
+          <DiagnosisTable diagnoses={diagnoses.results} />
+        ) : null}
+      </div>
     </DiagnosisListLayout>
   );
 }

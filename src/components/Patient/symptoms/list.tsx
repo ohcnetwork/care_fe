@@ -15,7 +15,10 @@ import { FullViewDialog } from "@/components/Patient/shared/FullViewDialog";
 
 import query from "@/Utils/request/query";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
-import { Symptom } from "@/types/emr/symptom/symptom";
+import {
+  INACTIVE_SYMPTOM_CLINICAL_STATUS,
+  Symptom,
+} from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
 import { SymptomTable } from "./SymptomTable";
@@ -49,25 +52,14 @@ export function SymptomsList({
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
       queryParams: {
-        encounter: completedEncounterStatus.includes(
-          encounter?.status as string,
-        )
-          ? encounter?.id
-          : undefined,
         limit: limit,
         offset: (page - 1) * limit,
         clinical_status: localDialogView ? undefined : "active",
+        exclude_verification_status: "entered_in_error",
+        ...(encounter?.id ? { encounter: encounter?.id } : {}),
       },
     }),
   });
-
-  const filteredSymptoms = allSymptoms?.filter(
-    (symptom) => symptom.verification_status !== "entered_in_error",
-  );
-
-  const hasEnteredInErrorEntry = allSymptoms.some(
-    (symptom) => symptom.verification_status === "entered_in_error",
-  );
 
   const { data: inactiveCheckData } = useQuery({
     queryKey: ["inactiveSymptomsCheck", patientId, encounter?.id],
@@ -80,23 +72,7 @@ export function SymptomsList({
           ? encounter?.id
           : undefined,
         limit: 1,
-        clinical_status: "inactive",
-      },
-    }),
-  });
-
-  const { data: resolvedCheckData } = useQuery({
-    queryKey: ["resolvedSymptomsCheck", patientId, encounter?.id],
-    queryFn: query(symptomApi.listSymptoms, {
-      pathParams: { patientId },
-      queryParams: {
-        encounter: completedEncounterStatus.includes(
-          encounter?.status as string,
-        )
-          ? encounter?.id
-          : undefined,
-        limit: 1,
-        clinical_status: "resolved",
+        clinical_status: INACTIVE_SYMPTOM_CLINICAL_STATUS.join(","),
       },
     }),
   });
@@ -130,11 +106,9 @@ export function SymptomsList({
   }
 
   const hasInActiveRecords =
-    (inactiveCheckData?.results && inactiveCheckData.results.length > 0) ||
-    (resolvedCheckData?.results && resolvedCheckData.results.length > 0) ||
-    hasEnteredInErrorEntry;
+    inactiveCheckData?.results && inactiveCheckData.results.length > 0;
 
-  if (!filteredSymptoms?.length) {
+  if (!allSymptoms?.length) {
     return (
       <SymptomListLayout
         dialogView={localDialogView}
@@ -154,17 +128,7 @@ export function SymptomsList({
       dialogView={localDialogView}
       readOnly={readOnly}
     >
-      <SymptomTable
-        symptoms={[
-          ...filteredSymptoms.filter((symptom) => {
-            if (symptom.verification_status === "entered_in_error") {
-              return false;
-            }
-
-            return true;
-          }),
-        ]}
-      />
+      <SymptomTable symptoms={allSymptoms} />
 
       {hasInActiveRecords && (
         <>

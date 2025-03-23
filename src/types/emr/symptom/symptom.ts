@@ -10,6 +10,12 @@ export const SYMPTOM_CLINICAL_STATUS = [
   "resolved",
 ] as const;
 
+export const INACTIVE_SYMPTOM_CLINICAL_STATUS = [
+  "inactive",
+  "remission",
+  "resolved",
+] as string[];
+
 export type SymptomClinicalStatus = (typeof SYMPTOM_CLINICAL_STATUS)[number];
 
 export const SYMPTOM_VERIFICATION_STATUS = [

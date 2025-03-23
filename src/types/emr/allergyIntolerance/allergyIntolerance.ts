@@ -9,6 +9,13 @@ export type AllergyVerificationStatus =
   | "entered_in_error";
 
 export type AllergyClinicalStatus = "active" | "inactive" | "resolved";
+
+export const INACTIVE_ALLERGY_CLINICAL_STATUS = [
+  "inactive",
+  "remission",
+  "resolved",
+] as string[];
+
 export type AllergyCategory =
   | "food"
   | "medication"

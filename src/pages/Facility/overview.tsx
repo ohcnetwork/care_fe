@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Calendar, Users } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -11,6 +12,12 @@ import {
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { getPermissions } from "@/common/Permissions";
+
+import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
+
 interface FacilityOverviewProps {
   facilityId: string;
 }
@@ -18,6 +25,19 @@ interface FacilityOverviewProps {
 export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
+  const { hasPermission } = usePermissions();
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
+
+  const { canViewSchedule, canListEncounters } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
 
   const shortcuts = [
     {
@@ -25,12 +45,14 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       description: t("manage_my_schedule"),
       icon: Calendar,
       href: `/facility/${facilityId}/users/${user?.username}/availability`,
+      visible: canViewSchedule,
     },
     {
       title: t("encounters"),
       description: t("manage_facility_users"),
       icon: Users,
       href: `/facility/${facilityId}/encounters`,
+      visible: canListEncounters,
     },
   ];
 
@@ -57,29 +79,31 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
             {t("quick_actions")}
           </h2>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-            {shortcuts.map((shortcut) => (
-              <Link
-                key={shortcut.href}
-                href={shortcut.href}
-                className="block h-full transition-all duration-200 hover:scale-102 hover:shadow-md"
-              >
-                <Card className="h-full border-0 shadow-sm hover:bg-gray-50">
-                  <CardHeader className="flex flex-row items-center h-full gap-4">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <shortcut.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">
-                        {shortcut.title}
-                      </CardTitle>
-                      <CardDescription className="text-gray-500">
-                        {shortcut.description}
-                      </CardDescription>
-                    </div>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
+            {shortcuts
+              .filter((shortcut) => shortcut.visible)
+              .map((shortcut) => (
+                <Link
+                  key={shortcut.href}
+                  href={shortcut.href}
+                  className="block h-full transition-all duration-200 hover:scale-102 hover:shadow-md"
+                >
+                  <Card className="h-full border-0 shadow-sm hover:bg-gray-50">
+                    <CardHeader className="flex flex-row items-center h-full gap-4">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <shortcut.icon className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">
+                          {shortcut.title}
+                        </CardTitle>
+                        <CardDescription className="text-gray-500">
+                          {shortcut.description}
+                        </CardDescription>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              ))}
           </div>
         </div>
       </div>

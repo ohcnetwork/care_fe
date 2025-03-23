@@ -3,6 +3,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 
 import {
   DeviceDetail,
+  DeviceEncounterHistory,
   DeviceList,
   DeviceLocationHistory,
   DeviceWrite,
@@ -48,6 +49,17 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<DeviceDetail>(),
     TBody: Type<{ location: string }>(),
+  },
+  associateEncounter: {
+    path: "/api/v1/facility/{facilityId}/device/{deviceId}/associate_encounter/",
+    method: HttpMethod.POST,
+    TRes: Type<DeviceDetail>(),
+    TBody: Type<{ encounter: string | null }>(),
+  },
+  encounterHistory: {
+    path: "/api/v1/facility/{facilityId}/device/{deviceId}/encounter_history/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<DeviceEncounterHistory>>(),
   },
   locationHistory: {
     path: "/api/v1/facility/{facilityId}/device/{id}/location_history/",

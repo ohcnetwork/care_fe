@@ -42,6 +42,7 @@ import {
   ALLERGY_VERIFICATION_STATUS_STYLES,
   AllergyCategory,
   AllergyIntolerance,
+  INACTIVE_ALLERGY_CLINICAL_STATUS,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
@@ -95,14 +96,11 @@ export function AllergyList({
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: {
-        encounter: completedEncounterStatus.includes(
-          encounter?.status as string,
-        )
-          ? encounter?.id
-          : undefined,
         limit: limit,
         offset: (page - 1) * limit,
         clinical_status: localDialogView ? undefined : "active",
+        exclude_verification_status: "entered_in_error",
+        ...(encounter?.id ? { encounter: encounter?.id } : {}),
       },
     }),
   });
@@ -114,14 +112,6 @@ export function AllergyList({
       );
     }
   }, [allergies, page]);
-
-  const filteredAllergies = allAllergies?.filter(
-    (allergy) => allergy.verification_status !== "entered_in_error",
-  );
-
-  const hasEnteredInErrorEntry = allAllergies.some(
-    (allergy) => allergy.verification_status === "entered_in_error",
-  );
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1);
@@ -139,23 +129,7 @@ export function AllergyList({
           ? encounter?.id
           : undefined,
         limit: 1,
-        clinical_status: "inactive",
-      },
-    }),
-  });
-
-  const { data: resolvedCheckData } = useQuery({
-    queryKey: ["resolvedAllergiesCheck", patientId, encounter?.id],
-    queryFn: query(allergyIntoleranceApi.getAllergy, {
-      pathParams: { patientId },
-      queryParams: {
-        encounter: completedEncounterStatus.includes(
-          encounter?.status as string,
-        )
-          ? encounter?.id
-          : undefined,
-        limit: 1,
-        clinical_status: "resolved",
+        clinical_status: INACTIVE_ALLERGY_CLINICAL_STATUS.join(","),
       },
     }),
   });
@@ -175,11 +149,9 @@ export function AllergyList({
   }
 
   const hasInActiveRecords =
-    (inactiveCheckData?.results && inactiveCheckData.results.length > 0) ||
-    (resolvedCheckData?.results && resolvedCheckData.results.length > 0) ||
-    hasEnteredInErrorEntry;
+    inactiveCheckData?.results && inactiveCheckData.results.length > 0;
 
-  if (!filteredAllergies?.length) {
+  if (!allAllergies?.length) {
     return (
       <AllergyListLayout
         dialogView={localDialogView}
@@ -309,7 +281,7 @@ export function AllergyList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredAllergies.map((allergy) => (
+          {allAllergies.map((allergy) => (
             <AllergyRow key={allergy.id} allergy={allergy} />
           ))}
         </TableBody>
