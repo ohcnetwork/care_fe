@@ -19,6 +19,7 @@ import type { Question } from "@/types/questionnaire/question";
 import { AllergyQuestion } from "./AllergyQuestion";
 import { BooleanQuestion } from "./BooleanQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
+import { DateQuestion } from "./DateQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
 import { DiagnosisQuestion } from "./DiagnosisQuestion";
 import { EncounterQuestion } from "./EncounterQuestion";
@@ -102,6 +103,9 @@ export function QuestionInput({
     switch (question.type) {
       case "dateTime":
         return <DateTimeQuestion {...commonProps} />;
+
+      case "date":
+        return <DateQuestion {...commonProps} />;
 
       case "decimal":
       case "integer":
