@@ -51,6 +51,9 @@ export const PractitionerSelector = ({
     }),
   });
 
+  const filterPractitioners = practitioners?.users?.filter(
+    (user, index, self) => index === self.findIndex((t) => t.id === user.id),
+  );
   return (
     <Popover>
       <PopoverTrigger asChild disabled={isLoading}>
@@ -100,7 +103,7 @@ export const PractitionerSelector = ({
                   </PopoverClose>
                 </CommandItem>
               )}
-              {practitioners?.users.map((user) => (
+              {filterPractitioners?.map((user) => (
                 <CommandItem
                   key={user.id}
                   value={formatName(user)}
