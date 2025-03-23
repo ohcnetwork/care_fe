@@ -6,7 +6,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -119,19 +119,30 @@ export function DiagnosisQuestion({
   });
 
   // Sort diagnoses: chronic conditions first, then by date
-  const sortedDiagnoses = [...diagnoses].sort((a, b) => {
-    if (
-      a.category === "chronic_condition" &&
-      b.category !== "chronic_condition"
-    )
-      return -1;
-    if (
-      a.category !== "chronic_condition" &&
-      b.category === "chronic_condition"
-    )
-      return 1;
-    return 0;
-  });
+  const sortedDiagnoses = useMemo(() => {
+    return [...diagnoses].sort((a, b) => {
+      // First sort by category (chronic conditions first)
+      if (
+        a.category === "chronic_condition" &&
+        b.category !== "chronic_condition"
+      )
+        return -1;
+      if (
+        a.category !== "chronic_condition" &&
+        b.category === "chronic_condition"
+      )
+        return 1;
+
+      // Then sort by date within each category (this applies to both chronic and encounter diagnoses)
+      const dateA = a.onset?.onset_datetime
+        ? new Date(a.onset.onset_datetime)
+        : new Date(0);
+      const dateB = b.onset?.onset_datetime
+        ? new Date(b.onset.onset_datetime)
+        : new Date(0);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }, [diagnoses]);
 
   const { data: patientDiagnoses } = useQuery({
     queryKey: ["diagnoses", patientId],
@@ -140,7 +151,7 @@ export function DiagnosisQuestion({
       queryParams: {
         encounter: encounterId,
         limit: 100,
-        category: ["encounter_diagnosis", "chronic_condition"],
+        category: "encounter_diagnosis,chronic_condition",
       },
     }),
     enabled: !isPreview,
@@ -169,7 +180,7 @@ export function DiagnosisQuestion({
   const handleCategoryConfirm = () => {
     if (!selectedCode) return;
 
-    const isDuplicate = diagnoses.some(
+    const isDuplicate = sortedDiagnoses.some(
       (diagnosis) =>
         diagnosis.code.code === selectedCode.code &&
         diagnosis.verification_status !== "entered_in_error",
@@ -181,7 +192,7 @@ export function DiagnosisQuestion({
     }
 
     const newDiagnoses = [
-      ...diagnoses,
+      ...sortedDiagnoses,
       {
         ...newDiagnosis,
         code: selectedCode,
@@ -209,10 +220,10 @@ export function DiagnosisQuestion({
   };
 
   const handleRemoveDiagnosis = (index: number) => {
-    const diagnosis = diagnoses[index];
+    const diagnosis = sortedDiagnoses[index];
     if (diagnosis.id) {
       // For existing records, update verification status to entered_in_error
-      const newDiagnoses = diagnoses.map((d, i) =>
+      const newDiagnoses = sortedDiagnoses.map((d, i) =>
         i === index
           ? { ...d, verification_status: "entered_in_error" as const }
           : d,
@@ -228,7 +239,7 @@ export function DiagnosisQuestion({
       );
     } else {
       // For new records, remove them completely
-      const newDiagnoses = diagnoses.filter((_, i) => i !== index);
+      const newDiagnoses = sortedDiagnoses.filter((_, i) => i !== index);
       updateQuestionnaireResponseCB(
         [
           {
@@ -245,7 +256,7 @@ export function DiagnosisQuestion({
     index: number,
     updates: Partial<DiagnosisRequest>,
   ) => {
-    const newDiagnoses = diagnoses.map((diagnosis, i) =>
+    const newDiagnoses = sortedDiagnoses.map((diagnosis, i) =>
       i === index ? { ...diagnosis, ...updates } : diagnosis,
     );
     updateQuestionnaireResponseCB(
@@ -261,7 +272,7 @@ export function DiagnosisQuestion({
 
   return (
     <div className="space-y-4">
-      {diagnoses.length > 0 && (
+      {sortedDiagnoses.length > 0 && (
         <div className="rounded-lg border">
           <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
             <div className="col-span-5">{t("diagnosis")}</div>

@@ -36,7 +36,7 @@ export function DiagnosisList({
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
-        category: ["encounter_diagnosis", "chronic_condition"],
+        category: "encounter_diagnosis,chronic_condition",
         ...(encounterId ? { encounter: encounterId } : {}),
       },
     }),
