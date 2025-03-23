@@ -702,7 +702,7 @@ const NewAvailabilityCard = ({
   const updateSlotDuration = () => {
     const isAutoFill = form.watch("auto_fill_duration");
     if (isAutoFill) {
-      let duration = calculateSlotDuration(
+      const duration = calculateSlotDuration(
         form.watch("start_time"),
         form.watch("end_time"),
       );
