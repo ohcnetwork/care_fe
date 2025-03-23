@@ -55,6 +55,7 @@ export function ConsentSheet({
   const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [open, setOpen] = useState(false);
 
   const { data: existingConsents } = useQuery({
     queryKey: ["consents", patientId, encounterId],
@@ -62,10 +63,11 @@ export function ConsentSheet({
       pathParams: { patientId },
       queryParams: { encounter: encounterId },
     }),
+    enabled: open,
   });
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">
