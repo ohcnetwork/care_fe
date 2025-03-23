@@ -785,9 +785,13 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         >
           {dosageInstruction?.timing && (
             <Input
-              type="text"
+              type="number"
               min={0}
-              value={dosageInstruction.timing.repeat.bounds_duration?.value}
+              value={
+                dosageInstruction.timing.repeat.bounds_duration?.value == 0
+                  ? ""
+                  : dosageInstruction.timing.repeat.bounds_duration?.value
+              }
               onChange={(e) => {
                 const value = e.target.value;
                 if (!dosageInstruction.timing) return;
