@@ -30,7 +30,6 @@ export function SymptomsList({
   readOnly = false,
 }: SymptomsListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
-
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
