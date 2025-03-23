@@ -103,10 +103,12 @@ export const structuredHandlers: {
           url: `/api/v1/patient/${patientId}/diagnosis/upsert/`,
           method: "POST",
           body: {
-            datapoints: diagnoses.map((diagnosis) => ({
-              ...diagnosis,
-              encounter: encounterId,
-            })),
+            datapoints: diagnoses
+              .filter((diagnosis) => diagnosis.dirty)
+              .map((diagnosis) => ({
+                ...diagnosis,
+                encounter: encounterId,
+              })),
           },
           reference_id: "diagnosis",
         },

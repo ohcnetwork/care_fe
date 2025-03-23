@@ -1,8 +1,8 @@
-import { CubeIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon, CubeIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, SearchIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -15,10 +15,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 
 import PageTitle from "@/components/Common/PageTitle";
-import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+
+import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
@@ -31,19 +39,38 @@ interface Props {
 
 export default function DevicesList({ facilityId }: Props) {
   const { t } = useTranslation();
-  const [page, setPage] = useState(1);
-
   const pluginDevices = usePluginDevices();
 
-  const limit = 12;
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 12,
+  });
 
+  // Handle search input change
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      updateQuery({ search_text: value || undefined });
+    },
+    [updateQuery],
+  );
+
+  // Handle care type filter change
+  const handleCareTypeChange = useCallback(
+    (careType: string | null) => {
+      updateQuery({ care_type: careType || undefined });
+    },
+    [updateQuery],
+  );
+
+  // Use TanStack Query with query.debounced for API call
   const { data, isLoading } = useQuery({
-    queryKey: ["devices", facilityId, page, limit],
+    queryKey: ["devices", facilityId, qParams],
     queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        offset: (page - 1) * limit,
-        limit,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        limit: resultsPerPage,
+        search_text: qParams.search_text || undefined,
+        care_type: qParams.care_type || undefined,
       },
     }),
   });
@@ -97,6 +124,59 @@ export default function DevicesList({ facilityId }: Props) {
         )}
       </div>
 
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <Input
+            placeholder={t("search_devices")}
+            value={qParams.search_text || ""}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 w-full sm:w-auto"
+            >
+              {qParams.care_type ? (
+                <span className="capitalize">{qParams.care_type}</span>
+              ) : (
+                t("filter_by_type")
+              )}
+              <CaretSortIcon className="ml-2 h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-2">
+            <div className="space-y-2">
+              <Button
+                variant="ghost"
+                className="w-full justify-start font-normal"
+                onClick={() => handleCareTypeChange(null)}
+              >
+                {t("all_types")}
+              </Button>
+              <Separator />
+              {pluginDevices.map((device) => {
+                const DeviceIcon = device.icon || CubeIcon;
+                return (
+                  <Button
+                    key={device.type}
+                    variant="ghost"
+                    className="w-full capitalize justify-start font-normal"
+                    onClick={() => handleCareTypeChange(device.type)}
+                  >
+                    <DeviceIcon className="mr-2 h-4 w-4" />
+                    {device.type}
+                  </Button>
+                );
+              })}
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <CardGridSkeleton count={6} />
@@ -111,19 +191,16 @@ export default function DevicesList({ facilityId }: Props) {
             ) : (
               <Card className="col-span-full">
                 <CardContent className="p-6 text-center text-gray-500">
-                  {t("no_devices_available")}
+                  {qParams.search_text || qParams.care_type
+                    ? t("no_devices_matching_filters")
+                    : t("no_devices_available")}
                 </CardContent>
               </Card>
             )}
           </div>
-          {data && data.count > limit && (
+          {data && data.count > resultsPerPage && (
             <div className="flex justify-center">
-              <Pagination
-                data={{ totalCount: data.count }}
-                onChange={(page, _) => setPage(page)}
-                defaultPerPage={limit}
-                cPage={page}
-              />
+              <Pagination totalCount={data.count} />
             </div>
           )}
         </div>
