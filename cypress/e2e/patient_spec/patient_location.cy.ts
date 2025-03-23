@@ -16,12 +16,12 @@ describe("Add a new Location and associate to an Encounter", () => {
 
   it("Create a new Location", () => {
     const formData: Array<LocationData> = [
+      // Room location form data with just required field eg. name
       {
-        form: "Room",
-        name: "Location 1",
-        description: "Location 1 description",
-        status: "Active",
+        name: "Room 1",
       },
+
+      // House location form data with all fields
       {
         form: "House",
         name: "House 1",
@@ -29,6 +29,8 @@ describe("Add a new Location and associate to an Encounter", () => {
         status: "Inactive",
         opStatus: "Housekeeping",
       },
+
+      // Bulk beds creation
       {
         form: "Bed",
         name: "ICU",
@@ -39,6 +41,7 @@ describe("Add a new Location and associate to an Encounter", () => {
       },
     ];
 
+    // Set up form data for each type of location
     const roomData = formData[0];
     const houseData = formData[1];
     const bedData = formData[2];
@@ -47,7 +50,7 @@ describe("Add a new Location and associate to an Encounter", () => {
       .navigateToSettings()
       .clickLocationTab()
 
-      // Create Room Location
+      // Create Room Location with Room data
       .clickAddLocation()
       .fillLocationData(roomData)
       .interceptLocationCreationRequest()
@@ -55,7 +58,7 @@ describe("Add a new Location and associate to an Encounter", () => {
       .verifyLocationCreationAPICall()
       .assertLocationCreationSuccess()
 
-      // Create House Location
+      // Create House Location with House data
       .clickAddLocation()
       .fillLocationData(houseData)
       .interceptLocationCreationRequest()
@@ -63,7 +66,7 @@ describe("Add a new Location and associate to an Encounter", () => {
       .verifyLocationCreationAPICall()
       .assertLocationCreationSuccess()
 
-      // Create Multiple Bed Locations
+      // Create Multiple Bed Locations with Beds data
       .clickAddLocation()
       .fillLocationData(bedData)
       .interceptLocationCreationRequest()
@@ -76,28 +79,33 @@ describe("Add a new Location and associate to an Encounter", () => {
     const now = new Date();
     now.setDate(now.getDate() + 1);
     const endTime = now.toISOString().slice(0, 16);
-
-    // Dissociate Current Location
     patientLocation
       .navigateToEncounters()
+      .clickPlannedEncounterFilter()
       .openFirstEncounterDetails()
-      .clickAssociatedLocationBadge()
-      .clickUpdateLocationButton()
-      .searchBedLocation("ICU 5")
-      .interceptLocationCreationRequest()
-      .submitLocationAssociation()
-      .verifyLocationAssociationFailAPICall()
-      .setStatusCompleted()
-      .fillEndTime(endTime)
-      .interceptLocationUpdationRequest()
-      .clickSaveStatusButton()
-      .assertLocationStatusUpdateSuccess()
 
-      // Associate New Location
+      // Associate New Location to the first planned encounter
       .clickAddLocationBadge()
       .searchBedLocation("ICU 5")
       .interceptLocationCreationRequest()
       .submitLocationAssociation()
-      .assertLocationAssociationSuccess();
+      .assertLocationAssociationSuccess()
+
+      // Dissociate Current Location assuming a location is already associated
+      .clickAssociatedLocationBadge()
+      .clickUpdateLocationButton()
+      .searchBedLocation("ICU 5")
+      .interceptLocationCreationRequest()
+
+      // Associate new location without dissociating current location and verify error
+      .submitLocationAssociation()
+      .verifyLocationAssociationFailAPICall()
+
+      // Dissociate Current Location and associate new location
+      .setStatusCompleted()
+      .fillEndTime(endTime)
+      .interceptLocationUpdationRequest()
+      .clickSaveStatusButton()
+      .assertLocationStatusUpdateSuccess();
   });
 });

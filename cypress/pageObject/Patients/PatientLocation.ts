@@ -1,5 +1,5 @@
 export interface LocationData {
-  form: string;
+  form?: string;
   name: string;
   bedsCount?: string;
   description?: string;
@@ -46,7 +46,9 @@ export class PatientLocation {
   }
 
   selectLocationForm(locationForm: string) {
-    cy.clickAndSelectOption(this.selectors.locationForm, locationForm);
+    if (locationForm) {
+      cy.clickAndSelectOption(this.selectors.locationForm, locationForm);
+    }
     return this;
   }
 
@@ -128,6 +130,16 @@ export class PatientLocation {
 
   navigateToEncounters() {
     cy.get('[data-sidebar="content"]').contains("Encounters").click();
+    return this;
+  }
+
+  clickPlannedEncounterFilter() {
+    cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
+    cy.verifyAndClickElement('[data-cy="planned-filter"]', "Planned");
+    cy.wait("@getEncounters", { timeout: 10000 }).then((interception) => {
+      expect(interception.request.url).to.include("status=planned");
+      expect(interception.response.statusCode).to.eq(200);
+    });
     return this;
   }
 
