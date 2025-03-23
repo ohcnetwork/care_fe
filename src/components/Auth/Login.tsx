@@ -41,6 +41,7 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
+import { autofillOtp } from "@/Utils/otpAutofill";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
@@ -73,10 +74,6 @@ type LoginMode = "staff" | "patient";
 
 interface LoginProps {
   forgot?: boolean;
-}
-
-interface OTPCredential {
-  code: string;
 }
 
 const Login = (props: LoginProps) => {
@@ -139,20 +136,15 @@ const Login = (props: LoginProps) => {
       setOtpError("");
       toast.success(t("send_otp_success"));
 
-      if ("OTPCredential" in window) {
-        navigator.credentials
-          .get({ otp: { transport: ["sms"] } } as CredentialRequestOptions)
-          .then((otpCredential) => {
-            const otp = otpCredential as OTPCredential | null;
-            if (otp) {
-              setOtp(otp.code);
-              setOtpValidationError("");
-            }
-          })
-          .catch(() => {
-            setOtpValidationError(t("opt_validation_error"));
-          });
-      }
+      autofillOtp(
+        (otp) => {
+          setOtp(otp);
+          setOtpValidationError("");
+        },
+        () => {
+          setOtpValidationError(t("opt_validation_error"));
+        },
+      );
     },
     onError: (error: any) => {
       const errors = error?.data || [];
