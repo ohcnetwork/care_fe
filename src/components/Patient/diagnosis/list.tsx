@@ -17,7 +17,7 @@ import query from "@/Utils/request/query";
 import {
   ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
   Diagnosis,
-  INACTIVE_DIAGNOSIS_CLINICAL_STATUS,
+  INACTIVE_DIAGNOSIS_CLINICAL_STATUS2,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { Encounter } from "@/types/emr/encounter";
@@ -90,9 +90,7 @@ export function DiagnosisList({
       pathParams: { patientId },
       queryParams: {
         limit: 1,
-        clinical_status: (
-          INACTIVE_DIAGNOSIS_CLINICAL_STATUS as unknown as string[]
-        ).join(","),
+        clinical_status: INACTIVE_DIAGNOSIS_CLINICAL_STATUS2.join(","),
         exclude_verification_status: "entered_in_error",
         ...(encounter?.id ? { encounter: encounter?.id } : {}),
       },

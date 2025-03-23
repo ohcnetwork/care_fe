@@ -30,6 +30,12 @@ export const INACTIVE_DIAGNOSIS_CLINICAL_STATUS = [
   "resolved",
 ] as const;
 
+export const INACTIVE_DIAGNOSIS_CLINICAL_STATUS2 = [
+  "inactive",
+  "remission",
+  "resolved",
+] as string[];
+
 export const DIAGNOSIS_VERIFICATION_STATUS = [
   "unconfirmed",
   "provisional",

@@ -12,7 +12,6 @@ export const SYMPTOM_CLINICAL_STATUS = [
 
 export const INACTIVE_SYMPTOM_CLINICAL_STATUS = [
   "inactive",
-  "remission",
   "resolved",
 ] as string[];
 

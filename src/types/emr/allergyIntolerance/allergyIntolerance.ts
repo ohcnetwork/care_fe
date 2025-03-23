@@ -12,7 +12,6 @@ export type AllergyClinicalStatus = "active" | "inactive" | "resolved";
 
 export const INACTIVE_ALLERGY_CLINICAL_STATUS = [
   "inactive",
-  "remission",
   "resolved",
 ] as string[];
 
