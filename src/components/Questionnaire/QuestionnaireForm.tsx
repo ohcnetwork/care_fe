@@ -333,11 +333,6 @@ export function QuestionnaireForm({
     enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
 
-  useEffect(() => {
-    console.log("forms", questionnaireForms);
-    console.log("slug", questionnaireSlug);
-  }, [questionnaireForms, questionnaireSlug]);
-
   const { mutate: submitBatch, isPending } = useMutation({
     mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
