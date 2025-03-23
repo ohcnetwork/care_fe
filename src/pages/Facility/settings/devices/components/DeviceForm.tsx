@@ -66,7 +66,13 @@ const formSchema = z
     expiration_date: z.string().optional(),
     lot_number: z.string().optional(),
     serial_number: z.string().optional(),
-    registered_name: z.string().min(1, { message: t("required") }),
+    registered_name: z
+      .string()
+      .min(1, { message: t("required") })
+      .transform((name) => name.trim())
+      .refine((name) => /^[^\s].*[^\s]$/.test(name), {
+        message: t("registered_name_invalid"),
+      }),
     user_friendly_name: z.string().optional(),
     model_number: z.string().optional(),
     part_number: z.string().optional(),
@@ -197,6 +203,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const metadata = values.metadata;
     delete values.metadata;
+    alert("");
     submitForm({ ...metadata, ...values, care_type: careType });
   }
 
