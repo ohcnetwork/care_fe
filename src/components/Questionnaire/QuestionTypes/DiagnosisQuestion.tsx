@@ -295,19 +295,21 @@ export function DiagnosisQuestion({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-56 text-center px-0.5">
+                  <TableHead className="w-48 text-left px-2">
                     {t("diagnosis")}
                   </TableHead>
-                  <TableHead className="w-20 text-center px-0.5">
+                  <TableHead className="w-24 text-center px-1">
                     {t("date")}
                   </TableHead>
-                  <TableHead className="w-21 text-center px-0.5">
+                  <TableHead className="w-24 text-center px-1">
                     {t("status")}
                   </TableHead>
-                  <TableHead className="w-21 text-center px-0.5">
+                  <TableHead className="w-24 text-center px-1">
                     {t("verification")}
                   </TableHead>
-                  <TableHead className="w-9">{t("action")}</TableHead>
+                  <TableHead className="w-12 text-center px-1">
+                    {t("action")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -679,7 +681,7 @@ const DiagnosisTableRow = ({
         <TableCell className="font-medium py-1 pl-1 overflow-hidden max-w-0">
           <div className="flex items-center gap-2 w-full">
             <div
-              className="font-medium text-sm truncate min-w-0"
+              className="font-medium text-sm min-w-0 truncate basis-3/4"
               title={diagnosis.code.display}
             >
               {diagnosis.code.display}
