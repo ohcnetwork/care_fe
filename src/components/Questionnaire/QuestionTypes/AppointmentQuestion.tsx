@@ -135,7 +135,6 @@ export function AppointmentQuestion({
       <div>
         <Label className="block mb-2">
           {t("select_practitioner")}
-
           <span className="text-red-500 ml-0.5">*</span>
         </Label>
         <div
