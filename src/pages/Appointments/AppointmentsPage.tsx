@@ -377,7 +377,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start">
           <div className="mt-1">
             <Label className="mb-2 text-black">
-              {t("select_practitioner")}Test
+              {t("select_practitioner")}
             </Label>
             <PractitionerSelector
               facilityId={facilityId}
