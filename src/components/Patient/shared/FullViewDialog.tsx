@@ -39,7 +39,7 @@ export function FullViewDialog({
         onClose();
       }
     };
-  });
+  }, [onClose]);
 
   // Function to navigate to the previous tab
   const navigateToPreviousTab = () => {
