@@ -41,6 +41,9 @@ const DuplicatePatientDialog = (props: Props) => {
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+        }}
       >
         <DialogHeader>
           <DialogTitle>{t("patient_records_found")}</DialogTitle>
