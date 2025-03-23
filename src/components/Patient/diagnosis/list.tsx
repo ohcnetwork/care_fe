@@ -205,23 +205,6 @@ export function DiagnosisList({
             )}
           </>
         )}
-        {chronicConditions?.results.length ? (
-          <DiagnosisTable
-            diagnoses={chronicConditions?.results}
-            title={t("chronic_condition", {
-              count: 2,
-            })}
-          />
-        ) : null}
-        {isLoading && (
-          <CardContent className="px-2 pb-2">
-            <Skeleton className="h-[100px] w-full" />
-            <Skeleton className="h-[100px] w-full" />
-          </CardContent>
-        )}
-        {diagnoses?.results?.length ? (
-          <DiagnosisTable diagnoses={diagnoses.results} />
-        ) : null}
       </div>
     </DiagnosisListLayout>
   );
