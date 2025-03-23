@@ -295,7 +295,7 @@ export function DiagnosisQuestion({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-52 text-center px-0.5">
+                  <TableHead className="w-56 text-center px-0.5">
                     {t("diagnosis")}
                   </TableHead>
                   <TableHead className="w-20 text-center px-0.5">
@@ -676,25 +676,25 @@ const DiagnosisTableRow = ({
   return (
     <>
       <TableRow className={rowClassName}>
-        <TableCell className="font-medium py-1 pl-1 max-w-full overflow-hidden">
-          <span className="flex items-center ml-0 pr-0 mr-0">
-            <span
-              className="font-medium text-sm truncate w-6/12"
+        <TableCell className="font-medium py-1 pl-1 overflow-hidden max-w-0">
+          <div className="flex items-center gap-2 w-full">
+            <div
+              className="font-medium text-sm truncate min-w-0"
               title={diagnosis.code.display}
             >
               {diagnosis.code.display}
-            </span>
-            <span
+            </div>
+            <div
               className={cn(
-                "text-xs px-2 py-0.5 rounded-full whitespace-nowrap",
+                "text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap",
                 diagnosis.category === "chronic_condition"
                   ? "bg-yellow-100 text-yellow-700"
                   : "bg-gray-100 text-gray-700",
               )}
             >
               {t(`Diagnosis_${diagnosis.category}__title`)}
-            </span>
-          </span>
+            </div>
+          </div>
         </TableCell>
         <TableCell className="py-1 px-1">
           <Input
