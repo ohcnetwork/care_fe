@@ -295,7 +295,9 @@ export function DiagnosisQuestion({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-55">{t("diagnosis")}</TableHead>
+                  <TableHead className="w-52 text-center px-0.5">
+                    {t("diagnosis")}
+                  </TableHead>
                   <TableHead className="w-20 text-center px-0.5">
                     {t("date")}
                   </TableHead>
@@ -328,18 +330,31 @@ export function DiagnosisQuestion({
             {sortedDiagnoses.map((diagnosis, index) => (
               <div
                 key={index}
-                className={`p-3 space-y-3 ${
-                  diagnosis.verification_status === "entered_in_error"
-                    ? "opacity-40 pointer-events-none"
-                    : diagnosis.clinical_status === "inactive"
-                      ? "opacity-60"
-                      : diagnosis.clinical_status === "resolved"
-                        ? "line-through"
-                        : ""
-                }`}
+                className={cn("group hover:bg-gray-50", {
+                  "opacity-40 pointer-events-none":
+                    diagnosis.verification_status === "entered_in_error",
+                  "bg-yellow-50/50": diagnosis.category === "chronic_condition",
+                })}
               >
                 <div className="flex items-center justify-between">
-                  <div className="font-medium">{diagnosis.code.display}</div>
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <div
+                      className="font-medium text-sm truncate flex-1"
+                      title={diagnosis.code.display}
+                    >
+                      {diagnosis.code.display}
+                    </div>
+                    <div
+                      className={cn(
+                        "text-xs px-2 py-0.5 rounded-full",
+                        diagnosis.category === "chronic_condition"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-gray-100 text-gray-700",
+                      )}
+                    >
+                      {t(`Diagnosis_${diagnosis.category}__title`)}
+                    </div>
+                  </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -652,17 +667,34 @@ const DiagnosisTableRow = ({
 }: DiagnosisItemProps) => {
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
 
-  const rowClassName = `group ${
-    diagnosis.verification_status === "entered_in_error"
-      ? "opacity-40 pointer-events-none"
-      : ""
-  }`;
+  const rowClassName = cn("group hover:bg-gray-50", {
+    "opacity-40 pointer-events-none":
+      diagnosis.verification_status === "entered_in_error",
+    "bg-yellow-50/50": diagnosis.category === "chronic_condition",
+  });
 
   return (
     <>
       <TableRow className={rowClassName}>
-        <TableCell className="font-medium py-1 pl-1">
-          {diagnosis.code.display}
+        <TableCell className="font-medium py-1 pl-1 max-w-full overflow-hidden">
+          <span className="flex items-center ml-0 pr-0 mr-0">
+            <span
+              className="font-medium text-sm truncate w-6/12"
+              title={diagnosis.code.display}
+            >
+              {diagnosis.code.display}
+            </span>
+            <span
+              className={cn(
+                "text-xs px-2 py-0.5 rounded-full whitespace-nowrap",
+                diagnosis.category === "chronic_condition"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-gray-100 text-gray-700",
+              )}
+            >
+              {t(`Diagnosis_${diagnosis.category}__title`)}
+            </span>
+          </span>
         </TableCell>
         <TableCell className="py-1 px-1">
           <Input
