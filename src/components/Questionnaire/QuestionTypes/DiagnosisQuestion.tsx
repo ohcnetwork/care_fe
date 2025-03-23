@@ -75,6 +75,7 @@ const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   verification_status: "confirmed",
   category: "encounter_diagnosis",
   onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+  dirty: true,
 };
 
 function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
@@ -94,7 +95,8 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     recorded_date: diagnosis.recorded_date,
     category: diagnosis.category,
     note: diagnosis.note,
-    encounter: "", // This will be set when submitting the form
+    encounter: diagnosis.encounter,
+    dirty: false,
   };
 }
 
@@ -140,25 +142,40 @@ export function DiagnosisQuestion({
       queryParams: {
         encounter: encounterId,
         limit: 100,
-        category: ["encounter_diagnosis", "chronic_condition"],
+        category: ["encounter_diagnosis"],
+      },
+    }),
+    enabled: !isPreview,
+  });
+
+  const { data: patientChronicConditions } = useQuery({
+    queryKey: ["chronic_condition", patientId],
+    queryFn: query(diagnosisApi.listDiagnosis, {
+      pathParams: { patientId },
+      queryParams: {
+        category: ["chronic_condition"],
+        limit: 100,
       },
     }),
     enabled: !isPreview,
   });
 
   useEffect(() => {
-    if (patientDiagnoses?.results) {
+    if (patientDiagnoses?.results && patientChronicConditions?.results) {
       updateQuestionnaireResponseCB(
         [
           {
             type: "diagnosis",
-            value: patientDiagnoses.results.map(convertToDiagnosisRequest),
+            value: [
+              ...patientChronicConditions.results,
+              ...patientDiagnoses.results,
+            ].map(convertToDiagnosisRequest),
           },
         ],
         questionnaireResponse.question_id,
       );
     }
-  }, [patientDiagnoses]);
+  }, [patientDiagnoses, patientChronicConditions]);
 
   const handleCodeSelect = (code: Code) => {
     setSelectedCode(code);
@@ -246,7 +263,7 @@ export function DiagnosisQuestion({
     updates: Partial<DiagnosisRequest>,
   ) => {
     const newDiagnoses = diagnoses.map((diagnosis, i) =>
-      i === index ? { ...diagnosis, ...updates } : diagnosis,
+      i === index ? { ...diagnosis, ...updates, dirty: true } : diagnosis,
     );
     updateQuestionnaireResponseCB(
       [

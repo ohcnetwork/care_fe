@@ -28,15 +28,19 @@ import {
 
 interface DiagnosisTableProps {
   diagnoses: Diagnosis[];
+  title?: string;
 }
 
-export function DiagnosisTable({ diagnoses }: DiagnosisTableProps) {
+export function DiagnosisTable({
+  diagnoses,
+  title = t("diagnosis"),
+}: DiagnosisTableProps) {
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>
         <TableRow className="rounded-md overflow-hidden bg-gray-100">
           <TableHead className="first:rounded-l-md h-auto  py-1 px-2  text-gray-600">
-            {t("diagnosis")}
+            {title}
           </TableHead>
           <TableHead className="h-auto  py-1 px-2  text-gray-600">
             {t("status")}

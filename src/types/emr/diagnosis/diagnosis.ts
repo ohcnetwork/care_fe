@@ -18,6 +18,18 @@ export const DIAGNOSIS_CATEGORY = [
   "chronic_condition",
 ] as const;
 
+export const ACTIVE_DIAGNOSIS_CLINICAL_STATUS = [
+  "active",
+  "recurrence",
+  "relapse",
+] as string[];
+
+export const INACTIVE_DIAGNOSIS_CLINICAL_STATUS = [
+  "inactive",
+  "remission",
+  "resolved",
+] as const;
+
 export const DIAGNOSIS_VERIFICATION_STATUS = [
   "unconfirmed",
   "provisional",
@@ -48,6 +60,7 @@ export interface Diagnosis {
   category: DiagnosisCategory;
   created_by: UserBase;
   updated_by: UserBase;
+  encounter: string;
 }
 
 export type DiagnosisCategory = (typeof DIAGNOSIS_CATEGORY)[number];
@@ -62,6 +75,7 @@ export interface DiagnosisRequest {
   note?: string;
   category: DiagnosisCategory;
   encounter: string;
+  dirty: boolean;
 }
 
 export const DIAGNOSIS_CLINICAL_STATUS_STYLES = {
