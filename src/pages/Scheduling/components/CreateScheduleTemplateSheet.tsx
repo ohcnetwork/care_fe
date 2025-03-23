@@ -246,7 +246,7 @@ export default function CreateScheduleTemplateSheet({
   const updateSlotDuration = (index: number) => {
     const isAutoFill = form.watch(`availabilities.${index}.auto_fill_duration`);
     if (isAutoFill) {
-      let duration = calculateSlotDuration(
+      const duration = calculateSlotDuration(
         form.watch(`availabilities.${index}.start_time`),
         form.watch(`availabilities.${index}.end_time`),
       );
