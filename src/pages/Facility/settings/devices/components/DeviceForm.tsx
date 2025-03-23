@@ -203,7 +203,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const metadata = values.metadata;
     delete values.metadata;
-    alert("");
+
     submitForm({ ...metadata, ...values, care_type: careType });
   }
 
