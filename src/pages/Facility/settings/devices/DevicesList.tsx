@@ -82,7 +82,7 @@ export default function DevicesList({ facilityId }: Props) {
         <div className="flex items-center gap-4">
           <PageTitle title={t("devices")} className="mt-2" />
           <Badge
-            className="bg-purple-50 text-purple-700  text-sm font-medium rounded-xl px-3 w-max"
+            className="bg-purple-50 text-purple-700 text-sm font-medium rounded-xl px-3 w-max"
             variant="outline"
           >
             {isLoading
