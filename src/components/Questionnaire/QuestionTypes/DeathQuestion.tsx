@@ -1,6 +1,5 @@
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 
-import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
   ResponseValue,
@@ -16,7 +15,6 @@ interface TimeOfDeathQuestionProps {
     note?: string,
   ) => void;
   disabled?: boolean;
-  errors: QuestionValidationError[];
 }
 
 export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
