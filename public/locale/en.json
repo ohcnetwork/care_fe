@@ -564,6 +564,7 @@
   "cancel": "Cancel",
   "cancel_appointment": "Cancel Appointment",
   "cancel_appointment_warning": "This action cannot be undone. The appointment will be cancelled and the patient will be notified.",
+  "cancel_appointment_warning_patient": "This action cannot be undone. The appointment will be cancelled",
   "cancelled": "Cancelled",
   "cannot_go_before_prescription_date": "Cannot view slots before the earliest prescription date",
   "cannot_select_date_out_of_range": "Cannot select date out of range",
