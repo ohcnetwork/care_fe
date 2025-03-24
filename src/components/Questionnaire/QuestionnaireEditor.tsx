@@ -612,11 +612,29 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
     onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
+      const errorData = error.cause as {
+        errors: { msg: string; loc: (string | number)[] }[];
+      };
+
       errorData.errors.forEach((er) => {
-        toast.error(er.msg);
+        let fieldPath = er.loc?.join(" > ");
+        if (er.loc?.includes("questions")) {
+          let questionPath = [];
+          for (let i = 0; i < er.loc.length; i++) {
+            if (
+              er.loc[i] === "questions" &&
+              typeof er.loc[i + 1] === "number"
+            ) {
+              questionPath.push(`Question ${Number(er.loc[i + 1]) + 1}`);
+            }
+          }
+          fieldPath = questionPath.join(" > ");
+        }
+
+        const message = fieldPath ? `Error in ${fieldPath}: ${er.msg}` : er.msg;
+
+        toast.error(message);
       });
-      toast.error("Failed to Create Questionnaire");
     },
   });
 
@@ -631,11 +649,29 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
     onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
+      const errorData = error.cause as {
+        errors: { msg: string; loc: (string | number)[] }[];
+      };
+
       errorData.errors.forEach((er) => {
-        toast.error(er.msg);
+        let fieldPath = er.loc?.join(" > ");
+        if (er.loc?.includes("questions")) {
+          let questionPath = [];
+          for (let i = 0; i < er.loc.length; i++) {
+            if (
+              er.loc[i] === "questions" &&
+              typeof er.loc[i + 1] === "number"
+            ) {
+              questionPath.push(`Question ${Number(er.loc[i + 1]) + 1}`);
+            }
+          }
+          fieldPath = questionPath.join(" > ");
+        }
+
+        const message = fieldPath ? `Error in ${fieldPath}: ${er.msg}` : er.msg;
+
+        toast.error(message);
       });
-      toast.error("Failed to Update Questionnaire");
     },
   });
 
