@@ -193,6 +193,7 @@ export const EncounterShow = (props: Props) => {
                 {keysOf(tabs).map((tab) => (
                   <Link
                     key={tab}
+                    data-cy={`tab-${tab}`}
                     className={tabButtonClasses(props.tab === tab)}
                     href={`${tab}`}
                   >

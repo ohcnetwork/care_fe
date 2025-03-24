@@ -279,6 +279,15 @@ export const mergeAutocompleteOptions = (
   return [value, ...options];
 };
 
+export const readFileAsDataURL = async (file: File) => {
+  let result_base64 = await new Promise((resolve) => {
+    let fileReader = new FileReader();
+    fileReader.onload = () => resolve(fileReader.result);
+    fileReader.readAsDataURL(file);
+  });
+
+  return result_base64 as string;
+};
 export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
   if (!pastDate) {
     return [];
