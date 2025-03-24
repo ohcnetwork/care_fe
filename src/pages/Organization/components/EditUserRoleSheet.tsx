@@ -39,7 +39,6 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { editUserPermissions } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -64,6 +63,7 @@ export default function EditUserRoleSheet({
   const [open, setOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>(userRole.role.id);
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
+  const authUser = useAuthUser();
   const { t } = useTranslation();
 
   const { data: roles } = useQuery({
@@ -124,8 +124,8 @@ export default function EditUserRoleSheet({
       role: selectedRole,
     });
   };
-  const authUser = useAuthUser();
-  const editPermissions = editUserPermissions(authUser, userRole.user);
+  const canEditUser =
+    authUser.is_superuser || authUser.username === userRole.user.username;
 
   return (
     <>
@@ -249,7 +249,7 @@ export default function EditUserRoleSheet({
                 </AlertDialogContent>
               </AlertDialog>
 
-              {editPermissions && (
+              {canEditUser && (
                 <Button
                   variant="outline"
                   className="w-full"
