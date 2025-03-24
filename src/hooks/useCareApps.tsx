@@ -53,7 +53,7 @@ export const useCareAppEncounterTabs = () => {
 export function usePluginRoutes() {
   const careApps = useCareApps();
   const routes = careApps.reduce((acc, plugin) => {
-    return { ...acc, ...plugin.routes };
+    return { ...acc, ...(plugin.routes ?? {}) };
   }, {});
   if (!routes) {
     throw new Error("'usePluginRoutes' must be used within 'AppRouter' only");

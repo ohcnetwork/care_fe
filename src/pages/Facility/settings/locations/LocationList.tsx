@@ -301,6 +301,7 @@ export default function LocationList({ facilityId }: Props) {
               onLocationClick={handleEditLocation}
               facilityName={facilityData?.name || t("facility")}
               searchQuery={searchQuery}
+              isEditing={isSheetOpen}
             />
           )}
 
