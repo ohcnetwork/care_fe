@@ -280,21 +280,19 @@ function ResponseCard({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
-              {t("print_questionnaire_response")}
+              {t("print")}
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <Link href={`questionnaire_response/${item.id}/print`}>
-              <DropdownMenuItem>
-                {t("print_current_questionnaire_response")}
-              </DropdownMenuItem>
+              <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
             </Link>
             <Link
               href={`questionnaire/${item.questionnaire?.id}/responses/print`}
             >
               <DropdownMenuItem>
-                {t("print_all_questionnaire_responses", {
+                {t("print_all_responses", {
                   title: item.questionnaire?.title,
                 })}
               </DropdownMenuItem>

@@ -20,6 +20,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
+import { FileUploadQuestion } from "@/types/files/files";
 import {
   DetailedValidationError,
   QuestionValidationError,
@@ -36,6 +37,7 @@ import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
+import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
 import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
@@ -299,6 +301,10 @@ const STRUCTURED_TYPE_VALIDATORS = {
   ) => {
     const medicationData = (response?.value as MedicationRequest[]) || [];
     return validateMedicationRequestQuestion(medicationData, questionId);
+  },
+  files: (response: ResponseValue | undefined, quesitonId: string) => {
+    const files = (response?.value as FileUploadQuestion[]) || [];
+    return validateFileUploadQuestion(files, quesitonId);
   },
 } as const;
 
@@ -609,21 +615,29 @@ export function QuestionnaireForm({
     const requests: FormBatchRequest[] = [];
     if (encounterId && patientId) {
       const context = { facilityId, patientId, encounterId };
-      // First, collect all structured data requests if encounterId is provided
+      const structuredPromises: Promise<FormBatchRequest[]>[] = [];
+
       formsWithValidation.forEach((form) => {
         form.responses.forEach((response) => {
           if (response.structured_type) {
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
-              const structuredRequests = getStructuredRequests(
-                response.structured_type,
-                structuredData,
-                context,
+              structuredPromises.push(
+                getStructuredRequests(
+                  response.structured_type,
+                  structuredData,
+                  context,
+                ),
               );
-              requests.push(...structuredRequests);
             }
           }
         });
+      });
+
+      const structuredRequestsArrays = await Promise.all(structuredPromises);
+
+      structuredRequestsArrays.forEach((requestArray) => {
+        requests.push(...requestArray);
       });
     }
 
