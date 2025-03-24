@@ -120,6 +120,26 @@ const symptom_questionnaire: QuestionnaireDetail = {
   tags: [],
 };
 
+const files_questionnaire: QuestionnaireDetail = {
+  id: "files",
+  slug: "files",
+  version: "0.0.1",
+  title: "Files",
+  status: "active",
+  subject_type: "patient",
+  questions: [
+    {
+      id: "files",
+      text: "Files",
+      type: "structured",
+      structured_type: "files",
+      link_id: "1.1",
+      required: true,
+    },
+  ],
+  tags: [],
+};
+
 export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireDetail> = {
   encounter: encounterQuestionnaire,
   medication_request: medication_request_questionnaire,
@@ -127,4 +147,5 @@ export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireDetail> = {
   medication_statement: medication_statement_questionnaire,
   diagnosis: diagnosis_questionnaire,
   symptom: symptom_questionnaire,
+  files: files_questionnaire,
 };
