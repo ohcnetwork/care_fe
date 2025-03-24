@@ -15,6 +15,7 @@ import { Edit3Icon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -59,9 +60,13 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters, { FilterState } from "@/hooks/useFilters";
 
+import { getPermissions } from "@/common/Permissions";
+
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
@@ -71,6 +76,7 @@ import {
   formatName,
   formatPatientAge,
 } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import {
   formatSlotTimeRange,
@@ -242,6 +248,21 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
 
+  const { hasPermission } = usePermissions();
+  const { goBack } = useAppHistory();
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
+
+  const { canViewAppointments } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
+
   const schedulableUsersQuery = useQuery({
     queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
@@ -319,6 +340,13 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const slots = slotsQuery.data?.results?.filter((s) => s.allocated > 0);
   const slot = slots?.find((s) => s.id === qParams.slot);
+
+  useEffect(() => {
+    if (!canViewAppointments) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack("/");
+    }
+  }, [canViewAppointments]);
 
   if (schedulableUsersQuery.isLoading) {
     return <Loading />;
@@ -528,6 +556,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
                 search={qParams.search?.toLowerCase()}
+                canViewAppointments={canViewAppointments}
               />
             ))}
           </div>
@@ -543,6 +572,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
           date_from={qParams.date_from}
           date_to={qParams.date_to}
           search={qParams.search?.toLowerCase()}
+          canViewAppointments={canViewAppointments}
           resultsPerPage={resultsPerPage}
           status={qParams.status}
           Pagination={Pagination}
@@ -560,6 +590,7 @@ function AppointmentColumn(props: {
   date_from: string | null;
   date_to: string | null;
   search?: string;
+  canViewAppointments: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -584,7 +615,7 @@ function AppointmentColumn(props: {
         date_before: props.date_to,
       },
     }),
-    enabled: !!props.date_from && !!props.date_to,
+    enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
   });
 
   let appointments = data?.results ?? [];
@@ -702,6 +733,7 @@ function AppointmentRow(props: {
   date_from: string | null;
   date_to: string | null;
   search?: string;
+  canViewAppointments: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -728,7 +760,7 @@ function AppointmentRow(props: {
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
       },
     }),
-    enabled: !!props.date_from && !!props.date_to,
+    enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
   });
 
   let appointments = data?.results ?? [];

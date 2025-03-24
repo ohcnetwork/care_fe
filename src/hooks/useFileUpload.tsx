@@ -385,7 +385,7 @@ export default function useFileUpload(
   const Input = (props: FileInputProps) => (
     <input
       {...props}
-      id="file_upload_patient"
+      id={`file_upload_${fileType}`}
       title={t("change_file")}
       onChange={onFileChange}
       type="file"
