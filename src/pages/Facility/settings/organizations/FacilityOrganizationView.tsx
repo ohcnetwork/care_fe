@@ -24,7 +24,7 @@ import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganiza
 import FacilityOrganizationLayout from "./components/FacilityOrganizationLayout";
 
 interface Props {
-  id: string;
+  id?: string;
   facilityId: string;
 }
 
@@ -86,7 +86,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     queryFn: query.debounced(facilityOrganizationApi.list, {
       pathParams: { facilityId },
       queryParams: {
-        parent: id,
+        parent: id || "",
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         limit: resultsPerPage,
         name: qParams.search || undefined,

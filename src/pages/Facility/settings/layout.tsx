@@ -15,7 +15,6 @@ import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 import { GeneralSettings } from "./general/general";
 import LocationList from "./locations/LocationList";
 import LocationView from "./locations/LocationView";
-import FacilityOrganizationIndex from "./organizations/FacilityOrganizationIndex";
 import FacilityOrganizationUsers from "./organizations/FacilityOrganizationUsers";
 import FacilityOrganizationView from "./organizations/FacilityOrganizationView";
 
@@ -25,7 +24,7 @@ interface SettingsLayoutProps {
 
 const getRoutes = (facilityId: string) => ({
   "/general": () => <GeneralSettings facilityId={facilityId} />,
-  "/departments": () => <FacilityOrganizationIndex facilityId={facilityId} />,
+  "/departments": () => <FacilityOrganizationView facilityId={facilityId} />,
   "/departments/:id": ({ id }: { id: string }) => (
     <FacilityOrganizationView facilityId={facilityId} id={id} />
   ),
