@@ -1,5 +1,7 @@
 import { t } from "i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,15 +28,19 @@ import {
 
 interface DiagnosisTableProps {
   diagnoses: Diagnosis[];
+  title?: string;
 }
 
-export function DiagnosisTable({ diagnoses }: DiagnosisTableProps) {
+export function DiagnosisTable({
+  diagnoses,
+  title = t("diagnosis"),
+}: DiagnosisTableProps) {
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>
         <TableRow className="rounded-md overflow-hidden bg-gray-100">
           <TableHead className="first:rounded-l-md h-auto  py-1 px-2  text-gray-600">
-            {t("diagnosis")}
+            {title}
           </TableHead>
           <TableHead className="h-auto  py-1 px-2  text-gray-600">
             {t("status")}
@@ -57,14 +63,27 @@ export function DiagnosisTable({ diagnoses }: DiagnosisTableProps) {
         {diagnoses.map((diagnosis) => (
           <TableRow
             key={diagnosis.id}
-            className={`rounded-md overflow-hidden bg-gray-50 ${
+            className={cn(
+              "rounded-md overflow-hidden",
               diagnosis.verification_status === "entered_in_error"
                 ? "opacity-50"
-                : ""
-            }`}
+                : diagnosis.category === "chronic_condition"
+                  ? "bg-yellow-50/50"
+                  : "bg-gray-50",
+            )}
           >
             <TableCell className="font-medium first:rounded-l-md">
-              {diagnosis.code.display}
+              <div className="flex items-center gap-2">
+                {diagnosis.code.display}
+                {diagnosis.category === "chronic_condition" && (
+                  <Badge
+                    variant="outline"
+                    className="bg-yellow-100 text-yellow-700 text-xs"
+                  >
+                    {t("chronic_condition", { count: 1 })}
+                  </Badge>
+                )}
+              </div>
             </TableCell>
             <TableCell>
               <Badge

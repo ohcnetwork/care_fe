@@ -63,6 +63,7 @@ const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
   clinical_status: "active",
   verification_status: "confirmed",
   severity: "moderate",
+  category: "problem_list_item",
   onset: { onset_datetime: new Date().toISOString().split("T")[0] },
 };
 
@@ -83,6 +84,7 @@ function convertToSymptomRequest(symptom: Symptom): SymptomRequest {
       : undefined,
     recorded_date: symptom.recorded_date,
     note: symptom.note,
+    category: symptom.category,
     encounter: "", // This will be set when submitting the form
   };
 }

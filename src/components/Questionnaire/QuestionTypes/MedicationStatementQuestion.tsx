@@ -514,7 +514,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           <SelectContent>
             {MEDICATION_STATEMENT_STATUS.map((status) => (
               <SelectItem key={status} value={status}>
-                {t(`${status}`)}
+                {t(`medication_status_${status}`)}
               </SelectItem>
             ))}
           </SelectContent>
