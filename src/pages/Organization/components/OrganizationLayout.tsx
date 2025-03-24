@@ -202,7 +202,7 @@ export default function OrganizationLayout({
                       className="mr-2 h-5 w-5"
                     />
                   )}
-                  <span className="font-medium">
+                  <span className="font-medium text-base">
                     {activeNavItem ? activeNavItem.title : t("navigation")}
                   </span>
                 </div>
@@ -232,7 +232,7 @@ export default function OrganizationLayout({
                     className="flex items-center w-full"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <div className="flex items-center">
+                    <div className="flex items-center text-base">
                       <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
                       {item.title}
                     </div>
