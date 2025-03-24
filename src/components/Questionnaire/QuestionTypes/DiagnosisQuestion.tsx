@@ -119,7 +119,7 @@ export function DiagnosisQuestion({
     ...DIAGNOSIS_INITIAL_VALUE,
     onset: { onset_datetime: new Date().toISOString().split("T")[0] },
   });
-  const isMobile = useBreakpoints({ default: true, sm: false });
+  const isMobile = useBreakpoints({ default: true, md: false });
 
   // Sort diagnoses: chronic conditions first, then by date
   const sortedDiagnoses = useMemo(() => {
@@ -432,6 +432,131 @@ export function DiagnosisQuestion({
     });
   };
 
+  const desktopDiagnosisContent = (
+    <div className="rounded-lg border p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          {selectedCode && (
+            <Label className="text-sm font-medium">
+              {selectedCode.display}
+            </Label>
+          )}
+        </div>
+        <Button variant="ghost" size="sm" onClick={handleCloseDrawer}>
+          {t("cancel")}
+        </Button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {DIAGNOSIS_CATEGORY.map((category) => (
+          <div
+            key={category}
+            className={cn(
+              "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
+              selectedCategory === category
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50",
+            )}
+            onClick={() => setSelectedCategory(category)}
+          >
+            <div className="flex items-center space-x-2">
+              <div className="flex-1">
+                <div className="font-medium">
+                  {t(`Diagnosis_${category}__title`)}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {t(`Diagnosis_${category}__description`)}
+                </div>
+              </div>
+              {selectedCategory === category && (
+                <div className="h-4 w-4 rounded-full bg-primary" />
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm">{t("date")}</Label>
+          <Input
+            type="date"
+            value={newDiagnosis.onset?.onset_datetime || ""}
+            onChange={(e) =>
+              setNewDiagnosis((prev) => ({
+                ...prev,
+                onset: { onset_datetime: e.target.value },
+              }))
+            }
+            className="h-9"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm">{t("status")}</Label>
+          <Select
+            value={newDiagnosis.clinical_status}
+            onValueChange={(value) =>
+              setNewDiagnosis((prev) => ({
+                ...prev,
+                clinical_status: value as DiagnosisRequest["clinical_status"],
+              }))
+            }
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue
+                placeholder={
+                  <span className="text-gray-500">
+                    {t("diagnosis_status_placeholder")}
+                  </span>
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
+                <SelectItem key={status} value={status} className="capitalize">
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm">{t("verification")}</Label>
+          <Select
+            value={newDiagnosis.verification_status}
+            onValueChange={(value) =>
+              setNewDiagnosis((prev) => ({
+                ...prev,
+                verification_status:
+                  value as DiagnosisRequest["verification_status"],
+              }))
+            }
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue
+                placeholder={
+                  <span className="text-gray-500">
+                    {t("diagnosis_verification_placeholder")}
+                  </span>
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
+                <SelectItem key={status} value={status} className="capitalize">
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-2">
+        <Button onClick={handleCategoryConfirm}>{t("add_diagnosis")}</Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       {sortedDiagnoses.length > 0 && (
@@ -488,21 +613,7 @@ export function DiagnosisQuestion({
           </CommandDrawer>
         </>
       ) : showCategorySelection ? (
-        <div className="rounded-lg border p-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {selectedCode && (
-                <Label className="text-sm font-medium">
-                  {selectedCode.display}
-                </Label>
-              )}
-            </div>
-            <Button variant="ghost" size="sm" onClick={handleCloseDrawer}>
-              {t("cancel")}
-            </Button>
-          </div>
-          {diagnosisDetailsContent}
-        </div>
+        desktopDiagnosisContent
       ) : (
         <ValueSetSelect
           system="system-condition-code"
