@@ -148,7 +148,7 @@ export const PrintPrescription = (props: {
               const notes = medication.note;
               return {
                 medicine: medication.medication?.display,
-                status: t(medication.status),
+                status: t(`medication_status_${medication.status}`),
                 dosage: dosage,
                 frequency: instruction?.as_needed_boolean
                   ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
