@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -223,7 +224,7 @@ export default function OrganizationLayout({
                     path === item.path
                       ? "font-medium text-primary-700 bg-gray-100"
                       : "text-gray-700"
-                  }`}
+                  } flex justify-between items-center`}
                   asChild
                 >
                   <Link
@@ -231,8 +232,16 @@ export default function OrganizationLayout({
                     className="flex items-center w-full"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
-                    {item.title}
+                    <div className="flex items-center">
+                      <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
+                      {item.title}
+                    </div>
+                    {path === item.path && (
+                      <DropdownMenuCheckboxItem
+                        checked
+                        className="pointer-events-none pr-1"
+                      />
+                    )}
                   </Link>
                 </DropdownMenuItem>
               ))}
