@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
@@ -12,6 +14,14 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 
 import Page from "@/components/Common/Page";
@@ -49,6 +59,7 @@ export default function OrganizationLayout({
   const path = usePath() || "";
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
@@ -103,6 +114,9 @@ export default function OrganizationLayout({
     },
   ];
 
+  const visibleNavItems = navItems.filter((item) => item.visibility);
+  const activeNavItem = visibleNavItems.find((item) => path === item.path);
+
   const orgParents: OrganizationParent[] = [];
   let currentParent = org.parent;
   while (currentParent) {
@@ -144,8 +158,9 @@ export default function OrganizationLayout({
           </Breadcrumb>
         </div>
       )}
-      {/* Navigation */}
-      <div className="mt-4 flex min-w-0">
+
+      {/* Desktop Navigation */}
+      <div className="mt-4 min-w-0 hidden lg:block">
         <Menubar className="w-full h-full overflow-x-auto">
           {navItems
             .filter((item) => item.visibility)
@@ -169,6 +184,75 @@ export default function OrganizationLayout({
             ))}
         </Menubar>
       </div>
+
+      {/* Mobile Navigation */}
+      <div className="mt-4">
+        <div className="block lg:hidden">
+          <DropdownMenu
+            open={isMobileMenuOpen}
+            onOpenChange={setIsMobileMenuOpen}
+          >
+            <DropdownMenuTrigger asChild className="py-2">
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center py-3 px-4"
+              >
+                <div className="flex items-center py-2">
+                  {activeNavItem && (
+                    <CareIcon
+                      icon={activeNavItem.icon}
+                      className="mr-2 h-5 w-5"
+                    />
+                  )}
+                  <span className="font-medium text-base">
+                    {activeNavItem ? activeNavItem.title : t("navigation")}
+                  </span>
+                </div>
+                <CareIcon
+                  icon={isMobileMenuOpen ? "l-angle-up" : "l-angle-down"}
+                  className="ml-2 h-4 w-4"
+                />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              sideOffset={5}
+              className="w-[var(--radix-dropdown-menu-trigger-width)]"
+            >
+              {visibleNavItems.map((item) => (
+                <DropdownMenuItem
+                  key={item.path}
+                  className={cn(
+                    "flex justify-between items-center py-3",
+                    path === item.path
+                      ? "font-medium text-primary-700 bg-gray-100"
+                      : "text-gray-700",
+                  )}
+                  asChild
+                >
+                  <Link
+                    href={item.path}
+                    className="flex items-center w-full"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <div className="flex items-center text-base">
+                      <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
+                      {item.title}
+                    </div>
+                    {path === item.path && (
+                      <DropdownMenuCheckboxItem
+                        checked
+                        className="pointer-events-none pr-1"
+                      />
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
       {/* Page Content */}
       <div className="mt-4">
         {children({ orgPermissions: org.permissions })}
