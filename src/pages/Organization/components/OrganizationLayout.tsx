@@ -190,12 +190,12 @@ export default function OrganizationLayout({
             open={isMobileMenuOpen}
             onOpenChange={setIsMobileMenuOpen}
           >
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className="py-2">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center py-2 px-4"
+                className="w-full flex justify-between items-center py-3 px-4"
               >
-                <div className="flex items-center">
+                <div className="flex items-center py-2">
                   {activeNavItem && (
                     <CareIcon
                       icon={activeNavItem.icon}
@@ -224,7 +224,7 @@ export default function OrganizationLayout({
                     path === item.path
                       ? "font-medium text-primary-700 bg-gray-100"
                       : "text-gray-700"
-                  } flex justify-between items-center`}
+                  } flex justify-between items-center py-3`}
                   asChild
                 >
                   <Link
