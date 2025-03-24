@@ -66,7 +66,10 @@ const formSchema = z
     expiration_date: z.string().optional(),
     lot_number: z.string().optional(),
     serial_number: z.string().optional(),
-    registered_name: z.string().min(1, { message: t("required") }),
+    registered_name: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     user_friendly_name: z.string().optional(),
     model_number: z.string().optional(),
     part_number: z.string().optional(),

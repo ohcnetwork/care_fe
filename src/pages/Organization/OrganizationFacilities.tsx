@@ -67,7 +67,7 @@ export default function OrganizationFacilities({
         );
         return (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap">
               <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
                 <EntityBadge
                   title={t("facilities")}
@@ -96,7 +96,7 @@ export default function OrganizationFacilities({
             </div>
 
             <div
-              className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+              className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4"
               data-cy="facility-cards"
             >
               {isFetching ? (

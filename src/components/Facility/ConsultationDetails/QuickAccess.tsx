@@ -117,7 +117,7 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
                         {stringifyNestedObject(org)}
                       </Badge>
                     ))
-                  : t("no_organizations_added_yet")}
+                  : t("no_organization_added_yet", { count: 0 })}
               </div>
             }
           />

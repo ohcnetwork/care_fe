@@ -1,23 +1,59 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Folder, FolderOpen, PenLine } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+import mutate from "@/Utils/request/mutate";
 import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import locationApi from "@/types/location/locationApi";
 
 interface Props {
   location: LocationList;
   onEdit?: (location: LocationList) => void;
   className?: string;
+  facilityId: string;
 }
 
-export function LocationCard({ location, onEdit, className }: Props) {
+export function LocationCard({
+  location,
+  onEdit,
+  className,
+  facilityId,
+}: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { mutate: removeLocation } = useMutation({
+    mutationFn: mutate(locationApi.delete, {
+      pathParams: { facility_id: facilityId, id: location.id },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["locations", facilityId],
+      });
+      toast.success(t("location_removed_successfully"));
+    },
+  });
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons] ||
     Folder;
@@ -80,16 +116,50 @@ export function LocationCard({ location, onEdit, className }: Props) {
         </div>
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
-          <div className="flex justify-end">
-            <Button variant="outline" asChild>
-              <Link
-                href={`/location/${location.id}`}
-                className="flex items-center gap-2"
-              >
-                {t("view_details")}
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
+          <div className="flex justify-between">
+            {!location.has_children && !location.current_encounter && (
+              <div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant={"white"}>
+                      <CareIcon icon="l-trash" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t("remove_location", { name: location.name })}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("are_you_sure_want_to_delete", {
+                          name: location.name,
+                        })}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => removeLocation({})}
+                        className={buttonVariants({ variant: "destructive" })}
+                      >
+                        {t("remove")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
+            <div className="ml-auto">
+              <Button variant="outline" asChild>
+                <Link
+                  href={`/location/${location.id}`}
+                  className="flex items-center gap-2"
+                >
+                  {t("view_details")}
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
