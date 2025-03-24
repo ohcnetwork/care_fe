@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -125,24 +125,27 @@ export default function LocationView({ id, facilityId }: Props) {
               <Link href={`/locations`}>{t("home")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
+          <BreadcrumbSeparator />
           {breadcrumbs.map((breadcrumb, index) => (
-            <BreadcrumbItem key={breadcrumb.id}>
-              {index === breadcrumbs.length - 1 ? (
-                <span className="font-semibold text-gray-900">
-                  {breadcrumb.name}
-                </span>
-              ) : (
-                <>
-                  <BreadcrumbLink
-                    asChild
-                    className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
-                  >
-                    <Link href={`${breadcrumb.id}`}>{breadcrumb.name}</Link>
-                  </BreadcrumbLink>
-                  <BreadcrumbSeparator />
-                </>
-              )}
-            </BreadcrumbItem>
+            <React.Fragment key={breadcrumb.id}>
+              <BreadcrumbItem>
+                {index === breadcrumbs.length - 1 ? (
+                  <span className="font-semibold text-gray-900">
+                    {breadcrumb.name}
+                  </span>
+                ) : (
+                  <>
+                    <BreadcrumbLink
+                      asChild
+                      className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                    >
+                      <Link href={`${breadcrumb.id}`}>{breadcrumb.name}</Link>
+                    </BreadcrumbLink>
+                  </>
+                )}
+              </BreadcrumbItem>
+              {index != breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+            </React.Fragment>
           ))}
         </BreadcrumbList>
       </Breadcrumb>
