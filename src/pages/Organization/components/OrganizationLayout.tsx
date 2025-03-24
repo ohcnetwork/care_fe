@@ -155,8 +155,9 @@ export default function OrganizationLayout({
           </Breadcrumb>
         </div>
       )}
-      {/* Navigation */}
-      <div className="mt-4 flex min-w-0  md:hidden">
+
+      {/* Desktop Navigation */}
+      <div className="mt-4 min-w-0 hidden lg:block">
         <Menubar className="w-full h-full overflow-x-auto">
           {navItems
             .filter((item) => item.visibility)
@@ -181,6 +182,7 @@ export default function OrganizationLayout({
         </Menubar>
       </div>
 
+      {/* Mobile Navigation */}
       <div className="mt-4">
         <div className="block lg:hidden">
           <DropdownMenu
