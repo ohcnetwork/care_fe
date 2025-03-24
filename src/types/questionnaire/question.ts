@@ -17,20 +17,76 @@ export type QuestionType =
   | "structured";
 
 export const SUPPORTED_QUESTION_TYPES = [
-  { name: "Group", value: "group" },
-  { name: "Display", value: "display" },
-  { name: "Boolean", value: "boolean" },
-  { name: "Decimal", value: "decimal" },
-  { name: "Integer", value: "integer" },
-  { name: "Date", value: "date" },
-  { name: "DateTime", value: "dateTime" },
-  { name: "Time", value: "time" },
-  { name: "String", value: "string" },
-  { name: "Text", value: "text" },
-  { name: "URL", value: "url" },
-  { name: "Choice", value: "choice" },
-  { name: "Quantity", value: "quantity" },
-  { name: "Structured", value: "structured" },
+  {
+    name: "Group",
+    value: "group",
+    description: "question_type_group_description",
+  },
+  {
+    name: "Display",
+    value: "display",
+    description: "question_type_display_description",
+  },
+  {
+    name: "Boolean",
+    value: "boolean",
+    description: "question_type_boolean_description",
+  },
+  {
+    name: "Decimal",
+    value: "decimal",
+    description: "question_type_decimal_description",
+  },
+  {
+    name: "Integer",
+    value: "integer",
+    description: "question_type_integer_description",
+  },
+  {
+    name: "Date",
+    value: "date",
+    description: "question_type_date_description",
+  },
+  {
+    name: "Date Time",
+    value: "dateTime",
+    description: "question_type_date_time_description",
+  },
+  {
+    name: "Time",
+    value: "time",
+    description: "question_type_time_description",
+  },
+  {
+    name: "String",
+    value: "string",
+    description: "question_type_string_description",
+  },
+  {
+    name: "Text",
+    value: "text",
+    description: "question_type_text_description",
+  },
+  {
+    name: "URL",
+    value: "url",
+    description: "question_type_url_description",
+  },
+  {
+    name: "Choice",
+    value: "choice",
+    description: "question_type_choice_description",
+  },
+  {
+    name: "Quantity",
+    value: "quantity",
+    description: "question_type_quantity_description",
+  },
+  {
+    name: "Structured",
+    value: "structured",
+    description: "question_type_structured_description",
+  },
 ];
 
 export type StructuredQuestionType =

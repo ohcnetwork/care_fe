@@ -12,6 +12,7 @@ import {
 import { Building, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -1391,6 +1392,7 @@ function QuestionEditor({
   isLast,
   index,
 }: QuestionEditorProps) {
+  const { t } = useTranslation();
   const {
     text,
     type,
@@ -1560,12 +1562,22 @@ function QuestionEditor({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t("select_question_type")} />
+                    <SelectValue placeholder={t("select_question_type")}>
+                      {
+                        SUPPORTED_QUESTION_TYPES.find((t) => t.value === type)
+                          ?.name
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
-                        {type.name}
+                        <div className="flex flex-col items-start">
+                          <span>{type.name}</span>
+                          <span className="text-xs max-w-xs text-muted-foreground whitespace-normal">
+                            {t(type.description)}
+                          </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
