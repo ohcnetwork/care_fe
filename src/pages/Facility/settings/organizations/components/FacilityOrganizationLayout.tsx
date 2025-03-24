@@ -17,6 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
+import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
   FacilityOrganization,
@@ -26,7 +27,7 @@ import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrgani
 
 interface Props {
   id: string;
-  children: React.ReactNode;
+  children: (props: { facilityPermissions: string[] }) => React.ReactNode;
   facilityId: string;
 }
 
@@ -59,6 +60,13 @@ export default function FacilityOrganizationLayout({
 
   const currentTab =
     navItems.find((item) => item.path === path)?.value || "users";
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
 
   const { data: org, isLoading } = useQuery<FacilityOrganization>({
     queryKey: ["facilityOrganization", id],
@@ -162,7 +170,9 @@ export default function FacilityOrganizationLayout({
             </TabsList>
           </Tabs>
         </div>
-        <div className="mt-4">{children}</div>
+        <div className="mt-4">
+          {children({ facilityPermissions: facilityData?.permissions ?? [] })}
+        </div>
       </Page>
     </>
   );
