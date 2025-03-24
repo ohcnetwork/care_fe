@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns from "@/components/Common/UserColumns";
+import { userChildProps } from "@/components/Common/UserColumns";
 import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
@@ -22,18 +23,14 @@ import {
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import {
-  editUserPermissions,
-  showAvatarEdit,
-  showUserDelete,
-  showUserPasswordReset,
-} from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
-import { UserBase } from "@/types/user/user";
 
-export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
+export default function UserSummaryTab({
+  userData,
+  permissions,
+}: userChildProps) {
   const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const authUser = useAuthUser();
@@ -64,11 +61,11 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
   const userColumnsData = {
     userData,
     username: userData.username,
+    permissions,
   };
-  const deletePermitted = showUserDelete(authUser, userData);
-  const passwordResetPermitted = showUserPasswordReset(authUser, userData);
-  const avatarPermitted = showAvatarEdit(authUser, userData);
-  const editPermissions = editUserPermissions(authUser, userData);
+  const loggedInUsersProfile = authUser.username === userData.username;
+  const canEditUser = authUser.is_superuser || loggedInUsersProfile;
+  const canResetPassword = loggedInUsersProfile;
 
   const renderBasicInformation = () => {
     return (
@@ -105,7 +102,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
         setOpen={setShowEditUserSheet}
       />
       <div className="mt-10 flex flex-col gap-y-6">
-        {editPermissions && (
+        {canEditUser && (
           <Button
             variant="outline"
             className="w-fit self-end"
@@ -116,7 +113,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
             {t("edit_user")}
           </Button>
         )}
-        {avatarPermitted && (
+        {canEditUser && (
           <UserColumns
             heading={t("edit_avatar")}
             note={
@@ -133,7 +130,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
           note={
             authUser.username === userData.username
               ? t("personal_information_note_self")
-              : editPermissions
+              : canEditUser
                 ? t("personal_information_note")
                 : t("personal_information_note_view")
           }
@@ -145,14 +142,14 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
           note={
             authUser.username === userData.username
               ? t("contact_info_note_self")
-              : editPermissions
+              : canEditUser
                 ? t("contact_info_note")
                 : t("contact_info_note_view")
           }
           Child={renderContactInformation}
           childProps={userColumnsData}
         />
-        {passwordResetPermitted && (
+        {canResetPassword && (
           <UserColumns
             heading={t("reset_password")}
             note={t("reset_password_note_self")}
@@ -182,7 +179,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
             />
           </>
         )}
-        {deletePermitted && (
+        {canEditUser && (
           <div className="mt-3 flex flex-col items-center gap-5 border-t-2 pt-5 sm:flex-row">
             <div className="sm:w-1/4">
               <div className="my-1 text-sm leading-5">
