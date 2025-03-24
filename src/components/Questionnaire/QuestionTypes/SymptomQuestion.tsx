@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -315,6 +316,16 @@ export function SymptomQuestion({
   }, [patientSymptoms]);
 
   const handleAddSymptom = (code: Code) => {
+    const isDuplicate = symptoms.some(
+      (symptom) =>
+        symptom.code.code === code.code &&
+        symptom.verification_status !== "entered_in_error",
+    );
+
+    if (isDuplicate) {
+      toast.warning(t("symptom_already_exist_warning"));
+      return;
+    }
     const newSymptoms = [
       ...symptoms,
       { ...SYMPTOM_INITIAL_VALUE, code },

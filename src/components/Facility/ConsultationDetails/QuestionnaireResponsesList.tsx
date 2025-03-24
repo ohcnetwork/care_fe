@@ -25,9 +25,9 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 interface Props {
   encounter?: Encounter;
   patientId: string;
-  facilityId?: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
+  canAccess?: boolean;
 }
 
 interface QuestionResponseProps {
@@ -327,6 +327,7 @@ export default function QuestionnaireResponsesList({
   patientId,
   isPrintPreview = false,
   onlyUnstructured,
+  canAccess = true,
 }: Props) {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
@@ -347,6 +348,7 @@ export default function QuestionnaireResponsesList({
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
     }),
+    enabled: canAccess,
   });
 
   return (

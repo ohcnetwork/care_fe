@@ -9,19 +9,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+import { getPermissions } from "@/common/Permissions";
 import { encounterIcons } from "@/common/constants";
 
 import { formatDateTime } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 
 interface EncounterCardProps {
   encounter: Encounter;
+  permissions: string[];
   facilityId?: string;
 }
 
 export const EncounterCard = (props: EncounterCardProps) => {
-  const { encounter, facilityId } = props;
+  const { encounter, permissions, facilityId } = props;
+  const { hasPermission } = usePermissions();
+  const { canViewEncounter, canViewPatients } = getPermissions(
+    hasPermission,
+    permissions,
+  );
 
+  const canAccess = canViewEncounter || canViewPatients;
   const Icon = encounterIcons[encounter.encounter_class];
 
   return (
@@ -116,21 +125,23 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 </div>
               )}
             </div>
-            <div className="w-full py-2 bg-gray-100 px-2">
-              <Button variant="outline" className="p-2 border border-black">
-                <Link
-                  href={
-                    facilityId
-                      ? `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
-                      : `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
-                  }
-                  className="flex items-center gap-2"
-                >
-                  <Eye className="w-4 h-4" />
-                  <span>{t("view_encounter")}</span>
-                </Link>
-              </Button>
-            </div>
+            {canAccess && (
+              <div className="w-full py-2 bg-gray-100 px-2">
+                <Button variant="outline" className="p-2 border border-black">
+                  <Link
+                    href={
+                      facilityId
+                        ? `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
+                        : `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
+                    }
+                    className="flex items-center gap-2"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>{t("view_encounter")}</span>
+                  </Link>
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

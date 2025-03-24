@@ -9,6 +9,8 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 
+import useSidebarState from "@/hooks/useSidebarState";
+
 import PatientUserProvider from "@/Providers/PatientUserProvider";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
 import PatientIndex from "@/pages/Patient/index";
@@ -83,6 +85,8 @@ export default function PatientRouter() {
 
   const appointmentPages = useRoutes(AppointmentRoutes);
 
+  const sidebarOpen = useSidebarState();
+
   if (!pages) {
     if (appointmentPages) {
       return <PatientUserProvider>{appointmentPages}</PatientUserProvider>;
@@ -92,7 +96,7 @@ export default function PatientRouter() {
 
   return (
     <PatientUserProvider>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={sidebarOpen}>
         <AppSidebar sidebarFor={SidebarFor.PATIENT} />
         <main
           id="pages"
