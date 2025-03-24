@@ -52,6 +52,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
+import {
+  STRUCTURED_QUESTIONS,
+  StructuredQuestionType,
+} from "@/components/Questionnaire/data/StructuredFormData";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -62,7 +66,6 @@ import {
   Question,
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
-  StructuredQuestionType,
 } from "@/types/questionnaire/question";
 import {
   QuestionStatus,
@@ -83,18 +86,6 @@ import { QuestionnaireForm } from "./QuestionnaireForm";
 interface QuestionnaireEditorProps {
   id?: string;
 }
-
-const STRUCTURED_QUESTION_TYPES = [
-  { value: "allergy_intolerance", label: "Allergy Intolerance" },
-  { value: "medication_request", label: "Medication Request" },
-  { value: "medication_statement", label: "Medication Statement" },
-  { value: "symptom", label: "Symptom" },
-  { value: "diagnosis", label: "Diagnosis" },
-  { value: "encounter", label: "Encounter" },
-  { value: "appointment", label: "Appointment" },
-  { value: "files", label: "Files" },
-] as const;
-
 interface Organization {
   id: string;
   name: string;
@@ -1295,7 +1286,7 @@ function QuestionEditor({
                       <SelectValue placeholder="Select structured type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {STRUCTURED_QUESTION_TYPES.map((type) => (
+                      {STRUCTURED_QUESTIONS.map((type) => (
                         <SelectItem key={type.value} value={type.value}>
                           {type.label}
                         </SelectItem>

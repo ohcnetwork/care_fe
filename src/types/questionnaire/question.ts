@@ -1,3 +1,5 @@
+import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
+
 import { Code } from "./code";
 
 export type QuestionType =
@@ -88,16 +90,6 @@ export const SUPPORTED_QUESTION_TYPES = [
     description: "question_type_structured_description",
   },
 ];
-
-export type StructuredQuestionType =
-  | "allergy_intolerance"
-  | "medication_request"
-  | "medication_statement"
-  | "symptom"
-  | "diagnosis"
-  | "encounter"
-  | "appointment"
-  | "files";
 
 type EnableWhenNumeric = {
   operator: "greater" | "less" | "greater_or_equals" | "less_or_equals";
