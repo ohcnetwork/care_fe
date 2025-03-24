@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetClose,
@@ -35,6 +36,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -42,7 +44,11 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
-import { getSlotsPerSession, getTokenDuration } from "@/pages/Scheduling/utils";
+import {
+  calculateSlotDuration,
+  getSlotsPerSession,
+  getTokenDuration,
+} from "@/pages/Scheduling/utils";
 import { ScheduleAvailabilityCreateRequest } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -106,6 +112,7 @@ export default function CreateScheduleTemplateSheet({
                 tokens_per_slot: z
                   .number()
                   .min(1, t("number_min_error", { min: 1 })),
+                auto_fill_duration: z.boolean().optional(),
               }),
               // Schema for open and closed types
               z.object({
@@ -158,6 +165,7 @@ export default function CreateScheduleTemplateSheet({
           end_time: undefined,
           tokens_per_slot: null as unknown as undefined,
           slot_size_in_minutes: null as unknown as undefined,
+          auto_fill_duration: false,
         },
       ],
     },
@@ -233,6 +241,17 @@ export default function CreateScheduleTemplateSheet({
         />
       </Callout>
     );
+  };
+
+  const updateSlotDuration = (index: number) => {
+    const isAutoFill = form.watch(`availabilities.${index}.auto_fill_duration`);
+    if (isAutoFill) {
+      const duration = calculateSlotDuration(
+        form.watch(`availabilities.${index}.start_time`),
+        form.watch(`availabilities.${index}.end_time`),
+      );
+      form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
+    }
   };
 
   return (
@@ -445,7 +464,14 @@ export default function CreateScheduleTemplateSheet({
                             <FormItem className="flex flex-col w-full">
                               <FormLabel required>{t("start_time")}</FormLabel>
                               <FormControl>
-                                <Input type="time" {...field} />
+                                <Input
+                                  type="time"
+                                  {...field}
+                                  onChange={(e) => {
+                                    field.onChange(e);
+                                    updateSlotDuration(index);
+                                  }}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -459,7 +485,14 @@ export default function CreateScheduleTemplateSheet({
                             <FormItem className="flex flex-col w-full mt-2">
                               <FormLabel required>{t("end_time")}</FormLabel>
                               <FormControl>
-                                <Input type="time" {...field} />
+                                <Input
+                                  type="time"
+                                  {...field}
+                                  onChange={(e) => {
+                                    field.onChange(e);
+                                    updateSlotDuration(index);
+                                  }}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -471,6 +504,36 @@ export default function CreateScheduleTemplateSheet({
                         "appointment" && (
                         <>
                           <div className="flex flex-wrap mt-0 pt-2 gap-2">
+                            <div className="w-full flex items-center justify-between space-x-4 mb-2 bg-gray-50 p-3 rounded-lg">
+                              <div className="flex items-center space-x-2">
+                                <CareIcon
+                                  icon="l-bolt"
+                                  className="text-lg text-blue-600"
+                                />
+                                <Label
+                                  htmlFor={`auto-fill-${index}`}
+                                  className="text-sm font-medium cursor-pointer"
+                                >
+                                  {t("auto_fill_slot_duration")}
+                                </Label>
+                              </div>
+                              <Switch
+                                id={`auto-fill-${index}`}
+                                checked={form.watch(
+                                  `availabilities.${index}.auto_fill_duration`,
+                                )}
+                                onCheckedChange={(checked) => {
+                                  form.setValue(
+                                    `availabilities.${index}.auto_fill_duration`,
+                                    checked,
+                                  );
+                                  if (checked) {
+                                    updateSlotDuration(index);
+                                  }
+                                }}
+                              />
+                            </div>
+
                             <FormField
                               control={form.control}
                               name={`availabilities.${index}.slot_size_in_minutes`}
@@ -489,9 +552,12 @@ export default function CreateScheduleTemplateSheet({
                                       placeholder="e.g. 10"
                                       {...field}
                                       value={field.value ?? ""}
-                                      onChange={(e) =>
-                                        field.onChange(e.target.valueAsNumber)
-                                      }
+                                      onChange={(e) => {
+                                        field.onChange(e.target.valueAsNumber);
+                                      }}
+                                      disabled={form.watch(
+                                        `availabilities.${index}.auto_fill_duration`,
+                                      )}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -577,6 +643,7 @@ export default function CreateScheduleTemplateSheet({
                       end_time: "00:00",
                       tokens_per_slot: null as unknown as number,
                       slot_size_in_minutes: null as unknown as number,
+                      auto_fill_duration: false,
                     },
                   ]);
                 }}

@@ -12,7 +12,7 @@ import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
@@ -148,7 +148,7 @@ export const PrintPrescription = (props: {
               const notes = medication.note;
               return {
                 medicine: medication.medication?.display,
-                status: t(medication.status),
+                status: t(`medication_status_${medication.status}`),
                 dosage: dosage,
                 frequency: instruction?.as_needed_boolean
                   ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
@@ -170,7 +170,7 @@ export const PrintPrescription = (props: {
                 return (
                   <div key={prescriberId} className="text-center">
                     <p className="text-sm text-gray-600 font-semibold">
-                      Dr. {prescriber.first_name} {prescriber.last_name}
+                      {formatName(prescriber)}
                     </p>
                   </div>
                 );
