@@ -103,10 +103,6 @@ const MEDICATION_STATEMENT_FIELDS: FieldDefinitions = {
       return !!period?.start && !!period?.end;
     },
   },
-  REASON: {
-    key: "reason",
-    required: true,
-  },
 } as const;
 
 export function validateMedicationStatementQuestion(
@@ -282,7 +278,6 @@ export function MedicationStatementQuestion({
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("reason")}
-                  <span className="text-red-500 ml-0.5">*</span>
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("notes")}
@@ -587,27 +582,14 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
 
       {/* Reason */}
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">
-          {t("reason")}
-          <span className="text-red-500 ml-0.5">*</span>
-        </Label>
+        <Label className="mb-1.5 block text-sm lg:hidden">{t("reason")}</Label>
         <Input
           maxLength={100}
           placeholder={t("reason_for_medication")}
           value={medication.reason || ""}
           onChange={(e) => onUpdate?.({ reason: e.target.value })}
           disabled={disabled || isReadOnly}
-          className={cn(
-            "h-9 text-sm",
-            hasError(MEDICATION_STATEMENT_FIELDS.REASON.key) &&
-              "border-red-500",
-          )}
-        />
-        <FieldError
-          fieldKey={MEDICATION_STATEMENT_FIELDS.REASON.key}
-          questionId={questionId}
-          errors={errors}
-          index={index}
+          className="h-9 text-sm"
         />
       </div>
 
