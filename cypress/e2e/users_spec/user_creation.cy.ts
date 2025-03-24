@@ -5,6 +5,7 @@ import {
   generatePhoneNumber,
   generateUsername,
 } from "@/utils/commonUtils";
+import { viewPort } from "@/utils/viewPort";
 
 describe("User Creation", () => {
   const facilityCreation = new FacilityCreation();
@@ -12,6 +13,7 @@ describe("User Creation", () => {
   const userRole = "Doctor";
 
   beforeEach(() => {
+    cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
     cy.loginByApi("orgadmin");
     cy.visit("/");
   });
