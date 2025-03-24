@@ -30,6 +30,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import DatePickerInput from "@/components/Common/DatePicker";
+
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
@@ -220,15 +222,16 @@ export default function CreateScheduleExceptionSheet({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel required>{t("valid_from")}</FormLabel>
-                        <Input
-                          type="date"
-                          min={format(new Date(), "yyyy-MM-dd")}
-                          {...field}
+                        <DatePickerInput
                           value={
-                            field.value
-                              ? format(new Date(field.value), "yyyy-MM-dd")
-                              : ""
+                            field.value ? new Date(field.value) : undefined
                           }
+                          onChange={(date) =>
+                            field.onChange(
+                              date ? format(date, "yyyy-MM-dd") : "",
+                            )
+                          }
+                          disabled={field.disabled}
                         />
                         <FormMessage />
                       </FormItem>

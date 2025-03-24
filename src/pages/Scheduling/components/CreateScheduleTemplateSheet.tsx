@@ -38,6 +38,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
+import DatePickerInput from "@/components/Common/DatePicker";
+
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import mutate from "@/Utils/request/mutate";
@@ -309,15 +311,12 @@ export default function CreateScheduleTemplateSheet({
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel required>{t("valid_from")}</FormLabel>
-                      <Input
-                        type="date"
-                        min={format(new Date(), "yyyy-MM-dd")}
-                        {...field}
-                        value={
-                          field.value
-                            ? format(new Date(field.value), "yyyy-MM-dd")
-                            : ""
+                      <DatePickerInput
+                        value={field.value ? new Date(field.value) : undefined}
+                        onChange={(date) =>
+                          field.onChange(date ? format(date, "yyyy-MM-dd") : "")
                         }
+                        disabled={field.disabled}
                       />
                       <FormMessage />
                     </FormItem>
