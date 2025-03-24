@@ -433,7 +433,7 @@ export function AllergyQuestion({
                             ).toLocaleDateString()
                           ) : (
                             <span className="text-muted-foreground">
-                              Select date
+                              {t("select_date")}
                             </span>
                           )}
                         </Button>
@@ -650,7 +650,9 @@ const AllergyTableRow = ({
                 {allergy.last_occurrence ? (
                   new Date(allergy.last_occurrence).toLocaleDateString()
                 ) : (
-                  <span className="text-muted-foreground">Select date</span>
+                  <span className="text-muted-foreground">
+                    {t("select_date")}
+                  </span>
                 )}
               </Button>
             </PopoverTrigger>

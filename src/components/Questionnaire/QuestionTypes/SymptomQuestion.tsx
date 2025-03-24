@@ -227,7 +227,9 @@ const SymptomRow = React.memo(function SymptomRow({
                 {symptom.onset?.onset_datetime ? (
                   new Date(symptom.onset.onset_datetime).toLocaleDateString()
                 ) : (
-                  <span className="text-muted-foreground">Select date</span>
+                  <span className="text-muted-foreground">
+                    {t("select_date")}
+                  </span>
                 )}
               </Button>
             </PopoverTrigger>

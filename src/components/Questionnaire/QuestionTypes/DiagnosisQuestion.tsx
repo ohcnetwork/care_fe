@@ -397,7 +397,9 @@ export function DiagnosisQuestion({
                         newDiagnosis.onset.onset_datetime,
                       ).toLocaleDateString()
                     ) : (
-                      <span className="text-muted-foreground">Select date</span>
+                      <span className="text-muted-foreground">
+                        {t("select_date")}
+                      </span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -632,7 +634,9 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                       diagnosis.onset.onset_datetime,
                     ).toLocaleDateString()
                   ) : (
-                    <span className="text-muted-foreground">Select date</span>
+                    <span className="text-muted-foreground">
+                      {t("select_date")}
+                    </span>
                   )}
                 </Button>
               </PopoverTrigger>
