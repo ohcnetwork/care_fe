@@ -225,6 +225,7 @@ export default function LocationView({ id, facilityId }: Props) {
                       key={childLocation.id}
                       location={childLocation}
                       onEdit={handleEditLocation}
+                      facilityId={facilityId}
                     />
                   ))
                 ) : (
