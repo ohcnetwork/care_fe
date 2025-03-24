@@ -82,7 +82,7 @@ export function LocationNavigation({
               selectedLocation={selectedLocation}
               locationHistory={locationHistory}
               onLocationClick={onLocationClick}
-              onGoBack={onGoBack}
+              onRootClick={onGoBack}
             />
           </div>
         </div>
@@ -119,7 +119,9 @@ export function LocationNavigation({
         {beds.length > 0 && (
           <div className="space-y-2 mt-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold">{t("available_beds")}</h2>
+              <h2 className="text-sm font-semibold mt-2">
+                {t("available_beds")}
+              </h2>
               <div className="flex items-center gap-2">
                 <Switch
                   id="available-only"

@@ -1,9 +1,5 @@
-import { CalendarClock } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { LocationList } from "@/types/location/location";
@@ -21,8 +17,6 @@ export function BedListing({
   onBedSelect,
   onCheckStatus,
 }: BedListingProps) {
-  const { t } = useTranslation();
-
   return (
     <RadioGroup
       value={selectedBed || ""}
@@ -31,7 +25,9 @@ export function BedListing({
     >
       {beds.map((bed) => {
         const isAvailable = !bed.current_encounter;
+        const isDischargedBed = bed.current_encounter?.status === "discharged";
         const isSelected = selectedBed === bed.id;
+        const isClickable = isAvailable || isDischargedBed;
 
         return (
           <div
@@ -40,16 +36,16 @@ export function BedListing({
               "h-32 relative border rounded-lg pt-3 pb-1",
               isSelected && "border-green-600 bg-green-50",
               !isSelected &&
-                isAvailable &&
+                isClickable &&
                 "border-gray-400 hover:border-green-200 cursor-pointer",
               !isSelected &&
-                !isAvailable &&
-                "border-gray-100 bg-gray-50 hover:border-red-200 cursor-pointer",
+                !isClickable &&
+                "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed",
             )}
             onClick={() => {
               if (isAvailable) {
                 onBedSelect(bed.id);
-              } else {
+              } else if (isDischargedBed) {
                 onCheckStatus(bed);
               }
             }}
@@ -59,11 +55,12 @@ export function BedListing({
                 value={bed.id}
                 id={bed.id}
                 className="h-4 w-4"
+                disabled={!isClickable}
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
             <div className="flex flex-col items-center">
-              <div className="relative mb-2">
+              <div className="relative">
                 <img
                   src={
                     isAvailable
@@ -75,25 +72,10 @@ export function BedListing({
                         : "/images/bed-unavailable.svg"
                   }
                   alt="Bed"
-                  className="h-8 w-8 mt-4"
+                  className="h-10 w-10 mt-4"
                 />
               </div>
-              <p className="text-xs text-center font-medium">{bed.name}</p>
-
-              {!isAvailable && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-5 mt-2 text-xs py-0 px-2 bg-gray-50"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCheckStatus(bed);
-                  }}
-                >
-                  <CalendarClock className="h-4 w-4 mr-2" />
-                  {t("check_status")}
-                </Button>
-              )}
+              <p className="text-xs text-center font-medium mt-2">{bed.name}</p>
             </div>
           </div>
         );

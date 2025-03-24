@@ -232,33 +232,6 @@ export function LocationSheet({
     setSearchTerm("");
   };
 
-  const goBack = () => {
-    if (sheetState.screen === "modify") {
-      setSheetState((prev) => ({
-        ...prev,
-        screen: "assign",
-        ...(sheetState.action === "new" && {
-          timeConfig: {
-            start: new Date(),
-            status: "active",
-          },
-        }),
-      }));
-    } else if (selectedLocation) {
-      setLocationHistory((prev) => prev.slice(0, -1));
-      const newHistory = locationHistory.slice(0, -1);
-      const newLocation =
-        newHistory.length > 0 ? newHistory[newHistory.length - 1] : null;
-      setSelectedLocation(newLocation);
-      setSelectedBed(null);
-      // Reset bed-related states
-      setBedsPage(1);
-      setAllBeds([]);
-      setHasMoreBeds(true);
-    }
-    setSelectedBed(null);
-  };
-
   const handleLoadMore = () => {
     if (selectedLocation) {
       setBedsPage((prev) => prev + 1);
@@ -660,8 +633,8 @@ export function LocationSheet({
                   setAllBeds([]);
                 }}
                 onLoadMore={handleLoadMore}
-                onGoBack={goBack}
                 onClearSelection={() => setSelectedBed(null)}
+                onGoBack={goBack}
               />
 
               <div className="mt-8 flex justify-end gap-2">
@@ -761,6 +734,34 @@ export function LocationSheet({
       }
     },
   });
+
+  const goBack = () => {
+    if (sheetState.screen === "modify") {
+      setSheetState((prev) => ({
+        ...prev,
+        screen: "assign",
+        ...(sheetState.action === "new" && {
+          timeConfig: {
+            start: new Date(),
+            status: "active",
+          },
+        }),
+      }));
+    } else {
+      // When clicking the root breadcrumb, reset everything to initial state
+      setLocationHistory([]);
+      setSelectedLocation(null);
+      setSelectedBed(null);
+      setLocationsPage(1);
+      setAllLocations([]);
+      setHasMoreLocations(true);
+      setBedsPage(1);
+      setAllBeds([]);
+      setHasMoreBeds(true);
+      setSearchTerm("");
+    }
+    setSelectedBed(null);
+  };
 
   return (
     <>
