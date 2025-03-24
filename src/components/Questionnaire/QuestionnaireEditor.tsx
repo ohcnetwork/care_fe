@@ -93,6 +93,7 @@ const STRUCTURED_QUESTION_TYPES = [
   { value: "diagnosis", label: "Diagnosis" },
   { value: "encounter", label: "Encounter" },
   { value: "appointment", label: "Appointment" },
+  { value: "files", label: "Files" },
 ] as const;
 
 interface Organization {
@@ -253,7 +254,7 @@ function OrganizationSelector({
           trigger={
             <Button variant="outline" className="w-full justify-start">
               <Building className="mr-2 h-4 w-4" />
-              {t("manage_organizations")}
+              {t("manage_organization_one")}
             </Button>
           }
         />

@@ -123,7 +123,10 @@ export default function TreatmentSummary({
     queryKey: ["diagnosis", patientId, encounterId],
     queryFn: query.paginated(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
-      queryParams: { encounter: encounterId },
+      queryParams: {
+        encounter: encounterId,
+        category: "encounter_diagnosis,chronic_condition",
+      },
       pageSize: 100,
     }),
     enabled: !!patientId && !!encounterId,
