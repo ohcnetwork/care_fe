@@ -760,10 +760,7 @@ export function QuestionnaireForm({
                   </p>
                 )}
               </div>
-              {!(
-                form.questionnaire.id === questionnaireData?.id ||
-                form.questionnaire.id === form.questionnaire.slug
-              ) && (
+              {form.questionnaire.slug !== questionnaireSlug && (
                 <Button
                   type="button"
                   variant="ghost"
