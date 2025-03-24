@@ -63,14 +63,13 @@ const formSchema = z
         (date) => !date || isBefore(new Date(date), startOfTomorrow()),
         t("manufacture_date_cannot_be_in_future"),
       ),
+    expiration_date: z.string().optional(),
+    lot_number: z.string().optional(),
+    serial_number: z.string().optional(),
     registered_name: z
       .string()
       .trim()
       .min(1, { message: t("field_required") }),
-    expiration_date: z.string().optional(),
-    lot_number: z.string().optional(),
-    serial_number: z.string().optional(),
-
     user_friendly_name: z.string().optional(),
     model_number: z.string().optional(),
     part_number: z.string().optional(),
