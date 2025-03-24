@@ -874,7 +874,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
         >
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <CardHeader
-              className={cn("p-2 rounded-lg shadow-none", {
+              className={cn("p-2 rounded-lg shadow-none bg-gray-50", {
                 "bg-gray-200 border border-gray-300": !isOpen,
               })}
             >
@@ -890,17 +890,17 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                         title={diagnosis.code.display}
                       >
                         {diagnosis.code.display}
+                        <div
+                          className={cn(
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ml-2",
+                            diagnosis.category === "chronic_condition"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-gray-100 text-gray-700",
+                          )}
+                        >
+                          {t(`Diagnosis_${diagnosis.category}__title`)}
+                        </div>
                       </CardTitle>
-                      <div
-                        className={cn(
-                          "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
-                          diagnosis.category === "chronic_condition"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-gray-100 text-gray-700",
-                        )}
-                      >
-                        {t(`Diagnosis_${diagnosis.category}__title`)}
-                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-2 shrink-0">
@@ -951,7 +951,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
               </div>
             </CardHeader>
             <CollapsibleContent>
-              <CardContent className="p-3 pt-2 space-y-3 rounded-lg">
+              <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
                 <div>
                   <div className="block text-sm font-medium text-gray-500 mb-1">
                     {t("onset_date")}
