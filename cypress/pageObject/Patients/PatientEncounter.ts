@@ -12,6 +12,15 @@ export class PatientEncounter {
       .click();
     return this;
   }
+  openOngoingEncounter() {
+    cy.get('[data-cy="in-progress-filter"]').click();
+    cy.get('[data-cy="encounter-list-cards"]')
+      .first()
+      .contains("View Details")
+      .click();
+    return this;
+  }
+
   clickMedicinesTab() {
     cy.verifyAndClickElement('[data-cy="tab-medicines"]', "Medicines");
     return this;

@@ -23,7 +23,7 @@ describe("Patient Prescription Management", () => {
     const notes = "testing notes";
     patientEncounter
       .navigateToEncounters()
-      .openFirstEncounterDetails()
+      .openOngoingEncounter()
       .clickMedicinesTab()
       .clickEditPrescription()
       .addMedication(
