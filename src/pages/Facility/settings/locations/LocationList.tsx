@@ -293,6 +293,7 @@ export default function LocationList({ facilityId }: Props) {
                 getChildren={getChildren}
                 handleEditLocation={handleEditLocation}
                 setExpandedRows={setExpandedRows}
+                facilityId={facilityId}
               />
             </>
           ) : (
