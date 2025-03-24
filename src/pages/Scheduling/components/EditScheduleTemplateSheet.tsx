@@ -250,7 +250,6 @@ const ScheduleTemplateEditor = ({
                 <FormItem className="flex flex-col">
                   <FormLabel required>{t("valid_from")}</FormLabel>
                   <DatePickerInput
-                    min={new Date()}
                     value={field.value ? new Date(field.value) : undefined}
                     onChange={(date) =>
                       field.onChange(date ? format(date, "yyyy-MM-dd") : "")
@@ -270,7 +269,11 @@ const ScheduleTemplateEditor = ({
                   <FormLabel required>{t("valid_to")}</FormLabel>
                   <DatePickerInput
                     value={field.value ? new Date(field.value) : undefined}
-                    min={new Date(form.watch("valid_from"))}
+                    min={
+                      form.watch("valid_from")
+                        ? new Date(form.watch("valid_from"))
+                        : undefined
+                    }
                     onChange={(date) =>
                       field.onChange(date ? format(date, "yyyy-MM-dd") : "")
                     }

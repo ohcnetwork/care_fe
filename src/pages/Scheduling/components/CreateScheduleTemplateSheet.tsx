@@ -329,22 +329,17 @@ export default function CreateScheduleTemplateSheet({
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel required>{t("valid_to")}</FormLabel>
-                      <Input
-                        type="date"
+                      <DatePickerInput
+                        value={field.value ? new Date(field.value) : undefined}
                         min={
                           form.watch("valid_from")
-                            ? format(
-                                new Date(form.watch("valid_from")),
-                                "yyyy-MM-dd",
-                              )
-                            : format(new Date(), "yyyy-MM-dd")
+                            ? new Date(form.watch("valid_from"))
+                            : undefined
                         }
-                        {...field}
-                        value={
-                          field.value
-                            ? format(new Date(field.value), "yyyy-MM-dd")
-                            : ""
+                        onChange={(date) =>
+                          field.onChange(date ? format(date, "yyyy-MM-dd") : "")
                         }
+                        disabled={field.disabled}
                       />
                       <FormMessage />
                     </FormItem>
