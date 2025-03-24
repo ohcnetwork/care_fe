@@ -92,6 +92,7 @@ const STRUCTURED_QUESTION_TYPES = [
   { value: "diagnosis", label: "Diagnosis" },
   { value: "encounter", label: "Encounter" },
   { value: "appointment", label: "Appointment" },
+  { value: "files", label: "Files" },
 ] as const;
 
 interface Organization {
