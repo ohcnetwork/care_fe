@@ -142,7 +142,30 @@ export default function PatientRegistration(
             message: t("geo_organization_required"),
             path: ["geo_organization"],
           },
+        )
+        .refine(
+          (data) => {
+            if (!data.death_datetime) return true;
+
+            const deathDate = dayjs(data.death_datetime);
+            if (!deathDate.isValid()) return false;
+
+            const dob = data.date_of_birth
+              ? dayjs(data.date_of_birth)
+              : dayjs().subtract(data.age || 0, "years");
+
+            return data.date_of_birth
+              ? dob.isBefore(deathDate)
+              : dob.year() < deathDate.year();
+          },
+          (data) => ({
+            message: dayjs(data.death_datetime).isValid()
+              ? t("death_date_must_be_after_dob")
+              : t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
+            path: ["death_datetime"],
+          }),
         ),
+
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 

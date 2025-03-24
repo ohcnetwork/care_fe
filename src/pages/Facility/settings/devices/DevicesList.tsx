@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -62,7 +63,7 @@ export default function DevicesList({ facilityId }: Props) {
   );
 
   // Use TanStack Query with query.debounced for API call
-  const { data, isLoading } = useQuery({
+  const { data: devices, isLoading } = useQuery({
     queryKey: ["devices", facilityId, qParams],
     queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
@@ -79,7 +80,18 @@ export default function DevicesList({ facilityId }: Props) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <PageTitle title={t("devices")} />
+          <PageTitle title={t("devices")} className="mt-2" />
+          <Badge
+            className="bg-purple-50 text-purple-700 text-sm font-medium rounded-xl px-3 w-max"
+            variant="outline"
+          >
+            {isLoading
+              ? t("loading")
+              : t("entity_count", {
+                  count: devices?.count ?? 0,
+                  entity: t("device"),
+                })}
+          </Badge>
         </div>
 
         {pluginDevices.length > 0 ? (
@@ -184,8 +196,8 @@ export default function DevicesList({ facilityId }: Props) {
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data?.results?.length ? (
-              data.results.map((device) => (
+            {devices?.results?.length ? (
+              devices.results.map((device) => (
                 <DeviceCard key={device.id} device={device} />
               ))
             ) : (
@@ -198,9 +210,9 @@ export default function DevicesList({ facilityId }: Props) {
               </Card>
             )}
           </div>
-          {data && data.count > resultsPerPage && (
+          {devices && devices.count > resultsPerPage && (
             <div className="flex justify-center">
-              <Pagination totalCount={data.count} />
+              <Pagination totalCount={devices.count} />
             </div>
           )}
         </div>
