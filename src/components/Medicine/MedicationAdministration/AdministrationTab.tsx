@@ -1,14 +1,16 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { t } from "i18next";
-import React, { useState } from "react";
+import { Link } from "raviger";
+import React, { useCallback, useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -90,6 +92,8 @@ function getAdministrationsForTimeSlot(
 interface AdministrationTabProps {
   patientId: string;
   encounterId: string;
+  canAccess: boolean;
+  canWrite: boolean;
 }
 
 interface TimeSlotHeaderProps {
@@ -117,6 +121,7 @@ interface MedicationRowProps {
     admin: MedicationAdministration,
   ) => void;
   onDiscontinue: (medication: MedicationRequestRead) => void;
+  canWrite: boolean;
 }
 
 // Utility Components
@@ -206,6 +211,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
   onAdminister,
   onEditAdministration,
   onDiscontinue,
+  canWrite,
 }) => {
   const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
     medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
@@ -257,15 +263,30 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
               return (
                 <div
                   key={admin.id}
-                  className={`flex font-medium items-center gap-2 rounded-md p-2 mb-2 cursor-pointer justify-between border ${colorClass}`}
+                  className={`flex font-medium flex-col rounded-md p-2 mb-2 cursor-pointer border ${colorClass}`}
                   onClick={() => onEditAdministration(medication, admin)}
                 >
-                  <div className="flex flex-col md:flex-row items-center gap-1">
+                  <div className="flex justify-between">
                     <div>
                       <CareIcon
                         icon="l-check-circle"
-                        className="h-3 w-3 self-center"
+                        className="h-4 w-4 self-center"
                       />
+                    </div>
+                    <div>
+                      {admin.note && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={`h-4 w-4 hover:${colorClass} p-0`}
+                        >
+                          <CareIcon icon="l-notes" className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    <span>
                       {new Date(
                         admin.occurrence_period_start,
                       ).toLocaleTimeString("en-US", {
@@ -273,11 +294,11 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                         minute: "2-digit",
                         hour12: true,
                       })}
-                    </div>
-                    <div>
-                      {admin.occurrence_period_end && (
-                        <>
-                          {"- "}
+                    </span>
+                    {admin.occurrence_period_end && (
+                      <>
+                        <span>{"-"}</span>
+                        <span>
                           {new Date(
                             admin.occurrence_period_end,
                           ).toLocaleTimeString("en-US", {
@@ -285,23 +306,14 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                             minute: "2-digit",
                             hour12: true,
                           })}
-                        </>
-                      )}
-                    </div>
+                        </span>
+                      </>
+                    )}
                   </div>
-                  {admin.note && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={`h-4 w-4 hover:${colorClass} p-0`}
-                    >
-                      <CareIcon icon="l-notes" className="h-3 w-3" />
-                    </Button>
-                  )}
                 </div>
               );
             })}
-            {isCurrentSlot && medication.status === "active" && (
+            {isCurrentSlot && medication.status === "active" && canWrite && (
               <Button
                 variant="outline"
                 size="sm"
@@ -320,30 +332,31 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
       >
         {ACTIVE_MEDICATION_STATUSES.includes(
           medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
-        ) && (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6">
-                <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-40 p-0">
-              <Button
-                variant="ghost"
-                className="w-full justify-start px-3 py-2 text-sm text-red-600 hover:text-red-600 hover:bg-red-50"
-                onClick={() => {
-                  onDiscontinue(medication);
-                  // Close the popover after clicking
-                  const button = document.activeElement as HTMLElement;
-                  button?.blur();
-                }}
-              >
-                <CareIcon icon="l-ban" className="mr-2 h-4 w-4" />
-                {t("discontinue")}
-              </Button>
-            </PopoverContent>
-          </Popover>
-        )}
+        ) &&
+          canWrite && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-40 p-0">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-3 py-2 text-sm text-red-600 hover:text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    onDiscontinue(medication);
+                    // Close the popover after clicking
+                    const button = document.activeElement as HTMLElement;
+                    button?.blur();
+                  }}
+                >
+                  <CareIcon icon="l-ban" className="mr-2 h-4 w-4" />
+                  {t("discontinue")}
+                </Button>
+              </PopoverContent>
+            </Popover>
+          )}
       </div>
     </React.Fragment>
   );
@@ -352,6 +365,8 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
 export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   patientId,
   encounterId,
+  canAccess,
+  canWrite,
 }) => {
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -361,7 +376,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     Math.floor(currentDate.getHours() / 6),
   );
   // Calculate visible slots based on end slot
-  const visibleSlots = React.useMemo(() => {
+  const visibleSlots = useMemo(() => {
     const slots = [];
     let currentIndex = endSlotIndex;
     let currentDate = new Date(endSlotDate);
@@ -382,8 +397,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     return slots;
   }, [endSlotDate, endSlotIndex]);
 
+  const queryClient = useQueryClient();
+
   // Queries
-  const { data: activeMedications, refetch: refetchActive } = useQuery({
+  const { data: activeMedications } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
@@ -393,10 +410,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: ACTIVE_MEDICATION_STATUSES.join(","),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
 
-  const { data: stoppedMedications, refetch: refetchStopped } = useQuery({
+  const { data: stoppedMedications } = useQuery({
     queryKey: ["medication_requests_stopped", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
@@ -406,10 +423,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: INACTIVE_MEDICATION_STATUSES.join(","),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
 
-  const { data: administrations, refetch: refetchAdministrations } = useQuery({
+  const { data: administrations } = useQuery({
     queryKey: ["medication_administrations", patientId, visibleSlots],
     queryFn: query(medicationAdministrationApi.list, {
       pathParams: { patientId },
@@ -434,11 +451,11 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         }),
       },
     }),
-    enabled: !!patientId && !!visibleSlots?.length,
+    enabled: !!patientId && !!visibleSlots?.length && canAccess,
   });
 
   // Get last administered date and last administered by for each medication
-  const lastAdministeredDetails = React.useMemo(() => {
+  const lastAdministeredDetails = useMemo(() => {
     return administrations?.results?.reduce<{
       dates: Record<string, string>;
       performers: Record<string, string>;
@@ -473,7 +490,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   };
 
   // Calculate if we can go back further based on the earliest slot and authored date
-  const canGoBack = React.useMemo(() => {
+  const canGoBack = useMemo(() => {
     const medications = showStopped
       ? [
           ...(activeMedications?.results || []),
@@ -500,7 +517,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     useState<MedicationAdministrationRequest | null>(null);
 
   // Calculate last modified date
-  const lastModifiedDate = React.useMemo(() => {
+  const lastModifiedDate = useMemo(() => {
     if (!administrations?.results?.length) return null;
 
     const sortedAdmins = [...administrations.results].sort(
@@ -518,13 +535,17 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       pathParams: { patientId },
     }),
     onSuccess: () => {
-      refetchActive();
-      refetchStopped();
+      queryClient.invalidateQueries({
+        queryKey: ["medication_requests_active"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["medication_requests_stopped"],
+      });
     },
   });
 
   // Handlers
-  const handlePreviousSlot = React.useCallback(() => {
+  const handlePreviousSlot = useCallback(() => {
     if (!canGoBack) return;
 
     const newEndSlotIndex = endSlotIndex - 1;
@@ -538,7 +559,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     }
   }, [endSlotDate, endSlotIndex, canGoBack]);
 
-  const handleNextSlot = React.useCallback(() => {
+  const handleNextSlot = useCallback(() => {
     const newEndSlotIndex = endSlotIndex + 1;
     if (newEndSlotIndex > 3) {
       setEndSlotIndex(0);
@@ -550,7 +571,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     }
   }, [endSlotDate, endSlotIndex]);
 
-  const handleAdminister = React.useCallback(
+  const handleAdminister = useCallback(
     (medication: MedicationRequestRead) => {
       setAdministrationRequest(
         createMedicationAdministrationRequest(medication, encounterId),
@@ -561,7 +582,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     [encounterId],
   );
 
-  const handleEditAdministration = React.useCallback(
+  const handleEditAdministration = useCallback(
     (medication: MedicationRequestRead, admin: MedicationAdministration) => {
       setAdministrationRequest({
         id: admin.id,
@@ -580,7 +601,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     [],
   );
 
-  const handleDiscontinue = React.useCallback(
+  const handleDiscontinue = useCallback(
     (medication: MedicationRequestRead) => {
       discontinueMedication({
         datapoints: [
@@ -602,14 +623,16 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       ]
     : activeMedications?.results || [];
 
-  const filteredMedications = medications.filter(
-    (med: MedicationRequestRead) => {
-      if (!searchQuery.trim()) return true;
-      const searchTerm = searchQuery.toLowerCase().trim();
-      const medicationName = med.medication?.display?.toLowerCase() || "";
-      return medicationName.includes(searchTerm);
-    },
-  );
+  const filteredMedications = !searchQuery.trim()
+    ? medications
+    : [
+        ...(activeMedications?.results || []),
+        ...(stoppedMedications?.results || []),
+      ].filter((med: MedicationRequestRead) =>
+        med.medication?.display
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase().trim()),
+      );
 
   let content;
   if (!activeMedications || !stoppedMedications) {
@@ -618,10 +641,13 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         <Loading />
       </div>
     );
-  } else if (!medications?.length) {
+  } else if (
+    !activeMedications?.results?.length &&
+    !stoppedMedications?.results?.length
+  ) {
     content = (
       <EmptyState
-        message={t("no_active_medications")}
+        message={t("no_medications")}
         description={t("no_medications_to_administer")}
       />
     );
@@ -629,124 +655,135 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     content = <EmptyState searching searchQuery={searchQuery} />;
   } else {
     content = (
-      <ScrollArea className="w-full whitespace-nowrap rounded-md">
-        <Card className="w-full border-none shadow-none min-w-[640px]">
-          <div className="grid grid-cols-[minmax(200px,2fr),repeat(4,minmax(140px,1fr)),40px]">
-            {/* Top row without vertical borders */}
-            <div className="col-span-full grid grid-cols-subgrid">
-              <div className="flex items-center justify-between p-4 bg-gray-50 border-t border-gray-50">
-                <div className="flex items-center gap-2 whitespace-break-spaces">
-                  {lastModifiedDate && (
-                    <div className="text-xs text-[#6b7280]">
-                      {t("last_modified")}{" "}
-                      {formatDistanceToNow(lastModifiedDate)} {t("ago")}
-                    </div>
-                  )}
+      <>
+        {!filteredMedications.length && (
+          <CardContent className="p-2">
+            <p className="text-gray-500 w-full flex justify-center mb-3">
+              {t("no_active_medication_recorded")}
+            </p>
+          </CardContent>
+        )}
+        <ScrollArea className="w-full whitespace-nowrap rounded-md">
+          <Card className="w-full border-none shadow-none min-w-[640px]">
+            <div className="grid grid-cols-[minmax(200px,2fr),repeat(4,minmax(140px,1fr)),40px]">
+              {/* Top row without vertical borders */}
+              <div className="col-span-full grid grid-cols-subgrid">
+                <div className="flex items-center justify-between p-4 bg-gray-50 border-t border-gray-50">
+                  <div className="flex items-center gap-2 whitespace-break-spaces">
+                    {lastModifiedDate && (
+                      <div className="text-xs text-[#6b7280]">
+                        {t("last_modified")}{" "}
+                        {formatDistanceToNow(lastModifiedDate)} {t("ago")}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-end items-center bg-gray-50 rounded">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 mr-2"
+                      onClick={handlePreviousSlot}
+                      disabled={!canGoBack}
+                      title={
+                        !canGoBack
+                          ? t("cannot_go_before_prescription_date")
+                          : ""
+                      }
+                    >
+                      <CareIcon icon="l-angle-left" className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex justify-end items-center bg-gray-50 rounded">
+                {visibleSlots.map((slot) => (
+                  <TimeSlotHeader
+                    key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
+                    slot={slot}
+                    isCurrentSlot={isTimeInSlot(currentDate, slot)}
+                    isEndSlot={slot.date.getTime() === currentDate.getTime()}
+                  />
+                ))}
+                <div className="flex justify-start items-center px-1 bg-gray-50">
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-8 w-8 text-gray-400 mr-2"
-                    onClick={handlePreviousSlot}
-                    disabled={!canGoBack}
-                    title={
-                      !canGoBack ? t("cannot_go_before_prescription_date") : ""
-                    }
+                    className="h-8 w-8 text-gray-400"
+                    onClick={handleNextSlot}
+                    disabled={isTimeInSlot(currentDate, visibleSlots[3])}
                   >
-                    <CareIcon icon="l-angle-left" className="h-4 w-4" />
+                    <CareIcon icon="l-angle-right" className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-              {visibleSlots.map((slot) => (
-                <TimeSlotHeader
-                  key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                  slot={slot}
-                  isCurrentSlot={isTimeInSlot(currentDate, slot)}
-                  isEndSlot={slot.date.getTime() === currentDate.getTime()}
-                />
-              ))}
-              <div className="flex justify-start items-center px-1 bg-gray-50">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 text-gray-400"
-                  onClick={handleNextSlot}
-                  disabled={isTimeInSlot(currentDate, visibleSlots[3])}
-                >
-                  <CareIcon icon="l-angle-right" className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
 
-            {/* Main content with borders */}
-            <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r">
-              {/* Headers */}
-              <div className="p-4 font-medium text-sm border-t bg-[#F3F4F6] text-secondary-700">
-                {t("medicine")}:
-              </div>
-              {visibleSlots.map((slot, i) => (
-                <div
-                  key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                  className="p-4 font-semibold text-xs text-center border-t relative bg-[#F3F4F6] text-secondary-700"
-                >
-                  {i === endSlotIndex &&
-                    slot.date.getTime() === currentDate.getTime() && (
-                      <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2">
-                        <div className="h-2 w-2 rounded-full bg-blue-500" />
-                      </div>
-                    )}
-                  {slot.label}
+              {/* Main content with borders */}
+              <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r">
+                {/* Headers */}
+                <div className="p-4 font-medium text-sm border-t bg-[#F3F4F6] text-secondary-700">
+                  {t("medicine")}:
                 </div>
-              ))}
-              <div className="border-t bg-[#F3F4F6]" />
+                {visibleSlots.map((slot, i) => (
+                  <div
+                    key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
+                    className="p-4 font-semibold text-xs text-center border-t relative bg-[#F3F4F6] text-secondary-700"
+                  >
+                    {i === endSlotIndex &&
+                      slot.date.getTime() === currentDate.getTime() && (
+                        <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2">
+                          <div className="h-2 w-2 rounded-full bg-blue-500" />
+                        </div>
+                      )}
+                    {slot.label}
+                  </div>
+                ))}
+                <div className="border-t bg-[#F3F4F6]" />
 
-              {/* Medication rows */}
-              {filteredMedications?.map((medication) => (
-                <MedicationRow
-                  key={medication.id}
-                  medication={medication}
-                  visibleSlots={visibleSlots}
-                  currentDate={currentDate}
-                  administrations={administrations?.results}
-                  onAdminister={handleAdminister}
-                  onEditAdministration={handleEditAdministration}
-                  onDiscontinue={handleDiscontinue}
+                {/* Medication rows */}
+                {filteredMedications?.map((medication) => (
+                  <MedicationRow
+                    key={medication.id}
+                    medication={medication}
+                    visibleSlots={visibleSlots}
+                    currentDate={currentDate}
+                    administrations={administrations?.results}
+                    onAdminister={handleAdminister}
+                    onEditAdministration={handleEditAdministration}
+                    onDiscontinue={handleDiscontinue}
+                    canWrite={canWrite}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {stoppedMedications?.results?.length > 0 && !searchQuery.trim() && (
+              <div
+                className="p-4 border-t border-[#e5e7eb] flex items-center gap-2 cursor-pointer hover:bg-gray-50"
+                onClick={() => setShowStopped(!showStopped)}
+              >
+                <CareIcon
+                  icon={showStopped ? "l-eye-slash" : "l-eye"}
+                  className="h-4 w-4"
                 />
-              ))}
-            </div>
-          </div>
-
-          {stoppedMedications?.results?.length > 0 && (
-            <div
-              className="p-4 border-t border-[#e5e7eb] flex items-center gap-2 cursor-pointer hover:bg-gray-50"
-              onClick={() => setShowStopped(!showStopped)}
-            >
-              <CareIcon
-                icon={showStopped ? "l-eye-slash" : "l-eye"}
-                className="h-4 w-4"
-              />
-              <span className="text-sm underline">
-                {showStopped ? t("hide") : t("show")}{" "}
-                {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
-                {t("prescriptions")}
-              </span>
-            </div>
-          )}
-        </Card>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+                <span className="text-sm underline">
+                  {showStopped ? t("hide") : t("show")}{" "}
+                  {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
+                  {t("prescriptions")}
+                </span>
+              </div>
+            )}
+          </Card>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </>
     );
   }
 
   return (
     <div className="flex flex-col gap-2 mt-4 mx-2">
-      <div className="flex justify-between items-center gap-2">
+      <div className="flex justify-start items-center gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-1">
           <div className="flex items-center gap-2 flex-1">
             <CareIcon icon="l-search" className="text-lg text-gray-500" />
-            <input
-              type="text"
+            <Input
               placeholder={t("search_medications")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -764,13 +801,27 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             )}
           </div>
         </div>
+        {canWrite && (
+          <Button
+            variant="outline"
+            className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
+            onClick={() => setIsSheetOpen(true)}
+            disabled={!activeMedications?.results.length}
+          >
+            <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+            {t("administer_medicine")}
+          </Button>
+        )}
         <Button
           variant="outline"
-          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
-          onClick={() => setIsSheetOpen(true)}
+          disabled={!activeMedications?.results?.length}
+          size="sm"
+          className="text-gray-950 hover:text-gray-700 h-9"
         >
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          {t("administer_medicine")}
+          <Link href={`medicines/administrations/print`}>
+            <CareIcon icon="l-print" className="mr-2" />
+            {t("print")}
+          </Link>
         </Button>
       </div>
 
@@ -784,7 +835,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             if (!open) {
               setAdministrationRequest(null);
               setSelectedMedication(null);
-              refetchAdministrations();
+              queryClient.invalidateQueries({
+                queryKey: ["medication_administrations"],
+              });
             }
           }}
           medication={selectedMedication}
@@ -804,10 +857,12 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         onOpenChange={(open) => {
           setIsSheetOpen(open);
           if (!open) {
-            refetchAdministrations();
+            queryClient.invalidateQueries({
+              queryKey: ["medication_administrations"],
+            });
           }
         }}
-        medications={medications}
+        medications={activeMedications?.results || []}
         lastAdministeredDates={lastAdministeredDetails?.dates}
         patientId={patientId}
         encounterId={encounterId}

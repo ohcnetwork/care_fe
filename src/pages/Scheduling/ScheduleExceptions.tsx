@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -8,12 +10,25 @@ import { cn } from "@/lib/utils";
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
+import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import { ScheduleException } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -30,8 +45,22 @@ export default function ScheduleExceptions({
 }: Props) {
   const { t } = useTranslation();
 
+  const { data: isSchedulableResource } = useIsUserSchedulableResource(
+    facilityId,
+    userId,
+  );
+
   if (items == null) {
     return <Loading />;
+  }
+
+  if (!isSchedulableResource) {
+    return (
+      <div className="flex flex-col items-center text-center text-gray-500 py-16">
+        <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
+        <p>{t("exception_for_non_schedulable_resource_warning")}</p>
+      </div>
+    );
   }
 
   if (items.length === 0) {
@@ -63,6 +92,7 @@ const ScheduleExceptionItem = (
 ) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { mutate: deleteException, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.exceptions.delete, {
@@ -112,15 +142,50 @@ const ScheduleExceptionItem = (
             </span>
           </div>
         </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={isPending}
-          onClick={() => deleteException(undefined)}
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
         >
-          <CareIcon icon="l-minus-circle" className="text-base" />
-          <span className="ml-2">{t("remove")}</span>
-        </Button>
+          <AlertDialogTrigger asChild>
+            <Button variant="secondary" size="sm" disabled={isPending}>
+              <CareIcon icon="l-minus-circle" className="text-base" />
+              <span className="ml-2">{t("remove")}</span>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                <Alert variant="destructive" className="mt-4">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t(
+                      "this_will_permanently_remove_the_exception_and_cannot_be_undone",
+                    )}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+                {t("cancel")}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className={cn(buttonVariants({ variant: "destructive" }))}
+                onClick={() => {
+                  deleteException();
+                  setIsDeleteDialogOpen(false);
+                }}
+              >
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
       {/* TODO: Add this information */}
       {/* <div className="px-4 py-2">

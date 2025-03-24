@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatDateTime, properCase } from "@/Utils/utils";
+import { formatDateTime, formatName, properCase } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -27,6 +27,7 @@ interface Props {
   patientId: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
+  canAccess?: boolean;
 }
 
 interface QuestionResponseProps {
@@ -76,8 +77,15 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
       <div className="text-xs text-gray-500">{question.text}</div>
       <div className="space-y-1">
         {response.values.map((valueObj, index) => {
-          const value = valueObj.value || valueObj.value_quantity?.value;
-          if (!value) return null;
+          const value = valueObj.value;
+
+          const coding = valueObj.coding;
+
+          const unit = valueObj.unit;
+
+          if (!value && !coding) return null;
+
+          const precedentUnit = unit ? unit : question.unit;
 
           return (
             <div
@@ -85,8 +93,13 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
               className="text-sm font-medium whitespace-pre-wrap"
             >
               {formatValue(value, question.type)}
-              {question.unit?.code && (
-                <span className="ml-1 text-xs">{question.unit.code}</span>
+              {precedentUnit && (
+                <span className="ml-1 text-xs">{precedentUnit.code}</span>
+              )}
+              {coding && (
+                <span className="ml-1 text-xs">
+                  {coding.display} ({coding.code})
+                </span>
               )}
               {index === response.values.length - 1 && response.note && (
                 <span className="ml-2 text-xs text-gray-500">
@@ -197,12 +210,23 @@ function StructuredResponseBadge({
   );
 }
 
-function ResponseCard({ item }: { item: QuestionnaireResponse }) {
+function ResponseCard({
+  item,
+  isPrintPreview,
+}: {
+  item: QuestionnaireResponse;
+  isPrintPreview?: boolean;
+}) {
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
 
   return (
-    <Card className="flex flex-col py-3 px-4 transition-colors hover:bg-muted/50">
+    <Card
+      className={cn(
+        "flex flex-col py-3 px-4 transition-colors hover:bg-muted/50",
+        isPrintPreview && "shadow-none",
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -234,7 +258,7 @@ function ResponseCard({ item }: { item: QuestionnaireResponse }) {
               <Trans
                 i18nKey="by_name"
                 values={{
-                  by: `${item.created_by?.first_name || ""} ${item.created_by?.last_name || ""}${
+                  by: `${formatName(item.created_by)}${
                     item.created_by?.user_type
                       ? ` (${item.created_by.user_type})`
                       : ""
@@ -245,6 +269,23 @@ function ResponseCard({ item }: { item: QuestionnaireResponse }) {
             </span>
           </div>
         </div>
+      </div>
+
+      <div className="flex gap-2 mt-2 max-sm:flex-col">
+        <Link
+          href={`questionnaire_response/${item.id}/print`}
+          className="text-xs text-blue-600 underline"
+        >
+          {t("print_this_questionnaire_response")}
+        </Link>
+        <Link
+          href={`questionnaire/${item.questionnaire?.id}/responses/print`}
+          className="text-xs text-blue-600 underline"
+        >
+          {t("print_all_questionnaire_responses", {
+            title: item.questionnaire?.title,
+          })}
+        </Link>
       </div>
 
       {item.questionnaire && (
@@ -286,6 +327,7 @@ export default function QuestionnaireResponsesList({
   patientId,
   isPrintPreview = false,
   onlyUnstructured,
+  canAccess = true,
 }: Props) {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
@@ -301,10 +343,12 @@ export default function QuestionnaireResponsesList({
         }),
         encounter: encounter?.id,
         only_unstructured: onlyUnstructured,
+        subject_type: encounter ? "encounter" : "patient",
       },
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
     }),
+    enabled: canAccess,
   });
 
   return (
@@ -317,7 +361,12 @@ export default function QuestionnaireResponsesList({
         ) : (
           <div>
             {questionnarieResponses?.results?.length === 0 ? (
-              <Card className="p-6">
+              <Card
+                className={cn(
+                  "p-6",
+                  isPrintPreview && "shadow-none border-gray",
+                )}
+              >
                 <div className="text-lg font-medium text-gray-500">
                   {t("no_questionnaire_responses")}
                 </div>
@@ -327,7 +376,11 @@ export default function QuestionnaireResponsesList({
                 {questionnarieResponses?.results?.map(
                   (item: QuestionnaireResponse) => (
                     <li key={item.id} className="w-full">
-                      <ResponseCard key={item.id} item={item} />
+                      <ResponseCard
+                        key={item.id}
+                        item={item}
+                        isPrintPreview={isPrintPreview}
+                      />
                     </li>
                   ),
                 )}

@@ -9,9 +9,10 @@ import {
   Tags,
   ViewIcon,
 } from "lucide-react";
-import { Building, Check, Loader2, X } from "lucide-react";
+import { Building, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,14 +30,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -44,11 +38,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -66,6 +55,7 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
@@ -81,6 +71,7 @@ import {
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
+import { ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
@@ -101,7 +92,6 @@ const STRUCTURED_QUESTION_TYPES = [
   { value: "diagnosis", label: "Diagnosis" },
   { value: "encounter", label: "Encounter" },
   { value: "appointment", label: "Appointment" },
-  { value: "location_association", label: "Location Association" },
 ] as const;
 
 interface Organization {
@@ -299,57 +289,19 @@ function OrganizationSelector({
         )}
       </div>
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className="w-full justify-between"
-          >
-            <span className="truncate">{t("select_organizations")}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput
-              placeholder={t("search_organizations")}
-              onValueChange={selection.setSearchQuery}
-            />
-            <CommandList>
-              <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
-              <CommandGroup>
-                {selection.isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  selection.available?.results.map((org) => (
-                    <CommandItem
-                      key={org.id}
-                      value={org.id}
-                      onSelect={() => selection.onToggle(org.id)}
-                    >
-                      <div className="flex flex-1 items-center gap-2">
-                        <Building className="h-4 w-4" />
-                        <span>{org.name}</span>
-                        {org.description && (
-                          <span className="text-xs text-gray-500">
-                            - {org.description}
-                          </span>
-                        )}
-                      </div>
-                      {selection.selectedIds.includes(org.id) && (
-                        <Check className="h-4 w-4" />
-                      )}
-                    </CommandItem>
-                  ))
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      <Autocomplete
+        options={(selection.available?.results ?? []).map((org) => ({
+          label: org.name,
+          value: org.id,
+          description: org.description,
+        }))}
+        value=""
+        onChange={selection.onToggle}
+        onSearch={selection.setSearchQuery}
+        placeholder={t("select_organizations")}
+        isLoading={selection.isLoading}
+        noOptionsMessage={t("no_organizations_found")}
+      />
     </div>
   );
 }
@@ -422,52 +374,18 @@ function TagSelector({
         )}
       </div>
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className="w-full justify-between"
-          >
-            <span className="truncate">{t("select_tags")}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput
-              placeholder={t("search_tags")}
-              onValueChange={selection.setSearchQuery}
-            />
-            <CommandList>
-              <CommandEmpty>{t("no_tags_found")}</CommandEmpty>
-              <CommandGroup>
-                {selection.isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  selection.available?.results.map((tag) => (
-                    <CommandItem
-                      key={tag.id}
-                      value={tag.id}
-                      onSelect={() => selection.onToggle(tag.id)}
-                    >
-                      <div className="flex flex-1 items-center gap-2">
-                        <Building className="h-4 w-4" />
-                        <span>{tag.name}</span>
-                      </div>
-                      {selection.selectedIds.includes(tag.id) && (
-                        <Check className="h-4 w-4" />
-                      )}
-                    </CommandItem>
-                  ))
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      <Autocomplete
+        options={(selection.available?.results ?? []).map((tag) => ({
+          label: tag.name,
+          value: tag.id,
+        }))}
+        value=""
+        onChange={selection.onToggle}
+        onSearch={selection.setSearchQuery}
+        placeholder={t("select_tags")}
+        isLoading={selection.isLoading}
+        noOptionsMessage={t("no_tags_found")}
+      />
     </div>
   );
 }
@@ -519,7 +437,7 @@ function QuestionnaireProperties({
           trigger={
             <Button variant="outline" className="w-full justify-start">
               <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
-              Clone Questionnaire
+              {t("clone_questionnaire")}
             </Button>
           }
         />
@@ -688,7 +606,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     onSuccess: (data: QuestionnaireDetail) => {
       toast.success("Questionnaire created successfully");
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
-      navigate(`/admin/questionnaire/${data.slug}`);
+      navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
     onError: (_error) => {
       toast.error("Failed to create questionnaire");
@@ -750,7 +668,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         <CareIcon icon="l-info-circle" className="h-4 w-4" />
         <AlertTitle>Not Found</AlertTitle>
         <AlertDescription>
-          The requested questionnaire could not be found.
+          {t("no_requested_questionnaires_found")}
         </AlertDescription>
       </Alert>
     );
@@ -775,7 +693,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleCancel = () => {
-    navigate(id ? `/admin/questionnaire/${id}` : "/admin/questionnaire");
+    navigate("/admin/questionnaire");
   };
 
   const toggleQuestionExpanded = (questionId: string) => {
@@ -813,18 +731,17 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <h1 className="text-2xl font-bold">
             {id
               ? t("edit") + " " + questionnaire.title
-              : "Create Questionnaire"}
+              : t("create_questionnaire")}
           </h1>
           <p className="text-sm text-gray-500">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleCancel}>
-            <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
-            Cancel
+            {t("cancel")}
           </Button>
           <Button onClick={handleSave} disabled={isCreating || isUpdating}>
             <CareIcon icon="l-save" className="mr-2 h-4 w-4" />
-            {id ? "Save" : "Create"}
+            {id ? t("save") : t("create")}
           </Button>
         </div>
       </div>
@@ -836,14 +753,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         <TabsList className="mb-4">
           <TabsTrigger value="edit">
             <ViewIcon className="w-4 h-4 mr-2" />
-            Edit form
+            {t("edit_form")}
           </TabsTrigger>
           <TabsTrigger value="preview">
             <SquarePenIcon className="w-4 h-4 mr-2" />
-            Preview form
+            {t("form_preview")}
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
             <div className="space-y-4 md:w-60">
@@ -949,11 +865,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             <div className="space-y-4 flex-1">
               <Card>
                 <CardHeader>
-                  <CardTitle>Basic Information</CardTitle>
+                  <CardTitle>{t("basic_info")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="title">Title</Label>
+                    <Label htmlFor="title">{t("title")}</Label>
                     <Input
                       id="title"
                       value={questionnaire.title}
@@ -964,7 +880,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="slug">Slug</Label>
+                    <Label htmlFor="slug">{t("slug")}</Label>
                     <Input
                       id="slug"
                       value={questionnaire.slug}
@@ -980,7 +896,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="desc">Description</Label>
+                    <Label htmlFor="desc">{t("description")}</Label>
                     <Textarea
                       id="desc"
                       value={questionnaire.description || ""}
@@ -997,7 +913,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   <div>
                     <CardTitle>
                       <p className="text-sm text-gray-700 font-medium mt-1">
-                        {questionnaire.questions?.length || 0} Question
+                        {questionnaire.questions?.length || 0} {t("question")}
                         {questionnaire.questions?.length !== 1 ? "s" : ""}
                       </p>
                     </CardTitle>
@@ -1023,7 +939,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     }}
                   >
                     <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-                    Add Question
+                    {t("add_question")}
                   </Button>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -1126,7 +1042,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         <TabsContent value="preview">
           <Card>
             <CardHeader>
-              <CardTitle>Preview</CardTitle>
+              <CardTitle>{t("preview")}</CardTitle>
             </CardHeader>
             <CardContent>
               <QuestionnaireForm
@@ -1173,6 +1089,7 @@ function QuestionEditor({
   isLast,
   index,
 }: QuestionEditorProps) {
+  const { t } = useTranslation();
   const {
     text,
     type,
@@ -1188,12 +1105,17 @@ function QuestionEditor({
     new Set(),
   );
 
-  const { data: valuesetResponse } = useQuery({
-    queryKey: ["valuesets"],
-    queryFn: query(valuesetApi.list),
+  const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
+  const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
+    queryKey: ["valuesets", valueSetSearchQuery],
+    queryFn: query.debounced(valuesetApi.list, {
+      queryParams: {
+        name: valueSetSearchQuery,
+        status: "active",
+      },
+    }),
+    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
   });
-
-  const valuesets = valuesetResponse?.results || [];
 
   const updateField = <K extends keyof Question>(
     field: K,
@@ -1233,11 +1155,11 @@ function QuestionEditor({
             </div>
             <div className="flex gap-2 mt-1">
               <Badge variant="secondary">{type}</Badge>
-              {required && <Badge variant="secondary">Required</Badge>}
-              {repeats && <Badge variant="secondary">Repeatable</Badge>}
+              {required && <Badge variant="secondary">{t("required")}</Badge>}
+              {repeats && <Badge variant="secondary">{t("repeatable")}</Badge>}
               {type === "group" && questions && questions.length > 0 && (
                 <Badge variant="secondary">
-                  {questions.length} sub-questions
+                  {t("sub_questions_count", { count: questions.length })}
                 </Badge>
               )}
             </div>
@@ -1263,7 +1185,7 @@ function QuestionEditor({
                 }}
               >
                 <ChevronUp className="mr-2 h-4 w-4" />
-                Move Up
+                {t("move_up")}
               </DropdownMenuItem>
             )}
             {!isLast && (
@@ -1274,7 +1196,7 @@ function QuestionEditor({
                 }}
               >
                 <ChevronDown className="mr-2 h-4 w-4" />
-                Move Down
+                {t("move_down")}
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
@@ -1286,7 +1208,7 @@ function QuestionEditor({
               className="text-destructive"
             >
               <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
-              Delete
+              {t("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -1313,7 +1235,7 @@ function QuestionEditor({
           </div>
 
           <div>
-            <Label>Description</Label>
+            <Label>{t("description")}</Label>
             <Textarea
               value={question.description || ""}
               onChange={(e) => updateField("description", e.target.value)}
@@ -1325,7 +1247,7 @@ function QuestionEditor({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Type</Label>
+                <Label>{t("type")}</Label>
                 <Select
                   value={type}
                   onValueChange={(val: QuestionType) => {
@@ -1337,12 +1259,22 @@ function QuestionEditor({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select question type" />
+                    <SelectValue placeholder="Select question type">
+                      {
+                        SUPPORTED_QUESTION_TYPES.find((t) => t.value === type)
+                          ?.name
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
-                        {type.name}
+                        <div className="flex flex-col items-start">
+                          <span>{type.name}</span>
+                          <span className="text-xs max-w-xs text-muted-foreground whitespace-normal">
+                            {t(type.description)}
+                          </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1351,7 +1283,7 @@ function QuestionEditor({
 
               {type === "structured" && (
                 <div>
-                  <Label>Structured Type</Label>
+                  <Label>{t("structured_type")}</Label>
                   <Select
                     value={structured_type ?? "allergy_intolerance"}
                     onValueChange={(val: StructuredQuestionType) =>
@@ -1384,7 +1316,7 @@ function QuestionEditor({
           <div className="space-y-6">
             <div className="border rounded-lg bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">Question Settings</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-gray-500 mb-4">
                 Configure the basic behavior: mark as required, allow multiple
                 entries, or set as read only.
               </p>
@@ -1397,7 +1329,7 @@ function QuestionEditor({
                       id={`required-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`required-${getQuestionPath()}`}>
-                      Required
+                      {t("required")}
                     </Label>
                   </div>
 
@@ -1408,7 +1340,7 @@ function QuestionEditor({
                       id={`repeats-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`repeats-${getQuestionPath()}`}>
-                      Repeatable
+                      {t("repeatable")}
                     </Label>
                   </div>
 
@@ -1430,12 +1362,27 @@ function QuestionEditor({
               <h3 className="text-sm font-medium mb-2">
                 Data Collection Details
               </h3>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-gray-500 mb-4">
                 Specify key collection info: time, performer, body site, and
                 method.
               </p>
               <div className="">
                 <div className="flex flex-wrap gap-4">
+                  {type === "group" && (
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={question.is_component ?? false}
+                        onCheckedChange={(val) =>
+                          updateField("is_component", val)
+                        }
+                        id={`is_component-${getQuestionPath()}`}
+                      />
+                      <Label htmlFor={`is_component-${getQuestionPath()}`}>
+                        {t("is_component")}
+                      </Label>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={question.collect_time ?? false}
@@ -1445,7 +1392,7 @@ function QuestionEditor({
                       id={`collect_time-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_time-${getQuestionPath()}`}>
-                      Collect Time
+                      {t("collect_time")}
                     </Label>
                   </div>
 
@@ -1458,7 +1405,7 @@ function QuestionEditor({
                       id={`collect_performer-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_performer-${getQuestionPath()}`}>
-                      Collect Performer
+                      {t("collect_performer")}
                     </Label>
                   </div>
 
@@ -1471,7 +1418,7 @@ function QuestionEditor({
                       id={`collect_body_site-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_body_site-${getQuestionPath()}`}>
-                      Collect Body Site
+                      {t("collect_body_site")}
                     </Label>
                   </div>
 
@@ -1484,7 +1431,7 @@ function QuestionEditor({
                       id={`collect_method-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_method-${getQuestionPath()}`}>
-                      Collect Method
+                      {t("collect_method")}
                     </Label>
                   </div>
                 </div>
@@ -1499,8 +1446,7 @@ function QuestionEditor({
                   Group Layout Options
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Choose the layout style that best fits your sub-questions from
-                  the available options.
+                  {t("choose_layout_style")}
                 </p>
                 <RadioGroup
                   value={
@@ -1532,40 +1478,63 @@ function QuestionEditor({
             </div>
           )}
 
-          {type === "choice" && (
+          {(type === "choice" || type === "quantity") && (
             <div className="space-y-4">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div>
-                    <CardTitle className="text-base font-medium">
-                      Answer Options
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Define possible answers for this question
-                    </p>
-                  </div>
-                  <Select
-                    value={question.answer_value_set ? "valueset" : "custom"}
-                    onValueChange={(val: string) =>
-                      updateField(
-                        "answer_value_set",
-                        val === "custom" ? undefined : "valueset",
-                      )
-                    }
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder={t("select_a_value_set")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="custom">
-                        {t("custom_options")}
-                      </SelectItem>
-                      <SelectItem value="valueset">{t("value_set")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </CardHeader>
+                {question.type === "choice" && (
+                  <>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <div>
+                        <CardTitle className="text-base font-medium">
+                          Answer Options
+                        </CardTitle>
+                        <p className="text-sm text-gray-500">
+                          Define possible answers for this question
+                        </p>
+                      </div>
+                      <Select
+                        value={
+                          question.answer_value_set ? "valueset" : "custom"
+                        }
+                        onValueChange={(val: string) =>
+                          updateField(
+                            "answer_value_set",
+                            val === "custom" ? undefined : "valueset",
+                            { answer_option: [] },
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder={t("select_a_value_set")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="custom">
+                            {t("custom_options")}
+                          </SelectItem>
+                          <SelectItem value="valueset">
+                            {t("value_set")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </CardHeader>
+                  </>
+                )}
 
-                {!question.answer_value_set ? (
+                {question.type === "quantity" && (
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div>
+                      <CardTitle className="text-base font-medium">
+                        Quantity
+                      </CardTitle>
+                      <p className="text-sm text-gray-500">
+                        Select the valueset of options for this quantity
+                        question
+                      </p>
+                    </div>
+                  </CardHeader>
+                )}
+
+                {question.type === "choice" && !question.answer_value_set ? (
                   <CardContent className="space-y-4">
                     {(answer_option || []).map((opt, idx) => (
                       <div
@@ -1638,32 +1607,29 @@ function QuestionEditor({
                       }}
                     >
                       <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-                      Add Option
+                      {t("add_option")}
                     </Button>
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <Select
+                    <Autocomplete
+                      options={(valuesets ?? []).map((valueset) => ({
+                        label: valueset.name,
+                        value: valueset.slug,
+                      }))}
                       value={
                         question.answer_value_set === "valueset"
-                          ? undefined
-                          : question.answer_value_set
+                          ? ""
+                          : (question.answer_value_set ?? "")
                       }
-                      onValueChange={(val: string) =>
+                      onChange={(val: string) =>
                         updateField("answer_value_set", val)
                       }
-                    >
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder={t("select_a_value_set")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {valuesets.map((valueset) => (
-                          <SelectItem key={valueset.id} value={valueset.slug}>
-                            {valueset.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onSearch={setValueSetSearchQuery}
+                      placeholder={t("select_a_value_set")}
+                      isLoading={isFetchingValuesets}
+                      noOptionsMessage={t("no_valuesets_found")}
+                    />
                   </CardContent>
                 )}
               </Card>
@@ -1700,7 +1666,7 @@ function QuestionEditor({
                   }}
                 >
                   <CareIcon icon="l-plus" className="h-4 w-4" />
-                  Add Sub-Question
+                  {t("add_sub_question")}
                 </Button>
               </div>
               <div className="space-y-4">
@@ -1893,8 +1859,8 @@ function QuestionEditor({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="true">True</SelectItem>
-                            <SelectItem value="false">False</SelectItem>
+                            <SelectItem value="true">{t("true")}</SelectItem>
+                            <SelectItem value="false">{t("false")}</SelectItem>
                           </SelectContent>
                         </Select>
                       ) : (
@@ -1983,7 +1949,7 @@ function QuestionEditor({
                 }}
               >
                 <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-                Add Condition
+                {t("add_condition")}
               </Button>
             </div>
           </div>

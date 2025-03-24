@@ -10,48 +10,52 @@ import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
+import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
+import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
-import { EncounterUpdatesTab } from "@/pages/Encounters/tabs/EncounterUpdatesTab";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
+import { EncounterDrawingsTab } from "./tabs/EncounterDrawingsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 
 export interface EncounterTabProps {
-  facilityId: string;
   encounter: Encounter;
   patient: Patient;
-  subPage?: string;
 }
 
 const defaultTabs = {
-  // feed: EncounterFeedTab,
-  updates: EncounterUpdatesTab,
+  updates: EncounterOverviewTab,
   plots: EncounterPlotsTab,
   medicines: EncounterMedicinesTab,
   files: EncounterFilesTab,
   notes: EncounterNotesTab,
+  devices: EncounterDevicesTab,
+  drawings: EncounterDrawingsTab,
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
   // pressure_sore: EncounterPressureSoreTab,
 } as Record<string, React.FC<EncounterTabProps>>;
 
 interface Props {
-  facilityId: string;
   patientId: string;
   encounterId: string;
+  facilityId?: string;
   tab?: string;
-  subPage?: string;
 }
 
 export const EncounterShow = (props: Props) => {
-  const { facilityId, encounterId, patientId, subPage } = props;
+  const { encounterId, patientId, facilityId } = props;
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
   const pluginTabs = useCareAppEncounterTabs();
 
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
@@ -59,17 +63,37 @@ export const EncounterShow = (props: Props) => {
     ...pluginTabs,
   };
 
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId ?? "" },
+    }),
+    enabled: !!facilityId,
+  });
+
+  const { canListEncounters, canWriteEncounter } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
+
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounterId },
-      queryParams: {
-        facility: facilityId,
-        patient: patientId,
-      },
+      queryParams: facilityId
+        ? {
+            facility: facilityId,
+          }
+        : {
+            patient: patientId,
+          },
     }),
-    enabled: !!encounterId,
+    enabled: !!encounterId && canListEncounters,
   });
+
+  const canWrite =
+    canWriteEncounter &&
+    !inactiveEncounterStatus.includes(encounterData?.status ?? "");
 
   if (isLoading || !encounterData) {
     return <Loading />;
@@ -78,8 +102,6 @@ export const EncounterShow = (props: Props) => {
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
     patient: encounterData.patient,
-    subPage: subPage,
-    facilityId,
   };
 
   if (!props.tab) {
@@ -145,6 +167,7 @@ export const EncounterShow = (props: Props) => {
               patient={encounterData.patient}
               encounter={encounterData}
               fetchPatientData={() => {}}
+              canWrite={canWrite}
             />
 
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
@@ -171,7 +194,7 @@ export const EncounterShow = (props: Props) => {
                   <Link
                     key={tab}
                     className={tabButtonClasses(props.tab === tab)}
-                    href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterData.id}/${tab}`}
+                    href={`${tab}`}
                   >
                     {t(`ENCOUNTER_TAB__${tab}`)}
                   </Link>

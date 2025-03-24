@@ -50,7 +50,7 @@ interface AllergyListProps {
   patientId: string;
   encounterId?: string;
   className?: string;
-  isPrintPreview?: boolean;
+  readOnly?: boolean;
   encounterStatus?: Encounter["status"];
 }
 
@@ -68,14 +68,13 @@ export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
 };
 
 export function AllergyList({
-  facilityId,
   patientId,
   encounterId,
-  className,
-  isPrintPreview = false,
+  className = "",
+  readOnly = false,
   encounterStatus,
 }: AllergyListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId, encounterStatus],
@@ -91,11 +90,7 @@ export function AllergyList({
 
   if (isLoading) {
     return (
-      <AllergyListLayout
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-      >
+      <AllergyListLayout readOnly={readOnly} className={className}>
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -114,11 +109,7 @@ export function AllergyList({
 
   if (!filteredAllergies?.length) {
     return (
-      <AllergyListLayout
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-      >
+      <AllergyListLayout readOnly={readOnly} className={className}>
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_allergies_recorded")}</p>
         </CardContent>
@@ -178,28 +169,22 @@ export function AllergyList({
         <TableCell className="text-sm text-gray-950">
           {allergy.note && (
             <div className="flex items-center gap-2">
-              {isPrintPreview ? (
-                <span className="text-gray-950 max-w-[200px]">
-                  {allergy.note}
-                </span>
-              ) : (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs shrink-0"
-                    >
-                      {t("see_note")}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 p-4">
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                      {allergy.note}
-                    </p>
-                  </PopoverContent>
-                </Popover>
-              )}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs shrink-0"
+                  >
+                    {t("see_note")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {allergy.note}
+                  </p>
+                </PopoverContent>
+              </Popover>
             </div>
           )}
         </TableCell>
@@ -218,13 +203,7 @@ export function AllergyList({
   }
 
   return (
-    <AllergyListLayout
-      facilityId={facilityId}
-      patientId={patientId}
-      encounterId={encounterId}
-      className={className}
-      isPrintPreview={isPrintPreview}
-    >
+    <AllergyListLayout readOnly={readOnly} className={className}>
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
           <TableRow className="rounded-md overflow-hidden bg-gray-100">
@@ -290,48 +269,29 @@ export function AllergyList({
 }
 
 const AllergyListLayout = ({
-  facilityId,
-  patientId,
-  encounterId,
   children,
   className,
-  isPrintPreview = false,
+  readOnly = false,
 }: {
-  facilityId?: string;
-  patientId: string;
-  encounterId?: string;
   children: ReactNode;
   className?: string;
-  isPrintPreview?: boolean;
+  readOnly?: boolean;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
-      <CardHeader
-        className={cn(
-          "flex justify-between flex-row",
-          !isPrintPreview && "px-4 pt-4 pb-2 ",
-          isPrintPreview && "px-0 py-2 ",
-        )}
-      >
+      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
         <CardTitle>{t("allergies")}</CardTitle>
-        {facilityId && encounterId && (
+        {!readOnly && (
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/allergy_intolerance`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 underline"
+            href={`questionnaire/allergy_intolerance`}
+            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
-            <CareIcon icon="l-edit" className="w-4 h-4" />
+            <CareIcon icon="l-pen" className="w-4 h-4" />
             {t("edit")}
           </Link>
         )}
       </CardHeader>
-      <CardContent
-        className={cn(
-          !isPrintPreview && "px-2 pb-2",
-          isPrintPreview && "px-0 py-0",
-        )}
-      >
-        {children}
-      </CardContent>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };

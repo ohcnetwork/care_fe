@@ -4,20 +4,22 @@ import { useMutation } from "@tanstack/react-query";
 import { Hospital } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 
+import { getPermissions } from "@/common/Permissions";
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -27,6 +29,8 @@ import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
+import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
 import type {
@@ -34,6 +38,8 @@ import type {
   OrganizationParent,
 } from "@/types/organization/organization";
 import { getOrgLabel } from "@/types/organization/organization";
+
+import { FacilityMapsLink } from "./FacilityMapLink";
 
 type Props = {
   facilityId: string;
@@ -89,6 +95,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -96,6 +103,23 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
     }),
   });
+
+  const { canUpdateFacility } = getPermissions(
+    hasPermission,
+    facilityData?.root_org_permissions ?? [],
+  );
+
+  /*   const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
+    mutationFn: mutate(routes.deleteFacility, {
+      pathParams: { id: facilityId },
+    }),
+    onSuccess: () => {
+      toast.success(
+        t("facility_deleted_successfully", { name: facilityData?.name }),
+      );
+      navigate("/facility");
+    },
+  }); */
 
   const { mutateAsync: deleteAvatar } = useMutation({
     mutationFn: mutate(routes.deleteFacilityCoverImage, {
@@ -159,10 +183,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
     return <Loading />;
   }
 
-  const hasPermissionToEditCoverImage = true;
-
-  //  TODO: get permissions from backend to delete facility
-
   const coverImageHint = (
     <>
       {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
@@ -183,10 +203,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
         onOpenChange={(open) => setEditCoverImage(open)}
         hint={coverImageHint}
       />
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto pt-2">
         <div className="mx-auto max-w-3xl space-y-6">
           <Card className="border-none bg-transparent shadow-none">
-            <div className="group rounded-3xl relative h-64 w-full bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
+            <div className="group rounded-2xl relative h-64 w-full bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
               {facilityData?.read_cover_image_url ? (
                 <>
                   <img
@@ -194,37 +214,40 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     alt={facilityData?.name}
                     className="h-full w-full object-cover rounded-2xl"
                   />
-                  <div className="absolute rounded-lg inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
+                  <div className="absolute rounded-2xl inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
                 </>
               ) : (
-                <div className="relative rounded-3xl  h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
+                <div className="relative rounded-2xl  h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
               )}
               <div className="absolute bottom-0 left-0 translate-x-0 translate-y-1/3">
-                <div className="sm:px-4 px-8 inline-flex rounded-md">
+                <div className="sm:px-4 px-8 inline-flex rounded-xl">
                   <Avatar
                     name={facilityData.name}
-                    className="size-16 sm:size-20 md:size-24 rounded-md border-4 border-white shadow-lg"
+                    className="size-20 md:size-24 rounded-xl border-4 border-white shadow-lg"
                   />
                 </div>
               </div>
 
-              <div className="absolute bottom-0 left-0 translate-x-0 ml-[8rem]">
+              <div className="absolute bottom-0 left-0 translate-x-0 ml-32">
                 <div className="flex flex-wrap items-center gap-4 md:gap-6">
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 mb-2">
                     <div className="text-white">
-                      <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold">
-                        {facilityData?.name}
-                      </h1>
-                      <h2 className="text-base sm:text-sm md:text-md lg:text-sm text-white/70">
-                        {facilityData?.facility_type}
-                      </h2>
+                      <TooltipComponent content={facilityData?.name}>
+                        <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold">
+                          {facilityData?.name}
+                        </h1>
+                      </TooltipComponent>
+                      <TooltipComponent
+                        content={facilityData?.facility_type}
+                        side="right"
+                      >
+                        <h2 className="text-xs sm:text-sm md:text-base lg:text-base text-white/70">
+                          {facilityData?.facility_type}
+                        </h2>
+                      </TooltipComponent>
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <PLUGIN_Component
-                      __name="FacilityHomeActions"
-                      facility={facilityData}
-                    />
                     {/* <AlertDialog>
                       TODO: add delete facility
                       <AlertDialogTrigger asChild>
@@ -259,15 +282,16 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   </div>
                 </div>
               </div>
-              <div className="absolute right-0 bottom-0 p-1 text-white [@media(max-width:35rem)]:top-0">
-                {hasPermissionToEditCoverImage && (
+              <div className="absolute right-0 bottom-0 p-1 text-white [@media(max-width:55rem)]:top-0">
+                {canUpdateFacility && (
                   <Button
                     variant="link"
                     onClick={() => setEditCoverImage(true)}
                     aria-label={t("edit_cover_photo")}
+                    size="sm"
                   >
                     <CareIcon
-                      icon="l-edit"
+                      icon="l-pen"
                       className="text-white"
                       aria-hidden="true"
                     />
@@ -280,67 +304,79 @@ export const FacilityHome = ({ facilityId }: Props) => {
             </div>
 
             <div className="mt-2 space-y-2">
-              <div className="mt-2 space-y-2 flex justify-end">
-                <EditFacilitySheet
-                  facilityId={facilityId}
-                  trigger={
-                    <Button
-                      className="cursor-pointer mt-2 [@media(max-width:25rem)]:mt-12 [@media(max-width:25rem)]:w-full"
-                      variant="outline"
-                    >
-                      <CareIcon icon="l-edit" />
-                      {t("edit_facility_details")}
-                    </Button>
-                  }
-                />
-              </div>
+              {canUpdateFacility && (
+                <div className="flex justify-end gap-2 max-sm:flex-col sm:mt-4 mt-12 flex-wrap">
+                  <PLUGIN_Component
+                    __name="FacilityHomeActions"
+                    facility={facilityData}
+                  />
+                  <EditFacilitySheet
+                    facilityId={facilityId}
+                    trigger={
+                      <Button
+                        className="cursor-pointer font-semibold"
+                        variant="outline"
+                        size="sm"
+                      >
+                        <CareIcon icon="l-pen" />
+                        {t("edit_facility_details")}
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
               <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
                 <Card className="basis-1/2">
-                  <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                  <CardContent className="p-6 flex flex-col h-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="col-span-1 sm:col-span-2 flex flex-col">
-                        <span className="font-semibold text-lg">
-                          {t("address")}
-                        </span>
-                        <span className="text-gray-700 truncate">
+                        <span className="font-semibold">{t("address")}</span>
+                        <span className="text-gray-700 whitespace-pre-wrap break-words text-sm">
                           {facilityData.address}
                         </span>
                       </div>
 
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-lg">
+                      <div className="flex flex-col mt-2">
+                        <span className="font-semibold">
                           {t("mobile_number")}
                         </span>
-                        <span className="text-gray-800 truncate">
+                        <span className="text-gray-700 truncate text-sm">
                           <ContactLink
-                            tel={String(facilityData?.phone_number)}
+                            tel={formatPhoneNumberIntl(
+                              String(facilityData?.phone_number),
+                            )}
                           />
                         </span>
                       </div>
 
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-lg">
+                      <div className="flex flex-col mt-2">
+                        <span className="font-semibold">
                           {t("location_details")}
                         </span>
-                        <span className="text-gray-800 truncate">
-                          {/* Add Location Link Here */}
+                        <span className="text-sm">
+                          {facilityData.latitude && facilityData.longitude && (
+                            <FacilityMapsLink
+                              latitude={facilityData.latitude.toString()}
+                              longitude={facilityData.longitude.toString()}
+                            />
+                          )}
                         </span>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="basis-1/2">
+                <Card className="basis-1/2 ">
                   <CardContent>
-                    <div className="grid grid-cols-1 mt-3 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 mt-6 sm:grid-cols-2 gap-4">
                       {facilityData.geo_organization &&
                         renderGeoOrganizations(
                           facilityData.geo_organization,
                         ).map((item, index) => (
                           <div key={index} className="flex flex-col">
-                            <span className="font-semibold text-lg truncate">
+                            <span className="font-semibold truncate">
                               {item.label}
                             </span>
-                            <span className="text-gray-800 truncate">
+                            <span className="text-gray-700 text-sm truncate">
                               {item.value}
                             </span>
                           </div>
@@ -354,34 +390,19 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 FACILITY_FEATURE_TYPES.some((f) => f.id === feature),
               ) && (
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg font-medium">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="font-semibold text-lg">
                       {t("features")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {facilityData?.features?.map(
-                        (feature: number) =>
-                          FACILITY_FEATURE_TYPES.some(
-                            (f) => f.id === feature,
-                          ) && (
-                            <Badge
-                              key={feature}
-                              variant="secondary"
-                              className="flex items-center gap-2 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1"
-                            >
-                              {getFacilityFeatureIcon(feature)}
-                              <span>
-                                {
-                                  FACILITY_FEATURE_TYPES.find(
-                                    (f) => f.id === feature,
-                                  )?.name
-                                }
-                              </span>
-                            </Badge>
-                          ),
-                      )}
+                      {facilityData.features?.map((featureId) => (
+                        <FeatureBadge
+                          key={featureId}
+                          featureId={featureId as number}
+                        />
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -390,7 +411,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {facilityData?.description && (
                 <Card>
                   <CardContent className="mt-4">
-                    <Markdown content={facilityData.description} />
+                    <Markdown
+                      content={facilityData.description}
+                      className="text-sm"
+                    />
                   </CardContent>
                 </Card>
               )}

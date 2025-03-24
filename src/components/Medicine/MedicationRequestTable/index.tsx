@@ -2,11 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -14,7 +16,13 @@ import Loading from "@/components/Common/Loading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { getPermissions } from "@/common/Permissions";
+
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
@@ -51,30 +59,35 @@ export const EmptyState = ({
 
 interface Props {
   readonly?: boolean;
-  facilityId: string;
   patientId: string;
-  encounterId: string;
+  encounter: Encounter;
 }
 
 export default function MedicationRequestTable({
   patientId,
-  encounterId,
-  facilityId,
+  encounter,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
+  const { hasPermission } = usePermissions();
+  const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
+    getPermissions(hasPermission, encounter.permissions);
+  const canAccess = canViewClinicalData || canViewEncounter;
+  const { goBack } = useAppHistory();
 
+  const canWrite =
+    canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: encounterId,
+        encounter: encounter.id,
         limit: 100,
         status: ["active", "on-hold", "draft", "unknown"].join(","),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
 
   const { data: stoppedMedications, isLoading: loadingStopped } = useQuery({
@@ -82,15 +95,23 @@ export default function MedicationRequestTable({
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: encounterId,
+        encounter: encounter.id,
         limit: 100,
         status: ["ended", "completed", "cancelled", "entered_in_error"].join(
           ",",
         ),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
+
+  useEffect(() => {
+    if (!canAccess) {
+      toast.error("You do not have permission to view this encounter");
+      goBack();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canAccess]);
 
   const medications = showStopped
     ? [
@@ -99,14 +120,16 @@ export default function MedicationRequestTable({
       ]
     : activeMedications?.results || [];
 
-  const displayedMedications = medications.filter(
-    (med: MedicationRequestRead) => {
-      if (!searchQuery.trim()) return true;
-      const searchTerm = searchQuery.toLowerCase().trim();
-      const medicationName = med.medication?.display?.toLowerCase() || "";
-      return medicationName.includes(searchTerm);
-    },
-  );
+  const displayedMedications = !searchQuery.trim()
+    ? medications
+    : [
+        ...(activeMedications?.results || []),
+        ...(stoppedMedications?.results || []),
+      ].filter((med: MedicationRequestRead) =>
+        med.medication?.display
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase().trim()),
+      );
 
   const isLoading = loadingActive || loadingStopped;
 
@@ -134,8 +157,7 @@ export default function MedicationRequestTable({
               <div className="flex items-center justify-between p-2 gap-2 flex-wrap">
                 <div className="flex items-center gap-2 flex-1">
                   <CareIcon icon="l-search" className="text-lg text-gray-500" />
-                  <input
-                    type="text"
+                  <Input
                     placeholder={t("search_medications")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -153,28 +175,26 @@ export default function MedicationRequestTable({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
+                  {canWrite && (
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="text-gray-950 hover:text-gray-700 h-9"
+                    >
+                      <Link href={`questionnaire/medication_request`}>
+                        <PencilIcon className="mr-2 h-4 w-4" />
+                        {t("edit")}
+                      </Link>
+                    </Button>
+                  )}
                   <Button
-                    asChild
                     variant="outline"
+                    disabled={!activeMedications?.results?.length}
                     size="sm"
                     className="text-gray-950 hover:text-gray-700 h-9"
                   >
-                    <Link
-                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`}
-                    >
-                      <PencilIcon className="mr-2 h-4 w-4" />
-                      {t("edit")}
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="text-gray-950 hover:text-gray-700 h-9"
-                  >
-                    <Link
-                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/prescriptions/print`}
-                    >
+                    <Link href={`prescriptions/print`}>
                       <CareIcon icon="l-print" className="mr-2" />
                       {t("print")}
                     </Link>
@@ -186,35 +206,34 @@ export default function MedicationRequestTable({
                 <div className="min-h-[200px] flex items-center justify-center">
                   <Loading />
                 </div>
-              ) : !medications.length ? (
-                <EmptyState />
-              ) : !displayedMedications.length ? (
+              ) : !activeMedications?.results?.length &&
+                !stoppedMedications?.results?.length ? (
+                <EmptyState message={t("no_medications")} />
+              ) : searchQuery && !displayedMedications.length ? (
                 <EmptyState searching searchQuery={searchQuery} />
               ) : (
-                <ScrollArea className="h-[calc(100vh-16rem)]">
+                <ScrollArea className="h-fit">
                   <div className="min-w-[800px]">
                     <div className="p-2">
-                      <MedicationsTable
-                        patientId={patientId}
-                        encounterId={encounterId}
-                      />
+                      <MedicationsTable medications={displayedMedications} />
                     </div>
-                    {!!stoppedMedications?.results?.length && (
-                      <div
-                        className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
-                        onClick={() => setShowStopped(!showStopped)}
-                      >
-                        <CareIcon
-                          icon={showStopped ? "l-eye-slash" : "l-eye"}
-                          className="h-4 w-4"
-                        />
-                        <span className="text-sm underline">
-                          {showStopped ? t("hide") : t("show")}{" "}
-                          {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
-                          {t("prescriptions")}
-                        </span>
-                      </div>
-                    )}
+                    {!!stoppedMedications?.results?.length &&
+                      !searchQuery.trim() && (
+                        <div
+                          className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
+                          onClick={() => setShowStopped(!showStopped)}
+                        >
+                          <CareIcon
+                            icon={showStopped ? "l-eye-slash" : "l-eye"}
+                            className="h-4 w-4"
+                          />
+                          <span className="text-sm underline">
+                            {showStopped ? t("hide") : t("show")}{" "}
+                            {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
+                            {t("prescriptions")}
+                          </span>
+                        </div>
+                      )}
                   </div>
                   <ScrollBar orientation="horizontal" />
                 </ScrollArea>
@@ -225,7 +244,9 @@ export default function MedicationRequestTable({
           <TabsContent value="administration">
             <AdministrationTab
               patientId={patientId}
-              encounterId={encounterId}
+              encounterId={encounter.id}
+              canAccess={canAccess}
+              canWrite={canWrite}
             />
           </TabsContent>
         </Tabs>

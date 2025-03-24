@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isBefore, parse } from "date-fns";
-import { ArrowRightIcon, SaveIcon, Trash2Icon } from "lucide-react";
+import { Loader2, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -9,13 +9,27 @@ import { Trans } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { cn } from "@/lib/utils";
+
 import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import WeekdayCheckbox, {
   DayOfWeek,
 } from "@/CAREUI/interactive/WeekdayCheckbox";
 
-import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
@@ -26,13 +40,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
@@ -40,7 +57,11 @@ import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
-import { getSlotsPerSession, getTokenDuration } from "@/pages/Scheduling/utils";
+import {
+  calculateSlotDuration,
+  getSlotsPerSession,
+  getTokenDuration,
+} from "@/pages/Scheduling/utils";
 import {
   AvailabilityDateTime,
   ScheduleAvailability,
@@ -74,6 +95,9 @@ export default function EditScheduleTemplateSheet({
       <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[32rem]">
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
+          <SheetDescription className="sr-only">
+            {t("edit_schedule_template")}
+          </SheetDescription>
         </SheetHeader>
         <div className="overflow-auto -mx-6 px-6 pb-16">
           <ScheduleTemplateEditor
@@ -126,6 +150,7 @@ const ScheduleTemplateEditor = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const templateFormSchema = z
     .object({
@@ -250,20 +275,61 @@ const ScheduleTemplateEditor = ({
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => deleteTemplate()}
-              disabled={isProcessing}
-              size="sm"
+            <AlertDialog
+              open={isDeleteDialogOpen}
+              onOpenChange={(open) => setIsDeleteDialogOpen(open)}
             >
-              <Trash2Icon />
-              {isDeleting ? t("deleting") : t("delete")}
-            </Button>
+              <AlertDialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isProcessing}
+                  size="sm"
+                >
+                  <Trash2Icon />
+                  {isDeleting ? t("deleting") : t("delete")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    <Alert variant="destructive" className="mt-4">
+                      <AlertTitle>{t("warning")}</AlertTitle>
+                      <AlertDescription>
+                        {t(
+                          "this_will_permanently_remove_the_scheduled_template_and_cannot_be_undone",
+                        )}
+                      </AlertDescription>
+                    </Alert>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel
+                    onClick={() => setIsDeleteDialogOpen(false)}
+                  >
+                    {t("cancel")}
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className={cn(buttonVariants({ variant: "destructive" }))}
+                    onClick={() => {
+                      deleteTemplate();
+                      setIsDeleteDialogOpen(false);
+                    }}
+                  >
+                    {isDeleting ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      t("confirm")
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button
               variant="primary"
               type="submit"
-              disabled={isUpdating}
+              disabled={isUpdating || !form.formState.isDirty}
               size="sm"
             >
               <SaveIcon />
@@ -289,6 +355,7 @@ const AvailabilityEditor = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { mutate: deleteAvailability, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.delete, {
@@ -351,15 +418,54 @@ const AvailabilityEditor = ({
           </span>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => deleteAvailability()}
-          disabled={isDeleting}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={(open) => setIsDeleteDialogOpen(open)}
         >
-          <CareIcon icon="l-trash" className="text-lg" />
-        </Button>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={isDeleting}
+            >
+              <CareIcon icon="l-trash" className="text-lg" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                <Alert variant="destructive" className="mt-4">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t(
+                      "this_will_permanently_remove_the_session_and_cannot_be_undone",
+                    )}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+                {t("cancel")}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className={cn(buttonVariants({ variant: "destructive" }))}
+                onClick={() => {
+                  deleteAvailability();
+                  setIsDeleteDialogOpen(false);
+                }}
+              >
+                {isDeleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="space-y-4">
@@ -475,6 +581,7 @@ const NewAvailabilityCard = ({
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
+      auto_fill_duration: z.boolean().optional(),
     })
     .refine(
       (data) => {
@@ -501,6 +608,7 @@ const NewAvailabilityCard = ({
       tokens_per_slot: null,
       reason: "",
       weekdays: [],
+      auto_fill_duration: false,
     },
   });
 
@@ -591,6 +699,16 @@ const NewAvailabilityCard = ({
       </div>
     );
   }
+  const updateSlotDuration = () => {
+    const isAutoFill = form.watch("auto_fill_duration");
+    if (isAutoFill) {
+      const duration = calculateSlotDuration(
+        form.watch("start_time"),
+        form.watch("end_time"),
+      );
+      form.setValue("slot_size_in_minutes", duration);
+    }
+  };
 
   return (
     <div className="mt-4 rounded-lg bg-white p-4 shadow">
@@ -653,31 +771,43 @@ const NewAvailabilityCard = ({
             )}
           /> */}
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap">
             <FormField
               control={form.control}
               name="start_time"
               render={({ field }) => (
-                <FormItem className="flex-1">
+                <FormItem className="flex flex-col w-full">
                   <FormLabel required>{t("start_time")}</FormLabel>
                   <FormControl>
-                    <Input type="time" {...field} />
+                    <Input
+                      type="time"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        updateSlotDuration();
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <ArrowRightIcon className="size-4 mt-5" />
-
             <FormField
               control={form.control}
               name="end_time"
               render={({ field }) => (
-                <FormItem className="flex-1">
+                <FormItem className="flex flex-col w-full mt-2">
                   <FormLabel required>{t("end_time")}</FormLabel>
                   <FormControl>
-                    <Input type="time" {...field} />
+                    <Input
+                      type="time"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        updateSlotDuration();
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -687,6 +817,29 @@ const NewAvailabilityCard = ({
 
           {form.watch("slot_type") === "appointment" && (
             <>
+              <div className="flex flex-wrap mt-0 pt-2 gap-2">
+                <div className="w-full flex items-center justify-between space-x-4 mb-2 bg-gray-50 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <CareIcon icon="l-bolt" className="text-lg text-blue-600" />
+                    <Label
+                      htmlFor="auto-fill"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      {t("auto_fill_slot_duration")}
+                    </Label>
+                  </div>
+                  <Switch
+                    id="auto-fill"
+                    checked={form.watch("auto_fill_duration")}
+                    onCheckedChange={(checked) => {
+                      form.setValue("auto_fill_duration", checked);
+                      if (checked) {
+                        updateSlotDuration();
+                      }
+                    }}
+                  />
+                </div>
+              </div>
               <div className="flex items-center gap-4">
                 <FormField
                   control={form.control}
@@ -706,6 +859,7 @@ const NewAvailabilityCard = ({
                           onChange={(e) =>
                             field.onChange(e.target.valueAsNumber)
                           }
+                          disabled={form.watch("auto_fill_duration")}
                         />
                       </FormControl>
                       <FormMessage />

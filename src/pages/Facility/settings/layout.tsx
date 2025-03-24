@@ -6,6 +6,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
+import DeviceLocationHistory from "@/pages/Facility/settings/devices/DeviceLocationHistory";
+import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
+import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
+import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
+
 import { GeneralSettings } from "./general/general";
 import LocationList from "./locations/LocationList";
 import LocationView from "./locations/LocationView";
@@ -29,6 +35,17 @@ const getRoutes = (facilityId: string) => ({
   "/locations": () => <LocationList facilityId={facilityId} />,
   "/location/:id": ({ id }: { id: string }) => (
     <LocationView facilityId={facilityId} id={id} />
+  ),
+  "/devices": () => <DevicesList facilityId={facilityId} />,
+  "/devices/create": () => <CreateDevice facilityId={facilityId} />,
+  "/devices/:id": ({ id }: { id: string }) => (
+    <DeviceDetail facilityId={facilityId} deviceId={id} />
+  ),
+  "/devices/:id/edit": ({ id }: { id: string }) => (
+    <UpdateDevice facilityId={facilityId} deviceId={id} />
+  ),
+  "/devices/:id/locationHistory": ({ id }: { id: string }) => (
+    <DeviceLocationHistory facilityId={facilityId} deviceId={id} />
   ),
   "*": () => <ErrorPage />,
 });
@@ -59,6 +76,11 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
       label: t("locations"),
       href: `${basePath}/locations`,
     },
+    {
+      value: "devices",
+      label: t("devices"),
+      href: `${basePath}/devices`,
+    },
   ];
 
   // Extract the current tab from the URL
@@ -68,12 +90,12 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
   return (
     <div className="container mx-auto p-4">
       <Tabs defaultValue={currentTab} className="w-full" value={currentTab}>
-        <TabsList className="w-full justify-start border-b bg-transparent p-0 h-auto">
+        <TabsList className="w-full justify-evenly sm:justify-start border-b bg-transparent p-0 h-auto  overflow-x-auto">
           {settingsTabs.map((tab) => (
             <Link key={tab.value} href={tab.href}>
               <TabsTrigger
                 value={tab.value}
-                className="border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-primary-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                className="border-b-2 border-transparent px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-primary-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
               >
                 {tab.label}
               </TabsTrigger>

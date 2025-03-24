@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BedSingle,
   Building,
@@ -7,33 +6,20 @@ import {
   CircleDashed,
   Clock,
   Droplet,
+  SignatureIcon,
 } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -43,56 +29,34 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { LocationHistorySheet } from "@/components/Location/LocationHistorySheet";
+import { ConsentSheet } from "@/components/Consent/ConsentSheet";
+import EncounterActions from "@/components/Encounter/EncounterActions";
+import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
+import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
-import mutate from "@/Utils/request/mutate";
+import dayjs from "@/Utils/dayjs";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import {
+  Encounter,
+  completedEncounterStatus,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
-
-import LinkDepartmentsSheet from "./LinkDepartmentsSheet";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 export interface PatientInfoCardProps {
   patient: Patient;
   encounter: Encounter;
   fetchPatientData?: (state: { aborted: boolean }) => void;
+  canWrite: boolean;
+  disableButtons?: boolean;
 }
 
 export default function PatientInfoCard(props: PatientInfoCardProps) {
-  const { patient, encounter } = props;
+  const { patient, encounter, canWrite, disableButtons = false } = props;
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-
-  const { mutate: updateEncounter } = useMutation({
-    mutationFn: mutate(routes.encounter.update, {
-      pathParams: { id: encounter.id },
-    }),
-    onSuccess: () => {
-      toast.success(t("encounter_marked_as_complete"));
-      queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
-    },
-    onError: () => {
-      toast.error(t("error_updating_encounter"));
-    },
-  });
-
-  const handleMarkAsComplete = () => {
-    updateEncounter({
-      ...encounter,
-      status: "completed",
-      organizations: encounter.organizations.map((org) => org.id),
-      patient: encounter.patient.id,
-      encounter_class: encounter.encounter_class,
-      period: encounter.period,
-      hospitalization: encounter.hospitalization,
-      priority: encounter.priority,
-      external_identifier: encounter.external_identifier,
-      facility: encounter.facility.id,
-    });
-  };
 
   return (
     <>
@@ -109,12 +73,12 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
             </div>
             <div className="flex justify-center">
               <div
-                className="mb-2 flex flex-col text-xl font-semibold capitalize lg:hidden"
+                className="mb-2 flex flex-col text-base md:text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
                 <Link
                   href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
-                  className="text-gray-950 font-semibold flex items-start gap-0.5"
+                  className="text-gray-950 font-semibold flex items-start leading-tight"
                   id="patient-details"
                   data-cy="patient-details-button"
                 >
@@ -124,10 +88,24 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     className="w-3 h-3 opacity-50 mt-1"
                   />
                 </Link>
-                <div className="mt-[6px] text-sm font-semibold text-secondary-600">
+                <div className="my-[2px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
+                {patient.death_datetime && (
+                  <Badge
+                    variant="destructive"
+                    className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                  >
+                    <h3 className="text-xs font-normal sm:text-sm sm:font-medium">
+                      {t("time_of_death")}
+                      {": "}
+                      {dayjs(patient.death_datetime).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    </h3>
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -153,6 +131,20 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
+                {patient.death_datetime && (
+                  <Badge
+                    variant="destructive"
+                    className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                  >
+                    <h3 className="text-sm font-medium">
+                      {t("time_of_death")}
+                      {": "}
+                      {dayjs(patient.death_datetime).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    </h3>
+                  </Badge>
+                )}
               </div>
               <div className="grid gap-4 grid-cols-3 mt-2 md:mt-0">
                 <div className="flex flex-col space-y-1">
@@ -324,36 +316,38 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     )
                   }
 
-                  <LinkDepartmentsSheet
-                    entityType="encounter"
-                    entityId={encounter.id}
-                    currentOrganizations={encounter.organizations}
-                    facilityId={encounter.facility.id}
-                    trigger={
+                  {canWrite ? (
+                    <LinkDepartmentsSheet
+                      entityType="encounter"
+                      entityId={encounter.id}
+                      currentOrganizations={encounter.organizations}
+                      facilityId={encounter.facility.id}
+                      trigger={
+                        <div className="flex flex-wrap gap-2">
+                          {encounter.organizations.map((org) =>
+                            organizationBadge(org),
+                          )}
+                          {encounter.organizations.length === 0 && (
+                            <Badge
+                              className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                              variant="outline"
+                            >
+                              <Building className="w-4 h-4 text-blue-400" />
+                              Add Organizations
+                            </Badge>
+                          )}
+                        </div>
+                      }
+                    />
+                  ) : (
+                    encounter.organizations.length > 0 && (
                       <div className="flex flex-wrap gap-2">
-                        {encounter.organizations.map((org) => (
-                          <Badge
-                            key={org.id}
-                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                            variant="outline"
-                            title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
-                          >
-                            <Building className="w-4 h-4 text-blue-400" />
-                            {org.name}
-                          </Badge>
-                        ))}
-                        {encounter.organizations.length === 0 && (
-                          <Badge
-                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                            variant="outline"
-                          >
-                            <Building className="w-4 h-4 text-blue-400" />
-                            Add Organizations
-                          </Badge>
+                        {encounter.organizations.map((org) =>
+                          organizationBadge(org),
                         )}
                       </div>
-                    }
-                  />
+                    )
+                  )}
                   {props.encounter.current_location ? (
                     <Popover>
                       <PopoverTrigger asChild>
@@ -379,7 +373,9 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               {t("location")}
                             </h4>
 
-                            <LocationHistorySheet
+                            <LocationSheet
+                              facilityId={props.encounter.facility.id}
+                              encounterId={props.encounter.id}
                               history={encounter.location_history}
                               trigger={
                                 <div>
@@ -402,34 +398,56 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             location={props.encounter.current_location}
                           />
                           <div className="border-b border-dashed border-gray-200 my-2" />
-                          <Button
-                            variant="outline"
-                            className="border-gray-400 w-full"
-                          >
-                            <Link
-                              href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                              className="text-sm text-gray-950 font-semibold"
-                            >
-                              {t("update_location")}
-                            </Link>
-                          </Button>
+                          {canWrite && (
+                            <LocationSheet
+                              facilityId={props.encounter.facility.id}
+                              encounterId={props.encounter.id}
+                              trigger={
+                                <Button
+                                  variant="outline"
+                                  className="border-gray-400 w-full"
+                                >
+                                  {t("update_location")}
+                                </Button>
+                              }
+                              history={encounter.location_history}
+                            />
+                          )}
                         </div>
                       </PopoverContent>
                     </Popover>
-                  ) : (
+                  ) : canWrite ? (
                     <Badge variant="outline">
-                      <Link
-                        href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                        className="flex items-center gap-1 text-gray-950 py-0.5"
-                      >
-                        <CareIcon
-                          icon="l-location-point"
-                          className="h-4 w-4 text-green-600"
-                        />
-                        {t("add_location")}
-                      </Link>
+                      <LocationSheet
+                        facilityId={props.encounter.facility.id}
+                        encounterId={props.encounter.id}
+                        trigger={
+                          <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                            <CareIcon
+                              icon="l-location-point"
+                              className="h-4 w-4 text-green-600"
+                            />
+                            {t("add_location")}
+                          </div>
+                        }
+                        history={encounter.location_history}
+                      />
                     </Badge>
+                  ) : (
+                    <></>
                   )}
+                  <Badge variant="outline">
+                    <ConsentSheet
+                      patientId={props.encounter.patient.id}
+                      encounterId={props.encounter.id}
+                      trigger={
+                        <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                          <SignatureIcon className="h-4 w-4 text-green-600" />
+                          {t("manage_consents")}
+                        </div>
+                      }
+                    />
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -439,78 +457,48 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
-          {!completedEncounterStatus.includes(encounter.status) && (
+          {!disableButtons && (
             <div
               className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
               data-cy="update-encounter-button"
             >
-              <AlertDialog>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="primary">
-                      {t("update")}
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                    <DropdownMenuItem>
-                      <Link
-                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/treatment_summary`}
-                        className="cursor-pointer text-gray-800"
-                      >
-                        {t("treatment_summary")}
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/files/discharge_summary`}
-                        className="cursor-pointer text-gray-800"
-                      >
-                        {t("discharge_summary")}
-                      </Link>
-                    </DropdownMenuItem>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        {t("mark_as_complete")}
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <PLUGIN_Component
-                      __name="PatientInfoCardActions"
-                      encounter={encounter}
-                    />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("mark_encounter_as_complete_confirmation")}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="primary">
+                    {inactiveEncounterStatus.includes(encounter.status)
+                      ? t("actions")
+                      : t("update")}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <EncounterActions encounter={encounter} layout="dropdown" />
                   <PLUGIN_Component
-                    __name="PatientInfoCardMarkAsComplete"
+                    __name="PatientInfoCardActions"
                     encounter={encounter}
                   />
-
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-
-                    <AlertDialogAction
-                      className={cn(buttonVariants({ variant: "primary" }))}
-                      onClick={handleMarkAsComplete}
-                      data-cy="mark-encounter-as-complete"
-                    >
-                      {t("mark_as_complete")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
         </div>
       </section>
     </>
   );
+
+  function organizationBadge(org: FacilityOrganization) {
+    return (
+      <Badge
+        key={org.id}
+        className={cn(
+          "capitalize gap-1 py-1 px-2 hover:bg-secondary-100 cursor-pointer",
+        )}
+        variant="outline"
+        title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
+      >
+        <Building className="w-4 h-4 text-blue-400" />
+        {org.name}
+      </Badge>
+    );
+  }
 }

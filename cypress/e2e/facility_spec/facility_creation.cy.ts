@@ -1,6 +1,7 @@
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 import { generatePhoneNumber } from "@/utils/commonUtils";
 import { generateFacilityData } from "@/utils/facilityData";
+import { viewPort } from "@/utils/viewPort";
 
 const LOCATION_HIERARCHY = {
   state: "Kerala",
@@ -14,7 +15,7 @@ describe("Facility Management", () => {
   const facilityType = "Primary Health Centre";
 
   beforeEach(() => {
-    cy.viewport(1920, 1080);
+    cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
     cy.loginByApi("nurse");
     cy.visit("/");
   });
@@ -23,7 +24,7 @@ describe("Facility Management", () => {
     const testFacility = generateFacilityData();
     const phoneNumber = generatePhoneNumber();
 
-    facilityPage.navigateToOrganization("Kerala");
+    facilityPage.navigateToGovernance("Kerala");
     facilityPage.navigateToFacilitiesList();
     facilityPage.clickAddFacility();
     facilityPage.submitFacilityCreationForm();
@@ -46,10 +47,7 @@ describe("Facility Management", () => {
 
     facilityPage.fillLocationHierarchy(LOCATION_HIERARCHY);
 
-    facilityPage.fillLocationDetails(
-      testFacility.coordinates.latitude,
-      testFacility.coordinates.longitude,
-    );
+    facilityPage.fillLocationDetails("Ernakulam");
 
     // Submit and verify
     facilityPage.makePublicFacility();
