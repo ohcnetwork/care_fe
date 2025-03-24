@@ -164,7 +164,7 @@ function LocationRow({
                       size={isMobile ? "xs" : "sm"}
                       className="gap-2"
                       disabled={
-                        !(!location.has_children && !location.current_encounter)
+                        location.has_children || !!location.current_encounter
                       }
                     >
                       <CareIcon icon={"l-trash"} className="h-4 w-4" />
