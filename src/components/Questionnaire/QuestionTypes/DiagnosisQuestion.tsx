@@ -305,6 +305,17 @@ export function DiagnosisQuestion({
     });
   };
 
+  const handleBackToValueSet = () => {
+    setSelectedCode(null);
+    setSelectedCategory("encounter_diagnosis");
+    setNewDiagnosis({
+      ...DIAGNOSIS_INITIAL_VALUE,
+      onset: {
+        onset_datetime: new Date().toISOString().split("T")[0],
+      },
+    });
+  };
+
   const diagnosisDetailsContent = (
     <div className="space-y-4 p-4">
       <div className="grid grid-cols-1 gap-4">
@@ -427,7 +438,7 @@ export function DiagnosisQuestion({
       </div>
 
       <div className="flex justify-between space-x-2">
-        <Button variant="outline" onClick={handleCloseDrawer}>
+        <Button variant="outline" onClick={handleBackToValueSet}>
           {t("cancel")}
         </Button>
         <Button onClick={handleCategoryConfirm}>{t("add_diagnosis")}</Button>
@@ -598,22 +609,52 @@ export function DiagnosisQuestion({
             onOpenChange={setShowCategorySelection}
           >
             <Command className="px-0">
-              <div className="py-3 px-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 className="text-lg font-semibold">
-                  {selectedCode?.display}
-                </h3>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8"
-                  onClick={handleCloseDrawer}
-                >
-                  <CareIcon icon="l-times" className="h-5 w-5" />
-                </Button>
-              </div>
-              <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
-                {diagnosisDetailsContent}
-              </CommandList>
+              {selectedCode ? (
+                <>
+                  <div className="py-3 px-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">
+                      {selectedCode.display}
+                    </h3>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={handleBackToValueSet}
+                    >
+                      <CareIcon icon="l-times" className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
+                    {diagnosisDetailsContent}
+                  </CommandList>
+                </>
+              ) : (
+                <>
+                  <div className="py-3 px-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">
+                      {t("select_diagnosis")}
+                    </h3>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={handleCloseDrawer}
+                    >
+                      <CareIcon icon="l-times" className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
+                    <ValueSetSelect
+                      system="system-condition-code"
+                      placeholder={t("search_diagnosis")}
+                      onSelect={handleCodeSelect}
+                      disabled={disabled}
+                      hideTrigger={true}
+                      controlledOpen={true}
+                    />
+                  </CommandList>
+                </>
+              )}
             </Command>
           </CommandDrawer>
         </>
