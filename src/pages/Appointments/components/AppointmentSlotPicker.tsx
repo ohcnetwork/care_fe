@@ -214,6 +214,7 @@ export function AppointmentSlotPicker({
                               );
                             }}
                             selectedDate={selectedDate}
+                            allowOngoingSlots={true}
                           />
                         ))}
                       </div>
@@ -235,17 +236,22 @@ export const TokenSlotButton = ({
   selectedSlotId,
   onClick,
   selectedDate,
+  allowOngoingSlots,
 }: {
   slot: Omit<TokenSlot, "availability">;
   availability: TokenSlot["availability"];
   selectedSlotId: string | undefined;
   onClick: () => void;
   selectedDate: Date;
+  allowOngoingSlots: boolean;
 }) => {
   const percentage = slot.allocated / availability.tokens_per_slot;
   const isPastSlot =
     isSameDay(selectedDate, new Date()) &&
-    isBefore(slot.start_datetime, new Date());
+    isBefore(
+      allowOngoingSlots ? slot.end_datetime : slot.start_datetime,
+      new Date(),
+    );
 
   return (
     <Button

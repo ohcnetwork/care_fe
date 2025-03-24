@@ -299,6 +299,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                                 setSelectedSlot({ ...slot, availability })
                               }
                               selectedDate={selectedDate}
+                              allowOngoingSlots={false}
                             />
                           ))}
                         </div>
