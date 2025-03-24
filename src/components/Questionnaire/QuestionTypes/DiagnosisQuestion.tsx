@@ -293,6 +293,18 @@ export function DiagnosisQuestion({
     );
   };
 
+  const handleCloseDrawer = () => {
+    setShowCategorySelection(false);
+    setSelectedCode(null);
+    setSelectedCategory("encounter_diagnosis");
+    setNewDiagnosis({
+      ...DIAGNOSIS_INITIAL_VALUE,
+      onset: {
+        onset_datetime: new Date().toISOString().split("T")[0],
+      },
+    });
+  };
+
   const diagnosisDetailsContent = (
     <div className="space-y-4 p-4">
       <div className="grid grid-cols-1 gap-4">
@@ -414,23 +426,14 @@ export function DiagnosisQuestion({
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2">
+      <div className="flex justify-between space-x-2">
+        <Button variant="outline" onClick={handleCloseDrawer}>
+          {t("cancel")}
+        </Button>
         <Button onClick={handleCategoryConfirm}>{t("add_diagnosis")}</Button>
       </div>
     </div>
   );
-
-  const handleCloseDrawer = () => {
-    setShowCategorySelection(false);
-    setSelectedCode(null);
-    setSelectedCategory("encounter_diagnosis");
-    setNewDiagnosis({
-      ...DIAGNOSIS_INITIAL_VALUE,
-      onset: {
-        onset_datetime: new Date().toISOString().split("T")[0],
-      },
-    });
-  };
 
   const desktopDiagnosisContent = (
     <div className="rounded-lg border p-4 space-y-4">
@@ -608,7 +611,9 @@ export function DiagnosisQuestion({
                   <CareIcon icon="l-times" className="h-5 w-5" />
                 </Button>
               </div>
-              <CommandList>{diagnosisDetailsContent}</CommandList>
+              <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
+                {diagnosisDetailsContent}
+              </CommandList>
             </Command>
           </CommandDrawer>
         </>
