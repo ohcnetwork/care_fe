@@ -6,12 +6,12 @@ const patientEncounter = new PatientEncounter();
 
 describe("Patient Prescription Management", () => {
   beforeEach(() => {
-    cy.loginByApi("testnurse4");
+    cy.loginByApi("test-human");
     cy.visit("/");
   });
 
   it("should add a new medicine for the patient", () => {
-    facilityCreation.selectFacility("GHC payyanur");
+    facilityCreation.selectFacility("GHC Payyanur");
     const medicineName = "Estriol 1 mg oral tablet";
     const dosage = 6;
     const dosageInput = "6 Milligram";

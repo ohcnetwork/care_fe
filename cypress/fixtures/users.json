@@ -27,8 +27,8 @@
     "username": "development-adm",
     "password": "Test@123"
   },
-  "testnurse4": {
-    "username": "testnurse4",
+  "test-human": {
+    "username": "test-human",
     "password": "Test@123"
   }
 }
