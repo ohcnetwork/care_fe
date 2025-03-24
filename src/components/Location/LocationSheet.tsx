@@ -210,7 +210,19 @@ export function LocationSheet({
   }, [bedsData, bedsPage]);
 
   const handleLocationClick = (location: LocationList) => {
-    setLocationHistory((prev) => [...prev, location]);
+    // Find the index of the clicked location in the history
+    const locationIndex = locationHistory.findIndex(
+      (loc) => loc.id === location.id,
+    );
+
+    if (locationIndex !== -1) {
+      // If location is in history, slice the history up to that point
+      setLocationHistory((prev) => prev.slice(0, locationIndex + 1));
+    } else {
+      // If it's a new location, append it to history
+      setLocationHistory((prev) => [...prev, location]);
+    }
+
     setSelectedLocation(location);
     setLocationsPage(1);
     setBedsPage(1);

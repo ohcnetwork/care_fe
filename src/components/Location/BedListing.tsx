@@ -1,6 +1,8 @@
 import { CalendarClock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -34,13 +36,16 @@ export function BedListing({
         return (
           <div
             key={bed.id}
-            className={`relative border rounded-lg pt-3 pb-1 ${
-              isSelected
-                ? "border-green-400 bg-green-50"
-                : isAvailable
-                  ? "border-gray-400 hover:border-green-200 cursor-pointer"
-                  : "border-gray-100 bg-gray-50 hover:border-red-200 cursor-pointer"
-            }`}
+            className={cn(
+              "h-32 relative border rounded-lg pt-3 pb-1",
+              isSelected && "border-green-600 bg-green-50",
+              !isSelected &&
+                isAvailable &&
+                "border-gray-400 hover:border-green-200 cursor-pointer",
+              !isSelected &&
+                !isAvailable &&
+                "border-gray-100 bg-gray-50 hover:border-red-200 cursor-pointer",
+            )}
             onClick={() => {
               if (isAvailable) {
                 onBedSelect(bed.id);
@@ -70,7 +75,7 @@ export function BedListing({
                         : "/images/bed-unavailable.svg"
                   }
                   alt="Bed"
-                  className="h-8 w-8"
+                  className="h-8 w-8 mt-4"
                 />
               </div>
               <p className="text-xs text-center font-medium">{bed.name}</p>
@@ -79,7 +84,7 @@ export function BedListing({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="mt-2 text-xs py-0 px-2 bg-gray-50"
+                  className="h-5 mt-2 text-xs py-0 px-2 bg-gray-50"
                   onClick={(e) => {
                     e.stopPropagation();
                     onCheckStatus(bed);

@@ -31,17 +31,29 @@ export function LocationBreadcrumb({
   return (
     <>
       <div className="flex items-center gap-1 text-sm text-gray-600">
-        {locationHistory.map((_loc, _index) => (
+        {locationHistory.slice(0, -1).map((_loc, _index) => (
           <div key={_loc.id} className="flex items-center gap-1">
             <span
               className="hover:text-gray-900 cursor-pointer"
-              onClick={() => onLocationClick(_loc)}
+              onClick={() => {
+                const newHistory = locationHistory.slice(0, _index + 1);
+                const lastLocation = newHistory[newHistory.length - 1];
+                onLocationClick(lastLocation);
+              }}
             >
               {_loc.name}
             </span>
             <ChevronRight className="h-4 w-4" />
           </div>
         ))}
+        {locationHistory.length > 0 && (
+          <div className="flex items-center gap-1">
+            <span className="text-gray-900 font-medium">
+              {locationHistory[locationHistory.length - 1].name}
+            </span>
+            <ChevronRight className="h-4 w-4" />
+          </div>
+        )}
       </div>
       <div className="flex items-center mt-2">
         <Button
