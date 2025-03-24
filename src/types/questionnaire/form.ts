@@ -4,6 +4,7 @@ import { EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
+import { FileUploadQuestion } from "@/types/files/files";
 import { Code } from "@/types/questionnaire/code";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
@@ -30,7 +31,8 @@ export type ResponseValue =
   | RV<"symptom", SymptomRequest[]>
   | RV<"diagnosis", DiagnosisRequest[]>
   | RV<"encounter", EncounterEditRequest[]>
-  | RV<"appointment", CreateAppointmentQuestion[]>;
+  | RV<"appointment", CreateAppointmentQuestion[]>
+  | RV<"files", FileUploadQuestion[]>;
 
 export interface QuestionnaireResponse {
   question_id: string;

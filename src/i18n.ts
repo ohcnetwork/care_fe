@@ -14,6 +14,8 @@ export const LANGUAGES = {
   hi: "हिन्दी",
 } as const;
 
+const DEFAULT_NAMESPACE = "care_fe";
+
 const namespaceToUrl = (namespace: string) => {
   return careConfig.careApps.find((app) => app.name === namespace)?.url ?? "";
 };
@@ -24,7 +26,14 @@ i18n
   .use(LanguageDetector)
   .use(
     resourcesToBackend((language, namespace, callback) => {
-      fetch(`${namespaceToUrl(namespace)}/locale/${language}.json`)
+      const baseUrl = namespaceToUrl(namespace)?.replace(/\/$/, "");
+
+      if (!baseUrl && namespace !== DEFAULT_NAMESPACE) {
+        callback(null, {});
+        return;
+      }
+
+      fetch(`${baseUrl}/locale/${language}.json`)
         .then((response) => {
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -45,14 +54,14 @@ i18n
   )
   .init({
     fallbackLng: "en",
-    ns: ["care_fe", ...careConfig.careApps.map((app) => app.name)],
+    ns: [DEFAULT_NAMESPACE, ...careConfig.careApps.map((app) => app.name)],
     load: "currentOnly",
     supportedLngs: Object.keys(LANGUAGES),
     interpolation: {
       escapeValue: false,
       skipOnVariables: false,
     },
-    defaultNS: "care_fe",
+    defaultNS: DEFAULT_NAMESPACE,
   });
 
 export default i18n;

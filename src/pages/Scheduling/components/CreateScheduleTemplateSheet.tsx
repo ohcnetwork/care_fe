@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { differenceInMinutes, isAfter, isBefore, parse } from "date-fns";
+import { isAfter, isBefore, parse } from "date-fns";
 import { useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -44,7 +44,11 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
-import { getSlotsPerSession, getTokenDuration } from "@/pages/Scheduling/utils";
+import {
+  calculateSlotDuration,
+  getSlotsPerSession,
+  getTokenDuration,
+} from "@/pages/Scheduling/utils";
 import { ScheduleAvailabilityCreateRequest } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -239,23 +243,13 @@ export default function CreateScheduleTemplateSheet({
     );
   };
 
-  // Function to calculate duration between start and end time
-  const calculateDuration = (startTime: string, endTime: string) => {
-    const start = parse(startTime, "HH:mm", new Date());
-    const end = parse(endTime, "HH:mm", new Date());
-    return differenceInMinutes(end, start);
-  };
-
-  // Function to update slot duration based on time changes
   const updateSlotDuration = (index: number) => {
     const isAutoFill = form.watch(`availabilities.${index}.auto_fill_duration`);
-    if (!isAutoFill) return;
-
-    const startTime = form.watch(`availabilities.${index}.start_time`);
-    const endTime = form.watch(`availabilities.${index}.end_time`);
-
-    if (startTime && endTime) {
-      const duration = calculateDuration(startTime, endTime);
+    if (isAutoFill) {
+      const duration = calculateSlotDuration(
+        form.watch(`availabilities.${index}.start_time`),
+        form.watch(`availabilities.${index}.end_time`),
+      );
       form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
     }
   };
