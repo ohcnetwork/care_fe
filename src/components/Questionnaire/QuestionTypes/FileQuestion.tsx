@@ -192,7 +192,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
             }}
           >
             <Label
-              htmlFor="file_upload_patient"
+              htmlFor="file_upload_encounter"
               className="py-1 flex flex-row items-center cursor-pointer text-primary-900  w-full"
             >
               <CareIcon icon="l-file-upload-alt" className="mr-1" />
