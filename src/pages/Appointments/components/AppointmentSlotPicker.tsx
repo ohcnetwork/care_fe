@@ -101,7 +101,11 @@ export function AppointmentSlotPicker({
         >
           <div className="relative z-10">
             <span>{date.getDate()}</span>
-            <span className="text-xs text-gray-400 block">{t("no_slots")}</span>
+            {!heatmapQuery.isFetching && (
+              <span className="text-xs text-gray-400 block">
+                {t("no_slots")}
+              </span>
+            )}
           </div>
         </button>
       );
