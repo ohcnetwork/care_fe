@@ -2,11 +2,15 @@ import { CubeIcon } from "@radix-ui/react-icons";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -60,56 +64,61 @@ export default function DeviceCard({ device, encounter }: Props) {
   };
 
   return (
-    <Link
-      href={`/devices/${device.id}`}
-      basePath={encounter ? `/facility/${encounter.facility.id}/settings` : ""}
-      className="block h-[160px]"
-    >
-      <Card className="hover:shadow-md transition-shadow h-full">
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-2">
-              <div className="mt-1">
-                <DeviceIcon className="h-5 w-5 text-gray-500" />
-              </div>
-              <div>
-                <CardTitle className="text-lg font-semibold line-clamp-1">
-                  {device.registered_name}
-                </CardTitle>
-                {device.user_friendly_name && (
-                  <CardDescription className="line-clamp-1">
-                    {device.user_friendly_name}
-                  </CardDescription>
-                )}
-              </div>
+    <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-2">
+            <div className="mt-1">
+              <DeviceIcon className="h-5 w-5 text-gray-500" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-semibold line-clamp-1">
+                {device.registered_name}
+              </CardTitle>
+              {device.user_friendly_name && (
+                <CardDescription className="text-sm text-gray-600 line-clamp-1">
+                  {device.user_friendly_name}
+                </CardDescription>
+              )}
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 flex-grow">
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="secondary" className={getStatusColor(device.status)}>
+            {t(`device_status_${device.status}`)}
+          </Badge>
+          <Badge
+            variant="secondary"
+            className={getAvailabilityStatusColor(device.availability_status)}
+          >
+            {t(`device_availability_status_${device.availability_status}`)}
+          </Badge>
+          {device.care_type && (
             <Badge
               variant="secondary"
-              className={getStatusColor(device.status)}
+              className="bg-blue-100 text-blue-800 hover:bg-blue-100/80"
             >
-              {t(`device_status_${device.status}`)}
+              {device.care_type}
             </Badge>
-            <Badge
-              variant="secondary"
-              className={getAvailabilityStatusColor(device.availability_status)}
-            >
-              {t(`device_availability_status_${device.availability_status}`)}
-            </Badge>
-            {device.care_type && (
-              <Badge
-                variant="secondary"
-                className="bg-blue-100 text-blue-800 hover:bg-blue-100/80"
-              >
-                {device.care_type}
-              </Badge>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+          )}
+        </div>
+      </CardContent>
+      <CardFooter className="border-t flex justify-end min-h-10 p-3">
+        <Button asChild variant="link" size="icon" className="mr-8">
+          <Link
+            href={`/devices/${device.id}`}
+            basePath={
+              encounter ? `/facility/${encounter.facility.id}/settings` : ""
+            }
+            className="flex items-center text-secondary font-semibold"
+          >
+            {t("view_device")}
+            <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+          </Link>
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }
