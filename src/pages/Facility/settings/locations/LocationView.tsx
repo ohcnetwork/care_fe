@@ -235,17 +235,19 @@ export default function LocationView({
                 {location?.status}
               </Badge>
             </div>
-            <div className="flex flex-col xl:flex-row justify-between items-start w-full gap-4">
-              <Input
-                placeholder={t("search_by_name")}
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full xl:w-72"
-              />
-              <div className="flex flex-col sm:flex-row gap-2 w-full xl:w-auto">
+            <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
+              <div className="w-full md:w-72">
+                <Input
+                  placeholder={t("search_by_name")}
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full"
+                />
+              </div>
+              <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                 {location && "mode" in location && location.mode === "kind" && (
                   <Button
                     variant="primary"
@@ -265,7 +267,7 @@ export default function LocationView({
                     trigger={
                       <Button variant="outline" className="w-full sm:w-auto">
                         <CareIcon icon="l-building" className="h-4 w-4 mr-2" />
-                        {t("manage_organizations")}
+                        {t("manage_organization_other")}
                       </Button>
                     }
                     onUpdate={() => {
