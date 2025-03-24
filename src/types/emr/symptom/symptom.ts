@@ -46,6 +46,7 @@ export interface Symptom {
   note?: string;
   created_by: UserBase;
   updated_by: UserBase;
+  category: string;
 }
 
 export interface SymptomRequest {
@@ -58,6 +59,7 @@ export interface SymptomRequest {
   recorded_date?: string;
   note?: string;
   encounter: string;
+  category: string;
 }
 
 export const SYMPTOM_CLINICAL_STATUS_STYLES = {
