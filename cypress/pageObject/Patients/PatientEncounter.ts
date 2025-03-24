@@ -28,14 +28,11 @@ export class PatientEncounter {
 
   // Questionnaire actions
   addQuestionnaire(questionnaireName: string) {
-    cy.get('[data-cy="add-questionnaire-button"]').click();
-    cy.get('[role="dialog"] input')
-      .should("be.visible")
-      .type(questionnaireName);
-    cy.get('[role="dialog"] button')
-      .contains(questionnaireName)
-      .should("be.visible")
-      .click();
+    cy.typeAndSelectOption(
+      '[data-cy="add-questionnaire-button"]',
+      questionnaireName,
+      false,
+    );
     return this;
   }
 
@@ -96,10 +93,18 @@ export class PatientEncounter {
   }
 
   clickConfirmEncounterAsComplete() {
+    cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounter");
     cy.verifyAndClickElement(
       '[data-cy="confirm-encounter-complete"]',
       "Mark as Complete",
     );
+    cy.wait("@getEncounter").then((interception) => {
+      expect(interception.response?.statusCode).to.eq(200); // Verify status code
+      expect(interception.response?.body).to.have.property(
+        "status",
+        "completed",
+      );
+    });
     return this;
   }
 

@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -62,6 +63,7 @@ const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
   clinical_status: "active",
   verification_status: "confirmed",
   severity: "moderate",
+  category: "problem_list_item",
   onset: { onset_datetime: new Date().toISOString().split("T")[0] },
 };
 
@@ -82,6 +84,7 @@ function convertToSymptomRequest(symptom: Symptom): SymptomRequest {
       : undefined,
     recorded_date: symptom.recorded_date,
     note: symptom.note,
+    category: symptom.category,
     encounter: "", // This will be set when submitting the form
   };
 }
@@ -315,6 +318,16 @@ export function SymptomQuestion({
   }, [patientSymptoms]);
 
   const handleAddSymptom = (code: Code) => {
+    const isDuplicate = symptoms.some(
+      (symptom) =>
+        symptom.code.code === code.code &&
+        symptom.verification_status !== "entered_in_error",
+    );
+
+    if (isDuplicate) {
+      toast.warning(t("symptom_already_exist_warning"));
+      return;
+    }
     const newSymptoms = [
       ...symptoms,
       { ...SYMPTOM_INITIAL_VALUE, code },
