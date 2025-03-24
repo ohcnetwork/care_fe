@@ -65,12 +65,7 @@ const formSchema = z
       ),
     registered_name: z.preprocess(
       (value) => (typeof value === "string" ? value.trim() : value),
-      z
-        .string()
-        .min(1, { message: t("enter_atleast_one_character") })
-        .regex(/^[a-zA-Z\s-_]+$/, {
-          message: t("registered_name_must_contain_only_letters_spaces"),
-        }),
+      z.string().min(1, { message: t("field_required") }),
     ),
     expiration_date: z.string().optional(),
     lot_number: z.string().optional(),
