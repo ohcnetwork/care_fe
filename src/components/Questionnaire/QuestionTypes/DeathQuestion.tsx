@@ -22,7 +22,7 @@ interface TimeOfDeathQuestionProps {
 export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
   const { questionnaireResponse, updateQuestionnaireResponseCB } = props;
 
-  const values = (questionnaireResponse.values?.[0]?.value as string) || [];
+  const values = (questionnaireResponse.values?.[0]?.value as string[]) || [];
 
   const handleUpdate = (updates: string) => {
     updateQuestionnaireResponseCB(
