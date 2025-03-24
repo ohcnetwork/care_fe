@@ -55,7 +55,7 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
@@ -560,6 +560,37 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const queryClient = useQueryClient();
 
+  const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
+    const errorData = (
+      error as {
+        cause?: { errors: { msg: string; loc?: (string | number)[] }[] };
+      }
+    )?.cause;
+
+    if (!errorData?.errors) {
+      toast.error(fallbackMessage);
+      return;
+    }
+
+    errorData.errors.forEach((er) => {
+      let fieldPath = er.loc?.join(" > ");
+      if (er.loc?.includes("questions")) {
+        let questionPath = [];
+        for (let i = 0; i < er.loc.length; i++) {
+          if (er.loc[i] === "questions" && typeof er.loc[i + 1] === "number") {
+            questionPath.push(`Question ${Number(er.loc[i + 1]) + 1}`);
+          }
+        }
+        fieldPath = questionPath.join(" > ");
+      }
+
+      const message = fieldPath ? `Error in ${fieldPath}: ${er.msg}` : er.msg;
+      toast.error(message);
+    });
+
+    toast.error(fallbackMessage);
+  };
+
   const {
     data: initialQuestionnaire,
     isLoading,
@@ -611,31 +642,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
       navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
-    onError: (error) => {
-      const errorData = error.cause as {
-        errors: { msg: string; loc: (string | number)[] }[];
-      };
-
-      errorData.errors.forEach((er) => {
-        let fieldPath = er.loc?.join(" > ");
-        if (er.loc?.includes("questions")) {
-          let questionPath = [];
-          for (let i = 0; i < er.loc.length; i++) {
-            if (
-              er.loc[i] === "questions" &&
-              typeof er.loc[i + 1] === "number"
-            ) {
-              questionPath.push(`Question ${Number(er.loc[i + 1]) + 1}`);
-            }
-          }
-          fieldPath = questionPath.join(" > ");
-        }
-
-        const message = fieldPath ? `Error in ${fieldPath}: ${er.msg}` : er.msg;
-
-        toast.error(message);
-      });
-    },
+    onError: (error) => handleOnErrors(error, "Failed to Create Questionnaire"),
   });
 
   const { mutate: updateQuestionnaire, isPending: isUpdating } = useMutation({
@@ -648,31 +655,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       navigate(`/admin/questionnaire/${data.slug}/edit`);
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
-    onError: (error) => {
-      const errorData = error.cause as {
-        errors: { msg: string; loc: (string | number)[] }[];
-      };
-
-      errorData.errors.forEach((er) => {
-        let fieldPath = er.loc?.join(" > ");
-        if (er.loc?.includes("questions")) {
-          let questionPath = [];
-          for (let i = 0; i < er.loc.length; i++) {
-            if (
-              er.loc[i] === "questions" &&
-              typeof er.loc[i + 1] === "number"
-            ) {
-              questionPath.push(`Question ${Number(er.loc[i + 1]) + 1}`);
-            }
-          }
-          fieldPath = questionPath.join(" > ");
-        }
-
-        const message = fieldPath ? `Error in ${fieldPath}: ${er.msg}` : er.msg;
-
-        toast.error(message);
-      });
-    },
+    onError: (error) => handleOnErrors(error, "Failed to Update Questionnaire"),
   });
 
   const [questionnaire, setQuestionnaire] =
