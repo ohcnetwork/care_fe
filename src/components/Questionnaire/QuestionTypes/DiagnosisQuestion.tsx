@@ -880,13 +880,30 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
             >
               <div className="flex flex-col space-y-1">
                 <div className="flex items-center justify-between">
-                  <CardTitle
-                    className="text-base text-gray-950"
-                    title={diagnosis.code.display}
-                  >
-                    {diagnosis.code.display}
-                  </CardTitle>
-                  <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-start gap-1">
+                      <CardTitle
+                        className={cn(
+                          "text-base text-gray-950",
+                          isOpen ? "break-normal" : "truncate",
+                        )}
+                        title={diagnosis.code.display}
+                      >
+                        {diagnosis.code.display}
+                      </CardTitle>
+                      <div
+                        className={cn(
+                          "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
+                          diagnosis.category === "chronic_condition"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-gray-100 text-gray-700",
+                        )}
+                      >
+                        {t(`Diagnosis_${diagnosis.category}__title`)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 ml-2 shrink-0">
                     {isOpen && (
                       <Button
                         variant="ghost"
