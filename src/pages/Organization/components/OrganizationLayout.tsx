@@ -3,6 +3,8 @@ import { Link, usePath } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import {
@@ -220,11 +222,12 @@ export default function OrganizationLayout({
               {visibleNavItems.map((item) => (
                 <DropdownMenuItem
                   key={item.path}
-                  className={`${
+                  className={cn(
+                    "flex justify-between items-center py-3",
                     path === item.path
                       ? "font-medium text-primary-700 bg-gray-100"
-                      : "text-gray-700"
-                  } flex justify-between items-center py-3`}
+                      : "text-gray-700",
+                  )}
                   asChild
                 >
                   <Link
