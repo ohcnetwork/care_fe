@@ -298,7 +298,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                               onClick={() =>
                                 setSelectedSlot({ ...slot, availability })
                               }
-                              selectedDate={selectedDate}
                               allowOngoingSlots={false}
                             />
                           ))}
