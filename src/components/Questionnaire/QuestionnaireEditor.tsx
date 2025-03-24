@@ -681,6 +681,22 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleSave = () => {
+    let hasError = false;
+    questionnaire.questions.forEach((question) => {
+      if (question.code && !question.code.display) {
+        hasError = true;
+        toast.error(
+          `Please enter a verified code for question ${question.link_id}`,
+        );
+      }
+      if (question.unit && !question.unit.display) {
+        hasError = true;
+        toast.error(
+          `Please enter a verified unit for question ${question.link_id}`,
+        );
+      }
+    });
+    if (hasError) return;
     if (id) {
       updateQuestionnaire(questionnaire);
     } else {
