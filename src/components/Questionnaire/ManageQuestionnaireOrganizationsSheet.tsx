@@ -112,13 +112,13 @@ export default function ManageQuestionnaireOrganizationsSheet({
         {trigger || (
           <Button variant="outline" size="sm">
             <Building className="mr-2 h-4 w-4" />
-            {t("manage_organizations")}
+            {t("manage_organization_one")}
           </Button>
         )}
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{t("manage_organizations")}</SheetTitle>
+          <SheetTitle>{t("manage_organization_other")}</SheetTitle>
           <SheetDescription>
             {t("manage_organizations_description")}
           </SheetDescription>
