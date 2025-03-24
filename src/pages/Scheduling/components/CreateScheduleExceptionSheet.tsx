@@ -223,6 +223,7 @@ export default function CreateScheduleExceptionSheet({
                       <FormItem>
                         <FormLabel required>{t("valid_from")}</FormLabel>
                         <DatePickerInput
+                          min={new Date()}
                           value={
                             field.value ? new Date(field.value) : undefined
                           }
