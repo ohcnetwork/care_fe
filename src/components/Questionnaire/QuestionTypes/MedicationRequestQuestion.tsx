@@ -366,7 +366,7 @@ export function MedicationRequestQuestion({
                   );
 
                   return (
-                    <React.Fragment key={index}>
+                    <React.Fragment key={medication.id}>
                       {!desktopLayout ? (
                         <Collapsible
                           open={expandedMedicationIndex === index}
@@ -389,7 +389,9 @@ export function MedicationRequestQuestion({
                             <CollapsibleTrigger className="flex-1 text-left">
                               <div
                                 className={cn("font-medium text-gray-900", {
-                                  "line-through": isInactive,
+                                  "line-through":
+                                    isInactive &&
+                                    medication?.status !== "ended",
                                 })}
                               >
                                 {medication.medication?.display}
@@ -634,7 +636,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
         <span
           className={cn("break-words line-clamp-2 hidden lg:block", {
-            "line-through": disabled,
+            "line-through": disabled && medication.status !== "ended",
           })}
         >
           {medication.medication?.display}

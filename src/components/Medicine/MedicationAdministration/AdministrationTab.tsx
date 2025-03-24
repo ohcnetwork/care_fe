@@ -6,6 +6,8 @@ import { t } from "i18next";
 import { Link } from "raviger";
 import React, { useCallback, useMemo, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -218,12 +220,16 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
   );
 
   return (
-    <React.Fragment>
+    <React.Fragment key={medication.id}>
       <div
-        className={`p-4 border-t border-gray-200 ${isInactive ? "bg-gray-100 opacity-80" : ""}`}
+        className={cn("p-4 border-t border-gray-200", {
+          "opacity-40 bg-gray-200": isInactive,
+        })}
       >
         <div
-          className={`font-semibold truncate ${isInactive ? "line-through" : ""}`}
+          className={cn("font-semibold truncate", {
+            "line-through": isInactive && medication.status !== "ended",
+          })}
         >
           {medication.medication?.display}
         </div>
@@ -257,7 +263,9 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
         return (
           <div
             key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-            className={`p-4 border-t relative text-sm ${isInactive ? "bg-gray-100 opacity-80" : ""}`}
+            className={cn("p-4 border-t relative text-sm", {
+              "opacity-40 bg-gray-200": isInactive,
+            })}
           >
             {administrationRecords?.map((admin) => {
               const colorClass =
@@ -332,7 +340,9 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
       })}
 
       <div
-        className={`p-4 border-t border-gray-200 flex justify-center ${isInactive ? "bg-gray-100" : ""}`}
+        className={cn("p-4 border-t border-gray-200 flex justify-center", {
+          "bg-gray-200 opacity-40": isInactive,
+        })}
       >
         {ACTIVE_MEDICATION_STATUSES.includes(
           medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
