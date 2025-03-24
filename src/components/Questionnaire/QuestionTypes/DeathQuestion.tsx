@@ -39,7 +39,7 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
 
   return (
     <DateTimePicker
-      value={values[0] ? new Date() : undefined}
+      value={values[0] ? new Date(values[0]) : undefined}
       onChange={(value) => handleUpdate(value?.toISOString() || "")}
       disabled={props.disabled}
     />

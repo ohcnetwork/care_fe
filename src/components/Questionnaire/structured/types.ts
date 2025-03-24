@@ -36,7 +36,7 @@ export interface StructuredRequestMap {
   appointment: AppointmentCreateRequest;
   files: FileUploadQuestion;
   time_of_death: {
-    death_datetime: string;
+    deceased_datetime: string;
   };
 }
 

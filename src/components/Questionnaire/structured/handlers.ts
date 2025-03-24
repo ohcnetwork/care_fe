@@ -188,7 +188,7 @@ export const structuredHandlers: {
         url: `/api/v1/patient/${patientId}/`,
         method: "PUT",
         body: {
-          death_datetime: timeOfDeath,
+          deceased_datetime: timeOfDeath,
         },
         reference_id: "time_of_death",
       }));

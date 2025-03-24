@@ -92,7 +92,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
-                {patient.death_datetime && (
+                {patient.deceased_datetime && (
                   <Badge
                     variant="destructive"
                     className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
@@ -100,7 +100,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     <h3 className="text-xs font-normal sm:text-sm sm:font-medium">
                       {t("time_of_death")}
                       {": "}
-                      {dayjs(patient.death_datetime).format(
+                      {dayjs(patient.deceased_datetime).format(
                         "DD MMM YYYY, hh:mm A",
                       )}
                     </h3>
@@ -131,7 +131,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
-                {patient.death_datetime && (
+                {patient.deceased_datetime && (
                   <Badge
                     variant="destructive"
                     className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
@@ -139,7 +139,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     <h3 className="text-sm font-medium">
                       {t("time_of_death")}
                       {": "}
-                      {dayjs(patient.death_datetime).format(
+                      {dayjs(patient.deceased_datetime).format(
                         "DD MMM YYYY, hh:mm A",
                       )}
                     </h3>
