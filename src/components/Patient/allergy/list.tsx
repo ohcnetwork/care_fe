@@ -75,6 +75,7 @@ export function AllergyList({
   encounterStatus,
 }: AllergyListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId, encounterStatus],
@@ -90,7 +91,13 @@ export function AllergyList({
 
   if (isLoading) {
     return (
-      <AllergyListLayout readOnly={readOnly} className={className}>
+      <AllergyListLayout
+        readOnly={readOnly}
+        className={className}
+        count={0}
+        isExpanded={isExpanded}
+        onToggle={() => setIsExpanded(!isExpanded)}
+      >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -109,10 +116,14 @@ export function AllergyList({
 
   if (!filteredAllergies?.length) {
     return (
-      <AllergyListLayout readOnly={readOnly} className={className}>
-        <CardContent className="px-2 pb-3 pt-2">
-          <p className="text-gray-500">{t("no_allergies_recorded")}</p>
-        </CardContent>
+      <AllergyListLayout
+        readOnly={readOnly}
+        className={className}
+        count={0}
+        isExpanded={isExpanded}
+        onToggle={() => setIsExpanded(!isExpanded)}
+      >
+        <></>
       </AllergyListLayout>
     );
   }
@@ -203,7 +214,13 @@ export function AllergyList({
   }
 
   return (
-    <AllergyListLayout readOnly={readOnly} className={className}>
+    <AllergyListLayout
+      readOnly={readOnly}
+      className={className}
+      count={filteredAllergies.length}
+      isExpanded={isExpanded}
+      onToggle={() => setIsExpanded(!isExpanded)}
+    >
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
           <TableRow className="rounded-md overflow-hidden bg-gray-100">
@@ -272,15 +289,35 @@ const AllergyListLayout = ({
   children,
   className,
   readOnly = false,
+  count,
+  isExpanded,
+  onToggle,
 }: {
   children: ReactNode;
   className?: string;
   readOnly?: boolean;
+  count: number;
+  isExpanded: boolean;
+  onToggle: () => void;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
       <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
-        <CardTitle>{t("allergies")}</CardTitle>
+        <div className="flex items-center">
+          <Button
+            size="icon"
+            variant="link"
+            onClick={onToggle}
+            disabled={count == 0}
+          >
+            {count > 0 && isExpanded ? (
+              <CareIcon icon="l-angle-down" className="h-6 w-6" />
+            ) : (
+              <CareIcon icon="l-angle-right" className="h-6 w-6" />
+            )}
+          </Button>
+          <CardTitle>{t("allergies_count", { count })}</CardTitle>
+        </div>
         {!readOnly && (
           <Link
             href={`questionnaire/allergy_intolerance`}
@@ -291,7 +328,9 @@ const AllergyListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
+      {isExpanded && (
+        <CardContent className="px-2 pb-2">{children}</CardContent>
+      )}
     </Card>
   );
 };

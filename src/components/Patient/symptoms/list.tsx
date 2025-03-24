@@ -30,6 +30,7 @@ export function SymptomsList({
   readOnly = false,
 }: SymptomsListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
@@ -44,6 +45,9 @@ export function SymptomsList({
         patientId={patientId}
         encounterId={encounterId}
         readOnly={readOnly}
+        count={0}
+        isExpanded={isExpanded}
+        onToggle={() => setIsExpanded(!isExpanded)}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -67,10 +71,11 @@ export function SymptomsList({
         patientId={patientId}
         encounterId={encounterId}
         readOnly={readOnly}
+        count={0}
+        isExpanded={isExpanded}
+        onToggle={() => setIsExpanded(!isExpanded)}
       >
-        <CardContent className="px-2 pb-3 pt-2">
-          <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
-        </CardContent>
+        <></>
       </SymptomListLayout>
     );
   }
@@ -81,6 +86,9 @@ export function SymptomsList({
       encounterId={encounterId}
       className={className}
       readOnly={readOnly}
+      count={filteredSymptoms.length}
+      isExpanded={isExpanded}
+      onToggle={() => setIsExpanded(!isExpanded)}
     >
       <SymptomTable
         symptoms={[
@@ -118,6 +126,9 @@ const SymptomListLayout = ({
   children,
   className,
   readOnly = false,
+  count,
+  isExpanded,
+  onToggle,
 }: {
   facilityId?: string;
   patientId: string;
@@ -125,11 +136,28 @@ const SymptomListLayout = ({
   children: ReactNode;
   className?: string;
   readOnly?: boolean;
+  count: number;
+  isExpanded: boolean;
+  onToggle: () => void;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
       <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
-        <CardTitle>{t("symptoms")}</CardTitle>
+        <div className="flex items-center">
+          <Button
+            size="icon"
+            variant="link"
+            onClick={onToggle}
+            disabled={count == 0}
+          >
+            {count > 0 && isExpanded ? (
+              <CareIcon icon="l-angle-down" className="h-6 w-6" />
+            ) : (
+              <CareIcon icon="l-angle-right" className="h-6 w-6" />
+            )}
+          </Button>
+          <CardTitle>{t("symptoms_count", { count })}</CardTitle>
+        </div>
         {!readOnly && (
           <Link
             href={`questionnaire/symptom`}
@@ -140,7 +168,9 @@ const SymptomListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
+      {isExpanded && (
+        <CardContent className="px-2 pb-2">{children}</CardContent>
+      )}
     </Card>
   );
 };

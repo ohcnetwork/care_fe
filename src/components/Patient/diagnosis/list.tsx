@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Link } from "raviger";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -29,6 +30,7 @@ export function DiagnosisList({
   className = "",
   readOnly = false,
 }: DiagnosisListProps) {
+  const [isExpanded, setIsExpanded] = useState(true);
   const { data: diagnoses, isLoading: isDiagnosesLoading } = useQuery({
     queryKey: ["encounter_diagnosis", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
@@ -57,16 +59,29 @@ export function DiagnosisList({
 
   if (!diagnoses?.results.length && !chronicConditions?.results.length) {
     return (
-      <DiagnosisListLayout className={className} readOnly={readOnly}>
-        <CardContent className="px-2 pb-3 pt-2">
-          <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
-        </CardContent>
+      <DiagnosisListLayout
+        className={className}
+        readOnly={readOnly}
+        count={0}
+        isExpanded={isExpanded}
+        onToggle={() => setIsExpanded(!isExpanded)}
+      >
+        <></>
       </DiagnosisListLayout>
     );
   }
 
   return (
-    <DiagnosisListLayout className={className} readOnly={readOnly}>
+    <DiagnosisListLayout
+      className={className}
+      readOnly={readOnly}
+      count={
+        (diagnoses?.results?.length ?? 0) +
+        (chronicConditions?.results?.length ?? 0)
+      }
+      isExpanded={isExpanded}
+      onToggle={() => setIsExpanded(!isExpanded)}
+    >
       <div className="space-y-2">
         {isChronicConditionsLoading && (
           <CardContent className="px-2 pb-2">
@@ -100,17 +115,37 @@ const DiagnosisListLayout = ({
   children,
   className,
   readOnly = false,
+  count,
+  isExpanded,
+  onToggle,
 }: {
   children: ReactNode;
   className?: string;
   readOnly?: boolean;
+  count: number;
+  isExpanded: boolean;
+  onToggle: () => void;
 }) => {
   return (
     <Card className={cn("rounded-sm ", className)}>
       <CardHeader
         className={cn("px-4 pt-4 pb-2 flex justify-between flex-row")}
       >
-        <CardTitle>{t("diagnoses")}</CardTitle>
+        <div className="flex items-center">
+          <Button
+            size="icon"
+            variant="link"
+            onClick={onToggle}
+            disabled={count == 0}
+          >
+            {count > 0 && isExpanded ? (
+              <CareIcon icon="l-angle-down" className="h-6 w-6" />
+            ) : (
+              <CareIcon icon="l-angle-right" className="h-6 w-6" />
+            )}
+          </Button>
+          <CardTitle>{t("diagnoses_count", { count })}</CardTitle>
+        </div>
         {!readOnly && (
           <Link
             href={`questionnaire/diagnosis`}
@@ -121,7 +156,9 @@ const DiagnosisListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
+      {isExpanded && (
+        <CardContent className="px-2 pb-2">{children}</CardContent>
+      )}
     </Card>
   );
 };
