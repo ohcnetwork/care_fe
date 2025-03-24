@@ -13,8 +13,7 @@ import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 
 import { GeneralSettings } from "./general/general";
-import LocationList from "./locations/LocationList";
-import LocationView from "./locations/LocationView";
+import LocationSettings from "./locations/LocationSettings";
 import FacilityOrganizationIndex from "./organizations/FacilityOrganizationIndex";
 import FacilityOrganizationUsers from "./organizations/FacilityOrganizationUsers";
 import FacilityOrganizationView from "./organizations/FacilityOrganizationView";
@@ -32,9 +31,9 @@ const getRoutes = (facilityId: string) => ({
   "/departments/:id/users": ({ id }: { id: string }) => (
     <FacilityOrganizationUsers facilityId={facilityId} id={id} />
   ),
-  "/locations": () => <LocationList facilityId={facilityId} />,
+  "/locations": () => <LocationSettings facilityId={facilityId} />,
   "/location/:id": ({ id }: { id: string }) => (
-    <LocationView facilityId={facilityId} id={id} />
+    <LocationSettings facilityId={facilityId} locationId={id} />
   ),
   "/devices": () => <DevicesList facilityId={facilityId} />,
   "/devices/create": () => <CreateDevice facilityId={facilityId} />,
