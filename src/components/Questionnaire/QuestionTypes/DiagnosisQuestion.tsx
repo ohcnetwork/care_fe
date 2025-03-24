@@ -12,6 +12,8 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -293,32 +295,6 @@ export function DiagnosisQuestion({
 
   const diagnosisDetailsContent = (
     <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {selectedCode && (
-            <Label className="text-sm font-medium">
-              {selectedCode.display}
-            </Label>
-          )}
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setShowCategorySelection(false);
-            setSelectedCode(null);
-            setSelectedCategory("encounter_diagnosis");
-            setNewDiagnosis({
-              ...DIAGNOSIS_INITIAL_VALUE,
-              onset: {
-                onset_datetime: new Date().toISOString().split("T")[0],
-              },
-            });
-          }}
-        >
-          {t("cancel")}
-        </Button>
-      </div>
       <div className="grid grid-cols-1 gap-4">
         {DIAGNOSIS_CATEGORY.map((category) => (
           <div
@@ -444,6 +420,18 @@ export function DiagnosisQuestion({
     </div>
   );
 
+  const handleCloseDrawer = () => {
+    setShowCategorySelection(false);
+    setSelectedCode(null);
+    setSelectedCategory("encounter_diagnosis");
+    setNewDiagnosis({
+      ...DIAGNOSIS_INITIAL_VALUE,
+      onset: {
+        onset_datetime: new Date().toISOString().split("T")[0],
+      },
+    });
+  };
+
   return (
     <div className="space-y-4">
       {sortedDiagnoses.length > 0 && (
@@ -482,10 +470,18 @@ export function DiagnosisQuestion({
             onOpenChange={setShowCategorySelection}
           >
             <Command className="px-0">
-              <div className="py-2 text-center border-b border-gray-200">
+              <div className="py-3 px-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 className="text-lg font-semibold">
-                  {t("diagnosis_details")}
+                  {selectedCode?.display}
                 </h3>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8"
+                  onClick={handleCloseDrawer}
+                >
+                  <CareIcon icon="l-times" className="h-5 w-5" />
+                </Button>
               </div>
               <CommandList>{diagnosisDetailsContent}</CommandList>
             </Command>
@@ -493,6 +489,18 @@ export function DiagnosisQuestion({
         </>
       ) : showCategorySelection ? (
         <div className="rounded-lg border p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              {selectedCode && (
+                <Label className="text-sm font-medium">
+                  {selectedCode.display}
+                </Label>
+              )}
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleCloseDrawer}>
+              {t("cancel")}
+            </Button>
+          </div>
           {diagnosisDetailsContent}
         </div>
       ) : (
