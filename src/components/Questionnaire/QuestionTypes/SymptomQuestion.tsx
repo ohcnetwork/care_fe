@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -158,9 +160,12 @@ const SymptomRow = React.memo(function SymptomRow({
   onRemove,
 }: SymptomRowProps) {
   const [showNotes, setShowNotes] = useState(Boolean(symptom.note));
+  const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
+    "absolute",
+  );
 
   const handleDateChange = useCallback(
-    (date: Date) =>
+    (date: Date | undefined) =>
       onUpdate(index, {
         onset: { onset_datetime: dateQueryString(date) },
       }),
@@ -226,15 +231,45 @@ const SymptomRow = React.memo(function SymptomRow({
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="p-0" align="start">
-              <RelativeDatePicker
-                value={
-                  symptom.onset?.onset_datetime
-                    ? new Date(symptom.onset.onset_datetime)
-                    : undefined
+            <PopoverContent className="p-0 w-auto" align="start">
+              <Tabs
+                value={activeTab}
+                onValueChange={(v) =>
+                  setActiveTab(v as "absolute" | "relative")
                 }
-                onDateChange={handleDateChange}
-              />
+              >
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="absolute">
+                    {t("absolute_date")}
+                  </TabsTrigger>
+                  <TabsTrigger value="relative">
+                    {t("relative_date")}
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="absolute" className="p-0">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      symptom.onset?.onset_datetime
+                        ? new Date(symptom.onset.onset_datetime)
+                        : undefined
+                    }
+                    onSelect={(date: Date | undefined) => {
+                      handleDateChange(date);
+                    }}
+                  />
+                </TabsContent>
+                <TabsContent value="relative" className="p-0">
+                  <RelativeDatePicker
+                    value={
+                      symptom.onset?.onset_datetime
+                        ? new Date(symptom.onset.onset_datetime)
+                        : undefined
+                    }
+                    onDateChange={(date) => handleDateChange(date)}
+                  />
+                </TabsContent>
+              </Tabs>
             </PopoverContent>
           </Popover>
         </div>
