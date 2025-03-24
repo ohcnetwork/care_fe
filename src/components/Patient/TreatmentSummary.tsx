@@ -164,12 +164,6 @@ export default function TreatmentSummary({
     medicationsLoading ||
     medicationStatementLoading;
 
-  console.log("Allergies:", allergies);
-  console.log("Symptoms:", symptoms);
-  console.log("Diagnoses:", diagnoses);
-  console.log("Medications:", medications);
-  console.log("Medication Statements:", medicationStatement);
-
   if (isLoading) {
     return (
       <PrintPreview
