@@ -31,8 +31,7 @@ const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
   sbomVersions: {
-    frontend: env.REACT_SBOM_FE_VERSION || "latest",
-    backend: env.REACT_SBOM_BE_VERSION || "latest",
+    frontend: (await import("./package.json")).version || "latest",
   },
   urls: {
     dashboard: env.REACT_DASHBOARD_URL,
