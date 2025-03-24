@@ -65,16 +65,30 @@ export function FacilityNavUser({
                 </>
               )}
               {!open && (
-                <div className="flex flex-row items-center">
+                <>
                   <Avatar
-                    name={`${user.first_name} ${user.last_name}`}
                     className="h-8 w-8 rounded-lg"
+                    name={`${user.first_name} ${user.last_name}`}
                     imageUrl={user.read_profile_picture_url}
                   />
-                </div>
+                  {isMobile && (
+                    <>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-semibold">
+                          {formatName(user)}
+                        </span>
+                        <span className="truncate text-xs">
+                          {user.username}
+                        </span>
+                      </div>
+                      <CaretSortIcon className="ml-auto size-4" />
+                    </>
+                  )}
+                </>
               )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
