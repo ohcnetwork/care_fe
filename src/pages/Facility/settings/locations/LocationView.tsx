@@ -199,7 +199,7 @@ export default function LocationView({ id, facilityId }: Props) {
                     trigger={
                       <Button variant="outline" className="w-full md:w-auto">
                         <CareIcon icon="l-building" className="h-4 w-4 mr-2" />
-                        {t("manage_organizations")}
+                        {t("manage_organization", { count: 0 })}
                       </Button>
                     }
                     onUpdate={() => {
