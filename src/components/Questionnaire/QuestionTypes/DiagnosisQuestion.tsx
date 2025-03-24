@@ -422,6 +422,20 @@ export function DiagnosisQuestion({
             </SelectContent>
           </Select>
         </div>
+        <div className="space-y-2">
+          <Label className="text-sm">{t("notes")}</Label>
+          <Input
+            type="text"
+            placeholder={t("add_notes_about_diagnosis")}
+            value={newDiagnosis.note || ""}
+            onChange={(e) =>
+              setNewDiagnosis((prev) => ({
+                ...prev,
+                note: e.target.value,
+              }))
+            }
+          />
+        </div>
       </div>
 
       <div className="flex justify-end space-x-2">
