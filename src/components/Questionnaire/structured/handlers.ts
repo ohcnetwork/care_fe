@@ -3,6 +3,7 @@ import {
   RequestTypeFor,
 } from "@/components/Questionnaire/structured/types";
 
+import { readFileAsDataURL } from "@/Utils/utils";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 
 interface StructuredHandlerContext {
@@ -15,19 +16,21 @@ type StructuredHandler<T extends StructuredQuestionType> = {
   getRequests: (
     data: DataTypeFor<T>[],
     context: StructuredHandlerContext,
-  ) => Array<{
-    url: string;
-    method: string;
-    body: RequestTypeFor<T>;
-    reference_id: string;
-  }>;
+  ) => Promise<
+    Array<{
+      url: string;
+      method: string;
+      body: RequestTypeFor<T>;
+      reference_id: string;
+    }>
+  >;
 };
 
 export const structuredHandlers: {
   [K in StructuredQuestionType]: StructuredHandler<K>;
 } = {
   allergy_intolerance: {
-    getRequests: (allergies, { patientId, encounterId }) => {
+    getRequests: async (allergies, { patientId, encounterId }) => {
       return [
         {
           url: `/api/v1/patient/${patientId}/allergy_intolerance/upsert/`,
@@ -44,7 +47,7 @@ export const structuredHandlers: {
     },
   },
   medication_request: {
-    getRequests: (medications, { patientId, encounterId }) => {
+    getRequests: async (medications, { patientId, encounterId }) => {
       return [
         {
           url: `/api/v1/patient/${patientId}/medication/request/upsert/`,
@@ -62,7 +65,7 @@ export const structuredHandlers: {
     },
   },
   medication_statement: {
-    getRequests: (medications, { patientId, encounterId }) => {
+    getRequests: async (medications, { patientId, encounterId }) => {
       return [
         {
           url: `/api/v1/patient/${patientId}/medication/statement/upsert/`,
@@ -80,7 +83,7 @@ export const structuredHandlers: {
     },
   },
   symptom: {
-    getRequests: (symptoms, { patientId, encounterId }) => {
+    getRequests: async (symptoms, { patientId, encounterId }) => {
       return [
         {
           url: `/api/v1/patient/${patientId}/symptom/upsert/`,
@@ -97,7 +100,7 @@ export const structuredHandlers: {
     },
   },
   diagnosis: {
-    getRequests: (diagnoses, { patientId, encounterId }) => {
+    getRequests: async (diagnoses, { patientId, encounterId }) => {
       return [
         {
           url: `/api/v1/patient/${patientId}/diagnosis/upsert/`,
@@ -116,7 +119,7 @@ export const structuredHandlers: {
     },
   },
   encounter: {
-    getRequests: (encounters, { facilityId, patientId, encounterId }) => {
+    getRequests: async (encounters, { facilityId, patientId, encounterId }) => {
       if (!encounterId) return [];
       if (!facilityId) {
         throw new Error("Cannot create encounter without a facility");
@@ -144,7 +147,7 @@ export const structuredHandlers: {
     },
   },
   appointment: {
-    getRequests: (appointment, { facilityId, patientId }) => {
+    getRequests: async (appointment, { facilityId, patientId }) => {
       const { reason_for_visit, slot_id } = appointment[0];
       return [
         {
@@ -159,10 +162,30 @@ export const structuredHandlers: {
       ];
     },
   },
+  files: {
+    getRequests: async (files, { encounterId }) =>
+      await Promise.all(
+        files.map(async (file) => {
+          const base64 = (await readFileAsDataURL(file.file_data)).split(
+            ",",
+          )[1];
+          return {
+            url: `/api/v1/files/upload-file/`,
+            method: "POST",
+            body: {
+              ...file,
+              file_data: base64 as unknown as File,
+              encounter: encounterId,
+            },
+            reference_id: "files",
+          };
+        }),
+      ),
+  },
 };
 
-export const getStructuredRequests = <T extends StructuredQuestionType>(
+export const getStructuredRequests = async <T extends StructuredQuestionType>(
   type: T,
   data: DataTypeFor<T>[],
   context: StructuredHandlerContext,
-) => structuredHandlers[type].getRequests(data, context);
+) => await structuredHandlers[type].getRequests(data, context);

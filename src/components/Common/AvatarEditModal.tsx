@@ -23,8 +23,9 @@ import {
 } from "@/components/ui/dialog";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
-
 import { getCroppedImg } from "@/Utils/getCroppedImg";
+import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
+
 
 interface Props {
   title: string;
@@ -93,6 +94,8 @@ const AvatarEditModal = ({
     isCropping: false,
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { requestPermission } = useMediaDevicePermission();
 
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
@@ -945,6 +948,20 @@ const AvatarEditModal = ({
                           }}
                         />
                       </div>
+                      <Webcam
+                        audio={false}
+                        height={720}
+                        screenshotFormat="image/jpeg"
+                        width={1280}
+                        ref={webRef}
+                        videoConstraints={constraint}
+                        onUserMediaError={async () => {
+                          const requestValue = await requestPermission("user");
+                          if (!requestValue.hasPermission) {
+                            setIsCameraOpen(false);
+                          }
+                        }}
+                      />
                     </>
                   ) : (
                     <>
