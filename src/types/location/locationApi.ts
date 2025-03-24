@@ -32,6 +32,11 @@ export default {
     TRes: Type<LocationDetail>(),
     TBody: Type<LocationWrite>(),
   },
+  delete: {
+    path: "/api/v1/facility/{facility_id}/location/{id}/",
+    method: HttpMethod.DELETE,
+    TRes: Type<void>(),
+  },
   getOrganizations: {
     path: "/api/v1/facility/{facility_id}/location/{id}/organizations",
     method: HttpMethod.GET,
