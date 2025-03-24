@@ -23,6 +23,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { RelativeDatePicker } from "@/components/ui/relative-date-picker";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -33,6 +39,7 @@ import {
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import {
   SYMPTOM_CLINICAL_STATUS,
   SYMPTOM_SEVERITY,
@@ -153,9 +160,9 @@ const SymptomRow = React.memo(function SymptomRow({
   const [showNotes, setShowNotes] = useState(Boolean(symptom.note));
 
   const handleDateChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (date: Date) =>
       onUpdate(index, {
-        onset: { onset_datetime: e.target.value },
+        onset: { onset_datetime: dateQueryString(date) },
       }),
     [index, onUpdate],
   );
@@ -205,13 +212,31 @@ const SymptomRow = React.memo(function SymptomRow({
           <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
             {t("date")}
           </div>
-          <Input
-            type="date"
-            value={symptom.onset?.onset_datetime || ""}
-            onChange={handleDateChange}
-            disabled={disabled || !!symptom.id}
-            className="h-8 md:h-9"
-          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="h-8 md:h-9 w-full justify-start font-normal"
+                disabled={disabled || !!symptom.id}
+              >
+                {symptom.onset?.onset_datetime ? (
+                  new Date(symptom.onset.onset_datetime).toLocaleDateString()
+                ) : (
+                  <span className="text-muted-foreground">Select date</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0" align="start">
+              <RelativeDatePicker
+                value={
+                  symptom.onset?.onset_datetime
+                    ? new Date(symptom.onset.onset_datetime)
+                    : undefined
+                }
+                onDateChange={handleDateChange}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="col-span-2">
           <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
