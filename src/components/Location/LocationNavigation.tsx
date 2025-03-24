@@ -1,4 +1,4 @@
-import { ChevronRight, Loader2, Search } from "lucide-react";
+import { ChevronRight, Loader2, Search, XIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -85,25 +85,28 @@ export function LocationNavigation({
               onGoBack={onGoBack}
             />
           </div>
-          {selectedBed && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-red-500 hover:text-red-700 whitespace-nowrap"
-              onClick={onClearSelection}
-            >
-              {t("clear_selection")}
-            </Button>
-          )}
         </div>
 
         {selectedBed && (
           <div className="bg-green-50 border border-green-200 p-3 rounded-md">
-            <p className="text-sm text-green-800">
-              {t("selected_bed")}:{" "}
-              <span className="font-medium">
-                {beds.find((b) => b.id === selectedBed)?.name}
+            <p className="text-sm text-green-800 flex items-center justify-between">
+              <span className="font-normal">
+                {t("selected_bed")}:{" "}
+                <span className="font-medium">
+                  {beds.find((b) => b.id === selectedBed)?.name}
+                </span>
               </span>
+              {selectedBed && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-gray-950 border-gray-400 font-semibold"
+                  onClick={onClearSelection}
+                >
+                  <XIcon className="h-4 w-4" />
+                  {t("clear_selection")}
+                </Button>
+              )}
             </p>
           </div>
         )}
