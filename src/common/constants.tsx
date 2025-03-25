@@ -342,6 +342,31 @@ export const DEFAULT_ALLOWED_EXTENSIONS = [
   "application/vnd.oasis.opendocument.spreadsheet,application/pdf",
 ];
 
+export const BACKEND_ALLOWED_EXTENSIONS = [
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "bmp",
+  "tiff",
+  "mp4",
+  "mov",
+  "avi",
+  "wmv",
+  "mp3",
+  "wav",
+  "ogg",
+  "txt",
+  "csv",
+  "rtf",
+  "doc",
+  "odt",
+  "pdf",
+  "xls",
+  "xlsx",
+  "ods",
+];
+
 export const FILE_EXTENSIONS = {
   IMAGE: ["jpeg", "jpg", "png", "gif", "svg", "bmp", "webp", "jfif"],
   AUDIO: ["mp3", "wav"],
