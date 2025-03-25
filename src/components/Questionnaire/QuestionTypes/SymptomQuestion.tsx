@@ -289,10 +289,7 @@ const SymptomRow = React.memo(function SymptomRow({
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0 mr-2">
                     <CardTitle
-                      className={cn(
-                        "text-base text-gray-950",
-                        isOpen ? "break-words" : "truncate",
-                      )}
+                      className="text-base text-gray-950 break-words"
                       title={symptom.code.display}
                     >
                       {symptom.code.display}

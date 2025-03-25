@@ -890,10 +890,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-start gap-1">
                       <CardTitle
-                        className={cn(
-                          "text-base text-gray-950",
-                          isOpen ? "break-normal" : "truncate",
-                        )}
+                        className="text-base text-gray-950 break-words"
                         title={diagnosis.code.display}
                       >
                         <span className="mr-2">{diagnosis.code.display}</span>
