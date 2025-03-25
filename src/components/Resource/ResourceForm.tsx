@@ -76,7 +76,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         name: z.string(),
       })
       .nullable(),
-    assigned_to: z.string().min(1, { message: t("field_required") }),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
     reason: z.string().min(1, { message: t("field_required") }),
@@ -85,6 +84,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       .min(1, { message: t("field_required") }),
     referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),
+    assigned_to: id
+      ? z.string().min(1, { message: t("field_required") })
+      : z.string().optional(),
   });
 
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
@@ -190,7 +192,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     queryKey: ["facilities", facilitySearch],
     queryFn: query.debounced(facilityApi.getAllFacilities, {
       queryParams: {
-        search_text: facilitySearch,
+        search_text: facilitySearch ? facilitySearch : undefined,
         limit: 50,
       },
     }),
@@ -202,7 +204,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   }));
 
   const handleUserChange = (user: UserBase) => {
-    form.setValue("assigned_to", user.id);
+    form.setValue("assigned_to", user.id, { shouldDirty: true });
     setAssignedToUser(user);
   };
 
@@ -210,9 +212,14 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     form.setValue(
       "referring_facility_contact_name",
       `${authUser.first_name} ${authUser.last_name}`.trim(),
+      { shouldDirty: true },
     );
     if (authUser.phone_number) {
-      form.setValue("referring_facility_contact_number", authUser.phone_number);
+      form.setValue(
+        "referring_facility_contact_number",
+        authUser.phone_number,
+        { shouldDirty: true },
+      );
     }
   };
 
@@ -292,7 +299,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                                   facilities?.results.find(
                                     (f) => f.id === value,
                                   ) ?? null;
-                                form.setValue("assigned_facility", facility);
+                                form.setValue("assigned_facility", facility, {
+                                  shouldDirty: true,
+                                });
                               }}
                             />
                           </FormControl>
@@ -402,24 +411,27 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="assigned_to"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel required>{t("assigned_to")}</FormLabel>
-                          <FormControl>
-                            <UserSelector
-                              selected={assignedToUser}
-                              onChange={handleUserChange}
-                              placeholder={t("search_users")}
-                              noOptionsMessage={t("no_users_found")}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+
+                    {id && (
+                      <FormField
+                        control={form.control}
+                        name="assigned_to"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel required>{t("assigned_to")}</FormLabel>
+                            <FormControl>
+                              <UserSelector
+                                selected={assignedToUser}
+                                onChange={handleUserChange}
+                                placeholder={t("search_users")}
+                                noOptionsMessage={t("no_users_found")}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </div>
                 </div>
                 <Separator />
@@ -551,7 +563,15 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   >
                     {t("cancel")}
                   </Button>
-                  <Button type="submit" variant="default" disabled={isPending}>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={
+                      id
+                        ? isUpdatePending || !form.formState.isDirty
+                        : isPending
+                    }
+                  >
                     {isPending && (
                       <CareIcon
                         icon="l-spinner"

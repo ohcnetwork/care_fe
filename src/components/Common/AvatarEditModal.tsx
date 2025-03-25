@@ -24,6 +24,8 @@ import {
 import useCameraSelect from "@/hooks/useCameraSelect";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
+import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
+
 interface Props {
   title: string;
   open: boolean;
@@ -79,6 +81,7 @@ const AvatarEditModal = ({
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const { CameraSelect, selectedDeviceId } = useCameraSelect();
+  const { requestPermission } = useMediaDevicePermission();
 
   const handleSwitchCamera = useCallback(() => {
     setConstraint((prev) => {
@@ -401,9 +404,11 @@ const AvatarEditModal = ({
                           deviceId: selectedDeviceId,
                           ...constraint,
                         }}
-                        onUserMediaError={(_e) => {
-                          setIsCameraOpen(false);
-                          toast.warning(t("camera_permission_denied"));
+                        onUserMediaError={async () => {
+                          const requestValue = await requestPermission("user");
+                          if (!requestValue.hasPermission) {
+                            setIsCameraOpen(false);
+                          }
                         }}
                       />
                     </>

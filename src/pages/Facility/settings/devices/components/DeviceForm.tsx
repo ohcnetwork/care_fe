@@ -2,7 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isBefore, startOfTomorrow } from "date-fns";
 import { t } from "i18next";
-import { useEffect } from "react";
+import { useQueryParams } from "raviger";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -28,8 +29,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import ErrorBoundary from "@/components/Common/ErrorBoundary";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
+import {
+  usePluginDevice,
+  usePluginDevices,
+} from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import {
   ContactPointSystems,
   contactPointSchema,
@@ -57,11 +66,32 @@ const formSchema = z
     expiration_date: z.string().optional(),
     lot_number: z.string().optional(),
     serial_number: z.string().optional(),
-    registered_name: z.string().min(1, { message: t("required") }),
+    registered_name: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     user_friendly_name: z.string().optional(),
     model_number: z.string().optional(),
     part_number: z.string().optional(),
-    contact: z.array(contactPointSchema),
+    contact: z.array(contactPointSchema).superRefine((contacts, ctx) => {
+      const valueMap = new Map();
+      contacts.forEach((contact, index) => {
+        //To take care of case sensitivity in URL
+        const normalizedValue = contact.value.trim().toLowerCase();
+        if (normalizedValue) {
+          if (valueMap.has(normalizedValue)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("duplicate_contact_values_not_allowed"),
+              path: [index, "value"],
+            });
+          } else {
+            valueMap.set(normalizedValue, true);
+          }
+        }
+      });
+    }),
+    metadata: z.record(z.string(), z.unknown()).optional(),
   })
   .refine(
     (data) => {
@@ -88,16 +118,23 @@ const defaultValues: z.infer<typeof formSchema> = {
   manufacture_date: undefined,
   registered_name: "",
   contact: [],
+  metadata: {},
 };
 
 export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
+  const [qParams] = useQueryParams<{ type?: string }>();
+
   const queryClient = useQueryClient();
+  const pluginDevices = usePluginDevices();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
+
+  const [careType, setCareType] = useState<string>();
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -133,8 +170,19 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         part_number: device.part_number || undefined,
         contact: Array.isArray(device.contact) ? device.contact : [],
       });
+
+      setCareType(device.care_type);
+      form.setValue("metadata", device.care_metadata);
+    } else {
+      const pluginDevice = pluginDevices.find(
+        (pluginDevice) => pluginDevice.type === qParams.type,
+      );
+
+      if (pluginDevice) {
+        setCareType(pluginDevice.type);
+      }
     }
-  }, [device, form]);
+  }, [device, form, qParams.type]);
 
   useEffect(() => {
     if (device?.manufacture_date) {
@@ -150,7 +198,9 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   }, [device, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    submitForm({ ...values });
+    const metadata = values.metadata;
+    delete values.metadata;
+    submitForm({ ...metadata, ...values, care_type: careType });
   }
 
   return (
@@ -352,10 +402,9 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             )}
           />
         </div>
-
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-muted-foreground">
+            <h3 className="text-sm font-medium text-gray-500">
               {t("contact_points")}
             </h3>
             <Button
@@ -374,11 +423,27 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             </Button>
           </div>
 
+          {fields.length === 0 && (
+            <div className="py-4 text-center text-sm text-muted-foreground">
+              {t("no_contact_points_added")}
+            </div>
+          )}
+
           {fields.map((field, index) => (
             <div
               key={field.id}
-              className="relative grid gap-1 md:gap-2 grid-cols-[1fr,3fr,auto] py-2"
+              className="relative grid gap-3 sm:gap-1 grid-cols-1 sm:grid-cols-[1fr,3fr,auto] py-2"
             >
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => remove(index)}
+                className="h-10 px-2 flex sm:hidden w-1/12 justify-self-end"
+              >
+                <CareIcon icon="l-trash" className="h-4 w-4 text-destructive" />
+              </Button>
+
               <FormField
                 control={form.control}
                 name={`contact.${index}.system`}
@@ -450,7 +515,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 variant="ghost"
                 size="sm"
                 onClick={() => remove(index)}
-                className="h-8 px-2"
+                className="h-10 px-2 hidden sm:flex"
               >
                 <CareIcon icon="l-trash" className="h-4 w-4 text-destructive" />
               </Button>
@@ -458,8 +523,50 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           ))}
         </div>
 
-        <div className="flex justify-end gap-4">
-          <Button type="submit" disabled={isPending}>
+        {careType && (
+          <ErrorBoundary
+            fallback={
+              <div className="p-4 rounded-md border border-red-200 bg-red-50 text-red-700">
+                <p className="font-medium">Oops, something went wrong</p>
+                <p className="text-sm mt-1">
+                  Failed to render the {careType} configure form
+                </p>
+              </div>
+            }
+          >
+            <FormField
+              control={form.control}
+              name="metadata"
+              render={({ field }) => (
+                <FormItem className="space-y-0">
+                  <PluginDeviceConfigureForm
+                    type={careType}
+                    facilityId={facilityId}
+                    metadata={field.value ?? {}}
+                    onChange={(metadata) => field.onChange(metadata)}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </ErrorBoundary>
+        )}
+
+        <div className="flex items-center justify-end">
+          <Button
+            variant="outline"
+            className="m-4"
+            onClick={() => {
+              if (device) {
+                goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
+              } else {
+                goBack(`/facility/${facilityId}/settings/devices`);
+              }
+            }}
+          >
+            {t("cancel")}
+          </Button>
+          <Button type="submit" disabled={isPending || !form.formState.isDirty}>
             {isPending ? t("saving") : t("save")}
           </Button>
         </div>
@@ -467,3 +574,29 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     </Form>
   );
 }
+
+const PluginDeviceConfigureForm = ({
+  type,
+  facilityId,
+  metadata,
+  onChange,
+}: {
+  type: string;
+  facilityId: string;
+  metadata: Record<string, unknown>;
+  onChange: (metadata: Record<string, unknown>) => void;
+}) => {
+  const pluginDevice = usePluginDevice(type);
+
+  if (!pluginDevice.configureForm) {
+    return null;
+  }
+
+  return (
+    <pluginDevice.configureForm
+      facilityId={facilityId}
+      metadata={metadata}
+      onChange={onChange}
+    />
+  );
+};

@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -26,6 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+
+import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import {
@@ -71,7 +72,7 @@ function ConceptFields({
           (concept) => concept.code === response.metadata.code,
         );
 
-        if (conceptIndex && conceptIndex !== -1) {
+        if (conceptIndex != undefined && conceptIndex !== -1) {
           parentForm.setValue(
             `compose.${type}.${nestIndex}.concept.${conceptIndex}.display`,
             response.metadata.display,
@@ -148,9 +149,7 @@ function ConceptFields({
                   <Input
                     {...field}
                     placeholder="Unverified"
-                    className={
-                      !field.value ? "text-muted-foreground" : undefined
-                    }
+                    className={!field.value ? "text-gray-500" : undefined}
                     readOnly
                   />
                 </FormControl>
@@ -341,65 +340,74 @@ function RuleFields({
   );
 }
 
-const valuesetFormSchema = z.object({
-  name: z.string().min(1, t("field_required")),
-  slug: z.string().min(1, t("field_required")),
-  description: z.string(),
-  status: z.enum(["active", "draft", "retired", "unknown"]),
-  is_system_defined: z.boolean(),
-  compose: z.object({
-    include: z.array(
-      z.object({
-        system: z.string(),
-        concept: z
-          .array(
-            z.object({
-              code: z.string(),
-              display: z.string(),
-            }),
-          )
-          .optional(),
-        filter: z
-          .array(
-            z.object({
-              property: z.string(),
-              op: z.string(),
-              value: z.string(),
-            }),
-          )
-          .optional(),
-      }),
-    ),
-    exclude: z.array(
-      z.object({
-        system: z.string(),
-        concept: z
-          .array(
-            z.object({
-              code: z.string(),
-              display: z.string(),
-            }),
-          )
-          .optional(),
-        filter: z
-          .array(
-            z.object({
-              property: z.string(),
-              op: z.string(),
-              value: z.string(),
-            }),
-          )
-          .optional(),
-      }),
-    ),
-  }),
-});
 export function ValueSetForm({
   initialData,
   onSubmit,
   isSubmitting,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
+  const valuesetFormSchema = z.object({
+    name: z.string().trim().min(1, t("field_required")),
+    slug: z
+      .string()
+      .trim()
+      .min(5, t("field_required"))
+      .max(25, t("max_character_validation", { length: 25 }))
+      .regex(/^[-\w]+$/, {
+        message: t("slug_format_message"),
+      }),
+    description: z.string(),
+    status: z.enum(["active", "draft", "retired", "unknown"]),
+    is_system_defined: z.boolean(),
+    compose: z.object({
+      include: z.array(
+        z.object({
+          system: z.string(),
+          concept: z
+            .array(
+              z.object({
+                code: z.string(),
+                display: z.string(),
+              }),
+            )
+            .optional(),
+          filter: z
+            .array(
+              z.object({
+                property: z.string(),
+                op: z.string(),
+                value: z.string(),
+              }),
+            )
+            .optional(),
+        }),
+      ),
+      exclude: z.array(
+        z.object({
+          system: z.string(),
+          concept: z
+            .array(
+              z.object({
+                code: z.string(),
+                display: z.string(),
+              }),
+            )
+            .optional(),
+          filter: z
+            .array(
+              z.object({
+                property: z.string(),
+                op: z.string(),
+                value: z.string(),
+              }),
+            )
+            .optional(),
+        }),
+      ),
+    }),
+  });
+
+  const { goBack } = useAppHistory();
 
   const form = useForm<ValuesetFormType>({
     resolver: zodResolver(valuesetFormSchema),
@@ -490,9 +498,23 @@ export function ValueSetForm({
           <RuleFields type="exclude" form={form} />
         </div>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? t("saving") : t("save_valueset")}
-        </Button>
+        <div className="flex gap-2 w-full justify-end">
+          <Button
+            variant="outline"
+            disabled={isSubmitting}
+            type="button"
+            onClick={() => goBack("/admin/valuesets")}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={isSubmitting || !form.formState.isDirty}
+          >
+            {isSubmitting ? t("saving") : t("save_valueset")}
+          </Button>
+        </div>
       </form>
     </Form>
   );

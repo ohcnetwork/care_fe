@@ -123,37 +123,37 @@ export const FACILITY_FEATURE_TYPES: {
     id: 1,
     name: "CT Scan",
     icon: "l-compact-disc",
-    variant: "green",
+    variant: "blue",
   },
   {
     id: 2,
     name: "Maternity Care",
     icon: "l-baby-carriage",
-    variant: "blue",
+    variant: "pink",
   },
   {
     id: 3,
     name: "X-Ray",
     icon: "l-clipboard-alt",
-    variant: "amber",
+    variant: "blue",
   },
   {
     id: 4,
     name: "Neonatal Care",
     icon: "l-baby-carriage",
-    variant: "teal",
+    variant: "pink",
   },
   {
     id: 5,
     name: "Operation Theater",
     icon: "l-syringe",
-    variant: "red",
+    variant: "orange",
   },
   {
     id: 6,
     name: "Blood Bank",
     icon: "l-medical-drip",
-    variant: "orange",
+    variant: "purple",
   },
   {
     id: 7,
@@ -165,17 +165,17 @@ export const FACILITY_FEATURE_TYPES: {
     id: 8,
     name: "Inpatient Services",
     icon: "l-hospital",
-    variant: "red",
+    variant: "orange",
   },
   {
     id: 9,
     name: "Outpatient Services",
     icon: "l-hospital",
-    variant: "red",
+    variant: "indigo",
   },
   {
     id: 10,
-    name: "Intensive Care Units",
+    name: "Intensive Care Units (ICU)",
     icon: "l-hospital",
     variant: "red",
   },
@@ -183,25 +183,25 @@ export const FACILITY_FEATURE_TYPES: {
     id: 11,
     name: "Pharmacy",
     icon: "l-hospital",
-    variant: "red",
+    variant: "indigo",
   },
   {
     id: 12,
     name: "Rehabilitation Services",
     icon: "l-hospital",
-    variant: "red",
+    variant: "teal",
   },
   {
     id: 13,
     name: "Home Care Services",
     icon: "l-hospital",
-    variant: "red",
+    variant: "teal",
   },
   {
     id: 14,
     name: "Psychosocial Support",
     icon: "l-hospital",
-    variant: "red",
+    variant: "purple",
   },
   {
     id: 15,
@@ -213,7 +213,7 @@ export const FACILITY_FEATURE_TYPES: {
     id: 16,
     name: "Daycare Programs",
     icon: "l-hospital",
-    variant: "red",
+    variant: "yellow",
   },
 ];
 
@@ -342,6 +342,31 @@ export const DEFAULT_ALLOWED_EXTENSIONS = [
   "application/vnd.oasis.opendocument.spreadsheet,application/pdf",
 ];
 
+export const BACKEND_ALLOWED_EXTENSIONS = [
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "bmp",
+  "tiff",
+  "mp4",
+  "mov",
+  "avi",
+  "wmv",
+  "mp3",
+  "wav",
+  "ogg",
+  "txt",
+  "csv",
+  "rtf",
+  "doc",
+  "odt",
+  "pdf",
+  "xls",
+  "xlsx",
+  "ods",
+];
+
 export const FILE_EXTENSIONS = {
   IMAGE: ["jpeg", "jpg", "png", "gif", "svg", "bmp", "webp", "jfif"],
   AUDIO: ["mp3", "wav"],
@@ -386,3 +411,5 @@ export const PREVIEWABLE_FILE_EXTENSIONS = [
   "gif",
   "webp",
 ] as const;
+
+export const NAME_PREFIXES = ["Dr.", "Mr.", "Mrs.", "Ms.", "Miss", "Prof."];

@@ -29,7 +29,7 @@ export function FacilitySwitcher({
   facilities: UserFacilityModel[];
   selectedFacility: UserFacilityModel | null;
 }) {
-  const { isMobile, setOpenMobile } = useSidebar();
+  const { isMobile } = useSidebar();
   const { t } = useTranslation();
 
   return (
@@ -40,6 +40,7 @@ export function FacilitySwitcher({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
+              tooltip={selectedFacility?.name}
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
                 <Hospital className="size-4" />
@@ -70,9 +71,6 @@ export function FacilitySwitcher({
                 key={index}
                 onClick={() => {
                   navigate(`/facility/${facility.id}/overview`);
-                  if (isMobile) {
-                    setOpenMobile(false);
-                  }
                 }}
                 className={cn(
                   "gap-2 p-2",

@@ -31,7 +31,7 @@ export function OrganizationSwitcher({
   organizations,
   selectedOrganization,
 }: Props) {
-  const { isMobile, setOpenMobile } = useSidebar();
+  const { isMobile } = useSidebar();
   const { t } = useTranslation();
 
   return (
@@ -42,6 +42,11 @@ export function OrganizationSwitcher({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
+              tooltip={
+                selectedOrganization
+                  ? t("my_organizations")
+                  : t("select_organization")
+              }
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
                 <Globe className="size-4" />
@@ -75,9 +80,6 @@ export function OrganizationSwitcher({
             key={org.id}
             onClick={() => {
               navigate(`/organization/${org.id}`);
-              if (isMobile) {
-                setOpenMobile(false);
-              }
             }}
             className={cn(
               "gap-2 p-2",

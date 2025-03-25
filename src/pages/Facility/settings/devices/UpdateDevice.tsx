@@ -8,6 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
 import query from "@/Utils/request/query";
 import deviceApi from "@/types/device/deviceApi";
 
@@ -20,6 +22,7 @@ interface Props {
 
 export default function UpdateDevice({ facilityId, deviceId }: Props) {
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
 
   const { data: device, isLoading } = useQuery({
     queryKey: ["device", facilityId, deviceId],
@@ -40,13 +43,13 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
             facilityId={facilityId}
             device={device}
             onSuccess={() => {
-              window.history.back();
+              goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
             }}
           />
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center gap-4 py-16">
-          <p className="text-muted-foreground">{t("device_not_found")}</p>
+          <p className="text-gray-500">{t("device_not_found")}</p>
           <Link href={`/facility/${facilityId}/settings/devices/${deviceId}`}>
             <Button variant="outline">{t("back")}</Button>
           </Link>
