@@ -215,18 +215,18 @@ export function AllergyQuestion({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-10"></TableHead>
-                  <TableHead className="w-55">{t("substance")}</TableHead>
-                  <TableHead className="w-17 text-center px-0.5">
+                  <TableHead className="w-[10%] max-w-[3rem]"></TableHead>
+                  <TableHead className="w-[40%]">{t("substance")}</TableHead>
+                  <TableHead className="w-[15%] text-center">
                     {t("criticality")}
                   </TableHead>
-                  <TableHead className="w-20 text-center px-0.5">
+                  <TableHead className="w-[15%] text-center">
                     {t("status")}
                   </TableHead>
-                  <TableHead className="w-20 text-center px-0.5 pr-6">
+                  <TableHead className="w-[15%] text-center">
                     {t("occurrence")}
                   </TableHead>
-                  <TableHead className="w-9">{t("action")}</TableHead>
+                  <TableHead className="w-[5%]">{t("action")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -268,7 +268,7 @@ export function AllergyQuestion({
                       }
                       disabled={disabled || !!allergy.id}
                     >
-                      <SelectTrigger className="h-8 w-[32px] px-0 [&>svg]:hidden flex items-center justify-center">
+                      <SelectTrigger className="h-8 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center">
                         <SelectValue>
                           {allergy.category &&
                             CATEGORY_ICONS[allergy.category as AllergyCategory]}
@@ -424,7 +424,7 @@ export function AllergyQuestion({
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="h-7 text-sm px-2 justify-start font-normal"
+                          className="h-7 text-sm px-2 justify-start font-normal w-full"
                           disabled={disabled}
                         >
                           {allergy.last_occurrence ? (
@@ -566,7 +566,7 @@ const AllergyTableRow = ({
             onValueChange={(value) => onUpdate?.({ category: value })}
             disabled={disabled || !!allergy.id}
           >
-            <SelectTrigger className="h-7 w-[32px] px-0 [&>svg]:hidden flex items-center justify-center">
+            <SelectTrigger className="h-7 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center">
               <SelectValue
                 placeholder="Cat"
                 className="text-center h-full flex items-center justify-center m-0 p-0"
@@ -601,7 +601,7 @@ const AllergyTableRow = ({
             onValueChange={(value) => onUpdate?.({ criticality: value })}
             disabled={disabled}
           >
-            <SelectTrigger className="h-7 px-1">
+            <SelectTrigger className="h-7 w-full px-1 text-sm">
               <SelectValue placeholder={t("critical")} />
             </SelectTrigger>
             <SelectContent>
@@ -625,7 +625,7 @@ const AllergyTableRow = ({
             }}
             disabled={disabled}
           >
-            <SelectTrigger className="h-7 px-1">
+            <SelectTrigger className="h-7 w-full px-1 text-sm">
               <SelectValue placeholder={t("verify")} />
             </SelectTrigger>
             <SelectContent>
@@ -639,12 +639,12 @@ const AllergyTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[100px] py-1 px-1">
+        <TableCell className="py-1 px-1">
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="h-7 text-sm px-2 justify-start font-normal"
+                className="h-7 text-sm px-2 justify-start font-normal w-full"
                 disabled={disabled}
               >
                 {allergy.last_occurrence ? (
