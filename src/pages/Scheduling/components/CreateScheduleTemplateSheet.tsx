@@ -108,11 +108,16 @@ export default function CreateScheduleTemplateSheet({
                   .min(1, t("field_required")) as unknown as z.ZodType<Time>,
                 slot_size_in_minutes: z
                   .number()
-                  .min(1, t("number_min_error", { min: 1 })),
+                  .min(1, t("number_min_error", { min: 0 })),
                 tokens_per_slot: z
                   .number()
-                  .min(1, t("number_min_error", { min: 1 })),
-                auto_fill_duration: z.boolean().optional(),
+                  .min(1, t("number_min_error", { min: 0 })),
+                auto_fill_duration: z.object({
+                  is_auto_fill: z.boolean().optional(),
+                  num_of_slots: z
+                    .number()
+                    .min(1, t("number_min_error", { min: 0 })),
+                }),
               }),
               // Schema for open and closed types
               z.object({
@@ -165,7 +170,7 @@ export default function CreateScheduleTemplateSheet({
           end_time: undefined,
           tokens_per_slot: null as unknown as undefined,
           slot_size_in_minutes: null as unknown as undefined,
-          auto_fill_duration: false,
+          auto_fill_duration: { is_auto_fill: false, num_of_slots: 1 },
         },
       ],
     },
@@ -243,13 +248,13 @@ export default function CreateScheduleTemplateSheet({
     );
   };
 
-  const updateSlotDuration = (index: number, numOfSlots: number = 1) => {
+  const updateSlotDuration = (index: number) => {
     const isAutoFill = form.watch(`availabilities.${index}.auto_fill_duration`);
     if (isAutoFill) {
       const duration = calculateSlotDuration(
         form.watch(`availabilities.${index}.start_time`),
         form.watch(`availabilities.${index}.end_time`),
-        numOfSlots,
+        form.watch(`availabilities.${index}.auto_fill_duration.num_of_slots`),
       );
       form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
     }
@@ -505,7 +510,7 @@ export default function CreateScheduleTemplateSheet({
                         "appointment" && (
                         <>
                           <div className="flex flex-wrap mt-0 pt-2 gap-2">
-                            <div className="w-full grid grid-cols-[auto_1fr_auto] gap-x-2 gap-y-2 mb-2 bg-gray-50 p-3 rounded-lg">
+                            <div className="w-full gap-x-2 grid grid-cols-[auto_1fr_auto] mb-2 bg-gray-50 p-3 rounded-lg">
                               <CareIcon
                                 icon="l-bolt"
                                 className="text-lg text-blue-600"
@@ -520,11 +525,11 @@ export default function CreateScheduleTemplateSheet({
                                 className="col-start-3"
                                 id={`auto-fill-${index}`}
                                 checked={form.watch(
-                                  `availabilities.${index}.auto_fill_duration`,
+                                  `availabilities.${index}.auto_fill_duration.is_auto_fill`,
                                 )}
                                 onCheckedChange={(checked) => {
                                   form.setValue(
-                                    `availabilities.${index}.auto_fill_duration`,
+                                    `availabilities.${index}.auto_fill_duration.is_auto_fill`,
                                     checked,
                                   );
                                   if (checked) {
@@ -533,39 +538,34 @@ export default function CreateScheduleTemplateSheet({
                                 }}
                               />
                               {form.watch(
-                                `availabilities.${index}.auto_fill_duration`,
+                                `availabilities.${index}.auto_fill_duration.is_auto_fill`,
                               ) && (
                                 <div className="row-start-2 col-start-2">
-                                  <Label
-                                    htmlFor={`auto-fill-slots-${index}`}
-                                    className="text-sm font-light mb-1"
-                                  >
-                                    Number of slots:
-                                  </Label>
-                                  <Input
-                                    type="number"
-                                    min={0}
-                                    max={100}
-                                    className="shadow-none"
-                                    defaultValue={1}
-                                    onChange={(e) => {
-                                      updateSlotDuration(
-                                        index,
-                                        e.target.valueAsNumber,
-                                      );
-                                    }}
-                                    onBlur={(e) => {
-                                      if (!e.target.value) {
-                                        e.target.value = "1";
-                                        updateSlotDuration(index);
-                                      } else if (e.target.valueAsNumber > 100) {
-                                        e.target.value = "100";
-                                        updateSlotDuration(
-                                          index,
-                                          e.target.valueAsNumber,
-                                        );
-                                      }
-                                    }}
+                                  <FormField
+                                    control={form.control}
+                                    name={`availabilities.${index}.auto_fill_duration.num_of_slots`}
+                                    render={({ field }) => (
+                                      <FormItem className="flex flex-col w-full mt-2">
+                                        <Label className="text-sm font-light">
+                                          Number of slots:
+                                        </Label>
+                                        <FormMessage />
+                                        <FormControl>
+                                          <Input
+                                            type="number"
+                                            min={1}
+                                            defaultValue={1}
+                                            {...field}
+                                            onChange={(e) => {
+                                              field.onChange(
+                                                e.target.valueAsNumber,
+                                              );
+                                              updateSlotDuration(index);
+                                            }}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
                                   />
                                 </div>
                               )}
@@ -593,7 +593,7 @@ export default function CreateScheduleTemplateSheet({
                                         field.onChange(e.target.valueAsNumber);
                                       }}
                                       disabled={form.watch(
-                                        `availabilities.${index}.auto_fill_duration`,
+                                        `availabilities.${index}.auto_fill_duration.is_auto_fill`,
                                       )}
                                     />
                                   </FormControl>
@@ -680,7 +680,10 @@ export default function CreateScheduleTemplateSheet({
                       end_time: "00:00",
                       tokens_per_slot: null as unknown as number,
                       slot_size_in_minutes: null as unknown as number,
-                      auto_fill_duration: false,
+                      auto_fill_duration: {
+                        is_auto_fill: false,
+                        num_of_slots: 1,
+                      },
                     },
                   ]);
                 }}
