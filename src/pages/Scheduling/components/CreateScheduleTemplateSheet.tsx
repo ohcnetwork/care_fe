@@ -547,7 +547,7 @@ export default function CreateScheduleTemplateSheet({
                                     render={({ field }) => (
                                       <FormItem className="flex flex-col w-full mt-2">
                                         <Label className="text-sm font-light">
-                                          Number of slots:
+                                          {t("number_of_slots")}
                                         </Label>
                                         <FormMessage />
                                         <FormControl>
