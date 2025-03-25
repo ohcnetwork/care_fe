@@ -875,7 +875,11 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
             "border-0 shadow-none": !isOpen,
           })}
         >
-          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <Collapsible
+            open={isOpen}
+            onOpenChange={setIsOpen}
+            key={diagnosis.id}
+          >
             <CardHeader
               className={cn("p-2 rounded-lg shadow-none bg-gray-50", {
                 "bg-gray-200 border border-gray-300": !isOpen,
