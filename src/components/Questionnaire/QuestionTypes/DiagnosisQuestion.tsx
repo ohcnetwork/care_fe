@@ -890,10 +890,10 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                         )}
                         title={diagnosis.code.display}
                       >
-                        {diagnosis.code.display}
+                        <span className="mr-2">{diagnosis.code.display}</span>
                         <div
                           className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ml-2",
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
                             diagnosis.category === "chronic_condition"
                               ? "bg-yellow-100 text-yellow-700"
                               : "bg-gray-100 text-gray-700",
