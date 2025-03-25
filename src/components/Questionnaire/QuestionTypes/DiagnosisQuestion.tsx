@@ -715,7 +715,9 @@ export function DiagnosisQuestion({
           <div className="md:divide-y md:divide-gray-200">
             {sortedDiagnoses.map((diagnosis, index) => (
               <DiagnosisItem
-                key={index}
+                key={
+                  diagnosis.id || `diagnosis-${diagnosis.code.code}-${index}`
+                }
                 diagnosis={diagnosis}
                 disabled={disabled}
                 onUpdate={(updates) => handleUpdateDiagnosis(index, updates)}
@@ -778,7 +780,7 @@ export function DiagnosisQuestion({
                   <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
                     <ValueSetSelect
                       system="system-condition-code"
-                      placeholder={t("search_diagnosis")}
+                      placeholder={t("add_another_diagnosis")}
                       onSelect={handleCodeSelect}
                       disabled={disabled}
                       hideTrigger={true}
@@ -1068,7 +1070,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
           <Collapsible
             open={isOpen}
             onOpenChange={setIsOpen}
-            key={diagnosis.id}
+            key={diagnosis.id || `diagnosis-${diagnosis.code.code}`}
           >
             <CardHeader
               className={cn("p-2 rounded-lg shadow-none bg-gray-50", {
