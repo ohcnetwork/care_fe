@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -18,13 +20,25 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { getPermissions } from "@/common/Permissions";
+
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 export const Appointments = (props: PatientProps) => {
-  const { patientData, facilityId, patientId } = props;
+  const { patientData, facilityId } = props;
+  const patientId = patientData.id;
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+  const { canViewAppointments, canCreateAppointment } = getPermissions(
+    hasPermission,
+    patientData.permissions,
+  );
+  const { goBack } = useAppHistory();
 
   const { data, isLoading } = useQuery({
     queryKey: ["patient-appointments", patientId],
@@ -41,6 +55,14 @@ export const Appointments = (props: PatientProps) => {
       },
     ),
   });
+
+  useEffect(() => {
+    if (!canViewAppointments) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack(`/facility/${facilityId}/patient/${patientId}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canViewAppointments]);
 
   const appointments = data?.results;
 
@@ -71,7 +93,7 @@ export const Appointments = (props: PatientProps) => {
         <h2 className="text-2xl font-semibold leading-tight text-center sm:text-left">
           {t("appointments")}
         </h2>
-        {facilityId && (
+        {canCreateAppointment && (
           <Button variant="outline_primary" asChild>
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/book-appointment`}
@@ -92,7 +114,9 @@ export const Appointments = (props: PatientProps) => {
               <TableHead>{t("date_and_time")}</TableHead>
               <TableHead>{t("booked_by")}</TableHead>
               <TableHead>{t("status")}</TableHead>
-              <TableHead className="text-right">{t("actions")}</TableHead>
+              {facilityId && (
+                <TableHead className="text-right">{t("actions")}</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -116,7 +140,7 @@ export const Appointments = (props: PatientProps) => {
                       <div className="flex items-center gap-2">
                         <Avatar
                           imageUrl={appointment.booked_by?.profile_picture_url}
-                          name={formatName(appointment.booked_by)}
+                          name={formatName(appointment.booked_by, true)}
                           className="size-6 rounded-full"
                         />
                         <span>{formatName(appointment.booked_by)}</span>
@@ -126,16 +150,18 @@ export const Appointments = (props: PatientProps) => {
                     )}
                   </TableCell>
                   <TableCell>{getStatusBadge(appointment.status)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link
-                        href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
-                      >
-                        <CareIcon icon="l-eye" className="mr-1" />
-                        {t("view")}
-                      </Link>
-                    </Button>
-                  </TableCell>
+                  {facilityId && (
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link
+                          href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
+                        >
+                          <CareIcon icon="l-eye" className="mr-1" />
+                          {t("view")}
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             ) : (
