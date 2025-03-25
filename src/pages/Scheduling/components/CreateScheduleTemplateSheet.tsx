@@ -243,12 +243,13 @@ export default function CreateScheduleTemplateSheet({
     );
   };
 
-  const updateSlotDuration = (index: number) => {
+  const updateSlotDuration = (index: number, numOfSlots: number = 1) => {
     const isAutoFill = form.watch(`availabilities.${index}.auto_fill_duration`);
     if (isAutoFill) {
       const duration = calculateSlotDuration(
         form.watch(`availabilities.${index}.start_time`),
         form.watch(`availabilities.${index}.end_time`),
+        numOfSlots,
       );
       form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
     }
@@ -543,9 +544,28 @@ export default function CreateScheduleTemplateSheet({
                                   </Label>
                                   <Input
                                     type="number"
-                                    min="1"
-                                    max="500"
+                                    min={0}
+                                    max={100}
                                     className="shadow-none"
+                                    defaultValue={1}
+                                    onChange={(e) => {
+                                      updateSlotDuration(
+                                        index,
+                                        e.target.valueAsNumber,
+                                      );
+                                    }}
+                                    onBlur={(e) => {
+                                      if (!e.target.value) {
+                                        e.target.value = "1";
+                                        updateSlotDuration(index);
+                                      } else if (e.target.valueAsNumber > 100) {
+                                        e.target.value = "100";
+                                        updateSlotDuration(
+                                          index,
+                                          e.target.valueAsNumber,
+                                        );
+                                      }
+                                    }}
                                   />
                                 </div>
                               )}
