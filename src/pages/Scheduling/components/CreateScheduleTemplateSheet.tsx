@@ -556,6 +556,7 @@ export default function CreateScheduleTemplateSheet({
                                             min={1}
                                             defaultValue={1}
                                             {...field}
+                                            className="shadow-none"
                                             onChange={(e) => {
                                               field.onChange(
                                                 e.target.valueAsNumber,
@@ -630,7 +631,7 @@ export default function CreateScheduleTemplateSheet({
                               )}
                             />
                           </div>
-                          <div className="col-span-2">
+                          <div className="col-span-2 mb-2">
                             {timeAllocationCallout(index)}
                           </div>
                         </>
