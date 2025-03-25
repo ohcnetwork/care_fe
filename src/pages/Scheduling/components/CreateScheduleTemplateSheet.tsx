@@ -243,12 +243,13 @@ export default function CreateScheduleTemplateSheet({
     );
   };
 
-  const updateSlotDuration = (index: number) => {
+  const updateSlotDuration = (index: number, numOfSlots: number = 1) => {
     const isAutoFill = form.watch(`availabilities.${index}.auto_fill_duration`);
     if (isAutoFill) {
       const duration = calculateSlotDuration(
         form.watch(`availabilities.${index}.start_time`),
         form.watch(`availabilities.${index}.end_time`),
+        numOfSlots,
       );
       form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
     }
@@ -504,20 +505,19 @@ export default function CreateScheduleTemplateSheet({
                         "appointment" && (
                         <>
                           <div className="flex flex-wrap mt-0 pt-2 gap-2">
-                            <div className="w-full flex items-center justify-between space-x-4 mb-2 bg-gray-50 p-3 rounded-lg">
-                              <div className="flex items-center space-x-2">
-                                <CareIcon
-                                  icon="l-bolt"
-                                  className="text-lg text-blue-600"
-                                />
-                                <Label
-                                  htmlFor={`auto-fill-${index}`}
-                                  className="text-sm font-medium cursor-pointer"
-                                >
-                                  {t("auto_fill_slot_duration")}
-                                </Label>
-                              </div>
+                            <div className="w-full grid grid-cols-[auto_1fr_auto] gap-x-2 gap-y-2 mb-2 bg-gray-50 p-3 rounded-lg">
+                              <CareIcon
+                                icon="l-bolt"
+                                className="text-lg text-blue-600"
+                              />
+                              <Label
+                                htmlFor={`auto-fill-${index}`}
+                                className="text-sm font-medium cursor-pointer col-start-2"
+                              >
+                                {t("auto_fill_slot_duration")}
+                              </Label>
                               <Switch
+                                className="col-start-3"
                                 id={`auto-fill-${index}`}
                                 checked={form.watch(
                                   `availabilities.${index}.auto_fill_duration`,
@@ -532,6 +532,43 @@ export default function CreateScheduleTemplateSheet({
                                   }
                                 }}
                               />
+                              {form.watch(
+                                `availabilities.${index}.auto_fill_duration`,
+                              ) && (
+                                <div className="row-start-2 col-start-2">
+                                  <Label
+                                    htmlFor={`auto-fill-slots-${index}`}
+                                    className="text-sm font-light mb-1"
+                                  >
+                                    Number of slots:
+                                  </Label>
+                                  <Input
+                                    type="number"
+                                    min={0}
+                                    max={100}
+                                    className="shadow-none"
+                                    defaultValue={1}
+                                    onChange={(e) => {
+                                      updateSlotDuration(
+                                        index,
+                                        e.target.valueAsNumber,
+                                      );
+                                    }}
+                                    onBlur={(e) => {
+                                      if (!e.target.value) {
+                                        e.target.value = "1";
+                                        updateSlotDuration(index);
+                                      } else if (e.target.valueAsNumber > 100) {
+                                        e.target.value = "100";
+                                        updateSlotDuration(
+                                          index,
+                                          e.target.valueAsNumber,
+                                        );
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              )}
                             </div>
 
                             <FormField
