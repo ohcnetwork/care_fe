@@ -9,7 +9,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -697,20 +696,9 @@ export function QuestionnaireForm({
         {questionnaireForms.map((form, index) => (
           <div
             key={`${form.questionnaire.id}-${index}`}
-            className="rounded-lg py-6 px-4 space-y-6"
             data-questionnaire-id={form.questionnaire.id}
           >
             <div className="flex justify-between items-center max-w-4xl">
-              <div className="space-y-1">
-                <h2 className="text-xl font-semibold">
-                  {form.questionnaire.title}
-                </h2>
-                {form.questionnaire.description && (
-                  <p className="text-sm text-gray-500">
-                    {form.questionnaire.description}
-                  </p>
-                )}
-              </div>
               {form.questionnaire.slug !== questionnaireSlug && (
                 <Button
                   type="button"
@@ -854,12 +842,6 @@ export function QuestionnaireForm({
           __name="Scribe"
           formState={questionnaireForms}
           setFormState={setQuestionnaireForms}
-        />
-
-        <DebugPreview
-          data={questionnaireForms}
-          title="QuestionnaireForm"
-          className="p-4 space-y-6 max-w-4xl m-2"
         />
       </div>
     </div>

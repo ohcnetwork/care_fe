@@ -79,6 +79,7 @@ import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import { CodingEditor } from "./CodingEditor";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
 import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
+import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 
 interface QuestionnaireEditorProps {
@@ -1256,7 +1257,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     ) : (
                       questionnaire.questions.map((question) => (
                         <div key={question.id}>
-                          <QuestionPreview question={question} depth={0} />
+                          <QuestionPreview question={question} />
                         </div>
                       ))
                     )}
@@ -1301,62 +1302,55 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     </div>
   );
 }
-function QuestionPreview({
-  question,
-  depth,
-}: {
-  question: Question;
-  depth: number;
-}) {
-  const isRequired = question.required;
+function QuestionPreview({ question }: { question: Question }) {
   const hasSubQuestions =
     question.type === "group" && (question.questions?.length ?? 0) > 0;
 
   return (
     <div id={`question-${question.id}`} className="space-y-2">
-      <div
-        className={`pl-3 -ml-6 ${
-          depth === 0
-            ? isRequired
-              ? "border-l-4 border-purple-500"
-              : "border-l-4 border-gray-300"
-            : ""
-        }`}
-      >
-        <div className="flex items-center justify-between">
-          <span className="text-gray-700 font-bold">
-            {question.text || t("Untitled")}
-            {isRequired && <span className="text-red-500 ml-1">*</span>}
-          </span>
-        </div>
-      </div>
-      <QuestionInput
-        question={question}
-        questionnaireResponses={[
-          {
-            question_id: question.id,
-            link_id: "",
-            values: [],
-            structured_type: question.structured_type ?? null,
-          },
-        ]}
-        updateQuestionnaireResponseCB={() => {}}
-        errors={[]}
-        clearError={() => {}}
-        patientId="preview"
-        encounterId="preview"
-        facilityId="preview"
-        disabled
-      />
-
+      {question.type === "group" ? (
+        <QuestionGroup
+          question={question}
+          questionnaireResponses={[
+            {
+              question_id: question.id,
+              link_id: "",
+              values: [],
+              structured_type: question.structured_type ?? null,
+            },
+          ]}
+          updateQuestionnaireResponseCB={() => {}}
+          errors={[]}
+          clearError={() => {}}
+          patientId="preview"
+          encounterId="preview"
+          facilityId="preview"
+          disabled
+        />
+      ) : (
+        <QuestionInput
+          question={question}
+          questionnaireResponses={[
+            {
+              question_id: question.id,
+              link_id: "",
+              values: [],
+              structured_type: question.structured_type ?? null,
+            },
+          ]}
+          updateQuestionnaireResponseCB={() => {}}
+          errors={[]}
+          clearError={() => {}}
+          patientId="preview"
+          encounterId="preview"
+          facilityId="preview"
+          disabled
+        />
+      )}
       {hasSubQuestions && (
-        <div className="border border-gray-200 rounded-md p-4 space-y-3 mt-2">
+        <div className="border border-gray-200 rounded-md p-6 space-y-3 mt-2">
           {question.questions?.map((subQuestion) => (
-            <QuestionPreview
-              key={subQuestion.id}
-              question={subQuestion}
-              depth={depth + 1}
-            />
+            <QuestionPreview key={subQuestion.id} question={subQuestion} />
           ))}
         </div>
       )}

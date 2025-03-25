@@ -143,21 +143,23 @@ export const QuestionGroup = memo(function QuestionGroup({
             question.styling_metadata.containerClasses,
         )}
       >
-        {question.questions?.map((subQuestion) => (
-          <QuestionGroup
-            encounterId={encounterId}
-            facilityId={facilityId}
-            key={subQuestion.id}
-            question={subQuestion}
-            questionnaireResponses={questionnaireResponses}
-            updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
-            errors={errors}
-            clearError={clearError}
-            disabled={disabled}
-            activeGroupId={activeGroupId}
-            patientId={patientId}
-          />
-        ))}
+        <div className="border border-gray-200 rounded-md p-6 space-y-3 mt-2">
+          {question.questions?.map((subQuestion) => (
+            <QuestionGroup
+              key={subQuestion.id}
+              encounterId={encounterId}
+              facilityId={facilityId}
+              question={subQuestion}
+              questionnaireResponses={questionnaireResponses}
+              updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+              errors={errors}
+              clearError={clearError}
+              disabled={disabled}
+              activeGroupId={activeGroupId}
+              patientId={patientId}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
