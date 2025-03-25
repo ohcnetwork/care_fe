@@ -758,7 +758,7 @@ export function DiagnosisQuestion({
                       <CareIcon icon="l-times" className="h-5 w-5" />
                     </Button>
                   </div>
-                  <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
+                  <CommandList className="max-h-[100vh] overflow-y-auto pb-1">
                     {diagnosisDetailsContent}
                   </CommandList>
                 </>
