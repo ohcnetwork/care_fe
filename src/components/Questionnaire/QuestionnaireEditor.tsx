@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Building, X } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -76,6 +76,7 @@ import valuesetApi from "@/types/valueset/valuesetApi";
 
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import { CodingEditor } from "./CodingEditor";
+import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
 import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
@@ -118,7 +119,7 @@ interface QuestionnairePropertiesProps {
   id?: string;
   organizations?: OrganizationResponse;
   organizationSelection: {
-    selectedIds: string[];
+    selectedOrgs: Organization[];
     onToggle: (orgId: string) => void;
     searchQuery: string;
     setSearchQuery: (query: string) => void;
@@ -127,12 +128,13 @@ interface QuestionnairePropertiesProps {
   };
   tags?: QuestionnaireTagModel[];
   tagSelection: {
-    selectedIds: string[];
+    selectedTags: QuestionnaireTagModel[];
     onToggle: (tagId: string) => void;
     searchQuery: string;
     setSearchQuery: (query: string) => void;
     available?: TagResponse;
     isLoading?: boolean;
+    onTagCreated?: (tag: QuestionnaireTagModel) => void;
   };
 }
 
@@ -263,26 +265,24 @@ function OrganizationSelector({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {selection.selectedIds.length > 0 ? (
-          selection.available?.results
-            .filter((org) => selection.selectedIds.includes(org.id))
-            .map((org) => (
-              <Badge
-                key={org.id}
-                variant="secondary"
-                className="flex items-center gap-1"
+        {selection.selectedOrgs.length > 0 ? (
+          selection.selectedOrgs.map((org) => (
+            <Badge
+              key={org.id}
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              {org.name}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-4 w-4 p-0 hover:bg-transparent"
+                onClick={() => selection.onToggle(org.id)}
               >
-                {org.name}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => selection.onToggle(org.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          ))
         ) : (
           <p className="text-sm text-gray-500">
             {t("no_organizations_selected")}
@@ -350,26 +350,24 @@ function TagSelector({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {selection.selectedIds.length > 0 ? (
-          selection.available?.results
-            .filter((tag) => selection.selectedIds.includes(tag.id))
-            .map((tag) => (
-              <Badge
-                key={tag.id}
-                variant="secondary"
-                className="flex items-center gap-1"
+        {selection.selectedTags.length > 0 ? (
+          selection.selectedTags.map((tag) => (
+            <Badge
+              key={tag.id}
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              {tag.name}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-4 w-4 p-0 hover:bg-transparent"
+                onClick={() => selection.onToggle(tag.id)}
               >
-                {tag.name}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => selection.onToggle(tag.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          ))
         ) : (
           <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
         )}
@@ -386,6 +384,18 @@ function TagSelector({
         placeholder={t("select_tags")}
         isLoading={selection.isLoading}
         noOptionsMessage={t("no_tags_found")}
+      />
+
+      <CreateQuestionnaireTagSheet
+        onTagCreated={(tag) => {
+          selection.onTagCreated?.(tag);
+        }}
+        trigger={
+          <Button variant="outline" className="w-full justify-start">
+            <Tags className="mr-2 h-4 w-4" />
+            {t("create_tag")}
+          </Button>
+        }
       />
     </div>
   );
@@ -433,15 +443,18 @@ function QuestionnaireProperties({
             questionnaire={questionnaire}
           />
         </div>
-        <CloneQuestionnaireSheet
-          questionnaire={questionnaire}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
-              {t("clone_questionnaire")}
-            </Button>
-          }
-        />
+        {id && (
+          <CloneQuestionnaireSheet
+            questionnaire={questionnaire}
+            tags={questionnaire.tags.map((t) => t.id)}
+            trigger={
+              <Button variant="outline" className="w-full justify-start">
+                <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
+                {t("clone_questionnaire")}
+              </Button>
+            }
+          />
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="version">{t("version")}</Label>
@@ -554,8 +567,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set(),
   );
-  const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [selectedOrgs, setSelectedOrgs] = useState<Organization[]>([]);
+  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const queryClient = useQueryClient();
@@ -601,6 +614,23 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       },
     }),
   });
+
+  // This useMemo will automatically include the new tag in options
+  const tagOptions = useMemo(() => {
+    if (!availableTags?.results) return selectedTags;
+    if (tagSearchQuery) return availableTags.results;
+
+    const availableSlugs = new Set(
+      availableTags.results.map((tag) => tag.slug),
+    );
+
+    // Add selected tags that aren't in availableTags
+    const selectedNotInAvailable = selectedTags.filter(
+      (selectedTag) => !availableSlugs.has(selectedTag.slug),
+    );
+
+    return [...availableTags.results, ...selectedNotInAvailable];
+  }, [availableTags, selectedTags, tagSearchQuery]);
 
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.create),
@@ -688,7 +718,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     } else {
       createQuestionnaire({
         ...questionnaire,
-        organizations: selectedOrgIds,
+        organizations: selectedOrgs.map((o) => o.id),
+        tags: selectedTags.map((t) => t.id),
       });
     }
   };
@@ -710,19 +741,27 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleToggleOrganization = (orgId: string) => {
-    setSelectedOrgIds((current) =>
-      current.includes(orgId)
-        ? current.filter((id) => id !== orgId)
-        : [...current, orgId],
+    const newOrg = availableOrganizations?.results.find((o) => o.id === orgId);
+    const newAdded = newOrg ? [...selectedOrgs, newOrg] : selectedOrgs;
+    setSelectedOrgs((current) =>
+      current.some((o) => o.id === orgId)
+        ? current.filter((o) => o.id !== orgId)
+        : newAdded,
     );
   };
 
   const handleToggleTag = (tagId: string) => {
-    setSelectedTagIds((current) =>
-      current.includes(tagId)
-        ? current.filter((id) => id !== tagId)
-        : [...current, tagId],
+    const newTag = tagOptions.find((t) => t.id === tagId);
+    const newAdded = newTag ? [...selectedTags, newTag] : selectedTags;
+    setSelectedTags((current) =>
+      current.some((t) => t.id === tagId)
+        ? current.filter((t) => t.id !== tagId)
+        : newAdded,
     );
+  };
+
+  const handleTagCreated = (tag: QuestionnaireTagModel) => {
+    setSelectedTags((current) => [...current, tag]);
   };
 
   return (
@@ -843,7 +882,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   id={id}
                   organizations={organizations}
                   organizationSelection={{
-                    selectedIds: selectedOrgIds,
+                    selectedOrgs: selectedOrgs,
                     onToggle: handleToggleOrganization,
                     searchQuery: orgSearchQuery,
                     setSearchQuery: setOrgSearchQuery,
@@ -852,12 +891,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   }}
                   tags={questionnaire.tags}
                   tagSelection={{
-                    selectedIds: selectedTagIds,
+                    selectedTags: selectedTags,
                     onToggle: handleToggleTag,
                     searchQuery: tagSearchQuery,
                     setSearchQuery: setTagSearchQuery,
                     available: availableTags,
                     isLoading: isLoadingAvailableTags,
+                    onTagCreated: handleTagCreated,
                   }}
                 />
               </div>
@@ -1014,7 +1054,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 id={id}
                 organizations={organizations}
                 organizationSelection={{
-                  selectedIds: selectedOrgIds,
+                  selectedOrgs: selectedOrgs,
                   onToggle: handleToggleOrganization,
                   searchQuery: orgSearchQuery,
                   setSearchQuery: setOrgSearchQuery,
@@ -1023,12 +1063,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 }}
                 tags={questionnaire.tags}
                 tagSelection={{
-                  selectedIds: selectedTagIds,
+                  selectedTags: selectedTags,
                   onToggle: handleToggleTag,
                   searchQuery: tagSearchQuery,
                   setSearchQuery: setTagSearchQuery,
                   available: availableTags,
                   isLoading: isLoadingAvailableTags,
+                  onTagCreated: handleTagCreated,
                 }}
               />
             </div>

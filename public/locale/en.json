@@ -816,6 +816,7 @@
   "create_schedule_template": "Create Schedule Template",
   "create_summaries": "Create Summaries",
   "create_tag": "Create Tag",
+  "create_tag_description": "Create a new tag for the questionnaire",
   "create_template": "Create Template",
   "create_user": "Create User",
   "create_user_and_add_to_org": "Create a new user and add them to the organization.",
