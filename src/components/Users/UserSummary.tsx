@@ -43,7 +43,11 @@ export default function UserSummaryTab({
     onSuccess: () => {
       toast.success(t("user_deleted_successfully"));
       setShowDeleteDialog(false);
-      navigate("/users");
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        navigate("/");
+      }
     },
     onError: () => {
       setShowDeleteDialog(false);
