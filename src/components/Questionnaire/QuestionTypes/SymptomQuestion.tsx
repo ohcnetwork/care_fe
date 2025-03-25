@@ -534,6 +534,14 @@ export function SymptomQuestion({
     });
   };
 
+  const handleBackToValueSet = () => {
+    setSelectedCode(null);
+    setNewSymptom({
+      ...SYMPTOM_INITIAL_VALUE,
+      onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+    });
+  };
+
   const handleRemoveSymptom = (index: number) => {
     const symptom = symptoms[index];
     if (symptom.id) {
@@ -654,7 +662,7 @@ export function SymptomQuestion({
       </div>
 
       <div className="flex justify-between space-x-2">
-        <Button variant="outline" onClick={handleCloseDrawer}>
+        <Button variant="outline" onClick={handleBackToValueSet}>
           {t("cancel")}
         </Button>
         <Button onClick={handleConfirmSymptom}>{t("add_symptom")}</Button>
@@ -711,7 +719,7 @@ export function SymptomQuestion({
                       size="icon"
                       variant="ghost"
                       className="h-8 w-8"
-                      onClick={handleCloseDrawer}
+                      onClick={handleBackToValueSet}
                     >
                       <CareIcon icon="l-times" className="h-5 w-5" />
                     </Button>
