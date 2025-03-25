@@ -181,6 +181,7 @@ export default function MedicationRequestTable({
                       variant="outline"
                       size="sm"
                       className="text-gray-950 hover:text-gray-700 h-9"
+                      data-cy="edit-prescription"
                     >
                       <Link href={`questionnaire/medication_request`}>
                         <PencilIcon className="mr-2 h-4 w-4" />
@@ -222,6 +223,7 @@ export default function MedicationRequestTable({
                         <div
                           className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
                           onClick={() => setShowStopped(!showStopped)}
+                          data-cy="toggle-stopped-medications"
                         >
                           <CareIcon
                             icon={showStopped ? "l-eye-slash" : "l-eye"}

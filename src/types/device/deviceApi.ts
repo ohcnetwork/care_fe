@@ -61,6 +61,18 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<DeviceEncounterHistory>>(),
   },
+  addOrganization: {
+    path: "/api/v1/facility/{facilityId}/device/{id}/add_managing_organization/",
+    method: HttpMethod.POST,
+    TRes: Type<DeviceDetail>(),
+    TBody: Type<{ managing_organization: string }>(),
+  },
+  removeOrganization: {
+    path: "/api/v1/facility/{facilityId}/device/{id}/remove_managing_organization/",
+    method: HttpMethod.POST,
+    TRes: Type<DeviceDetail>(),
+    TBody: Type<{ managing_organization: string }>(),
+  },
   locationHistory: {
     path: "/api/v1/facility/{facilityId}/device/{id}/location_history/",
     method: HttpMethod.GET,
