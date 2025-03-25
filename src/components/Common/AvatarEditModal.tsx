@@ -25,6 +25,7 @@ import {
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import { getCroppedImg } from "@/Utils/getCroppedImg";
+import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
 interface Props {
   title: string;
@@ -80,6 +81,7 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
+  const { requestPermission } = useMediaDevicePermission();
   const [cropState, setCropState] = useState({
     crop: { x: 0, y: 0 },
     zoom: 1,
@@ -939,9 +941,12 @@ const AvatarEditModal = ({
                           ref={webRef}
                           videoConstraints={constraint}
                           className="h-full w-full object-cover"
-                          onUserMediaError={(_e) => {
-                            setIsCameraOpen(false);
-                            toast.warning(t("camera_permission_denied"));
+                          onUserMediaError={async () => {
+                            const requestValue =
+                              await requestPermission("user");
+                            if (!requestValue.hasPermission) {
+                              setIsCameraOpen(false);
+                            }
                           }}
                         />
                       </div>
