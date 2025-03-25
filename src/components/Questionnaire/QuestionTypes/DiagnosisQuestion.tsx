@@ -1073,7 +1073,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                 </div>
                 {!isOpen && (
                   <div className="text-sm text-gray-500">
-                    Onset{" "}
+                    {t("diagnosed_on")}{" "}
                     {diagnosis.onset?.onset_datetime
                       ? format(
                           new Date(diagnosis.onset.onset_datetime),
@@ -1092,7 +1092,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
               <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
                 <div>
                   <div className="block text-sm font-medium text-gray-500 mb-1">
-                    {t("onset_date")}
+                    {t("diagnosis")} {t("date")}
                   </div>
                   <Input
                     type="date"

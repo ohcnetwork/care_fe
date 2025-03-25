@@ -929,6 +929,7 @@
   "device_status_entered_in_error": "Entered in Error",
   "device_status_inactive": "Inactive",
   "devices": "Devices",
+  "diagnosed_on": "Diagnosed On",
   "diagnoses": "Diagnoses",
   "diagnosis": "Diagnosis",
   "diagnosis__confirmed": "Confirmed",
