@@ -251,7 +251,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
-  const { data: facilityData } = useQuery({
+  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId },
@@ -342,11 +342,12 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const slot = slots?.find((s) => s.id === qParams.slot);
 
   useEffect(() => {
-    if (!canViewAppointments) {
+    if (!canViewAppointments && !isFacilityLoading) {
       toast.error(t("no_permission_to_view_page"));
       goBack("/");
     }
-  }, [canViewAppointments]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canViewAppointments, isFacilityLoading]);
 
   if (schedulableUsersQuery.isLoading) {
     return <Loading />;
