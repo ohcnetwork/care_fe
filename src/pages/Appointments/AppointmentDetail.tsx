@@ -16,6 +16,7 @@ import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -336,7 +337,7 @@ const AppointmentDetails = ({
                   href={`tel:${appointment.patient.phone_number}`}
                   className="text-primary hover:underline"
                 >
-                  {appointment.patient.phone_number}
+                  {formatPhoneNumberIntl(appointment.patient.phone_number)}
                 </a>
               </p>
               <p className="text-gray-600">
@@ -346,7 +347,9 @@ const AppointmentDetails = ({
                     href={`tel:${appointment.patient.emergency_phone_number}`}
                     className="text-primary hover:underline"
                   >
-                    {appointment.patient.emergency_phone_number}
+                    {formatPhoneNumberIntl(
+                      appointment.patient.emergency_phone_number,
+                    )}
                   </a>
                 )}
               </p>

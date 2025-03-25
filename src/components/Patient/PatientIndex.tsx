@@ -2,7 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { isValidPhoneNumber } from "react-phone-number-input";
+import {
+  formatPhoneNumberIntl,
+  isValidPhoneNumber,
+} from "react-phone-number-input";
 import { toast } from "sonner";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
@@ -218,7 +221,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                 <TableCell className="font-medium">
                                   {patient.name}
                                 </TableCell>
-                                <TableCell>{patient.phone_number}</TableCell>
+                                <TableCell>
+                                  {formatPhoneNumberIntl(patient.phone_number)}
+                                </TableCell>
                                 <TableCell>
                                   {
                                     GENDER_TYPES.find(

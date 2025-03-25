@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -69,7 +70,7 @@ export const Demography = (props: PatientProps) => {
                 href={`tel:${props.number}`}
                 className="text-sm font-medium text-black hover:text-secondary-500"
               >
-                {props.number || "-"}
+                {(props.number && formatPhoneNumberIntl(props.number)) || "-"}
               </a>
             </div>
             {props.number && (
@@ -149,7 +150,8 @@ export const Demography = (props: PatientProps) => {
                 href={`tel:${patientData.phone_number}`}
                 className="text-sm font-medium text-black hover:text-secondary-500"
               >
-                {patientData.phone_number || "-"}
+                {patientData.phone_number &&
+                  formatPhoneNumberIntl(patientData.phone_number)}
               </a>
               <br />
               <a

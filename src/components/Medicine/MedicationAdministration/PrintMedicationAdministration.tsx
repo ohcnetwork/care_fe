@@ -229,7 +229,7 @@ export const PrintMedicationAdministration = (props: {
               <DetailRow
                 label={t("mobile_number")}
                 value={
-                  encounter?.patient.phone_number &&
+                  encounter &&
                   formatPhoneNumberIntl(encounter.patient.phone_number)
                 }
                 isStrong
