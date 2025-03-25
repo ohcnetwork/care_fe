@@ -167,7 +167,7 @@ export default function LocationView({ id, facilityId }: Props) {
                 {location?.status}
               </Badge>
             </div>
-            <div className="flex flex-col md:flex-row flex-wrap items-center gap-2">
+            <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
               <div className="w-full md:w-72">
                 <Input
                   placeholder={t("search_by_name")}
@@ -199,7 +199,7 @@ export default function LocationView({ id, facilityId }: Props) {
                     trigger={
                       <Button variant="outline" className="w-full md:w-auto">
                         <CareIcon icon="l-building" className="h-4 w-4 mr-2" />
-                        {t("manage_organizations")}
+                        {t("manage_organization_other")}
                       </Button>
                     }
                     onUpdate={() => {

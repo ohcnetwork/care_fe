@@ -252,7 +252,7 @@ function OrganizationSelector({
           trigger={
             <Button variant="outline" className="w-full justify-start">
               <Building className="mr-2 h-4 w-4" />
-              {t("manage_organizations")}
+              {t("manage_organization_one")}
             </Button>
           }
         />
