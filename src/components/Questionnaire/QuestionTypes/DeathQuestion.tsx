@@ -1,4 +1,6 @@
-import { DateTimePicker } from "@/components/ui/date-time-picker";
+import { format } from "date-fns";
+
+import { Input } from "@/components/ui/input";
 
 import {
   QuestionnaireResponse,
@@ -36,9 +38,14 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
   };
 
   return (
-    <DateTimePicker
-      value={values[0] ? new Date(values[0]) : undefined}
-      onChange={(value) => handleUpdate(value?.toISOString() || "")}
+    <Input
+      type="datetime-local"
+      value={
+        values[0]
+          ? format(new Date(values[0]), "yyyy-MM-dd'T'HH:mm")
+          : undefined
+      }
+      onChange={(e) => handleUpdate(e.target.value || "")}
       disabled={props.disabled}
     />
   );
