@@ -46,13 +46,13 @@ export default function CreateQuestionnaireTagSheet({
       setNewTagSlug("");
       setOpen(false);
       onTagCreated?.(tagData);
-      toast.success("Tag created successfully");
+      toast.success(t("tag_created_successfully"));
     },
   });
 
   const handleCreateTag = () => {
     if (!newTagName.trim() || !newTagSlug.trim()) {
-      toast.error("Name and slug are required");
+      toast.error(t("name_and_slug_are_required"));
       return;
     }
 

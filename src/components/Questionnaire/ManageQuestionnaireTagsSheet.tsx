@@ -79,7 +79,7 @@ export default function ManageQuestionnaireTagsSheet({
       queryClient.invalidateQueries({
         queryKey: ["questionnaireDetail", questionnaire.slug],
       });
-      toast.success("Tags updated successfully");
+      toast.success(t("tag_updated_successfully"));
       setOpen(false);
     },
   });
@@ -95,7 +95,7 @@ export default function ManageQuestionnaireTagsSheet({
       setNewTagName("");
       setNewTagSlug("");
       setIsCreateOpen(false);
-      toast.success("Tag created successfully");
+      toast.success(t("tag_created_successfully"));
     },
   });
 
@@ -140,7 +140,7 @@ export default function ManageQuestionnaireTagsSheet({
 
   const handleCreateTag = () => {
     if (!newTagName.trim() || !newTagSlug.trim()) {
-      toast.error("Name and slug are required");
+      toast.error(t("name_and_slug_are_required"));
       return;
     }
 
