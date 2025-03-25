@@ -540,12 +540,12 @@ export default function CreateScheduleTemplateSheet({
                               {form.watch(
                                 `availabilities.${index}.auto_fill_duration.is_auto_fill`,
                               ) && (
-                                <div className="row-start-2 col-start-2">
+                                <div className="row-start-2 col-start-2 col-span-2">
                                   <FormField
                                     control={form.control}
                                     name={`availabilities.${index}.auto_fill_duration.num_of_slots`}
                                     render={({ field }) => (
-                                      <FormItem className="flex flex-col w-full mt-2">
+                                      <FormItem className="flex flex-col mt-2 space-y-0">
                                         <Label className="text-sm font-light">
                                           {t("number_of_slots")}
                                         </Label>
