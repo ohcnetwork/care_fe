@@ -292,6 +292,7 @@ export default function LocationList({ facilityId }: Props) {
                 getChildren={getChildren}
                 handleEditLocation={handleEditLocation}
                 setExpandedRows={setExpandedRows}
+                facilityId={facilityId}
               />
             </>
           ) : (
@@ -300,6 +301,7 @@ export default function LocationList({ facilityId }: Props) {
               onLocationClick={handleEditLocation}
               facilityName={facilityData?.name || t("facility")}
               searchQuery={searchQuery}
+              isEditing={isSheetOpen}
             />
           )}
 

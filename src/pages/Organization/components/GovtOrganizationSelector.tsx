@@ -119,12 +119,7 @@ export default function GovtOrganizationSelector(
         newLevels.push(organization);
         return newLevels;
       });
-      if (!organization.has_children) {
-        onChange(organization.id);
-        // Else condition is necessary to reset the form value for pre-filled forms
-      } else {
-        onChange("");
-      }
+      onChange(organization.id);
     } else {
       onChange("");
       // Reset subsequent levels when clearing a selection
