@@ -17,15 +17,16 @@ import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
+import { Patient } from "@/types/emr/newPatient";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 type PrintQuestionnaireQuestionnaireResponsesProps = {
   questionnaireId: string;
-  encounterId: string;
   patientId: string;
-  facilityId: string;
+  encounterId?: string;
+  facilityId?: string;
 };
 
 export function PrintQuestionnaireQuestionnaireResponses({
@@ -37,11 +38,22 @@ export function PrintQuestionnaireQuestionnaireResponses({
   const { t } = useTranslation();
 
   const { data: encounter } = useQuery<Encounter>({
-    queryKey: ["encounter", encounterId],
+    queryKey: ["encounter", encounterId, facilityId],
     queryFn: query(api.encounter.get, {
-      pathParams: { id: encounterId },
+      pathParams: { id: encounterId! },
       queryParams: { facility: facilityId },
     }),
+    enabled: !!encounterId && !!facilityId,
+  });
+
+  const { data: patient } = useQuery<Patient>({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.patient.getPatient, {
+      pathParams: {
+        id: patientId,
+      },
+    }),
+    enabled: !(!!encounterId && !!facilityId),
   });
 
   const { data: questionnaireResponses } = useQuery({
@@ -67,7 +79,7 @@ export function PrintQuestionnaireQuestionnaireResponses({
 
   return (
     <PrintPreview
-      title={t("encounter_questionnaire_logs")}
+      title={t("questionnaire_response_logs")}
       disabled={!questionnaireResponses?.results?.length}
     >
       <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
@@ -80,15 +92,18 @@ export function PrintQuestionnaireQuestionnaireResponses({
             />
             <div className="text-center sm:text-left sm:order-1">
               <h1 className="text-3xl font-semibold">
-                {encounter?.facility?.name}
+                {encounter?.facility?.name ?? patient?.name}
               </h1>
               <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
-                {t("encounter_questionnaire_logs")}
+                {t("questionnaire_response_logs")}
               </h2>
             </div>
           </div>
 
-          <EncounterDetails encounter={encounter} />
+          <EncounterDetails
+            encounter={encounter}
+            patient={encounter?.patient ?? patient}
+          />
 
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
             <div className="text-center sm:text-left sm:order-1">
@@ -134,26 +149,26 @@ const DetailRow = ({
 
 interface EncounterDetailsProps {
   encounter?: Encounter;
+  patient?: Patient;
 }
 
-export function EncounterDetails({ encounter }: EncounterDetailsProps) {
+export function EncounterDetails({
+  encounter,
+  patient,
+}: EncounterDetailsProps) {
   const { t } = useTranslation();
 
-  if (!encounter) return null;
+  if (!patient) return null;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
       <div className="space-y-3">
-        <DetailRow
-          label={t("patient")}
-          value={encounter?.patient.name}
-          isStrong
-        />
+        <DetailRow label={t("patient")} value={patient.name} isStrong />
         <DetailRow
           label={`${t("age")} / ${t("sex")}`}
           value={
-            encounter?.patient
-              ? `${formatPatientAge(encounter.patient, true)}, ${t(`GENDER__${encounter.patient.gender}`)}`
+            patient
+              ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
               : undefined
           }
           isStrong
@@ -163,8 +178,9 @@ export function EncounterDetails({ encounter }: EncounterDetailsProps) {
         <DetailRow
           label={t("encounter_date")}
           value={
-            encounter?.period?.start &&
-            format(new Date(encounter.period.start), "dd MMM yyyy, EEEE")
+            encounter?.period?.start
+              ? format(new Date(encounter.period.start), "dd MMM yyyy, EEEE")
+              : t("NA")
           }
           isStrong
         />
@@ -172,7 +188,7 @@ export function EncounterDetails({ encounter }: EncounterDetailsProps) {
           label={t("mobile_number")}
           value={
             encounter?.patient.phone_number &&
-            formatPhoneNumber(encounter.patient.phone_number)
+            formatPhoneNumber(patient!.phone_number)
           }
           isStrong
         />
