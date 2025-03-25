@@ -48,6 +48,7 @@ export type UserModel = UserBareMinimum & {
   organizations?: Organization[];
   permissions: string[];
   mfa_enabled?: boolean;
+  deleted: boolean;
 };
 
 export interface UserAssignedModel extends UserBareMinimum {
