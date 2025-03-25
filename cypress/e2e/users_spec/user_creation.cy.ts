@@ -11,6 +11,42 @@ describe("User Creation", () => {
   const facilityCreation = new FacilityCreation();
   const userCreation = new UserCreation();
   const userRole = "Doctor";
+  const defaultPassword = "Test@123";
+
+  // Define location constants to avoid duplication
+  const LOCATIONS = {
+    DISTRICT: "Ernakulam",
+    LOCAL_BODY: "Aluva",
+    WARD: "4",
+  };
+
+  const locationTestCases = [
+    {
+      description: "without any location data",
+      geoData: {},
+    },
+    {
+      description: "with district only",
+      geoData: {
+        district: LOCATIONS.DISTRICT,
+      },
+    },
+    {
+      description: "with district and local body",
+      geoData: {
+        district: LOCATIONS.DISTRICT,
+        localBody: LOCATIONS.LOCAL_BODY,
+      },
+    },
+    {
+      description: "with district, local body and ward",
+      geoData: {
+        district: LOCATIONS.DISTRICT,
+        localBody: LOCATIONS.LOCAL_BODY,
+        ward: LOCATIONS.WARD,
+      },
+    },
+  ];
 
   beforeEach(() => {
     cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
@@ -18,43 +54,41 @@ describe("User Creation", () => {
     cy.visit("/");
   });
 
-  it("should create a new user successfully", () => {
-    // Generate fresh data at the start of each test attempt
-    const fullName = generateName();
-    const [firstName, lastName] = fullName.split(" ");
-    const defaultPassword = "Test@123";
+  locationTestCases.forEach(({ description, geoData }) => {
+    it(`creates a new user ${description}`, () => {
+      // Generate fresh data for each test
+      const fullName = generateName();
+      const [firstName, lastName] = fullName.split(" ");
+      const username = generateUsername(firstName);
 
-    const testUserData = {
-      firstName,
-      lastName,
-      username: generateUsername(firstName),
-      password: defaultPassword,
-      confirmPassword: defaultPassword,
-      email: `${generateUsername(firstName)}@test.com`,
-      phoneNumber: generatePhoneNumber(),
-      userType: "Doctor",
-      gender: "Male",
-      state: "Kerala",
-      district: "Ernakulam",
-      localBody: "Aluva",
-      ward: "4",
-    };
+      const baseUserData = {
+        firstName,
+        lastName,
+        username,
+        password: defaultPassword,
+        confirmPassword: defaultPassword,
+        email: `${username}@test.com`,
+        phoneNumber: generatePhoneNumber(),
+        userType: "Doctor",
+        gender: "Male",
+      };
 
-    facilityCreation.navigateToGovernance("Kerala");
+      facilityCreation.navigateToGovernance("Kerala");
 
-    userCreation
-      .navigateToUsersTab()
-      .clickAddUserButton()
-      .fillEmail(testUserData.email)
-      .submitUserForm()
-      .verifyValidationErrors()
-      .fillUserDetails(testUserData)
-      .interceptUserCreationRequest()
-      .submitUserForm()
-      .verifyUserCreationApiCall()
-      .selectUserRole(userRole)
-      .interceptOrganizationUserLinking()
-      .clickLinkToOrganization()
-      .verifyOrganizationUserLinkingApiCall();
+      userCreation
+        .navigateToUsersTab()
+        .clickAddUserButton()
+        .fillEmail(baseUserData.email)
+        .submitUserForm()
+        .verifyValidationErrors()
+        .fillUserDetails({ ...baseUserData, ...geoData })
+        .interceptUserCreationRequest()
+        .submitUserForm()
+        .verifyUserCreationApiCall()
+        .selectUserRole(userRole)
+        .interceptOrganizationUserLinking()
+        .clickLinkToOrganization()
+        .verifyOrganizationUserLinkingApiCall();
+    });
   });
 });
