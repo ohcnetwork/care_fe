@@ -1,5 +1,6 @@
 import {
   addMinutes,
+  differenceInMinutes,
   format,
   isSameDay,
   isWithinInterval,
@@ -160,4 +161,10 @@ export const getFakeTokenNumber = (appointment: Appointment) => {
 
   // Get a number between 10-99
   return (hash % 90) + 10;
+};
+
+export const calculateSlotDuration = (startTime: string, endTime: string) => {
+  const start = parse(startTime, "HH:mm", new Date());
+  const end = parse(endTime, "HH:mm", new Date());
+  return differenceInMinutes(end, start);
 };

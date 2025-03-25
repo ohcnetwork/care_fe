@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -21,48 +20,44 @@ export function NavMain({
     name: string;
     url: string;
     icon?: string;
+    visibility?: boolean;
   }[];
 }) {
-  const { isMobile, setOpenMobile } = useSidebar();
-
   return (
     <SidebarGroup>
       <SidebarMenu>
-        {links.map((link) => (
-          <SidebarMenuItem key={link.name}>
-            <SidebarMenuButton
-              asChild
-              tooltip={link.name}
-              className={
-                "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-              }
-              onClick={() => {
-                if (isMobile) {
-                  setOpenMobile(false);
+        {links
+          .filter((link) => link.visibility !== false)
+          .map((link) => (
+            <SidebarMenuItem key={link.name}>
+              <SidebarMenuButton
+                asChild
+                tooltip={link.name}
+                className={
+                  "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                 }
-              }}
-            >
-              <ActiveLink
-                href={link.url}
-                activeClass="bg-white text-green-700 shadow"
-                exactActiveClass="bg-white text-green-700 shadow"
               >
-                {link.icon ? (
-                  <CareIcon icon={link.icon as IconName} />
-                ) : (
-                  <Avatar
-                    name={link.name}
-                    className="w-6 h-6 -m-1 rounded-sm"
-                  />
-                )}
+                <ActiveLink
+                  href={link.url}
+                  activeClass="bg-white text-green-700 shadow"
+                  exactActiveClass="bg-white text-green-700 shadow"
+                >
+                  {link.icon ? (
+                    <CareIcon icon={link.icon as IconName} />
+                  ) : (
+                    <Avatar
+                      name={link.name}
+                      className="w-6 h-6 -m-1 rounded-sm"
+                    />
+                  )}
 
-                <span className="group-data-[collapsible=icon]:hidden ml-1">
-                  {link.name}
-                </span>
-              </ActiveLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
+                  <span className="group-data-[collapsible=icon]:hidden ml-1">
+                    {link.name}
+                  </span>
+                </ActiveLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
       </SidebarMenu>
     </SidebarGroup>
   );

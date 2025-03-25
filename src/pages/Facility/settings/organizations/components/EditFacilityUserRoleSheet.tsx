@@ -40,7 +40,9 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { FacilityOrganizationUserRole } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   facilityId: string;
@@ -68,7 +70,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: updateRole } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.facilityOrganization.updateUserRole, {
+      mutate(facilityOrganizationApi.updateUserRole, {
         pathParams: {
           facilityId,
           organizationId: organizationId,
@@ -93,7 +95,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: removeRole } = useMutation({
     mutationFn: () =>
-      mutate(routes.facilityOrganization.removeUserRole, {
+      mutate(facilityOrganizationApi.removeUserRole, {
         pathParams: {
           facilityId,
           organizationId: organizationId,
@@ -149,7 +151,7 @@ export default function EditUserRoleSheet({
               />
               <div className="flex flex-col flex-1">
                 <span className="font-medium text-lg">
-                  {userRole.user.first_name} {userRole.user.last_name}
+                  {formatName(userRole.user)}
                 </span>
                 <span className="text-sm text-gray-500">
                   {userRole.user.email}

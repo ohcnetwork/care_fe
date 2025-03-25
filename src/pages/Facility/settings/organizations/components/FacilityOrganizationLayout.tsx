@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -22,10 +23,11 @@ import {
   FacilityOrganization,
   FacilityOrganizationParent,
 } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   id: string;
-  children: React.ReactNode;
+  children: (props: { facilityPermissions: string[] }) => React.ReactNode;
   facilityId: string;
 }
 
@@ -45,23 +47,30 @@ export default function FacilityOrganizationLayout({
 
   const navItems: NavItem[] = [
     {
-      path: `/departments/${id}`,
-      title: t("departments_or_teams"),
-      value: "departments",
-    },
-    {
       path: `/departments/${id}/users`,
       title: t("users"),
       value: "users",
     },
+    {
+      path: `/departments/${id}`,
+      title: t("departments_or_teams"),
+      value: "departments",
+    },
   ];
 
   const currentTab =
-    navItems.find((item) => item.path === path)?.value || "departments";
+    navItems.find((item) => item.path === path)?.value || "users";
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
 
   const { data: org, isLoading } = useQuery<FacilityOrganization>({
     queryKey: ["facilityOrganization", id],
-    queryFn: query(routes.facilityOrganization.get, {
+    queryFn: query(facilityOrganizationApi.get, {
       pathParams: { facilityId, organizationId: id },
     }),
   });
@@ -99,8 +108,8 @@ export default function FacilityOrganizationLayout({
           <Breadcrumb>
             <BreadcrumbList>
               {orgParents.reverse().map((parent) => (
-                <>
-                  <BreadcrumbItem key={parent.id}>
+                <React.Fragment key={parent.id}>
+                  <BreadcrumbItem>
                     <BreadcrumbLink
                       asChild
                       className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
@@ -110,10 +119,10 @@ export default function FacilityOrganizationLayout({
                       </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbItem key={`ellipsis-${parent.id}`}>
+                  <BreadcrumbItem>
                     <BreadcrumbSeparator />
                   </BreadcrumbItem>
-                </>
+                </React.Fragment>
               ))}
               <BreadcrumbItem key={org.id}>
                 <span className="text-sm font-semibold text-gray-900">
@@ -138,7 +147,7 @@ export default function FacilityOrganizationLayout({
       >
         <div className="mt-2">
           {org.description && (
-            <p className="text-sm text-gray-500 line-clamp-2">
+            <p className="text-sm text-gray-500 break-all whitespace-normal">
               {org.description}
             </p>
           )}
@@ -161,7 +170,9 @@ export default function FacilityOrganizationLayout({
             </TabsList>
           </Tabs>
         </div>
-        <div className="mt-4">{children}</div>
+        <div className="mt-4">
+          {children({ facilityPermissions: facilityData?.permissions ?? [] })}
+        </div>
       </Page>
     </>
   );

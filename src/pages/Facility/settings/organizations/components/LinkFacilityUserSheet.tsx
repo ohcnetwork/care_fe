@@ -28,6 +28,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
@@ -72,7 +73,7 @@ export default function LinkFacilityUserSheet({
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.facilityOrganization.assignUser, {
+      mutate(facilityOrganizationApi.assignUser, {
         pathParams: { facilityId: facilityId, organizationId: organizationId },
         body,
       })(body),
@@ -139,12 +140,12 @@ export default function LinkFacilityUserSheet({
                 <div className="flex gap-4 flex-row">
                   <Avatar
                     imageUrl={selectedUser.profile_picture_url}
-                    name={formatName(selectedUser)}
+                    name={formatName(selectedUser, true)}
                     className="h-12 w-12"
                   />
                   <div className="w-3/4">
                     <p className="font-medium text-lg truncate">
-                      {selectedUser.first_name} {selectedUser.last_name}
+                      {formatName(selectedUser)}
                     </p>
                     <span className="text-sm text-gray-500">
                       {selectedUser.email}

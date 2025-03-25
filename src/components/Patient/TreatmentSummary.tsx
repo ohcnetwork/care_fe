@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { Loader } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
@@ -14,9 +16,14 @@ import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetail
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { getPermissions } from "@/common/Permissions";
+
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { completedEncounterStatus } from "@/types/emr/encounter";
@@ -48,13 +55,6 @@ const SectionLayout = ({
   );
 };
 
-const EmptyState = ({ message }: { message: string }) => {
-  return (
-    <CardContent className="px-2 pb-3 pt-2">
-      <p className="text-gray-500">{message}</p>
-    </CardContent>
-  );
-};
 export default function TreatmentSummary({
   facilityId,
   encounterId,
@@ -69,6 +69,22 @@ export default function TreatmentSummary({
     enabled: !!encounterId && !!facilityId,
   });
 
+  const { goBack } = useAppHistory();
+  const { hasPermission } = usePermissions();
+  const { canViewEncounter, canViewClinicalData } = getPermissions(
+    hasPermission,
+    encounter?.permissions ?? [],
+  );
+
+  const canAccess = canViewEncounter || canViewClinicalData;
+
+  useEffect(() => {
+    if (!canAccess) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canAccess]);
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query.paginated(allergyIntoleranceApi.getAllergy, {
@@ -100,7 +116,10 @@ export default function TreatmentSummary({
     queryKey: ["diagnosis", patientId, encounterId],
     queryFn: query.paginated(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
-      queryParams: { encounter: encounterId },
+      queryParams: {
+        encounter: encounterId,
+        category: "encounter_diagnosis,chronic_condition",
+      },
       pageSize: 100,
     }),
     enabled: !!patientId && !!encounterId,
@@ -312,8 +331,8 @@ export default function TreatmentSummary({
           {/* Medical Information */}
           <div className="space-y-6">
             {/* Allergies */}
-            <SectionLayout title={t("allergies")}>
-              {allergies?.count ? (
+            {allergies?.count != 0 && (
+              <SectionLayout title={t("allergies")}>
                 <PrintTable
                   headers={[
                     { key: "allergen" },
@@ -332,15 +351,12 @@ export default function TreatmentSummary({
                     logged_by: formatName(allergy.created_by),
                   }))}
                 />
-              ) : (
-                <EmptyState message={t("no_allergies_recorded")} />
-              )}
-            </SectionLayout>
+              </SectionLayout>
+            )}
 
             {/* Symptoms */}
-
-            <SectionLayout title={t("symptoms")}>
-              {symptoms?.count ? (
+            {symptoms?.count != 0 && (
+              <SectionLayout title={t("symptoms")}>
                 <PrintTable
                   headers={[
                     { key: "symptom" },
@@ -365,14 +381,12 @@ export default function TreatmentSummary({
                     logged_by: formatName(symptom.created_by),
                   }))}
                 />
-              ) : (
-                <EmptyState message={t("no_symptoms_recorded")} />
-              )}
-            </SectionLayout>
+              </SectionLayout>
+            )}
 
             {/* Diagnoses */}
-            <SectionLayout title={t("diagnoses")}>
-              {diagnoses?.count ? (
+            {diagnoses?.count != 0 && (
+              <SectionLayout title={t("diagnoses")}>
                 <PrintTable
                   headers={[
                     { key: "diagnosis" },
@@ -395,14 +409,12 @@ export default function TreatmentSummary({
                     logged_by: formatName(diagnosis.created_by),
                   }))}
                 />
-              ) : (
-                <EmptyState message={t("no_diagnoses_recorded")} />
-              )}
-            </SectionLayout>
+              </SectionLayout>
+            )}
 
             {/* Medications */}
-            <SectionLayout title={t("medications")}>
-              {medications?.results.length ? (
+            {medications?.count != 0 && (
+              <SectionLayout title={t("medications")}>
                 <PrintTable
                   headers={[
                     { key: "medicine" },
@@ -422,7 +434,7 @@ export default function TreatmentSummary({
                     const notes = medication.note;
                     return {
                       medicine: medication.medication?.display,
-                      status: t(medication.status),
+                      status: t(`medication_status_${medication.status}`),
                       dosage: dosage,
                       frequency: instruction?.as_needed_boolean
                         ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
@@ -437,14 +449,12 @@ export default function TreatmentSummary({
                     };
                   })}
                 />
-              ) : (
-                <EmptyState message={t("no_medication_recorded")} />
-              )}
-            </SectionLayout>
+              </SectionLayout>
+            )}
 
             {/* Medication Statements */}
-            <SectionLayout title={t("ongoing_medications")}>
-              {medicationStatement?.results.length ? (
+            {medicationStatement?.count != 0 && (
+              <SectionLayout title={t("ongoing_medications")}>
                 <PrintTable
                   headers={[
                     { key: "medication" },
@@ -462,7 +472,7 @@ export default function TreatmentSummary({
                       medication.medication.display ??
                       medication.medication.code,
                     dosage: medication.dosage_text,
-                    status: medication.status,
+                    status: t(`medication_status_${medication.status}`),
                     medication_taken_between: [
                       medication.effective_period?.start,
                       medication.effective_period?.end,
@@ -474,10 +484,8 @@ export default function TreatmentSummary({
                     logged_by: formatName(medication.created_by),
                   }))}
                 />
-              ) : (
-                <EmptyState message={t("no_ongoing_medications")} />
-              )}
-            </SectionLayout>
+              </SectionLayout>
+            )}
           </div>
 
           {/* Questionnaire Responses Section */}
@@ -487,6 +495,7 @@ export default function TreatmentSummary({
               patientId={encounter.patient.id}
               isPrintPreview={true}
               onlyUnstructured={true}
+              canAccess={canAccess}
             />
           </div>
         </div>

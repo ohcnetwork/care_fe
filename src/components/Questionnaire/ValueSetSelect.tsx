@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandDialog,
+  CommandDrawer,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -25,10 +25,10 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { Code, ValueSetSystem } from "@/types/questionnaire/code";
+import { Code } from "@/types/questionnaire/code";
 
 interface Props {
-  system: ValueSetSystem;
+  system: string;
   value?: Code | null;
   onSelect: (value: Code) => void;
   placeholder?: string;
@@ -77,6 +77,7 @@ export default function ValueSetSelect({
         placeholder={placeholder}
         className="outline-none border-none ring-0 shadow-none"
         onValueChange={setSearch}
+        autoFocus
       />
       <CommandList>
         <CommandEmpty>
@@ -128,9 +129,9 @@ export default function ValueSetSelect({
           <span>{value?.display || placeholder}</span>
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
-        <CommandDialog open={internalOpen} onOpenChange={setInternalOpen}>
+        <CommandDrawer open={internalOpen} onOpenChange={setInternalOpen}>
           {content}
-        </CommandDialog>
+        </CommandDrawer>
       </>
     );
   }
