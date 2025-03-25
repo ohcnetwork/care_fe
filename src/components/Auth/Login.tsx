@@ -240,6 +240,22 @@ const Login = (props: LoginProps) => {
     return form;
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    ViewCache.invalidateAll();
+    const validated = validateData();
+    if (!validated) return;
+
+    FiltersCache.invalidateAll();
+    try {
+      await signIn(validated);
+    } catch (error) {
+      if (error instanceof HTTPError) {
+        setCaptcha(error.status == 429);
+      }
+    }
+  };
+
   const validateForgetData = () => {
     let hasError = false;
     const err = Object.assign({}, errors);
@@ -261,23 +277,6 @@ const Login = (props: LoginProps) => {
     }
     return form;
   };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    ViewCache.invalidateAll();
-    const validated = validateData();
-    if (!validated) return;
-
-    FiltersCache.invalidateAll();
-    try {
-      await signIn(validated);
-    } catch (error) {
-      if (error instanceof HTTPError) {
-        setCaptcha(error.status == 429);
-      }
-    }
-  };
-
   const handleForgetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const valid = validateForgetData();
