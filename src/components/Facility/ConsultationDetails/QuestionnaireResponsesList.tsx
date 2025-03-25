@@ -1,12 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
+import { ChevronDown } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 
 import PaginationComponent from "@/components/Common/Pagination";
@@ -227,7 +235,7 @@ function ResponseCard({
         isPrintPreview && "shadow-none",
       )}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between max-sm:flex-col gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <div className="flex items-center gap-2">
@@ -269,23 +277,28 @@ function ResponseCard({
             </span>
           </div>
         </div>
-      </div>
-
-      <div className="flex gap-2 mt-2 max-sm:flex-col">
-        <Link
-          href={`questionnaire_response/${item.id}/print`}
-          className="text-xs text-blue-600 underline"
-        >
-          {t("print_this_questionnaire_response")}
-        </Link>
-        <Link
-          href={`questionnaire/${item.questionnaire?.id}/responses/print`}
-          className="text-xs text-blue-600 underline"
-        >
-          {t("print_all_questionnaire_responses", {
-            title: item.questionnaire?.title,
-          })}
-        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              {t("print")}
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <Link href={`questionnaire_response/${item.id}/print`}>
+              <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
+            </Link>
+            <Link
+              href={`questionnaire/${item.questionnaire?.id}/responses/print`}
+            >
+              <DropdownMenuItem>
+                {t("print_all_responses", {
+                  title: item.questionnaire?.title,
+                })}
+              </DropdownMenuItem>
+            </Link>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {item.questionnaire && (

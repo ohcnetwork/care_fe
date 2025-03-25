@@ -375,8 +375,8 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
 
                             <LocationSheet
                               facilityId={props.encounter.facility.id}
-                              encounterId={props.encounter.id}
                               history={encounter.location_history}
+                              encounter={encounter}
                               trigger={
                                 <div>
                                   <CareIcon
@@ -401,7 +401,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           {canWrite && (
                             <LocationSheet
                               facilityId={props.encounter.facility.id}
-                              encounterId={props.encounter.id}
+                              encounter={encounter}
                               trigger={
                                 <Button
                                   variant="outline"
@@ -420,7 +420,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     <Badge variant="outline">
                       <LocationSheet
                         facilityId={props.encounter.facility.id}
-                        encounterId={props.encounter.id}
+                        encounter={encounter}
                         trigger={
                           <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
                             <CareIcon
