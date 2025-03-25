@@ -581,7 +581,10 @@ const NewAvailabilityCard = ({
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
-      auto_fill_duration: z.boolean().optional(),
+      auto_fill_duration: z.object({
+        is_auto_fill: z.boolean().optional(),
+        num_of_slots: z.number().min(1, t("number_min_error", { min: 0 })),
+      }),
     })
     .refine(
       (data) => {
@@ -608,7 +611,7 @@ const NewAvailabilityCard = ({
       tokens_per_slot: null,
       reason: "",
       weekdays: [],
-      auto_fill_duration: false,
+      auto_fill_duration: { is_auto_fill: false, num_of_slots: 1 },
     },
   });
 
@@ -705,6 +708,7 @@ const NewAvailabilityCard = ({
       const duration = calculateSlotDuration(
         form.watch("start_time"),
         form.watch("end_time"),
+        form.watch("auto_fill_duration.num_of_slots"),
       );
       form.setValue("slot_size_in_minutes", duration);
     }
@@ -818,26 +822,54 @@ const NewAvailabilityCard = ({
           {form.watch("slot_type") === "appointment" && (
             <>
               <div className="flex flex-wrap mt-0 pt-2 gap-2">
-                <div className="w-full flex items-center justify-between space-x-4 mb-2 bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <CareIcon icon="l-bolt" className="text-lg text-blue-600" />
-                    <Label
-                      htmlFor="auto-fill"
-                      className="text-sm font-medium cursor-pointer"
-                    >
-                      {t("auto_fill_slot_duration")}
-                    </Label>
-                  </div>
+                <div className="w-full gap-x-2 grid grid-cols-[auto_1fr_auto] mb-2 bg-gray-50 p-3 rounded-lg">
+                  <CareIcon icon="l-bolt" className="text-lg text-blue-600" />
+                  <Label
+                    htmlFor={"auto-fill"}
+                    className="text-sm font-medium cursor-pointer col-start-2"
+                  >
+                    {t("auto_fill_slot_duration")}
+                  </Label>
                   <Switch
-                    id="auto-fill"
-                    checked={form.watch("auto_fill_duration")}
+                    className="col-start-3"
+                    id={"auto-fill"}
+                    checked={form.watch(`auto_fill_duration.is_auto_fill`)}
                     onCheckedChange={(checked) => {
-                      form.setValue("auto_fill_duration", checked);
+                      form.setValue(`auto_fill_duration.is_auto_fill`, checked);
                       if (checked) {
                         updateSlotDuration();
                       }
                     }}
                   />
+                  {form.watch(`auto_fill_duration.is_auto_fill`) && (
+                    <div className="row-start-2 col-start-2 col-span-2">
+                      <FormField
+                        control={form.control}
+                        name={`auto_fill_duration.num_of_slots`}
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col mt-2 space-y-0">
+                            <Label className="text-sm font-light">
+                              {t("number_of_slots")}
+                            </Label>
+                            <FormMessage />
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={1}
+                                defaultValue={1}
+                                {...field}
+                                className="shadow-none"
+                                onChange={(e) => {
+                                  field.onChange(e.target.valueAsNumber);
+                                  updateSlotDuration();
+                                }}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -859,7 +891,9 @@ const NewAvailabilityCard = ({
                           onChange={(e) =>
                             field.onChange(e.target.valueAsNumber)
                           }
-                          disabled={form.watch("auto_fill_duration")}
+                          disabled={form.watch(
+                            "auto_fill_duration.is_auto_fill",
+                          )}
                         />
                       </FormControl>
                       <FormMessage />
