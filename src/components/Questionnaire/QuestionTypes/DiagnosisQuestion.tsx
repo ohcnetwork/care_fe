@@ -340,6 +340,8 @@ export function DiagnosisQuestion({
                       handleUpdateDiagnosis(index, updates)
                     }
                     onRemove={() => handleRemoveDiagnosis(index)}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
                   />
                 ))}
               </TableBody>
@@ -742,6 +744,8 @@ const DiagnosisTableRow = ({
   disabled,
   onUpdate,
   onRemove,
+  activeTab,
+  setActiveTab,
 }: DiagnosisItemProps) => {
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
 
@@ -775,71 +779,69 @@ const DiagnosisTableRow = ({
           </div>
         </TableCell>
         <TableCell className="py-1 px-1">
-         <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="h-8 md:h-9 w-full justify-start font-normal"
-                  disabled={disabled || !!diagnosis.id}
-                >
-                  {diagnosis.onset?.onset_datetime ? (
-                    new Date(
-                      diagnosis.onset.onset_datetime,
-                    ).toLocaleDateString()
-                  ) : (
-                    <span className="text-muted-foreground">
-                      {t("select_date")}
-                    </span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0 w-auto" align="start">
-                <Tabs
-                  value={activeTab}
-                  onValueChange={(v) =>
-                    setActiveTab(v as "absolute" | "relative")
-                  }
-                >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="absolute">
-                      {t("absolute_date")}
-                    </TabsTrigger>
-                    <TabsTrigger value="relative">
-                      {t("relative_date")}
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="absolute" className="p-0">
-                    <Calendar
-                      mode="single"
-                      selected={
-                        diagnosis.onset?.onset_datetime
-                          ? new Date(diagnosis.onset.onset_datetime)
-                          : undefined
-                      }
-                      onSelect={(date: Date | undefined) => {
-                        onUpdate?.({
-                          onset: { onset_datetime: dateQueryString(date) },
-                        });
-                      }}
-                    />
-                  </TabsContent>
-                  <TabsContent value="relative" className="p-0">
-                    <RelativeDatePicker
-                      value={
-                        diagnosis.onset?.onset_datetime
-                          ? new Date(diagnosis.onset.onset_datetime)
-                          : undefined
-                      }
-                      onDateChange={(date) =>
-                        onUpdate?.({
-                          onset: { onset_datetime: dateQueryString(date) },
-                        })
-                      }
-                    />
-                  </TabsContent>
-                </Tabs>
-              </PopoverContent>
-            </Popover>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="h-8 md:h-9 w-full justify-start font-normal"
+                disabled={disabled || !!diagnosis.id}
+              >
+                {diagnosis.onset?.onset_datetime ? (
+                  new Date(diagnosis.onset.onset_datetime).toLocaleDateString()
+                ) : (
+                  <span className="text-muted-foreground">
+                    {t("select_date")}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 w-auto" align="start">
+              <Tabs
+                value={activeTab}
+                onValueChange={(v) =>
+                  setActiveTab(v as "absolute" | "relative")
+                }
+              >
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="absolute">
+                    {t("absolute_date")}
+                  </TabsTrigger>
+                  <TabsTrigger value="relative">
+                    {t("relative_date")}
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="absolute" className="p-0">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      diagnosis.onset?.onset_datetime
+                        ? new Date(diagnosis.onset.onset_datetime)
+                        : undefined
+                    }
+                    onSelect={(date: Date | undefined) => {
+                      onUpdate?.({
+                        onset: { onset_datetime: dateQueryString(date) },
+                      });
+                    }}
+                  />
+                </TabsContent>
+                <TabsContent value="relative" className="p-0">
+                  <RelativeDatePicker
+                    value={
+                      diagnosis.onset?.onset_datetime
+                        ? new Date(diagnosis.onset.onset_datetime)
+                        : undefined
+                    }
+                    onDateChange={(date) =>
+                      onUpdate?.({
+                        onset: { onset_datetime: dateQueryString(date) },
+                      })
+                    }
+                  />
+                </TabsContent>
+              </Tabs>
+            </PopoverContent>
+          </Popover>
         </TableCell>
         <TableCell className="py-1 px-0.5">
           <Select
