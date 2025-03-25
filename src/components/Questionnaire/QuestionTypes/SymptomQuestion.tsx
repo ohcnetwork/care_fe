@@ -344,42 +344,52 @@ const SymptomRow = React.memo(function SymptomRow({
             "border-0 shadow-none": !isOpen,
           })}
         >
-          <Collapsible open={isOpen} onOpenChange={setIsOpen} key={symptom.id}>
-            <CardHeader
-              className={cn("p-2 rounded-lg shadow-none bg-gray-50", {
-                "bg-gray-200 border border-gray-300": !isOpen,
-              })}
-            >
-              <div className="flex flex-col space-y-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0 mr-2">
-                    <CardTitle
-                      className="text-base text-gray-950 break-words"
-                      title={symptom.code.display}
-                    >
-                      {symptom.code.display}
-                    </CardTitle>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {isOpen && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={
-                          disabled ||
-                          symptom.verification_status === "entered_in_error"
-                        }
-                        onClick={handleRemove}
-                        className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
+          <Collapsible
+            open={isOpen}
+            onOpenChange={setIsOpen}
+            key={symptom.id || `symptom-${symptom.code.code}-${index}`}
+          >
+            <CollapsibleTrigger asChild>
+              <CardHeader
+                className={cn(
+                  "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
+                  {
+                    "bg-gray-200 border border-gray-300": !isOpen,
+                  },
+                )}
+              >
+                <div className="flex flex-col space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0 mr-2">
+                      <CardTitle
+                        className="text-base text-gray-950 break-words"
+                        title={symptom.code.display}
                       >
-                        <MinusCircledIcon className="h-5 w-5" />
-                      </Button>
-                    )}
-                    <CollapsibleTrigger asChild>
+                        {symptom.code.display}
+                      </CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {isOpen && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={
+                            disabled ||
+                            symptom.verification_status === "entered_in_error"
+                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemove();
+                          }}
+                          className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
+                        >
+                          <MinusCircledIcon className="h-5 w-5" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-10 w-10 border border-gray-400 bg-white shadow p-4"
+                        className="h-10 w-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
                       >
                         {isOpen ? (
                           <ChevronsDownUp className="h-5 w-5" />
@@ -387,26 +397,26 @@ const SymptomRow = React.memo(function SymptomRow({
                           <ChevronsUpDown className="h-5 w-5" />
                         )}
                       </Button>
-                    </CollapsibleTrigger>
+                    </div>
                   </div>
+                  {!isOpen && (
+                    <div className="text-sm mt-1 text-gray-600">
+                      Onset{" "}
+                      {symptom.onset?.onset_datetime
+                        ? format(
+                            new Date(symptom.onset.onset_datetime),
+                            "MMMM d, yyyy",
+                          )
+                        : ""}
+                      {" · "}
+                      {t(symptom.clinical_status)}
+                      {" · "}
+                      {t(symptom.severity)} {t("severity")}
+                    </div>
+                  )}
                 </div>
-                {!isOpen && (
-                  <div className="text-sm mt-1 text-gray-600">
-                    Onset{" "}
-                    {symptom.onset?.onset_datetime
-                      ? format(
-                          new Date(symptom.onset.onset_datetime),
-                          "MMMM d, yyyy",
-                        )
-                      : ""}
-                    {" · "}
-                    {t(symptom.clinical_status)}
-                    {" · "}
-                    {t(symptom.severity)} {t("severity")}
-                  </div>
-                )}
-              </div>
-            </CardHeader>
+              </CardHeader>
+            </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
                 <div>
@@ -855,12 +865,12 @@ export function SymptomQuestion({
           <div className="md:divide-y md:divide-gray-200">
             {symptoms.map((symptom, index) => (
               <SymptomRow
-                key={index}
                 symptom={symptom}
                 index={index}
                 disabled={disabled}
                 onUpdate={handleUpdateSymptom}
                 onRemove={handleRemoveSymptom}
+                key={symptom.id || `symptom-${symptom.code.code}-${index}`}
               />
             ))}
           </div>

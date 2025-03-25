@@ -1075,7 +1075,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
             <CollapsibleTrigger asChild>
               <CardHeader
                 className={cn(
-                  "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer",
+                  "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
                   {
                     "bg-gray-200 border border-gray-300": !isOpen,
                   },
