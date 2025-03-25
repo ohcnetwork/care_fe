@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -28,6 +28,8 @@ export function BooleanQuestion({
   disabled,
   clearError,
 }: BooleanQuestionProps) {
+  const { t } = useTranslation();
+
   return (
     <RadioGroup
       value={questionnaireResponse.values[0]?.value?.toString()}
