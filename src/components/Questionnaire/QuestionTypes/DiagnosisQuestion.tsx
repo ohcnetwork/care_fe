@@ -1072,49 +1072,55 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
             onOpenChange={setIsOpen}
             key={diagnosis.id || `diagnosis-${diagnosis.code.code}`}
           >
-            <CardHeader
-              className={cn("p-2 rounded-lg shadow-none bg-gray-50", {
-                "bg-gray-200 border border-gray-300": !isOpen,
-              })}
-            >
-              <div className="flex flex-col space-y-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-start gap-1">
-                      <CardTitle
-                        className="text-base text-gray-950 break-words"
-                        title={diagnosis.code.display}
-                      >
-                        <span className="mr-2">{diagnosis.code.display}</span>
-                        <div
-                          className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
-                            diagnosis.category === "chronic_condition"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-gray-100 text-gray-700",
-                          )}
+            <CollapsibleTrigger asChild>
+              <CardHeader
+                className={cn(
+                  "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer",
+                  {
+                    "bg-gray-200 border border-gray-300": !isOpen,
+                  },
+                )}
+              >
+                <div className="flex flex-col space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-start gap-1">
+                        <CardTitle
+                          className="text-base text-gray-950 break-words"
+                          title={diagnosis.code.display}
                         >
-                          {t(`Diagnosis_${diagnosis.category}__title`)}
-                        </div>
-                      </CardTitle>
+                          <span className="mr-2">{diagnosis.code.display}</span>
+                          <div
+                            className={cn(
+                              "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
+                              diagnosis.category === "chronic_condition"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-gray-100 text-gray-700",
+                            )}
+                          >
+                            {t(`Diagnosis_${diagnosis.category}__title`)}
+                          </div>
+                        </CardTitle>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-2 shrink-0">
-                    {isOpen && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={
-                          disabled ||
-                          diagnosis.verification_status === "entered_in_error"
-                        }
-                        onClick={onRemove}
-                        className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
-                      >
-                        <MinusCircledIcon className="h-5 w-5" />
-                      </Button>
-                    )}
-                    <CollapsibleTrigger asChild>
+                    <div className="flex items-center gap-2 ml-2 shrink-0">
+                      {isOpen && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={
+                            disabled ||
+                            diagnosis.verification_status === "entered_in_error"
+                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemove?.();
+                          }}
+                          className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
+                        >
+                          <MinusCircledIcon className="h-5 w-5" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -1126,26 +1132,26 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                           <ChevronsUpDown className="h-5 w-5" />
                         )}
                       </Button>
-                    </CollapsibleTrigger>
+                    </div>
                   </div>
+                  {!isOpen && (
+                    <div className="text-sm text-gray-500">
+                      {t("diagnosed_on")}{" "}
+                      {diagnosis.onset?.onset_datetime
+                        ? format(
+                            new Date(diagnosis.onset.onset_datetime),
+                            "MMMM d, yyyy",
+                          )
+                        : ""}
+                      {" · "}
+                      {t(diagnosis.clinical_status)}
+                      {" · "}
+                      {t(diagnosis.verification_status)}
+                    </div>
+                  )}
                 </div>
-                {!isOpen && (
-                  <div className="text-sm text-gray-500">
-                    {t("diagnosed_on")}{" "}
-                    {diagnosis.onset?.onset_datetime
-                      ? format(
-                          new Date(diagnosis.onset.onset_datetime),
-                          "MMMM d, yyyy",
-                        )
-                      : ""}
-                    {" · "}
-                    {t(diagnosis.clinical_status)}
-                    {" · "}
-                    {t(diagnosis.verification_status)}
-                  </div>
-                )}
-              </div>
-            </CardHeader>
+              </CardHeader>
+            </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
                 <div>
