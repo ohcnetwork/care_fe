@@ -686,7 +686,9 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
   onRemove,
 }) => {
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
-  const [isOpen, setIsOpen] = useState(!diagnosis.id);
+  const [isOpen, setIsOpen] = useState(
+    Boolean(diagnosis.dirty) || !diagnosis.id,
+  );
 
   return (
     <div
