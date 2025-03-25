@@ -6,6 +6,7 @@ import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -150,6 +151,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           pathParams: { facility_id: facilityId },
         }),
     onSuccess: () => {
+      toast.success(t("device_added"));
       queryClient.invalidateQueries({ queryKey: ["devices"] });
       onSuccess?.();
     },
