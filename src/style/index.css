@@ -7,9 +7,10 @@
 @import "@fontsource/figtree/900.css" layer(base);
 
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @config '../../tailwind.config.js';
+
+@import "tw-animate-css";
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
