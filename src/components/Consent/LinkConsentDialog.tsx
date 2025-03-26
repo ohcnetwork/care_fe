@@ -10,7 +10,6 @@ import * as z from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -37,12 +36,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import DatePickerInput from "@/components/Common/DatePicker";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFileUpload from "@/hooks/useFileUpload";
 
 import mutate from "@/Utils/request/mutate";
+import { dateQueryString } from "@/Utils/utils";
 import {
   CONSENT_CATEGORIES,
   CONSENT_DECISIONS,
@@ -237,7 +238,11 @@ export default function LinkConsentDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel required>{t("consent_date")}</FormLabel>
-                    <DatePicker date={field.value} onChange={field.onChange} />
+                    <DatePickerInput
+                      onChange={(date) => field.onChange(dateQueryString(date))}
+                      value={field.value ? new Date(field.value) : undefined}
+                      disabled={field.disabled}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -249,7 +254,11 @@ export default function LinkConsentDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>{t("consent_period_start_date")}</FormLabel>
-                    <DatePicker date={field.value} onChange={field.onChange} />
+                    <DatePickerInput
+                      onChange={(date) => field.onChange(dateQueryString(date))}
+                      value={field.value ? new Date(field.value) : undefined}
+                      disabled={field.disabled}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -261,7 +270,11 @@ export default function LinkConsentDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>{t("consent_period_end_date")}</FormLabel>
-                    <DatePicker date={field.value} onChange={field.onChange} />
+                    <DatePickerInput
+                      onChange={(date) => field.onChange(dateQueryString(date))}
+                      value={field.value ? new Date(field.value) : undefined}
+                      disabled={field.disabled}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
