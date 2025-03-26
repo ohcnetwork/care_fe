@@ -62,6 +62,17 @@ export interface DeviceEncounterHistory {
   end: string;
 }
 
+export interface ServiceHistory {
+  id: string;
+  serviced_on: string;
+  note: string;
+}
+
+export interface ServiceHistoryWriteRequest {
+  serviced_on: string;
+  note: string;
+}
+
 export interface DeviceLocationHistory {
   id: string;
   created_by: UserBase;
