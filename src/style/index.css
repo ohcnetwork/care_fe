@@ -6,8 +6,6 @@
 @import "@fontsource/figtree/800.css";
 @import "@fontsource/figtree/900.css";
 
-@import "./CAREUI.css";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

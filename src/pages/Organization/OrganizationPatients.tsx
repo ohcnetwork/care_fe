@@ -3,11 +3,11 @@ import { Link } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
@@ -16,6 +16,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { formatDateTime, relativeTime } from "@/Utils/utils";
 import { Patient } from "@/types/emr/newPatient";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -194,11 +195,16 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                             )}
                           </div>
                           <div className="mt-4 pt-4 border-t">
-                            <RecordMeta
-                              className="text-sm text-gray-500"
-                              prefix="Last updated"
-                              time={patient.modified_date}
-                            />
+                            <div className="text-sm text-gray-500">
+                              {t("last_modified")}{" "}
+                              <TooltipComponent
+                                content={formatDateTime(patient.modified_date)}
+                              >
+                                <span>
+                                  {relativeTime(patient.modified_date)}
+                                </span>
+                              </TooltipComponent>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
