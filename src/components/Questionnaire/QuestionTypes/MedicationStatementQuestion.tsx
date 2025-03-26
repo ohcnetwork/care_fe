@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/select";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { NativeDatePickerRange } from "@/components/Common/NativeDateRangePicker";
+import { DateRangePickerRange } from "@/components/Common/DateRangePicker";
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -553,7 +553,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
               "border border-red-500 rounded-md",
           )}
         >
-          <NativeDatePickerRange
+          <DateRangePickerRange
             date={{
               from: medication.effective_period?.start
                 ? new Date(medication.effective_period?.start)

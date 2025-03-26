@@ -56,8 +56,8 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { DateRangePickerRange } from "@/components/Common/DateRangePicker";
 import Loading from "@/components/Common/Loading";
-import { NativeDatePickerRange } from "@/components/Common/NativeDateRangePicker";
 import Page from "@/components/Common/Page";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -485,7 +485,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                       </Button>
                     </div>
 
-                    <NativeDatePickerRange
+                    <DateRangePickerRange
                       key={`${qParams.date_from}-${qParams.date_to}`}
                       date={{
                         from: qParams.date_from

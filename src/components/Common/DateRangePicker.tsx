@@ -10,17 +10,17 @@ import DatePickerInput from "./DatePicker";
 
 type DateRange = { from?: Date; to?: Date };
 
-type NativeDatePickerRangeProps = {
+type DateRangePickerRangeProps = {
   date?: DateRange;
   onChange?: (date?: DateRange) => void;
   className?: string;
 };
 
-export function NativeDatePickerRange({
+export function DateRangePickerRange({
   date,
   onChange,
   className,
-}: NativeDatePickerRangeProps) {
+}: DateRangePickerRangeProps) {
   const [startDate, setStartDate] = useState<Date | undefined>(date?.from);
   const [endDate, setEndDate] = useState<Date | undefined>(date?.to);
 
