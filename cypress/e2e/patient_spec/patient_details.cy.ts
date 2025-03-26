@@ -1,6 +1,7 @@
 import { PatientDetails } from "@/pageObject/Patients/PatientDetails";
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
+import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
@@ -8,7 +9,7 @@ const patientDetails = new PatientDetails();
 
 describe("Patient Management", () => {
   beforeEach(() => {
-    cy.viewport(1920, 1080);
+    cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
     cy.loginByApi("devdoctor");
     cy.visit("/");
   });
@@ -16,7 +17,7 @@ describe("Patient Management", () => {
   it("Assign users to a patient", () => {
     const userName = "nihal-nurse";
     const userRole = "Nurse";
-    facilityCreation.selectFacility("GHC payyanur");
+    facilityCreation.selectFacility("GHC Payyanur");
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()

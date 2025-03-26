@@ -39,18 +39,27 @@ export const relativeDate = (date: DateLike, withoutSuffix = false) => {
   } at ${obj.format(TIME_FORMAT)}`;
 };
 
-export const formatName = (user: { first_name: string; last_name: string }) => {
-  return `${user.first_name} ${user.last_name}`;
-};
-
-export const formatDisplayName = (user: {
-  first_name: string;
-  last_name: string;
-  username: string;
-}) => {
-  return user.first_name && user.last_name
-    ? `${user.first_name} ${user.last_name}`
-    : user.first_name || user.username || "User";
+export const formatName = (
+  user: {
+    first_name: string;
+    last_name: string;
+    prefix?: string | null;
+    suffix?: string | null;
+    username: string;
+  },
+  hidePrefixSuffix: boolean = false,
+) => {
+  return (
+    [
+      hidePrefixSuffix ? undefined : user.prefix,
+      user.first_name,
+      user.last_name,
+      hidePrefixSuffix ? undefined : user.suffix,
+    ]
+      .map((s) => s?.trim())
+      .filter(Boolean)
+      .join(" ") || user.username
+  );
 };
 
 export const relativeTime = (time?: DateLike) => {
@@ -248,7 +257,8 @@ export const stringifyNestedObject = <
   T extends { name: string; parent?: Partial<T> },
 >(
   obj: T,
-  separator = ", ",
+  separator: string | React.ReactNode = ", ",
+  reverse: boolean = false,
 ) => {
   const levels: string[] = [];
 
@@ -258,7 +268,18 @@ export const stringifyNestedObject = <
     current = current.parent;
   }
 
-  return levels.join(separator);
+  if (reverse) {
+    levels.reverse();
+  }
+
+  if (typeof separator === "string") {
+    return levels.join(separator);
+  }
+
+  return levels.reduce((acc: (string | React.ReactNode)[], curr, i) => {
+    if (i === 0) return [curr];
+    return [...acc, separator, curr];
+  }, []);
 };
 
 export const mergeAutocompleteOptions = (
@@ -269,3 +290,41 @@ export const mergeAutocompleteOptions = (
   if (options.find((o) => o.value === value.value)) return options;
   return [value, ...options];
 };
+
+export const readFileAsDataURL = async (file: File) => {
+  let result_base64 = await new Promise((resolve) => {
+    let fileReader = new FileReader();
+    fileReader.onload = () => resolve(fileReader.result);
+    fileReader.readAsDataURL(file);
+  });
+
+  return result_base64 as string;
+};
+export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
+  if (!pastDate) {
+    return [];
+  }
+
+  const intervals = [];
+  let current = new Date(pastDate);
+  let currentEnd = new Date();
+
+  while (currentEnd >= current) {
+    let currentStart = new Date(currentEnd);
+    currentStart.setDate(currentStart.getDate() - 6);
+
+    if (currentStart < current) {
+      currentStart = current;
+    }
+
+    intervals.push({
+      start: currentStart,
+      end: currentEnd,
+    });
+
+    currentEnd = new Date(currentStart);
+    currentEnd.setDate(currentEnd.getDate() - 1);
+  }
+
+  return intervals;
+}

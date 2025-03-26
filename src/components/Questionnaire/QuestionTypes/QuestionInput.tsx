@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -17,13 +19,16 @@ import type { Question } from "@/types/questionnaire/question";
 import { AllergyQuestion } from "./AllergyQuestion";
 import { BooleanQuestion } from "./BooleanQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
+import { DateQuestion } from "./DateQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
 import { DiagnosisQuestion } from "./DiagnosisQuestion";
 import { EncounterQuestion } from "./EncounterQuestion";
+import { FilesQuestion } from "./FileQuestion";
 import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
 import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
 import { NumberQuestion } from "./NumberQuestion";
+import { QuantityQuestion } from "./QuantityQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
 import { TextQuestion } from "./TextQuestion";
 
@@ -39,7 +44,7 @@ interface QuestionInputProps {
   errors: QuestionValidationError[];
   clearError: () => void;
   disabled?: boolean;
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
 }
 
@@ -54,6 +59,7 @@ export function QuestionInput({
   facilityId,
   patientId,
 }: QuestionInputProps) {
+  const { t } = useTranslation();
   const questionnaireResponse = questionnaireResponses.find(
     (v) => v.question_id === question.id,
   );
@@ -92,15 +98,22 @@ export function QuestionInput({
       clearError,
       index,
       patientId,
+      errors,
     };
 
     switch (question.type) {
       case "dateTime":
         return <DateTimeQuestion {...commonProps} />;
 
+      case "date":
+        return <DateQuestion {...commonProps} />;
+
       case "decimal":
       case "integer":
         return <NumberQuestion {...commonProps} />;
+
+      case "quantity":
+        return <QuantityQuestion {...commonProps} />;
 
       case "choice":
         return <ChoiceQuestion {...commonProps} />;
@@ -124,10 +137,7 @@ export function QuestionInput({
               );
             }
             return (
-              <span>
-                Medication requests cannot be recorded without an active
-                encounter
-              </span>
+              <span>{t("questionnaire_medication_request_no_encounter")}</span>
             );
           case "medication_statement":
             if (encounterId) {
@@ -140,8 +150,7 @@ export function QuestionInput({
             }
             return (
               <span>
-                Medication statement cannot be recorded without an active
-                encounter
+                {t("questionnaire_medication_statement_no_encounter")}
               </span>
             );
           case "allergy_intolerance":
@@ -156,24 +165,23 @@ export function QuestionInput({
                 />
               );
             }
-            return (
-              <span> Symptoms cannot be recorded without an encounter </span>
-            );
+            return <span>{t("questionnaire_symptom_no_encounter")}</span>;
           case "diagnosis":
             if (encounterId) {
               return (
                 <DiagnosisQuestion {...commonProps} encounterId={encounterId} />
               );
             }
-            return (
-              <span>
-                Diagnosis cannot be recorded without an active encounter
-              </span>
-            );
+            return <span>{t("questionnaire_diagnosis_no_encounter")}</span>;
           case "appointment":
-            return <AppointmentQuestion {...commonProps} />;
+            if (facilityId) {
+              return (
+                <AppointmentQuestion {...commonProps} facilityId={facilityId} />
+              );
+            }
+            return <span>{t("questionnaire_appointment_no_encounter")}</span>;
           case "encounter":
-            if (encounterId) {
+            if (encounterId && facilityId) {
               return (
                 <EncounterQuestion
                   {...commonProps}
@@ -182,9 +190,14 @@ export function QuestionInput({
                 />
               );
             }
-            return (
-              <span> Create an encounter first in order to update it </span>
-            );
+            return <span>{t("questionnaire_no_encounter")}</span>;
+          case "files":
+            if (encounterId && facilityId) {
+              return (
+                <FilesQuestion {...commonProps} encounterId={encounterId} />
+              );
+            }
+            return <span>{t("questionnaire_files_no_encounter")}</span>;
         }
         return null;
 
@@ -270,7 +283,7 @@ export function QuestionInput({
               disabled={disabled}
             >
               <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-              Add Another
+              {t("add_another")}
             </Button>
             <NotesInput
               questionnaireResponse={questionnaireResponse}

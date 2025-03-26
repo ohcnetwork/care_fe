@@ -9,6 +9,7 @@ type QueryParamValue =
 export type QueryParams = Record<string, QueryParamValue>;
 
 export interface ApiRoute<TData, TBody = unknown> {
+  baseUrl?: string;
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   TBody?: TBody;
   path: string;
@@ -70,4 +71,8 @@ declare module "@tanstack/react-query" {
 export interface PaginatedResponse<TItem> {
   count: number;
   results: TItem[];
+}
+
+export interface UpsertRequest<TCreate, TUpdate> {
+  datapoints: (TCreate | (TUpdate & { id: string }))[];
 }

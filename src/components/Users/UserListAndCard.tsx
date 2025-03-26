@@ -35,12 +35,12 @@ export const UserStatusIndicator = ({
       className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}
     >
       {isUserOnline(user) || isAuthUser ? (
-        <Badge variant="secondary" className="bg-green-100 whitespace-nowrap">
+        <Badge variant="outline" className="bg-green-100 whitespace-nowrap">
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-green-500 mr-2" />
           <span className="text-xs text-green-700">{t("online")}</span>
         </Badge>
       ) : user.last_login ? (
-        <Badge variant="secondary" className="bg-yellow-100 whitespace-nowrap">
+        <Badge variant="outline" className="bg-yellow-100 whitespace-nowrap">
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
           <span className="text-xs text-yellow-700">
             {relativeTime(user.last_login)}
@@ -48,8 +48,8 @@ export const UserStatusIndicator = ({
         </Badge>
       ) : (
         <Badge
-          variant="secondary"
-          className="bg-gray-100 whitespace-nowrap flex items-center px-2 py-1 rounded-lg text-xs text-gray-700"
+          variant="outline"
+          className="bg-gray-100 whitespace-nowrap text-xs text-gray-700"
         >
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-gray-500 mr-2" />
           <span className="hidden lg:inline">{t("never_logged_in")}</span>
@@ -66,7 +66,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
       <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
         <div className="flex items-start gap-3">
           <Avatar
-            name={formatName(user)}
+            name={formatName(user, true)}
             imageUrl={
               "profile_picture_url" in user ? user.profile_picture_url : ""
             }
@@ -75,11 +75,11 @@ const UserCard = ({ user }: { user: UserBase }) => {
 
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between gap-2 w-full overflow-hidden">
-                <h1 className="text-base font-bold break-words  pr-2 max-w-[60%]">
-                  {user.first_name} {user.last_name}
+              <div className="flex items-start justify-between">
+                <h1 className="text-base font-bold break-words pr-2 w-[50%] text-wrap">
+                  {formatName(user)}
                 </h1>
-                <UserStatusIndicator user={user} className="flex-shrink-0" />
+                <UserStatusIndicator user={user} />
               </div>
 
               <span className="text-sm text-gray-500 mr-2 break-words">
@@ -155,7 +155,7 @@ const UserListRow = ({ user }: { user: UserBase }) => {
             imageUrl={
               "profile_picture_url" in user ? user.profile_picture_url : ""
             }
-            name={formatName(user) ?? ""}
+            name={formatName(user, true) ?? ""}
             className="h-10 w-10 text-lg"
           />
           <div className="flex flex-col">
