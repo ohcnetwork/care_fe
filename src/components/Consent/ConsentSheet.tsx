@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import {
   Calendar,
   CalendarRange,
@@ -56,10 +57,8 @@ export const EmptyState = () => (
       />
     </div>
     <div className="max-w-[300px] space-y-1">
-      <h3 className="font-medium">No Consents found</h3>
-      <p className="text-sm text-gray-500">
-        Add a new consent or try adjusting the filters
-      </p>
+      <h3 className="font-medium">{t("no_consent_found")}</h3>
+      <p className="text-sm text-gray-500">{t("no_consent_description")}</p>
     </div>
   </div>
 );

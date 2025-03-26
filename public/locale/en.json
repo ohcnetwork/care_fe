@@ -1750,6 +1750,8 @@
   "no_child_locations": "No Child Locations",
   "no_child_locations_found": "No child locations found",
   "no_comments_available": "No comments available",
+  "no_consent_description": "Add a new consent or try adjusting the filters",
+  "no_consent_found": "No Consents found",
   "no_consultation_filed": "No consultation filed",
   "no_consultation_updates": "No consultation updates",
   "no_contact_points_added": "No contact points added",
