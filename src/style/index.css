@@ -10,15 +10,14 @@
 @tailwind components;
 @tailwind utilities;
 
-
 html {
-    @apply w-full h-full;
+  @apply h-full w-full;
 }
 
 body {
-    font-family: "Figtree", sans-serif;
-    color: #453c52;
-    @apply font-sans text-secondary-900 w-full h-full antialiased;
+  font-family: "Figtree", sans-serif;
+  color: #453c52;
+  @apply h-full w-full font-sans text-secondary-900 antialiased;
 }
 
 h1,
@@ -27,113 +26,122 @@ h3,
 h4,
 h5,
 h6 {
-    @apply font-bold;
+  @apply font-bold;
 }
 
 h1 {
-    font-size: 2.5rem;
+  font-size: 2.5rem;
 }
 
 h2 {
-    font-size: 2rem;
+  font-size: 2rem;
 }
 
 h3 {
-    font-size: 1.5rem;
+  font-size: 1.5rem;
 }
 
 h4 {
-    font-size: 1.25rem;
+  font-size: 1.25rem;
 }
 
 h5 {
-    font-size: 1rem;
+  font-size: 1rem;
 }
 
 h6 {
-    font-size: 0.875rem;
+  font-size: 0.875rem;
 }
 
 @keyframes wave {
-    50% {
-        transform: scale(0.9);
-    }
+  50% {
+    transform: scale(0.9);
+  }
 }
 
-
 @media print {
-    @page {
-        margin-top: 0;
-      }
-    body * {
-        visibility: hidden;
-    }
-    #section-to-print,
-    #section-to-print * {
-        visibility: visible;
-        -webkit-print-color-adjust: exact;
-    }
-    #section-to-print {
-        position: absolute;
-        left: 0;
-        top: 0;
-    }
+  @page {
+    margin-top: 0;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #section-to-print,
+  #section-to-print * {
+    visibility: visible;
+    -webkit-print-color-adjust: exact;
+  }
+  #section-to-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
 }
 
 .App {
-    text-align: center;
+  text-align: center;
 }
 
 .App-logo {
-    height: 10vmin;
-    pointer-events: none;
-    filter: brightness(80%);
+  height: 10vmin;
+  pointer-events: none;
+  filter: brightness(80%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-blink 1s linear infinite;
-    }
+  .App-logo {
+    animation: App-logo-blink 1s linear infinite;
+  }
 }
 
 .App-header {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
 }
 
 @keyframes App-logo-blink {
-    0% { opacity: 0;}
-    25% { opacity: 0.5;}
-    50% {opacity: 1;}
-    75% {opacity: 0.5;}
-    100% {opacity: 0;}
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .dropdown:hover .dropdown-menu {
-    display: block;
+  display: block;
 }
 
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 8px;
+  width: 10px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 /* for gmaps search dropdown */
@@ -141,37 +149,43 @@ h6 {
   z-index: 100000 !important;
 }
 
-.login-hero{
-  background: linear-gradient(to bottom right, rgba(4, 78, 55, 0.466), rgba(2, 54, 40, 0.521)), url('/images/wave_scene_square.png');
+.login-hero {
+  background:
+    linear-gradient(
+      to bottom right,
+      rgba(4, 78, 55, 0.466),
+      rgba(2, 54, 40, 0.521)
+    ),
+    url("/images/wave_scene_square.png");
   background-size: cover;
   background-position: center;
   animation: alternate-reverse 30s linear infinite herobg;
 }
 
-.login-hero::before{
-  content: '';
+.login-hero::before {
+  content: "";
   position: absolute;
   top: 0;
   bottom: 0;
   right: 0px;
   width: 200px;
   z-index: 2;
-  background: url('/images/wave_long_2.png');
+  background: url("/images/wave_long_2.png");
   background-position: top right;
   transition: 0.2s;
   animation: 120s linear infinite wave alternate-reverse;
   -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.101));
 }
 
-.login-hero::after{
-  content: '';
+.login-hero::after {
+  content: "";
   position: absolute;
   top: 0;
   bottom: 0;
   right: 10px;
   width: 200px;
   z-index: 1;
-  background: url('/images/wave_long.png');
+  background: url("/images/wave_long.png");
   opacity: 0.5;
   background-position: bottom right;
   animation: 120s linear infinite wave_2 alternate-reverse;
@@ -179,10 +193,10 @@ h6 {
 }
 
 @media screen and (max-width: 768px) {
-  .login-hero::before{
+  .login-hero::before {
     display: none;
   }
-  .login-hero::after{
+  .login-hero::after {
     display: none;
   }
 }
@@ -196,7 +210,7 @@ h6 {
   }
 }
 
-@keyframes wave_2{
+@keyframes wave_2 {
   0% {
     background-position: bottom right;
   }
@@ -226,25 +240,35 @@ h6 {
 }
 
 /* clears the ‘X’ from Internet Explorer for input:search */
-input[type=search]::-ms-clear { display: none; width : 0; height: 0; }
-input[type=search]::-ms-reveal { display: none; width : 0; height: 0; }
+input[type="search"]::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+input[type="search"]::-ms-reveal {
+  display: none;
+  width: 0;
+  height: 0;
+}
 
 /* clears the ‘X’ from Chrome for input:search */
 input[type="search"]::-webkit-search-decoration,
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-results-button,
-input[type="search"]::-webkit-search-results-decoration { display: none; }
+input[type="search"]::-webkit-search-results-decoration {
+  display: none;
+}
 
 @layer base {
   :root {
-        --radius:  0.5rem;
-        --sidebar-background: 220 14.3% 95.9%;
-        --sidebar-foreground:  240 5.3% 26.1%;
-        --sidebar-primary:  240 5.9% 10%;
-        --sidebar-primary-foreground:  0 0% 98%;
-        --sidebar-accent:  240 4.8% 95.9%;
-        --sidebar-accent-foreground:  240 5.9% 10%;
-        --sidebar-border: transparent;
-        --sidebar-ring:  217.2 91.2% 59.8%;
-    }
+    --radius: 0.5rem;
+    --sidebar-background: 220 14.3% 95.9%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: transparent;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
 }
