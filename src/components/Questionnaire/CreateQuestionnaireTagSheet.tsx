@@ -21,8 +21,8 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
 interface Props {
-  trigger?: React.ReactNode;
-  onTagCreated?: (tag: QuestionnaireTagModel) => void;
+  trigger: React.ReactNode;
+  onTagCreated: (tag: QuestionnaireTagModel) => void;
 }
 
 export default function CreateQuestionnaireTagSheet({
