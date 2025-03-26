@@ -117,7 +117,7 @@ export default function DeviceServiceHistory({
                           onServiceUpdated={handleServiceUpdated}
                           trigger={
                             <Button variant="ghost" size="icon">
-                              <Edit className="h-4 w-4" />
+                              <Edit className="size-4" />
                             </Button>
                           }
                         />

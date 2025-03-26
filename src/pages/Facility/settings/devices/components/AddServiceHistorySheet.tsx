@@ -34,7 +34,7 @@ export default function AddServiceHistorySheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button size="sm">
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="size-4 mr-2" />
           {t("service_record_add")}
         </Button>
       </SheetTrigger>
