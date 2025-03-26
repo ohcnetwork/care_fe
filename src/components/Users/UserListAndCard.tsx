@@ -35,12 +35,12 @@ export const UserStatusIndicator = ({
       className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}
     >
       {isUserOnline(user) || isAuthUser ? (
-        <Badge variant="secondary" className="bg-green-100 whitespace-nowrap">
+        <Badge variant="outline" className="bg-green-100 whitespace-nowrap">
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-green-500 mr-2" />
           <span className="text-xs text-green-700">{t("online")}</span>
         </Badge>
       ) : user.last_login ? (
-        <Badge variant="secondary" className="bg-yellow-100 whitespace-nowrap">
+        <Badge variant="outline" className="bg-yellow-100 whitespace-nowrap">
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
           <span className="text-xs text-yellow-700">
             {relativeTime(user.last_login)}
@@ -48,11 +48,12 @@ export const UserStatusIndicator = ({
         </Badge>
       ) : (
         <Badge
-          variant="secondary"
-          className="bg-gray-100 whitespace-nowrap text-wrap"
+          variant="outline"
+          className="bg-gray-100 whitespace-nowrap text-xs text-gray-700"
         >
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-gray-500 mr-2" />
-          <span className="text-xs text-gray-700">{t("never_logged_in")}</span>
+          <span className="hidden lg:inline">{t("never_logged_in")}</span>
+          <span className="lg:hidden">{t("never")}</span>
         </Badge>
       )}
     </span>
@@ -78,10 +79,9 @@ const UserCard = ({ user }: { user: UserBase }) => {
                 <h1 className="text-base font-bold break-words pr-2 w-[50%] text-wrap">
                   {formatName(user)}
                 </h1>
-                <span className="text-sm text-gray-500">
-                  <UserStatusIndicator user={user} />
-                </span>
+                <UserStatusIndicator user={user} />
               </div>
+
               <span className="text-sm text-gray-500 mr-2 break-words">
                 {user.username}
               </span>
