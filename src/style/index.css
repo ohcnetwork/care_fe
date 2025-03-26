@@ -7,6 +7,7 @@
 @import "@fontsource/figtree/900.css" layer(base);
 
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @config '../../tailwind.config.js';
 
@@ -30,13 +31,13 @@
 
 @layer utilities {
   html {
-    @apply h-full w-full;
+    @apply size-full;
   }
 
   body {
     font-family: "Figtree", sans-serif;
     color: #453c52;
-    @apply text-secondary-900 h-full w-full font-sans antialiased;
+    @apply text-secondary-900 size-full font-sans antialiased;
   }
 
   h1,

@@ -119,7 +119,6 @@
     "recharts": "^2.15.0",
     "sonner": "^2.0.0",
     "tailwind-merge": "^3.0.0",
-    "tailwindcss-animate": "^1.0.7",
     "use-keyboard-shortcut": "^1.1.6",
     "vaul": "^1.1.2",
     "zod": "^3.23.8"
@@ -173,6 +172,7 @@
     "tailwindcss": "^4.0.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
+    "tw-animate-css": "^1.2.4",
     "typescript": "^5.6.3",
     "unimported": "^1.31.0",
     "uuid": "^11.0.2",
