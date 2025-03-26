@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -6,6 +7,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import { ServiceHistory } from "@/types/device/device";
@@ -16,23 +18,22 @@ interface EditServiceHistorySheetProps {
   facilityId: string;
   deviceId: string;
   serviceRecord: ServiceHistory;
-  open: boolean;
-  setOpen: (open: boolean) => void;
   onServiceUpdated?: (service: ServiceHistory) => void;
+  trigger?: React.ReactNode;
 }
 
 export default function EditServiceHistorySheet({
   facilityId,
   deviceId,
   serviceRecord,
-  open,
-  setOpen,
   onServiceUpdated,
+  trigger,
 }: EditServiceHistorySheetProps) {
   const { t } = useTranslation();
-
+  const [open, setOpen] = useState(false);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent
         className="w-full sm:max-w-2xl overflow-y-auto"
         data-cy="edit-service-form"
@@ -47,8 +48,8 @@ export default function EditServiceHistorySheet({
             deviceId={deviceId}
             serviceRecord={serviceRecord}
             onSubmitSuccess={(service) => {
-              setOpen(false);
               onServiceUpdated?.(service);
+              setOpen(false);
             }}
           />
         </div>

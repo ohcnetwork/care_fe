@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Edit } from "lucide-react";
 import { useQueryParams } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -40,18 +39,7 @@ export default function DeviceServiceHistory({
   deviceId,
 }: DeviceServiceHistoryProps) {
   const { t } = useTranslation();
-  const [sheetState, setSheetState] = useState<{
-    sheet: "" | "add" | "edit";
-    serviceHistory: ServiceHistory | null;
-  }>({
-    sheet: "",
-    serviceHistory: null,
-  });
   const queryClient = useQueryClient();
-
-  // Derived values from the state
-  const isAddServiceSheetOpen = sheetState.sheet === "add";
-  const isEditServiceSheetOpen = sheetState.sheet === "edit";
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
   const { data: serviceHistory, isLoading } = useQuery({
@@ -68,13 +56,6 @@ export default function DeviceServiceHistory({
     }),
   });
 
-  const handleEditService = (service: ServiceHistory) => {
-    setSheetState({
-      sheet: "edit",
-      serviceHistory: service,
-    });
-  };
-
   const handleServiceCreated = () => {
     queryClient.invalidateQueries({
       queryKey: ["deviceServiceHistory", facilityId, deviceId, qParams],
@@ -82,11 +63,6 @@ export default function DeviceServiceHistory({
   };
 
   const handleServiceUpdated = () => {
-    setSheetState({
-      sheet: "",
-      serviceHistory: null,
-    });
-
     queryClient.invalidateQueries({
       queryKey: ["deviceServiceHistory", facilityId, deviceId, qParams],
     });
@@ -101,13 +77,6 @@ export default function DeviceServiceHistory({
         <AddServiceHistorySheet
           facilityId={facilityId}
           deviceId={deviceId}
-          open={isAddServiceSheetOpen}
-          setOpen={(open) =>
-            setSheetState({
-              sheet: open ? "add" : "",
-              serviceHistory: sheetState.serviceHistory,
-            })
-          }
           onServiceCreated={handleServiceCreated}
         />
       </CardHeader>
@@ -141,13 +110,17 @@ export default function DeviceServiceHistory({
                         {service.note}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditService(service)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        <EditServiceHistorySheet
+                          facilityId={facilityId}
+                          deviceId={deviceId}
+                          serviceRecord={service}
+                          onServiceUpdated={handleServiceUpdated}
+                          trigger={
+                            <Button variant="ghost" size="icon">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
                       </TableCell>
                     </TableRow>
                   ))
@@ -174,21 +147,6 @@ export default function DeviceServiceHistory({
           </div>
         )}
       </CardContent>
-      {sheetState.serviceHistory && (
-        <EditServiceHistorySheet
-          open={isEditServiceSheetOpen}
-          setOpen={(open) =>
-            setSheetState({
-              sheet: open ? "edit" : "",
-              serviceHistory: open ? sheetState.serviceHistory : null,
-            })
-          }
-          facilityId={facilityId}
-          deviceId={deviceId}
-          serviceRecord={sheetState.serviceHistory}
-          onServiceUpdated={handleServiceUpdated}
-        />
-      )}
     </Card>
   );
 }

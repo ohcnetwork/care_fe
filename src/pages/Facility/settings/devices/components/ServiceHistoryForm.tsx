@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
+import dayjs from "dayjs";
 import { CalendarIcon } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -51,7 +52,7 @@ export default function ServiceHistoryForm({
     note: z.string().min(1, { message: t("field_required") }),
     serviced_on: z
       .date({ required_error: t("field_required") })
-      .min(new Date(new Date().setHours(0, 0, 0, 0)), {
+      .max(dayjs().toDate(), {
         message: t("service_date_min_date"),
       }),
   });
@@ -171,7 +172,7 @@ export default function ServiceHistoryForm({
               <FormControl>
                 <Textarea
                   data-cy="service-notes-input"
-                  placeholder={t("service_notes_enter")}
+                  placeholder={t("service_notes_placeholder")}
                   {...field}
                   rows={5}
                 />

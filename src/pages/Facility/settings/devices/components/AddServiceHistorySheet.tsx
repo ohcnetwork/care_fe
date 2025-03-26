@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -18,19 +19,16 @@ import ServiceHistoryForm from "./ServiceHistoryForm";
 interface AddServiceHistorySheetProps {
   facilityId: string;
   deviceId: string;
-  open: boolean;
-  setOpen: (open: boolean) => void;
   onServiceCreated?: (service: ServiceHistory) => void;
 }
 
 export default function AddServiceHistorySheet({
   facilityId,
   deviceId,
-  open,
-  setOpen,
   onServiceCreated,
 }: AddServiceHistorySheetProps) {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -53,8 +51,8 @@ export default function AddServiceHistorySheet({
             facilityId={facilityId}
             deviceId={deviceId}
             onSubmitSuccess={(service) => {
-              setOpen(false);
               onServiceCreated?.(service);
+              setOpen(false);
             }}
           />
         </div>
