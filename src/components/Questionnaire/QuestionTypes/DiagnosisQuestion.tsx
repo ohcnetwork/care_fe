@@ -313,14 +313,7 @@ export function DiagnosisQuestion({
 
   const handleCloseDrawer = () => {
     setShowCategorySelection(false);
-    setSelectedCode(null);
-    setSelectedCategory("encounter_diagnosis");
-    setNewDiagnosis({
-      ...DIAGNOSIS_INITIAL_VALUE,
-      onset: {
-        onset_datetime: new Date().toISOString().split("T")[0],
-      },
-    });
+    handleBackToValueSet();
   };
 
   const handleBackToValueSet = () => {
