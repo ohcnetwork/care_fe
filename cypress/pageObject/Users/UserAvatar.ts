@@ -22,10 +22,7 @@ export class UserAvatar {
   }
 
   uploadAvatar() {
-    cy.get('input[title="changeFile"]').selectFile(
-      "cypress/fixtures/avatar.jpg",
-      { force: true },
-    );
+    cy.get("#upload-cover-image").selectFile("cypress/fixtures/avatar.jpg");
     return this;
   }
 
