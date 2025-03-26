@@ -89,7 +89,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             format(new Date(encounter.period.start), "PPp")}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow">
+      <CardContent className="grow">
         <div className="flex flex-col justify-between h-full space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <Badge

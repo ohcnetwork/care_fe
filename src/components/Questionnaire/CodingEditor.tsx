@@ -113,7 +113,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
           </Select>
         </div>
 
-        <div className="grid grid-cols-[1fr,1fr,auto] gap-4 items-start">
+        <div className="grid grid-cols-[1fr_1fr_auto] gap-4 items-start">
           <div>
             <Label>Code</Label>
             <Input

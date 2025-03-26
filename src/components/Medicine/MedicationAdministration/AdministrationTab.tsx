@@ -665,7 +665,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         )}
         <ScrollArea className="w-full whitespace-nowrap rounded-md">
           <Card className="w-full border-none shadow-none min-w-[640px]">
-            <div className="grid grid-cols-[minmax(200px,2fr),repeat(4,minmax(140px,1fr)),40px]">
+            <div className="grid grid-cols-[minmax(200px,2fr)_repeat(4,minmax(140px,1fr))_40px]">
               {/* Top row without vertical borders */}
               <div className="col-span-full grid grid-cols-subgrid">
                 <div className="flex items-center justify-between p-4 bg-gray-50 border-t border-gray-50">
@@ -787,7 +787,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               placeholder={t("search_medications")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-500"
+              className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
             />
             {searchQuery && (
               <Button

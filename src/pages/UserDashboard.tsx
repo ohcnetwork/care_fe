@@ -63,7 +63,7 @@ export default function UserDashboard() {
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
       {/* Welcome Section */}
       <div className="flex flex-col gap-1">
-        <div className="flex justify-between gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm w-full  mx-auto">
+        <div className="flex justify-between gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-xs w-full  mx-auto">
           <div className="flex flex-auto items-center gap-4">
             <Avatar
               name={formatName(user, true)}

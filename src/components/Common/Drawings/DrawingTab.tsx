@@ -183,7 +183,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
                         elements={drawing.object_value.elements}
                       />
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-center p-2">
+                    <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-center p-2">
                       <span className="text-white font-medium flex items-center gap-1">
                         <CareIcon icon="l-eye" />
                         {t("view")}
@@ -194,7 +194,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
                     <div className="flex items-center space-x-2 mb-2">
                       <CareIcon
                         icon="l-edit"
-                        className="text-xl text-primary-600 flex-shrink-0"
+                        className="text-xl text-primary-600 shrink-0"
                       />
                       <span className="font-medium truncate">
                         {drawing.name}

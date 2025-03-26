@@ -148,7 +148,7 @@ export const Comment = ({
           />
         </div>
       </TooltipComponent>
-      <div className="flex flex-col flex-grow mt-1">
+      <div className="flex flex-col grow mt-1">
         <div className="flex items-center justify-between w-full">
           <span className="text-gray-700 font-medium text-xs md:text-sm">
             {formatName(created_by)}

@@ -293,7 +293,7 @@ function PreviewFile({ file }: PreviewFileProps) {
         pageNumber={1}
         onDocumentLoadSuccess={() => {}}
         scale={1}
-        className="object-cover w-full h-full !overflow-hidden"
+        className="object-cover w-full h-full overflow-hidden!"
       />
     );
   }

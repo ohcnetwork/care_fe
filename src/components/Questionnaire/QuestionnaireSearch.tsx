@@ -76,7 +76,7 @@ export function QuestionnaireSearch({
     <Command filter={() => 1}>
       <CommandInput
         placeholder={t("search_questionnaires")}
-        className="outline-none border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none"
         onValueChange={setSearch}
         autoFocus
       />

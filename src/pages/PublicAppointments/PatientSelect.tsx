@@ -223,7 +223,7 @@ export default function PatientSelect({
             )
           }
         >
-          <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+          <span className="bg-linear-to-b from-white/15 to-transparent"></span>
           {t("add_new_patient")}
         </Button>
       </div>

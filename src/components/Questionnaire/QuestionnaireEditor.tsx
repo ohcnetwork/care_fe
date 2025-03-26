@@ -477,10 +477,10 @@ const LAYOUT_OPTIONS = [
   },
   {
     id: "wide-start",
-    value: "grid grid-cols-[2fr,1fr]",
+    value: "grid grid-cols-[2fr_1fr]",
     label: "Wide Start",
     preview: (
-      <div className="w-full grid grid-cols-[2fr,1fr] gap-1">
+      <div className="w-full grid grid-cols-[2fr_1fr] gap-1">
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
@@ -490,10 +490,10 @@ const LAYOUT_OPTIONS = [
   },
   {
     id: "wide-end",
-    value: "grid grid-cols-[1fr,2fr]",
+    value: "grid grid-cols-[1fr_2fr]",
     label: "Wide End",
     preview: (
-      <div className="w-full grid grid-cols-[1fr,2fr] gap-1">
+      <div className="w-full grid grid-cols-[1fr_2fr] gap-1">
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
@@ -1747,7 +1747,7 @@ function QuestionEditor({
               {(question.enable_when || []).map((condition, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-[2fr,1fr,2fr] gap-2 items-start"
+                  className="grid grid-cols-[2fr_1fr_2fr] gap-2 items-start"
                 >
                   <div>
                     <Label className="text-xs">Question</Label>

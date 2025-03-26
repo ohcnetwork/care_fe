@@ -229,7 +229,7 @@ export default function UserAvailabilityTab({
               variant={view === "schedule" ? "outline" : "ghost"}
               onClick={() => setQParams({ tab: "schedule" })}
               className={cn(
-                view === "schedule" && "shadow",
+                view === "schedule" && "shadow-sm",
                 "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
               )}
             >
@@ -239,7 +239,7 @@ export default function UserAvailabilityTab({
               variant={view === "exceptions" ? "outline" : "ghost"}
               onClick={() => setQParams({ tab: "exceptions" })}
               className={cn(
-                view === "exceptions" && "shadow",
+                view === "exceptions" && "shadow-sm",
                 "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
               )}
             >

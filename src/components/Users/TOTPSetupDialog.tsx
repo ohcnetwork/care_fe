@@ -78,7 +78,7 @@ export function TOTPSetupDialog({
         <div className="space-y-4 overflow-auto">
           <div className="flex items-center gap-8">
             {setupData.uri && (
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <QRCodeSVG
                   value={setupData.uri}
                   size={128}

@@ -258,7 +258,7 @@ export function MedicationStatementQuestion({
               })}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_260px_190px_200px_48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("medicine")}
                 </div>
@@ -305,7 +305,7 @@ export function MedicationStatementQuestion({
                       >
                         <div
                           className={cn(
-                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-sm text-sm",
+                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-xs text-sm",
                             expandedMedicationIndex === index
                               ? "bg-gray-50"
                               : "bg-gray-100",
@@ -433,7 +433,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] border-b hover:bg-gray-50/50",
+        "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_260px_190px_200px_48px] border-b hover:bg-gray-50/50",
         {
           "opacity-40 pointer-events-none":
             medication.status === "entered_in_error",

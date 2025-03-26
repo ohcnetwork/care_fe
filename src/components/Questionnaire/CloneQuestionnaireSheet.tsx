@@ -192,7 +192,7 @@ export default function CloneQuestionnaireSheet({
                   <CommandInput
                     placeholder={t("search_organizations")}
                     onValueChange={setSearchQuery}
-                    className="focus:ring-0 focus:outline-none border-none"
+                    className="focus:ring-0 focus:outline-hidden border-none"
                   />
                   <CommandList>
                     <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>

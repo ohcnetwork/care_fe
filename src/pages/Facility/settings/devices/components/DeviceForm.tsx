@@ -432,7 +432,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           {fields.map((field, index) => (
             <div
               key={field.id}
-              className="relative grid gap-3 sm:gap-1 grid-cols-1 sm:grid-cols-[1fr,3fr,auto] py-2"
+              className="relative grid gap-3 sm:gap-1 grid-cols-1 sm:grid-cols-[1fr_3fr_auto] py-2"
             >
               <Button
                 type="button"

@@ -159,7 +159,7 @@ function ValidationErrorDisplay({
           return (
             <div
               key={`server-${index}`}
-              className="bg-white rounded p-3 border border-red-100 shadow-sm"
+              className="bg-white rounded p-3 border border-red-100 shadow-xs"
             >
               <div className="font-medium text-gray-900 mb-1">
                 {getErrorTitle(error)}
@@ -167,7 +167,7 @@ function ValidationErrorDisplay({
               <div className="text-sm text-red-600 flex items-start gap-2">
                 <CareIcon
                   icon="l-exclamation-circle"
-                  className="h-4 w-4 mt-0.5 flex-shrink-0"
+                  className="h-4 w-4 mt-0.5 shrink-0"
                 />
                 <span>{error.message}</span>
               </div>
@@ -225,7 +225,7 @@ function ValidationErrorDisplay({
                   {form.errors.map((error, errorIndex) => (
                     <div
                       key={errorIndex}
-                      className="bg-white rounded p-3 border border-red-100 shadow-sm"
+                      className="bg-white rounded p-3 border border-red-100 shadow-xs"
                     >
                       <div className="text-sm text-gray-600 mb-1">
                         {findQuestionText(form, error.question_id)}
@@ -233,7 +233,7 @@ function ValidationErrorDisplay({
                       <div className="text-sm text-red-600 flex items-start gap-2">
                         <CareIcon
                           icon="l-exclamation-circle"
-                          className="h-4 w-4 mt-0.5 flex-shrink-0"
+                          className="h-4 w-4 mt-0.5 shrink-0"
                         />
                         <span>{error.error}</span>
                       </div>

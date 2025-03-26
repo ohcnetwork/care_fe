@@ -83,7 +83,7 @@ const CustomNode = ({ data }: NodeProps) => {
       <div
         onClick={() => data.onClick({ id: data.id })}
         className={cn(
-          "relative w-[240px] bg-white rounded-lg border-2 overflow-hidden shadow-sm cursor-pointer",
+          "relative w-[240px] bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer",
           "border-gray-200",
           "hover:border-primary/50 hover:shadow-lg",
           "transition-all duration-200",
@@ -589,7 +589,7 @@ function LocationMapContent({
         <Controls showFitView={true} showZoom={true} showInteractive={false} />
         <Panel
           position="top-right"
-          className="bg-white/80 backdrop-blur-sm rounded-lg p-2 shadow-sm"
+          className="bg-white/80 backdrop-blur-xs rounded-lg p-2 shadow-xs"
         >
           <Button
             variant="outline"

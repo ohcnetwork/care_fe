@@ -55,7 +55,7 @@ export function LocationActionButtons({
     label: t("move_to_another_bed"),
     onClick: onMove,
     variant: "outline",
-    className: "border-gray-400 shadow",
+    className: "border-gray-400 shadow-sm",
   });
 
   if (status === "active" && onComplete) {
@@ -63,7 +63,7 @@ export function LocationActionButtons({
       label: t("complete_bed_stay"),
       onClick: () => onComplete(location),
       variant: "outline",
-      className: "border-gray-400 shadow",
+      className: "border-gray-400 shadow-sm",
     });
   }
 
@@ -72,7 +72,7 @@ export function LocationActionButtons({
       label: t("assign_bed_now"),
       onClick: onAssignNow,
       variant: "primary",
-      className: "shadow",
+      className: "shadow-sm",
     });
   }
 

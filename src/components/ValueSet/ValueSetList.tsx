@@ -195,7 +195,7 @@ const RenderTable = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="hidden lg:block overflow-hidden rounded-lg bg-white shadow">
+    <div className="hidden lg:block overflow-hidden rounded-lg bg-white shadow-sm">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : valuesets.length === 0 ? (

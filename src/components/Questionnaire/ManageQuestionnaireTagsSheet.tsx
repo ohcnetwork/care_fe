@@ -204,7 +204,7 @@ export default function ManageQuestionnaireTagsSheet({
                   <CommandInput
                     placeholder={t("search_tags")}
                     onValueChange={setSearchQuery}
-                    className="outline-none border-none ring-0 shadow-none"
+                    className="outline-hidden border-none ring-0 shadow-none"
                   />
                   <CommandList>
                     <CommandEmpty>{t("no_tags_found")}</CommandEmpty>

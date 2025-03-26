@@ -36,7 +36,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
   return (
     <div
       className={cn(
-        "border rounded-lg overflow-hidden shadow-sm h-full",
+        "border rounded-lg overflow-hidden shadow-xs h-full",
         isOccupied
           ? "bg-white border-gray-200"
           : "bg-green-50 border-green-200",
@@ -102,7 +102,7 @@ function LocationCard({ location, onClick }: LocationCardProps) {
 
   return (
     <div
-      className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="border rounded-lg overflow-hidden shadow-xs hover:shadow-md transition-shadow cursor-pointer"
       onClick={onClick}
     >
       <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">

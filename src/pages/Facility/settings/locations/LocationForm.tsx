@@ -467,7 +467,7 @@ export default function LocationForm({
                     {bedFields.map((field) => (
                       <div
                         key={field.id}
-                        className="px-3 py-1 bg-gray-100 rounded-md shadow-sm"
+                        className="px-3 py-1 bg-gray-100 rounded-md shadow-xs"
                       >
                         {field.name}
                       </div>

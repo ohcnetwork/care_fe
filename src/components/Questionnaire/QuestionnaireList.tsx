@@ -172,7 +172,7 @@ const RenderTable = ({
 }) => {
   const navigate = useNavigate();
   return (
-    <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow overflow-x-auto">
+    <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow-sm overflow-x-auto">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : questionnaireList.length === 0 ? (

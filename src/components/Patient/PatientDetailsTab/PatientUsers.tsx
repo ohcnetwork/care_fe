@@ -262,7 +262,7 @@ export const PatientUsers = (props: PatientProps) => {
         {users?.results.map((user) => (
           <div
             key={user.id}
-            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm relative"
+            className="rounded-lg border border-gray-200 bg-white p-4 shadow-xs relative"
           >
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">

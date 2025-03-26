@@ -206,7 +206,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       <div className="container mx-auto pt-2">
         <div className="mx-auto max-w-3xl space-y-6">
           <Card className="border-none bg-transparent shadow-none">
-            <div className="group rounded-2xl relative h-64 w-full bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
+            <div className="group rounded-2xl relative h-64 w-full bg-linear-to-br from-emerald-400 via-emerald-500 to-emerald-600">
               {facilityData?.read_cover_image_url ? (
                 <>
                   <img
@@ -214,7 +214,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     alt={facilityData?.name}
                     className="h-full w-full object-cover rounded-2xl"
                   />
-                  <div className="absolute rounded-2xl inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
+                  <div className="absolute rounded-2xl inset-0 bg-linear-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
                 </>
               ) : (
                 <div className="relative rounded-2xl  h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
@@ -247,7 +247,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       </TooltipComponent>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     {/* <AlertDialog>
                       TODO: add delete facility
                       <AlertDialogTrigger asChild>

@@ -68,7 +68,7 @@ export function LocationSearch({
           <CommandInput
             placeholder="Search locations..."
             value={search}
-            className="outline-none border-none ring-0 shadow-none"
+            className="outline-hidden border-none ring-0 shadow-none"
             onValueChange={setSearch}
           />
           <CommandEmpty>{t("no_locations_found")}</CommandEmpty>

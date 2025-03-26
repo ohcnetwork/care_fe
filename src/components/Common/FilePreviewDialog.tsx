@@ -478,7 +478,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         key={index}
                         onClick={button[2] as () => void}
                         className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
+                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
                           index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
                         )}
                         disabled={button[3] as boolean}
@@ -524,7 +524,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         key={index}
                         onClick={button[2] as () => void}
                         className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
+                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
                           index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
                         )}
                         disabled={button[3] as boolean}
