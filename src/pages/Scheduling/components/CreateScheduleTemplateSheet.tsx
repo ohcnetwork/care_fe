@@ -38,8 +38,6 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-import DatePickerInput from "@/components/Common/DatePicker";
-
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import mutate from "@/Utils/request/mutate";
@@ -311,13 +309,15 @@ export default function CreateScheduleTemplateSheet({
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel required>{t("valid_from")}</FormLabel>
-                      <DatePickerInput
-                        min={new Date()}
-                        value={field.value ? new Date(field.value) : undefined}
-                        onChange={(date) =>
-                          field.onChange(date ? format(date, "yyyy-MM-dd") : "")
+                      <Input
+                        type="date"
+                        min={format(new Date(), "yyyy-MM-dd")}
+                        {...field}
+                        value={
+                          field.value
+                            ? format(new Date(field.value), "yyyy-MM-dd")
+                            : ""
                         }
-                        disabled={field.disabled}
                       />
                       <FormMessage />
                     </FormItem>
@@ -330,17 +330,19 @@ export default function CreateScheduleTemplateSheet({
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel required>{t("valid_to")}</FormLabel>
-                      <DatePickerInput
-                        value={field.value ? new Date(field.value) : undefined}
+                      <Input
+                        type="date"
                         min={
                           form.watch("valid_from")
-                            ? new Date(form.watch("valid_from"))
-                            : undefined
+                            ? form.watch("valid_from")
+                            : format(new Date(), "yyyy-MM-dd")
                         }
-                        onChange={(date) =>
-                          field.onChange(date ? format(date, "yyyy-MM-dd") : "")
+                        {...field}
+                        value={
+                          field.value
+                            ? format(new Date(field.value), "yyyy-MM-dd")
+                            : ""
                         }
-                        disabled={field.disabled}
                       />
                       <FormMessage />
                     </FormItem>

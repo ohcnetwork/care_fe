@@ -30,8 +30,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import DatePickerInput from "@/components/Common/DatePicker";
-
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
@@ -222,17 +220,15 @@ export default function CreateScheduleExceptionSheet({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel required>{t("valid_from")}</FormLabel>
-                        <DatePickerInput
-                          min={new Date()}
+                        <Input
+                          type="date"
+                          min={format(new Date(), "yyyy-MM-dd")}
+                          {...field}
                           value={
-                            field.value ? new Date(field.value) : undefined
+                            field.value
+                              ? format(new Date(field.value), "yyyy-MM-dd")
+                              : ""
                           }
-                          onChange={(date) =>
-                            field.onChange(
-                              date ? format(date, "yyyy-MM-dd") : "",
-                            )
-                          }
-                          disabled={field.disabled}
                         />
                         <FormMessage />
                       </FormItem>
@@ -245,21 +241,19 @@ export default function CreateScheduleExceptionSheet({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel required>{t("valid_to")}</FormLabel>
-                        <DatePickerInput
-                          value={
-                            field.value ? new Date(field.value) : undefined
-                          }
+                        <Input
+                          type="date"
                           min={
                             form.watch("valid_from")
-                              ? new Date(form.watch("valid_from"))
-                              : undefined
+                              ? form.watch("valid_from")
+                              : format(new Date(), "yyyy-MM-dd")
                           }
-                          onChange={(date) =>
-                            field.onChange(
-                              date ? format(date, "yyyy-MM-dd") : "",
-                            )
+                          {...field}
+                          value={
+                            field.value
+                              ? format(new Date(field.value), "yyyy-MM-dd")
+                              : ""
                           }
-                          disabled={field.disabled}
                         />
                         <FormMessage />
                       </FormItem>

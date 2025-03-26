@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isBefore, startOfTomorrow } from "date-fns";
+import { addDays } from "date-fns";
 import { t } from "i18next";
 import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
@@ -29,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import DatePickerInput from "@/components/Common/DatePicker";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -325,7 +327,12 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("manufacture_date")}</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <DatePickerInput
+                    onChange={(date) => field.onChange(dateQueryString(date))}
+                    value={field.value ? new Date(field.value) : undefined}
+                    disabled={field.disabled}
+                    max={new Date()}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -339,7 +346,19 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("expiration_date")}</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <DatePickerInput
+                    onChange={(date) => field.onChange(dateQueryString(date))}
+                    value={field.value ? new Date(field.value) : undefined}
+                    disabled={field.disabled}
+                    min={
+                      form.watch("manufacture_date")
+                        ? addDays(
+                            new Date(form.watch("manufacture_date") ?? ""),
+                            1,
+                          )
+                        : undefined
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

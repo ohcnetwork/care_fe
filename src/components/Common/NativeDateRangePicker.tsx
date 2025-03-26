@@ -4,8 +4,9 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+import DatePickerInput from "./DatePicker";
 
 type DateRange = { from?: Date; to?: Date };
 
@@ -23,8 +24,8 @@ export function NativeDatePickerRange({
   const [startDate, setStartDate] = useState<Date | undefined>(date?.from);
   const [endDate, setEndDate] = useState<Date | undefined>(date?.to);
 
-  const handleDateChange = (key: "from" | "to", value: string) => {
-    const parsedDate = value ? new Date(value) : undefined;
+  const handleDateChange = (key: "from" | "to", value: Date | undefined) => {
+    const parsedDate = value ? value : undefined;
 
     if (!parsedDate) return;
 
@@ -49,23 +50,16 @@ export function NativeDatePickerRange({
     <div className={cn("grid gap-2", className)}>
       <div className="flex items-center gap-2">
         <Label className="text-gray-700 font-medium">{t("start_date")}</Label>
-        <Input
-          type="date"
-          value={startDate ? startDate.toISOString().split("T")[0] : ""}
-          onChange={(e) => handleDateChange("from", e.target.value)}
-          className="border px-3 py-2 rounded-md"
+        <DatePickerInput
+          value={startDate ? startDate : undefined}
+          onChange={(date) => handleDateChange("from", date)}
         />
       </div>
       <div className="flex items-center gap-2">
         <Label className="text-gray-700 font-medium">{t("end_date")}</Label>
-        <Input
-          type="date"
-          value={endDate ? endDate.toISOString().split("T")[0] : ""}
-          onChange={(e) => handleDateChange("to", e.target.value)}
-          className={cn(
-            "border px-3 py-2 rounded-md",
-            endDate && startDate && endDate < startDate ? "border-red-500" : "",
-          )}
+        <DatePickerInput
+          value={endDate ? endDate : undefined}
+          onChange={(date) => handleDateChange("to", date)}
         />
       </div>
     </div>
