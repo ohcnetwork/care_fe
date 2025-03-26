@@ -21,6 +21,10 @@ interface DateTimePickerProps {
   disabled?: boolean;
 }
 
+/**
+ * @deprecated This component will be removed in a future release.
+ * Please use the `Input` component with `type="datetime-local"` instead.
+ */
 export function DateTimePicker({
   value,
   onChange,

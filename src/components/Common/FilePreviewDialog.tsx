@@ -77,6 +77,35 @@ const previewExtensions = [
   ".gif",
   ".webp",
 ];
+
+interface DragState {
+  isDragging: boolean;
+  position: { x: number; y: number };
+  dragStart: { x: number; y: number };
+}
+
+const calculateClampedPosition = (
+  e: { clientX: number; clientY: number },
+  dragStart: { x: number; y: number },
+  containerRect: DOMRect,
+  imageRect: DOMRect,
+) => {
+  const maxX = Math.max(0, (imageRect.width - containerRect.width) / 2);
+  const maxY = Math.max(0, (imageRect.height - containerRect.height) / 2);
+  const newX = e.clientX - dragStart.x;
+  const newY = e.clientY - dragStart.y;
+  return {
+    x: Math.max(-maxX, Math.min(maxX, newX)),
+    y: Math.max(-maxY, Math.min(maxY, newY)),
+  };
+};
+
+const initialDragState: DragState = {
+  isDragging: false,
+  position: { x: 0, y: 0 },
+  dragStart: { x: 0, y: 0 },
+};
+
 const FilePreviewDialog = (props: FilePreviewProps) => {
   const {
     show,
@@ -94,11 +123,18 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const [numPages, setNumPages] = useState(1);
   const [index, setIndex] = useState<number>(currentIndex);
   const [scale, setScale] = useState(1.0);
+  const [dragState, setDragState] = useState<DragState>(initialDragState);
+
   useEffect(() => {
     if (uploadedFiles && show) {
       setIndex(currentIndex);
     }
   }, [uploadedFiles, show, currentIndex]);
+
+  useEffect(() => {
+    setDragState(initialDragState);
+  }, [index, show]);
+
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
     setFileState({
@@ -177,6 +213,92 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     () => index < (uploadedFiles?.length || 0) - 1 && handleNext(index + 1),
   );
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!file_state.isImage) return;
+    setDragState((prev) => ({
+      ...prev,
+      isDragging: true,
+      dragStart: {
+        x: e.clientX - prev.position.x,
+        y: e.clientY - prev.position.y,
+      },
+    }));
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!dragState.isDragging) return;
+    const container = e.currentTarget as HTMLDivElement;
+    const image = container.querySelector("img");
+    if (!image) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const imageRect = image.getBoundingClientRect();
+
+    const { x, y } = calculateClampedPosition(
+      e,
+      dragState.dragStart,
+      containerRect,
+      imageRect,
+    );
+
+    setDragState((prev) => ({
+      ...prev,
+      position: { x, y },
+    }));
+  };
+
+  const handleMouseUp = () => {
+    setDragState((prev) => ({
+      ...prev,
+      isDragging: false,
+    }));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!file_state.isImage) return;
+    setDragState((prev) => ({
+      ...prev,
+      isDragging: true,
+      dragStart: {
+        x: e.touches[0].clientX - prev.position.x,
+        y: e.touches[0].clientY - prev.position.y,
+      },
+    }));
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!dragState.isDragging) return;
+    e.preventDefault();
+    const container = e.currentTarget as HTMLDivElement;
+    const image = container.querySelector("img");
+    if (!image) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const imageRect = image.getBoundingClientRect();
+
+    const { x, y } = calculateClampedPosition(
+      {
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY,
+      },
+      dragState.dragStart,
+      containerRect,
+      imageRect,
+    );
+
+    setDragState((prev) => ({
+      ...prev,
+      position: { x, y },
+    }));
+  };
+
+  const handleTouchEnd = () => {
+    setDragState((prev) => ({
+      ...prev,
+      isDragging: false,
+    }));
+  };
+
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
@@ -238,15 +360,40 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   <CareIcon icon="l-arrow-left" className="h-4 w-4" />
                 </Button>
               )}
-              <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
+              <div
+                className={cn(
+                  "flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200 touch-none",
+                  dragState.isDragging ? "cursor-grabbing" : "cursor-grab",
+                )}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
                 {file_state.isImage ? (
-                  <img
-                    src={fileUrl}
-                    alt="file"
-                    className={`h-full w-full object-contain ${
-                      zoom_values[file_state.zoom - 1]
-                    } ${getRotationClass(file_state.rotation)}`}
-                  />
+                  <div
+                    className={cn(
+                      "flex items-center justify-center w-full h-full transition-transform duration-100",
+                      dragState.isDragging ? "duration-0" : "",
+                    )}
+                    style={{
+                      transform: `translate(${dragState.position.x}px, ${dragState.position.y}px)`,
+                    }}
+                  >
+                    <img
+                      src={fileUrl}
+                      alt="file"
+                      className={cn(
+                        "max-h-full max-w-full select-none object-contain",
+                        zoom_values[file_state.zoom - 1],
+                        getRotationClass(file_state.rotation),
+                      )}
+                      draggable={false}
+                    />
+                  </div>
                 ) : file_state.extension === "pdf" ? (
                   <Suspense fallback={<CircularProgress />}>
                     <PDFViewer
