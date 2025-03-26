@@ -47,6 +47,23 @@ type ConsentSheetProps = {
   encounterId: string;
 };
 
+export const EmptyState = () => (
+  <div className="flex min-h-[200px] flex-col items-center justify-center gap-2 p-8 text-center">
+    <div className="rounded-full bg-secondary/10 p-3">
+      <CareIcon
+        icon="l-file-exclamation-alt"
+        className="text-3xl text-gray-500"
+      />
+    </div>
+    <div className="max-w-[300px] space-y-1">
+      <h3 className="font-medium">No Consents found</h3>
+      <p className="text-sm text-gray-500">
+        Add a new consent or try adjusting the filters
+      </p>
+    </div>
+  </div>
+);
+
 export function ConsentSheet({
   trigger,
   patientId,
@@ -102,17 +119,26 @@ export function ConsentSheet({
               />
             </div>
 
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
-              {existingConsents?.results
-                ?.filter((consent) =>
-                  consent.source_attachments[0]?.name
-                    ?.toLowerCase()
-                    .includes(searchQuery.toLowerCase()),
-                ) // TODO: move this to the backend in the next iteration
-                .map((consent) => (
-                  <ConsentCard key={consent.id} consent={consent} />
-                ))}
-            </div>
+            {existingConsents?.results &&
+            existingConsents?.results?.filter((consent) =>
+              consent.source_attachments[0]?.name
+                ?.toLowerCase()
+                .includes(searchQuery.toLowerCase()),
+            ).length > 0 ? (
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
+                {existingConsents.results
+                  .filter((consent) =>
+                    consent.source_attachments[0]?.name
+                      ?.toLowerCase()
+                      .includes(searchQuery.toLowerCase()),
+                  )
+                  .map((consent) => (
+                    <ConsentCard key={consent.id} consent={consent} />
+                  ))}
+              </div>
+            ) : (
+              <EmptyState />
+            )}
           </div>
         </ScrollArea>
       </SheetContent>
