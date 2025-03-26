@@ -17,23 +17,27 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import deviceApi from "@/types/device/deviceApi";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import locationApi from "@/types/location/locationApi";
 
 interface Props {
-  entityType: "encounter" | "location";
+  entityType: "encounter" | "location" | "device";
   entityId: string;
   currentOrganizations: FacilityOrganization[];
   facilityId: string;
   trigger?: React.ReactNode;
   onUpdate?: () => void;
+  orgType?: "organization" | "managing_organization";
 }
 
 type MutationRoute =
   | typeof routes.encounter.addOrganization
   | typeof routes.encounter.removeOrganization
   | typeof locationApi.addOrganization
-  | typeof locationApi.removeOrganization;
+  | typeof locationApi.removeOrganization
+  | typeof deviceApi.addOrganization
+  | typeof deviceApi.removeOrganization;
 
 interface EncounterPathParams {
   encounterId: string;
@@ -44,7 +48,12 @@ interface LocationPathParams {
   id: string;
 }
 
-type PathParams = EncounterPathParams | LocationPathParams;
+interface DevicePathParams {
+  facilityId: string;
+  id: string;
+}
+
+type PathParams = EncounterPathParams | LocationPathParams | DevicePathParams;
 
 interface MutationParams {
   route: MutationRoute;
@@ -53,7 +62,7 @@ interface MutationParams {
 }
 
 function getMutationParams(
-  entityType: "encounter" | "location",
+  entityType: "encounter" | "location" | "device",
   entityId: string,
   facilityId: string,
   isAdd: boolean,
@@ -66,22 +75,39 @@ function getMutationParams(
       pathParams: { encounterId: entityId } as EncounterPathParams,
       queryKey: ["encounter", entityId],
     };
+  } else if (entityType === "location") {
+    return {
+      route: isAdd
+        ? locationApi.addOrganization
+        : locationApi.removeOrganization,
+      pathParams: {
+        facility_id: facilityId,
+        id: entityId,
+      } as LocationPathParams,
+      queryKey: ["location", entityId],
+    };
   }
+
   return {
-    route: isAdd ? locationApi.addOrganization : locationApi.removeOrganization,
-    pathParams: { facility_id: facilityId, id: entityId } as LocationPathParams,
-    queryKey: ["location", entityId],
+    route: isAdd ? deviceApi.addOrganization : deviceApi.removeOrganization,
+    pathParams: {
+      facilityId,
+      id: entityId,
+    } as DevicePathParams,
+    queryKey: ["device", entityId],
   };
 }
 
 function getInvalidateQueries(
-  entityType: "encounter" | "location",
+  entityType: "encounter" | "location" | "device",
   entityId: string,
 ) {
   if (entityType === "encounter") {
     return ["encounter", entityId];
+  } else if (entityType === "location") {
+    return ["location", entityId, "organizations"];
   }
-  return ["location", entityId, "organizations"];
+  return ["device", entityId, "organizations"];
 }
 
 function DeleteOrganizationButton({
@@ -92,7 +118,7 @@ function DeleteOrganizationButton({
   onSuccess,
 }: {
   organizationId: string;
-  entityType: "encounter" | "location";
+  entityType: "encounter" | "location" | "device";
   entityId: string;
   facilityId: string;
   onSuccess?: () => void;
@@ -154,24 +180,22 @@ export default function LinkDepartmentsSheet({
   facilityId,
   trigger,
   onUpdate,
+  orgType = "organization",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const { route, pathParams } = getMutationParams(
+    entityType,
+    entityId,
+    facilityId,
+    true,
+  );
 
   const { mutate: addOrganization, isPending: isAdding } = useMutation({
-    mutationFn: (organizationId: string) => {
-      const { route, pathParams } = getMutationParams(
-        entityType,
-        entityId,
-        facilityId,
-        true,
-      );
-      return mutate(route, {
-        pathParams,
-        body: { organization: organizationId },
-      })({ organization: organizationId });
-    },
+    mutationFn: mutate(route, {
+      pathParams,
+    }),
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
@@ -194,15 +218,24 @@ export default function LinkDepartmentsSheet({
         {trigger || (
           <Button variant="outline" size="sm">
             <Building className="mr-2 h-4 w-4" />
-            {t("manage_organizations")}
+            {t("manage_organization", {
+              count: entityType === "device" ? 1 : 0,
+            })}
           </Button>
         )}
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{t("manage_organizations")}</SheetTitle>
+          <SheetTitle>
+            {t("manage_organization", {
+              count: entityType === "device" ? 1 : 0,
+            })}
+          </SheetTitle>
           <SheetDescription>
-            {t("encounter_manage_organization_description")}
+            {t("manage_organization_description", {
+              entityType,
+              count: entityType === "device" ? 1 : 0,
+            })}
           </SheetDescription>
         </SheetHeader>
 
@@ -217,17 +250,27 @@ export default function LinkDepartmentsSheet({
 
               <Button
                 className="w-full"
-                onClick={() => selectedOrg && addOrganization(selectedOrg)}
+                onClick={() =>
+                  selectedOrg &&
+                  addOrganization({ [orgType]: selectedOrg } as Record<
+                    typeof orgType,
+                    string
+                  >)
+                }
                 disabled={!selectedOrg || isAdding}
               >
                 {isAdding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t("add_organizations")}
+                {t("add_organization", {
+                  count: entityType === "device" ? 1 : 0,
+                })}
               </Button>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-sm font-medium">
-                {t("current_organizations")}
+                {t("current_organization", {
+                  count: entityType === "device" ? 1 : 0,
+                })}
               </h3>
               <div className="space-y-2">
                 {currentOrganizations.map((org) => (
@@ -257,7 +300,9 @@ export default function LinkDepartmentsSheet({
                 ))}
                 {currentOrganizations.length === 0 && (
                   <p className="text-sm text-gray-500">
-                    {t("no_organizations_added_yet")}
+                    {t("no_organization_added_yet", {
+                      count: entityType === "device" ? 1 : 0,
+                    })}
                   </p>
                 )}
               </div>

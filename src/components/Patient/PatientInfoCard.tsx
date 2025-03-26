@@ -6,6 +6,7 @@ import {
   CircleDashed,
   Clock,
   Droplet,
+  SignatureIcon,
 } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -19,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { ConsentSheet } from "@/components/Consent/ConsentSheet";
 import EncounterActions from "@/components/Encounter/EncounterActions";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
@@ -49,11 +50,12 @@ export interface PatientInfoCardProps {
   patient: Patient;
   encounter: Encounter;
   fetchPatientData?: (state: { aborted: boolean }) => void;
+  canWrite: boolean;
   disableButtons?: boolean;
 }
 
 export default function PatientInfoCard(props: PatientInfoCardProps) {
-  const { patient, encounter, disableButtons = false } = props;
+  const { patient, encounter, canWrite, disableButtons = false } = props;
   const { t } = useTranslation();
 
   return (
@@ -71,12 +73,12 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
             </div>
             <div className="flex justify-center">
               <div
-                className="mb-2 flex flex-col text-xl font-semibold capitalize lg:hidden"
+                className="mb-2 flex flex-col text-base md:text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
                 <Link
                   href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
-                  className="text-gray-950 font-semibold flex items-start gap-0.5"
+                  className="text-gray-950 font-semibold flex items-start leading-tight"
                   id="patient-details"
                   data-cy="patient-details-button"
                 >
@@ -86,14 +88,17 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     className="w-3 h-3 opacity-50 mt-1"
                   />
                 </Link>
-                <div className="mt-[6px] text-sm font-semibold text-secondary-600">
+                <div className="my-[2px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
                 {patient.death_datetime && (
-                  <Badge variant="destructive">
-                    <h3 className="text-sm font-medium">
-                      {t("expired_on")}
+                  <Badge
+                    variant="destructive"
+                    className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                  >
+                    <h3 className="text-xs font-normal sm:text-sm sm:font-medium">
+                      {t("time_of_death")}
                       {": "}
                       {dayjs(patient.death_datetime).format(
                         "DD MMM YYYY, hh:mm A",
@@ -127,9 +132,12 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {t(`GENDER__${patient.gender}`)}
                 </div>
                 {patient.death_datetime && (
-                  <Badge variant="destructive">
+                  <Badge
+                    variant="destructive"
+                    className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                  >
                     <h3 className="text-sm font-medium">
-                      {t("expired_on")}
+                      {t("time_of_death")}
                       {": "}
                       {dayjs(patient.death_datetime).format(
                         "DD MMM YYYY, hh:mm A",
@@ -308,28 +316,38 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     )
                   }
 
-                  <LinkDepartmentsSheet
-                    entityType="encounter"
-                    entityId={encounter.id}
-                    currentOrganizations={encounter.organizations}
-                    facilityId={encounter.facility.id}
-                    trigger={
+                  {canWrite ? (
+                    <LinkDepartmentsSheet
+                      entityType="encounter"
+                      entityId={encounter.id}
+                      currentOrganizations={encounter.organizations}
+                      facilityId={encounter.facility.id}
+                      trigger={
+                        <div className="flex flex-wrap gap-2">
+                          {encounter.organizations.map((org) =>
+                            organizationBadge(org),
+                          )}
+                          {encounter.organizations.length === 0 && (
+                            <Badge
+                              className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                              variant="outline"
+                            >
+                              <Building className="w-4 h-4 text-blue-400" />
+                              Add Organizations
+                            </Badge>
+                          )}
+                        </div>
+                      }
+                    />
+                  ) : (
+                    encounter.organizations.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {encounter.organizations.map((org) =>
                           organizationBadge(org),
                         )}
-                        {encounter.organizations.length === 0 && (
-                          <Badge
-                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                            variant="outline"
-                          >
-                            <Building className="w-4 h-4 text-blue-400" />
-                            Add Organizations
-                          </Badge>
-                        )}
                       </div>
-                    }
-                  />
+                    )
+                  )}
                   {props.encounter.current_location ? (
                     <Popover>
                       <PopoverTrigger asChild>
@@ -357,8 +375,8 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
 
                             <LocationSheet
                               facilityId={props.encounter.facility.id}
-                              encounterId={props.encounter.id}
                               history={encounter.location_history}
+                              encounter={encounter}
                               trigger={
                                 <div>
                                   <CareIcon
@@ -380,42 +398,56 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             location={props.encounter.current_location}
                           />
                           <div className="border-b border-dashed border-gray-200 my-2" />
-                          <LocationSheet
-                            facilityId={props.encounter.facility.id}
-                            encounterId={props.encounter.id}
-                            trigger={
-                              <Button
-                                variant="outline"
-                                className="border-gray-400 w-full"
-                              >
-                                {t("update_location")}
-                              </Button>
-                            }
-                            history={encounter.location_history}
-                          />
+                          {canWrite && (
+                            <LocationSheet
+                              facilityId={props.encounter.facility.id}
+                              encounter={encounter}
+                              trigger={
+                                <Button
+                                  variant="outline"
+                                  className="border-gray-400 w-full"
+                                >
+                                  {t("update_location")}
+                                </Button>
+                              }
+                              history={encounter.location_history}
+                            />
+                          )}
                         </div>
                       </PopoverContent>
                     </Popover>
+                  ) : canWrite ? (
+                    <Badge variant="outline">
+                      <LocationSheet
+                        facilityId={props.encounter.facility.id}
+                        encounter={encounter}
+                        trigger={
+                          <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                            <CareIcon
+                              icon="l-location-point"
+                              className="h-4 w-4 text-green-600"
+                            />
+                            {t("add_location")}
+                          </div>
+                        }
+                        history={encounter.location_history}
+                      />
+                    </Badge>
                   ) : (
-                    !inactiveEncounterStatus.includes(encounter.status) && (
-                      <Badge variant="outline">
-                        <LocationSheet
-                          facilityId={props.encounter.facility.id}
-                          encounterId={props.encounter.id}
-                          trigger={
-                            <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
-                              <CareIcon
-                                icon="l-location-point"
-                                className="h-4 w-4 text-green-600"
-                              />
-                              {t("add_location")}
-                            </div>
-                          }
-                          history={encounter.location_history}
-                        />
-                      </Badge>
-                    )
+                    <></>
                   )}
+                  <Badge variant="outline">
+                    <ConsentSheet
+                      patientId={props.encounter.patient.id}
+                      encounterId={props.encounter.id}
+                      trigger={
+                        <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                          <SignatureIcon className="h-4 w-4 text-green-600" />
+                          {t("manage_consents")}
+                        </div>
+                      }
+                    />
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -425,30 +457,30 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
-          {!completedEncounterStatus.includes(encounter.status) &&
-            !disableButtons && (
-              <div
-                className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
-                data-cy="update-encounter-button"
-              >
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="primary">
-                      {t("update")}
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                    <EncounterActions encounter={encounter} layout="dropdown" />
-                    <PLUGIN_Component
-                      __name="PatientInfoCardActions"
-                      encounter={encounter}
-                    />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+          {!disableButtons && (
+            <div
+              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+              data-cy="update-encounter-button"
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="primary">
+                    {inactiveEncounterStatus.includes(encounter.status)
+                      ? t("actions")
+                      : t("update")}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <EncounterActions encounter={encounter} layout="dropdown" />
+                  <PLUGIN_Component
+                    __name="PatientInfoCardActions"
+                    encounter={encounter}
+                  />
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
         </div>
       </section>
     </>

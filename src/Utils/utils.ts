@@ -257,7 +257,8 @@ export const stringifyNestedObject = <
   T extends { name: string; parent?: Partial<T> },
 >(
   obj: T,
-  separator = ", ",
+  separator: string | React.ReactNode = ", ",
+  reverse: boolean = false,
 ) => {
   const levels: string[] = [];
 
@@ -267,7 +268,18 @@ export const stringifyNestedObject = <
     current = current.parent;
   }
 
-  return levels.join(separator);
+  if (reverse) {
+    levels.reverse();
+  }
+
+  if (typeof separator === "string") {
+    return levels.join(separator);
+  }
+
+  return levels.reduce((acc: (string | React.ReactNode)[], curr, i) => {
+    if (i === 0) return [curr];
+    return [...acc, separator, curr];
+  }, []);
 };
 
 export const mergeAutocompleteOptions = (
@@ -279,6 +291,15 @@ export const mergeAutocompleteOptions = (
   return [value, ...options];
 };
 
+export const readFileAsDataURL = async (file: File) => {
+  let result_base64 = await new Promise((resolve) => {
+    let fileReader = new FileReader();
+    fileReader.onload = () => resolve(fileReader.result);
+    fileReader.readAsDataURL(file);
+  });
+
+  return result_base64 as string;
+};
 export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
   if (!pastDate) {
     return [];
