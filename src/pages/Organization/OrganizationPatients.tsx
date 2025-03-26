@@ -200,7 +200,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                               <TooltipComponent
                                 content={formatDateTime(patient.modified_date)}
                               >
-                                <span>
+                                <span className="underline underline-offset-2">
                                   {relativeTime(patient.modified_date)}
                                 </span>
                               </TooltipComponent>
