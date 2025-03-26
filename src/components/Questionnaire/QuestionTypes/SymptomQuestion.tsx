@@ -126,14 +126,14 @@ function SymptomActionsMenu({
           variant="ghost"
           size="icon"
           disabled={disabled}
-          className="h-8 w-8"
+          className="size-8"
         >
-          <DotsVerticalIcon className="h-4 w-4" />
+          <DotsVerticalIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={onToggleNotes}>
-          <Pencil2Icon className="h-4 w-4 mr-2" />
+          <Pencil2Icon className="size-4 mr-2" />
           {showNotes ? t("hide_notes") : t("add_notes")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -142,7 +142,7 @@ function SymptomActionsMenu({
           onClick={onRemove}
           disabled={verificationStatus === "entered_in_error"}
         >
-          <MinusCircledIcon className="h-4 w-4 mr-2" />
+          <MinusCircledIcon className="size-4 mr-2" />
           {verificationStatus === "entered_in_error"
             ? t("already_marked_as_error")
             : t("remove_symptom")}

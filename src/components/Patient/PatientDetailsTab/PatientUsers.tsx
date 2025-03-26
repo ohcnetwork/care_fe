@@ -111,7 +111,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline_primary" data-cy="assign-user-button">
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-plus" className="mr-2 size-4" />
           {t("assign_user")}
         </Button>
       </SheetTrigger>
@@ -137,7 +137,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                   <Avatar
                     name={formatName(selectedUser, true)}
                     imageUrl={selectedUser.profile_picture_url}
-                    className="h-12 w-12"
+                    className="size-12"
                   />
                   <div className="flex flex-col flex-1">
                     <TooltipComponent content={formatName(selectedUser)}>
@@ -268,7 +268,7 @@ export const PatientUsers = (props: PatientProps) => {
               <div className="flex items-start space-x-4">
                 <Avatar
                   name={formatName(user, true)}
-                  className="h-10 w-10"
+                  className="size-10"
                   imageUrl={user.profile_picture_url}
                 />
                 <div>

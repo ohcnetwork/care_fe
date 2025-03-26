@@ -103,7 +103,7 @@ export function LocationNavigation({
                   className="text-gray-950 border-gray-400 font-semibold"
                   onClick={onClearSelection}
                 >
-                  <XIcon className="h-4 w-4" />
+                  <XIcon className="size-4" />
                   {t("clear_selection")}
                 </Button>
               )}
@@ -147,7 +147,7 @@ export function LocationNavigation({
 
         {isLoadingLocations || isLoadingBeds ? (
           <div className="flex justify-center my-4">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            <Loader2 className="size-6 animate-spin text-gray-400" />
           </div>
         ) : (
           hasMore && (
@@ -158,7 +158,7 @@ export function LocationNavigation({
                 className="text-sm"
               >
                 {t("load_more")}
-                <ChevronRight className="ml-1 h-4 w-4" />
+                <ChevronRight className="ml-1 size-4" />
               </Button>
             </div>
           )

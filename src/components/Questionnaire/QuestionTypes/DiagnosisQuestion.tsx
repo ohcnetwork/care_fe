@@ -375,7 +375,7 @@ export function DiagnosisQuestion({
                     </div>
                   </div>
                   {selectedCategory === category && (
-                    <div className="h-4 w-4 rounded-full bg-primary" />
+                    <div className="size-4 rounded-full bg-primary" />
                   )}
                 </div>
               </div>
@@ -595,14 +595,14 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   variant="ghost"
                   size="icon"
                   disabled={disabled}
-                  className="h-8 w-8"
+                  className="size-8"
                 >
-                  <DotsVerticalIcon className="h-4 w-4" />
+                  <DotsVerticalIcon className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
-                  <Pencil2Icon className="h-4 w-4 mr-2" />
+                  <Pencil2Icon className="size-4 mr-2" />
                   {showNotes ? t("hide_notes") : t("add_notes")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -610,7 +610,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   className="text-destructive focus:text-destructive"
                   onClick={onRemove}
                 >
-                  <MinusCircledIcon className="h-4 w-4 mr-2" />
+                  <MinusCircledIcon className="size-4 mr-2" />
                   {t("remove_diagnosis")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -767,14 +767,14 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                 variant="ghost"
                 size="icon"
                 disabled={disabled}
-                className="h-9 w-9"
+                className="size-9"
               >
-                <DotsVerticalIcon className="h-4 w-4" />
+                <DotsVerticalIcon className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
-                <Pencil2Icon className="h-4 w-4 mr-2" />
+                <Pencil2Icon className="size-4 mr-2" />
                 {showNotes ? t("hide_notes") : t("add_notes")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -782,7 +782,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                 className="text-destructive focus:text-destructive"
                 onClick={onRemove}
               >
-                <MinusCircledIcon className="h-4 w-4 mr-2" />
+                <MinusCircledIcon className="size-4 mr-2" />
                 {t("remove_diagnosis")}
               </DropdownMenuItem>
             </DropdownMenuContent>

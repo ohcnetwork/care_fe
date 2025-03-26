@@ -49,7 +49,7 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
   return typeof feature.icon === "string" ? (
-    <Hospital className="h-4 w-4" />
+    <Hospital className="size-4" />
   ) : (
     feature.icon
   );
@@ -251,7 +251,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     {/* <AlertDialog>
                       TODO: add delete facility
                       <AlertDialogTrigger asChild>
-                        <Trash2 className="mr-2 h-4 w-4" />
+                        <Trash2 className="mr-2 size-4" />
                         {t("delete_facility")}
                       </AlertDialogTrigger>
                       <AlertDialogContent>

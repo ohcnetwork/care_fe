@@ -387,14 +387,14 @@ export function MedicationRequestQuestion({
                                 aria-label="Expand Medication Request"
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-gray-500 hover:text-gray-900"
+                                className="size-8 text-gray-500 hover:text-gray-900"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setExpandedMedicationIndex(index);
                                 }}
                                 disabled={disabled}
                               >
-                                <Pencil2Icon className="h-4 w-4" />
+                                <Pencil2Icon className="size-4" />
                               </Button>
                             )}
                             <TooltipComponent
@@ -415,10 +415,10 @@ export function MedicationRequestQuestion({
                                   disabled ||
                                   medication.status === "entered_in_error"
                                 }
-                                className="h-8 w-8"
+                                className="size-8"
                                 data-cy="remove-medication"
                               >
-                                <MinusCircledIcon className="h-4 w-4" />
+                                <MinusCircledIcon className="size-4" />
                               </Button>
                             </TooltipComponent>
                           </div>
@@ -679,7 +679,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-3 w-3 rounded-full hover:bg-transparent"
+                  className="size-3 rounded-full hover:bg-transparent"
                   onClick={handleDoseRangeClick}
                   disabled={disabled || isReadOnly}
                 >
@@ -1051,9 +1051,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           size="icon"
           onClick={onRemove}
           disabled={disabled}
-          className="h-8 w-8"
+          className="size-8"
         >
-          <MinusCircledIcon className="h-4 w-4" />
+          <MinusCircledIcon className="size-4" />
         </Button>
       </div>
     </div>

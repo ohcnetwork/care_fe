@@ -79,7 +79,7 @@ export default function FacilityOrganizationLayout({
     return (
       <div className="px-6 py-6 space-y-6">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-8 w-8/12 self-end" />
+        <Skeleton className="size-8/12 self-end" />
         <Skeleton className="h-8 w-full self-end" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <CardGridSkeleton count={6} />

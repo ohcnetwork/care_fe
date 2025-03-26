@@ -144,7 +144,7 @@ export const Comment = ({
         <div className="flex">
           <Avatar
             name={`${created_by.first_name} ${created_by.last_name}`}
-            className="w-8 h-8 rounded-full object-cover"
+            className="size-8 rounded-full object-cover"
           />
         </div>
       </TooltipComponent>

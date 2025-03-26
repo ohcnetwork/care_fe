@@ -144,7 +144,7 @@ export function LandingPage() {
             <div className="relative w-full sm:w-9/12" data-search-container>
               <div className="rounded-lg border border-gray-200 hover:shadow-lg transition-shadow">
                 <div className="flex items-center px-2 bg-white rounded-lg">
-                  <CareIcon icon="l-search" className="h-5 w-5 text-gray-400" />
+                  <CareIcon icon="l-search" className="size-5 text-gray-400" />
                   <input
                     ref={inputRef}
                     type="text"
@@ -172,7 +172,7 @@ export function LandingPage() {
                     >
                       <CareIcon
                         icon="l-times"
-                        className="h-4 w-4 text-gray-400"
+                        className="size-4 text-gray-400"
                       />
                     </Button>
                   )}
@@ -231,7 +231,7 @@ export function LandingPage() {
               <div className="rounded-full bg-green-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
                 <CareIcon
                   icon="d-health-worker"
-                  className="w-8 h-8 text-green-700"
+                  className="size-8 text-green-700"
                 />
               </div>
               <div className="flex flex-col items-center">
@@ -249,10 +249,7 @@ export function LandingPage() {
             </div>
             <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/patient_background.png')] bg-auto bg-center bg-no-repeat">
               <div className="rounded-full bg-indigo-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
-                <CareIcon
-                  icon="d-patient"
-                  className="w-8 h-8 text-indigo-700"
-                />
+                <CareIcon icon="d-patient" className="size-8 text-indigo-700" />
               </div>
               <div className="flex flex-col items-center">
                 <Button

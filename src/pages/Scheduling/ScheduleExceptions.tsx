@@ -178,7 +178,7 @@ const ScheduleExceptionItem = (
                 }}
               >
                 {isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className="size-4 animate-spin mr-2" />
                 ) : (
                   t("confirm")
                 )}

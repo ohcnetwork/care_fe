@@ -383,7 +383,7 @@ export default function LocationForm({
           form.watch("name").trim() !== "" && (
             <div className="space-y-4 mt-4">
               <Alert className="bg-blue-50 border-blue-200">
-                <Info className="h-4 w-4 text-blue-500" />
+                <Info className="size-4 text-blue-500" />
                 <AlertDescription className="text-blue-700">
                   {t("bulk_bed_creation_info")}
                 </AlertDescription>
@@ -420,7 +420,7 @@ export default function LocationForm({
                       size="sm"
                       onClick={resetToDefaultNames}
                     >
-                      <RotateCcw className="h-4 w-4 mr-2" />
+                      <RotateCcw className="size-4 mr-2" />
                       {t("reset_to_default")}
                     </Button>
                   </div>

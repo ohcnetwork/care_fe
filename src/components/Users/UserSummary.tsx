@@ -113,7 +113,7 @@ export default function UserSummaryTab({
             data-cy="edit-user-button"
             onClick={() => setShowEditUserSheet(true)}
           >
-            <CareIcon icon="l-pen" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-pen" className="mr-2 size-4" />
             {t("edit_user")}
           </Button>
         )}

@@ -538,7 +538,7 @@ export default function UserForm({
                             htmlFor="immediate"
                             className="text-base font-medium cursor-pointer flex items-center"
                           >
-                            <Lock className="h-4 w-4 mr-2" />
+                            <Lock className="size-4 mr-2" />
                             {t("set_password_now")}
                           </Label>
                           <p className="text-sm text-muted-foreground">
@@ -564,7 +564,7 @@ export default function UserForm({
                             htmlFor="email"
                             className="text-base font-medium cursor-pointer flex items-center"
                           >
-                            <Mail className="h-4 w-4 mr-2" />
+                            <Mail className="size-4 mr-2" />
                             {t("send_email_invitation")}
                           </Label>
                           <p className="text-sm text-muted-foreground">

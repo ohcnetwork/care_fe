@@ -47,7 +47,7 @@ export function NavMain({
                   ) : (
                     <Avatar
                       name={link.name}
-                      className="w-6 h-6 -m-1 rounded-sm"
+                      className="size-6 -m-1 rounded-sm"
                     />
                   )}
 

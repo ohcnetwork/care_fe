@@ -111,7 +111,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
       <SheetTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm">
-            <Building className="mr-2 h-4 w-4" />
+            <Building className="mr-2 size-4" />
             {t("manage_organization_one")}
           </Button>
         )}
@@ -141,11 +141,11 @@ export default function ManageQuestionnaireOrganizationsSheet({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-4 w-4 p-0 hover:bg-transparent"
+                    className="size-4 p-0 hover:bg-transparent"
                     onClick={() => handleToggleOrganization(org.id)}
                     disabled={isUpdating}
                   >
-                    <X className="h-3 w-3" />
+                    <X className="size-3" />
                   </Button>
                 </Badge>
               ))}
@@ -174,7 +174,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
                 <CommandGroup>
                   {isLoadingOrganizations ? (
                     <div className="flex items-center justify-center py-6">
-                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <Loader2 className="size-6 animate-spin" />
                     </div>
                   ) : (
                     availableOrganizations?.results.map((org) => (
@@ -184,7 +184,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
                         onSelect={() => handleToggleOrganization(org.id)}
                       >
                         <div className="flex flex-1 items-center gap-2">
-                          <Building className="h-4 w-4" />
+                          <Building className="size-4" />
                           <span>{org.name}</span>
                           {org.description && (
                             <span className="text-xs text-gray-500">
@@ -193,7 +193,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
                           )}
                         </div>
                         {selectedIds.includes(org.id) && (
-                          <Check className="h-4 w-4" />
+                          <Check className="size-4" />
                         )}
                       </CommandItem>
                     ))
@@ -220,7 +220,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
             <Button onClick={handleSave} disabled={isUpdating || !hasChanges}>
               {isUpdating ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" />
                   {t("saving")}
                 </>
               ) : (

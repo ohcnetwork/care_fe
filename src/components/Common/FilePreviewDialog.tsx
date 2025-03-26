@@ -338,7 +338,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       className="text-white"
                       download={`${file_state.name}.${file_state.extension}`}
                     >
-                      <CareIcon icon="l-file-download" className="h-4 w-4" />
+                      <CareIcon icon="l-file-download" className="size-4" />
                       <span>{t("download")}</span>
                     </a>
                   </Button>
@@ -357,7 +357,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   disabled={index <= 0}
                   aria-label="Previous file"
                 >
-                  <CareIcon icon="l-arrow-left" className="h-4 w-4" />
+                  <CareIcon icon="l-arrow-left" className="size-4" />
                 </Button>
               )}
               <div
@@ -431,7 +431,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   disabled={index >= uploadedFiles.length - 1}
                   aria-label={t("next_file")}
                 >
-                  <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+                  <CareIcon icon="l-arrow-right" className="size-4" />
                 </Button>
               )}
             </div>

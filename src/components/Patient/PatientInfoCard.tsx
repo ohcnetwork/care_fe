@@ -67,7 +67,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
         >
           <div className="flex justify-items-start gap-5 lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
-              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:w-24 md:h-24 rounded">
+              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:size-24 rounded">
                 <Avatar name={patient.name} className="w-full h-full" />
               </div>
             </div>
@@ -85,7 +85,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {patient.name}
                   <CareIcon
                     icon="l-external-link-alt"
-                    className="w-3 h-3 opacity-50 mt-1"
+                    className="size-3 opacity-50 mt-1"
                   />
                 </Link>
                 <div className="my-[2px] text-sm font-semibold text-secondary-600">
@@ -124,7 +124,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {patient.name}
                   <CareIcon
                     icon="l-external-link-alt"
-                    className="w-4 h-4 opacity-70"
+                    className="size-4 opacity-70"
                   />
                 </Link>
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
@@ -195,14 +195,14 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             props.encounter.status,
                           ) ? (
                             <CircleCheck
-                              className="w-4 h-4 text-green-300"
+                              className="size-4 text-green-300"
                               fill="green"
                             />
                           ) : (
-                            <CircleDashed className="w-4 h-4 text-yellow-500" />
+                            <CircleDashed className="size-4 text-yellow-500" />
                           )}
                           {t(`encounter_status__${props.encounter.status}`)}
-                          <ChevronDown className="h-3 w-3 opacity-50" />
+                          <ChevronDown className="size-3 opacity-50" />
                         </Badge>
                       </div>
                     </PopoverTrigger>
@@ -239,13 +239,13 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           title={`Encounter Class: ${props.encounter.encounter_class}`}
                         >
                           <BedSingle
-                            className="w-4 h-4 text-blue-400"
+                            className="size-4 text-blue-400"
                             fill="#93C5FD"
                           />
                           {t(
                             `encounter_class__${props.encounter.encounter_class}`,
                           )}
-                          <ChevronDown className="h-3 w-3 opacity-50" />
+                          <ChevronDown className="size-3 opacity-50" />
                         </Badge>
                       </div>
                     </PopoverTrigger>
@@ -279,7 +279,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       `encounter_priority__${props.encounter.priority.toLowerCase()}`,
                     )}`}
                   >
-                    <Clock className="w-4 h-4 text-yellow-500" />
+                    <Clock className="size-4 text-yellow-500" />
                     {t(
                       `encounter_priority__${props.encounter.priority.toLowerCase()}`,
                     )}
@@ -291,7 +291,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       variant="outline"
                       title={`Blood Group: ${patient.blood_group?.replace("_", " ")}`}
                     >
-                      <Droplet className="w-4 h-4 text-red-300" fill="red" />
+                      <Droplet className="size-4 text-red-300" fill="red" />
                       {patient.blood_group?.replace("_", " ")}
                     </Badge>
                   )}
@@ -307,7 +307,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       >
                         <CareIcon
                           icon="l-signout"
-                          className="w-4 h-4 text-blue-400"
+                          className="size-4 text-blue-400"
                         />
                         {t(
                           `encounter_discharge_disposition__${encounter.hospitalization.discharge_disposition}`,
@@ -332,7 +332,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
                               variant="outline"
                             >
-                              <Building className="w-4 h-4 text-blue-400" />
+                              <Building className="size-4 text-blue-400" />
                               Add Organizations
                             </Badge>
                           )}
@@ -359,10 +359,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           >
                             <CareIcon
                               icon="l-location-point"
-                              className="h-4 w-4 text-green-600"
+                              className="size-4 text-green-600"
                             />
                             {props.encounter.current_location.name}
-                            <ChevronDown className="h-3 w-3 opacity-50" />
+                            <ChevronDown className="size-3 opacity-50" />
                           </Badge>
                         </div>
                       </PopoverTrigger>
@@ -381,7 +381,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                                 <div>
                                   <CareIcon
                                     icon="l-history"
-                                    className="w-4 h-4 text-gray-700"
+                                    className="size-4 text-gray-700"
                                   />
                                   <Button
                                     variant="link"
@@ -425,7 +425,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
                             <CareIcon
                               icon="l-location-point"
-                              className="h-4 w-4 text-green-600"
+                              className="size-4 text-green-600"
                             />
                             {t("add_location")}
                           </div>
@@ -442,7 +442,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       encounterId={props.encounter.id}
                       trigger={
                         <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
-                          <SignatureIcon className="h-4 w-4 text-green-600" />
+                          <SignatureIcon className="size-4 text-green-600" />
                           {t("manage_consents")}
                         </div>
                       }
@@ -468,7 +468,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     {inactiveEncounterStatus.includes(encounter.status)
                       ? t("actions")
                       : t("update")}
-                    <ChevronDown className="ml-2 h-4 w-4" />
+                    <ChevronDown className="ml-2 size-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -496,7 +496,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
         variant="outline"
         title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
       >
-        <Building className="w-4 h-4 text-blue-400" />
+        <Building className="size-4 text-blue-400" />
         {org.name}
       </Badge>
     );

@@ -82,7 +82,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         onClick={handleCreatePatient}
         data-cy="create-new-patient-button"
       >
-        <CareIcon icon="l-plus" className="h-4 w-4" />
+        <CareIcon icon="l-plus" className="size-4" />
         {t("add_new_patient")}
         <kbd
           className={cn(

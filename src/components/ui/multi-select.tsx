@@ -128,12 +128,12 @@ export const MultiSelect = React.forwardRef<
                           {option?.icon && (
                             <CareIcon
                               icon={option.icon}
-                              className="h-4 w-4 mr-2"
+                              className="size-4 mr-2"
                             />
                           )}
                           {option?.label}
                           <XCircle
-                            className="ml-2 h-4 w-4 cursor-pointer"
+                            className="ml-2 size-4 cursor-pointer"
                             onClick={(event) => {
                               event.stopPropagation();
                               toggleOption(value);
@@ -205,7 +205,7 @@ export const MultiSelect = React.forwardRef<
                         {option?.icon && (
                           <CareIcon
                             icon={option.icon}
-                            className="mr-2 h-4 w-4"
+                            className="mr-2 size-4"
                           />
                         )}
                         <span>{option.label}</span>

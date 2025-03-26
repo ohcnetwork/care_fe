@@ -84,7 +84,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           </Link>
         </div>
         <CardDescription className="flex items-center">
-          <CareIcon icon="l-clock" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-clock" className="mr-2 size-4" />
           {encounter.period.start &&
             format(new Date(encounter.period.start), "PPp")}
         </CardDescription>
@@ -115,7 +115,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
               className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
             >
               {t("view_details")}
-              <CareIcon icon="l-arrow-right" className="ml-1 h-4 w-4" />
+              <CareIcon icon="l-arrow-right" className="ml-1 size-4" />
             </Link>
           </div>
         </div>

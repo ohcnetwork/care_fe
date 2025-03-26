@@ -441,7 +441,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 onClick={() => remove(index)}
                 className="h-10 px-2 flex sm:hidden w-1/12 justify-self-end"
               >
-                <CareIcon icon="l-trash" className="h-4 w-4 text-destructive" />
+                <CareIcon icon="l-trash" className="size-4 text-destructive" />
               </Button>
 
               <FormField
@@ -517,7 +517,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 onClick={() => remove(index)}
                 className="h-10 px-2 hidden sm:flex"
               >
-                <CareIcon icon="l-trash" className="h-4 w-4 text-destructive" />
+                <CareIcon icon="l-trash" className="size-4 text-destructive" />
               </Button>
             </div>
           ))}

@@ -73,7 +73,7 @@ const MedicineListItem = ({
         <Checkbox
           checked={isSelected}
           onCheckedChange={onSelect}
-          className="mt-1 mr-6 border-gray-800 h-5 w-5"
+          className="mt-1 mr-6 border-gray-800 size-5"
           aria-label="Select for administration"
         />
       </div>
@@ -226,7 +226,7 @@ export function MedicineAdminSheet({
               {t("administer_medicines")}
             </SheetTitle>
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
               <Input
                 placeholder={t("search_medicine")}
                 value={search}

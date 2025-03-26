@@ -455,7 +455,7 @@ export default function FacilityForm({
               <>
                 <CareIcon
                   icon="l-spinner"
-                  className="mr-2 h-4 w-4 animate-spin"
+                  className="mr-2 size-4 animate-spin"
                 />
                 {t("updating_facility")}
               </>
@@ -464,10 +464,7 @@ export default function FacilityForm({
             )
           ) : isPending ? (
             <>
-              <CareIcon
-                icon="l-spinner"
-                className="mr-2 h-4 w-4 animate-spin"
-              />
+              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
               {t("creating_facility")}
             </>
           ) : (

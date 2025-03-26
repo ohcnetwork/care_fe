@@ -143,7 +143,7 @@ export default function ManageQuestionnaireTagsSheet({
       <SheetTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm">
-            <Hash className="mr-2 h-4 w-4" />
+            <Hash className="mr-2 size-4" />
             {t("manage_tags")}
           </Button>
         )}
@@ -169,11 +169,11 @@ export default function ManageQuestionnaireTagsSheet({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-4 w-4 p-0 hover:bg-transparent"
+                    className="size-4 p-0 hover:bg-transparent"
                     onClick={() => handleToggleTag(tag.slug)}
                     disabled={isUpdating}
                   >
-                    <X className="h-3 w-3" />
+                    <X className="size-3" />
                   </Button>
                 </Badge>
               ))}
@@ -192,7 +192,7 @@ export default function ManageQuestionnaireTagsSheet({
                   variant="outline"
                   className="w-full justify-start text-left font-normal"
                 >
-                  <Hash className="mr-2 h-4 w-4" />
+                  <Hash className="mr-2 size-4" />
                   <span>{t("search_tags")}</span>
                 </Button>
               </PopoverTrigger>
@@ -211,7 +211,7 @@ export default function ManageQuestionnaireTagsSheet({
                     <CommandGroup>
                       {isLoading ? (
                         <div className="flex items-center justify-center py-6">
-                          <Loader2 className="h-6 w-6 animate-spin" />
+                          <Loader2 className="size-6 animate-spin" />
                         </div>
                       ) : (
                         availableTags?.results?.map((tag) => (
@@ -221,11 +221,11 @@ export default function ManageQuestionnaireTagsSheet({
                             onSelect={() => handleToggleTag(tag.slug)}
                           >
                             <div className="flex flex-1 items-center gap-2">
-                              <Hash className="h-4 w-4" />
+                              <Hash className="size-4" />
                               <span>{tag.name}</span>
                             </div>
                             {selectedSlugs.includes(tag.slug) && (
-                              <Check className="h-4 w-4" />
+                              <Check className="size-4" />
                             )}
                           </CommandItem>
                         ))
@@ -250,12 +250,12 @@ export default function ManageQuestionnaireTagsSheet({
                 className="flex w-full items-center justify-between"
               >
                 <div className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
+                  <Plus className="size-4" />
                   <span>{t("create_new_tag")}</span>
                 </div>
                 <CareIcon
                   icon={isCreateOpen ? "l-angle-up" : "l-angle-down"}
-                  className="h-4 w-4"
+                  className="size-4"
                 />
               </Button>
             </CollapsibleTrigger>
@@ -285,7 +285,7 @@ export default function ManageQuestionnaireTagsSheet({
               >
                 {isCreating ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 size-4 animate-spin" />
                     {t("creating")}
                   </>
                 ) : (
@@ -310,7 +310,7 @@ export default function ManageQuestionnaireTagsSheet({
             <Button onClick={handleSave} disabled={isUpdating || !hasChanges}>
               {isUpdating ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" />
                   {t("saving")}
                 </>
               ) : (

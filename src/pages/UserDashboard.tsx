@@ -68,7 +68,7 @@ export default function UserDashboard() {
             <Avatar
               name={formatName(user, true)}
               imageUrl={user.read_profile_picture_url}
-              className="h-20 w-20 md:h-24 md:w-24 rounded-full"
+              className="size-20 md:size-24 rounded-full"
             />
             <div className="space-y-1 text-left">
               <div>
@@ -101,7 +101,7 @@ export default function UserDashboard() {
                   href="/admin/questionnaire"
                   className="gap-2 text-inherit flex items-center"
                 >
-                  <User2Icon className="h-4 w-4" />
+                  <User2Icon className="size-4" />
                   {t("admin_dashboard")}
                 </Link>
               </Button>
@@ -123,7 +123,7 @@ export default function UserDashboard() {
                       href="/admin/questionnaire"
                       className="flex items-center gap-2 w-full text-inherit"
                     >
-                      <User2Icon className="h-4 w-4" />
+                      <User2Icon className="size-4" />
                       {t("admin_dashboard")}
                     </Link>
                   </DropdownMenuItem>
@@ -133,7 +133,7 @@ export default function UserDashboard() {
                     href={`/users/${user.username}`}
                     className="flex items-center gap-2 w-full text-inherit"
                   >
-                    <SquarePen className="h-4 w-4" />
+                    <SquarePen className="size-4" />
                     {t("edit_profile")}
                   </Link>
                 </DropdownMenuItem>
@@ -141,7 +141,7 @@ export default function UserDashboard() {
                   className="cursor-pointer flex items-center gap-2 text-xs w-full sm:w-auto"
                   onClick={signOut}
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="size-4" />
                   {t("sign_out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -194,7 +194,7 @@ export default function UserDashboard() {
                         <CardContent className="flex items-center gap-3 p-3 md:p-4">
                           <Avatar
                             name={facility.name}
-                            className="h-12 w-12 md:h-14 md:w-14"
+                            className="size-12 md:size-14"
                           />
                           <div className="flex-1 min-w-0">
                             <h3 className="font-medium truncate text-sm md:text-base">
@@ -204,7 +204,7 @@ export default function UserDashboard() {
                               {t("view_facility_details")}
                             </p>
                           </div>
-                          <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
+                          <ChevronRight className="size-4 md:size-5 text-gray-500" />
                         </CardContent>
                       </Card>
                     </Link>
@@ -227,7 +227,7 @@ export default function UserDashboard() {
                       <CardContent className="flex items-center gap-3 p-3 md:p-4">
                         <Avatar
                           name={association.name}
-                          className="h-12 w-12 md:h-14 md:w-14"
+                          className="size-12 md:size-14"
                         />
                         <div className="flex-1 min-w-0">
                           <h3 className="font-medium truncate text-sm md:text-base">
@@ -241,7 +241,7 @@ export default function UserDashboard() {
                               )}
                           </p>
                         </div>
-                        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
+                        <ChevronRight className="size-4 md:size-5 text-gray-500" />
                       </CardContent>
                     </Card>
                   </Link>
@@ -263,7 +263,7 @@ export default function UserDashboard() {
                       <CardContent className="flex items-center gap-3 p-3 md:p-4">
                         <Avatar
                           name={governanceOrg.name}
-                          className="h-12 w-12 md:h-14 md:w-14"
+                          className="size-12 md:size-14"
                         />
                         <div className="flex-1 min-w-0">
                           <h3 className="font-medium truncate text-sm md:text-base">
@@ -277,7 +277,7 @@ export default function UserDashboard() {
                               )}
                           </p>
                         </div>
-                        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
+                        <ChevronRight className="size-4 md:size-5 text-gray-500" />
                       </CardContent>
                     </Card>
                   </Link>

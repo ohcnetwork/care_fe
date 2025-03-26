@@ -92,7 +92,7 @@ const CustomNode = ({ data }: NodeProps) => {
         <div className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-md shrink-0">
-              <Icon className="h-5 w-5" />
+              <Icon className="size-5" />
             </div>
             <div className="flex-1 min-w-0">
               <TooltipProvider>
@@ -128,9 +128,9 @@ const CustomNode = ({ data }: NodeProps) => {
                 </span>
                 {data.form !== "facility" &&
                   (data.isExpanded ? (
-                    <ChevronDown className="h-4 w-4 text-gray-600" />
+                    <ChevronDown className="size-4 text-gray-600" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 text-gray-600" />
+                    <ChevronRight className="size-4 text-gray-600" />
                   ))}
               </Button>
             </div>
@@ -599,12 +599,12 @@ function LocationMapContent({
           >
             {expandedNodes.length === locations.length ? (
               <>
-                <ChevronUp className="h-4 w-4" />
+                <ChevronUp className="size-4" />
                 {t("collapse_all")}
               </>
             ) : (
               <>
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="size-4" />
                 {t("expand_all")}
               </>
             )}

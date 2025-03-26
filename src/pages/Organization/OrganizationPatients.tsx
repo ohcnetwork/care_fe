@@ -145,7 +145,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                             <div className="flex items-start space-x-4">
                               <Avatar
                                 name={patient.name || ""}
-                                className="h-10 w-10"
+                                className="size-10"
                               />
                               <div>
                                 <h3 className="text-sm font-medium text-gray-900">
@@ -165,7 +165,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                               <div>
                                 <CareIcon
                                   icon="l-arrow-up-right"
-                                  className="h-4 w-4"
+                                  className="size-4"
                                 />
                               </div>
                             </Button>

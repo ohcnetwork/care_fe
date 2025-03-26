@@ -374,7 +374,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             inputRef.current?.focus();
           }}
         >
-          <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-times" className="mr-2 size-4" />
           {t("clear_search")}
         </Button>
       )}

@@ -322,14 +322,14 @@ export function MedicationStatementQuestion({
                                 aria-label="Expand Medication Statement"
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-gray-500 hover:text-gray-900"
+                                className="size-8 text-gray-500 hover:text-gray-900"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setExpandedMedicationIndex(index);
                                 }}
                                 disabled={disabled}
                               >
-                                <Pencil2Icon className="h-4 w-4" />
+                                <Pencil2Icon className="size-4" />
                               </Button>
                             )}
                             <TooltipComponent
@@ -350,9 +350,9 @@ export function MedicationStatementQuestion({
                                   disabled ||
                                   medication.status === "entered_in_error"
                                 }
-                                className="h-8 w-8"
+                                className="size-8"
                               >
-                                <MinusCircledIcon className="h-4 w-4" />
+                                <MinusCircledIcon className="size-4" />
                               </Button>
                             </TooltipComponent>
                           </div>
@@ -634,9 +634,9 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           size="icon"
           onClick={onRemove}
           disabled={disabled}
-          className="h-8 w-8"
+          className="size-8"
         >
-          <MinusCircledIcon className="h-4 w-4" />
+          <MinusCircledIcon className="size-4" />
         </Button>
       </div>
     </div>

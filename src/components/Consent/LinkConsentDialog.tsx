@@ -215,7 +215,7 @@ export default function LinkConsentDialog({
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" className="gap-2">
-            <Plus className="h-4 w-4" />
+            <Plus className="size-4" />
             {t("link_consent")}
           </Button>
         )}

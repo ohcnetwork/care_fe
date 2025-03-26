@@ -286,7 +286,7 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="link"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn("size-7", className)}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
@@ -295,7 +295,7 @@ const SidebarTrigger = React.forwardRef<
     >
       {isMobile ? (
         <svg
-          className="w-8 h-8"
+          className="size-8"
           stroke="currentColor"
           fill="none"
           viewBox="0 0 24 24"

@@ -116,7 +116,7 @@ export default function LinkUserSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="primary_gradient">
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-plus" className="mr-2 size-4" />
           {t("link_user")}
         </Button>
       </SheetTrigger>
@@ -142,7 +142,7 @@ export default function LinkUserSheet({
                   <Avatar
                     name={`${selectedUser.first_name} ${selectedUser.last_name}`}
                     imageUrl={selectedUser.profile_picture_url}
-                    className="h-12 w-12"
+                    className="size-12"
                   />
                   <div className="w-3/4">
                     <p className="font-medium text-lg truncate">

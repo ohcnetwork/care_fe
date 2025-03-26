@@ -184,7 +184,7 @@ export default function MedicationRequestTable({
                       data-cy="edit-prescription"
                     >
                       <Link href={`questionnaire/medication_request`}>
-                        <PencilIcon className="mr-2 h-4 w-4" />
+                        <PencilIcon className="mr-2 size-4" />
                         {t("edit")}
                       </Link>
                     </Button>
@@ -227,7 +227,7 @@ export default function MedicationRequestTable({
                         >
                           <CareIcon
                             icon={showStopped ? "l-eye-slash" : "l-eye"}
-                            className="h-4 w-4"
+                            className="size-4"
                           />
                           <span className="text-sm underline">
                             {showStopped ? t("hide") : t("show")}{" "}

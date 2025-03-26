@@ -53,7 +53,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
         <div className="flex items-center">
           <Bed
             className={cn(
-              "h-4 w-4 mr-2",
+              "size-4 mr-2",
               isOccupied ? "text-blue-600" : "text-green-600",
             )}
           />
@@ -107,10 +107,10 @@ function LocationCard({ location, onClick }: LocationCardProps) {
     >
       <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
         <div className="flex items-center">
-          <Icon className="h-4 w-4 mr-2 text-gray-600" />
+          <Icon className="size-4 mr-2 text-gray-600" />
           <span className="font-medium">{location.name}</span>
         </div>
-        <ArrowRight className="h-4 w-4 text-gray-400" />
+        <ArrowRight className="size-4 text-gray-400" />
       </div>
 
       <div className="p-4">

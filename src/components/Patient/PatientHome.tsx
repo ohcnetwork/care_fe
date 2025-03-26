@@ -90,7 +90,7 @@ export const PatientHome = (props: {
               <div className="flex flex-col justify-between gap-4 gap-y-2 md:flex-row">
                 <div className="flex flex-col gap-4 md:flex-row">
                   <div className="flex flex-row gap-x-4">
-                    <div className="h-10 w-10 shrink-0 md:h-14 md:w-14">
+                    <div className="size-10 shrink-0 md:size-14">
                       <Avatar
                         className="size-10 font-semibold text-secondary-800 md:size-auto"
                         name={patientData.name}

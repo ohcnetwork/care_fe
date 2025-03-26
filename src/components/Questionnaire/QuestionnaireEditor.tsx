@@ -228,7 +228,7 @@ function OrganizationSelector({
               variant="secondary"
               className="flex items-center gap-1"
             >
-              <Building className="h-3 w-3" />
+              <Building className="size-3" />
               {org.name}
             </Badge>
           ))}
@@ -242,7 +242,7 @@ function OrganizationSelector({
           questionnaireId={id}
           trigger={
             <Button variant="outline" className="w-full justify-start">
-              <Building className="mr-2 h-4 w-4" />
+              <Building className="mr-2 size-4" />
               {t("manage_organization_one")}
             </Button>
           }
@@ -267,10 +267,10 @@ function OrganizationSelector({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
+                  className="size-4 p-0 hover:bg-transparent"
                   onClick={() => selection.onToggle(org.id)}
                 >
-                  <X className="h-3 w-3" />
+                  <X className="size-3" />
                 </Button>
               </Badge>
             ))
@@ -317,7 +317,7 @@ function TagSelector({
               variant="secondary"
               className="flex items-center gap-1"
             >
-              <Building className="h-3 w-3" />
+              <Building className="size-3" />
               {tag.name}
             </Badge>
           ))}
@@ -329,7 +329,7 @@ function TagSelector({
           questionnaire={questionnaire}
           trigger={
             <Button variant="outline" className="w-full justify-start">
-              <Tags className="mr-2 h-4 w-4" />
+              <Tags className="mr-2 size-4" />
               {t("manage_tags")}
             </Button>
           }
@@ -354,10 +354,10 @@ function TagSelector({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
+                  className="size-4 p-0 hover:bg-transparent"
                   onClick={() => selection.onToggle(tag.id)}
                 >
-                  <X className="h-3 w-3" />
+                  <X className="size-3" />
                 </Button>
               </Badge>
             ))
@@ -428,7 +428,7 @@ function QuestionnaireProperties({
           questionnaire={questionnaire}
           trigger={
             <Button variant="outline" className="w-full justify-start">
-              <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-copy" className="mr-2 size-4" />
               {t("clone_questionnaire")}
             </Button>
           }
@@ -646,7 +646,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   if (error) {
     return (
       <Alert variant="destructive">
-        <CareIcon icon="l-exclamation-circle" className="h-4 w-4" />
+        <CareIcon icon="l-exclamation-circle" className="size-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           Failed to load questionnaire. Please try again later.
@@ -657,7 +657,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   if (!questionnaire) {
     return (
       <Alert>
-        <CareIcon icon="l-info-circle" className="h-4 w-4" />
+        <CareIcon icon="l-info-circle" className="size-4" />
         <AlertTitle>Not Found</AlertTitle>
         <AlertDescription>
           {t("no_requested_questionnaires_found")}
@@ -732,7 +732,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             {t("cancel")}
           </Button>
           <Button onClick={handleSave} disabled={isCreating || isUpdating}>
-            <CareIcon icon="l-save" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-save" className="mr-2 size-4" />
             {id ? t("save") : t("create")}
           </Button>
         </div>
@@ -744,11 +744,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       >
         <TabsList className="mb-4">
           <TabsTrigger value="edit">
-            <ViewIcon className="w-4 h-4 mr-2" />
+            <ViewIcon className="size-4 mr-2" />
             {t("edit_form")}
           </TabsTrigger>
           <TabsTrigger value="preview">
-            <SquarePenIcon className="w-4 h-4 mr-2" />
+            <SquarePenIcon className="size-4 mr-2" />
             {t("form_preview")}
           </TabsTrigger>
         </TabsList>
@@ -930,7 +930,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       );
                     }}
                   >
-                    <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                    <CareIcon icon="l-plus" className="mr-2 size-4" />
                     {t("add_question")}
                   </Button>
                 </CardHeader>
@@ -1157,15 +1157,15 @@ function QuestionEditor({
             </div>
           </div>
           {isExpanded ? (
-            <ChevronsDownUp className="h-4 w-4 text-gray-500" />
+            <ChevronsDownUp className="size-4 text-gray-500" />
           ) : (
-            <ChevronsUpDown className="h-4 w-4 text-gray-500" />
+            <ChevronsUpDown className="size-4 text-gray-500" />
           )}
         </CollapsibleTrigger>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <CareIcon icon="l-ellipsis-v" className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="size-8">
+              <CareIcon icon="l-ellipsis-v" className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -1176,7 +1176,7 @@ function QuestionEditor({
                   onMoveUp?.();
                 }}
               >
-                <ChevronUp className="mr-2 h-4 w-4" />
+                <ChevronUp className="mr-2 size-4" />
                 {t("move_up")}
               </DropdownMenuItem>
             )}
@@ -1187,7 +1187,7 @@ function QuestionEditor({
                   onMoveDown?.();
                 }}
               >
-                <ChevronDown className="mr-2 h-4 w-4" />
+                <ChevronDown className="mr-2 size-4" />
                 {t("move_down")}
               </DropdownMenuItem>
             )}
@@ -1199,7 +1199,7 @@ function QuestionEditor({
               }}
               className="text-destructive"
             >
-              <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
               {t("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -1580,7 +1580,7 @@ function QuestionEditor({
                                 updateField("answer_option", newOptions);
                               }}
                             >
-                              <CareIcon icon="l-times" className="h-4 w-4" />
+                              <CareIcon icon="l-times" className="size-4" />
                             </Button>
                           </div>
                         </div>
@@ -1598,7 +1598,7 @@ function QuestionEditor({
                         updateField("answer_option", newOptions);
                       }}
                     >
-                      <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-plus" className="mr-2 size-4" />
                       {t("add_option")}
                     </Button>
                   </CardContent>
@@ -1657,7 +1657,7 @@ function QuestionEditor({
                     );
                   }}
                 >
-                  <CareIcon icon="l-plus" className="h-4 w-4" />
+                  <CareIcon icon="l-plus" className="size-4" />
                   {t("add_sub_question")}
                 </Button>
               </div>
@@ -1920,7 +1920,7 @@ function QuestionEditor({
                         updateField("enable_when", newConditions);
                       }}
                     >
-                      <CareIcon icon="l-times" className="h-4 w-4" />
+                      <CareIcon icon="l-times" className="size-4" />
                     </Button>
                   </div>
                 </div>
@@ -1940,7 +1940,7 @@ function QuestionEditor({
                   ]);
                 }}
               >
-                <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
                 {t("add_condition")}
               </Button>
             </div>

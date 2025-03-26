@@ -119,7 +119,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                               {t("view_details")}
                               <CareIcon
                                 icon="l-arrow-right"
-                                className="h-4 w-4"
+                                className="size-4"
                               />
                             </Link>
                           </Button>

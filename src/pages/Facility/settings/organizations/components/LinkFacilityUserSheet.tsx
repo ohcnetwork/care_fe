@@ -115,7 +115,7 @@ export default function LinkFacilityUserSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button>
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-plus" className="mr-2 size-4" />
           Link User
         </Button>
       </SheetTrigger>
@@ -141,7 +141,7 @@ export default function LinkFacilityUserSheet({
                   <Avatar
                     imageUrl={selectedUser.profile_picture_url}
                     name={formatName(selectedUser, true)}
-                    className="h-12 w-12"
+                    className="size-12"
                   />
                   <div className="w-3/4">
                     <p className="font-medium text-lg truncate">
