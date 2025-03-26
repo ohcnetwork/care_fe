@@ -21,8 +21,10 @@ import { BooleanQuestion } from "./BooleanQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
 import { DateQuestion } from "./DateQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
+import { TimeOfDeathQuestion } from "./DeathQuestion";
 import { DiagnosisQuestion } from "./DiagnosisQuestion";
 import { EncounterQuestion } from "./EncounterQuestion";
+import { FilesQuestion } from "./FileQuestion";
 import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
 import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
@@ -190,6 +192,15 @@ export function QuestionInput({
               );
             }
             return <span>{t("questionnaire_no_encounter")}</span>;
+          case "time_of_death":
+            return <TimeOfDeathQuestion {...commonProps} />;
+          case "files":
+            if (encounterId && facilityId) {
+              return (
+                <FilesQuestion {...commonProps} encounterId={encounterId} />
+              );
+            }
+            return <span>{t("questionnaire_files_no_encounter")}</span>;
         }
         return null;
 

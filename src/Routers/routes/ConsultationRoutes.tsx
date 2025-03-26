@@ -25,8 +25,14 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId/responses/print":
-    ({ encounterId, patientId, questionnaireId, facilityId }) => {
+  ...[
+    "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId/responses/print",
+    "/organization/:organizationId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId/responses/print",
+    "/facility/:facilityId/patient/:patientId/questionnaire/:questionnaireId/responses/print",
+    "/organization/:organizationId/patient/:patientId/questionnaire/:questionnaireId/responses/print",
+    "/patient/:patientId/questionnaire/:questionnaireId/responses/print",
+  ].reduce((acc: AppRoutes, path) => {
+    acc[path] = ({ encounterId, patientId, questionnaireId, facilityId }) => {
       return (
         <PrintQuestionnaireQuestionnaireResponses
           encounterId={encounterId}
@@ -35,9 +41,22 @@ const consultationRoutes: AppRoutes = {
           facilityId={facilityId}
         />
       );
-    },
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print":
-    ({ encounterId, patientId, questionnaireResponseId, facilityId }) => {
+    };
+    return acc;
+  }, {}),
+  ...[
+    "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print",
+    "/organization/:organizationId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print",
+    "/facility/:facilityId/patient/:patientId/questionnaire_response/:questionnaireResponseId/print",
+    "/organization/:organizationId/patient/:patientId/questionnaire_response/:questionnaireResponseId/print",
+    "/patient/:patientId/questionnaire_response/:questionnaireResponseId/print",
+  ].reduce((acc: AppRoutes, path) => {
+    acc[path] = ({
+      encounterId,
+      patientId,
+      questionnaireResponseId,
+      facilityId,
+    }) => {
       return (
         <PrintQuestionnaireResponse
           encounterId={encounterId}
@@ -46,7 +65,9 @@ const consultationRoutes: AppRoutes = {
           facilityId={facilityId}
         />
       );
-    },
+    };
+    return acc;
+  }, {}),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/medicines/administrations/print":
     ({ facilityId, encounterId, patientId }) => (
       <PrintMedicationAdministration

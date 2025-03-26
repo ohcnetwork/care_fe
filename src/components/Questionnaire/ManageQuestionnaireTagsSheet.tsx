@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Hash, Loader2, Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -56,18 +56,19 @@ export default function ManageQuestionnaireTagsSheet({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [popOverOpen, setPopOverOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [newTagSlug, setNewTagSlug] = useState("");
+  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
 
   const { data: availableTags, isLoading } = useQuery({
     queryKey: ["questionnaire_tags", searchQuery],
     queryFn: query.debounced(questionnaireApi.tags.list, {
       queryParams: searchQuery !== "" ? { name: searchQuery } : undefined,
     }),
-    enabled: open,
+    enabled: popOverOpen,
   });
 
   const { mutate: setTags, isPending: isUpdating } = useMutation({
@@ -78,7 +79,7 @@ export default function ManageQuestionnaireTagsSheet({
       queryClient.invalidateQueries({
         queryKey: ["questionnaireDetail", questionnaire.slug],
       });
-      toast.success("Tags updated successfully");
+      toast.success(t("tag_updated_successfully"));
       setOpen(false);
     },
   });
@@ -90,36 +91,56 @@ export default function ManageQuestionnaireTagsSheet({
       queryClient.invalidateQueries({
         queryKey: ["questionnaire_tags"],
       });
-      setSelectedSlugs((current) => [...current, tagData.slug]);
+      setSelectedTags((current) => [...current, tagData]);
       setNewTagName("");
       setNewTagSlug("");
       setIsCreateOpen(false);
-      toast.success("Tag created successfully");
+      toast.success(t("tag_created_successfully"));
     },
   });
 
-  // Initialize selected slugs from questionnaire tags
+  // Initialize selected tags from questionnaire tags
   useEffect(() => {
     if (questionnaire.tags) {
-      setSelectedSlugs(questionnaire.tags.map((tag) => tag.slug));
+      setSelectedTags(questionnaire.tags);
     }
   }, [questionnaire.tags]);
 
-  const handleToggleTag = (tagSlug: string) => {
-    setSelectedSlugs((current) =>
-      current.includes(tagSlug)
-        ? current.filter((slug) => slug !== tagSlug)
-        : [...current, tagSlug],
+  // Simple merge of selected tags with available tags
+  const tagOptions = useMemo(() => {
+    if (!availableTags?.results) return selectedTags;
+    if (searchQuery) return availableTags.results;
+
+    const availableSlugs = new Set(
+      availableTags.results.map((tag) => tag.slug),
     );
+
+    // Add selected tags that aren't in availableTags
+    const selectedNotInAvailable = selectedTags.filter(
+      (selectedTag) => !availableSlugs.has(selectedTag.slug),
+    );
+
+    return [...availableTags.results, ...selectedNotInAvailable];
+  }, [availableTags, selectedTags, searchQuery]);
+
+  const handleToggleTag = (tagSlug: string) => {
+    setSelectedTags((current) => {
+      const newTag = tagOptions?.find((tag) => tag.slug === tagSlug);
+      return current.some((tag) => tag.slug === tagSlug)
+        ? current.filter((tag) => tag.slug !== tagSlug)
+        : newTag
+          ? [...current, newTag]
+          : current;
+    });
   };
 
   const handleSave = () => {
-    setTags({ tags: selectedSlugs });
+    setTags({ tags: selectedTags.map((tag) => tag.slug) });
   };
 
   const handleCreateTag = () => {
     if (!newTagName.trim() || !newTagSlug.trim()) {
-      toast.error("Name and slug are required");
+      toast.error(t("name_and_slug_are_required"));
       return;
     }
 
@@ -129,14 +150,12 @@ export default function ManageQuestionnaireTagsSheet({
     });
   };
 
-  const selectedTags = availableTags?.results.filter((tag) =>
-    selectedSlugs.includes(tag.slug),
-  );
-
   const hasChanges =
     new Set(questionnaire.tags.map((tag) => tag.slug)).size !==
-      new Set(selectedSlugs).size ||
-    !questionnaire.tags.every((tag) => selectedSlugs.includes(tag.slug));
+      new Set(selectedTags).size ||
+    !questionnaire.tags.every((tag) =>
+      selectedTags.some((st) => st.slug === tag.slug),
+    );
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -186,7 +205,16 @@ export default function ManageQuestionnaireTagsSheet({
           {/* Tag Selector */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium">{t("add_tags")}</h3>
-            <Popover modal={true}>
+            <Popover
+              modal={true}
+              open={popOverOpen}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setSearchQuery("");
+                }
+                setPopOverOpen(open);
+              }}
+            >
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -214,7 +242,7 @@ export default function ManageQuestionnaireTagsSheet({
                           <Loader2 className="h-6 w-6 animate-spin" />
                         </div>
                       ) : (
-                        availableTags?.results?.map((tag) => (
+                        tagOptions?.map((tag) => (
                           <CommandItem
                             key={tag.slug}
                             value={tag.slug}
@@ -224,7 +252,7 @@ export default function ManageQuestionnaireTagsSheet({
                               <Hash className="h-4 w-4" />
                               <span>{tag.name}</span>
                             </div>
-                            {selectedSlugs.includes(tag.slug) && (
+                            {selectedTags.some((t) => t.slug === tag.slug) && (
                               <Check className="h-4 w-4" />
                             )}
                           </CommandItem>
@@ -301,7 +329,7 @@ export default function ManageQuestionnaireTagsSheet({
             <Button
               variant="outline"
               onClick={() => {
-                setSelectedSlugs(questionnaire.tags.map((tag) => tag.slug));
+                setSelectedTags(questionnaire.tags);
                 setOpen(false);
               }}
             >
