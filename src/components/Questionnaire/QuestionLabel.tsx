@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 import { Label } from "@/components/ui/label";
 
 import type { Question } from "@/types/questionnaire/question";
@@ -32,11 +34,12 @@ export function QuestionLabel({
           )}
           <span>
             <span
-              className={
-                question.type === "structured" || groupLabel || !isSubQuestion
-                  ? "text-gray-950 font-semibold"
-                  : ""
-              }
+              className={cn({
+                "text-gray-950 font-semibold":
+                  question.type === "structured" ||
+                  groupLabel ||
+                  !isSubQuestion,
+              })}
             >
               {question.text}
             </span>
