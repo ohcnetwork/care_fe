@@ -64,7 +64,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
           <div className="flex items-center gap-4 mb-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Hey {user?.first_name}
+                {t("hey")} {user?.first_name}
               </h1>
               <p className="text-gray-500">
                 {t("welcome_back_to_hospital_dashboard")}
