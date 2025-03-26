@@ -329,34 +329,11 @@ export function DiagnosisQuestion({
 
   const diagnosisDetailsContent = (
     <div className="space-y-4 p-4">
-      <div className="grid grid-cols-1 gap-4">
-        {DIAGNOSIS_CATEGORY.map((category) => (
-          <div
-            key={category}
-            className={cn(
-              "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
-              selectedCategory === category
-                ? "border-primary bg-primary/5"
-                : "border-border hover:border-primary/50",
-            )}
-            onClick={() => setSelectedCategory(category)}
-          >
-            <div className="flex items-center space-x-2">
-              <div className="flex-1">
-                <div className="font-medium">
-                  {t(`Diagnosis_${category}__title`)}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {t(`Diagnosis_${category}__description`)}
-                </div>
-              </div>
-              {selectedCategory === category && (
-                <div className="h-4 w-4 rounded-full bg-primary" />
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      <CategorySelector
+        categories={DIAGNOSIS_CATEGORY}
+        selectedCategory={selectedCategory}
+        onCategorySelect={setSelectedCategory}
+      />
 
       <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
@@ -527,35 +504,12 @@ export function DiagnosisQuestion({
           {t("cancel")}
         </Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {DIAGNOSIS_CATEGORY.map((category) => (
-          <div
-            key={category}
-            className={cn(
-              "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
-              selectedCategory === category
-                ? "border-primary bg-primary/5"
-                : "border-border hover:border-primary/50",
-            )}
-            onClick={() => setSelectedCategory(category)}
-          >
-            <div className="flex items-center space-x-2">
-              <div className="flex-1">
-                <div className="font-medium">
-                  {t(`Diagnosis_${category}__title`)}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {t(`Diagnosis_${category}__description`)}
-                </div>
-              </div>
-              {selectedCategory === category && (
-                <div className="h-4 w-4 rounded-full bg-primary" />
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
+      <CategorySelector
+        categories={DIAGNOSIS_CATEGORY}
+        selectedCategory={selectedCategory}
+        onCategorySelect={setSelectedCategory}
+        gridCols="grid-cols-1 md:grid-cols-2"
+      />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label className="text-sm">{t("date")}</Label>
@@ -1314,3 +1268,48 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
     </div>
   );
 };
+
+function CategorySelector({
+  categories,
+  selectedCategory,
+  onCategorySelect,
+  gridCols = "grid-cols-1",
+}: {
+  categories: readonly string[];
+  selectedCategory: DiagnosisRequest["category"];
+  onCategorySelect: Dispatch<SetStateAction<DiagnosisRequest["category"]>>;
+  gridCols?: string;
+}) {
+  return (
+    <div className={`grid ${gridCols} gap-4`}>
+      {categories.map((category) => (
+        <div
+          key={category}
+          className={cn(
+            "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
+            selectedCategory === category
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-primary/50",
+          )}
+          onClick={() =>
+            onCategorySelect(category as DiagnosisRequest["category"])
+          }
+        >
+          <div className="flex items-center space-x-2">
+            <div className="flex-1">
+              <div className="font-medium">
+                {t(`Diagnosis_${category}__title`)}
+              </div>
+              <div className="flex-1 text-sm text-muted-foreground">
+                {t(`Diagnosis_${category}__description`)}
+              </div>
+            </div>
+            {selectedCategory === category && (
+              <div className="h-4 w-4 rounded-full bg-primary" />
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
