@@ -238,7 +238,7 @@ export function QuestionInput({
           return (
             <div
               key={index}
-              className={cn("", removeButton && "gap-2 flex items-end")}
+              className={cn(removeButton && "gap-2 flex items-end")}
             >
               <div
                 className={cn("space-y-1", { "flex-1": removeButton })}
