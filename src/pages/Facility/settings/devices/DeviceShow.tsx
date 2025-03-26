@@ -45,6 +45,7 @@ import deviceApi from "@/types/device/deviceApi";
 
 import DeviceEncounterHistory from "./DeviceEncounterHistory";
 import AssociateLocationSheet from "./components/AssociateLocationSheet";
+import DeviceServiceHistory from "./components/DeviceServiceHistory";
 
 interface Props {
   facilityId: string;
@@ -456,6 +457,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
           </Card>
         )}
 
+        <DeviceServiceHistory facilityId={facilityId} deviceId={deviceId} />
         {device.care_type && (
           <ErrorBoundary
             fallback={
