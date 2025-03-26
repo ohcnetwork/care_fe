@@ -72,7 +72,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           >
             <CardTitle className="group-hover:text-primary transition-colors">
               {encounter.patient.name}
-              {encounter.patient.death_datetime && (
+              {encounter.patient.deceased_datetime && (
                 <Badge
                   variant="destructive"
                   className="ml-2 py-0 border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"

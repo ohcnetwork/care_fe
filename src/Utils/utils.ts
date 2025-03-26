@@ -134,7 +134,7 @@ export const formatPatientAge = (
   );
 
   const end = dayjs(
-    obj.death_datetime ? new Date(obj.death_datetime) : new Date(),
+    obj.deceased_datetime ? new Date(obj.deceased_datetime) : new Date(),
   );
 
   const years = end.diff(start, "years");
@@ -257,7 +257,8 @@ export const stringifyNestedObject = <
   T extends { name: string; parent?: Partial<T> },
 >(
   obj: T,
-  separator = ", ",
+  separator: string | React.ReactNode = ", ",
+  reverse: boolean = false,
 ) => {
   const levels: string[] = [];
 
@@ -267,7 +268,18 @@ export const stringifyNestedObject = <
     current = current.parent;
   }
 
-  return levels.join(separator);
+  if (reverse) {
+    levels.reverse();
+  }
+
+  if (typeof separator === "string") {
+    return levels.join(separator);
+  }
+
+  return levels.reduce((acc: (string | React.ReactNode)[], curr, i) => {
+    if (i === 0) return [curr];
+    return [...acc, separator, curr];
+  }, []);
 };
 
 export const mergeAutocompleteOptions = (
