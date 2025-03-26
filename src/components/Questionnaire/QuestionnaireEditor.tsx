@@ -380,7 +380,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       }
       return true;
     }
-    if (setSelectedOrgs.length === 0) {
+    if (selectedOrgs.length === 0) {
       setOrgError(t("organization_selection_required"));
       return false;
     }
