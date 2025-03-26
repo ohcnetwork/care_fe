@@ -20,6 +20,7 @@ import FacilityOrganizationSelector from "@/pages/Facility/settings/organization
 import deviceApi from "@/types/device/deviceApi";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import locationApi from "@/types/location/locationApi";
+import type { BatchRequestBody } from "@/types/questionnaire/batch";
 
 interface Props {
   entityType: "encounter" | "location" | "device";
@@ -182,24 +183,16 @@ export default function LinkDepartmentsSheet({
   onUpdate,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<string[]>([]);
+  const [selectedOrgs, setSelectedOrgs] = useState<string[] | null>(null);
   const queryClient = useQueryClient();
-  const { route, pathParams } = getMutationParams(
-    entityType,
-    entityId,
-    facilityId,
-    true,
-  );
 
-  const { mutate: addOrganization, isPending: isAdding } = useMutation({
-    mutationFn: mutate(route, {
-      pathParams,
-    }),
+  const { mutate: submitBatch, isPending: isAdding } = useMutation({
+    mutationFn: mutate(routes.batchRequest),
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
       toast.success(t("organization_added_successfully"));
-      setSelectedOrg([]);
+      setSelectedOrgs(null);
       setOpen(false);
       onUpdate?.();
     },
@@ -210,7 +203,36 @@ export default function LinkDepartmentsSheet({
       });
     },
   });
+  const handleAddOrganizations = () => {
+    if (!selectedOrgs?.length) return;
 
+    const { route, pathParams } = getMutationParams(
+      entityType,
+      entityId,
+      facilityId,
+      true,
+    );
+
+    const batchRequest: BatchRequestBody = {
+      requests: selectedOrgs.map((orgId) => {
+        const resolvedPath = route.path
+          .replace("{facility_id}", facilityId)
+          .replace("{id}", entityId);
+
+        return {
+          url: resolvedPath,
+          method: "POST",
+          reference_id: `Add Organization ${orgId}`,
+          body: {
+            organization: orgId,
+          },
+          pathParams,
+        };
+      }),
+    };
+
+    submitBatch(batchRequest);
+  };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -243,18 +265,14 @@ export default function LinkDepartmentsSheet({
             <div className="space-y-4">
               <FacilityOrganizationSelector
                 facilityId={facilityId}
-                value={selectedOrg.length > 0 ? selectedOrg : undefined}
-                onChange={setSelectedOrg}
+                value={selectedOrgs}
+                onChange={setSelectedOrgs}
               />
 
               <Button
                 className="w-full"
-                onClick={() =>
-                  selectedOrg.forEach((orgId) =>
-                    addOrganization({ organization: orgId }),
-                  )
-                }
-                disabled={!selectedOrg || isAdding}
+                onClick={handleAddOrganizations}
+                disabled={!selectedOrgs?.length || isAdding}
               >
                 {isAdding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t("add_organization", {
