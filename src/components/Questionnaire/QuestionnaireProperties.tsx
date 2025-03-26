@@ -373,7 +373,6 @@ export function QuestionnaireProperties({
         {id && (
           <CloneQuestionnaireSheet
             questionnaire={questionnaire}
-            tags={questionnaire.tags.map((t) => t.id)}
             trigger={
               <Button variant="outline" className="w-full justify-start">
                 <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
