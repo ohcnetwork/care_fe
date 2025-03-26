@@ -48,7 +48,7 @@ type ConsentSheetProps = {
 };
 
 export const EmptyState = () => (
-  <div className="flex min-h-[200px] flex-col items-center justify-center gap-2 p-8 text-center">
+  <div className="flex min-h-[200px] flex-col items-center justify-center gap-1 p-8 text-center">
     <div className="rounded-full bg-secondary/10 p-3">
       <CareIcon
         icon="l-file-exclamation-alt"

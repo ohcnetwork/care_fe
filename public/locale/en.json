@@ -702,6 +702,7 @@
   "confirm_transfer_complete": "Confirm Transfer Complete!",
   "confirm_unavailability": "Confirm Unavailability",
   "confirmed": "Confirmed",
+  "consent_after_end": "Consent date cannot be after end date",
   "consent_attachments": "Consent Attachments",
   "consent_category__acd": "Advance Directive",
   "consent_category__acd_description": "Consent given in anticipation of a potential need for medical treatment",
