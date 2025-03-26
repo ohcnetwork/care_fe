@@ -13,6 +13,7 @@ import api from "@/Utils/request/api";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { Encounter } from "@/types/emr/encounter";
+import { Patient } from "@/types/emr/newPatient";
 
 type PrintQuestionnaireResponseProps = {
   questionnaireResponseId: string;
@@ -30,11 +31,22 @@ export function PrintQuestionnaireResponse({
   const { t } = useTranslation();
 
   const { data: encounter } = useQuery<Encounter>({
-    queryKey: ["encounter", encounterId],
+    queryKey: ["encounter", encounterId, facilityId],
     queryFn: query(api.encounter.get, {
-      pathParams: { id: encounterId },
+      pathParams: { id: encounterId! },
       queryParams: { facility: facilityId },
     }),
+    enabled: !!(encounterId && facilityId),
+  });
+
+  const { data: patient } = useQuery<Patient>({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.patient.getPatient, {
+      pathParams: {
+        id: patientId,
+      },
+    }),
+    enabled: !(encounterId && facilityId),
   });
 
   const { data: questionnaireResponse } = useQuery({
@@ -66,15 +78,18 @@ export function PrintQuestionnaireResponse({
             />
             <div className="text-center sm:text-left sm:order-1">
               <h1 className="text-3xl font-semibold">
-                {encounter?.facility?.name}
+                {encounter?.facility?.name ?? patient?.name}
               </h1>
               <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
-                {t("encounter_questionnaire_logs")}
+                {t("questionnaire_response_logs")}
               </h2>
             </div>
           </div>
 
-          <EncounterDetails encounter={encounter} />
+          <EncounterDetails
+            encounter={encounter}
+            patient={encounter?.patient ?? patient}
+          />
 
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
             <div className="text-center sm:text-left sm:order-1">

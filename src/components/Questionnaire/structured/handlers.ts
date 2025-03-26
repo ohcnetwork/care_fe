@@ -1,10 +1,10 @@
+import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
 import {
   DataTypeFor,
   RequestTypeFor,
 } from "@/components/Questionnaire/structured/types";
 
 import { readFileAsDataURL } from "@/Utils/utils";
-import { StructuredQuestionType } from "@/types/questionnaire/question";
 
 interface StructuredHandlerContext {
   patientId: string;
@@ -181,6 +181,18 @@ export const structuredHandlers: {
           };
         }),
       ),
+  },
+  time_of_death: {
+    getRequests: async (timeOfDeaths, { patientId }) => {
+      return timeOfDeaths.map((timeOfDeath) => ({
+        url: `/api/v1/patient/${patientId}/`,
+        method: "PUT",
+        body: {
+          deceased_datetime: timeOfDeath,
+        },
+        reference_id: "time_of_death",
+      }));
+    },
   },
 };
 

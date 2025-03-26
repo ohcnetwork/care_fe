@@ -4,7 +4,7 @@ import {
   compareAsc,
   eachDayOfInterval,
   format,
-  isBefore,
+  isPast,
   max,
   startOfToday,
 } from "date-fns";
@@ -25,7 +25,7 @@ export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
   }[] = [];
 
   for (const slot of slots) {
-    if (isBefore(slot.end_datetime, new Date())) {
+    if (isPast(slot.end_datetime)) {
       continue;
     }
     const availability = slot.availability;
