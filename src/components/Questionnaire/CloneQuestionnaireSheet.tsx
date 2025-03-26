@@ -95,6 +95,7 @@ export default function CloneQuestionnaireSheet({
       status: "draft" as const,
       title: `${questionnaire.title} (Clone)`,
       organizations: selectedIds,
+      tags: questionnaire.tags.map((tag) => tag.id),
     };
 
     cloneQuestionnaire(clonedQuestionnaire);
