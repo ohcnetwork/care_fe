@@ -37,7 +37,7 @@ const DuplicatePatientDialog = (props: Props) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="[&>button:last-child]:hidden w-3/4 md:w-1/2"
+        className="[&>button:last-child]:hidden w-3/4 max-w-lg max-h-[90vh] overflow-y-auto sm:w-3/4 sm:max-w-xl"
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
@@ -56,7 +56,7 @@ const DuplicatePatientDialog = (props: Props) => {
             </p>
           </div>
           <div>
-            <div className="max-h-[200px] overflow-auto ">
+            <div className="overflow-auto ">
               <Table>
                 <TableHeader>
                   <TableRow>
