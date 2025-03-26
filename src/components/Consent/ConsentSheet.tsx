@@ -72,7 +72,6 @@ export function ConsentSheet({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [open, setOpen] = useState(false);
-
   const { data: existingConsents } = useQuery({
     queryKey: ["consents", patientId, encounterId],
     queryFn: query(consentApi.list, {
@@ -81,6 +80,12 @@ export function ConsentSheet({
     }),
     enabled: open,
   });
+
+  const consents = existingConsents?.results?.filter((consent) =>
+    consent.source_attachments[0]?.name
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase()),
+  ); // TODO: move this to the backend in the next iteration
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -118,22 +123,11 @@ export function ConsentSheet({
               />
             </div>
 
-            {existingConsents?.results &&
-            existingConsents?.results?.filter((consent) =>
-              consent.source_attachments[0]?.name
-                ?.toLowerCase()
-                .includes(searchQuery.toLowerCase()),
-            ).length > 0 ? (
+            {consents && consents.length > 0 ? (
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
-                {existingConsents.results
-                  .filter((consent) =>
-                    consent.source_attachments[0]?.name
-                      ?.toLowerCase()
-                      .includes(searchQuery.toLowerCase()),
-                  )
-                  .map((consent) => (
-                    <ConsentCard key={consent.id} consent={consent} />
-                  ))}
+                {consents.map((consent) => (
+                  <ConsentCard key={consent.id} consent={consent} />
+                ))}
               </div>
             ) : (
               <EmptyState />
