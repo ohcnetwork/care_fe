@@ -123,7 +123,7 @@ export const MultiSelect = React.forwardRef<
                       return (
                         <Badge
                           key={value}
-                          className="m-1 border-foreground/10 bg-secondary text-black hover:bg-secondary/80"
+                          className="m-1 bg-secondary text-black"
                         >
                           {option?.icon && (
                             <CareIcon

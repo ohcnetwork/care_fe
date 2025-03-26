@@ -219,7 +219,9 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
 
   return (
     <React.Fragment>
-      <div className={`p-4 border-t ${isInactive ? "bg-gray-100" : ""}`}>
+      <div
+        className={`p-4 border-t border-gray-200 ${isInactive ? "bg-gray-100" : ""}`}
+      >
         <div className="font-semibold truncate">
           {medication.medication?.display}
         </div>
@@ -253,7 +255,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
         return (
           <div
             key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-            className={`p-4 border-t relative text-sm ${isInactive ? "bg-gray-100" : ""}`}
+            className={`p-4 border-t border-gray-200 relative text-sm ${isInactive ? "bg-gray-100" : ""}`}
           >
             {administrationRecords?.map((admin) => {
               const colorClass =
@@ -263,7 +265,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
               return (
                 <div
                   key={admin.id}
-                  className={`flex font-medium flex-col rounded-md p-2 mb-2 cursor-pointer border ${colorClass}`}
+                  className={`flex font-medium flex-col rounded-md p-2 mb-2 cursor-pointer border border-gray-200 ${colorClass}`}
                   onClick={() => onEditAdministration(medication, admin)}
                 >
                   <div className="flex justify-between">
@@ -328,7 +330,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
       })}
 
       <div
-        className={`p-4 border-t flex justify-center ${isInactive ? "bg-gray-100" : ""}`}
+        className={`p-4 border-t border-gray-200 flex justify-center ${isInactive ? "bg-gray-100" : ""}`}
       >
         {ACTIVE_MEDICATION_STATUSES.includes(
           medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
@@ -716,15 +718,15 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               </div>
 
               {/* Main content with borders */}
-              <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r">
+              <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r border-gray-200">
                 {/* Headers */}
-                <div className="p-4 font-medium text-sm border-t bg-[#F3F4F6] text-secondary-700">
+                <div className="p-4 font-medium text-sm border-t border-gray-200 bg-[#F3F4F6] text-secondary-700">
                   {t("medicine")}:
                 </div>
                 {visibleSlots.map((slot, i) => (
                   <div
                     key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                    className="p-4 font-semibold text-xs text-center border-t relative bg-[#F3F4F6] text-secondary-700"
+                    className="p-4 font-semibold text-xs text-center border-t border-gray-200 relative bg-[#F3F4F6] text-secondary-700"
                   >
                     {i === endSlotIndex &&
                       slot.date.getTime() === currentDate.getTime() && (
@@ -735,7 +737,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     {slot.label}
                   </div>
                 ))}
-                <div className="border-t bg-[#F3F4F6]" />
+                <div className="border-t border-gray-200 bg-[#F3F4F6]" />
 
                 {/* Medication rows */}
                 {filteredMedications?.map((medication) => (

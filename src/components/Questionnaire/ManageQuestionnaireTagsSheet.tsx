@@ -241,7 +241,7 @@ export default function ManageQuestionnaireTagsSheet({
           <Collapsible
             open={isCreateOpen}
             onOpenChange={setIsCreateOpen}
-            className="rounded-lg border p-4"
+            className="rounded-lg border border-gray-200 p-4"
           >
             <CollapsibleTrigger asChild>
               <Button
@@ -296,7 +296,7 @@ export default function ManageQuestionnaireTagsSheet({
           </Collapsible>
         </div>
 
-        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t">
+        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
           <div className="flex w-full justify-end gap-4">
             <Button
               variant="outline"

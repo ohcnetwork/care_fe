@@ -525,8 +525,7 @@ function LayoutOptionCard({
       <Label
         htmlFor={optionId}
         className={cn(
-          "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-50",
-          "peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
           isSelected && "border-primary",
         )}
       >
@@ -792,7 +791,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             </span>
                           </button>
                           {hasSubQuestions && question.questions && (
-                            <div className="ml-6 border-l-2 border-muted pl-2 space-y-1">
+                            <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
                               {question.questions.map(
                                 (subQuestion, subIndex) => (
                                   <button
@@ -1306,7 +1305,7 @@ function QuestionEditor({
           </div>
 
           <div className="space-y-6">
-            <div className="border rounded-lg bg-gray-100 p-4">
+            <div className="border rounded-lg border-gray-200 bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">Question Settings</h3>
               <p className="text-sm text-gray-500 mb-4">
                 Configure the basic behavior: mark as required, allow multiple
@@ -1350,7 +1349,7 @@ function QuestionEditor({
               </div>
             </div>
 
-            <div className="border rounded-lg bg-gray-100 p-4">
+            <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">
                 Data Collection Details
               </h3>
@@ -1433,7 +1432,7 @@ function QuestionEditor({
 
           {type === "group" && (
             <div className="space-y-4">
-              <div className="border rounded-lg bg-gray-100 p-4">
+              <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
                 <h3 className="text-sm font-medium mb-2">
                   Group Layout Options
                 </h3>
@@ -1531,7 +1530,7 @@ function QuestionEditor({
                     {(answer_option || []).map((opt, idx) => (
                       <div
                         key={idx}
-                        className="space-y-4 pb-4 border-b last:border-0 last:pb-0"
+                        className="space-y-4 pb-4 border-b border-gray-200 last:border-0 last:pb-0"
                       >
                         <div className="grid grid-cols-2 gap-4">
                           <div>

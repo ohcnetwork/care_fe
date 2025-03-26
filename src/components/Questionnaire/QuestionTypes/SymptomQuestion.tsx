@@ -439,7 +439,7 @@ export function SymptomQuestion({
   return (
     <div className="space-y-2">
       {symptoms.length > 0 && (
-        <div className="rounded-lg border">
+        <div className="border border-gray-200 rounded-lg">
           <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
             <div className="col-span-5">{t("symptom")}</div>
             <div className="col-span-2 text-center">{t("date")}</div>

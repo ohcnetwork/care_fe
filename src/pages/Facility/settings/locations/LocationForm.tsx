@@ -319,7 +319,7 @@ export default function LocationForm({
             control={form.control}
             name="enableBulkCreation"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -393,7 +393,7 @@ export default function LocationForm({
                 control={form.control}
                 name="customizeNames"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -411,7 +411,7 @@ export default function LocationForm({
               />
 
               {form.watch("customizeNames") ? (
-                <div className="space-y-4 border rounded-md p-4">
+                <div className="space-y-4 border border-gray-200 rounded-md p-4">
                   <div className="flex justify-between items-center flex-wrap gap-2">
                     <h4 className="font-medium">{t("individual_bed_names")}</h4>
                     <Button

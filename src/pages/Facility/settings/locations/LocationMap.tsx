@@ -17,8 +17,6 @@ import ReactFlow, {
   useViewport,
 } from "reactflow";
 
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -82,12 +80,7 @@ const CustomNode = ({ data }: NodeProps) => {
       )}
       <div
         onClick={() => data.onClick({ id: data.id })}
-        className={cn(
-          "relative w-[240px] bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer",
-          "border-gray-200",
-          "hover:border-primary/50 hover:shadow-lg",
-          "transition-all duration-200",
-        )}
+        className="relative w-60 bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-200"
       >
         <div className="p-4">
           <div className="flex items-center gap-3">
@@ -114,7 +107,7 @@ const CustomNode = ({ data }: NodeProps) => {
           </div>
           {hasChildren && (
             <div
-              className="flex justify-center mt-2 border-t pt-2"
+              className="flex justify-center mt-2 border-t border-gray-200 pt-2"
               onClick={(e) => e.stopPropagation()}
             >
               <Button
@@ -550,7 +543,7 @@ function LocationMapContent({
   ]);
 
   return (
-    <div className="h-[600px] w-full bg-gray-50 rounded-lg border">
+    <div className="h-[600px] w-full bg-gray-50 rounded-lg border border-gray-200">
       <ReactFlow
         nodes={nodes}
         edges={edges}

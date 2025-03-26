@@ -511,7 +511,7 @@ export default function UserForm({
               control={form.control}
               name="password_setup_method"
               render={({ field }) => (
-                <FormItem className="border rounded-lg p-4 bg-gray-50">
+                <FormItem className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                   <FormLabel className="text-base font-medium mb-3 block">
                     {t("password_setup_method")}
                   </FormLabel>
@@ -525,7 +525,7 @@ export default function UserForm({
                         className={`flex items-start space-x-3 rounded-md border p-3 ${
                           field.value === "immediate"
                             ? "bg-white border-primary"
-                            : "bg-transparent"
+                            : "bg-transparent  border-gray-200"
                         }`}
                       >
                         <RadioGroupItem
@@ -551,7 +551,7 @@ export default function UserForm({
                         className={`flex items-start space-x-3 rounded-md border p-3 ${
                           field.value === "email"
                             ? "bg-white border-primary"
-                            : "bg-transparent"
+                            : "bg-transparent  border-gray-200"
                         }`}
                       >
                         <RadioGroupItem

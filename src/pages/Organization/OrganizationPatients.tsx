@@ -194,7 +194,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                               </div>
                             )}
                           </div>
-                          <div className="mt-4 pt-4 border-t">
+                          <div className="mt-4 pt-4 border-t border-gray-200">
                             <div className="text-sm text-gray-500">
                               {t("last_modified")}{" "}
                               <TooltipComponent

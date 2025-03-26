@@ -102,7 +102,7 @@ function LocationCard({ location, onClick }: LocationCardProps) {
 
   return (
     <div
-      className="border rounded-lg overflow-hidden shadow-xs hover:shadow-md transition-shadow cursor-pointer"
+      className="border border-gray-200 rounded-lg overflow-hidden shadow-xs hover:shadow-md transition-shadow cursor-pointer"
       onClick={onClick}
     >
       <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">

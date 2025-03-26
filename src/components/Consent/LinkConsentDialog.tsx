@@ -402,7 +402,7 @@ export default function LinkConsentDialog({
                       <>
                         <Label
                           htmlFor={`file_upload_consent`}
-                          className="w-full inline-flex items-center justify-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground"
+                          className="w-full inline-flex items-center justify-center px-4 py-2 cursor-pointer border border-gray-200 rounded-md hover:bg-accent hover:text-accent-foreground"
                         >
                           <CareIcon icon="l-file-upload-alt" className="mr-1" />
                           <span

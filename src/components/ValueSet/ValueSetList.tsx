@@ -100,7 +100,7 @@ const RenderCard = ({
                   </Badge>
                 </div>
 
-                <div className="mb-4 border-b pb-2">
+                <div className="mb-4 border-b border-gray-200 pb-2">
                   <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     {t("name")}
                   </h3>
@@ -109,7 +109,7 @@ const RenderCard = ({
                   </p>
                 </div>
 
-                <div className="mb-4 border-b pb-2">
+                <div className="mb-4 border-b pb-2 border-gray-200">
                   <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     {t("name")}
                   </h3>

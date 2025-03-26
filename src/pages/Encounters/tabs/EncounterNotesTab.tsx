@@ -98,7 +98,7 @@ const ThreadItem = ({
 }) => (
   <button
     className={cn(
-      "group relative w-full p-4 text-left rounded-lg transition-colors border ",
+      "group relative w-full p-4 text-left rounded-lg transition-colors border",
       isSelected
         ? "bg-primary-100 hover:bg-primary/15 border-primary"
         : "hover:bg-gray-100 hover:border-gray-200",
@@ -291,7 +291,7 @@ const MobileNav = ({
   onOpenThreads: () => void;
   onNewThread: () => void;
 }) => (
-  <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t bg-white p-2 flex items-center justify-around z-50 divide-x">
+  <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-50 divide-x">
     <Button
       variant="ghost"
       size="sm"
@@ -477,8 +477,8 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   return (
     <div className="flex h-[calc(100vh-12rem)]">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r">
-        <div className="p-4 border-b">
+      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
+        <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MessageCircle className="size-4 text-primary" />
@@ -531,7 +531,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
           </SheetDescription>
           <SheetTitle className="sr-only">{t("encounter")}</SheetTitle>
           <div className="flex flex-col h-full">
-            <div className="p-4 border-b">
+            <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MessageCircle className="size-4 text-primary" />
@@ -586,7 +586,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       <div className="flex-1 min-w-0">
         <div className="flex flex-col h-full pb-[60px] lg:pb-0">
           {/* Header */}
-          <div className="p-4 border-b sticky top-0 z-10">
+          <div className="p-4 border-b border-gray-200 sticky top-0 z-10">
             {selectedThread ? (
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-medium truncate flex-1">
@@ -665,7 +665,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                   </ScrollArea>
                   {/* Message Input */}
                   {canWriteCurrentEncounter && (
-                    <div className="border-t p-4 sticky bottom-0">
+                    <div className="border-t border-gray-200 p-4 sticky bottom-0">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea

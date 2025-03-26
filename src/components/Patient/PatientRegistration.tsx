@@ -339,7 +339,7 @@ export default function PatientRegistration(
 
   return (
     <Page title={title}>
-      <hr className="mt-4" />
+      <hr className="mt-4 border-gray-200" />
       <div className="relative mt-4 flex flex-col md:flex-row gap-4">
         <SectionNavigator sections={sidebarItems} className="hidden md:flex" />
 

@@ -179,7 +179,7 @@ export function LandingPage() {
                 </div>
               </div>
               {isOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 rounded-md border bg-white shadow-lg z-10">
+                <div className="absolute top-full left-0 right-0 mt-1 rounded-md border border-gray-200 bg-white shadow-lg z-10">
                   <Command>
                     <CommandGroup className="overflow-y-auto max-h-60 md:max-h-80">
                       {filteredOrganizations.length === 0 ? (

@@ -210,7 +210,7 @@ export function AllergyQuestion({
   return (
     <>
       {allergies.length > 0 && (
-        <div className="rounded-lg border">
+        <div className="rounded-lg border border-gray-200">
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>

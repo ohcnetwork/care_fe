@@ -122,7 +122,7 @@ export default function GeoLocationPicker({
         />
       </div>
 
-      <div className="h-[25rem] w-full rounded-lg border overflow-hidden">
+      <div className="h-[25rem] w-full rounded-lg border border-gray-200 overflow-hidden">
         <Map
           height={400}
           center={latitude && longitude ? [latitude, longitude] : undefined}

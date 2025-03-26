@@ -63,7 +63,7 @@ export default function UserDashboard() {
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
       {/* Welcome Section */}
       <div className="flex flex-col gap-1">
-        <div className="flex justify-between gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-xs w-full  mx-auto">
+        <div className="flex justify-between gap-4 bg-card p-4 md:p-6 rounded-lg border border-gray-200 shadow-xs w-full mx-auto">
           <div className="flex flex-auto items-center gap-4">
             <Avatar
               name={formatName(user, true)}
@@ -190,7 +190,7 @@ export default function UserDashboard() {
                       key={facility.id}
                       href={`/facility/${facility.id}/overview`}
                     >
-                      <Card className="transition-all hover:shadow-md hover:border-primary/20">
+                      <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
                         <CardContent className="flex items-center gap-3 p-3 md:p-4">
                           <Avatar
                             name={facility.name}
@@ -223,7 +223,7 @@ export default function UserDashboard() {
                     key={association.id}
                     href={`/organization/${association.id}`}
                   >
-                    <Card className="transition-all hover:shadow-md hover:border-primary/20">
+                    <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
                       <CardContent className="flex items-center gap-3 p-3 md:p-4">
                         <Avatar
                           name={association.name}
@@ -259,7 +259,7 @@ export default function UserDashboard() {
                     key={governanceOrg.id}
                     href={`/organization/${governanceOrg.id}`}
                   >
-                    <Card className="transition-all hover:shadow-md hover:border-primary/20">
+                    <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
                       <CardContent className="flex items-center gap-3 p-3 md:p-4">
                         <Avatar
                           name={governanceOrg.name}

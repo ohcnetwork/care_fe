@@ -102,7 +102,7 @@ export function FacilityDetailsPage({ id }: Props) {
         </Button>
         <LoginHeader />
       </div>
-      <Card className="overflow-hidden bg-white">
+      <Card className="overflow-hidden bg-white border border-gray-200">
         <div className="flex flex-col sm:flex-row  m-6">
           <div className="size-64 shrink-0 overflow-hidden rounded-lg">
             <Avatar

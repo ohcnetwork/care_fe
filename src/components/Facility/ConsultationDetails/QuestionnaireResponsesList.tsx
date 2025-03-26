@@ -377,7 +377,7 @@ export default function QuestionnaireResponsesList({
               <Card
                 className={cn(
                   "p-6",
-                  isPrintPreview && "shadow-none border-gray",
+                  isPrintPreview && "shadow-none border-gray-200",
                 )}
               >
                 <div className="text-lg font-medium text-gray-500">

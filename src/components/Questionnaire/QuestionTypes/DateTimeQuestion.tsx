@@ -119,7 +119,7 @@ export function DateTimeQuestion({
       </Popover>
       <Input
         type="time"
-        className="sm:w-[150px] border-t-0 sm:border-t"
+        className="sm:w-[150px] border-t-0 sm:border-t border-gray-200"
         value={formatTime(currentValue)}
         onChange={handleTimeChange}
         disabled={disabled || !currentValue}

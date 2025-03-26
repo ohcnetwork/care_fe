@@ -301,7 +301,7 @@ export function DiagnosisQuestion({
   return (
     <div className="space-y-4">
       {sortedDiagnoses.length > 0 && (
-        <div className="rounded-lg border">
+        <div className="rounded-lg border border-gray-200">
           <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
             <div className="col-span-5">{t("diagnosis")}</div>
             <div className="col-span-2 text-center">{t("date")}</div>
@@ -326,7 +326,7 @@ export function DiagnosisQuestion({
       )}
 
       {showCategorySelection ? (
-        <div className="rounded-lg border p-4 space-y-4">
+        <div className="rounded-lg border border-gray-200 p-4 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               {selectedCode && (
@@ -361,7 +361,7 @@ export function DiagnosisQuestion({
                   "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
                   selectedCategory === category
                     ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50",
+                    : "border-gray-200 hover:border-primary/50",
                 )}
                 onClick={() => setSelectedCategory(category)}
               >

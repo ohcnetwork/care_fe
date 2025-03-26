@@ -120,7 +120,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
       }
     >
       <div className="space-y-4 mt-2 px-6">
-        <div className="rounded-lg border bg-card shadow-xs">
+        <div className="border border-gray-200 rounded-lg">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">

@@ -137,7 +137,7 @@ export default function LinkUserSheet({
           />
           {selectedUser && (
             <div className="space-y-4">
-              <div className="rounded-lg border p-4 space-y-4">
+              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
                 <div className="flex gap-4 flex-row">
                   <Avatar
                     name={`${selectedUser.first_name} ${selectedUser.last_name}`}
@@ -154,7 +154,7 @@ export default function LinkUserSheet({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
                   <div>
                     <span className="text-sm text-gray-500">
                       {t("username")}

@@ -150,7 +150,7 @@ export default function TreatmentSummary({
 
   if (!encounter) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-gray-200 border-dashed p-4 text-gray-500">
         {t("no_patient_record_found")}
       </div>
     );
@@ -183,7 +183,7 @@ export default function TreatmentSummary({
       <div className="min-h-screen py-2 max-w-4xl mx-auto">
         <div className="space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-start pb-2 border-b">
+          <div className="flex justify-between items-start pb-2 border-b border-gray-200">
             <div className="space-y-4 flex-1">
               <div>
                 <h1 className="text-3xl font-semibold">

@@ -101,7 +101,7 @@ function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
         <div className="flex items-center gap-2">
           <Avatar
             name={formatName(statement.created_by, true)}
-            className="size-4"
+            className="w-4 h-4"
             imageUrl={statement.created_by.read_profile_picture_url}
           />
           <span className="text-sm">{formatName(statement.created_by)}</span>
@@ -158,7 +158,7 @@ export function MedicationStatementList({
       className={className}
     >
       <>
-        <Table className="border-separate border-spacing-y-0.5">
+        <Table className="border-separate border-gray-200 border-spacing-y-0.5">
           <TableHeader>
             <TableRow className="rounded-md overflow-hidden bg-gray-100">
               <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600">

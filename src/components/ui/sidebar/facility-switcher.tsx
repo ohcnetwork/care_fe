@@ -78,7 +78,7 @@ export function FacilitySwitcher({
                     "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
                 )}
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
+                <div className="flex size-6 items-center justify-center rounded-sm border border-gray-200">
                   <Hospital className="size-4 shrink-0" />
                 </div>
                 {facility.name}

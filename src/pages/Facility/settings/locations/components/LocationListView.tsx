@@ -218,7 +218,7 @@ function LocationRow({
             </div>
           )}
         </TableCell>
-        <TableCell className="hidden sm:table-cell border-l bg-white font-semibold text-gray-900">
+        <TableCell className="hidden sm:table-cell border-l border-gray-200 bg-white font-semibold text-gray-900">
           {t(`location_form__${location.form}`)}
         </TableCell>
       </TableRow>
@@ -285,10 +285,10 @@ export function LocationListView({
 
   return (
     <div className="space-y-4">
-      <Table className="border rounded-lg w-full overflow-hidden">
+      <Table className="border border-gray-200 rounded-lg w-full overflow-hidden">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[80%] border text-gray-700 bg-gray-200">
+            <TableHead className="w-[80%] border border-gray-200 text-gray-700 bg-gray-200">
               {t("name")}
             </TableHead>
             <TableHead className="hidden sm:table-cell bg-gray-200 text-gray-700">

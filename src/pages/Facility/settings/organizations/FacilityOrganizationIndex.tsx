@@ -248,7 +248,7 @@ export default function FacilityOrganizationIndex({
             </div>
           </TableCell>
           {!isMobile && (
-            <TableCell className="border-l bg-white font-semibold text-gray-900">
+            <TableCell className="border-l border-gray-200 bg-white font-semibold text-gray-900">
               {t(`facility_organization_type__${org.org_type}`)}
             </TableCell>
           )}
@@ -317,10 +317,10 @@ export default function FacilityOrganizationIndex({
           </div>
         </div>
       </div>
-      <Table className="border rounded-lg w-full overflow-hidden">
+      <Table className="border border-gray-200 rounded-lg w-full overflow-hidden">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[80%] border text-gray-700  bg-gray-200">
+            <TableHead className="w-[80%] border border-gray-200 text-gray-700 bg-gray-200">
               {t("name")}
             </TableHead>
             {!isMobile && (

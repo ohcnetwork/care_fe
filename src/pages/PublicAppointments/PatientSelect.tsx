@@ -95,7 +95,7 @@ export default function PatientSelect({
 
   const renderNoPatientFound = () => {
     return (
-      <div className="">
+      <div>
         <span className="text-base font-medium">
           {t("no_patients_found_phone_number")}
         </span>
@@ -130,7 +130,7 @@ export default function PatientSelect({
               <th className="w-1/6 px-4 py-2 text-left">{t("sex")}</th>
             </tr>
           </thead>
-          <tbody className="divide-y rounded-lg border bg-card">
+          <tbody className="divide-y rounded-lg border border-gray-200 bg-card">
             {patients?.map((patient) => (
               <tr
                 key={patient.id}

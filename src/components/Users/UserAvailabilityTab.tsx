@@ -339,7 +339,7 @@ function DayDetailsPopover({
 
       <ScrollArea className="max-h-[22rem] overflow-auto">
         {templates.map((template) => (
-          <div key={template.id} className="border-t pt-3 mt-3">
+          <div key={template.id} className="border-t border-gray-200 pt-3 mt-3">
             <div className="flex items-center">
               <ColoredIndicator
                 className="mr-2 size-3 rounded"

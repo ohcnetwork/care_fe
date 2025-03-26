@@ -118,7 +118,7 @@ export default function PatientRouter() {
             </a>
           </div>
           <div
-            className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow-sm"
+            className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border border-gray-200 bg-gray-50 p-3 shadow-sm"
             data-cui-page
           >
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
