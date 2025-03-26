@@ -84,7 +84,9 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
 
   // Extract the current tab from the URL
   const currentPath = window.location.pathname;
-  const currentTab = currentPath.split("/").pop() || "general";
+  const basePathPattern = new RegExp(`${basePath}/([^/]+)`);
+  const match = currentPath.match(basePathPattern);
+  const currentTab = match?.[1] || "general";
 
   return (
     <div className="container mx-auto p-4">
