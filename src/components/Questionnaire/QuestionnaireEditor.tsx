@@ -12,6 +12,7 @@ import {
 import { Building, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -51,6 +52,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
+import {
+  STRUCTURED_QUESTIONS,
+  StructuredQuestionType,
+} from "@/components/Questionnaire/data/StructuredFormData";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -61,7 +66,6 @@ import {
   Question,
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
-  StructuredQuestionType,
 } from "@/types/questionnaire/question";
 import {
   QuestionStatus,
@@ -82,17 +86,6 @@ import { QuestionnaireForm } from "./QuestionnaireForm";
 interface QuestionnaireEditorProps {
   id?: string;
 }
-
-const STRUCTURED_QUESTION_TYPES = [
-  { value: "allergy_intolerance", label: "Allergy Intolerance" },
-  { value: "medication_request", label: "Medication Request" },
-  { value: "medication_statement", label: "Medication Statement" },
-  { value: "symptom", label: "Symptom" },
-  { value: "diagnosis", label: "Diagnosis" },
-  { value: "encounter", label: "Encounter" },
-  { value: "appointment", label: "Appointment" },
-] as const;
-
 interface Organization {
   id: string;
   name: string;
@@ -250,7 +243,7 @@ function OrganizationSelector({
           trigger={
             <Button variant="outline" className="w-full justify-start">
               <Building className="mr-2 h-4 w-4" />
-              {t("manage_organizations")}
+              {t("manage_organization_one")}
             </Button>
           }
         />
@@ -1088,6 +1081,7 @@ function QuestionEditor({
   isLast,
   index,
 }: QuestionEditorProps) {
+  const { t } = useTranslation();
   const {
     text,
     type,
@@ -1257,12 +1251,22 @@ function QuestionEditor({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select question type" />
+                    <SelectValue placeholder="Select question type">
+                      {
+                        SUPPORTED_QUESTION_TYPES.find((t) => t.value === type)
+                          ?.name
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
-                        {type.name}
+                        <div className="flex flex-col items-start">
+                          <span>{type.name}</span>
+                          <span className="text-xs max-w-xs text-muted-foreground whitespace-normal">
+                            {t(type.description)}
+                          </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1282,7 +1286,7 @@ function QuestionEditor({
                       <SelectValue placeholder="Select structured type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {STRUCTURED_QUESTION_TYPES.map((type) => (
+                      {STRUCTURED_QUESTIONS.map((type) => (
                         <SelectItem key={type.value} value={type.value}>
                           {type.label}
                         </SelectItem>

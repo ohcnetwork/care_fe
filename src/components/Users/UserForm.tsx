@@ -285,6 +285,7 @@ export default function UserForm({
             ? data.c_password
             : undefined,
         profile_picture_url: "",
+        geo_organization: data.geo_organization || null,
       } as CreateUserModel);
     }
   };
