@@ -651,11 +651,7 @@ export function SymptomQuestion({
 
   const handleCloseDrawer = () => {
     setShowSymptomSelection(false);
-    setSelectedCode(null);
-    setNewSymptom({
-      ...SYMPTOM_INITIAL_VALUE,
-      onset: { onset_datetime: new Date().toISOString().split("T")[0] },
-    });
+    handleBackToValueSet();
   };
 
   const handleBackToValueSet = () => {
