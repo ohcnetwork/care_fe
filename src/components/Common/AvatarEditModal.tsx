@@ -25,6 +25,10 @@ import {
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import { getCroppedImg } from "@/Utils/getCroppedImg";
+import {
+  captureWebcamImage,
+  processCroppedImage,
+} from "@/Utils/imageCaptureUtils";
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
 interface Props {
@@ -119,14 +123,16 @@ const AvatarEditModal = ({
     [],
   );
 
-  const captureImage = () => {
-    if (webRef.current) {
-      const screenshot = webRef.current.getScreenshot();
-      if (!screenshot) {
-        toast.error(t("failed_to_capture_image"));
-        return;
-      }
+  const captureImage = async () => {
+    const { screenshot, file, error } = await captureWebcamImage(webRef, t);
+
+    if (error) {
+      return;
+    }
+
+    if (screenshot && file) {
       setPreviewImage(screenshot);
+      setSelectedFile(file);
 
       // Reset crop state when capturing a new image
       setCropState((prev) => ({
@@ -137,136 +143,6 @@ const AvatarEditModal = ({
         croppedImage: null,
         isCropping: true, // Automatically enter cropping mode when capturing an image
       }));
-
-      // Create an image element to process
-      const img = new Image();
-      img.onload = () => {
-        // Create a canvas to resize and process the image
-        const canvas = document.createElement("canvas");
-
-        // Make sure dimensions meet backend requirements (min 400x400, max 1024x1024)
-        let width = Math.max(400, Math.min(img.width, 1024));
-        let height = Math.max(400, Math.min(img.height, 1024));
-
-        // Maintain aspect ratio for the largest dimension
-        if (img.width > img.height) {
-          height = Math.round(img.height * (width / img.width));
-          // Ensure height is at least 400px
-          if (height < 400) {
-            height = 400;
-            width = Math.round(img.width * (height / img.height));
-          }
-        } else {
-          width = Math.round(img.width * (height / img.height));
-          // Ensure width is at least 400px
-          if (width < 400) {
-            width = 400;
-            height = Math.round(img.height * (width / img.width));
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        // Draw resized image to canvas with proper quality
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          toast.error(t("failed_to_process_image"));
-          return;
-        }
-
-        // Use higher quality rendering
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Convert to PNG blob - using PNG ensures we don't lose quality in compression
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              // Check size limits
-              if (blob.size < 1024) {
-                // If image is too small, try again with no compression
-                canvas.toBlob(
-                  (blob2) => {
-                    if (blob2 && blob2.size >= 1024) {
-                      const myFile = new File([blob2], "camera_image.png", {
-                        type: "image/png",
-                      });
-                      setSelectedFile(myFile);
-                    } else {
-                      toast.error(t("image_too_small_in_size"));
-                    }
-                  },
-                  "image/png",
-                  1.0,
-                );
-              } else if (blob.size > 2 * 1024 * 1024) {
-                // If image is too large, compress more
-                canvas.toBlob(
-                  (blob2) => {
-                    if (blob2 && blob2.size <= 2 * 1024 * 1024) {
-                      const myFile = new File([blob2], "camera_image.jpg", {
-                        type: "image/jpeg",
-                      });
-                      setSelectedFile(myFile);
-                    } else {
-                      // If still too large, use lower resolution
-                      const smallerCanvas = document.createElement("canvas");
-                      smallerCanvas.width = width * 0.8;
-                      smallerCanvas.height = height * 0.8;
-                      const smallerCtx = smallerCanvas.getContext("2d");
-                      smallerCtx?.drawImage(
-                        img,
-                        0,
-                        0,
-                        smallerCanvas.width,
-                        smallerCanvas.height,
-                      );
-                      smallerCanvas.toBlob(
-                        (blob3) => {
-                          if (blob3) {
-                            const myFile = new File(
-                              [blob3],
-                              "camera_image.jpg",
-                              {
-                                type: "image/jpeg",
-                              },
-                            );
-                            setSelectedFile(myFile);
-                          } else {
-                            toast.error(t("failed_to_process_image"));
-                          }
-                        },
-                        "image/jpeg",
-                        0.7,
-                      );
-                    }
-                  },
-                  "image/jpeg",
-                  0.85,
-                );
-              } else {
-                // Size is within the acceptable range
-                const myFile = new File([blob], "camera_image.png", {
-                  type: "image/png",
-                });
-                setSelectedFile(myFile);
-              }
-            } else {
-              toast.error(t("failed_to_capture_image"));
-            }
-          },
-          "image/png",
-          0.9,
-        );
-      };
-
-      img.onerror = () => {
-        toast.error(t("failed_to_process_image"));
-      };
-      img.src = screenshot;
-    } else {
-      toast.error(t("camera_not_available"));
     }
   };
 
@@ -312,173 +188,34 @@ const AvatarEditModal = ({
 
   useEffect(() => {
     if (cropState.croppedImage) {
-      const processCroppedImage = async () => {
+      const processCroppedImageData = async () => {
         try {
-          // Create an Image element to ensure consistent processing
-          const img = new Image();
-          img.onload = async () => {
-            try {
-              // Create a canvas for resizing and format conversion
-              const canvas = document.createElement("canvas");
-              // Ensure minimum dimensions of 400x400 and maximum of 1024x1024
-              const MIN_DIMENSION = 400;
-              const MAX_DIMENSION = 1024;
-              // Calculate optimal dimensions while maintaining aspect ratio
-              let size = Math.min(
-                MAX_DIMENSION,
-                Math.max(MIN_DIMENSION, img.width, img.height),
-              );
-              let width = size;
-              let height = size;
+          const { file, error } = await processCroppedImage(
+            cropState.croppedImage!,
+            t,
+          );
 
-              // Adjust for non-square images while maintaining aspect ratio
-              if (img.width !== img.height) {
-                if (img.width > img.height) {
-                  height = Math.round(img.height * (width / img.width));
-                  if (height < MIN_DIMENSION) {
-                    height = MIN_DIMENSION;
-                    width = Math.round(img.width * (height / img.height));
-                  }
-                } else {
-                  width = Math.round(img.width * (height / img.height));
-                  if (width < MIN_DIMENSION) {
-                    width = MIN_DIMENSION;
-                    height = Math.round(img.height * (width / img.width));
-                  }
-                }
-              }
-              canvas.width = width;
-              canvas.height = height;
+          if (error) {
+            setErrorMessage(error);
+            return;
+          }
 
-              const ctx = canvas.getContext("2d");
-              if (!ctx) {
-                throw new Error("Failed to get canvas context");
-              }
-
-              // Use high quality rendering
-              ctx.imageSmoothingEnabled = true;
-              ctx.imageSmoothingQuality = "high";
-
-              // Draw the image centered
-              ctx.drawImage(
-                img,
-                0,
-                0,
-                width,
-                height, // Use full canvas
-              );
-
-              // Try PNG first (better quality)
-              canvas.toBlob(
-                (blob) => {
-                  if (!blob) {
-                    throw new Error("Failed to create blob");
-                  }
-
-                  // Check size constraints
-                  if (blob.size < 1024) {
-                    // Less than 1KB
-                    // Try with no compression
-                    canvas.toBlob(
-                      (blob2) => {
-                        if (blob2 && blob2.size >= 1024) {
-                          createFileFromBlob(blob2, "image/png");
-                        } else {
-                          setErrorMessage(t("image_too_small_in_size"));
-                        }
-                      },
-                      "image/png",
-                      1.0, // No compression
-                    );
-                  } else if (blob.size > 2 * 1024 * 1024) {
-                    // Greater than 2MB
-                    // Try JPEG with compression
-                    canvas.toBlob(
-                      (blob2) => {
-                        if (blob2 && blob2.size <= 2 * 1024 * 1024) {
-                          createFileFromBlob(blob2, "image/jpeg");
-                        } else {
-                          // If still too large, reduce dimensions
-                          const smallerCanvas =
-                            document.createElement("canvas");
-                          smallerCanvas.width = Math.round(width * 0.8);
-                          smallerCanvas.height = Math.round(height * 0.8);
-                          const smallerCtx = smallerCanvas.getContext("2d");
-
-                          if (smallerCtx) {
-                            smallerCtx.imageSmoothingEnabled = true;
-                            smallerCtx.imageSmoothingQuality = "high";
-                            smallerCtx.drawImage(
-                              img,
-                              0,
-                              0,
-                              smallerCanvas.width,
-                              smallerCanvas.height,
-                            );
-
-                            smallerCanvas.toBlob(
-                              (blob3) => {
-                                if (blob3) {
-                                  createFileFromBlob(blob3, "image/jpeg");
-                                } else {
-                                  setErrorMessage(
-                                    t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
-                                  );
-                                }
-                              },
-                              "image/jpeg",
-                              0.7, // Higher compression
-                            );
-                          } else {
-                            setErrorMessage(
-                              t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
-                            );
-                          }
-                        }
-                      },
-                      "image/jpeg",
-                      0.85, // Moderate compression
-                    );
-                  } else {
-                    // Size is within acceptable range
-                    createFileFromBlob(blob, "image/png");
-                  }
-                },
-                "image/png",
-                0.9, // Light compression
-              );
-
-              // Helper function to create a file from blob and update state
-              function createFileFromBlob(blob: Blob, mimeType: string) {
-                const extension = mimeType === "image/png" ? "png" : "jpg";
-                const myFile = new File([blob], `cropped_image.${extension}`, {
-                  type: mimeType,
-                });
-                setSelectedFile(myFile);
-                setPreview(cropState.croppedImage!);
-                setCropState((prev) => ({ ...prev, croppedImage: null }));
-                // Reset loading states to ensure they only appear when submitting
-                setIsCaptureImgBeingUploaded(false);
-                setIsProcessing(false);
-                setErrorMessage(null);
-              }
-            } catch (err) {
-              console.error("Canvas processing error:", err);
-              setErrorMessage(t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"));
-            }
-          };
-
-          img.onerror = () => {
-            setErrorMessage(t("AVATAR_EDIT__ERROR_LOADING_IMAGE"));
-          };
-
-          img.src = cropState.croppedImage!;
+          if (file) {
+            setSelectedFile(file);
+            setPreview(cropState.croppedImage!);
+            setCropState((prev) => ({ ...prev, croppedImage: null }));
+            // Reset loading states to ensure they only appear when submitting
+            setIsCaptureImgBeingUploaded(false);
+            setIsProcessing(false);
+            setErrorMessage(null);
+          }
         } catch (error) {
           console.error("Image processing error:", error);
           toast.error(t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"));
         }
       };
-      processCroppedImage();
+
+      processCroppedImageData();
     }
   }, [cropState.croppedImage, t]);
 
