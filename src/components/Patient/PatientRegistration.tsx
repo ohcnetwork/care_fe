@@ -101,7 +101,7 @@ export default function PatientRegistration(
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
             }, t("enter_valid_dob"))
             .optional(),
-          death_datetime: z.string().nullable().optional(),
+          deceased_datetime: z.string().nullable().optional(),
           age: z
             .number()
             .int()
@@ -145,9 +145,9 @@ export default function PatientRegistration(
         )
         .refine(
           (data) => {
-            if (!data.death_datetime) return true;
+            if (!data.deceased_datetime) return true;
 
-            const deathDate = dayjs(data.death_datetime);
+            const deathDate = dayjs(data.deceased_datetime);
             if (!deathDate.isValid()) return false;
 
             const dob = data.date_of_birth
@@ -159,10 +159,10 @@ export default function PatientRegistration(
               : dob.year() < deathDate.year();
           },
           (data) => ({
-            message: dayjs(data.death_datetime).isValid()
+            message: dayjs(data.deceased_datetime).isValid()
               ? t("death_date_must_be_after_dob")
               : t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
-            path: ["death_datetime"],
+            path: ["deceased_datetime"],
           }),
         ),
 
@@ -287,7 +287,7 @@ export default function PatientRegistration(
       setSelectedLevels([
         patientQuery.data.geo_organization as unknown as Organization,
       ]);
-      setIsDeceased(!!patientQuery.data.death_datetime);
+      setIsDeceased(!!patientQuery.data.deceased_datetime);
       form.reset({
         name: patientQuery.data.name || "",
         phone_number: patientQuery.data.phone_number || "",
@@ -312,7 +312,7 @@ export default function PatientRegistration(
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
-        death_datetime: patientQuery.data.death_datetime || undefined,
+        deceased_datetime: patientQuery.data.deceased_datetime || undefined,
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]);
@@ -634,8 +634,8 @@ export default function PatientRegistration(
                       onCheckedChange={(checked) => {
                         setIsDeceased(checked as boolean);
                         form.setValue(
-                          "death_datetime",
-                          checked ? form.getValues("death_datetime") : null,
+                          "deceased_datetime",
+                          checked ? form.getValues("deceased_datetime") : null,
                         );
                       }}
                       data-cy="is-deceased-checkbox"
@@ -649,7 +649,7 @@ export default function PatientRegistration(
                   </div>
                 </div>
 
-                {(isDeceased || form.watch("death_datetime")) && (
+                {(isDeceased || form.watch("deceased_datetime")) && (
                   <div className="mt-4">
                     <div className="flex items-center gap-2 mb-4 text-gray-500">
                       <InfoIcon className="w-4 h-4" />
@@ -660,7 +660,7 @@ export default function PatientRegistration(
 
                     <FormField
                       control={form.control}
-                      name="death_datetime"
+                      name="deceased_datetime"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t("date_and_time_of_death")}</FormLabel>
