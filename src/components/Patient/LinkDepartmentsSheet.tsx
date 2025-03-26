@@ -187,7 +187,7 @@ export default function LinkDepartmentsSheet({
   const queryClient = useQueryClient();
 
   const { mutate: submitBatch, isPending: isAdding } = useMutation({
-    mutationFn: mutate(routes.batchRequest),
+    mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
@@ -197,12 +197,32 @@ export default function LinkDepartmentsSheet({
       onUpdate?.();
     },
     onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
-      errorData.errors.forEach((er) => {
-        toast.error(er.msg);
-      });
+      try {
+        const errorData = error.cause as {
+          results?: {
+            data?: { detail?: string; errors?: { msg: string }[] };
+          }[];
+        };
+
+        const errorMessages = errorData?.results
+          ?.flatMap(
+            (result) =>
+              result?.data?.errors?.map((err) => err.msg) || // Extract from `errors[].msg`
+              (result?.data?.detail ? [result.data.detail] : []), // Extract from `data.detail`
+          )
+          .filter(Boolean); // Remove undefined/null values
+
+        if (errorMessages?.length) {
+          errorMessages.forEach((msg) => toast.error(msg));
+        } else {
+          toast.error("An unexpected error occurred");
+        }
+      } catch {
+        toast.error("An unexpected error occurred");
+      }
     },
   });
+
   const handleAddOrganizations = () => {
     if (!selectedOrgs?.length) return;
 
