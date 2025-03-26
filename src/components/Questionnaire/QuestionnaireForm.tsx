@@ -647,7 +647,10 @@ export function QuestionnaireForm({
         (response) => !response.structured_type,
       );
       const validResponses = nonStructuredResponses.filter(
-        (response) => response.values.length > 0 && !response.structured_type,
+        (response) =>
+          response.values.length > 0 &&
+          !response.structured_type &&
+          response.values?.[0]?.value !== "",
       );
       if (validResponses.length > 0) {
         requests.push({
