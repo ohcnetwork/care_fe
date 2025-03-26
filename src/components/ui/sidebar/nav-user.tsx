@@ -48,13 +48,13 @@ export function FacilityNavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              {open && (
+              <Avatar
+                className="h-8 w-8 rounded-lg"
+                name={`${user.first_name} ${user.last_name}`}
+                imageUrl={user.read_profile_picture_url}
+              />
+              {(open || isMobile) && (
                 <>
-                  <Avatar
-                    className="h-8 w-8 rounded-lg"
-                    name={`${user.first_name} ${user.last_name}`}
-                    imageUrl={user.read_profile_picture_url}
-                  />
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
                       {formatName(user)}
@@ -62,28 +62,6 @@ export function FacilityNavUser({
                     <span className="truncate text-xs">{user.username}</span>
                   </div>
                   <CaretSortIcon className="ml-auto size-4" />
-                </>
-              )}
-              {!open && (
-                <>
-                  <Avatar
-                    className="h-8 w-8 rounded-lg"
-                    name={`${user.first_name} ${user.last_name}`}
-                    imageUrl={user.read_profile_picture_url}
-                  />
-                  {isMobile && (
-                    <>
-                      <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-semibold">
-                          {formatName(user)}
-                        </span>
-                        <span className="truncate text-xs">
-                          {user.username}
-                        </span>
-                      </div>
-                      <CaretSortIcon className="ml-auto size-4" />
-                    </>
-                  )}
                 </>
               )}
             </SidebarMenuButton>
