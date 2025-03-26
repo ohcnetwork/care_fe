@@ -49,7 +49,11 @@ export default function ServiceHistoryForm({
 
   const formSchema = z.object({
     note: z.string().min(1, { message: t("field_required") }),
-    serviced_on: z.date({ required_error: t("field_required") }),
+    serviced_on: z
+      .date({ required_error: t("field_required") })
+      .min(new Date(new Date().setHours(0, 0, 0, 0)), {
+        message: t("service_date_min_date"),
+      }),
   });
 
   type FormValues = z.infer<typeof formSchema>;
@@ -151,7 +155,6 @@ export default function ServiceHistoryForm({
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>

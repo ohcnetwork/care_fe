@@ -2496,6 +2496,7 @@
   "sending": "Sending",
   "serial_number": "Serial Number",
   "service_date": "Service Date",
+  "service_date_min_date": "Service date must be set to today or a future date",
   "service_history": "Service History",
   "service_notes": "Notes",
   "service_notes_enter": "Enter service notes",
