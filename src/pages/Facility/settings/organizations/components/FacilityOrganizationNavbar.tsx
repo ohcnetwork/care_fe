@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -17,6 +16,7 @@ import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrgani
 interface OrganizationTreeNodeProps {
   organization: FacilityOrganization;
   selectedOrganizationId: string | null;
+  onSelect: (organization: FacilityOrganization) => void;
   expandedOrganizations: Set<string>;
   onToggleExpand: (organizationId: string) => void;
   level?: number;
@@ -26,6 +26,7 @@ interface OrganizationTreeNodeProps {
 function OrganizationTreeNode({
   organization,
   selectedOrganizationId,
+  onSelect,
   expandedOrganizations,
   onToggleExpand,
   level = 0,
@@ -77,11 +78,7 @@ function OrganizationTreeNode({
           <span className="w-6" />
         )}
         <div
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/settings/departments/${organization.id}/users`,
-            )
-          }
+          onClick={() => onSelect(organization)}
           className="flex items-center flex-1 text-sm gap-2 cursor-pointer"
         >
           <span className="truncate">{organization.name}</span>
@@ -94,6 +91,7 @@ function OrganizationTreeNode({
               key={child.id}
               organization={child}
               selectedOrganizationId={selectedOrganizationId}
+              onSelect={onSelect}
               expandedOrganizations={expandedOrganizations}
               onToggleExpand={onToggleExpand}
               level={level + 1}
@@ -111,6 +109,7 @@ interface FacilityOrganizationNavbarProps {
   selectedOrganizationId: string | null;
   expandedOrganizations: Set<string>;
   onToggleExpand: (organizationId: string) => void;
+  onOrganizationSelect: (organization: FacilityOrganization) => void;
 }
 
 export default function FacilityOrganizationNavbar({
@@ -118,11 +117,14 @@ export default function FacilityOrganizationNavbar({
   selectedOrganizationId,
   expandedOrganizations,
   onToggleExpand,
+  onOrganizationSelect,
 }: FacilityOrganizationNavbarProps) {
   const { t } = useTranslation();
 
   const { data: allOrganizations, isLoading: isLoadingOrganizations } =
-    useQuery({
+    useQuery<{
+      results: FacilityOrganization[];
+    }>({
       queryKey: ["facilityOrganization", "list", facilityId],
       queryFn: query(facilityOrganizationApi.list, {
         pathParams: { facilityId },
@@ -130,6 +132,8 @@ export default function FacilityOrganizationNavbar({
           parent: "",
         },
       }),
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
     });
 
   const topLevelOrganizations = allOrganizations?.results || [];
@@ -139,7 +143,7 @@ export default function FacilityOrganizationNavbar({
   }
 
   return (
-    <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block min-h-[calc(100vh-10rem)]">
+    <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block min-h-[calc(100vh-10rem)] pt-2">
       <div className="p-4">
         <h2 className="text-lg font-semibold">{t("departments_or_teams")}</h2>
       </div>
@@ -155,6 +159,7 @@ export default function FacilityOrganizationNavbar({
                 key={organization.id}
                 organization={organization}
                 selectedOrganizationId={selectedOrganizationId}
+                onSelect={onOrganizationSelect}
                 expandedOrganizations={expandedOrganizations}
                 onToggleExpand={onToggleExpand}
                 facilityId={facilityId}
