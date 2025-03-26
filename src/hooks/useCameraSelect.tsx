@@ -77,7 +77,10 @@ const useCameraSelect = ({ onChange }: UseCameraSelectOptions = {}) => {
       </SelectTrigger>
       <SelectContent>
         {devices.map((device: any) => (
-          <SelectItem key={device.deviceId} value={device.deviceId}>
+          <SelectItem
+            key={device.deviceId}
+            value={device.deviceId || "Unknown Device"}
+          >
             {device.label || `Camera ${device.deviceId}`}
           </SelectItem>
         ))}
