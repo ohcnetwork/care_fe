@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isBefore, isToday, parse, startOfDay } from "date-fns";
+import dayjs from "dayjs";
 import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -66,17 +66,16 @@ export default function CreateScheduleExceptionSheet({
       // Ensure valid_from is today or future
       valid_from: z
         .date({ required_error: t("field_required") })
-        .refine((date) => date >= startOfDay(new Date()), {
+        .refine((date) => dayjs(date).isAfter(dayjs().subtract(1, "day")), {
           message: t("date_must_be_future"),
         }),
 
       // Ensure valid_to is strictly after valid_from
       valid_to: z
         .date({ required_error: t("field_required") })
-        .refine((date) => date > new Date(), {
+        .refine((date) => dayjs(date).isAfter(dayjs().subtract(1, "day")), {
           message: t("date_must_be_future"),
         }),
-
       start_time: z
         .string()
         .min(1, t("field_required")) as unknown as z.ZodType<Time>,
@@ -91,29 +90,29 @@ export default function CreateScheduleExceptionSheet({
       (data) => {
         if (data.unavailable_all_day) return true;
 
-        const now = new Date();
-
-        const startTime = parse(data.start_time, "HH:mm", new Date());
-        const endTime = parse(data.end_time, "HH:mm", new Date());
+        const startTime = dayjs(data.start_time, "HH:mm");
+        const endTime = dayjs(data.end_time, "HH:mm");
 
         // If the date is today, ensure start_time and end_time are in the future
-        if (isToday(data.valid_from)) {
-          return isBefore(now, startTime) && isBefore(startTime, endTime);
+        if (dayjs(data.valid_from).isSame(dayjs(), "day")) {
+          return dayjs().isBefore(startTime) && startTime.isBefore(endTime);
         }
-
         // Ensure start_time is before end_time
-        return isBefore(startTime, endTime);
+        return startTime.isBefore(endTime);
       },
       {
         message: t("start_time_must_be_in_the_future"),
         path: ["start_time"],
       },
     )
-
-    .refine((data) => data.valid_from <= data.valid_to, {
-      message: t("from_date_must_be_before_to_date"),
-      path: ["valid_from"],
-    });
+    .refine(
+      (data) =>
+        dayjs(data.valid_to).isAfter(dayjs(data.valid_from).subtract(1, "day")),
+      {
+        message: t("to_date_equal_or_after_from_date"),
+        path: ["valid_to"],
+      },
+    );
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
