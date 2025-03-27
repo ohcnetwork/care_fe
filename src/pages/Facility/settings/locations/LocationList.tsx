@@ -232,87 +232,82 @@ export default function LocationList({ facilityId }: Props) {
   }, [searchQuery, data?.results]);
 
   return (
-    <Page title={t("locations")} hideTitleOnPage={true} className="p-0">
-      <div className="space-y-4">
-        <h3 className="text-black">{t("locations")}</h3>
-        <div className="space-y-4">
-          <div className="flex flex-col lg:flex-row gap-2">
-            <div className="flex items-center justify-between w-full">
-              <Tabs
-                value={activeTab}
-                onValueChange={(value) => setActiveTab(value as "list" | "map")}
-              >
-                <TabsList className="flex">
-                  <TabsTrigger value="list" id="location-list-view">
-                    <div className="flex items-center gap-1">
-                      <CareIcon icon="l-list-ul" className="text-lg" />
-                      <span>{t("list")}</span>
-                    </div>
-                  </TabsTrigger>
-                  <TabsTrigger value="map" id="location-map-view">
-                    <div className="flex items-center gap-1">
-                      <CareIcon icon="l-map" className="text-lg" />
-                      <span>{t("map")}</span>
-                    </div>
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
+    <Page title={t("locations")} className="p-0 md:p-0 space-y-4">
+      <div className="flex flex-col lg:flex-row gap-2">
+        <div className="flex items-center justify-between w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "list" | "map")}
+          >
+            <TabsList className="flex">
+              <TabsTrigger value="list" id="location-list-view">
+                <div className="flex items-center gap-1">
+                  <CareIcon icon="l-list-ul" className="text-lg" />
+                  <span>{t("list")}</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="map" id="location-map-view">
+                <div className="flex items-center gap-1">
+                  <CareIcon icon="l-map" className="text-lg" />
+                  <span>{t("map")}</span>
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
-            <div className="flex flex-col lg:flex-row gap-4 w-full">
-              <Input
-                placeholder={t("filter_by_locations")}
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                }}
-                className="w-full text-xs lg:text-sm"
-              />
-              <Button
-                variant="primary"
-                onClick={handleAddLocation}
-                className="w-full lg:w-auto"
-              >
-                <CareIcon icon="l-plus" className="size-4 mr-2" />
-                {t("add_location")}
-              </Button>
-            </div>
-          </div>
-
-          {activeTab === "list" ? (
-            <>
-              <LocationInfoCard />
-              <LocationListView
-                isLoading={isLoading}
-                tableData={filteredData || []}
-                searchQuery={searchQuery}
-                filteredTopLevelLocations={filteredTopLevelLocations}
-                expandedRows={expandedRows}
-                toggleRow={toggleRow}
-                getChildren={getChildren}
-                handleEditLocation={handleEditLocation}
-                setExpandedRows={setExpandedRows}
-                facilityId={facilityId}
-              />
-            </>
-          ) : (
-            <LocationMap
-              locations={filteredData || []}
-              onLocationClick={handleEditLocation}
-              facilityName={facilityData?.name || t("facility")}
-              searchQuery={searchQuery}
-              isEditing={isSheetOpen}
-            />
-          )}
-
-          <LocationSheet
-            open={isSheetOpen}
-            onOpenChange={handleSheetClose}
-            facilityId={facilityId}
-            location={selectedLocation || undefined}
+        <div className="flex flex-col lg:flex-row gap-4 w-full">
+          <Input
+            placeholder={t("filter_by_locations")}
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
+            className="w-full text-xs lg:text-sm"
           />
+          <Button
+            variant="primary"
+            onClick={handleAddLocation}
+            className="w-full lg:w-auto"
+          >
+            <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
+            {t("add_location")}
+          </Button>
         </div>
       </div>
+
+      {activeTab === "list" ? (
+        <>
+          <LocationInfoCard />
+          <LocationListView
+            isLoading={isLoading}
+            tableData={filteredData || []}
+            searchQuery={searchQuery}
+            filteredTopLevelLocations={filteredTopLevelLocations}
+            expandedRows={expandedRows}
+            toggleRow={toggleRow}
+            getChildren={getChildren}
+            handleEditLocation={handleEditLocation}
+            setExpandedRows={setExpandedRows}
+            facilityId={facilityId}
+          />
+        </>
+      ) : (
+        <LocationMap
+          locations={filteredData || []}
+          onLocationClick={handleEditLocation}
+          facilityName={facilityData?.name || t("facility")}
+          searchQuery={searchQuery}
+          isEditing={isSheetOpen}
+        />
+      )}
+
+      <LocationSheet
+        open={isSheetOpen}
+        onOpenChange={handleSheetClose}
+        facilityId={facilityId}
+        location={selectedLocation || undefined}
+      />
     </Page>
   );
 }

@@ -1389,6 +1389,7 @@
   "help_provisional": "This is a tentative diagnosis - still a candidate that is under consideration.",
   "help_refuted": "This condition has been ruled out by subsequent diagnostic and clinical evidence.",
   "help_unconfirmed": "There is not sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.",
+  "hey_user": "Hey {{user}} 👋",
   "hide": "Hide",
   "hide_notes": "Hide notes",
   "high": "High",
