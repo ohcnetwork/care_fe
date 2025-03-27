@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
 import { Trans } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -126,8 +127,8 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
             <UserSelector
               selected={selectedUser}
               onChange={handleUserChange}
-              placeholder="Search users..."
-              noOptionsMessage="No users found"
+              placeholder={t("search_users")}
+              noOptionsMessage={t("no_users_found")}
             />
           </div>
           {selectedUser && (
@@ -168,6 +169,16 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                       {selectedUser.user_type}
                     </p>
                   </div>
+                  <div>
+                    <span className="text-sm text-gray-500">
+                      {t("phone_number")}
+                    </span>
+                    <p className="text-sm font-medium truncate">
+                      {selectedUser.phone_number
+                        ? formatPhoneNumberIntl(selectedUser.phone_number)
+                        : "-"}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -177,7 +188,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                 </label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger data-cy="patient-user-role-select">
-                    <SelectValue placeholder="Select a role" />
+                    <SelectValue placeholder={t("select_role")} />
                   </SelectTrigger>
                   <SelectContent>
                     {roles?.results?.map((role) => (
