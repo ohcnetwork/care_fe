@@ -202,7 +202,7 @@ export default function CreateScheduleExceptionSheet({
                   name="reason"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>{t("reason")}</FormLabel>
+                      <FormLabel aria-required>{t("reason")}</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="e.g. Holiday Leave, Conference, etc."
@@ -220,7 +220,7 @@ export default function CreateScheduleExceptionSheet({
                     name="valid_from"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>{t("valid_from")}</FormLabel>
+                        <FormLabel aria-required>{t("valid_from")}</FormLabel>
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
@@ -235,7 +235,7 @@ export default function CreateScheduleExceptionSheet({
                     name="valid_to"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>{t("valid_to")}</FormLabel>
+                        <FormLabel aria-required>{t("valid_to")}</FormLabel>
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
@@ -270,7 +270,7 @@ export default function CreateScheduleExceptionSheet({
                     name="start_time"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>From</FormLabel>
+                        <FormLabel aria-required>From</FormLabel>
                         <FormControl>
                           <Input
                             type="time"
@@ -288,7 +288,7 @@ export default function CreateScheduleExceptionSheet({
                     name="end_time"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>To</FormLabel>
+                        <FormLabel aria-required>To</FormLabel>
                         <FormControl>
                           <Input
                             type="time"

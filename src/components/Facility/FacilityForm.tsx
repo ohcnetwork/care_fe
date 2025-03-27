@@ -229,7 +229,7 @@ export default function FacilityForm({
               name="facility_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("facility_type")}</FormLabel>
+                  <FormLabel aria-required>{t("facility_type")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger data-cy="facility-type">
@@ -258,7 +258,7 @@ export default function FacilityForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("facility_name")}</FormLabel>
+                  <FormLabel aria-required>{t("facility_name")}</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-name"
@@ -324,7 +324,7 @@ export default function FacilityForm({
               name="phone_number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("phone_number")}</FormLabel>
+                  <FormLabel aria-required>{t("phone_number")}</FormLabel>
                   <FormControl>
                     <PhoneInput
                       data-cy="facility-phone"
@@ -342,7 +342,7 @@ export default function FacilityForm({
               name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("pincode")}</FormLabel>
+                  <FormLabel aria-required>{t("pincode")}</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-pincode"
@@ -384,7 +384,7 @@ export default function FacilityForm({
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("address")}</FormLabel>
+                <FormLabel aria-required>{t("address")}</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}

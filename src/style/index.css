@@ -279,6 +279,11 @@
   input[type="search"]::-webkit-search-results-decoration {
     display: none;
   }
+
+  /* Style for required form labels */
+  [data-slot="form-label"][for][aria-required="true"]::after {
+    @apply -ml-1 text-red-500 content-['*'];
+  }
 }
 
 @layer base {
