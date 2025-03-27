@@ -41,6 +41,22 @@ describe("Patient Files", () => {
 
   const inputFileName1 = "Cypress Test File Upload 1 " + timestamp;
 
+  it("Add multiple patient files", () => {
+    const filePaths = (fileNames: string[]) =>
+      fileNames.map((file) => `cypress/fixtures/${file}`);
+
+    patientFiles
+      .clickAddFilesButton()
+      .uploadMultipleFiles(filePaths(fileNames))
+      .clickUploadFilesButton()
+      .verifyValidationErrors(validationMessage)
+      .fillMultipleFileNames(inputFileNames)
+      .interceptFileUploadRequest()
+      .clickUploadFilesButton()
+      .verifyFileUploadApiCall()
+      .verifyMultipleFileUploadSuccess(fileUploadSuccessToast);
+  });
+
   it("Capture image and upload", () => {
     // Capture Image Upload Setup
     const captureFileName = "Cypress Capture Test " + timestamp;
@@ -119,22 +135,6 @@ describe("Patient Files", () => {
       .clickProceedButton()
       .verifyFileArchiveApiCall()
       .verifySingleFileUploadSuccess(fileArchiveSuccessToast);
-  });
-
-  it("Add multiple patient files", () => {
-    const filePaths = (fileNames: string[]) =>
-      fileNames.map((file) => `cypress/fixtures/${file}`);
-
-    patientFiles
-      .clickAddFilesButton()
-      .uploadMultipleFiles(filePaths(fileNames))
-      .clickUploadFilesButton()
-      .verifyValidationErrors(validationMessage)
-      .fillMultipleFileNames(inputFileNames)
-      .interceptFileUploadRequest()
-      .clickUploadFilesButton()
-      .verifyFileUploadApiCall()
-      .verifyMultipleFileUploadSuccess(fileUploadSuccessToast);
   });
 
   it("Record, Upload and Download Audio file", () => {

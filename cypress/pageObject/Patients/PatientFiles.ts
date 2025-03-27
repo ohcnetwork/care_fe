@@ -116,7 +116,7 @@ export class PatientFiles {
 
   verifyMultipleFileUploadSuccess(message: string) {
     cy.get("li[data-sonner-toast]")
-      .should("have.length", 3)
+      .should("have.length", 2)
       .each(($toast) => {
         cy.wrap($toast)
           .find("div[data-title]")
