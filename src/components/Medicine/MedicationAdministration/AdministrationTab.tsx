@@ -220,7 +220,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
   );
 
   return (
-    <React.Fragment key={medication.id}>
+    <React.Fragment>
       <div
         className={cn(
           "p-4 border-t border-gray-200",
