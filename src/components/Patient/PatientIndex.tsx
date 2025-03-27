@@ -32,10 +32,12 @@ import {
 import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 
+import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import { PartialPatientModel } from "@/types/emr/newPatient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
@@ -46,6 +48,19 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     useState<PartialPatientModel | null>(null);
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
+
+  const { canCreatePatient } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
 
   const handleCreatePatient = useCallback(() => {
     const queryParams = phoneNumber ? { phone_number: phoneNumber } : {};
@@ -55,7 +70,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     });
   }, [facilityId, phoneNumber]);
 
-  useKeyboardShortcut(["shift", "p"], handleCreatePatient);
+  useKeyboardShortcut(["shift", "p"], handleCreatePatient, {
+    ignoreInputFields: false,
+  });
 
   function AddPatientButton({ outline }: { outline?: boolean }) {
     return (
@@ -65,13 +82,13 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         onClick={handleCreatePatient}
         data-cy="create-new-patient-button"
       >
-        <CareIcon icon="l-plus" className="h-4 w-4" />
+        <CareIcon icon="l-plus" className="size-4" />
         {t("add_new_patient")}
         <kbd
           className={cn(
-            "hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
+            "hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
             outline
-              ? "border-input bg-transparent"
+              ? "border-gray-200 bg-transparent"
               : "bg-white/20 border-white/20 text-white",
           )}
         >
@@ -132,15 +149,21 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   return (
     <div>
       <div className="container max-w-5xl mx-auto py-6">
-        <div className="flex justify-center md:justify-end">
-          <AddPatientButton />
-        </div>
+        {canCreatePatient && (
+          <div className="flex justify-center md:justify-end">
+            <AddPatientButton />
+          </div>
+        )}
         <div className="space-y-6 mt-6">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">
               {t("search_patients")}
             </h1>
-            <p className="text-gray-500">{t("search_patient_page_text")}</p>
+            <p className="text-gray-500">
+              {canCreatePatient
+                ? t("search_patient_page_text")
+                : t("search_only_patient_page_text")}
+            </p>
           </div>
 
           <div>
@@ -151,6 +174,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                 options={searchOptions}
                 onSearch={handleSearch}
                 className="w-full"
+                autoFocus
               />
 
               <div className="min-h-[200px]" id="patient-search-results">
@@ -173,7 +197,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-lg border">
+                      <div className="rounded-lg border border-gray-200">
                         <Table>
                           <TableHeader>
                             <TableRow>

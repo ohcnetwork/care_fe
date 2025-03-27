@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -102,7 +102,7 @@ export default function LocationView({ id, facilityId }: Props) {
   const generateBreadcrumbs = (location: any) => {
     const breadcrumbs = [];
     let current = location;
-    while (current) {
+    while (current?.id) {
       breadcrumbs.unshift({
         name: current.name,
         id: current.id,
@@ -125,24 +125,27 @@ export default function LocationView({ id, facilityId }: Props) {
               <Link href={`/locations`}>{t("home")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
+          <BreadcrumbSeparator />
           {breadcrumbs.map((breadcrumb, index) => (
-            <BreadcrumbItem key={breadcrumb.id}>
-              {index === breadcrumbs.length - 1 ? (
-                <span className="font-semibold text-gray-900">
-                  {breadcrumb.name}
-                </span>
-              ) : (
-                <>
-                  <BreadcrumbLink
-                    asChild
-                    className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
-                  >
-                    <Link href={`${breadcrumb.id}`}>{breadcrumb.name}</Link>
-                  </BreadcrumbLink>
-                  <BreadcrumbSeparator />
-                </>
-              )}
-            </BreadcrumbItem>
+            <React.Fragment key={breadcrumb.id}>
+              <BreadcrumbItem>
+                {index === breadcrumbs.length - 1 ? (
+                  <span className="font-semibold text-gray-900">
+                    {breadcrumb.name}
+                  </span>
+                ) : (
+                  <>
+                    <BreadcrumbLink
+                      asChild
+                      className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                    >
+                      <Link href={`${breadcrumb.id}`}>{breadcrumb.name}</Link>
+                    </BreadcrumbLink>
+                  </>
+                )}
+              </BreadcrumbItem>
+              {index != breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+            </React.Fragment>
           ))}
         </BreadcrumbList>
       </Breadcrumb>
@@ -164,7 +167,7 @@ export default function LocationView({ id, facilityId }: Props) {
                 {location?.status}
               </Badge>
             </div>
-            <div className="flex flex-col md:flex-row flex-wrap items-center gap-2">
+            <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
               <div className="w-full md:w-72">
                 <Input
                   placeholder={t("search_by_name")}
@@ -183,7 +186,7 @@ export default function LocationView({ id, facilityId }: Props) {
                     onClick={handleAddLocation}
                     className="w-full md:w-auto"
                   >
-                    <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
+                    <CareIcon icon="l-plus" className="size-4 mr-2" />
                     {t("add_location")}
                   </Button>
                 )}
@@ -195,8 +198,8 @@ export default function LocationView({ id, facilityId }: Props) {
                     facilityId={facilityId}
                     trigger={
                       <Button variant="outline" className="w-full md:w-auto">
-                        <CareIcon icon="l-building" className="h-4 w-4 mr-2" />
-                        {t("manage_organizations")}
+                        <CareIcon icon="l-building" className="size-4 mr-2" />
+                        {t("manage_organization_other")}
                       </Button>
                     }
                     onUpdate={() => {
@@ -222,6 +225,7 @@ export default function LocationView({ id, facilityId }: Props) {
                       key={childLocation.id}
                       location={childLocation}
                       onEdit={handleEditLocation}
+                      facilityId={facilityId}
                     />
                   ))
                 ) : (
