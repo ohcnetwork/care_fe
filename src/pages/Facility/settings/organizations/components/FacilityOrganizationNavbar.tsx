@@ -6,8 +6,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
@@ -147,7 +146,7 @@ export default function FacilityOrganizationNavbar({
         <div className="p-2">
           {isLoadingOrganizations ? (
             <div className="p-4">
-              <CardGridSkeleton count={3} />
+              <Skeleton className="h-8 w-full" />
             </div>
           ) : (
             topLevelOrganizations.map((organization) => (
