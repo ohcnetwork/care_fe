@@ -162,7 +162,7 @@ export const EncounterShow = (props: Props) => {
       </nav>
       <div className="mt-4 xl:mt-0 w-full border-b-2 border-secondary-200">
         <div className="mt-2 xl:mt-0 flex w-full flex-col md:flex-row">
-          <div className="size-full rounded-lg border bg-white text-black shadow">
+          <div className="size-full rounded-lg border border-gray-200 bg-white text-black shadow-sm">
             <PatientInfoCard
               patient={encounterData.patient}
               encounter={encounterData}
@@ -193,6 +193,7 @@ export const EncounterShow = (props: Props) => {
                 {keysOf(tabs).map((tab) => (
                   <Link
                     key={tab}
+                    data-cy={`tab-${tab}`}
                     className={tabButtonClasses(props.tab === tab)}
                     href={`${tab}`}
                     data-cy={`encounter-${tab.toLowerCase()}-tab`}

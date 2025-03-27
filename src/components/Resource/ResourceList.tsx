@@ -49,7 +49,7 @@ function EmptyState() {
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
-        <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
+        <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_resources_found")}</h3>
       <p className="text-sm text-gray-500 mb-4">
@@ -120,7 +120,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
       }
     >
       <div className="space-y-4 mt-2 px-6">
-        <div className="rounded-lg border bg-card shadow-sm">
+        <div className="border border-gray-200 rounded-lg">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
@@ -135,7 +135,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                           "bg-primary/10 text-primary hover:bg-primary/20",
                       )}
                     >
-                      <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-search" className="mr-2 size-4" />
                       {title ? (
                         <span className="truncate">{title}</span>
                       ) : (
@@ -267,7 +267,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                             (o) => o.text === statusOption,
                           )?.icon || "l-folder-open"
                         }
-                        className="mr-2 h-4 w-4"
+                        className="mr-2 size-4"
                       />
                       {t(`resource_status__${statusOption}`)}
                     </TabsTrigger>
@@ -334,7 +334,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         {resource.origin_facility?.name}
                         <CareIcon
                           icon="l-arrow-right"
-                          className="mx-2 h-4 w-4"
+                          className="mx-2 size-4"
                         />
                         {resource.assigned_facility?.name}
                       </Badge>
@@ -347,7 +347,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
                     >
                       View Details
-                      <CareIcon icon="l-arrow-right" className="ml-1 h-4 w-4" />
+                      <CareIcon icon="l-arrow-right" className="ml-1 size-4" />
                     </Link>
                   </CardFooter>
                 </Card>

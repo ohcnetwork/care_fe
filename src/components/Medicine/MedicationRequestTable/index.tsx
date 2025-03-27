@@ -161,7 +161,7 @@ export default function MedicationRequestTable({
                     placeholder={t("search_medications")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-500"
+                    className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
                   />
                   {searchQuery && (
                     <Button
@@ -181,9 +181,10 @@ export default function MedicationRequestTable({
                       variant="outline"
                       size="sm"
                       className="text-gray-950 hover:text-gray-700 h-9"
+                      data-cy="edit-prescription"
                     >
                       <Link href={`questionnaire/medication_request`}>
-                        <PencilIcon className="mr-2 h-4 w-4" />
+                        <PencilIcon className="mr-2 size-4" />
                         {t("edit")}
                       </Link>
                     </Button>
@@ -222,10 +223,11 @@ export default function MedicationRequestTable({
                         <div
                           className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
                           onClick={() => setShowStopped(!showStopped)}
+                          data-cy="toggle-stopped-medications"
                         >
                           <CareIcon
                             icon={showStopped ? "l-eye-slash" : "l-eye"}
-                            className="h-4 w-4"
+                            className="size-4"
                           />
                           <span className="text-sm underline">
                             {showStopped ? t("hide") : t("show")}{" "}

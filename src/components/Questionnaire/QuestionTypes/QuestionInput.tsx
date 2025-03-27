@@ -21,8 +21,10 @@ import { BooleanQuestion } from "./BooleanQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
 import { DateQuestion } from "./DateQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
+import { TimeOfDeathQuestion } from "./DeathQuestion";
 import { DiagnosisQuestion } from "./DiagnosisQuestion";
 import { EncounterQuestion } from "./EncounterQuestion";
+import { FilesQuestion } from "./FileQuestion";
 import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
 import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
@@ -190,6 +192,15 @@ export function QuestionInput({
               );
             }
             return <span>{t("questionnaire_no_encounter")}</span>;
+          case "time_of_death":
+            return <TimeOfDeathQuestion {...commonProps} />;
+          case "files":
+            if (encounterId && facilityId) {
+              return (
+                <FilesQuestion {...commonProps} encounterId={encounterId} />
+              );
+            }
+            return <span>{t("questionnaire_files_no_encounter")}</span>;
         }
         return null;
 
@@ -215,10 +226,10 @@ export function QuestionInput({
                 variant="ghost"
                 size="icon"
                 onClick={() => removeValue(index)}
-                className="h-10 w-10"
+                className="size-10"
                 disabled={disabled}
               >
-                <CareIcon icon="l-trash" className="h-4 w-4" />
+                <CareIcon icon="l-trash" className="size-4" />
               </Button>
             );
 
@@ -243,9 +254,8 @@ export function QuestionInput({
                   {!question.structured_type && !question.repeats && (
                     <NotesInput
                       className={cn({
-                        "bg-white border rounded-l-none -ml-2": !(
-                          question.type === "text"
-                        ),
+                        "bg-white border border-gray-200 rounded-l-none -ml-2":
+                          !(question.type === "text"),
                         "mt-2": question.type === "text",
                       })}
                       questionnaireResponse={questionnaireResponse}
@@ -274,7 +284,7 @@ export function QuestionInput({
               className=""
               disabled={disabled}
             >
-              <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-plus" className="mr-2 size-4" />
               {t("add_another")}
             </Button>
             <NotesInput

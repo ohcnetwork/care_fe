@@ -15,6 +15,8 @@ import {
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
+
 export interface CameraCaptureDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -26,6 +28,8 @@ export interface CameraCaptureDialogProps {
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const { open, onOpenChange, onCapture, onResetCapture, setPreview } = props;
   const isLaptopScreen = useBreakpoints({ lg: true, default: false });
+  const { requestPermission } = useMediaDevicePermission();
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const [cameraFacingMode, setCameraFacingMode] = useState(
     isLaptopScreen ? "user" : "environment",
@@ -41,17 +45,23 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
 
   useEffect(() => {
     if (!open) return;
-    let stream: MediaStream | null = null;
 
-    navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: cameraFacingMode } })
-      .then((mediaStream) => {
-        stream = mediaStream;
-      })
-      .catch(() => {
-        toast.warning(t("camera_permission_denied"));
+    const getCameraStream = async () => {
+      const hasPermission = await requestPermission(cameraFacingMode);
+      if (!hasPermission.hasPermission) {
         onOpenChange(false);
-      });
+        return;
+      }
+
+      try {
+        const mediaStream = hasPermission.mediaStream;
+        setStream(mediaStream);
+      } catch (error) {
+        console.error("Error accessing camera:", error);
+      }
+    };
+
+    getCameraStream();
 
     return () => {
       if (stream) {
@@ -159,6 +169,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(true);
                     }}
                     className="m-2"
+                    data-cy="capture-button"
                   >
                     {t("capture")}
                   </Button>
@@ -175,6 +186,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(false);
                     }}
                     className="m-2"
+                    data-cy="retake-button"
                   >
                     {t("retake")}
                   </Button>
@@ -186,6 +198,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(false);
                     }}
                     className="m-2"
+                    data-cy="capture-submit-button"
                   >
                     {t("submit")}
                   </Button>

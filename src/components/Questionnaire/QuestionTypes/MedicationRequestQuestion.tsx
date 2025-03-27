@@ -294,6 +294,7 @@ export function MedicationRequestQuestion({
             <AlertDialogAction
               onClick={confirmRemoveMedication}
               className={cn(buttonVariants({ variant: "destructive" }))}
+              data-cy="confirm-remove-medication"
             >
               {t("remove")}
             </AlertDialogAction>
@@ -305,45 +306,48 @@ export function MedicationRequestQuestion({
         <div className="md:overflow-x-auto w-auto pb-2">
           <div className="min-w-fit">
             <div
-              className={cn("max-w-[2304px] relative lg:border rounded-md", {
-                "bg-gray-50/50": !desktopLayout,
-              })}
+              className={cn(
+                "max-w-[2304px] relative lg:border border-gray-200 rounded-md",
+                {
+                  "bg-gray-50/50": !desktopLayout,
+                },
+              )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,200px,180px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
-                <div className="font-semibold text-gray-600 p-3 border-r">
+              <div className="hidden lg:grid grid-cols-[280px_180px_170px_160px_300px_180px_250px_180px_160px_200px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("dosage")}
                   <span className="text-red-500 ml-0.5">*</span>
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("frequency")}
                   <span className="text-red-500 ml-0.5">*</span>
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("duration")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("instructions")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("route")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("site")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("method")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("intent")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("authored_on")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("notes")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 sticky right-0 bg-gray-50 shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12" />
@@ -369,7 +373,7 @@ export function MedicationRequestQuestion({
                       >
                         <div
                           className={cn(
-                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-sm text-sm",
+                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-xs text-sm",
                             expandedMedicationIndex === index
                               ? "bg-gray-50"
                               : "bg-gray-100",
@@ -386,14 +390,14 @@ export function MedicationRequestQuestion({
                                 aria-label="Expand Medication Request"
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-gray-500 hover:text-gray-900"
+                                className="size-8 text-gray-500 hover:text-gray-900"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setExpandedMedicationIndex(index);
                                 }}
                                 disabled={disabled}
                               >
-                                <Pencil2Icon className="h-4 w-4" />
+                                <Pencil2Icon className="size-4" />
                               </Button>
                             )}
                             <TooltipComponent
@@ -414,9 +418,10 @@ export function MedicationRequestQuestion({
                                   disabled ||
                                   medication.status === "entered_in_error"
                                 }
-                                className="h-8 w-8"
+                                className="size-8"
+                                data-cy="remove-medication"
                               >
-                                <MinusCircledIcon className="h-4 w-4" />
+                                <MinusCircledIcon className="size-4" />
                               </Button>
                             </TooltipComponent>
                           </div>
@@ -610,7 +615,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,200px,180px,48px] border-b hover:bg-gray-50/50",
+        "grid grid-cols-1 lg:grid-cols-[280px_180px_170px_160px_300px_180px_250px_180px_160px_200px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50",
         {
           "opacity-40 pointer-events-none":
             medication.status === "entered_in_error",
@@ -618,13 +623,16 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       )}
     >
       {/* Medicine Name */}
-      <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
+      <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
         <span className="break-words line-clamp-2 hidden lg:block">
           {medication.medication?.display}
         </span>
       </div>
       {/* Dosage */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div
+        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        data-cy="dosage"
+      >
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -652,6 +660,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 )}
               >
                 <ComboboxQuantityInput
+                  data-cy="dosage-input"
                   quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
                   onChange={(value) => {
                     if (!value.value || !value.unit) return;
@@ -673,7 +682,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-3 w-3 rounded-full hover:bg-transparent"
+                  className="size-3 rounded-full hover:bg-transparent"
                   onClick={handleDoseRangeClick}
                   disabled={disabled || isReadOnly}
                 >
@@ -713,7 +722,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           ))}
       </div>
       {/* Frequency */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("frequency")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -745,6 +754,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           disabled={disabled || isReadOnly}
         >
           <SelectTrigger
+            data-cy="frequency"
             className={cn(
               "h-9 text-sm",
               hasError(MEDICATION_REQUEST_FIELDS.FREQUENCY.key) &&
@@ -772,7 +782,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Duration */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("duration")}
         </Label>
@@ -787,7 +797,11 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             <Input
               type="number"
               min={0}
-              value={dosageInstruction.timing.repeat.bounds_duration?.value}
+              value={
+                dosageInstruction.timing.repeat.bounds_duration?.value == 0
+                  ? ""
+                  : dosageInstruction.timing.repeat.bounds_duration?.value
+              }
               onChange={(e) => {
                 const value = e.target.value;
                 if (!dosageInstruction.timing) return;
@@ -862,7 +876,10 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Instructions */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div
+        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        data-cy="instructions"
+      >
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("instructions")}
         </Label>
@@ -905,11 +922,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             }
             placeholder={t("select_additional_instructions")}
             disabled={disabled || isReadOnly}
+            data-cy="medication-instructions"
           />
         )}
       </div>
       {/* Route */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div
+        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        data-cy="route"
+      >
         <Label className="mb-1.5 block text-sm lg:hidden">{t("route")}</Label>
         <ValueSetSelect
           system="system-route"
@@ -920,7 +941,10 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Site */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div
+        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        data-cy="site"
+      >
         <Label className="mb-1.5 block text-sm lg:hidden">{t("site")}</Label>
         <ValueSetSelect
           system="system-body-site"
@@ -932,7 +956,10 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Method */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div
+        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        data-cy="method"
+      >
         <Label className="mb-1.5 block text-sm lg:hidden">{t("method")}</Label>
         <ValueSetSelect
           system="system-administration-method"
@@ -944,7 +971,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Intent */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("intent")}</Label>
         <Select
           value={medication.intent}
@@ -969,7 +996,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </Select>
       </div>
       {/* Authored On */}
-      <div className="lg:px-1 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("authored_on")}
         </Label>
@@ -987,7 +1014,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Notes */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("notes")}</Label>
         {desktopLayout ? (
           <>
@@ -1027,9 +1054,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           size="icon"
           onClick={onRemove}
           disabled={disabled}
-          className="h-8 w-8"
+          className="size-8"
         >
-          <MinusCircledIcon className="h-4 w-4" />
+          <MinusCircledIcon className="size-4" />
         </Button>
       </div>
     </div>
