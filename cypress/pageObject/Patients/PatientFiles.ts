@@ -210,9 +210,7 @@ export class PatientFiles {
   }
 
   saveCurrentUrl() {
-    cy.url().then((url) => {
-      cy.wrap(url).as("savedPatientFileUrl");
-    });
+    cy.saveCurrentUrl();
     return this;
   }
 
@@ -245,9 +243,7 @@ export class PatientFiles {
   }
 
   navigateToSavedUrl() {
-    cy.get<string>("@savedPatientFileUrl").then((url) => {
-      cy.visit(url);
-    });
+    cy.navigateToSavedUrl();
     return this;
   }
 }

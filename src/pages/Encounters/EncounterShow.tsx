@@ -196,7 +196,6 @@ export const EncounterShow = (props: Props) => {
                     data-cy={`tab-${tab}`}
                     className={tabButtonClasses(props.tab === tab)}
                     href={`${tab}`}
-                    data-cy={`encounter-${tab.toLowerCase()}-tab`}
                   >
                     {t(`ENCOUNTER_TAB__${tab}`)}
                   </Link>
