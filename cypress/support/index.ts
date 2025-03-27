@@ -32,6 +32,8 @@ declare global {
         selector: string,
         texts: string[],
       ): Chainable<Element>;
+      saveCurrentUrl(): Chainable<Subject>;
+      navigateToSavedUrl(): Chainable<Subject>;
       verifyErrorMessages(errors: ErrorMessageItem[]): Chainable<void>;
       typeIntoField(
         selector: string,

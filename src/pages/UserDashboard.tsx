@@ -100,6 +100,7 @@ export default function UserDashboard() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
+                data-cy="user-dashboard-menu-trigger"
                 variant="outline"
                 size="sm"
                 className="px-2 w-full sm:w-auto"
@@ -118,6 +119,7 @@ export default function UserDashboard() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
+                data-cy="sign-out-button"
                 className="cursor-pointer flex items-center gap-2 text-xs w-full sm:w-auto"
                 onClick={signOut}
               >
