@@ -62,8 +62,8 @@ export default function UserDashboard() {
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
       {/* Welcome Section */}
-      <div className="flex flex-col gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm w-full  mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 items-center rounded-lg w-full justify-between">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
           <Avatar
             name={formatName(user)}
             imageUrl={user.read_profile_picture_url}
@@ -71,8 +71,8 @@ export default function UserDashboard() {
           />
           <div className="space-y-1 text-center sm:text-left">
             <h1 className="text-xl md:text-2xl font-bold">
-              {t("welcome_back_name", {
-                name: (user.prefix ? user.prefix + " " : "") + user.first_name,
+              {t("hey_user", {
+                user: [user.prefix, user.first_name].filter(Boolean).join(" "),
               })}
             </h1>
             <p className="text-sm md:text-base text-gray-500">
@@ -84,64 +84,48 @@ export default function UserDashboard() {
               })}
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            {user.is_superuser && (
+        </div>
+        <div className="flex gap-2">
+          {user.is_superuser && (
+            <Button variant="outline" size="sm" className="w-full" asChild>
+              <Link
+                href="/admin/questionnaire"
+                className="gap-2 text-inherit flex items-center"
+              >
+                <User2Icon className="size-4" />
+                {t("admin_dashboard")}
+              </Link>
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full sm:w-auto hidden sm:flex"
-                asChild
+                className="px-2 w-full sm:w-auto"
               >
-                <Link
-                  href="/admin/questionnaire"
-                  className="gap-2 text-inherit flex items-center"
-                >
-                  <User2Icon className="size-4" />
-                  {t("admin_dashboard")}
-                </Link>
+                <CareIcon icon="l-ellipsis-v" className="text-inherit" />
               </Button>
-            )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="px-2 w-full sm:w-auto"
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 text-xs w-full sm:w-auto">
+                <Link
+                  href={`/users/${user.username}`}
+                  className="flex items-center gap-2 w-full text-inherit"
                 >
-                  <CareIcon icon="l-ellipsis-v" className="text-inherit" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                {user.is_superuser && (
-                  <DropdownMenuItem className="cursor-pointer flex sm:hidden items-center gap-2 text-xs w-full sm:w-auto">
-                    <Link
-                      href="/admin/questionnaire"
-                      className="flex items-center gap-2 w-full text-inherit"
-                    >
-                      <User2Icon className="size-4" />
-                      {t("admin_dashboard")}
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem className="cursor-pointer flex items-center gap-2 text-xs w-full sm:w-auto">
-                  <Link
-                    href={`/users/${user.username}`}
-                    className="flex items-center gap-2 w-full text-inherit"
-                  >
-                    <SquarePen className="size-4" />
-                    {t("edit_profile")}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer flex items-center gap-2 text-xs w-full sm:w-auto"
-                  onClick={signOut}
-                >
-                  <LogOut className="size-4" />
-                  {t("sign_out")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                  <SquarePen className="size-4" />
+                  {t("edit_profile")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer flex items-center gap-2 text-xs w-full sm:w-auto"
+                onClick={signOut}
+              >
+                <LogOut className="size-4" />
+                {t("sign_out")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
