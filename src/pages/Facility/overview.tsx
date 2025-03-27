@@ -60,7 +60,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     <div className="">
       <div className="container p-6 mx-auto space-y-8">
         {/* Welcome Header */}
-        <div className="p-6 bg-white rounded-lg shadow-sm">
+        <div className="p-6 bg-white rounded-lg shadow-xs">
           <div className="flex items-center gap-4 mb-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
@@ -87,10 +87,10 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   href={shortcut.href}
                   className="block h-full transition-all duration-200 hover:scale-102 hover:shadow-md"
                 >
-                  <Card className="h-full border-0 shadow-sm hover:bg-gray-50">
+                  <Card className="h-full border-0 shadow-xs hover:bg-gray-50">
                     <CardHeader className="flex flex-row items-center h-full gap-4">
                       <div className="p-2 rounded-lg bg-primary/10">
-                        <shortcut.icon className="w-6 h-6 text-primary" />
+                        <shortcut.icon className="size-6 text-primary" />
                       </div>
                       <div>
                         <CardTitle className="text-lg">

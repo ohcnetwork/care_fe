@@ -381,7 +381,7 @@ export default function CreateScheduleTemplateSheet({
                 {form.watch("availabilities")?.map((_, index) => (
                   <div
                     key={index}
-                    className="flex flex-col rounded-lg bg-white p-4 shadow"
+                    className="flex flex-col rounded-lg bg-white p-4 shadow-sm"
                   >
                     <div className="flex items-center justify-between pb-6">
                       <div className="flex items-center gap-2">
@@ -558,7 +558,7 @@ export default function CreateScheduleTemplateSheet({
                               control={form.control}
                               name={`availabilities.${index}.slot_size_in_minutes`}
                               render={({ field }) => (
-                                <FormItem className="flex flex-grow flex-col">
+                                <FormItem className="flex grow flex-col">
                                   <FormLabel
                                     required
                                     className="whitespace-nowrap "
@@ -589,7 +589,7 @@ export default function CreateScheduleTemplateSheet({
                               control={form.control}
                               name={`availabilities.${index}.tokens_per_slot`}
                               render={({ field }) => (
-                                <FormItem className="flex flex-col flex-grow">
+                                <FormItem className="flex flex-col grow">
                                   <FormLabel
                                     required
                                     className="whitespace-nowrap"
@@ -672,7 +672,7 @@ export default function CreateScheduleTemplateSheet({
                 <span>{t("add_another_session")}</span>
               </Button>
 
-              <SheetFooter className="absolute inset-x-0 bottom-0 border-t bg-white p-6">
+              <SheetFooter className="absolute inset-x-0 bottom-0 border-t border-gray-200 bg-white p-6">
                 <SheetClose asChild>
                   <Button variant="outline" type="button" disabled={isPending}>
                     {t("cancel")}

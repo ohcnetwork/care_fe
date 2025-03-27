@@ -169,6 +169,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(true);
                     }}
                     className="m-2"
+                    data-cy="capture-button"
                   >
                     {t("capture")}
                   </Button>
@@ -185,6 +186,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(false);
                     }}
                     className="m-2"
+                    data-cy="retake-button"
                   >
                     {t("retake")}
                   </Button>
@@ -196,6 +198,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(false);
                     }}
                     className="m-2"
+                    data-cy="capture-submit-button"
                   >
                     {t("submit")}
                   </Button>

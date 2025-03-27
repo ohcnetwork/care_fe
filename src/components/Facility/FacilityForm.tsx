@@ -221,7 +221,7 @@ export default function FacilityForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("basic_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
@@ -316,7 +316,7 @@ export default function FacilityForm({
         </div>
 
         {/* Contact Information */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("contact_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
@@ -399,7 +399,7 @@ export default function FacilityForm({
         </div>
 
         {/* Location Information */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <LocationPicker
             latitude={form.watch("latitude")}
             longitude={form.watch("longitude")}
@@ -413,13 +413,13 @@ export default function FacilityForm({
         </div>
 
         {/* Visibility Settings */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("visibility_settings")}</h3>
           <FormField
             control={form.control}
             name="is_public"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/5">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4 bg-muted/5">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -455,7 +455,7 @@ export default function FacilityForm({
               <>
                 <CareIcon
                   icon="l-spinner"
-                  className="mr-2 h-4 w-4 animate-spin"
+                  className="mr-2 size-4 animate-spin"
                 />
                 {t("updating_facility")}
               </>
@@ -464,10 +464,7 @@ export default function FacilityForm({
             )
           ) : isPending ? (
             <>
-              <CareIcon
-                icon="l-spinner"
-                className="mr-2 h-4 w-4 animate-spin"
-              />
+              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
               {t("creating_facility")}
             </>
           ) : (

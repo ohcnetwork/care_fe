@@ -76,7 +76,7 @@ export function QuestionnaireSearch({
     <Command filter={() => 1}>
       <CommandInput
         placeholder={t("search_questionnaires")}
-        className="outline-none border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none"
         onValueChange={setSearch}
         autoFocus
       />
@@ -103,7 +103,7 @@ export function QuestionnaireSearch({
                 setIsOpen(false);
               }}
             >
-              <CareIcon icon="l-file-export" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-file-export" className="mr-2 size-4" />
               <span>{item.title}</span>
             </CommandItem>
           ))}
@@ -125,16 +125,13 @@ export function QuestionnaireSearch({
         >
           {isLoading ? (
             <>
-              <CareIcon
-                icon="l-spinner"
-                className="mr-2 h-4 w-4 animate-spin"
-              />
+              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
               {t("loading")}
             </>
           ) : (
             <span>{placeholder || t("add_questionnaire")}</span>
           )}
-          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
         <CommandDrawer open={isOpen} onOpenChange={setIsOpen}>
           {content}
@@ -155,16 +152,13 @@ export function QuestionnaireSearch({
         >
           {isLoading ? (
             <>
-              <CareIcon
-                icon="l-spinner"
-                className="mr-2 h-4 w-4 animate-spin"
-              />
+              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
               {t("loading")}
             </>
           ) : (
             <span>{placeholder || t("add_questionnaire")}</span>
           )}
-          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0" align="start">

@@ -73,7 +73,7 @@ export default function UserSummaryTab({
 
   const renderBasicInformation = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
         <BasicInfoDetails user={userData} />
       </div>
     );
@@ -81,7 +81,7 @@ export default function UserSummaryTab({
 
   const renderContactInformation = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
         <ContactInfoDetails user={userData} />
       </div>
     );
@@ -113,7 +113,7 @@ export default function UserSummaryTab({
             data-cy="edit-user-button"
             onClick={() => setShowEditUserSheet(true)}
           >
-            <CareIcon icon="l-pen" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-pen" className="mr-2 size-4" />
             {t("edit_user")}
           </Button>
         )}
