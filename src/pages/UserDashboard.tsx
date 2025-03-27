@@ -96,7 +96,7 @@ export default function UserDashboard() {
                   href="/admin/questionnaire"
                   className="gap-2 text-inherit flex items-center"
                 >
-                  <User2Icon className="h-4 w-4" />
+                  <User2Icon className="size-4" />
                   {t("admin_dashboard")}
                 </Link>
               </Button>
@@ -118,7 +118,7 @@ export default function UserDashboard() {
                       href="/admin/questionnaire"
                       className="flex items-center gap-2 w-full text-inherit"
                     >
-                      <User2Icon className="h-4 w-4" />
+                      <User2Icon className="size-4" />
                       {t("admin_dashboard")}
                     </Link>
                   </DropdownMenuItem>
@@ -128,7 +128,7 @@ export default function UserDashboard() {
                     href={`/users/${user.username}`}
                     className="flex items-center gap-2 w-full text-inherit"
                   >
-                    <SquarePen className="h-4 w-4" />
+                    <SquarePen className="size-4" />
                     {t("edit_profile")}
                   </Link>
                 </DropdownMenuItem>
@@ -136,7 +136,7 @@ export default function UserDashboard() {
                   className="cursor-pointer flex items-center gap-2 text-xs w-full sm:w-auto"
                   onClick={signOut}
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="size-4" />
                   {t("sign_out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -185,11 +185,11 @@ export default function UserDashboard() {
                       key={facility.id}
                       href={`/facility/${facility.id}/overview`}
                     >
-                      <Card className="transition-all hover:shadow-md hover:border-primary/20">
+                      <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
                         <CardContent className="flex items-center gap-3 p-3 md:p-4">
                           <Avatar
                             name={facility.name}
-                            className="h-12 w-12 md:h-14 md:w-14"
+                            className="size-12 md:size-14"
                           />
                           <div className="flex-1 min-w-0">
                             <h3 className="font-medium truncate text-sm md:text-base">
@@ -199,7 +199,7 @@ export default function UserDashboard() {
                               {t("view_facility_details")}
                             </p>
                           </div>
-                          <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
+                          <ChevronRight className="size-4 md:size-5 text-gray-500" />
                         </CardContent>
                       </Card>
                     </Link>
@@ -218,11 +218,11 @@ export default function UserDashboard() {
                     key={association.id}
                     href={`/organization/${association.id}`}
                   >
-                    <Card className="transition-all hover:shadow-md hover:border-primary/20">
+                    <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
                       <CardContent className="flex items-center gap-3 p-3 md:p-4">
                         <Avatar
                           name={association.name}
-                          className="h-12 w-12 md:h-14 md:w-14"
+                          className="size-12 md:size-14"
                         />
                         <div className="flex-1 min-w-0">
                           <h3 className="font-medium truncate text-sm md:text-base">
@@ -236,7 +236,7 @@ export default function UserDashboard() {
                               )}
                           </p>
                         </div>
-                        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
+                        <ChevronRight className="size-4 md:size-5 text-gray-500" />
                       </CardContent>
                     </Card>
                   </Link>
@@ -254,11 +254,11 @@ export default function UserDashboard() {
                     key={governanceOrg.id}
                     href={`/organization/${governanceOrg.id}`}
                   >
-                    <Card className="transition-all hover:shadow-md hover:border-primary/20">
+                    <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
                       <CardContent className="flex items-center gap-3 p-3 md:p-4">
                         <Avatar
                           name={governanceOrg.name}
-                          className="h-12 w-12 md:h-14 md:w-14"
+                          className="size-12 md:size-14"
                         />
                         <div className="flex-1 min-w-0">
                           <h3 className="font-medium truncate text-sm md:text-base">
@@ -272,7 +272,7 @@ export default function UserDashboard() {
                               )}
                           </p>
                         </div>
-                        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
+                        <ChevronRight className="size-4 md:size-5 text-gray-500" />
                       </CardContent>
                     </Card>
                   </Link>

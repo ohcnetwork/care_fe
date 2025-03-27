@@ -211,7 +211,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
               className={cn(
-                "flex-grow border-none shadow-none focus-visible:ring-0",
+                "grow border-none shadow-none focus-visible:ring-0",
                 inputClassName,
               )}
             />
@@ -230,7 +230,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   return (
     <div
       className={cn(
-        "border rounded-lg border-gray-200 bg-white shadow",
+        "border rounded-lg border-gray-200 bg-white shadow-sm",
         className,
       )}
     >
@@ -374,7 +374,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             inputRef.current?.focus();
           }}
         >
-          <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-times" className="mr-2 size-4" />
           {t("clear_search")}
         </Button>
       )}

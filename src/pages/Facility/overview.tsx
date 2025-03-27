@@ -95,7 +95,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   <Card className="h-full border-0 shadow rounded-xl p-4">
                     <CardContent className="p-0 flex flex-row items-center h-full gap-4">
                       <div className="p-2 rounded-lg bg-primary/10">
-                        <shortcut.icon className="w-6 h-6 text-primary" />
+                        <shortcut.icon className="size-6 text-primary" />
                       </div>
                       <div>
                         <CardTitle className="text-lg">
