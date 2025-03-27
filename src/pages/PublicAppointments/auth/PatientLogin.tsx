@@ -218,12 +218,21 @@ export default function PatientLogin({
                 t("verify_otp")
               )}
             </Button>
-            <a
-              className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
-              onClick={() => sendOTP({ phone_number: phoneNumber })}
-            >
-              {t("didnt_receive_a_message")} {t("resend_otp")}
-            </a>
+            <div className="w-full text-center">
+              {isSendOTPLoading ? (
+                <div className="flex justify-center items-center gap-2 text-sm text-secondary-800">
+                  <CircularProgress className="text-secondary-800" />
+                  {t("sending")}...
+                </div>
+              ) : (
+                <a
+                  className="text-sm underline cursor-pointer text-secondary-800"
+                  onClick={() => sendOTP({ phone_number: phoneNumber })}
+                >
+                  {t("didnt_receive_a_message")} {t("resend_otp")}
+                </a>
+              )}
+            </div>
           </form>
         </Form>
       </div>
