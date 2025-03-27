@@ -1,4 +1,12 @@
 export class PatientEncounter {
+  private inactiveEncounterStatus = [
+    "cancelled",
+    "entered_in_error",
+    "discontinued",
+    "completed",
+    "discharged",
+  ];
+
   // Navigation
   navigateToEncounters() {
     cy.get('[data-sidebar="content"]').contains("Encounters").click();
