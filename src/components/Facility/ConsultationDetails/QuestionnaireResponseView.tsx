@@ -61,12 +61,12 @@ export default function QuestionnaireResponseView({
 
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <div className="flex items-center gap-2">
-                <CareIcon icon="l-calender" className="h-4 w-4" />
+                <CareIcon icon="l-calender" className="size-4" />
                 <span>{formatDateTime(formResponse.created_date)}</span>
               </div>
               <Separator orientation="vertical" className="h-4" />
               <div className="flex items-center gap-2">
-                <CareIcon icon="l-user" className="h-4 w-4" />
+                <CareIcon icon="l-user" className="size-4" />
                 <span>
                   {formResponse.created_by?.first_name}{" "}
                   {formResponse.created_by?.last_name}

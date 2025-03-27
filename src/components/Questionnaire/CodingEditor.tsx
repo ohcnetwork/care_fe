@@ -121,7 +121,7 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
           </Select>
         </div>
 
-        <div className="grid grid-cols-[1fr,1fr,auto] gap-4 items-start">
+        <div className="grid grid-cols-[1fr_1fr_auto] gap-4 items-start">
           <div>
             <Label>{t("code")}</Label>
             <Input
@@ -163,7 +163,7 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
                 });
               }}
             >
-              <UpdateIcon className="h-4 w-4" />
+              <UpdateIcon className="size-4" />
             </Button>
           </div>
         </div>

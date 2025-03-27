@@ -273,7 +273,7 @@ export default function LocationList({ facilityId }: Props) {
                 onClick={handleAddLocation}
                 className="w-full lg:w-auto"
               >
-                <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
+                <CareIcon icon="l-plus" className="size-4 mr-2" />
                 {t("add_location")}
               </Button>
             </div>

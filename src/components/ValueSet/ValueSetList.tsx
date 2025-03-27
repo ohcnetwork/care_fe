@@ -49,7 +49,7 @@ function EmptyState() {
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
-        <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
+        <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_valuesets_found")}</h3>
       <p className="text-sm text-gray-500 mb-4">
@@ -100,7 +100,7 @@ const RenderCard = ({
                   </Badge>
                 </div>
 
-                <div className="mb-4 border-b pb-2">
+                <div className="mb-4 border-b border-gray-200 pb-2">
                   <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     {t("name")}
                   </h3>
@@ -109,7 +109,7 @@ const RenderCard = ({
                   </p>
                 </div>
 
-                <div className="mb-4 border-b pb-2">
+                <div className="mb-4 border-b pb-2 border-gray-200">
                   <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     {t("name")}
                   </h3>
@@ -171,7 +171,7 @@ const RenderCard = ({
                       }
                       className="hover:bg-primary/5"
                     >
-                      <Pencil className="w-4 h-4 mr-0" />
+                      <Pencil className="size-4 mr-0" />
                       {t("edit")}
                     </Button>
                   </div>
@@ -195,7 +195,7 @@ const RenderTable = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="hidden lg:block overflow-hidden rounded-lg bg-white shadow">
+    <div className="hidden lg:block overflow-hidden rounded-lg bg-white shadow-sm">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : valuesets.length === 0 ? (
@@ -277,7 +277,7 @@ const RenderTable = ({
                         navigate(`/admin/valuesets/${valueset.slug}/edit`)
                       }
                     >
-                      <Pencil className="w-4 h-4 mr-0" />
+                      <Pencil className="size-4 mr-0" />
                       {t("edit")}
                     </Button>
                   )}
@@ -329,19 +329,19 @@ export function ValueSetList() {
               <div className="min-w-[480px]">
                 <TabsList className="flex w-full">
                   <TabsTrigger value="active" className="flex-1">
-                    <FileCheckIcon className="w-4 h-4 mr-2" />
+                    <FileCheckIcon className="size-4 mr-2" />
                     {t("active")}
                   </TabsTrigger>
                   <TabsTrigger value="draft" className="flex-1">
-                    <NotepadTextDashedIcon className="w-4 h-4 mr-2" />
+                    <NotepadTextDashedIcon className="size-4 mr-2" />
                     {t("draft")}
                   </TabsTrigger>
                   <TabsTrigger value="retired" className="flex-1">
-                    <ArchiveIcon className="w-4 h-4 mr-2" />
+                    <ArchiveIcon className="size-4 mr-2" />
                     {t("retired")}
                   </TabsTrigger>
                   <TabsTrigger value="unknown" className="flex-1">
-                    <HelpCircle className="w-4 h-4 mr-2" />
+                    <HelpCircle className="size-4 mr-2" />
                     {t("unknown")}
                   </TabsTrigger>
                 </TabsList>
@@ -352,7 +352,7 @@ export function ValueSetList() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:max-w-md">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+            <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
             <Input
               placeholder={t("search_valuesets")}
               className="pl-10 w-full"
@@ -366,7 +366,7 @@ export function ValueSetList() {
               href="/admin/valuesets/create"
               className="flex items-center gap-2"
             >
-              <PlusIcon className="w-4 h-4" />
+              <PlusIcon className="size-4" />
               {t("create_valueset")}
             </Link>
           </Button>

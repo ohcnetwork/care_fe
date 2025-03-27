@@ -52,7 +52,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
 
   return (
     <div
-      className="border rounded-lg overflow-hidden"
+      className="border border-gray-200 rounded-lg overflow-hidden"
       data-cy="medications-table"
     >
       <Table>
