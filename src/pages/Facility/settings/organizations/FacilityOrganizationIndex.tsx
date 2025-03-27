@@ -268,14 +268,13 @@ export default function FacilityOrganizationIndex({
     );
   };
   return (
-    <Page title={t("departments")} hideTitleOnPage={true}>
-      <h3 className="mb-4 text-black">{t("departments")}</h3>
-      <div className="flex justify-between items-center mb-4 gap-5 lg:flex-row flex-col-reverse ">
+    <Page title={t("departments")} className="p-0 md:p-0">
+      <div className="flex justify-between items-center mb-4 gap-5 lg:flex-row flex-col-reverse mt-4">
         <div className="lg:w-3/4 w-full">
           <Input
-            className="px-2 placeholder:text-xs placeholder:text-gray-500"
+            className="px-2 placeholder:text-gray-500"
             placeholder={t("filter_by_department_or_team_name")}
-          ></Input>
+          />
         </div>
         <div className="flex lg:justify-end w-full">
           <CreateFacilityOrganizationSheet facilityId={facilityId} />

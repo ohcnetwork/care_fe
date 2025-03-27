@@ -62,32 +62,27 @@ export default function UserDashboard() {
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
       {/* Welcome Section */}
-      <div className="flex flex-col gap-1">
-        <div className="flex justify-between gap-4 bg-card p-4 md:p-6 rounded-lg border border-gray-200 shadow-xs w-full mx-auto">
-          <div className="flex flex-auto items-center gap-4">
-            <Avatar
-              name={formatName(user, true)}
-              imageUrl={user.read_profile_picture_url}
-              className="size-20 md:size-24 rounded-full"
-            />
-            <div className="space-y-1 text-left">
-              <div>
-                <p className="text-xs md:text-base text-gray-500">
-                  {t("welcome_back")}
-                </p>
-                <h1 className="text-xl md:text-2xl">
-                  {(user.prefix ? user.prefix + " " : "") + user.first_name}
-                </h1>
-              </div>
-              <p className="text-sm md:text-base text-gray-500">
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
-            </div>
+      <div className="flex flex-col gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm w-full  mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <Avatar
+            name={formatName(user)}
+            imageUrl={user.read_profile_picture_url}
+            className="h-14 w-14 md:h-16 md:w-16"
+          />
+          <div className="space-y-1 text-center sm:text-left">
+            <h1 className="text-xl md:text-2xl font-bold">
+              {t("welcome_back_name", {
+                name: (user.prefix ? user.prefix + " " : "") + user.first_name,
+              })}
+            </h1>
+            <p className="text-sm md:text-base text-gray-500">
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             {user.is_superuser && (
