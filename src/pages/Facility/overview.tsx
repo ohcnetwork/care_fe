@@ -67,8 +67,9 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
             <div>
               <h1 className="text-4xl font-bold text-gray-900">
                 {t("hey_user", {
-                  user:
-                    (user.prefix ? user.prefix + " " : "") + user.first_name,
+                  user: [user.prefix, user.first_name]
+                    .filter(Boolean)
+                    .join(" "),
                 })}
               </h1>
               <p className="text-gray-500">
