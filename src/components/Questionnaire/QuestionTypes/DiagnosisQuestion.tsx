@@ -702,7 +702,7 @@ export function DiagnosisQuestion({
                       className="h-8 w-8"
                       onClick={handleBackToValueSet}
                     >
-                      <CareIcon icon="l-times" className="h-5 w-5" />
+                      <CareIcon icon="l-times" className="size-5" />
                     </Button>
                   </div>
                   <CommandList className="max-h-[100vh] overflow-y-auto pb-1">
@@ -721,7 +721,7 @@ export function DiagnosisQuestion({
                       className="h-8 w-8"
                       onClick={handleCloseDrawer}
                     >
-                      <CareIcon icon="l-times" className="h-5 w-5" />
+                      <CareIcon icon="l-times" className="size-5" />
                     </Button>
                   </div>
                   <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
@@ -1065,7 +1065,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                           }}
                           className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
                         >
-                          <MinusCircledIcon className="h-5 w-5" />
+                          <MinusCircledIcon className="size-5" />
                         </Button>
                       )}
                       <Button
@@ -1074,9 +1074,9 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                         className="h-10 w-10 border border-gray-400 bg-white shadow p-4"
                       >
                         {isOpen ? (
-                          <ChevronsDownUp className="h-5 w-5" />
+                          <ChevronsDownUp className="size-5" />
                         ) : (
-                          <ChevronsUpDown className="h-5 w-5" />
+                          <ChevronsUpDown className="size-5" />
                         )}
                       </Button>
                     </div>
@@ -1305,7 +1305,7 @@ function CategorySelector({
               </div>
             </div>
             {selectedCategory === category && (
-              <div className="h-4 w-4 rounded-full bg-primary" />
+              <div className="size-4 rounded-full bg-primary" />
             )}
           </div>
         </div>
