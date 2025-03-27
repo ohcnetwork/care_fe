@@ -38,7 +38,7 @@ interface MultiSelectProps
   className?: string;
 }
 
-function MultiSelect({
+export function MultiSelect({
   options,
   onValueChange,
   value = [],
