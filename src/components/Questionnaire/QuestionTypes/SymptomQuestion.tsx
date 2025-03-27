@@ -8,7 +8,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
-import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
+import { ChevronsDownUp, ChevronsUpDown, X } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -26,6 +26,14 @@ import {
 } from "@/components/ui/collapsible";
 import { Command, CommandDrawer, CommandList } from "@/components/ui/command";
 import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -33,11 +41,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { RelativeDatePicker } from "@/components/ui/relative-date-picker";
 import {
   Select,
@@ -46,7 +49,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -176,12 +179,24 @@ const SymptomRow = React.memo(function SymptomRow({
     "absolute",
   );
   const [isOpen, setIsOpen] = useState(!symptom.id);
+  const [dateDialogOpen, setDateDialogOpen] = useState(false);
+
+  // Separate handler for tabs to prevent flickering
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value as "absolute" | "relative");
+  }, []);
 
   const handleDateChange = useCallback(
-    (date: Date | undefined) =>
+    (date: Date | undefined) => {
       onUpdate(index, {
         onset: { onset_datetime: dateQueryString(date) },
-      }),
+      });
+
+      // Use a small timeout to prevent flickering when closing the dialog
+      setTimeout(() => {
+        setDateDialogOpen(false);
+      }, 50);
+    },
     [index, onUpdate],
   );
 
@@ -231,8 +246,8 @@ const SymptomRow = React.memo(function SymptomRow({
           <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
             {t("date")}
           </div>
-          <Popover>
-            <PopoverTrigger asChild>
+          <Dialog open={dateDialogOpen} onOpenChange={setDateDialogOpen}>
+            <DialogTrigger asChild>
               <Button
                 variant="outline"
                 className="h-8 md:h-9 w-full justify-start font-normal"
@@ -246,48 +261,71 @@ const SymptomRow = React.memo(function SymptomRow({
                   </span>
                 )}
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-auto" align="start">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) =>
-                  setActiveTab(v as "absolute" | "relative")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="absolute">
-                    {t("absolute_date")}
-                  </TabsTrigger>
-                  <TabsTrigger value="relative">
-                    {t("relative_date")}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="absolute" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      symptom.onset?.onset_datetime
-                        ? new Date(symptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onSelect={(date: Date | undefined) => {
-                      handleDateChange(date);
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="relative" className="p-0">
-                  <RelativeDatePicker
-                    value={
-                      symptom.onset?.onset_datetime
-                        ? new Date(symptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onDateChange={(date) => handleDateChange(date)}
-                  />
-                </TabsContent>
-              </Tabs>
-            </PopoverContent>
-          </Popover>
+            </DialogTrigger>
+            <DialogPortal>
+              <DialogOverlay className="backdrop-blur-sm" />
+              <DialogContent className="p-0 max-w-md">
+                <div className="flex justify-between items-center p-2 border-b">
+                  <h3 className="font-medium">{t("select_date")}</h3>
+                  <DialogClose asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </DialogClose>
+                </div>
+                <div className="h-[360px]">
+                  <Tabs
+                    value={activeTab}
+                    onValueChange={handleTabChange}
+                    className="w-full h-full"
+                  >
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="absolute">
+                        {t("absolute_date")}
+                      </TabsTrigger>
+                      <TabsTrigger value="relative">
+                        {t("relative_date")}
+                      </TabsTrigger>
+                    </TabsList>
+                    <div className="h-[330px] relative">
+                      {activeTab === "absolute" && (
+                        <div className="absolute inset-0">
+                          <Calendar
+                            key="absolute-calendar"
+                            mode="single"
+                            selected={
+                              symptom.onset?.onset_datetime
+                                ? new Date(symptom.onset.onset_datetime)
+                                : undefined
+                            }
+                            onSelect={(date: Date | undefined) => {
+                              handleDateChange(date);
+                            }}
+                            className="border-none shadow-none"
+                          />
+                        </div>
+                      )}
+                      {activeTab === "relative" && (
+                        <div className="absolute inset-0">
+                          <RelativeDatePicker
+                            key="relative-picker"
+                            value={
+                              symptom.onset?.onset_datetime
+                                ? new Date(symptom.onset.onset_datetime)
+                                : undefined
+                            }
+                            onDateChange={(date) => {
+                              handleDateChange(date);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </Tabs>
+                </div>
+              </DialogContent>
+            </DialogPortal>
+          </Dialog>
         </div>
         <div className="col-span-2">
           <Select
@@ -423,8 +461,11 @@ const SymptomRow = React.memo(function SymptomRow({
                   <div className="block text-sm font-medium text-gray-500 mb-1">
                     {t("onset_date")}
                   </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
+                  <Dialog
+                    open={dateDialogOpen}
+                    onOpenChange={setDateDialogOpen}
+                  >
+                    <DialogTrigger asChild>
                       <Button
                         variant="outline"
                         className="h-8 md:h-9 w-full justify-start font-normal"
@@ -440,48 +481,75 @@ const SymptomRow = React.memo(function SymptomRow({
                           </span>
                         )}
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0 w-auto" align="start">
-                      <Tabs
-                        value={activeTab}
-                        onValueChange={(v) =>
-                          setActiveTab(v as "absolute" | "relative")
-                        }
-                      >
-                        <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="absolute">
-                            {t("absolute_date")}
-                          </TabsTrigger>
-                          <TabsTrigger value="relative">
-                            {t("relative_date")}
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="absolute" className="p-0">
-                          <Calendar
-                            mode="single"
-                            selected={
-                              symptom.onset?.onset_datetime
-                                ? new Date(symptom.onset.onset_datetime)
-                                : undefined
-                            }
-                            onSelect={(date: Date | undefined) => {
-                              handleDateChange(date);
-                            }}
-                          />
-                        </TabsContent>
-                        <TabsContent value="relative" className="p-0">
-                          <RelativeDatePicker
-                            value={
-                              symptom.onset?.onset_datetime
-                                ? new Date(symptom.onset.onset_datetime)
-                                : undefined
-                            }
-                            onDateChange={(date) => handleDateChange(date)}
-                          />
-                        </TabsContent>
-                      </Tabs>
-                    </PopoverContent>
-                  </Popover>
+                    </DialogTrigger>
+                    <DialogPortal>
+                      <DialogOverlay className="backdrop-blur-sm" />
+                      <DialogContent className="p-0 max-w-md">
+                        <div className="flex justify-between items-center p-2 border-b">
+                          <h3 className="font-medium">{t("select_date")}</h3>
+                          <DialogClose asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </DialogClose>
+                        </div>
+                        <div className="h-[360px]">
+                          <Tabs
+                            value={activeTab}
+                            onValueChange={handleTabChange}
+                            className="w-full h-full"
+                          >
+                            <TabsList className="grid w-full grid-cols-2">
+                              <TabsTrigger value="absolute">
+                                {t("absolute_date")}
+                              </TabsTrigger>
+                              <TabsTrigger value="relative">
+                                {t("relative_date")}
+                              </TabsTrigger>
+                            </TabsList>
+                            <div className="h-[330px] relative">
+                              {activeTab === "absolute" && (
+                                <div className="absolute inset-0">
+                                  <Calendar
+                                    key="absolute-calendar"
+                                    mode="single"
+                                    selected={
+                                      symptom.onset?.onset_datetime
+                                        ? new Date(symptom.onset.onset_datetime)
+                                        : undefined
+                                    }
+                                    onSelect={(date: Date | undefined) => {
+                                      handleDateChange(date);
+                                    }}
+                                    className="border-none shadow-none"
+                                  />
+                                </div>
+                              )}
+                              {activeTab === "relative" && (
+                                <div className="absolute inset-0">
+                                  <RelativeDatePicker
+                                    key="relative-picker"
+                                    value={
+                                      symptom.onset?.onset_datetime
+                                        ? new Date(symptom.onset.onset_datetime)
+                                        : undefined
+                                    }
+                                    onDateChange={(date) => {
+                                      handleDateChange(date);
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </Tabs>
+                        </div>
+                      </DialogContent>
+                    </DialogPortal>
+                  </Dialog>
                 </div>
                 <div>
                   <div className="block text-sm font-medium text-gray-500 mb-1">
@@ -576,6 +644,10 @@ export function SymptomQuestion({
     onset: { onset_datetime: new Date().toISOString().split("T")[0] },
   });
   const isMobile = useBreakpoints({ default: true, md: false });
+  const [dateDialogOpen, setDateDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
+    "absolute",
+  );
 
   const { data: patientSymptoms } = useQuery({
     queryKey: ["symptoms", patientId],
@@ -698,15 +770,21 @@ export function SymptomQuestion({
     );
   };
 
-  const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
-    "absolute",
-  );
+  // Separate handler for tabs to prevent flickering
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value as "absolute" | "relative");
+  }, []);
 
   const handleDateChange = (date: Date | undefined) => {
     setNewSymptom((prev) => ({
       ...prev,
       onset: { onset_datetime: dateQueryString(date) },
     }));
+
+    // Use a small timeout to prevent flickering when closing the dialog
+    setTimeout(() => {
+      setDateDialogOpen(false);
+    }, 50);
   };
 
   const symptomDetailsContent = (
@@ -716,8 +794,8 @@ export function SymptomQuestion({
           <div className="text-sm font-medium text-gray-700">
             {t("onset_date")}
           </div>
-          <Popover>
-            <PopoverTrigger asChild>
+          <Dialog open={dateDialogOpen} onOpenChange={setDateDialogOpen}>
+            <DialogTrigger asChild>
               <Button
                 variant="outline"
                 className="h-8 md:h-9 w-full justify-start font-normal"
@@ -731,48 +809,71 @@ export function SymptomQuestion({
                   </span>
                 )}
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-auto" align="start">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) =>
-                  setActiveTab(v as "absolute" | "relative")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="absolute">
-                    {t("absolute_date")}
-                  </TabsTrigger>
-                  <TabsTrigger value="relative">
-                    {t("relative_date")}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="absolute" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      newSymptom.onset?.onset_datetime
-                        ? new Date(newSymptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onSelect={(date: Date | undefined) => {
-                      handleDateChange(date);
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="relative" className="p-0">
-                  <RelativeDatePicker
-                    value={
-                      newSymptom.onset?.onset_datetime
-                        ? new Date(newSymptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onDateChange={(date) => handleDateChange(date)}
-                  />
-                </TabsContent>
-              </Tabs>
-            </PopoverContent>
-          </Popover>
+            </DialogTrigger>
+            <DialogPortal>
+              <DialogOverlay className="backdrop-blur-sm" />
+              <DialogContent className="p-0 max-w-md">
+                <div className="flex justify-between items-center p-2 border-b">
+                  <h3 className="font-medium">{t("select_date")}</h3>
+                  <DialogClose asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </DialogClose>
+                </div>
+                <div className="h-[360px]">
+                  <Tabs
+                    value={activeTab}
+                    onValueChange={handleTabChange}
+                    className="w-full h-full"
+                  >
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="absolute">
+                        {t("absolute_date")}
+                      </TabsTrigger>
+                      <TabsTrigger value="relative">
+                        {t("relative_date")}
+                      </TabsTrigger>
+                    </TabsList>
+                    <div className="h-[330px] relative">
+                      {activeTab === "absolute" && (
+                        <div className="absolute inset-0">
+                          <Calendar
+                            key="absolute-calendar"
+                            mode="single"
+                            selected={
+                              newSymptom.onset?.onset_datetime
+                                ? new Date(newSymptom.onset.onset_datetime)
+                                : undefined
+                            }
+                            onSelect={(date: Date | undefined) => {
+                              handleDateChange(date);
+                            }}
+                            className="border-none shadow-none"
+                          />
+                        </div>
+                      )}
+                      {activeTab === "relative" && (
+                        <div className="absolute inset-0">
+                          <RelativeDatePicker
+                            key="relative-picker"
+                            value={
+                              newSymptom.onset?.onset_datetime
+                                ? new Date(newSymptom.onset.onset_datetime)
+                                : undefined
+                            }
+                            onDateChange={(date) => {
+                              handleDateChange(date);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </Tabs>
+                </div>
+              </DialogContent>
+            </DialogPortal>
+          </Dialog>
         </div>
         <div className="space-y-2">
           <div className="text-sm font-medium text-gray-700">{t("status")}</div>
