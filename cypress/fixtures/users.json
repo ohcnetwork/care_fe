@@ -23,6 +23,10 @@
     "username": "development-doc",
     "password": "Test@123"
   },
+  "devdoctor2": {
+    "username": "development-doc2",
+    "password": "Test@123"
+  },
   "devadmin": {
     "username": "development-adm",
     "password": "Test@123"
@@ -33,6 +37,10 @@
   },
   "devnurse2": {
     "username": "devnurse2",
+    "password": "Test@123"
+  },
+  "devnurse3": {
+    "username": "devnurse3",
     "password": "Test@123"
   },
   "test-human": {

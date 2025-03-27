@@ -58,6 +58,8 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
   const { encounter, facilityId, hideBorder = false } = props;
   return (
     <Card
+      data-cy={`encounter-card-${encounter.id}`}
+      data-status={encounter.status}
       key={props.encounter.id}
       className={cn(
         "hover:shadow-lg transition-shadow group md:flex md:flex-col",
@@ -93,6 +95,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
         <div className="flex flex-col justify-between h-full space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <Badge
+              data-cy="encounter-status-badge"
               className={getStatusColor(encounter.status)}
               variant="outline"
             >
