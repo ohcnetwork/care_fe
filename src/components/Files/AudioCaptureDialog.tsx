@@ -115,7 +115,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
 
   return (
     <div
-      className={`inset-0 bg-black/70 backdrop-blur transition-all ${show ? "visible opacity-100" : "invisible opacity-0"} fixed z-50 flex flex-col items-center justify-center gap-8 p-6 text-center`}
+      className={`inset-0 bg-black/70 backdrop-blur-sm transition-all ${show ? "visible opacity-100" : "invisible opacity-0"} fixed z-50 flex flex-col items-center justify-center gap-8 p-6 text-center`}
     >
       {status === "PERMISSION_DENIED" && (
         <div>

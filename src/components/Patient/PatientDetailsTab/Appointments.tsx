@@ -106,7 +106,7 @@ export const Appointments = (props: PatientProps) => {
         )}
       </div>
 
-      <div className="rounded-lg border bg-white">
+      <div className="rounded-lg border border-gray-200 bg-white">
         <Table>
           <TableHeader>
             <TableRow>

@@ -505,7 +505,7 @@ export const FilesTab = (props: FilesTabProps) => {
     <div className="hidden xl:block">
       <Table className="border-separate border-spacing-y-3 mx-2 lg:max-w-[calc(100%-16px)]">
         <TableHeader>
-          <TableRow className="shadow rounded overflow-hidden">
+          <TableRow className="shadow-sm rounded overflow-hidden">
             <TableHead className="w-[20%] bg-white rounded-l">
               {t("file_name")}
             </TableHead>
@@ -530,8 +530,8 @@ export const FilesTab = (props: FilesTabProps) => {
               return (
                 <TableRow
                   key={file.id}
-                  className={cn("shadow rounded-md overflow-hidden group")}
                   data-cy={fileName}
+                  className={cn("shadow-sm rounded-md overflow-hidden group")}
                 >
                   <TableCell
                     className={cn(

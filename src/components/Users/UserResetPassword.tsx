@@ -91,7 +91,7 @@ export default function UserResetPassword({
   };
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6">
       {!isEditing && (
         <div className="mb-4 flex justify-start">
           <Button
@@ -102,7 +102,7 @@ export default function UserResetPassword({
           >
             <CareIcon
               icon={isEditing ? "l-times" : "l-pen"}
-              className="h-4 w-4"
+              className="size-4"
             />
             {t("update_password")}
           </Button>
@@ -228,7 +228,7 @@ export default function UserResetPassword({
                 {isPending && (
                   <CareIcon
                     icon="l-spinner"
-                    className="mr-2 h-4 w-4 animate-spin"
+                    className="mr-2 size-4 animate-spin"
                   />
                 )}
                 {isPending ? t("updating") : t("update_password")}

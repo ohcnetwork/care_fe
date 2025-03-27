@@ -6,12 +6,19 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,16 +29,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { RelativeDatePicker } from "@/components/ui/relative-date-picker";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import {
   ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_CATEGORY,
@@ -107,6 +122,9 @@ export function DiagnosisQuestion({
     ...DIAGNOSIS_INITIAL_VALUE,
     onset: { onset_datetime: new Date().toISOString().split("T")[0] },
   });
+  const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
+    "absolute",
+  );
 
   // Sort diagnoses: chronic conditions first, then by date
   const sortedDiagnoses = useMemo(() => {
@@ -283,7 +301,7 @@ export function DiagnosisQuestion({
   return (
     <div className="space-y-4">
       {sortedDiagnoses.length > 0 && (
-        <div className="rounded-lg border">
+        <div className="rounded-lg border border-gray-200">
           <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
             <div className="col-span-5">{t("diagnosis")}</div>
             <div className="col-span-2 text-center">{t("date")}</div>
@@ -299,6 +317,8 @@ export function DiagnosisQuestion({
                 disabled={disabled}
                 onUpdate={(updates) => handleUpdateDiagnosis(index, updates)}
                 onRemove={() => handleRemoveDiagnosis(index)}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
               />
             ))}
           </div>
@@ -306,7 +326,7 @@ export function DiagnosisQuestion({
       )}
 
       {showCategorySelection ? (
-        <div className="rounded-lg border p-4 space-y-4">
+        <div className="rounded-lg border border-gray-200 p-4 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               {selectedCode && (
@@ -341,7 +361,7 @@ export function DiagnosisQuestion({
                   "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
                   selectedCategory === category
                     ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50",
+                    : "border-gray-200 hover:border-primary/50",
                 )}
                 onClick={() => setSelectedCategory(category)}
               >
@@ -355,7 +375,7 @@ export function DiagnosisQuestion({
                     </div>
                   </div>
                   {selectedCategory === category && (
-                    <div className="h-4 w-4 rounded-full bg-primary" />
+                    <div className="size-4 rounded-full bg-primary" />
                   )}
                 </div>
               </div>
@@ -365,17 +385,73 @@ export function DiagnosisQuestion({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label className="text-sm">{t("date")}</Label>
-              <Input
-                type="date"
-                value={newDiagnosis.onset?.onset_datetime || ""}
-                onChange={(e) =>
-                  setNewDiagnosis((prev) => ({
-                    ...prev,
-                    onset: { onset_datetime: e.target.value },
-                  }))
-                }
-                className="h-9"
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-9 w-full justify-start font-normal"
+                    disabled={disabled}
+                  >
+                    {newDiagnosis.onset?.onset_datetime ? (
+                      new Date(
+                        newDiagnosis.onset.onset_datetime,
+                      ).toLocaleDateString()
+                    ) : (
+                      <span className="text-muted-foreground">
+                        {t("select_date")}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0 w-auto" align="start">
+                  <Tabs
+                    value={activeTab}
+                    onValueChange={(v) =>
+                      setActiveTab(v as "absolute" | "relative")
+                    }
+                  >
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="absolute">
+                        {t("absolute_date")}
+                      </TabsTrigger>
+                      <TabsTrigger value="relative">
+                        {t("relative_date")}
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="absolute" className="p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          newDiagnosis.onset?.onset_datetime
+                            ? new Date(newDiagnosis.onset.onset_datetime)
+                            : undefined
+                        }
+                        onSelect={(date: Date | undefined) => {
+                          setNewDiagnosis((prev) => ({
+                            ...prev,
+                            onset: { onset_datetime: dateQueryString(date) },
+                          }));
+                        }}
+                      />
+                    </TabsContent>
+                    <TabsContent value="relative" className="p-0">
+                      <RelativeDatePicker
+                        value={
+                          newDiagnosis.onset?.onset_datetime
+                            ? new Date(newDiagnosis.onset.onset_datetime)
+                            : undefined
+                        }
+                        onDateChange={(date) =>
+                          setNewDiagnosis((prev) => ({
+                            ...prev,
+                            onset: { onset_datetime: dateQueryString(date) },
+                          }))
+                        }
+                      />
+                    </TabsContent>
+                  </Tabs>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="space-y-2">
               <Label className="text-sm">{t("status")}</Label>
@@ -470,6 +546,8 @@ interface DiagnosisItemProps {
   disabled?: boolean;
   onUpdate?: (diagnosis: Partial<DiagnosisRequest>) => void;
   onRemove?: () => void;
+  activeTab: "absolute" | "relative";
+  setActiveTab: Dispatch<SetStateAction<"absolute" | "relative">>;
 }
 
 const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
@@ -477,6 +555,8 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
   disabled,
   onUpdate,
   onRemove,
+  activeTab,
+  setActiveTab,
 }) => {
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
 
@@ -515,14 +595,14 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   variant="ghost"
                   size="icon"
                   disabled={disabled}
-                  className="h-8 w-8"
+                  className="size-8"
                 >
-                  <DotsVerticalIcon className="h-4 w-4" />
+                  <DotsVerticalIcon className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
-                  <Pencil2Icon className="h-4 w-4 mr-2" />
+                  <Pencil2Icon className="size-4 mr-2" />
                   {showNotes ? t("hide_notes") : t("add_notes")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -530,7 +610,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   className="text-destructive focus:text-destructive"
                   onClick={onRemove}
                 >
-                  <MinusCircledIcon className="h-4 w-4 mr-2" />
+                  <MinusCircledIcon className="size-4 mr-2" />
                   {t("remove_diagnosis")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -542,17 +622,71 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
             <Label className="text-xs text-gray-500 md:hidden">
               {t("date")}
             </Label>
-            <Input
-              type="date"
-              value={diagnosis.onset?.onset_datetime || ""}
-              onChange={(e) =>
-                onUpdate?.({
-                  onset: { onset_datetime: e.target.value },
-                })
-              }
-              disabled={disabled || !!diagnosis.id}
-              className="h-8 md:h-9"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="h-8 md:h-9 w-full justify-start font-normal"
+                  disabled={disabled || !!diagnosis.id}
+                >
+                  {diagnosis.onset?.onset_datetime ? (
+                    new Date(
+                      diagnosis.onset.onset_datetime,
+                    ).toLocaleDateString()
+                  ) : (
+                    <span className="text-muted-foreground">
+                      {t("select_date")}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0 w-auto" align="start">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={(v) =>
+                    setActiveTab(v as "absolute" | "relative")
+                  }
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="absolute">
+                      {t("absolute_date")}
+                    </TabsTrigger>
+                    <TabsTrigger value="relative">
+                      {t("relative_date")}
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="absolute" className="p-0">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        diagnosis.onset?.onset_datetime
+                          ? new Date(diagnosis.onset.onset_datetime)
+                          : undefined
+                      }
+                      onSelect={(date: Date | undefined) => {
+                        onUpdate?.({
+                          onset: { onset_datetime: dateQueryString(date) },
+                        });
+                      }}
+                    />
+                  </TabsContent>
+                  <TabsContent value="relative" className="p-0">
+                    <RelativeDatePicker
+                      value={
+                        diagnosis.onset?.onset_datetime
+                          ? new Date(diagnosis.onset.onset_datetime)
+                          : undefined
+                      }
+                      onDateChange={(date) =>
+                        onUpdate?.({
+                          onset: { onset_datetime: dateQueryString(date) },
+                        })
+                      }
+                    />
+                  </TabsContent>
+                </Tabs>
+              </PopoverContent>
+            </Popover>
           </div>
           <div>
             <Label className="text-xs text-gray-500 md:hidden">
@@ -633,14 +767,14 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                 variant="ghost"
                 size="icon"
                 disabled={disabled}
-                className="h-9 w-9"
+                className="size-9"
               >
-                <DotsVerticalIcon className="h-4 w-4" />
+                <DotsVerticalIcon className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
-                <Pencil2Icon className="h-4 w-4 mr-2" />
+                <Pencil2Icon className="size-4 mr-2" />
                 {showNotes ? t("hide_notes") : t("add_notes")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -648,7 +782,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                 className="text-destructive focus:text-destructive"
                 onClick={onRemove}
               >
-                <MinusCircledIcon className="h-4 w-4 mr-2" />
+                <MinusCircledIcon className="size-4 mr-2" />
                 {t("remove_diagnosis")}
               </DropdownMenuItem>
             </DropdownMenuContent>
