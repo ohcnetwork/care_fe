@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import { ToastContainer, toast } from "react-toastify";
 import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -74,9 +75,19 @@ export default function PatientLogin({
     );
   }
 
+  // const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
+  //   mutationFn: mutate(routes.otp.sendOtp),
+  //   onSuccess: () => {
+  //     if (page === "send") {
+  //       navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
+  //     }
+  //   },
+  // });
+
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
     mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
+      toast.success(t("A verification code has been sent to your phone."));
       if (page === "send") {
         navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
       }
@@ -246,6 +257,17 @@ export default function PatientLogin({
         <span className="text-sm underline">{t("back")}</span>
       </Button>
       {page === "send" ? renderPhoneNumberForm() : renderVerifyForm()}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }
