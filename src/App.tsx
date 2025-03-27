@@ -7,8 +7,7 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Suspense } from "react";
 
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 
 import Loading from "@/components/Common/Loading";
 
@@ -61,7 +60,7 @@ const App = () => {
                   <Routers.AppRouter />
                 </AuthUserProvider>
               </HistoryAPIProvider>
-              <Sonner
+              <Toaster
                 position="top-right"
                 theme="light"
                 richColors
@@ -70,7 +69,6 @@ const App = () => {
                 // Refer: https://github.com/shadcn-ui/ui/issues/2234.
                 toastOptions={{ closeButton: true }}
               />
-              <Toaster />
             </PluginEngine>
           </PubSubProvider>
         </Suspense>

@@ -253,33 +253,36 @@ export function MedicationStatementQuestion({
         <div className="md:overflow-x-auto w-auto pb-2">
           <div className="min-w-fit">
             <div
-              className={cn("max-w-[1600px] relative lg:border rounded-md", {
-                "bg-gray-50/50": !desktopLayout,
-              })}
+              className={cn(
+                "max-w-[1600px] relative lg:border border-gray-200 rounded-md",
+                {
+                  "bg-gray-50/50": !desktopLayout,
+                },
+              )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
-                <div className="font-semibold text-gray-600 p-3 border-r">
+              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_260px_190px_200px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("source")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("status")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("dosage_instructions")}
                   <span className="text-red-500 ml-0.5">*</span>
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medication_taken_between")}
                   <span className="text-red-500 ml-0.5">*</span>
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("reason")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("notes")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 sticky right-0 bg-gray-50 shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12" />
@@ -305,7 +308,7 @@ export function MedicationStatementQuestion({
                       >
                         <div
                           className={cn(
-                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-sm text-sm",
+                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-xs text-sm",
                             expandedMedicationIndex === index
                               ? "bg-gray-50"
                               : "bg-gray-100",
@@ -322,14 +325,14 @@ export function MedicationStatementQuestion({
                                 aria-label="Expand Medication Statement"
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-gray-500 hover:text-gray-900"
+                                className="size-8 text-gray-500 hover:text-gray-900"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setExpandedMedicationIndex(index);
                                 }}
                                 disabled={disabled}
                               >
-                                <Pencil2Icon className="h-4 w-4" />
+                                <Pencil2Icon className="size-4" />
                               </Button>
                             )}
                             <TooltipComponent
@@ -350,9 +353,9 @@ export function MedicationStatementQuestion({
                                   disabled ||
                                   medication.status === "entered_in_error"
                                 }
-                                className="h-8 w-8"
+                                className="size-8"
                               >
-                                <MinusCircledIcon className="h-4 w-4" />
+                                <MinusCircledIcon className="size-4" />
                               </Button>
                             </TooltipComponent>
                           </div>
@@ -433,21 +436,21 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] border-b hover:bg-gray-50/50",
+        "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_260px_190px_200px_48px] border-b border-gray-200 hover:bg-gray-50/50",
         {
           "opacity-40 pointer-events-none":
             medication.status === "entered_in_error",
         },
       )}
     >
-      <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
+      <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
         <h4 className="text-base font-semibold break-words line-clamp-2 hidden lg:block">
           {index + 1}. {medication.medication?.display}
         </h4>
       </div>
 
       {/* Source */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("source")}</Label>
         <Select
           value={medication.information_source}
@@ -494,7 +497,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
 
       {/* Status */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("status")}</Label>
         <Select
           value={medication.status}
@@ -517,7 +520,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
 
       {/* Dosage Instructions */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage_instructions")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -542,7 +545,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
 
       {/* Period */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("medication_taken_between")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -581,7 +584,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
 
       {/* Reason */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("reason")}</Label>
         <Input
           maxLength={100}
@@ -594,7 +597,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
 
       {/* Notes */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("notes")}</Label>
         {desktopLayout ? (
           <>
@@ -634,9 +637,9 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           size="icon"
           onClick={onRemove}
           disabled={disabled}
-          className="h-8 w-8"
+          className="size-8"
         >
-          <MinusCircledIcon className="h-4 w-4" />
+          <MinusCircledIcon className="size-4" />
         </Button>
       </div>
     </div>

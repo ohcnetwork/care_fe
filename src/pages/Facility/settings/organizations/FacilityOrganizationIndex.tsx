@@ -58,7 +58,7 @@ export default function FacilityOrganizationIndex({
     return (
       <div className="px-6 py-6 space-y-6">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-8 w-8/12 self-end" />
+        <Skeleton className="size-8/12 self-end" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <CardGridSkeleton count={6} />
         </div>
@@ -83,7 +83,7 @@ export default function FacilityOrganizationIndex({
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center p-6">
             <div className="rounded-full bg-primary/10 p-6 mb-4">
-              <CareIcon icon="d-hospital" className="h-12 w-12 text-primary" />
+              <CareIcon icon="d-hospital" className="size-12 text-primary" />
             </div>
             <p className="text-center text-sm text-gray-500 max-w-sm mb-4">
               {t("organization_access_help")}
@@ -173,15 +173,15 @@ export default function FacilityOrganizationIndex({
                   disabled={children.length === 0}
                 >
                   {expandedRows[org.id] ? (
-                    <CareIcon icon="l-angle-down" className="h-5 w-5" />
+                    <CareIcon icon="l-angle-down" className="size-5" />
                   ) : (
-                    <CareIcon icon="l-angle-right" className="h-5 w-5" />
+                    <CareIcon icon="l-angle-right" className="size-5" />
                   )}
                 </Button>
               ) : (
                 <CareIcon
                   icon="l-corner-down-right-alt"
-                  className="h-4 w-4 text-gray-400 ml-4 mr-2"
+                  className="size-4 text-gray-400 ml-4 mr-2"
                 />
               )}
               <CareIcon
@@ -204,7 +204,7 @@ export default function FacilityOrganizationIndex({
                         >
                           <CareIcon
                             icon={allExpanded ? "l-minus" : "l-plus"}
-                            className="h-4 w-4 sm:h-2 sm:w-2"
+                            className="size-4 sm:size-2"
                           />
                           <span className="hidden sm:inline">
                             {t(allExpanded ? "collapse_all" : "expand_all")}
@@ -233,7 +233,7 @@ export default function FacilityOrganizationIndex({
                         >
                           <CareIcon
                             icon="l-arrow-up-right"
-                            className="h-4 w-4"
+                            className="size-4"
                           />
                           <span className="hidden sm:inline">
                             {t("see_details")}
@@ -248,7 +248,7 @@ export default function FacilityOrganizationIndex({
             </div>
           </TableCell>
           {!isMobile && (
-            <TableCell className="border-l bg-white font-semibold text-gray-900">
+            <TableCell className="border-l border-gray-200 bg-white font-semibold text-gray-900">
               {t(`facility_organization_type__${org.org_type}`)}
             </TableCell>
           )}
@@ -283,7 +283,7 @@ export default function FacilityOrganizationIndex({
       </div>
       <div className="items-center flex gap-3 text-blue-800 text-xs sm:text-sm border-2 rounded-lg border-blue-200 bg-blue-50 p-4 mb-4">
         <div className="sm:p-2 p-1 bg-blue-100 rounded-sm">
-          <CareIcon icon="l-info-circle" className="h-6 w-6 text-blue-900" />
+          <CareIcon icon="l-info-circle" className="size-6 text-blue-900" />
         </div>
         <div className="flex-1 space-y-2 text-xs md:text-sm text-blue-800">
           <div className="flex flex-wrap items-center">
@@ -300,7 +300,7 @@ export default function FacilityOrganizationIndex({
               components={{
                 strong: <strong className="font-semibold ml-1" />,
                 CareIcon: (
-                  <CareIcon icon="l-arrow-up-right" className="h-4 w-4 mr-1" />
+                  <CareIcon icon="l-arrow-up-right" className="size-4 mr-1" />
                 ),
               }}
             />
@@ -310,17 +310,17 @@ export default function FacilityOrganizationIndex({
               i18nKey="click_manage_create_users_mobile"
               components={{
                 CareIcon: (
-                  <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                  <CareIcon icon="l-arrow-up-right" className="size-4" />
                 ),
               }}
             />
           </div>
         </div>
       </div>
-      <Table className="border rounded-lg w-full overflow-hidden">
+      <Table className="border border-gray-200 rounded-lg w-full overflow-hidden">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[80%] border text-gray-700  bg-gray-200">
+            <TableHead className="w-[80%] border border-gray-200 text-gray-700 bg-gray-200">
               {t("name")}
             </TableHead>
             {!isMobile && (

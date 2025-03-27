@@ -176,7 +176,7 @@ export default function OrganizationLayout({
                   asChild
                 >
                   <Link href={item.path} className="cursor-pointer">
-                    <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
+                    <CareIcon icon={item.icon} className="mr-2 size-4" />
                     {item.title}
                   </Link>
                 </MenubarTrigger>
@@ -201,7 +201,7 @@ export default function OrganizationLayout({
                   {activeNavItem && (
                     <CareIcon
                       icon={activeNavItem.icon}
-                      className="mr-2 h-5 w-5"
+                      className="mr-2 size-5"
                     />
                   )}
                   <span className="font-medium text-base">
@@ -210,7 +210,7 @@ export default function OrganizationLayout({
                 </div>
                 <CareIcon
                   icon={isMobileMenuOpen ? "l-angle-up" : "l-angle-down"}
-                  className="ml-2 h-4 w-4"
+                  className="ml-2 size-4"
                 />
               </Button>
             </DropdownMenuTrigger>
@@ -236,7 +236,7 @@ export default function OrganizationLayout({
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <div className="flex items-center text-base">
-                      <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
+                      <CareIcon icon={item.icon} className="mr-2 size-4" />
                       {item.title}
                     </div>
                     {path === item.path && (

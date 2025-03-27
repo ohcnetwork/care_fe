@@ -339,7 +339,7 @@ export default function PatientRegistration(
 
   return (
     <Page title={title}>
-      <hr className="mt-4" />
+      <hr className="mt-4 border-gray-200" />
       <div className="relative mt-4 flex flex-col md:flex-row gap-4">
         <SectionNavigator sections={sidebarItems} className="hidden md:flex" />
 
@@ -652,7 +652,7 @@ export default function PatientRegistration(
                 {(isDeceased || form.watch("deceased_datetime")) && (
                   <div className="mt-4">
                     <div className="flex items-center gap-2 mb-4 text-gray-500">
-                      <InfoIcon className="w-4 h-4" />
+                      <InfoIcon className="size-4" />
                       <p className="text-sm text-gray-500">
                         {t("deceased_disclaimer")}
                       </p>

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
 import { Trans } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -111,7 +112,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline_primary" data-cy="assign-user-button">
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-plus" className="mr-2 size-4" />
           {t("assign_user")}
         </Button>
       </SheetTrigger>
@@ -126,18 +127,18 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
             <UserSelector
               selected={selectedUser}
               onChange={handleUserChange}
-              placeholder="Search users..."
-              noOptionsMessage="No users found"
+              placeholder={t("search_users")}
+              noOptionsMessage={t("no_users_found")}
             />
           </div>
           {selectedUser && (
             <div className="space-y-4">
-              <div className="rounded-lg border p-4 space-y-4">
+              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
                 <div className="flex items-start gap-4">
                   <Avatar
                     name={formatName(selectedUser, true)}
                     imageUrl={selectedUser.profile_picture_url}
-                    className="h-12 w-12"
+                    className="size-12"
                   />
                   <div className="flex flex-col flex-1">
                     <TooltipComponent content={formatName(selectedUser)}>
@@ -151,7 +152,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
                   <div>
                     <span className="text-sm text-gray-500">
                       {t("username")}
@@ -168,6 +169,16 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                       {selectedUser.user_type}
                     </p>
                   </div>
+                  <div>
+                    <span className="text-sm text-gray-500">
+                      {t("phone_number")}
+                    </span>
+                    <p className="text-sm font-medium truncate">
+                      {selectedUser.phone_number
+                        ? formatPhoneNumberIntl(selectedUser.phone_number)
+                        : "-"}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -177,7 +188,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                 </label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger data-cy="patient-user-role-select">
-                    <SelectValue placeholder="Select a role" />
+                    <SelectValue placeholder={t("select_role")} />
                   </SelectTrigger>
                   <SelectContent>
                     {roles?.results?.map((role) => (
@@ -262,13 +273,13 @@ export const PatientUsers = (props: PatientProps) => {
         {users?.results.map((user) => (
           <div
             key={user.id}
-            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm relative"
+            className="rounded-lg border border-gray-200 bg-white p-4 shadow-xs relative"
           >
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">
                 <Avatar
                   name={formatName(user, true)}
-                  className="h-10 w-10"
+                  className="size-10"
                   imageUrl={user.profile_picture_url}
                 />
                 <div>

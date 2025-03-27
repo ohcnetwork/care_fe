@@ -55,7 +55,7 @@ export default function OrganizationIndex() {
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center p-6">
             <div className="rounded-full bg-primary/10 p-6 mb-4">
-              <CareIcon icon="d-hospital" className="h-12 w-12 text-primary" />
+              <CareIcon icon="d-hospital" className="size-12 text-primary" />
             </div>
             <p className="text-center text-sm text-gray-500 max-w-sm mb-4">
               Organizations help you manage facilities, users, and resources
@@ -90,7 +90,7 @@ export default function OrganizationIndex() {
                   className="flex items-center justify-center gap-2"
                 >
                   View Details
-                  <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+                  <CareIcon icon="l-arrow-right" className="size-4" />
                 </Link>
               </Button>
             </CardFooter>
