@@ -108,7 +108,7 @@ function Calendar({
   const buttonNavClassName = buttonVariants({
     variant: "outline",
     className:
-      "absolute h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+      "absolute size-7 bg-transparent p-0 opacity-50 hover:opacity-100",
   });
   const _buttonNextClassName = cn(
     buttonNavClassName,
@@ -133,7 +133,7 @@ function Calendar({
     props.dayButtonClassName,
   );
   const buttonRangeClassName =
-    "bg-accent [&>button]:bg-primary [&>button]:text-primary-foreground [&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground";
+    "bg-accent [&>button]:bg-primary [&>button]:text-primary-foreground hover:[&>button]:bg-primary hover:[&>button]:text-primary-foreground";
   const _rangeStartClassName = cn(
     buttonRangeClassName,
     "day-range-start rounded-s-md",
@@ -145,11 +145,11 @@ function Calendar({
     props.rangeEndClassName,
   );
   const _rangeMiddleClassName = cn(
-    "bg-accent !text-foreground [&>button]:bg-transparent [&>button]:!text-foreground [&>button]:hover:bg-transparent [&>button]:hover:!text-foreground",
+    "bg-accent text-foreground! [&>button]:bg-transparent [&>button]:text-foreground! hover:[&>button]:bg-transparent hover:[&>button]:text-foreground!",
     props.rangeMiddleClassName,
   );
   const _selectedClassName = cn(
-    "[&>button]:bg-primary [&>button]:text-primary-foreground [&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground",
+    "[&>button]:bg-primary [&>button]:text-primary-foreground hover:[&>button]:bg-primary hover:[&>button]:text-primary-foreground",
     props.selectedClassName,
   );
   const _todayClassName = cn(
@@ -200,7 +200,7 @@ function Calendar({
       components={{
         Chevron: ({ orientation }) => {
           const Icon = orientation === "left" ? ChevronLeft : ChevronRight;
-          return <Icon className="h-4 w-4" />;
+          return <Icon className="size-4" />;
         },
         Nav: ({ className }) => (
           <Nav
@@ -344,7 +344,7 @@ function Nav({
     <nav className={cn("flex items-center", className)}>
       <Button
         variant="outline"
-        className="absolute left-0 h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100"
+        className="absolute left-0 size-7 bg-transparent p-0 opacity-80 hover:opacity-100"
         type="button"
         tabIndex={isPreviousDisabled ? undefined : -1}
         disabled={isPreviousDisabled}
@@ -357,12 +357,12 @@ function Nav({
         }
         onClick={handlePreviousClick}
       >
-        <ChevronLeft className="h-4 w-4" />
+        <ChevronLeft className="size-4" />
       </Button>
 
       <Button
         variant="outline"
-        className="absolute right-0 h-7 w-7 bg-transparent p-0 opacity-80 hover:opacity-100"
+        className="absolute right-0 size-7 bg-transparent p-0 opacity-80 hover:opacity-100"
         type="button"
         tabIndex={isNextDisabled ? undefined : -1}
         disabled={isNextDisabled}
@@ -373,7 +373,7 @@ function Nav({
         }
         onClick={handleNextClick}
       >
-        <ChevronRight className="h-4 w-4" />
+        <ChevronRight className="size-4" />
       </Button>
     </nav>
   );

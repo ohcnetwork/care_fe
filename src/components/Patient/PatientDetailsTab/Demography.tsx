@@ -248,7 +248,7 @@ export const Demography = (props: PatientProps) => {
                 <div
                   key={i}
                   id={subtab.id}
-                  className="group mt-4 rounded-md bg-white pb-2 pl-5 pt-5 shadow"
+                  className="group mt-4 rounded-md bg-white pb-2 pl-5 pt-5 shadow-sm"
                 >
                   <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
                   <div className="flex flex-row items-center justify-between gap-x-4 mb-4 mr-4">

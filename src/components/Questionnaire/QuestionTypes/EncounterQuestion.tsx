@@ -232,7 +232,7 @@ export function EncounterQuestion({
       </div>
       {/* Hospitalization Details - Only show for relevant encounter classes */}
       {["imp", "obsenc", "emer"].includes(encounter.encounter_class) && (
-        <div className="col-span-2 border rounded-lg p-4 space-y-4">
+        <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
           <h3 className="text-lg font-semibold break-words">
             {t("hospitalization_details")}
           </h3>

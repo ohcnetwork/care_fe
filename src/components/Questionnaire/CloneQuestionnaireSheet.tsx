@@ -156,10 +156,10 @@ export default function CloneQuestionnaireSheet({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-4 w-4 p-0 hover:bg-transparent"
+                        className="size-4 p-0 hover:bg-transparent"
                         onClick={() => handleToggleOrganization(org.id)}
                       >
-                        <X className="h-3 w-3" />
+                        <X className="size-3" />
                       </Button>
                     </Badge>
                   ))
@@ -182,7 +182,7 @@ export default function CloneQuestionnaireSheet({
                   className="w-full justify-between"
                 >
                   <span className="truncate">{t("select_organizations")}</span>
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent
@@ -193,7 +193,7 @@ export default function CloneQuestionnaireSheet({
                   <CommandInput
                     placeholder={t("search_organizations")}
                     onValueChange={setSearchQuery}
-                    className="focus:ring-0 focus:outline-none border-none"
+                    className="focus:ring-0 focus:outline-hidden border-none"
                   />
                   <CommandList>
                     <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
@@ -211,7 +211,7 @@ export default function CloneQuestionnaireSheet({
                             className="flex items-center justify-between pr-2"
                           >
                             <div className="flex flex-1 items-center gap-2">
-                              <Building className="h-4 w-4" />
+                              <Building className="size-4" />
                               <span>{org.name}</span>
                               {org.description && (
                                 <span className="text-xs text-gray-500">
@@ -220,7 +220,7 @@ export default function CloneQuestionnaireSheet({
                               )}
                             </div>
                             {selectedIds.includes(org.id) && (
-                              <Check className="h-4 w-4" />
+                              <Check className="size-4" />
                             )}
                           </CommandItem>
                         ))
@@ -233,7 +233,7 @@ export default function CloneQuestionnaireSheet({
           </div>
         </div>
 
-        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t">
+        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
           <div className="flex w-full justify-end gap-4">
             <Button
               variant="outline"
@@ -254,7 +254,7 @@ export default function CloneQuestionnaireSheet({
             >
               {isCloning ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" />
                   Cloning...
                 </>
               ) : (
