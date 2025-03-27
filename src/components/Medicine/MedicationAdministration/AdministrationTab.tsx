@@ -222,14 +222,16 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
   return (
     <React.Fragment key={medication.id}>
       <div
-        className={cn("p-4 border-t border-gray-200", {
-          "opacity-40 bg-gray-200": isInactive,
-        })}
+        className={cn(
+          "p-4 border-t border-gray-200",
+          isInactive && "bg-gray-200 opacity-40",
+        )}
       >
         <div
-          className={cn("font-semibold truncate", {
-            "line-through": isInactive && medication.status !== "ended",
-          })}
+          className={cn(
+            "font-semibold truncate",
+            isInactive && medication.status === "ended" && "line-through",
+          )}
         >
           {medication.medication?.display}
         </div>
@@ -263,9 +265,10 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
         return (
           <div
             key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-            className={cn("p-4 border-t relative text-sm", {
-              "opacity-40 bg-gray-200": isInactive,
-            })}
+            className={cn(
+              "p-4 border-t relative text-sm",
+              isInactive && "bg-gray-200 opacity-40",
+            )}
           >
             {administrationRecords?.map((admin) => {
               const colorClass =
@@ -340,9 +343,10 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
       })}
 
       <div
-        className={cn("p-4 border-t border-gray-200 flex justify-center", {
-          "bg-gray-200 opacity-40": isInactive,
-        })}
+        className={cn(
+          "p-4 border-t border-gray-200 flex justify-center",
+          isInactive && "bg-gray-200 opacity-40",
+        )}
       >
         {ACTIVE_MEDICATION_STATUSES.includes(
           medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
