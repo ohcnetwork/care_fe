@@ -20,6 +20,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
+import { FileUploadQuestion } from "@/types/files/files";
 import {
   DetailedValidationError,
   QuestionValidationError,
@@ -36,6 +37,7 @@ import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
+import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
 import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
@@ -141,7 +143,7 @@ function ValidationErrorDisplay({
         <div className="flex items-center gap-2 mb-4">
           <CareIcon
             icon="l-exclamation-circle"
-            className="h-5 w-5 text-red-500"
+            className="size-5 text-red-500"
           />
           <h3 className="font-medium text-red-700">Validation Errors</h3>
         </div>
@@ -157,7 +159,7 @@ function ValidationErrorDisplay({
           return (
             <div
               key={`server-${index}`}
-              className="bg-white rounded p-3 border border-red-100 shadow-sm"
+              className="bg-white rounded p-3 border border-red-100 shadow-xs"
             >
               <div className="font-medium text-gray-900 mb-1">
                 {getErrorTitle(error)}
@@ -165,7 +167,7 @@ function ValidationErrorDisplay({
               <div className="text-sm text-red-600 flex items-start gap-2">
                 <CareIcon
                   icon="l-exclamation-circle"
-                  className="h-4 w-4 mt-0.5 flex-shrink-0"
+                  className="size-4 mt-0.5 shrink-0"
                 />
                 <span>{error.message}</span>
               </div>
@@ -200,7 +202,7 @@ function ValidationErrorDisplay({
                     }
                   }}
                 >
-                  <CareIcon icon="l-arrow-up" className="mr-1 h-3 w-3" />
+                  <CareIcon icon="l-arrow-up" className="mr-1 size-3" />
                   {t("scroll_to_question")}
                 </Button>
               )}
@@ -223,7 +225,7 @@ function ValidationErrorDisplay({
                   {form.errors.map((error, errorIndex) => (
                     <div
                       key={errorIndex}
-                      className="bg-white rounded p-3 border border-red-100 shadow-sm"
+                      className="bg-white rounded p-3 border border-red-100 shadow-xs"
                     >
                       <div className="text-sm text-gray-600 mb-1">
                         {findQuestionText(form, error.question_id)}
@@ -231,7 +233,7 @@ function ValidationErrorDisplay({
                       <div className="text-sm text-red-600 flex items-start gap-2">
                         <CareIcon
                           icon="l-exclamation-circle"
-                          className="h-4 w-4 mt-0.5 flex-shrink-0"
+                          className="size-4 mt-0.5 shrink-0"
                         />
                         <span>{error.error}</span>
                       </div>
@@ -265,7 +267,7 @@ function ValidationErrorDisplay({
                           }
                         }}
                       >
-                        <CareIcon icon="l-arrow-up" className="mr-1 h-3 w-3" />
+                        <CareIcon icon="l-arrow-up" className="mr-1 size-3" />
                         {t("scroll_to_question")}
                       </Button>
                     </div>
@@ -299,6 +301,10 @@ const STRUCTURED_TYPE_VALIDATORS = {
   ) => {
     const medicationData = (response?.value as MedicationRequest[]) || [];
     return validateMedicationRequestQuestion(medicationData, questionId);
+  },
+  files: (response: ResponseValue | undefined, quesitonId: string) => {
+    const files = (response?.value as FileUploadQuestion[]) || [];
+    return validateFileUploadQuestion(files, quesitonId);
   },
 } as const;
 
@@ -609,21 +615,29 @@ export function QuestionnaireForm({
     const requests: FormBatchRequest[] = [];
     if (encounterId && patientId) {
       const context = { facilityId, patientId, encounterId };
-      // First, collect all structured data requests if encounterId is provided
+      const structuredPromises: Promise<FormBatchRequest[]>[] = [];
+
       formsWithValidation.forEach((form) => {
         form.responses.forEach((response) => {
           if (response.structured_type) {
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
-              const structuredRequests = getStructuredRequests(
-                response.structured_type,
-                structuredData,
-                context,
+              structuredPromises.push(
+                getStructuredRequests(
+                  response.structured_type,
+                  structuredData,
+                  context,
+                ),
               );
-              requests.push(...structuredRequests);
             }
           }
         });
+      });
+
+      const structuredRequestsArrays = await Promise.all(structuredPromises);
+
+      structuredRequestsArrays.forEach((requestArray) => {
+        requests.push(...requestArray);
       });
     }
 
@@ -702,7 +716,7 @@ export function QuestionnaireForm({
   return (
     <div className="flex gap-4">
       {/* Left Navigation */}
-      <div className="w-64 border-r p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
+      <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         {questionnaireForms.map((form) => (
           <div key={form.questionnaire.id} className="space-y-2">
             <button
@@ -746,10 +760,10 @@ export function QuestionnaireForm({
         {questionnaireForms.map((form, index) => (
           <div
             key={`${form.questionnaire.id}-${index}`}
-            className="rounded-lg py-6 px-4 space-y-6"
+            className="rounded-lg py-6 space-y-6"
             data-questionnaire-id={form.questionnaire.id}
           >
-            <div className="flex justify-between items-center max-w-4xl">
+            <div className="flex justify-between items-center max-w-4xl p-2">
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">
                   {form.questionnaire.title}
@@ -760,8 +774,7 @@ export function QuestionnaireForm({
                   </p>
                 )}
               </div>
-
-              {form.questionnaire.id !== questionnaireData?.id && (
+              {form.questionnaire.slug !== questionnaireSlug && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -885,7 +898,7 @@ export function QuestionnaireForm({
                     <>
                       <span className="opacity-0">{t("submit")}</span>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
+                        <div className="size-5 animate-spin rounded-full border-b-2 border-white" />
                       </div>
                     </>
                   ) : (

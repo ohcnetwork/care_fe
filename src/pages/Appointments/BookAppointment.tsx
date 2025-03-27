@@ -95,7 +95,7 @@ export default function BookAppointment(props: Props) {
 
   return (
     <Page title={t("book_appointment")}>
-      <hr className="mt-6 mb-8" />
+      <hr className="mt-6 mb-8 border-gray-200" />
       <div className="container mx-auto p-4 max-w-5xl">
         <div className="mb-8">
           <h1 className="text-lg font-bold mb-2">{t("book_appointment")}</h1>

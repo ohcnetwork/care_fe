@@ -97,7 +97,7 @@ export default function PatientSelect({
 
   const renderNoPatientFound = () => {
     return (
-      <div className="">
+      <div>
         <span className="text-base font-medium">
           {t("no_patients_found_phone_number")}
         </span>
