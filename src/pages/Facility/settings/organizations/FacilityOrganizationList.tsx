@@ -129,10 +129,10 @@ export default function FacilityOrganizationList({
   const handleParentClick = useCallback(
     (parentId: string) => {
       navigate(
-        `/facility/${facilityId}/settings/departments/${parentId}/departments`,
+        `/facility/${facilityId}/settings/departments/${parentId}/${currentTab}`,
       );
     },
-    [facilityId],
+    [facilityId, currentTab],
   );
 
   const orgParents: FacilityOrganizationParent[] = [];
@@ -163,7 +163,7 @@ export default function FacilityOrganizationList({
                     asChild
                     className="hover:text-primary cursor-pointer font-medium text-primary"
                     onClick={() =>
-                      navigate(`/facility/${facilityId}/settings/${currentTab}`)
+                      navigate(`/facility/${facilityId}/settings/departments`)
                     }
                   >
                     <button type="button">{t("departments")}</button>
