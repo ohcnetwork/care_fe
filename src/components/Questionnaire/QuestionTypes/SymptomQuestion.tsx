@@ -17,13 +17,13 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import { Command, CommandDrawer, CommandList } from "@/components/ui/command";
 import {
   DropdownMenu,
@@ -34,19 +34,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { RelativeDatePicker } from "@/components/ui/relative-date-picker";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -172,9 +165,6 @@ const SymptomRow = React.memo(function SymptomRow({
   onRemove,
 }: SymptomRowProps) {
   const [showNotes, setShowNotes] = useState(Boolean(symptom.note));
-  const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
-    "absolute",
-  );
   const [isOpen, setIsOpen] = useState(!symptom.id);
 
   const handleDateChange = useCallback(
@@ -231,63 +221,17 @@ const SymptomRow = React.memo(function SymptomRow({
           <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
             {t("date")}
           </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-8 md:h-9 w-full justify-start font-normal"
-                disabled={disabled || !!symptom.id}
-              >
-                {symptom.onset?.onset_datetime ? (
-                  new Date(symptom.onset.onset_datetime).toLocaleDateString()
-                ) : (
-                  <span className="text-muted-foreground">
-                    {t("select_date")}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-auto" align="start">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) =>
-                  setActiveTab(v as "absolute" | "relative")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="absolute">
-                    {t("absolute_date")}
-                  </TabsTrigger>
-                  <TabsTrigger value="relative">
-                    {t("relative_date")}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="absolute" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      symptom.onset?.onset_datetime
-                        ? new Date(symptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onSelect={(date: Date | undefined) => {
-                      handleDateChange(date);
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="relative" className="p-0">
-                  <RelativeDatePicker
-                    value={
-                      symptom.onset?.onset_datetime
-                        ? new Date(symptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onDateChange={(date) => handleDateChange(date)}
-                  />
-                </TabsContent>
-              </Tabs>
-            </PopoverContent>
-          </Popover>
+          <CombinedDatePicker
+            value={
+              symptom.onset?.onset_datetime
+                ? new Date(symptom.onset.onset_datetime)
+                : undefined
+            }
+            onChange={handleDateChange}
+            disabled={disabled || !!symptom.id}
+            dateFormat="P"
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+          />
         </div>
         <div className="col-span-2">
           <Select
@@ -423,65 +367,17 @@ const SymptomRow = React.memo(function SymptomRow({
                   <div className="block text-sm font-medium text-gray-500 mb-1">
                     {t("onset_date")}
                   </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="h-8 md:h-9 w-full justify-start font-normal"
-                        disabled={disabled || !!symptom.id}
-                      >
-                        {symptom.onset?.onset_datetime ? (
-                          new Date(
-                            symptom.onset.onset_datetime,
-                          ).toLocaleDateString()
-                        ) : (
-                          <span className="text-muted-foreground">
-                            {t("select_date")}
-                          </span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0 w-auto" align="start">
-                      <Tabs
-                        value={activeTab}
-                        onValueChange={(v) =>
-                          setActiveTab(v as "absolute" | "relative")
-                        }
-                      >
-                        <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="absolute">
-                            {t("absolute_date")}
-                          </TabsTrigger>
-                          <TabsTrigger value="relative">
-                            {t("relative_date")}
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="absolute" className="p-0">
-                          <Calendar
-                            mode="single"
-                            selected={
-                              symptom.onset?.onset_datetime
-                                ? new Date(symptom.onset.onset_datetime)
-                                : undefined
-                            }
-                            onSelect={(date: Date | undefined) => {
-                              handleDateChange(date);
-                            }}
-                          />
-                        </TabsContent>
-                        <TabsContent value="relative" className="p-0">
-                          <RelativeDatePicker
-                            value={
-                              symptom.onset?.onset_datetime
-                                ? new Date(symptom.onset.onset_datetime)
-                                : undefined
-                            }
-                            onDateChange={(date) => handleDateChange(date)}
-                          />
-                        </TabsContent>
-                      </Tabs>
-                    </PopoverContent>
-                  </Popover>
+                  <CombinedDatePicker
+                    value={
+                      symptom.onset?.onset_datetime
+                        ? new Date(symptom.onset.onset_datetime)
+                        : undefined
+                    }
+                    onChange={handleDateChange}
+                    disabled={disabled || !!symptom.id}
+                    buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+                    dateFormat="P"
+                  />
                 </div>
                 <div>
                   <div className="block text-sm font-medium text-gray-500 mb-1">
@@ -698,17 +594,6 @@ export function SymptomQuestion({
     );
   };
 
-  const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
-    "absolute",
-  );
-
-  const handleDateChange = (date: Date | undefined) => {
-    setNewSymptom((prev) => ({
-      ...prev,
-      onset: { onset_datetime: dateQueryString(date) },
-    }));
-  };
-
   const symptomDetailsContent = (
     <div className="space-y-4 p-4">
       <div className="grid grid-cols-1 gap-4">
@@ -716,63 +601,22 @@ export function SymptomQuestion({
           <div className="text-sm font-medium text-gray-700">
             {t("onset_date")}
           </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-8 md:h-9 w-full justify-start font-normal"
-                disabled={disabled || !!newSymptom.id}
-              >
-                {newSymptom.onset?.onset_datetime ? (
-                  new Date(newSymptom.onset.onset_datetime).toLocaleDateString()
-                ) : (
-                  <span className="text-muted-foreground">
-                    {t("select_date")}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-auto" align="start">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) =>
-                  setActiveTab(v as "absolute" | "relative")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="absolute">
-                    {t("absolute_date")}
-                  </TabsTrigger>
-                  <TabsTrigger value="relative">
-                    {t("relative_date")}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="absolute" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      newSymptom.onset?.onset_datetime
-                        ? new Date(newSymptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onSelect={(date: Date | undefined) => {
-                      handleDateChange(date);
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="relative" className="p-0">
-                  <RelativeDatePicker
-                    value={
-                      newSymptom.onset?.onset_datetime
-                        ? new Date(newSymptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onDateChange={(date) => handleDateChange(date)}
-                  />
-                </TabsContent>
-              </Tabs>
-            </PopoverContent>
-          </Popover>
+          <CombinedDatePicker
+            value={
+              newSymptom.onset?.onset_datetime
+                ? new Date(newSymptom.onset.onset_datetime)
+                : undefined
+            }
+            onChange={(date) => {
+              setNewSymptom((prev) => ({
+                ...prev,
+                onset: { onset_datetime: dateQueryString(date) },
+              }));
+            }}
+            disabled={disabled || !!newSymptom.id}
+            dateFormat="P"
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+          />
         </div>
         <div className="space-y-2">
           <div className="text-sm font-medium text-gray-700">{t("status")}</div>
