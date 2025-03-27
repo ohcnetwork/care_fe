@@ -111,10 +111,10 @@ const LAYOUT_OPTIONS = [
   },
   {
     id: "wide-start",
-    value: "grid grid-cols-[2fr,1fr]",
+    value: "grid grid-cols-[2fr_1fr]",
     label: "Wide Start",
     preview: (
-      <div className="w-full grid grid-cols-[2fr,1fr] gap-1">
+      <div className="w-full grid grid-cols-[2fr_1fr] gap-1">
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
@@ -124,10 +124,10 @@ const LAYOUT_OPTIONS = [
   },
   {
     id: "wide-end",
-    value: "grid grid-cols-[1fr,2fr]",
+    value: "grid grid-cols-[1fr_2fr]",
     label: "Wide End",
     preview: (
-      <div className="w-full grid grid-cols-[1fr,2fr] gap-1">
+      <div className="w-full grid grid-cols-[1fr_2fr] gap-1">
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
@@ -159,8 +159,7 @@ function LayoutOptionCard({
       <Label
         htmlFor={optionId}
         className={cn(
-          "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-50",
-          "peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
           isSelected && "border-primary",
         )}
       >
@@ -328,7 +327,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   if (error) {
     return (
       <Alert variant="destructive">
-        <CareIcon icon="l-exclamation-circle" className="h-4 w-4" />
+        <CareIcon icon="l-exclamation-circle" className="size-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           Failed to load questionnaire. Please try again later.
@@ -339,7 +338,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   if (!questionnaire) {
     return (
       <Alert>
-        <CareIcon icon="l-info-circle" className="h-4 w-4" />
+        <CareIcon icon="l-info-circle" className="size-4" />
         <AlertTitle>Not Found</AlertTitle>
         <AlertDescription>
           {t("no_requested_questionnaires_found")}
@@ -423,7 +422,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             {t("cancel")}
           </Button>
           <Button onClick={handleSave} disabled={isCreating || isUpdating}>
-            <CareIcon icon="l-save" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-save" className="mr-2 size-4" />
             {id ? t("save") : t("create")}
           </Button>
         </div>
@@ -435,11 +434,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       >
         <TabsList className="mb-4">
           <TabsTrigger value="edit">
-            <ViewIcon className="w-4 h-4 mr-2" />
+            <ViewIcon className="size-4 mr-2" />
             {t("edit_form")}
           </TabsTrigger>
           <TabsTrigger value="preview">
-            <SquarePenIcon className="w-4 h-4 mr-2" />
+            <SquarePenIcon className="size-4 mr-2" />
             {t("form_preview")}
           </TabsTrigger>
         </TabsList>
@@ -483,7 +482,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             </span>
                           </button>
                           {hasSubQuestions && question.questions && (
-                            <div className="ml-6 border-l-2 border-muted pl-2 space-y-1">
+                            <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
                               {question.questions.map(
                                 (subQuestion, subIndex) => (
                                   <button
@@ -636,7 +635,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       );
                     }}
                   >
-                    <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                    <CareIcon icon="l-plus" className="mr-2 size-4" />
                     {t("add_question")}
                   </Button>
                 </CardHeader>
@@ -864,15 +863,15 @@ function QuestionEditor({
             </div>
           </div>
           {isExpanded ? (
-            <ChevronsDownUp className="h-4 w-4 text-gray-500" />
+            <ChevronsDownUp className="size-4 text-gray-500" />
           ) : (
-            <ChevronsUpDown className="h-4 w-4 text-gray-500" />
+            <ChevronsUpDown className="size-4 text-gray-500" />
           )}
         </CollapsibleTrigger>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <CareIcon icon="l-ellipsis-v" className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="size-8">
+              <CareIcon icon="l-ellipsis-v" className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -883,7 +882,7 @@ function QuestionEditor({
                   onMoveUp?.();
                 }}
               >
-                <ChevronUp className="mr-2 h-4 w-4" />
+                <ChevronUp className="mr-2 size-4" />
                 {t("move_up")}
               </DropdownMenuItem>
             )}
@@ -894,7 +893,7 @@ function QuestionEditor({
                   onMoveDown?.();
                 }}
               >
-                <ChevronDown className="mr-2 h-4 w-4" />
+                <ChevronDown className="mr-2 size-4" />
                 {t("move_down")}
               </DropdownMenuItem>
             )}
@@ -906,7 +905,7 @@ function QuestionEditor({
               }}
               className="text-destructive"
             >
-              <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
               {t("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -1013,7 +1012,7 @@ function QuestionEditor({
           </div>
 
           <div className="space-y-6">
-            <div className="border rounded-lg bg-gray-100 p-4">
+            <div className="border rounded-lg border-gray-200 bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">Question Settings</h3>
               <p className="text-sm text-gray-500 mb-4">
                 Configure the basic behavior: mark as required, allow multiple
@@ -1057,7 +1056,7 @@ function QuestionEditor({
               </div>
             </div>
 
-            <div className="border rounded-lg bg-gray-100 p-4">
+            <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">
                 Data Collection Details
               </h3>
@@ -1140,7 +1139,7 @@ function QuestionEditor({
 
           {type === "group" && (
             <div className="space-y-4">
-              <div className="border rounded-lg bg-gray-100 p-4">
+              <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
                 <h3 className="text-sm font-medium mb-2">
                   Group Layout Options
                 </h3>
@@ -1238,7 +1237,7 @@ function QuestionEditor({
                     {(answer_option || []).map((opt, idx) => (
                       <div
                         key={idx}
-                        className="space-y-4 pb-4 border-b last:border-0 last:pb-0"
+                        className="space-y-4 pb-4 border-b border-gray-200 last:border-0 last:pb-0"
                       >
                         <div className="grid grid-cols-2 gap-4">
                           <div>
@@ -1287,7 +1286,7 @@ function QuestionEditor({
                                 updateField("answer_option", newOptions);
                               }}
                             >
-                              <CareIcon icon="l-times" className="h-4 w-4" />
+                              <CareIcon icon="l-times" className="size-4" />
                             </Button>
                           </div>
                         </div>
@@ -1305,7 +1304,7 @@ function QuestionEditor({
                         updateField("answer_option", newOptions);
                       }}
                     >
-                      <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-plus" className="mr-2 size-4" />
                       {t("add_option")}
                     </Button>
                   </CardContent>
@@ -1364,7 +1363,7 @@ function QuestionEditor({
                     );
                   }}
                 >
-                  <CareIcon icon="l-plus" className="h-4 w-4" />
+                  <CareIcon icon="l-plus" className="size-4" />
                   {t("add_sub_question")}
                 </Button>
               </div>
@@ -1454,7 +1453,7 @@ function QuestionEditor({
               {(question.enable_when || []).map((condition, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-[2fr,1fr,2fr] gap-2 items-start"
+                  className="grid grid-cols-[2fr_1fr_2fr] gap-2 items-start"
                 >
                   <div>
                     <Label className="text-xs">Question</Label>
@@ -1627,7 +1626,7 @@ function QuestionEditor({
                         updateField("enable_when", newConditions);
                       }}
                     >
-                      <CareIcon icon="l-times" className="h-4 w-4" />
+                      <CareIcon icon="l-times" className="size-4" />
                     </Button>
                   </div>
                 </div>
@@ -1647,7 +1646,7 @@ function QuestionEditor({
                   ]);
                 }}
               >
-                <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
                 {t("add_condition")}
               </Button>
             </div>

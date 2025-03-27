@@ -70,7 +70,7 @@ export function LocationCardWrapper({
       {showBackButton && (
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={handleCancelEdit}>
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="size-4" />
           </Button>
           <h3 className="text-lg font-semibold">{title}</h3>
         </div>
@@ -170,7 +170,7 @@ export function LocationCardWrapper({
                 onClick={() => handleConfirmEdit(locationHistory)}
                 disabled={isPending}
               >
-                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {isCompletingStay ? t("complete") : t("save")}
               </Button>
             </div>
