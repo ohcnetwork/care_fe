@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -74,7 +76,7 @@ export default function ValueSetSelect({
   const content = (
     <Command filter={() => 1}>
       <CommandInput
-        placeholder={placeholder}
+        placeholder={t("value_set_search_placeholder")}
         className="outline-hidden border-none ring-0 shadow-none"
         onValueChange={setSearch}
         autoFocus
@@ -118,7 +120,7 @@ export default function ValueSetSelect({
           role="combobox"
           onClick={() => setInternalOpen(true)}
           className={cn(
-            "w-full justify-between",
+            "w-full justify-between border border-primary rounded-md p-5",
             wrapTextForSmallScreen
               ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
               : "truncate",
@@ -126,8 +128,15 @@ export default function ValueSetSelect({
           )}
           disabled={disabled}
         >
-          <span>{value?.display || placeholder}</span>
-          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          <div className="flex items-center">
+            <CareIcon
+              icon="l-plus"
+              className="mr-2 text-5xl text-primary-700 font-normal"
+            />
+            <span className="text-primary-700 flex items-center font-semibold text-base text-wrap">
+              {value?.display || placeholder}
+            </span>
+          </div>
         </Button>
         <CommandDrawer open={internalOpen} onOpenChange={setInternalOpen}>
           {content}

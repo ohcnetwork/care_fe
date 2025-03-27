@@ -47,6 +47,7 @@ interface QuestionInputProps {
   disabled?: boolean;
   facilityId?: string;
   patientId: string;
+  isSubQuestion?: boolean;
 }
 
 export function QuestionInput({
@@ -59,6 +60,7 @@ export function QuestionInput({
   disabled,
   facilityId,
   patientId,
+  isSubQuestion,
 }: QuestionInputProps) {
   const { t } = useTranslation();
   const questionnaireResponse = questionnaireResponses.find(
@@ -218,7 +220,7 @@ export function QuestionInput({
       : questionnaireResponse.values;
 
     return (
-      <div className="">
+      <div className="bg-gray-100 md:bg-transparent px-2 py-3">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 && (
@@ -236,25 +238,32 @@ export function QuestionInput({
           return (
             <div
               key={index}
-              className={cn("mt-2", removeButton && "gap-2 flex items-end")}
+              className={cn(removeButton && "gap-2 flex items-end")}
             >
               <div
                 className={cn("space-y-1", { "flex-1": removeButton })}
                 data-question-id={question.id}
               >
-                {index === 0 && <QuestionLabel question={question} />}
+                {index === 0 && (
+                  <QuestionLabel
+                    question={question}
+                    isSubQuestion={isSubQuestion}
+                  />
+                )}
                 <div
-                  className={cn({
-                    "flex w-full": !question.structured_type,
+                  className={cn("w-full", {
+                    "flex flex-col md:flex-row": !question.structured_type,
                     "flex-col": question.repeats || question.type === "text",
                   })}
                 >
-                  <div className="flex-1">{renderSingleInput(index)}</div>
+                  <div className="flex-1 min-w-0">
+                    {renderSingleInput(index)}
+                  </div>
                   {/* Notes are not available for structured questions */}
                   {!question.structured_type && !question.repeats && (
                     <NotesInput
-                      className={cn({
-                        "bg-white border border-gray-200 rounded-l-none -ml-2":
+                      className={cn("w-min", {
+                        "bg-white border md:rounded-l-none md:-ml-2 mt-2 md:mt-0":
                           !(question.type === "text"),
                         "mt-2": question.type === "text",
                       })}
