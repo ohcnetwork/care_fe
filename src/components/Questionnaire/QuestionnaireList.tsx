@@ -47,7 +47,7 @@ function EmptyState() {
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
-        <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
+        <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">
         {t("no_questionnaires_found")}
@@ -132,7 +132,7 @@ const RenderCard = ({
                     }}
                     className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
                   >
-                    <EyeIcon className="w-4 h-4 mr-1" />
+                    <EyeIcon className="size-4 mr-1" />
                     {t("View")}
                   </Button>
                 </div>
@@ -154,7 +154,7 @@ const RenderTable = ({
 }) => {
   const navigate = useNavigate();
   return (
-    <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow overflow-x-auto">
+    <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow-sm overflow-x-auto">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : questionnaireList.length === 0 ? (
@@ -206,7 +206,7 @@ const RenderTable = ({
                       size="sm"
                       className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
                     >
-                      <EyeIcon className="w-4 h-4 mr-0" />
+                      <EyeIcon className="size-4 mr-0" />
                       {t("view")}
                     </Button>
                   </div>
@@ -260,21 +260,21 @@ export function QuestionnaireList() {
             >
               <TabsList>
                 <TabsTrigger value="active">
-                  <FileCheckIcon className="w-4 h-4 mr-2 " />
+                  <FileCheckIcon className="size-4 mr-2 " />
                   {t("active")}
                 </TabsTrigger>
                 <TabsTrigger value="draft">
-                  <NotepadTextDashedIcon className="w-4 h-4 mr-2" />
+                  <NotepadTextDashedIcon className="size-4 mr-2" />
                   {t("draft")}
                 </TabsTrigger>
                 <TabsTrigger value="retired">
-                  <ArchiveIcon className="w-4 h-4 mr-2" />
+                  <ArchiveIcon className="size-4 mr-2" />
                   {t("retired")}
                 </TabsTrigger>
               </TabsList>
             </Tabs>
             <div className="relative md:min-w-80 w-full">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
               <Input
                 placeholder={t("search_questionnaires")}
                 className="pl-10"
@@ -286,7 +286,7 @@ export function QuestionnaireList() {
 
           <div className="flex items-center md:self-start">
             <Button onClick={() => navigate("/admin/questionnaire/create")}>
-              <PlusIcon className="w-4 h-4" />
+              <PlusIcon className="size-4" />
               {t("create_questionnaire")}
             </Button>
           </div>

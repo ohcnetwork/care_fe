@@ -25,7 +25,8 @@ import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { PatientProps } from ".";
 
 export const ResourceRequests = (props: PatientProps) => {
-  const { patientData, facilityId, patientId } = props;
+  const { patientData, facilityId } = props;
+  const patientId = patientData.id;
   const { t } = useTranslation();
 
   const { data: resourceRequests, isLoading: loading } = useQuery({
@@ -76,7 +77,7 @@ export const ResourceRequests = (props: PatientProps) => {
         )}
       </div>
 
-      <div className="rounded-lg border bg-white">
+      <div className="rounded-lg border border-gray-200 bg-white">
         <Table>
           <TableHeader>
             <TableRow>

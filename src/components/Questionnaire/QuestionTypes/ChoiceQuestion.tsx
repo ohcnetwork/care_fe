@@ -93,11 +93,12 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select an option" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="max-w-[var(--radix-select-trigger-width)] w-full">
             {options.map((option: AnswerOption) => (
               <SelectItem
                 key={option.value.toString()}
                 value={option.value.toString()}
+                className="whitespace-normal break-words py-3"
               >
                 {properCase(option.display || option.value)}
               </SelectItem>
