@@ -116,7 +116,7 @@ export default function Autocomplete({
         onValueChange={handleInputChange}
         // Control the input when freeInput is true.
         {...(freeInput ? { value: inputValue } : {})}
-        className="outline-none border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none"
         autoFocus
       />
       <CommandList>
@@ -147,7 +147,7 @@ export default function Autocomplete({
             >
               <CheckIcon
                 className={cn(
-                  "mr-2 h-4 w-4",
+                  "mr-2 size-4",
                   value === option.value ? "opacity-100" : "opacity-0",
                 )}
               />

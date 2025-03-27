@@ -119,7 +119,7 @@ export function BackupCodesDialog({
               onClick={handleCopyBackupCodes}
               className="flex-1"
             >
-              <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-copy" className="mr-2 size-4" />
               {t("copy")}
             </Button>
             <Button
@@ -129,7 +129,7 @@ export function BackupCodesDialog({
             >
               <CareIcon
                 icon="l-file-download"
-                className="h-4 w-4 text-gray-500"
+                className="size-4 text-gray-500"
               />
               {t("download")}
             </Button>
@@ -138,7 +138,7 @@ export function BackupCodesDialog({
               onClick={handlePrintBackupCodes}
               className="flex-1"
             >
-              <CareIcon icon="l-print" className="h-4 w-4 text-gray-500" />
+              <CareIcon icon="l-print" className="size-4 text-gray-500" />
               {t("print")}
             </Button>
           </div>

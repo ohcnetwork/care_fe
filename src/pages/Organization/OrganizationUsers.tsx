@@ -183,7 +183,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                           <Avatar
                             name={`${userRole.user.first_name} ${userRole.user.last_name}`}
                             imageUrl={userRole.user.profile_picture_url}
-                            className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl flex-shrink-0"
+                            className="size-12 sm:size-14 text-xl sm:text-2xl shrink-0"
                           />
 
                           <div className="flex flex-col min-w-0 flex-1">

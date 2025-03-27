@@ -35,7 +35,7 @@ export function LocationBreadcrumb({
         >
           {t("locations")}
         </span>
-        <ChevronRight className="h-4 w-4" />
+        <ChevronRight className="size-4" />
       </div>
       {locationHistory.slice(0, -1).map((_loc, _index) => (
         <div key={_loc.id} className="flex items-center gap-1">
@@ -49,7 +49,7 @@ export function LocationBreadcrumb({
           >
             {_loc.name}
           </span>
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="size-4" />
         </div>
       ))}
       {locationHistory.length > 0 && (
@@ -57,7 +57,7 @@ export function LocationBreadcrumb({
           <span className="text-gray-900 font-medium">
             {locationHistory[locationHistory.length - 1].name}
           </span>
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="size-4" />
         </div>
       )}
     </div>

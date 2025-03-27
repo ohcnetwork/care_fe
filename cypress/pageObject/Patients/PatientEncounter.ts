@@ -1,4 +1,12 @@
 export class PatientEncounter {
+  private inactiveEncounterStatus = [
+    "cancelled",
+    "entered_in_error",
+    "discontinued",
+    "completed",
+    "discharged",
+  ];
+
   // Navigation
   navigateToEncounters() {
     cy.get('[data-sidebar="content"]').contains("Encounters").click();
@@ -211,6 +219,11 @@ export class PatientEncounter {
       expect(interception.request.url).to.include("status=in_progress");
       expect(interception.response.statusCode).to.eq(200);
     });
+    return this;
+  }
+
+  openEncounterNotesTab() {
+    cy.verifyAndClickElement('[data-cy="tab-notes"]', "Notes");
     return this;
   }
 }

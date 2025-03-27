@@ -215,7 +215,7 @@ export default function LinkConsentDialog({
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" className="gap-2">
-            <Plus className="h-4 w-4" />
+            <Plus className="size-4" />
             {t("link_consent")}
           </Button>
         )}
@@ -402,7 +402,7 @@ export default function LinkConsentDialog({
                       <>
                         <Label
                           htmlFor={`file_upload_consent`}
-                          className="w-full inline-flex items-center justify-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground"
+                          className="w-full inline-flex items-center justify-center px-4 py-2 cursor-pointer border border-gray-200 rounded-md hover:bg-accent hover:text-accent-foreground"
                         >
                           <CareIcon icon="l-file-upload-alt" className="mr-1" />
                           <span
