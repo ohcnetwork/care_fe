@@ -74,16 +74,6 @@ export default function PatientLogin({
       `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
     );
   }
-
-  // const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
-  //   mutationFn: mutate(routes.otp.sendOtp),
-  //   onSuccess: () => {
-  //     if (page === "send") {
-  //       navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
-  //     }
-  //   },
-  // });
-
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
     mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
