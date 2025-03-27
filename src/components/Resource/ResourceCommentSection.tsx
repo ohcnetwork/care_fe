@@ -144,11 +144,11 @@ export const Comment = ({
         <div className="flex">
           <Avatar
             name={`${created_by.first_name} ${created_by.last_name}`}
-            className="w-8 h-8 rounded-full object-cover"
+            className="size-8 rounded-full object-cover"
           />
         </div>
       </TooltipComponent>
-      <div className="flex flex-col flex-grow mt-1">
+      <div className="flex flex-col grow mt-1">
         <div className="flex items-center justify-between w-full">
           <span className="text-gray-700 font-medium text-xs md:text-sm">
             {formatName(created_by)}

@@ -51,7 +51,7 @@ export function FacilityNavUser({
               {open && (
                 <>
                   <Avatar
-                    className="h-8 w-8 rounded-lg"
+                    className="size-8 rounded-lg"
                     name={`${user.first_name} ${user.last_name}`}
                     imageUrl={user.read_profile_picture_url}
                   />
@@ -68,7 +68,7 @@ export function FacilityNavUser({
                 <div className="flex flex-row items-center">
                   <Avatar
                     name={`${user.first_name} ${user.last_name}`}
-                    className="h-8 w-8 rounded-lg"
+                    className="size-8 rounded-lg"
                     imageUrl={user.read_profile_picture_url}
                   />
                 </div>
@@ -76,7 +76,7 @@ export function FacilityNavUser({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
@@ -84,7 +84,7 @@ export function FacilityNavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar
-                  className="h-8 w-8 rounded-lg"
+                  className="size-8 rounded-lg"
                   name={`${user.first_name} ${user.last_name}`}
                   imageUrl={user.read_profile_picture_url}
                 />
@@ -143,7 +143,7 @@ export function PatientNavUser() {
               {open && (
                 <>
                   <Avatar
-                    className="h-8 w-8 rounded-lg"
+                    className="size-8 rounded-lg"
                     name={patient?.name || phoneNumber}
                   />
                   <div className="grid flex-1 text-left text-sm leading-tight">
@@ -161,14 +161,14 @@ export function PatientNavUser() {
                 <div className="flex flex-row items-center">
                   <Avatar
                     name={patient?.name || phoneNumber}
-                    className="h-8 w-8 rounded-lg"
+                    className="size-8 rounded-lg"
                   />
                 </div>
               )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
@@ -176,7 +176,7 @@ export function PatientNavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar
-                  className="h-8 w-8 rounded-lg"
+                  className="size-8 rounded-lg"
                   name={patient?.name || phoneNumber}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">

@@ -191,7 +191,7 @@ export default function FacilityOrganizationSelector(
                 key={index}
                 className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5"
               >
-                <Building className="h-4 w-4 text-sky-600 flex-shrink-0" />
+                <Building className="size-4 text-sky-600 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm text-sky-900 truncate">
                     {org.name}
@@ -200,10 +200,10 @@ export default function FacilityOrganizationSelector(
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900"
+                  className="size-8 p-0 text-gray-500 hover:text-gray-900"
                   onClick={() => handleRemoveOrganization(index)}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="size-4" />
                   <span className="sr-only">{t("remove_organization")}</span>
                 </Button>
               </div>

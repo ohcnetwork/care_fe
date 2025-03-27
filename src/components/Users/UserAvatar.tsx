@@ -109,12 +109,12 @@ export default function UserAvatar({ username }: { username: string }) {
         onOpenChange={(open) => setEditAvatar(open)}
       />
       <div>
-        <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex justify-between">
+        <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 flex justify-between">
           <div className="flex items-center">
             <Avatar
               name={formatName(userData, true)}
               imageUrl={userData?.profile_picture_url}
-              className="h-20 w-20"
+              className="size-20"
             />
             <div className="my-4 ml-4 flex flex-col gap-2">
               {!canEditAvatar ? (
