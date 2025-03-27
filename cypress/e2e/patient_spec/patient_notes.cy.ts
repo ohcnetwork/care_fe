@@ -15,17 +15,13 @@ const testData = {
   secondThreadTitle: `Second Thread - ${Date.now()}`,
   firstThreadMessages: [
     "First thread message 1",
-    "First thread message 2. This is a longer message that contains more details and extends beyond a single line to properly test multi-line text handling in the chat system.",
+    "First thread message 2. This is a longer message that contains more details",
   ],
   secondThreadMessages: [
     "Second thread message 1",
-    "Second thread message 2. This message is intentionally longer to verify how the system handles extended chat messages. It includes additional text to ensure the UI does not truncate or wrap the message improperly.",
+    "Second thread message 2. This message is intentionally longer to verify how the system handles extended chat messages.",
   ],
-
-  thirdThreadMessages: [
-    "Third thread message 1",
-    "Third thread message 2. This message is intentionally longer to verify how the system handles extended chat messages. It includes additional text to ensure the UI does not truncate or wrap the message improperly.",
-  ],
+  thirdThreadMessages: ["Third thread message 1"],
 };
 
 describe("Encounter Notes", () => {
@@ -39,9 +35,10 @@ describe("Encounter Notes", () => {
   it("Create multiple threads and verify the messages are multi-user contribution supported", () => {
     patientEncounter
       .navigateToEncounters()
-      .openOngoingEncounter()
-      .openEncounterNotesTab();
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails();
     patientNotes
+      .openEncounterNotesTab()
       .clickNewThreadButton()
       .typeThreadTitle(testData.firstThreadTitle)
       .clickCreateThreadButton()

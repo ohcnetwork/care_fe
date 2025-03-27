@@ -1,12 +1,4 @@
 export class PatientEncounter {
-  private inactiveEncounterStatus = [
-    "cancelled",
-    "entered_in_error",
-    "discontinued",
-    "completed",
-    "discharged",
-  ];
-
   // Navigation
   navigateToEncounters() {
     cy.get('[data-sidebar="content"]').contains("Encounters").click();
@@ -20,98 +12,14 @@ export class PatientEncounter {
       .click();
     return this;
   }
-  openOngoingEncounter() {
-    cy.get('[data-cy="in-progress-filter"]').click();
-    cy.get('[data-cy="encounter-list-cards"]')
-      .first()
-      .contains("View Details")
-      .click();
+
+  searchEncounter(patientName: string) {
+    cy.get('[data-cy="search-encounter"]').click();
+    cy.typeIntoField("#encounter-search", patientName);
+    cy.get('[data-cy="search-encounter"]').click();
     return this;
   }
 
-  clickMedicinesTab() {
-    cy.verifyAndClickElement('[data-cy="tab-medicines"]', "Medicines");
-    return this;
-  }
-  clickEditPrescription() {
-    cy.verifyAndClickElement('[data-cy="edit-prescription"]', "Edit");
-    return this;
-  }
-  addMedication(
-    medicineName,
-    dosage,
-    dosageInput,
-    frequency,
-    instructions,
-    route,
-    site,
-    method,
-    notes,
-  ) {
-    cy.clickAndSelectOption(
-      '[data-cy="question-medication-request"]',
-      medicineName,
-    );
-    cy.get('[data-cy="dosage"]').click().type(dosage);
-    cy.clickAndSelectOption('[data-cy="dosage"]', dosageInput);
-    cy.clickAndSelectOption('[data-cy="frequency"]', frequency);
-    cy.clickAndSelectOption('[data-cy="instructions"]', instructions);
-    cy.clickAndSelectOption('[data-cy="route"]', route);
-    cy.clickAndSelectOption('[data-cy="site"]', site);
-    cy.clickAndSelectOption('[data-cy="method"]', method);
-    cy.get('[data-cy="notes"]').click();
-    cy.get('[data-cy="notes-textarea"]').type(notes);
-    return this;
-  }
-  verifyMedication(
-    medicineName,
-    dosage,
-    frequency,
-    instructions,
-    route,
-    site,
-    method,
-    notes,
-  ) {
-    cy.get('[data-cy="medications-table"]').within(() => {
-      cy.contains("td", medicineName).should("exist");
-      cy.contains("td", dosage).should("exist");
-      cy.contains("td", frequency).should("exist");
-      cy.contains("td", instructions).should("exist");
-      cy.contains("td", route).should("exist");
-      cy.contains("td", site).should("exist");
-      cy.contains("td", method).should("exist");
-      cy.contains("td", notes).should("exist");
-    });
-    return this;
-  }
-  removeMedication() {
-    cy.get('[data-cy="remove-medication"]').first().click();
-    cy.verifyAndClickElement('[data-cy="confirm-remove-medication"]', "Remove");
-    return this;
-  }
-  verifyDeletedMedication(
-    medicineName,
-    dosage,
-    frequency,
-    instructions,
-    route,
-    site,
-    method,
-    notes,
-  ) {
-    cy.get('[data-cy="toggle-stopped-medications"]').click();
-    cy.get('[data-cy="medications-table"]').within(() => {
-      cy.contains("td", medicineName).should("exist");
-      cy.contains("td", dosage).should("exist");
-      cy.contains("td", frequency).should("exist");
-      cy.contains("td", instructions).should("exist");
-      cy.contains("td", route).should("exist");
-      cy.contains("td", site).should("exist");
-      cy.contains("td", method).should("exist");
-      cy.contains("td", notes).should("exist");
-    });
-  }
   clickUpdateEncounter() {
     cy.verifyAndClickElement(
       '[data-cy="update-encounter-option"]',
@@ -146,22 +54,6 @@ export class PatientEncounter {
         }
       });
     });
-    return this;
-  }
-
-  submitQuestionnaire() {
-    this.clickSubmitQuestionnaire();
-    this.verifyQuestionnaireSubmission();
-    return this;
-  }
-
-  clickSubmitQuestionnaire() {
-    cy.clickSubmitButton("Submit");
-    return this;
-  }
-
-  verifyQuestionnaireSubmission() {
-    cy.verifyNotification("Questionnaire submitted successfully");
     return this;
   }
 
@@ -219,11 +111,6 @@ export class PatientEncounter {
       expect(interception.request.url).to.include("status=in_progress");
       expect(interception.response.statusCode).to.eq(200);
     });
-    return this;
-  }
-
-  openEncounterNotesTab() {
-    cy.verifyAndClickElement('[data-cy="tab-notes"]', "Notes");
     return this;
   }
 }
