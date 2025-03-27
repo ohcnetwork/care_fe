@@ -341,7 +341,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 )}
                 disabled={!isPastTime || !!administrationRequest.id}
               >
-                <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-calender" className="mr-2 size-4" />
                 {administrationRequest.occurrence_period_start
                   ? format(
                       new Date(administrationRequest.occurrence_period_start),
@@ -403,7 +403,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   administrationRequest.status === "in_progress"
                 }
               >
-                <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-calender" className="mr-2 size-4" />
                 {administrationRequest.occurrence_period_end
                   ? format(
                       new Date(administrationRequest.occurrence_period_end),
