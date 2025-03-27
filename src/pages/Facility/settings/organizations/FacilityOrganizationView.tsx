@@ -21,11 +21,11 @@ import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrgan
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
-import FacilityOrganizationLayout from "./components/FacilityOrganizationLayout";
 
 interface Props {
-  id: string;
+  id?: string;
   facilityId: string;
+  permissions: string[];
 }
 
 function OrganizationCard({
@@ -53,7 +53,7 @@ function OrganizationCard({
               </div>
             </div>
             <Button variant="white" size="sm" className="font-semibold" asChild>
-              <Link href={`/departments/${org.id}/users`}>
+              <Link href={`/departments/${org.id}/departments`}>
                 {t("see_details")}
               </Link>
             </Button>
@@ -64,7 +64,11 @@ function OrganizationCard({
   );
 }
 
-export default function FacilityOrganizationView({ id, facilityId }: Props) {
+export default function FacilityOrganizationView({
+  id,
+  facilityId,
+  permissions,
+}: Props) {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
     limit: 12,
@@ -86,7 +90,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     queryFn: query.debounced(facilityOrganizationApi.list, {
       pathParams: { facilityId },
       queryParams: {
-        parent: id,
+        parent: id || "",
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         limit: resultsPerPage,
         name: qParams.search || undefined,
@@ -94,77 +98,72 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     }),
   });
 
-  return (
-    <FacilityOrganizationLayout id={id} facilityId={facilityId}>
-      {({ facilityPermissions }) => {
-        const { canCreateFacilityOrganization } = getPermissions(
-          hasPermission,
-          facilityPermissions,
-        );
-        return (
-          <div className="space-y-6 mx-auto max-w-4xl">
-            <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
-              <div className="flex flex-col items-start md:flex-row sm:items-center gap-4 w-full lg:justify-between">
-                <div className="w-full lg:w-1/3 relative">
-                  <div className="relative">
-                    <CareIcon
-                      icon="l-search"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
-                    />
-                    <Input
-                      placeholder={t("search_by_department_team_name")}
-                      value={qParams.search || ""}
-                      onChange={(e) => {
-                        updateQuery({ search: e.target.value || undefined });
-                      }}
-                      className="w-full pl-8"
-                    />
-                  </div>
-                </div>
-                <div className="w-auto">
-                  {canCreateFacilityOrganization && (
-                    <CreateFacilityOrganizationSheet
-                      facilityId={facilityId}
-                      parentId={id}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
+  const { canCreateFacilityOrganization } = getPermissions(
+    hasPermission,
+    permissions,
+  );
 
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <CardGridSkeleton count={6} />
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  {children?.results?.length ? (
-                    children.results.map((org) => (
-                      <OrganizationCard
-                        key={org.id}
-                        org={org}
-                        facilityId={facilityId}
-                      />
-                    ))
-                  ) : (
-                    <Card className="col-span-full">
-                      <CardContent className="p-6 text-center text-gray-500">
-                        {t("no_departments_teams_found")}
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-                {children && children.count > resultsPerPage && (
-                  <div className="flex justify-center">
-                    <Pagination totalCount={children.count} />
-                  </div>
-                )}
-              </div>
+  return (
+    <div className="space-y-6 mx-auto max-w-4xl">
+      <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
+        <div className="flex flex-col items-start md:flex-row sm:items-center gap-4 w-full lg:justify-between">
+          <div className="w-full lg:w-1/3 relative">
+            <div className="relative">
+              <CareIcon
+                icon="l-search"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+              />
+              <Input
+                placeholder={t("search_by_department_team_name")}
+                value={qParams.search || ""}
+                onChange={(e) => {
+                  updateQuery({ search: e.target.value || undefined });
+                }}
+                className="w-full pl-8"
+              />
+            </div>
+          </div>
+          <div className="w-auto">
+            {canCreateFacilityOrganization && (
+              <CreateFacilityOrganizationSheet
+                facilityId={facilityId}
+                parentId={id}
+              />
             )}
           </div>
-        );
-      }}
-    </FacilityOrganizationLayout>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <CardGridSkeleton count={4} />
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <div className="space-y-4">
+            {children?.results?.length ? (
+              children.results.map((org) => (
+                <OrganizationCard
+                  key={org.id}
+                  org={org}
+                  facilityId={facilityId}
+                />
+              ))
+            ) : (
+              <Card className="col-span-full">
+                <CardContent className="p-6 text-center text-gray-500">
+                  {t("no_departments_teams_found")}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+          {children && children.count > resultsPerPage && (
+            <div className="flex justify-center">
+              <Pagination totalCount={children.count} />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
