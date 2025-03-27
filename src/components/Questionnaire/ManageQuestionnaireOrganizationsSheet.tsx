@@ -113,7 +113,6 @@ export default function ManageQuestionnaireOrganizationsSheet({
           <Button variant="outline" size="sm">
             <Building className="mr-2 size-4" />
             {t("manage_organization", { count: 0 })}
-
           </Button>
         )}
       </SheetTrigger>
