@@ -38,7 +38,6 @@ interface RelativeDatePickerProps {
 
 const computeTimeUnits = (date?: Date): TimeUnitState => {
   const now = new Date();
-  console.log(date);
   if (!date) {
     return {
       unit: "days",

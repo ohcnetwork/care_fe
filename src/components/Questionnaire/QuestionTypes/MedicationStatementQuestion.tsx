@@ -436,7 +436,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_260px_190px_200px_48px] border-b border-gray-200 hover:bg-gray-50/50",
+        "grid grid-cols-1 gap-1 lg:grid-cols-[300px_180px_170px_250px_260px_190px_200px_48px] border-b border-gray-200 hover:bg-gray-50/50",
         {
           "opacity-40 pointer-events-none":
             medication.status === "entered_in_error",

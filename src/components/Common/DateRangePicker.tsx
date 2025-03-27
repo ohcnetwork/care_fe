@@ -35,9 +35,11 @@ export function DateRangePicker({
           ...prev,
           from: t("start_date_must_be_before_end_date"),
         }));
+        setStartDate(parsedDate);
         return;
+      } else {
+        setErrors((prev) => ({ ...prev, from: undefined }));
       }
-      setErrors((prev) => ({ ...prev, from: undefined }));
       setStartDate(parsedDate);
       onChange?.({ from: parsedDate, to: endDate });
     } else {
@@ -46,17 +48,19 @@ export function DateRangePicker({
           ...prev,
           to: t("end_date_must_be_after_start_date"),
         }));
+        setEndDate(parsedDate);
         return;
+      } else {
+        setErrors((prev) => ({ ...prev, to: undefined }));
       }
-      setErrors((prev) => ({ ...prev, to: undefined }));
       setEndDate(parsedDate);
       onChange?.({ from: startDate, to: parsedDate });
     }
   };
 
   return (
-    <div className={cn("grid gap-2", className)}>
-      <div className="flex items-center gap-2">
+    <div className={cn("grid gap-2 py-2", className)}>
+      <div className="flex flex-col gap-2">
         <Label className="text-gray-700 font-medium">{t("start_date")}</Label>
         <DatePicker
           value={startDate ? startDate : undefined}
@@ -66,7 +70,7 @@ export function DateRangePicker({
           <span className="text-red-500 text-sm">{errors.from}</span>
         )}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2">
         <Label className="text-gray-700 font-medium">{t("end_date")}</Label>
         <DatePicker
           value={endDate ? endDate : undefined}
