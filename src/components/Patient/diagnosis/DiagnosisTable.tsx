@@ -140,7 +140,7 @@ export function DiagnosisTable({
               <div className="flex items-center gap-2">
                 <Avatar
                   name={diagnosis.created_by.username}
-                  className="w-4 h-4"
+                  className="size-4"
                   imageUrl={diagnosis.created_by.profile_picture_url}
                 />
 

@@ -564,7 +564,7 @@ const Login = (props: LoginProps) => {
                                   <InputOTPSlot
                                     key={index}
                                     index={index}
-                                    className="w-10 h-10"
+                                    className="size-10"
                                   />
                                 ))}
                               </InputOTPGroup>

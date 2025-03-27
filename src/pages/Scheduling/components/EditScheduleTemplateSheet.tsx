@@ -222,7 +222,7 @@ const ScheduleTemplateEditor = ({
   }
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow">
+    <div className="rounded-lg bg-white p-4 shadow-sm">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -318,7 +318,7 @@ const ScheduleTemplateEditor = ({
                     }}
                   >
                     {isDeleting ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      <Loader2 className="size-4 animate-spin mr-2" />
                     ) : (
                       t("confirm")
                     )}
@@ -408,7 +408,7 @@ const AvailabilityEditor = ({
   })();
 
   return (
-    <div className="mt-4 rounded-lg bg-white p-4 shadow">
+    <div className="mt-4 rounded-lg bg-white p-4 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />
@@ -458,7 +458,7 @@ const AvailabilityEditor = ({
                 }}
               >
                 {isDeleting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className="size-4 animate-spin mr-2" />
                 ) : (
                   t("confirm")
                 )}
@@ -711,7 +711,7 @@ const NewAvailabilityCard = ({
   };
 
   return (
-    <div className="mt-4 rounded-lg bg-white p-4 shadow">
+    <div className="mt-4 rounded-lg bg-white p-4 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />

@@ -281,7 +281,7 @@ function ResponseCard({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
               {t("print")}
-              <ChevronDown className="ml-2 h-4 w-4" />
+              <ChevronDown className="ml-2 size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -377,7 +377,7 @@ export default function QuestionnaireResponsesList({
               <Card
                 className={cn(
                   "p-6",
-                  isPrintPreview && "shadow-none border-gray",
+                  isPrintPreview && "shadow-none border-gray-200",
                 )}
               >
                 <div className="text-lg font-medium text-gray-500">

@@ -116,7 +116,7 @@ function ConceptFields({
           size="sm"
           onClick={() => append({ code: "", display: "" })}
         >
-          <PlusIcon className="h-4 w-4 mr-2" />
+          <PlusIcon className="size-4 mr-2" />
           Add Concept
         </Button>
       </div>
@@ -168,7 +168,7 @@ function ConceptFields({
             onClick={() => handleVerify(index)}
             disabled={lookupMutation.isPending}
           >
-            <UpdateIcon className="h-4 w-4" />
+            <UpdateIcon className="size-4" />
           </Button>
           <Button
             type="button"
@@ -176,7 +176,7 @@ function ConceptFields({
             size="icon"
             onClick={() => remove(index)}
           >
-            <TrashIcon className="h-4 w-4" />
+            <TrashIcon className="size-4" />
           </Button>
         </div>
       ))}
@@ -207,7 +207,7 @@ function FilterFields({
           size="sm"
           onClick={() => append({ property: "", op: "", value: "" })}
         >
-          <PlusIcon className="h-4 w-4 mr-2" />
+          <PlusIcon className="size-4 mr-2" />
           Add Filter
         </Button>
       </div>
@@ -252,7 +252,7 @@ function FilterFields({
             size="icon"
             onClick={() => remove(index)}
           >
-            <TrashIcon className="h-4 w-4" />
+            <TrashIcon className="size-4" />
           </Button>
         </div>
       ))}
@@ -290,7 +290,7 @@ function RuleFields({
             })
           }
         >
-          <PlusIcon className="h-4 w-4 mr-2" />
+          <PlusIcon className="size-4 mr-2" />
           Add Rule
         </Button>
       </CardHeader>
@@ -333,7 +333,7 @@ function RuleFields({
                 size="icon"
                 onClick={() => remove(index)}
               >
-                <TrashIcon className="h-4 w-4" />
+                <TrashIcon className="size-4" />
               </Button>
             </div>
             <ConceptFields nestIndex={index} type={type} parentForm={form} />

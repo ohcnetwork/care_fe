@@ -1,5 +1,5 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
-import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
+import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 import {
   hashKey,
   useMutation,
@@ -137,7 +137,7 @@ export default function ExcalidrawEditor({
           <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-500 text-gray-50 shadow-sm hover:bg-red-500/90"
+              className="bg-red-500 text-gray-50 shadow-xs hover:bg-red-500/90"
               onClick={() => {
                 setIsAlertOpen(false);
                 navigate("../drawings");

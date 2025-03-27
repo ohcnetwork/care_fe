@@ -81,7 +81,7 @@ export function DateQuestion({
             )}
             disabled={disabled}
           >
-            <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-calender" className="mr-2 size-4" />
             {currentValue ? format(currentValue, "PPP") : t("pick_a_date")}
           </Button>
         </PopoverTrigger>
