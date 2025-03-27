@@ -392,12 +392,14 @@ export const FilesTab = (props: FilesTabProps) => {
         <DropdownMenuContent
           align="end"
           className="w-[calc(100vw-2.5rem)] sm:w-full"
+          data-cy="file-upload-dropdown"
         >
           <DropdownMenuItem
             className="flex flex-row items-center"
             onSelect={(e) => {
               e.preventDefault();
             }}
+            data-cy="choose-file-option"
           >
             <Label
               htmlFor={`file_upload_${type}`}

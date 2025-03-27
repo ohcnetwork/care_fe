@@ -47,6 +47,7 @@ export function FacilityNavUser({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              data-cy="user-menu-dropdown"
             >
               {open && (
                 <>
@@ -99,6 +100,7 @@ export function FacilityNavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
+                data-cy="user-menu-profile"
                 onClick={() => {
                   const profileUrl = selectedFacilityId
                     ? `/facility/${selectedFacilityId}/users/${user.username}`
@@ -111,7 +113,7 @@ export function FacilityNavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut}>
+            <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
               <LogOut />
               {t("logout")}
             </DropdownMenuItem>
@@ -139,6 +141,7 @@ export function PatientNavUser() {
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              data-cy="user-menu-dropdown"
             >
               {open && (
                 <>
@@ -190,7 +193,7 @@ export function PatientNavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut}>
+            <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
               <LogOut />
               {t("logout")}
             </DropdownMenuItem>

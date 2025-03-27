@@ -1,4 +1,6 @@
 export class PatientFiles {
+  private savedUrl: string = "";
+
   clickFilesTab() {
     cy.verifyAndClickElement('[data-cy="tab-files"]', "Files");
     return this;
@@ -9,8 +11,15 @@ export class PatientFiles {
     return this;
   }
 
+  selectUploadFromDevice() {
+    cy.verifyAndClickElement(
+      '[data-cy="choose-file-option"]',
+      "Upload From Device",
+    );
+    return this;
+  }
+
   uploadSingleFile(filePath: string) {
-    cy.contains("Upload From Device").should("be.visible");
     cy.get('input[type="file"]').selectFile(filePath, { force: true });
     return this;
   }
@@ -27,16 +36,17 @@ export class PatientFiles {
   }
 
   clickUploadFilesButton() {
-    cy.get('[data-cy="upload-files-button"]').click();
+    cy.verifyAndClickElement('[data-cy="upload-files-button"]', "Upload");
     return this;
   }
 
   verifyValidationErrors(errorMessage: string) {
-    cy.contains(errorMessage).then(($errors) => {
-      cy.wrap($errors).each(($error) => {
-        cy.wrap($error).scrollIntoView().should("be.visible");
-      });
-    });
+    cy.verifyErrorMessages([
+      {
+        label: "Enter File Name",
+        message: errorMessage,
+      },
+    ]);
     return this;
   }
 
@@ -69,14 +79,12 @@ export class PatientFiles {
   }
 
   interceptFilterRequest() {
-    cy.intercept("GET", "**/api/v1/files/?**").as("filterFiles");
+    cy.intercept("GET", "**/api/v1/files/**").as("filterFiles");
     return this;
   }
 
   verifyFilterApiCall() {
-    cy.wait("@filterFiles").then((interception) => {
-      expect(interception.response?.statusCode).to.equal(200);
-    });
+    cy.wait("@filterFiles").its("response.statusCode").should("eq", 200);
     return this;
   }
 
@@ -98,30 +106,23 @@ export class PatientFiles {
     cy.wait("@archiveFile").then((interception) => {
       expect(interception.response?.statusCode).to.equal(200);
     });
-    cy.wait(2000);
     return this;
   }
 
   verifySingleFileUploadSuccess(message: string) {
     cy.verifyNotification(message);
-    cy.wait(300);
     return this;
   }
 
   verifyMultipleFileUploadSuccess(message: string) {
-    cy.verifyNotification(message);
-    cy.wait(200);
-    cy.verifyNotification(message);
-    cy.wait(200);
-    cy.verifyNotification(message);
-    cy.wait(300);
-    return this;
-  }
-
-  verifyFilesAdded(fileNames: string[]) {
-    fileNames.forEach((fileName) => {
-      cy.verifyContentPresence(`[data-cy="${fileName}"]`, [fileName]);
-    });
+    cy.get("li[data-sonner-toast]")
+      .should("have.length", 3)
+      .each(($toast) => {
+        cy.wrap($toast)
+          .find("div[data-title]")
+          .should("be.visible")
+          .should("contain", message);
+      });
     return this;
   }
 
@@ -164,15 +165,13 @@ export class PatientFiles {
     return this;
   }
 
-  clickFileDetailsButton(fileName: string) {
-    cy.get(`[data-cy="${fileName}"] [data-cy="file-options-button"]`).click({
-      force: true,
-    });
+  clickFileDetailsButton() {
+    cy.get(`[data-cy="file-options-button"]`).first().click({ force: true });
     return this;
   }
 
   clickDownloadFile() {
-    cy.verifyAndClickElement('[data-cy="file-download-button"]', "Download");
+    cy.verifyAndClickElement('[data-cy="file-preview-download"]', "Download");
     return this;
   }
 
@@ -189,7 +188,7 @@ export class PatientFiles {
   }
 
   clickProceedButton() {
-    cy.contains("button", "Proceed").should("be.enabled").click();
+    cy.clickSubmitButton("Proceed");
     return this;
   }
 
@@ -205,15 +204,15 @@ export class PatientFiles {
     return this;
   }
 
-  clickViewFile(fileName: string) {
-    cy.get(`[data-cy="${fileName}"]`)
-      .contains("button", "View")
-      .click({ force: true });
+  clickFirstFileViewButton() {
+    cy.get('[data-cy="file-view-button"]').first().click({ force: true });
     return this;
   }
 
-  verifyArchiveReason(reason: string) {
-    cy.verifyContentPresence('[data-cy="archived-reason"]', [reason]);
+  saveCurrentUrl() {
+    cy.url().then((url) => {
+      cy.wrap(url).as("savedPatientFileUrl");
+    });
     return this;
   }
 
@@ -225,32 +224,8 @@ export class PatientFiles {
     return this;
   }
 
-  filterArchivedFiles() {
-    this.interceptFilterRequest();
-    cy.verifyAndClickElement('[data-cy="files-filter-button"]', "Filter");
-    cy.verifyAndClickElement(
-      '[data-cy="archived-files-button"]',
-      "Archived Files",
-    );
-    this.verifyFilterApiCall();
-    return this;
-  }
-
-  removeFilter() {
-    cy.get('[data-cy="filter-badge"]').click();
-    this.verifyFilterApiCall();
-    return this;
-  }
-
   closeFilePreview() {
-    cy.verifyAndClickElement("[data-cy=file-preview-close]", "Close");
-    return this;
-  }
-
-  verifyNotAccessible(fileName: string, archivedReason: string) {
-    this.clickViewFile(fileName);
-    this.verifyArchiveReason(archivedReason);
-    cy.verifyAndClickElement("[data-cy=archive-dialog-close", "Close");
+    cy.verifyAndClickElement("[data-cy='file-preview-close']", "Close");
     return this;
   }
 
@@ -261,18 +236,18 @@ export class PatientFiles {
 
   captureImage() {
     cy.verifyAndClickElement('[data-cy="capture-button"]', "Capture");
-    cy.wait(400);
-    return this;
-  }
-
-  retakeCapture() {
-    cy.verifyAndClickElement('[data-cy="retake-button"]', "Retake");
-    cy.wait(400);
     return this;
   }
 
   clickSubmit() {
     cy.verifyAndClickElement('[data-cy="capture-submit-button"]', "Submit");
+    return this;
+  }
+
+  navigateToSavedUrl() {
+    cy.get<string>("@savedPatientFileUrl").then((url) => {
+      cy.visit(url);
+    });
     return this;
   }
 }

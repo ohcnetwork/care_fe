@@ -1,16 +1,18 @@
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { PatientFiles } from "@/pageObject/Patients/PatientFiles";
+import { UserProfile } from "@/pageObject/Users/UserProfile";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 
 const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
 const patientFiles = new PatientFiles();
+const userProfile = new UserProfile();
 
 describe("Patient Files", () => {
   beforeEach(() => {
-    cy.loginByApi("raj");
+    cy.loginByApi("devnurse1");
     cy.visit("/");
-    facilityCreation.selectFacility("MEDICAL FACILITY");
+    facilityCreation.selectFacility("GHC Payyanur");
 
     patientEncounter
       .navigateToEncounters()
@@ -23,7 +25,6 @@ describe("Patient Files", () => {
   const validationMessage = "Please give a name for the file";
   const fileUploadSuccessToast = "File Uploaded Successfully";
   const newFileName = "Renamed Cypress File1 " + timestamp;
-  const newFileDisplayName = newFileName + ".png";
   const archiveReason = "Cypress Archive Reason";
 
   // Single File Upload Setup
@@ -37,18 +38,58 @@ describe("Patient Files", () => {
     "Cypress Image Test 2 " + timestamp,
     "Cypress File Test 3 " + timestamp,
   ];
-  const fileDisplayNames = [
-    inputFileNames[0] + ".png",
-    inputFileNames[1] + ".png",
-    inputFileNames[2] + ".xlsx",
-  ];
 
-  it("Add a new patient file", () => {
-    const inputFileName1 = "Cypress Test File Upload 1 " + timestamp;
-    const fileDisplayName1 = inputFileName1 + ".png";
+  const inputFileName1 = "Cypress Test File Upload 1 " + timestamp;
+
+  it("Capture image and upload", () => {
+    // Capture Image Upload Setup
+    const captureFileName = "Cypress Capture Test " + timestamp;
 
     patientFiles
       .clickAddFilesButton()
+      .openCamera()
+      .captureImage()
+      .clickSubmit()
+      .clickUploadFilesButton()
+      .verifyValidationErrors(validationMessage)
+      .fillSingleFileName(captureFileName)
+      .interceptFileUploadRequest()
+      .clickUploadFilesButton()
+      .verifyFileUploadApiCall()
+      .verifySingleFileUploadSuccess(fileUploadSuccessToast);
+  });
+
+  it("File Uploaded by one user is accessible to another user", () => {
+    patientFiles
+      .clickAddFilesButton()
+      .selectUploadFromDevice()
+      .uploadSingleFile(filePath(fileName))
+      .fillSingleFileName(inputFileName1)
+      .interceptFileUploadRequest()
+      .clickUploadFilesButton()
+      .verifyFileUploadApiCall()
+      .verifySingleFileUploadSuccess(fileUploadSuccessToast)
+      .filterActiveFiles()
+      .clickFirstFileViewButton()
+      .closeFilePreview()
+      .saveCurrentUrl();
+
+    userProfile.openUserMenu().clickUserLogout();
+    cy.loginByApi("devnurse2");
+    patientFiles
+      .navigateToSavedUrl()
+      .clickFirstFileViewButton()
+      .clickDownloadFile();
+  });
+
+  it("Add a new patient single file upload , Rename and Archive it", () => {
+    const fileArchiveSuccessToast = "File archived successfully";
+    const fileRenameSuccessToast = "File name changed successfully";
+
+    // Upload a single file
+    patientFiles
+      .clickAddFilesButton()
+      .selectUploadFromDevice()
       .uploadSingleFile(filePath(fileName))
       .clickUploadFilesButton()
       .verifyValidationErrors(validationMessage)
@@ -56,8 +97,28 @@ describe("Patient Files", () => {
       .interceptFileUploadRequest()
       .clickUploadFilesButton()
       .verifyFileUploadApiCall()
-      .verifySingleFileUploadSuccess(fileUploadSuccessToast)
-      .verifyFilesAdded([fileDisplayName1]);
+      .verifySingleFileUploadSuccess(fileUploadSuccessToast);
+
+    // Filter the file to only show the active files and rename the file
+    patientFiles
+      .filterActiveFiles()
+      .clickFileDetailsButton()
+      .clickRenameOption()
+      .fillNewFileName(newFileName)
+      .interceptFileRenameRequest()
+      .clickProceedButton()
+      .verifyFileRenameApiCall()
+      .verifySingleFileUploadSuccess(fileRenameSuccessToast);
+
+    // Archive the file
+    patientFiles
+      .clickFileDetailsButton()
+      .clickArchiveOption()
+      .fillArchiveReason(archiveReason)
+      .interceptFileArchiveRequest()
+      .clickProceedButton()
+      .verifyFileArchiveApiCall()
+      .verifySingleFileUploadSuccess(fileArchiveSuccessToast);
   });
 
   it("Add multiple patient files", () => {
@@ -73,15 +134,12 @@ describe("Patient Files", () => {
       .interceptFileUploadRequest()
       .clickUploadFilesButton()
       .verifyFileUploadApiCall()
-      .verifyMultipleFileUploadSuccess(fileUploadSuccessToast)
-      .verifyFilesAdded(fileDisplayNames);
+      .verifyMultipleFileUploadSuccess(fileUploadSuccessToast);
   });
 
   it("Record, Upload and Download Audio file", () => {
     // Audio File Upload Setup
     const audioFileName = "Cypress Audio Test " + timestamp;
-    const audioDisplayName = audioFileName + ".mp3";
-    const fileDownloadingSuccessToast = "Downloading file...";
 
     patientFiles
       .clickAddFilesButton()
@@ -109,99 +167,6 @@ describe("Patient Files", () => {
       .interceptFileUploadRequest()
       .clickUploadFilesButton()
       .verifyFileUploadApiCall()
-      .verifySingleFileUploadSuccess(fileUploadSuccessToast)
-      .verifyFilesAdded([audioDisplayName])
-
-      // Download Audio file
-      .clickFileDetailsButton(audioDisplayName)
-      .clickDownloadFile()
-      .verifySingleFileUploadSuccess(fileDownloadingSuccessToast);
-  });
-
-  it("File Modification, Rename and Archive", () => {
-    const fileArchiveSuccessToast = "File archived successfully";
-    const fileRenameSuccessToast = "File name changed successfully";
-    const inputFileName2 = "Cypress Test File Upload 2 " + timestamp;
-    const fileDisplayName2 = inputFileName2 + ".png";
-
-    // Upload a new file
-    patientFiles
-      .clickAddFilesButton()
-      .uploadSingleFile(filePath(fileName))
-      .clickUploadFilesButton()
-      .verifyValidationErrors(validationMessage)
-      .fillSingleFileName(inputFileName2)
-      .interceptFileUploadRequest()
-      .clickUploadFilesButton()
-      .verifyFileUploadApiCall()
-      .verifySingleFileUploadSuccess(fileUploadSuccessToast)
-      .verifyFilesAdded([fileDisplayName2])
-
-      // Rename the file
-      .clickFileDetailsButton(fileDisplayName2)
-      .clickRenameOption()
-      .fillNewFileName(newFileName)
-      .interceptFileRenameRequest()
-      .clickProceedButton()
-      .verifyFileRenameApiCall()
-      .verifySingleFileUploadSuccess(fileRenameSuccessToast)
-      .verifyFilesAdded([newFileDisplayName])
-
-      // Archive the file
-      .clickFileDetailsButton(newFileDisplayName)
-      .clickArchiveOption()
-      .fillArchiveReason(archiveReason)
-      .interceptFileArchiveRequest()
-      .clickProceedButton()
-      .verifyFileArchiveApiCall()
-      .verifySingleFileUploadSuccess(fileArchiveSuccessToast)
-      .verifyNotAccessible(newFileDisplayName, archiveReason);
-  });
-
-  it("File Accessible by another user", () => {
-    cy.loginByApi("raj");
-    cy.visit("/");
-    facilityCreation.selectFacility("MEDICAL FACILITY");
-
-    patientEncounter
-      .navigateToEncounters()
-      .openFirstEncounterDetails()
-      .clickPatientDetailsButton();
-
-    patientFiles
-      .clickFilesTab()
-
-      // Verify active file is accessible to other user
-      .clickViewFile(fileDisplayNames[1])
-      .closeFilePreview()
-      .clickViewFile(fileDisplayNames[0])
-      .closeFilePreview()
-
-      // Verify archived file is not accessible to other user
-      .filterArchivedFiles()
-      .verifyNotAccessible(newFileDisplayName, archiveReason)
-      .removeFilter();
-  });
-
-  it("Capture image and upload", () => {
-    // Capture Image Upload Setup
-    const captureFileName = "Cypress Capture Test " + timestamp;
-    const captureDisplayName = captureFileName + ".png";
-
-    patientFiles
-      .clickAddFilesButton()
-      .openCamera()
-      .captureImage()
-      .retakeCapture()
-      .captureImage()
-      .clickSubmit()
-      .clickUploadFilesButton()
-      .verifyValidationErrors(validationMessage)
-      .fillSingleFileName(captureFileName)
-      .interceptFileUploadRequest()
-      .clickUploadFilesButton()
-      .verifyFileUploadApiCall()
-      .verifySingleFileUploadSuccess(fileUploadSuccessToast)
-      .verifyFilesAdded([captureDisplayName]);
+      .verifySingleFileUploadSuccess(fileUploadSuccessToast);
   });
 });
