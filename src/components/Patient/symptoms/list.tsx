@@ -72,7 +72,7 @@ export function SymptomsList({
         encounterId={encounterId}
         readOnly={readOnly}
         count={0}
-        isExpanded={isExpanded}
+        isExpanded={false}
         onToggle={() => setIsExpanded(!isExpanded)}
       >
         <></>
@@ -142,14 +142,15 @@ const SymptomListLayout = ({
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
-      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
+      <CardHeader
+        className={cn(
+          "flex justify-between flex-row px-4 pt-4 pb-2",
+          count !== 0 && "cursor-pointer",
+        )}
+        onClick={onToggle}
+      >
         <div className="flex items-center">
-          <Button
-            size="icon"
-            variant="link"
-            onClick={onToggle}
-            disabled={count == 0}
-          >
+          <Button size="icon" variant="link" disabled={count == 0}>
             {count > 0 && isExpanded ? (
               <CareIcon icon="l-angle-down" className="h-6 w-6" />
             ) : (
