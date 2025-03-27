@@ -17,10 +17,7 @@ export class PatientNotes {
 
   // **4️⃣ Message Handling**
   typeMessage(message: string) {
-    cy.get('[data-cy="encounter-notes-chat-message-input"]')
-      .should("be.visible")
-      .clear()
-      .type(message);
+    cy.typeIntoField('[data-cy="encounter-notes-chat-message-input"]', message);
     return this;
   }
 
