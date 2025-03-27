@@ -228,10 +228,10 @@ export function QuestionInput({
                 variant="ghost"
                 size="icon"
                 onClick={() => removeValue(index)}
-                className="h-10 w-10"
+                className="size-10"
                 disabled={disabled}
               >
-                <CareIcon icon="l-trash" className="h-4 w-4" />
+                <CareIcon icon="l-trash" className="size-4" />
               </Button>
             );
 
@@ -293,7 +293,7 @@ export function QuestionInput({
               className=""
               disabled={disabled}
             >
-              <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-plus" className="mr-2 size-4" />
               {t("add_another")}
             </Button>
             <NotesInput

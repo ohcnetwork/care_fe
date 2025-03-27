@@ -82,7 +82,7 @@ const threadTemplates = [
 // Info tooltip component for help text
 const InfoTooltip = ({ content }: { content: string }) => (
   <TooltipComponent content={content}>
-    <Info className="h-4 w-4 text-gray-500 hover:text-primary cursor-help" />
+    <Info className="size-4 text-gray-500 hover:text-primary cursor-help" />
   </TooltipComponent>
 );
 
@@ -98,7 +98,7 @@ const ThreadItem = ({
 }) => (
   <button
     className={cn(
-      "group relative w-full p-4 text-left rounded-lg transition-colors border ",
+      "group relative w-full p-4 text-left rounded-lg transition-colors border",
       isSelected
         ? "bg-primary-100 hover:bg-primary/15 border-primary"
         : "hover:bg-gray-100 hover:border-gray-200",
@@ -150,7 +150,7 @@ const MessageItem = forwardRef<HTMLDivElement, { message: Message }>(
                 <Avatar
                   name={message.created_by?.username}
                   imageUrl={message.created_by?.profile_picture_url}
-                  className="w-8 h-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
+                  className="size-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
                 />
               </span>
             </Link>
@@ -269,9 +269,9 @@ const NewThreadDialog = ({
             disabled={!title.trim() || isCreating}
           >
             {isCreating ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <Loader2 className="size-4 animate-spin mr-2" />
             ) : (
-              <MessageSquarePlus className="h-4 w-4 mr-2" />
+              <MessageSquarePlus className="size-4 mr-2" />
             )}
             {t("create")}
           </Button>
@@ -291,14 +291,14 @@ const MobileNav = ({
   onOpenThreads: () => void;
   onNewThread: () => void;
 }) => (
-  <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t bg-white p-2 flex items-center justify-around z-50 divide-x">
+  <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-50 divide-x">
     <Button
       variant="ghost"
       size="sm"
       onClick={onOpenThreads}
       className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
     >
-      <MessageCircle className="h-5 w-5" />
+      <MessageCircle className="size-5" />
       <span className="text-xs">Threads ({threadsCount})</span>
     </Button>
     <Button
@@ -307,7 +307,7 @@ const MobileNav = ({
       onClick={onNewThread}
       className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
     >
-      <MessageSquarePlus className="h-5 w-5" />
+      <MessageSquarePlus className="size-5" />
       <span className="text-xs">New Thread</span>
     </Button>
   </div>
@@ -477,11 +477,11 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   return (
     <div className="flex h-[calc(100vh-12rem)]">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r">
-        <div className="p-4 border-b">
+      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
+        <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <MessageCircle className="h-4 w-4 text-primary" />
+              <MessageCircle className="size-4 text-primary" />
               <h3 className="text-sm font-medium">
                 {t("encounter_notes__discussions")}
               </h3>
@@ -493,7 +493,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                 onClick={() => setShowNewThreadDialog(true)}
                 className="h-8"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="size-4" />
                 {t("encounter_notes__new")}
               </Button>
             )}
@@ -504,7 +504,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
           <div className="space-y-2 p-4">
             {threadsData?.results.length === 0 ? (
               <div className="text-center py-6">
-                <MessageSquarePlus className="h-8 w-8 text-primary mx-auto mb-3" />
+                <MessageSquarePlus className="size-8 text-primary mx-auto mb-3" />
                 <p className="text-sm text-gray-500">
                   {t("encounter_notes__no_discussions")}
                 </p>
@@ -531,10 +531,10 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
           </SheetDescription>
           <SheetTitle className="sr-only">{t("encounter")}</SheetTitle>
           <div className="flex flex-col h-full">
-            <div className="p-4 border-b">
+            <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="h-4 w-4 text-primary" />
+                  <MessageCircle className="size-4 text-primary" />
                   <h3 className="text-sm font-medium">
                     {t("encounter_notes__all_discussions")}
                   </h3>
@@ -548,7 +548,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                   }}
                   className="h-8 hidden lg:block"
                 >
-                  <MessageSquarePlus className="h-4 w-4 mr-2" />
+                  <MessageSquarePlus className="size-4 mr-2" />
                   {t("encounter_notes__new")}
                 </Button>
               </div>
@@ -558,7 +558,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
               <div className="space-y-2 p-4">
                 {threadsData?.results.length === 0 ? (
                   <div className="text-center py-6">
-                    <MessageSquarePlus className="h-8 w-8 text-primary mx-auto mb-3" />
+                    <MessageSquarePlus className="size-8 text-primary mx-auto mb-3" />
                     <p className="text-sm text-gray-500">
                       {t("encounter_notes__no_discussions")}
                     </p>
@@ -586,7 +586,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       <div className="flex-1 min-w-0">
         <div className="flex flex-col h-full pb-[60px] lg:pb-0">
           {/* Header */}
-          <div className="p-4 border-b sticky top-0 z-10">
+          <div className="p-4 border-b border-gray-200 sticky top-0 z-10">
             {selectedThread ? (
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-medium truncate flex-1">
@@ -600,11 +600,11 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                   ${t("messages")}: ${totalMessages}`}
                 >
                   <div className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-                    <Users className="h-4 w-4" />
+                    <Users className="size-4" />
                     <span>
                       {new Set(messages.map((m) => m.created_by.id)).size}
                     </span>
-                    <MessageSquare className="h-4 w-4 ml-3" />
+                    <MessageSquare className="size-4 ml-3" />
                     <span>{totalMessages}</span>
                   </div>
                 </TooltipComponent>
@@ -631,7 +631,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                       <div ref={messagesEndRef} />
                       {messages.length === 0 ? (
                         <div className="text-center py-8">
-                          <MessageSquarePlus className="h-8 w-8 text-primary mx-auto mb-4" />
+                          <MessageSquarePlus className="size-8 text-primary mx-auto mb-4" />
                           <p className="text-sm font-medium">
                             {t("encounter_notes__start_conversation")}
                           </p>
@@ -665,7 +665,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                   </ScrollArea>
                   {/* Message Input */}
                   {canWriteCurrentEncounter && (
-                    <div className="border-t p-4 sticky bottom-0">
+                    <div className="border-t border-gray-200 p-4 sticky bottom-0">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
@@ -689,12 +689,12 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                               !newMessage.trim() ||
                               createMessageMutation.isPending
                             }
-                            className="h-10 w-10 shrink-0"
+                            className="size-10 shrink-0"
                           >
                             {createMessageMutation.isPending ? (
-                              <Loader2 className="h-5 w-5 animate-spin" />
+                              <Loader2 className="size-5 animate-spin" />
                             ) : (
-                              <Send className="h-5 w-5" />
+                              <Send className="size-5" />
                             )}
                           </Button>
                         </div>
@@ -706,7 +706,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-              <MessageSquarePlus className="h-12 w-12 text-primary mb-4" />
+              <MessageSquarePlus className="size-12 text-primary mb-4" />
               <h3 className="text-lg font-medium mb-2">
                 {t("encounter_notes__welcome")}
               </h3>
@@ -718,7 +718,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                 className="shadow-lg"
                 disabled={!canWriteCurrentEncounter}
               >
-                <MessageSquarePlus className="h-5 w-5 mr-2" />
+                <MessageSquarePlus className="size-5 mr-2" />
                 {t("encounter_notes__start_new_discussion")}
               </Button>
               {!canWriteCurrentEncounter && (

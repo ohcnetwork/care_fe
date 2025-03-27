@@ -271,7 +271,7 @@ const AvatarEditModal = ({
                       fill="none"
                       viewBox="0 0 48 48"
                       aria-hidden="true"
-                      className={`h-12 w-12 stroke-[2px] ${
+                      className={`size-12 stroke-[2px] ${
                         isDragging
                           ? "text-green-500"
                           : dragProps.dragOver

@@ -77,7 +77,7 @@ export default function ValueSetSelect({
     <Command filter={() => 1}>
       <CommandInput
         placeholder={t("value_set_search_placeholder")}
-        className="outline-none border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none"
         onValueChange={setSearch}
         autoFocus
       />
