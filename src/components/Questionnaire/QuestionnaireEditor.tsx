@@ -6,12 +6,10 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   SquarePenIcon,
-  Tags,
   ViewIcon,
 } from "lucide-react";
-import { Building, X } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -67,21 +65,15 @@ import {
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
 } from "@/types/questionnaire/question";
-import {
-  QuestionStatus,
-  QuestionnaireDetail,
-  SubjectType,
-} from "@/types/questionnaire/questionnaire";
+import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 import { ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
-import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import { CodingEditor } from "./CodingEditor";
-import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
-import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
+import { QuestionnaireProperties } from "./QuestionnaireProperties";
 
 interface QuestionnaireEditorProps {
   id?: string;
@@ -90,364 +82,6 @@ interface Organization {
   id: string;
   name: string;
   description?: string;
-}
-
-interface OrganizationResponse {
-  results: Organization[];
-}
-
-interface TagResponse {
-  results: QuestionnaireTagModel[];
-}
-
-interface QuestionnairePropertiesProps {
-  questionnaire: QuestionnaireDetail;
-  updateQuestionnaireField: <K extends keyof QuestionnaireDetail>(
-    field: K,
-    value: QuestionnaireDetail[K],
-  ) => void;
-  id?: string;
-  organizations?: OrganizationResponse;
-  organizationSelection: {
-    selectedIds: string[];
-    onToggle: (orgId: string) => void;
-    searchQuery: string;
-    setSearchQuery: (query: string) => void;
-    available?: OrganizationResponse;
-    isLoading?: boolean;
-  };
-  tags?: QuestionnaireTagModel[];
-  tagSelection: {
-    selectedIds: string[];
-    onToggle: (tagId: string) => void;
-    searchQuery: string;
-    setSearchQuery: (query: string) => void;
-    available?: TagResponse;
-    isLoading?: boolean;
-  };
-}
-
-function StatusSelector({
-  value,
-  onChange,
-}: {
-  value: QuestionStatus;
-  onChange: (value: QuestionStatus) => void;
-}) {
-  return (
-    <div className="space-y-2 w-fit">
-      <Label htmlFor="status">{t("status")}</Label>
-      <RadioGroup
-        value={value}
-        onValueChange={onChange}
-        className="flex items-center gap-0 border border-gray-300 divide-x rounded-md bg-white [&>div:has([data-state=checked])]:text-primary-500 [&>div:has([data-state=checked])]:bg-primary-200"
-      >
-        {["active", "draft", "retired"].map((status) => (
-          <div
-            key={status}
-            className={cn(
-              "flex items-center px-2 py-1 space-x-2",
-              status === "active" && "rounded-l-md",
-              status === "retired" && "rounded-r-md",
-            )}
-          >
-            <RadioGroupItem value={status} id={`status-${status}`} />
-            <Label
-              htmlFor={`status-${status}`}
-              className="text-sm font-normal text-gray-950"
-            >
-              {t(status)}
-            </Label>
-          </div>
-        ))}
-      </RadioGroup>
-    </div>
-  );
-}
-
-function SubjectTypeSelector({
-  value,
-  onChange,
-}: {
-  value: SubjectType;
-  onChange: (value: SubjectType) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor="subject_type">{t("subject_type")}</Label>
-      <RadioGroup
-        value={value}
-        onValueChange={onChange}
-        className="flex w-fit items-center gap-0 border border-gray-300 divide-x rounded-md bg-white [&>div:has([data-state=checked])]:bg-primary-200"
-      >
-        {[
-          { value: "patient", label: "patient" },
-          { value: "encounter", label: "encounter" },
-        ].map((type) => (
-          <div
-            key={type.value}
-            className={cn(
-              "flex items-center px-2 py-1 space-x-2",
-              type.value === "patient" && "rounded-l-md",
-              type.value === "encounter" && "rounded-r-md",
-            )}
-          >
-            <RadioGroupItem
-              value={type.value}
-              id={`subject-type-${type.value}`}
-            />
-            <Label
-              htmlFor={`subject-type-${type.value}`}
-              className="text-sm font-normal text-gray-950"
-            >
-              {t(type.label)}
-            </Label>
-          </div>
-        ))}
-      </RadioGroup>
-    </div>
-  );
-}
-
-function OrganizationSelector({
-  id,
-  organizations,
-  selection,
-}: {
-  id?: string;
-  organizations?: OrganizationResponse;
-  selection: QuestionnairePropertiesProps["organizationSelection"];
-}) {
-  if (id) {
-    return (
-      <>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {organizations?.results.map((org) => (
-            <Badge
-              key={org.id}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              <Building className="h-3 w-3" />
-              {org.name}
-            </Badge>
-          ))}
-          {(!organizations?.results || organizations.results.length === 0) && (
-            <p className="text-sm text-gray-500">
-              {t("no_organizations_selected")}
-            </p>
-          )}
-        </div>
-        <ManageQuestionnaireOrganizationsSheet
-          questionnaireId={id}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <Building className="mr-2 h-4 w-4" />
-              {t("manage_organization_one")}
-            </Button>
-          }
-        />
-      </>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {selection.selectedIds.length > 0 ? (
-          selection.available?.results
-            .filter((org) => selection.selectedIds.includes(org.id))
-            .map((org) => (
-              <Badge
-                key={org.id}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {org.name}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => selection.onToggle(org.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))
-        ) : (
-          <p className="text-sm text-gray-500">
-            {t("no_organizations_selected")}
-          </p>
-        )}
-      </div>
-
-      <Autocomplete
-        options={(selection.available?.results ?? []).map((org) => ({
-          label: org.name,
-          value: org.id,
-          description: org.description,
-        }))}
-        value=""
-        onChange={selection.onToggle}
-        onSearch={selection.setSearchQuery}
-        placeholder={t("select_organizations")}
-        isLoading={selection.isLoading}
-        noOptionsMessage={t("no_organizations_found")}
-      />
-    </div>
-  );
-}
-
-function TagSelector({
-  id,
-  selection,
-  questionnaire,
-}: {
-  id?: string;
-  selection: QuestionnairePropertiesProps["tagSelection"];
-  questionnaire: QuestionnaireDetail;
-}) {
-  if (id) {
-    return (
-      <>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {questionnaire.tags.map((tag) => (
-            <Badge
-              key={tag.id}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              <Building className="h-3 w-3" />
-              {tag.name}
-            </Badge>
-          ))}
-          {questionnaire.tags.length === 0 && (
-            <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
-          )}
-        </div>
-        <ManageQuestionnaireTagsSheet
-          questionnaire={questionnaire}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <Tags className="mr-2 h-4 w-4" />
-              {t("manage_tags")}
-            </Button>
-          }
-        />
-      </>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {selection.selectedIds.length > 0 ? (
-          selection.available?.results
-            .filter((tag) => selection.selectedIds.includes(tag.id))
-            .map((tag) => (
-              <Badge
-                key={tag.id}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {tag.name}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => selection.onToggle(tag.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))
-        ) : (
-          <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
-        )}
-      </div>
-
-      <Autocomplete
-        options={(selection.available?.results ?? []).map((tag) => ({
-          label: tag.name,
-          value: tag.id,
-        }))}
-        value=""
-        onChange={selection.onToggle}
-        onSearch={selection.setSearchQuery}
-        placeholder={t("select_tags")}
-        isLoading={selection.isLoading}
-        noOptionsMessage={t("no_tags_found")}
-      />
-    </div>
-  );
-}
-
-function QuestionnaireProperties({
-  questionnaire,
-  updateQuestionnaireField,
-  id,
-  organizations,
-  organizationSelection,
-  tagSelection,
-}: QuestionnairePropertiesProps) {
-  return (
-    <Card className="border-none bg-transparent shadow-none space-y-4 mt-2 ml-2">
-      <CardHeader className="p-0">
-        <CardTitle>{t("properties")}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6 p-0">
-        <StatusSelector
-          value={questionnaire.status}
-          onChange={(val) => updateQuestionnaireField("status", val)}
-        />
-
-        <SubjectTypeSelector
-          value={questionnaire.subject_type}
-          onChange={(val) => updateQuestionnaireField("subject_type", val)}
-        />
-
-        <div className="space-y-2">
-          <Label>
-            {t("organizations")} <span className="text-red-500">*</span>
-          </Label>
-          <OrganizationSelector
-            id={id}
-            organizations={organizations}
-            selection={organizationSelection}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{t("tags")}</Label>
-          <TagSelector
-            id={id}
-            selection={tagSelection}
-            questionnaire={questionnaire}
-          />
-        </div>
-        <CloneQuestionnaireSheet
-          questionnaire={questionnaire}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
-              {t("clone_questionnaire")}
-            </Button>
-          }
-        />
-
-        <div className="space-y-2">
-          <Label htmlFor="version">{t("version")}</Label>
-          <Input
-            id="version"
-            value={questionnaire.version || "0.0.1"}
-            disabled={true}
-            onChange={(e) =>
-              updateQuestionnaireField("version", e.target.value)
-            }
-          />
-        </div>
-      </CardContent>
-    </Card>
-  );
 }
 
 const LAYOUT_OPTIONS = [
@@ -545,8 +179,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set(),
   );
-  const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [selectedOrgs, setSelectedOrgs] = useState<Organization[]>([]);
+  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const queryClient = useQueryClient();
@@ -592,6 +226,23 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       },
     }),
   });
+
+  // This useMemo will automatically include the new tag in options
+  const tagOptions = useMemo(() => {
+    if (!availableTags?.results) return selectedTags;
+    if (tagSearchQuery) return availableTags.results;
+
+    const availableSlugs = new Set(
+      availableTags.results.map((tag) => tag.slug),
+    );
+
+    // Add selected tags that aren't in availableTags
+    const selectedNotInAvailable = selectedTags.filter(
+      (selectedTag) => !availableSlugs.has(selectedTag.slug),
+    );
+
+    return [...availableTags.results, ...selectedNotInAvailable];
+  }, [availableTags, selectedTags, tagSearchQuery]);
 
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.create),
@@ -679,7 +330,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     } else {
       createQuestionnaire({
         ...questionnaire,
-        organizations: selectedOrgIds,
+        organizations: selectedOrgs.map((o) => o.id),
+        tags: selectedTags.map((t) => t.id),
       });
     }
   };
@@ -701,19 +353,27 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleToggleOrganization = (orgId: string) => {
-    setSelectedOrgIds((current) =>
-      current.includes(orgId)
-        ? current.filter((id) => id !== orgId)
-        : [...current, orgId],
+    const newOrg = availableOrganizations?.results.find((o) => o.id === orgId);
+    const newAdded = newOrg ? [...selectedOrgs, newOrg] : selectedOrgs;
+    setSelectedOrgs((current) =>
+      current.some((o) => o.id === orgId)
+        ? current.filter((o) => o.id !== orgId)
+        : newAdded,
     );
   };
 
   const handleToggleTag = (tagId: string) => {
-    setSelectedTagIds((current) =>
-      current.includes(tagId)
-        ? current.filter((id) => id !== tagId)
-        : [...current, tagId],
+    const newTag = tagOptions.find((t) => t.id === tagId);
+    const newAdded = newTag ? [...selectedTags, newTag] : selectedTags;
+    setSelectedTags((current) =>
+      current.some((t) => t.id === tagId)
+        ? current.filter((t) => t.id !== tagId)
+        : newAdded,
     );
+  };
+
+  const handleTagCreated = (tag: QuestionnaireTagModel) => {
+    setSelectedTags((current) => [...current, tag]);
   };
 
   return (
@@ -834,7 +494,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   id={id}
                   organizations={organizations}
                   organizationSelection={{
-                    selectedIds: selectedOrgIds,
+                    selectedOrgs: selectedOrgs,
                     onToggle: handleToggleOrganization,
                     searchQuery: orgSearchQuery,
                     setSearchQuery: setOrgSearchQuery,
@@ -843,12 +503,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   }}
                   tags={questionnaire.tags}
                   tagSelection={{
-                    selectedIds: selectedTagIds,
+                    selectedTags: selectedTags,
                     onToggle: handleToggleTag,
                     searchQuery: tagSearchQuery,
                     setSearchQuery: setTagSearchQuery,
-                    available: availableTags,
+                    available: tagOptions,
                     isLoading: isLoadingAvailableTags,
+                    onTagCreated: !id ? handleTagCreated : undefined,
                   }}
                 />
               </div>
@@ -1005,7 +666,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 id={id}
                 organizations={organizations}
                 organizationSelection={{
-                  selectedIds: selectedOrgIds,
+                  selectedOrgs: selectedOrgs,
                   onToggle: handleToggleOrganization,
                   searchQuery: orgSearchQuery,
                   setSearchQuery: setOrgSearchQuery,
@@ -1014,12 +675,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 }}
                 tags={questionnaire.tags}
                 tagSelection={{
-                  selectedIds: selectedTagIds,
+                  selectedTags: selectedTags,
                   onToggle: handleToggleTag,
                   searchQuery: tagSearchQuery,
                   setSearchQuery: setTagSearchQuery,
-                  available: availableTags,
+                  available: tagOptions,
                   isLoading: isLoadingAvailableTags,
+                  onTagCreated: handleTagCreated,
                 }}
               />
             </div>
