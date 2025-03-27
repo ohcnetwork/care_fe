@@ -233,12 +233,12 @@ const AvatarEditModal = ({
           </DialogDescription>
         </DialogHeader>
         <div className="flex h-full w-full items-center justify-center overflow-y-auto">
-          <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
+          <div className="flex max-h-screen min-h-auto w-full flex-col overflow-auto">
             {!isCameraOpen ? (
               <>
                 {preview || imageUrl ? (
                   <>
-                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
+                    <div className="flex h-[25vh] md:h-[35vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
                       <img
                         src={
                           preview && preview.startsWith("blob:")
@@ -246,7 +246,7 @@ const AvatarEditModal = ({
                             : imageUrl
                         }
                         alt="cover-photo"
-                        className="h-full w-full object-contain"
+                        className="h-full object-contain rounded-md"
                       />
                     </div>
                     <p className="text-center font-medium text-secondary-700">
