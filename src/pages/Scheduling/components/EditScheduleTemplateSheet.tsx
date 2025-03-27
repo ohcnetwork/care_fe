@@ -51,7 +51,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-import DatePickerInput from "@/components/Common/DatePicker";
+import DatePicker from "@/components/Common/DatePicker";
 import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 
 import mutate from "@/Utils/request/mutate";
@@ -249,7 +249,7 @@ const ScheduleTemplateEditor = ({
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel required>{t("valid_from")}</FormLabel>
-                  <DatePickerInput
+                  <DatePicker
                     value={field.value ? new Date(field.value) : undefined}
                     onChange={(date) =>
                       field.onChange(date ? format(date, "yyyy-MM-dd") : "")
@@ -267,7 +267,7 @@ const ScheduleTemplateEditor = ({
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel required>{t("valid_to")}</FormLabel>
-                  <DatePickerInput
+                  <DatePicker
                     value={field.value ? new Date(field.value) : undefined}
                     min={
                       form.watch("valid_from")

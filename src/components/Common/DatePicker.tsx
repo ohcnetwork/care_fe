@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -15,7 +16,7 @@ import {
 import { RelativeDatePicker } from "@/components/ui/relative-date-picker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface DatePickerInputProps {
+interface DatePickerProps {
   value?: Date;
   onChange: (date: Date | undefined) => void;
   disabled?: boolean;
@@ -24,14 +25,15 @@ interface DatePickerInputProps {
   max?: Date;
 }
 
-export default function DatePickerInput({
+export default function DatePicker({
   value,
   onChange,
   disabled,
   classes,
   min,
   max,
-}: DatePickerInputProps) {
+}: DatePickerProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
     "absolute",
   );
@@ -54,8 +56,8 @@ export default function DatePickerInput({
             )}
             disabled={disabled}
           >
-            <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
-            {value ? format(value, "PPP") : "Pick a date"}
+            <CareIcon icon="l-calender" className="mr-2 size-4" />
+            {value ? format(value, "PPP") : t("pick_a_date")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -64,8 +66,8 @@ export default function DatePickerInput({
             onValueChange={(v) => setActiveTab(v as "absolute" | "relative")}
           >
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="absolute">Absolute Date</TabsTrigger>
-              <TabsTrigger value="relative">Relative Date</TabsTrigger>
+              <TabsTrigger value="absolute">{t("absolute_date")}</TabsTrigger>
+              <TabsTrigger value="relative">{t("relative_date")}</TabsTrigger>
             </TabsList>
             <TabsContent value="absolute" className="p-2">
               <Input

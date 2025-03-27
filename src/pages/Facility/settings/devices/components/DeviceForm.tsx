@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import DatePickerInput from "@/components/Common/DatePicker";
+import DatePicker from "@/components/Common/DatePicker";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -327,7 +327,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("manufacture_date")}</FormLabel>
                 <FormControl>
-                  <DatePickerInput
+                  <DatePicker
                     onChange={(date) => field.onChange(dateQueryString(date))}
                     value={field.value ? new Date(field.value) : undefined}
                     disabled={field.disabled}
@@ -346,7 +346,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("expiration_date")}</FormLabel>
                 <FormControl>
-                  <DatePickerInput
+                  <DatePicker
                     onChange={(date) => field.onChange(dateQueryString(date))}
                     value={field.value ? new Date(field.value) : undefined}
                     disabled={field.disabled}

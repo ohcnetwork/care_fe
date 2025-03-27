@@ -36,7 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import DatePickerInput from "@/components/Common/DatePicker";
+import DatePicker from "@/components/Common/DatePicker";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -238,7 +238,7 @@ export default function LinkConsentDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel required>{t("consent_date")}</FormLabel>
-                    <DatePickerInput
+                    <DatePicker
                       onChange={(date) => field.onChange(dateQueryString(date))}
                       value={field.value ? new Date(field.value) : undefined}
                       disabled={field.disabled}
@@ -254,7 +254,7 @@ export default function LinkConsentDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>{t("consent_period_start_date")}</FormLabel>
-                    <DatePickerInput
+                    <DatePicker
                       onChange={(date) => field.onChange(dateQueryString(date))}
                       value={field.value ? new Date(field.value) : undefined}
                       disabled={field.disabled}
@@ -270,7 +270,7 @@ export default function LinkConsentDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>{t("consent_period_end_date")}</FormLabel>
-                    <DatePickerInput
+                    <DatePicker
                       onChange={(date) => field.onChange(dateQueryString(date))}
                       value={field.value ? new Date(field.value) : undefined}
                       disabled={field.disabled}

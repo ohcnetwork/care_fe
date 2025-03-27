@@ -11,7 +11,8 @@ import {
   subWeeks,
   subYears,
 } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 
@@ -75,43 +76,44 @@ export function RelativeDatePicker({
   onDateChange,
   value,
 }: RelativeDatePickerProps) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState(() => {
     const initialState = computeTimeUnits(value);
-    console.log(initialState);
     return {
       unit: initialState.unit,
       value: initialState.value,
     };
   });
-  const [resultDate, setResultDate] = useState<Date>(new Date());
 
   const timeUnits: TimeUnit[] = ["days", "weeks", "months", "years"];
 
-  // Update result date when value or unit changes
-  useEffect(() => {
+  // Calculate and memoize the result date based on selected
+  const resultDate = useMemo(() => {
     const now = new Date();
-    let newDate: Date;
 
     switch (selected.unit) {
       case "days":
-        newDate = subDays(now, selected.value);
-        break;
+        return subDays(now, selected.value);
       case "weeks":
-        newDate = subWeeks(now, selected.value);
-        break;
+        return subWeeks(now, selected.value);
       case "months":
-        newDate = subMonths(now, selected.value);
-        break;
+        return subMonths(now, selected.value);
       case "years":
-        newDate = subYears(now, selected.value);
-        break;
+        return subYears(now, selected.value);
       default:
-        newDate = now;
+        return now;
     }
+  }, [selected.unit, selected.value]);
 
-    setResultDate(newDate);
-    onDateChange(newDate);
-  }, [selected, onDateChange]);
+  useEffect(() => {
+    onDateChange(resultDate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resultDate]);
+
+  const handleValueChange = (newValue: string) => {
+    const numValue = parseInt(newValue) || 0;
+    setSelected((prev) => ({ ...prev, value: numValue }));
+  };
 
   const handleUnitChange = (newUnit: TimeUnit) => {
     setSelected((prev) => ({ ...prev, unit: newUnit }));
@@ -126,15 +128,10 @@ export function RelativeDatePicker({
         <div className="grid grid-cols-2 gap-2">
           <Select
             value={selected.value.toString()}
-            onValueChange={(value) =>
-              setSelected((prev) => ({
-                ...prev,
-                value: Number.parseInt(value) || 0,
-              }))
-            }
+            onValueChange={(value) => handleValueChange(value)}
           >
             <SelectTrigger className="col-span-2">
-              <SelectValue placeholder="Select a number" />
+              <SelectValue placeholder={t("select_number")} />
             </SelectTrigger>
             <SelectContent>
               {Array.from({ length: 31 }, (_, i) => i + 1).map((timeUnit) => (

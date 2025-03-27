@@ -1,28 +1,28 @@
 import { t } from "i18next";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
 import { Label } from "@/components/ui/label";
 
-import DatePickerInput from "./DatePicker";
+import DatePicker from "./DatePicker";
 
 type DateRange = { from?: Date; to?: Date };
 
-type DateRangePickerRangeProps = {
+type DateRangePickerProps = {
   date?: DateRange;
   onChange?: (date?: DateRange) => void;
   className?: string;
 };
 
-export function DateRangePickerRange({
+export function DateRangePicker({
   date,
   onChange,
   className,
-}: DateRangePickerRangeProps) {
+}: DateRangePickerProps) {
   const [startDate, setStartDate] = useState<Date | undefined>(date?.from);
   const [endDate, setEndDate] = useState<Date | undefined>(date?.to);
+  const [errors, setErrors] = useState<{ from?: string; to?: string }>({});
 
   const handleDateChange = (key: "from" | "to", value: Date | undefined) => {
     const parsedDate = value ? value : undefined;
@@ -31,16 +31,24 @@ export function DateRangePickerRange({
 
     if (key === "from") {
       if (endDate && parsedDate > endDate) {
-        toast.error(t("start_date_must_be_before_end_date"));
+        setErrors((prev) => ({
+          ...prev,
+          from: t("start_date_must_be_before_end_date"),
+        }));
         return;
       }
+      setErrors((prev) => ({ ...prev, from: undefined }));
       setStartDate(parsedDate);
       onChange?.({ from: parsedDate, to: endDate });
     } else {
       if (startDate && parsedDate < startDate) {
-        toast.error(t("end_date_must_be_after_start_date"));
+        setErrors((prev) => ({
+          ...prev,
+          to: t("end_date_must_be_after_start_date"),
+        }));
         return;
       }
+      setErrors((prev) => ({ ...prev, to: undefined }));
       setEndDate(parsedDate);
       onChange?.({ from: startDate, to: parsedDate });
     }
@@ -50,17 +58,21 @@ export function DateRangePickerRange({
     <div className={cn("grid gap-2", className)}>
       <div className="flex items-center gap-2">
         <Label className="text-gray-700 font-medium">{t("start_date")}</Label>
-        <DatePickerInput
+        <DatePicker
           value={startDate ? startDate : undefined}
           onChange={(date) => handleDateChange("from", date)}
         />
+        {errors.from && (
+          <span className="text-red-500 text-sm">{errors.from}</span>
+        )}
       </div>
       <div className="flex items-center gap-2">
         <Label className="text-gray-700 font-medium">{t("end_date")}</Label>
-        <DatePickerInput
+        <DatePicker
           value={endDate ? endDate : undefined}
           onChange={(date) => handleDateChange("to", date)}
         />
+        {errors.to && <span className="text-red-500 text-sm">{errors.to}</span>}
       </div>
     </div>
   );
