@@ -21,17 +21,26 @@ import mutate from "@/Utils/request/mutate";
 import { Code } from "@/types/questionnaire/code";
 import {
   TERMINOLOGY_SYSTEMS,
+  TerminologySystem,
   ValuesetLookupResponse,
 } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface CodingEditorProps {
   code?: Code;
-  isUnit?: boolean;
+  defaultSystem?: TerminologySystem;
+  label: string;
+  disableSystemSelect?: boolean;
   onChange: (code: Code | undefined) => void;
 }
 
-export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
+export function CodingEditor({
+  code,
+  onChange,
+  defaultSystem,
+  label,
+  disableSystemSelect,
+}: CodingEditorProps) {
   const { t } = useTranslation();
   const { mutate: verifyCode, isPending } = useMutation({
     mutationFn: mutate(valuesetApi.lookup),
@@ -58,16 +67,14 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
           size="sm"
           onClick={() => {
             onChange({
-              system: isUnit
-                ? TERMINOLOGY_SYSTEMS.UCUM
-                : TERMINOLOGY_SYSTEMS.LOINC,
+              system: TERMINOLOGY_SYSTEMS[defaultSystem ?? "LOINC"],
               code: "",
               display: "",
             });
           }}
         >
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          {isUnit ? t("add_unit") : t("add_coding")}
+          {t("add")} {label}
         </Button>
       </div>
     );
@@ -78,7 +85,7 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center w-full justify-between">
           <Label className="text-base font-medium">
-            {isUnit ? t("unit_details") : t("coding_details")}
+            {label} {t("details")}
           </Label>
           <Button
             variant="ghost"
@@ -88,7 +95,7 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
             }}
           >
             <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
-            {isUnit ? t("remove_unit") : t("remove_coding")}
+            {t("remove")} {label}
           </Button>
         </div>
       </CardHeader>
@@ -106,7 +113,7 @@ export function CodingEditor({ code, onChange, isUnit }: CodingEditorProps) {
                 display: "",
               });
             }}
-            disabled={isUnit}
+            disabled={disableSystemSelect}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select system" />

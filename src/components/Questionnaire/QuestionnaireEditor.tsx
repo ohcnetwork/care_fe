@@ -964,11 +964,14 @@ function QuestionEditor({
                 <CodingEditor
                   code={code}
                   onChange={(newCode) => updateField("code", newCode)}
+                  label={t("coding")}
                 />
                 <CodingEditor
                   code={unit}
-                  isUnit={true}
                   onChange={(newCode) => updateField("unit", newCode)}
+                  defaultSystem="UCUM"
+                  label={t("unit")}
+                  disableSystemSelect
                 />
               </div>
             )}
