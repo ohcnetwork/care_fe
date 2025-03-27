@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 interface PaginationProps {
   data: { totalCount: number };
@@ -164,17 +165,16 @@ interface NavButtonProps {
 
 const NavButton = (props: NavButtonProps) => {
   return (
-    <Button
-      id={props.id}
-      disabled={props.disabled}
-      onClick={props.onClick}
-      variant={props.selected ? "primary" : "secondary"}
-      className="tooltip rounded-none text-sm font-bold"
-    >
-      {props.children}
-      <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs font-normal">
-        {props.tooltip}
-      </span>
-    </Button>
+    <TooltipComponent content={props.tooltip}>
+      <Button
+        id={props.id}
+        disabled={props.disabled}
+        onClick={props.onClick}
+        variant={props.selected ? "primary" : "secondary"}
+        className="rounded-none text-sm font-bold"
+      >
+        {props.children}
+      </Button>
+    </TooltipComponent>
   );
 };

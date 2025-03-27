@@ -84,7 +84,7 @@ export function PrintQuestionnaireQuestionnaireResponses({
     >
       <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
         <div>
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
+          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
             <img
               src={careConfig.mainLogo?.dark}
               alt="Care Logo"
@@ -105,7 +105,7 @@ export function PrintQuestionnaireQuestionnaireResponses({
             patient={encounter?.patient ?? patient}
           />
 
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
+          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
             <div className="text-center sm:text-left sm:order-1">
               <h3 className="text-lg font-semibold">{questionnaire?.title}</h3>
               <p className="text-gray-500 text-sm tracking-wide mt-1">

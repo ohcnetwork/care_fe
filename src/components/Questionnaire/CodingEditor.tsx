@@ -61,7 +61,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
             });
           }}
         >
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-plus" className="mr-2 size-4" />
           Add Coding
         </Button>
       </div>
@@ -80,7 +80,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
               onChange(undefined);
             }}
           >
-            <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
             Remove Coding
           </Button>
         </div>
@@ -113,7 +113,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
           </Select>
         </div>
 
-        <div className="grid grid-cols-[1fr,1fr,auto] gap-4 items-start">
+        <div className="grid grid-cols-[1fr_1fr_auto] gap-4 items-start">
           <div>
             <Label>Code</Label>
             <Input
@@ -155,7 +155,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
                 });
               }}
             >
-              <UpdateIcon className="h-4 w-4" />
+              <UpdateIcon className="size-4" />
             </Button>
           </div>
         </div>

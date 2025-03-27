@@ -171,7 +171,7 @@ export const PrintMedicationAdministration = (props: {
 
   if (!medicationAdministrations?.results?.length) {
     return (
-      <div className="flex h-52 items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
+      <div className="flex h-52 items-center justify-center rounded-lg border-2 border-gray-200 border-dashed p-4 text-gray-500">
         {t("no_medications_found_for_this_encounter")}
       </div>
     );
@@ -184,7 +184,7 @@ export const PrintMedicationAdministration = (props: {
     >
       <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
         <div>
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
+          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
             <img
               src={careConfig.mainLogo?.dark}
               alt="Care Logo"
@@ -450,7 +450,7 @@ const MedicationAdministrationTable = ({
       </div>
       <Table className="w-full">
         <TableHeader>
-          <TableRow className="bg-transparent hover:bg-transparent divide-x divide-gray border-b-gray">
+          <TableRow className="bg-transparent hover:bg-transparent divide-x divide-gray border-b-gray-200">
             <TableHead className="first:rounded-l-md h-auto py-1 pl-2 pr-2 text-black text-center capitalize">
               {t("medication")}
             </TableHead>
@@ -487,7 +487,7 @@ const MedicationAdministrationTable = ({
                     {renderMedication(dateWiseAdministrations)}
                   </TableCell>
                 )}
-                <TableCell className="whitespace-nowrap text-center border-x">
+                <TableCell className="whitespace-nowrap text-center border-x border-gray-200">
                   {hourRange.start} - {hourRange.end}
                 </TableCell>
                 {dates.map((date) => (

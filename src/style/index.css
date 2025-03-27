@@ -1,104 +1,121 @@
-@import "@fontsource/figtree/300.css";
-@import "@fontsource/figtree/400.css";
-@import "@fontsource/figtree/500.css";
-@import "@fontsource/figtree/600.css";
-@import "@fontsource/figtree/700.css";
-@import "@fontsource/figtree/800.css";
-@import "@fontsource/figtree/900.css";
+@import "@fontsource/figtree/300.css" layer(base);
+@import "@fontsource/figtree/400.css" layer(base);
+@import "@fontsource/figtree/500.css" layer(base);
+@import "@fontsource/figtree/600.css" layer(base);
+@import "@fontsource/figtree/700.css" layer(base);
+@import "@fontsource/figtree/800.css" layer(base);
+@import "@fontsource/figtree/900.css" layer(base);
 
-@import "./CAREUI.css";
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config '../../tailwind.config.js';
 
+@import "tw-animate-css";
 
-html {
-    @apply w-full h-full;
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
 }
 
-body {
+@layer utilities {
+  html {
+    @apply size-full;
+  }
+
+  body {
     font-family: "Figtree", sans-serif;
     color: #453c52;
-    @apply font-sans text-secondary-900 w-full h-full antialiased;
-}
+    @apply text-secondary-900 size-full font-sans antialiased;
+  }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-bold;
-}
+  }
 
-h1 {
+  h1 {
     font-size: 2.5rem;
-}
+  }
 
-h2 {
+  h2 {
     font-size: 2rem;
-}
+  }
 
-h3 {
+  h3 {
     font-size: 1.5rem;
-}
+  }
 
-h4 {
+  h4 {
     font-size: 1.25rem;
-}
+  }
 
-h5 {
+  h5 {
     font-size: 1rem;
-}
+  }
 
-h6 {
+  h6 {
     font-size: 0.875rem;
-}
+  }
 
-@keyframes wave {
+  @keyframes wave {
     50% {
-        transform: scale(0.9);
+      transform: scale(0.9);
     }
-}
+  }
 
-
-@media print {
+  @media print {
     @page {
-        margin-top: 0;
-      }
+      margin-top: 0;
+    }
     body * {
-        visibility: hidden;
+      visibility: hidden;
     }
     #section-to-print,
     #section-to-print * {
-        visibility: visible;
-        -webkit-print-color-adjust: exact;
+      visibility: visible;
+      -webkit-print-color-adjust: exact;
     }
     #section-to-print {
-        position: absolute;
-        left: 0;
-        top: 0;
+      position: absolute;
+      left: 0;
+      top: 0;
     }
-}
+  }
 
-.App {
+  .App {
     text-align: center;
-}
+  }
 
-.App-logo {
+  .App-logo {
     height: 10vmin;
     pointer-events: none;
     filter: brightness(80%);
-}
+  }
 
-@media (prefers-reduced-motion: no-preference) {
+  @media (prefers-reduced-motion: no-preference) {
     .App-logo {
-        animation: App-logo-blink 1s linear infinite;
+      animation: App-logo-blink 1s linear infinite;
     }
-}
+  }
 
-.App-header {
+  .App-header {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -106,147 +123,174 @@ h6 {
     justify-content: center;
     font-size: calc(10px + 2vmin);
     color: white;
-}
+  }
 
-@keyframes App-logo-blink {
-    0% { opacity: 0;}
-    25% { opacity: 0.5;}
-    50% {opacity: 1;}
-    75% {opacity: 0.5;}
-    100% {opacity: 0;}
-}
+  @keyframes App-logo-blink {
+    0% {
+      opacity: 0;
+    }
+    25% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
+    75% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
 
-.dropdown:hover .dropdown-menu {
+  .dropdown:hover .dropdown-menu {
     display: block;
-}
+  }
 
-::-webkit-scrollbar {
+  ::-webkit-scrollbar {
     width: 10px;
     height: 8px;
-}
+  }
 
-::-webkit-scrollbar-track {
+  ::-webkit-scrollbar-track {
     background: transparent;
-}
+  }
 
-::-webkit-scrollbar-thumb {
+  ::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 6px;
-}
+  }
 
-::-webkit-scrollbar-thumb:hover {
+  ::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.4);
-}
-
-/* for gmaps search dropdown */
-.pac-container {
-  z-index: 100000 !important;
-}
-
-.login-hero{
-  background: linear-gradient(to bottom right, rgba(4, 78, 55, 0.466), rgba(2, 54, 40, 0.521)), url('/images/wave_scene_square.png');
-  background-size: cover;
-  background-position: center;
-  animation: alternate-reverse 30s linear infinite herobg;
-}
-
-.login-hero::before{
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0px;
-  width: 200px;
-  z-index: 2;
-  background: url('/images/wave_long_2.png');
-  background-position: top right;
-  transition: 0.2s;
-  animation: 120s linear infinite wave alternate-reverse;
-  -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.101));
-}
-
-.login-hero::after{
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 10px;
-  width: 200px;
-  z-index: 1;
-  background: url('/images/wave_long.png');
-  opacity: 0.5;
-  background-position: bottom right;
-  animation: 120s linear infinite wave_2 alternate-reverse;
-  -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.116));
-}
-
-@media screen and (max-width: 768px) {
-  .login-hero::before{
-    display: none;
   }
-  .login-hero::after{
-    display: none;
-  }
-}
 
-@keyframes wave {
-  0% {
+  /* for gmaps search dropdown */
+  .pac-container {
+    z-index: 100000 !important;
+  }
+
+  .login-hero {
+    background:
+      linear-gradient(
+        to bottom right,
+        rgba(4, 78, 55, 0.466),
+        rgba(2, 54, 40, 0.521)
+      ),
+      url("/images/wave_scene_square.png");
+    background-size: cover;
+    background-position: center;
+    animation: alternate-reverse 30s linear infinite herobg;
+  }
+
+  .login-hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0px;
+    width: 200px;
+    z-index: 2;
+    background: url("/images/wave_long_2.png");
     background-position: top right;
+    transition: 0.2s;
+    animation: 120s linear infinite wave alternate-reverse;
+    -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.101));
   }
-  100% {
+
+  .login-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 10px;
+    width: 200px;
+    z-index: 1;
+    background: url("/images/wave_long.png");
+    opacity: 0.5;
     background-position: bottom right;
+    animation: 120s linear infinite wave_2 alternate-reverse;
+    -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.116));
   }
-}
 
-@keyframes wave_2{
-  0% {
-    background-position: bottom right;
+  @media screen and (max-width: 768px) {
+    .login-hero::before {
+      display: none;
+    }
+    .login-hero::after {
+      display: none;
+    }
   }
-  100% {
-    background-position: top right;
-  }
-}
 
-@keyframes herobg {
-  0% {
-    background-size: 110%;
+  @keyframes wave {
+    0% {
+      background-position: top right;
+    }
+    100% {
+      background-position: bottom right;
+    }
   }
-  100% {
-    background-size: 200%;
-  }
-}
 
-@media screen and (max-width: 1078px) {
+  @keyframes wave_2 {
+    0% {
+      background-position: bottom right;
+    }
+    100% {
+      background-position: top right;
+    }
+  }
+
   @keyframes herobg {
     0% {
-      background-size: 140%;
+      background-size: 110%;
     }
     100% {
       background-size: 200%;
     }
   }
+
+  @media screen and (max-width: 1078px) {
+    @keyframes herobg {
+      0% {
+        background-size: 140%;
+      }
+      100% {
+        background-size: 200%;
+      }
+    }
+  }
+
+  /* clears the ‘X’ from Internet Explorer for input:search */
+  input[type="search"]::-ms-clear {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  input[type="search"]::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* clears the ‘X’ from Chrome for input:search */
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    display: none;
+  }
 }
-
-/* clears the ‘X’ from Internet Explorer for input:search */
-input[type=search]::-ms-clear { display: none; width : 0; height: 0; }
-input[type=search]::-ms-reveal { display: none; width : 0; height: 0; }
-
-/* clears the ‘X’ from Chrome for input:search */
-input[type="search"]::-webkit-search-decoration,
-input[type="search"]::-webkit-search-cancel-button,
-input[type="search"]::-webkit-search-results-button,
-input[type="search"]::-webkit-search-results-decoration { display: none; }
 
 @layer base {
   :root {
-        --radius:  0.5rem;
-        --sidebar-background: 220 14.3% 95.9%;
-        --sidebar-foreground:  240 5.3% 26.1%;
-        --sidebar-primary:  240 5.9% 10%;
-        --sidebar-primary-foreground:  0 0% 98%;
-        --sidebar-accent:  240 4.8% 95.9%;
-        --sidebar-accent-foreground:  240 5.9% 10%;
-        --sidebar-border: transparent;
-        --sidebar-ring:  217.2 91.2% 59.8%;
-    }
+    --radius: 0.5rem;
+    --sidebar-background: 220 14.3% 95.9%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: transparent;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
 }

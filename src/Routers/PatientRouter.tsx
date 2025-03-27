@@ -100,9 +100,9 @@ export default function PatientRouter() {
         <AppSidebar sidebarFor={SidebarFor.PATIENT} />
         <main
           id="pages"
-          className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
+          className="flex-1 overflow-y-auto bg-gray-100 focus:outline-hidden md:pb-2 md:pr-2"
         >
-          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
+          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow-sm md:hidden">
             <div className="flex items-center">
               <SidebarTrigger className="px-2" />
             </div>
@@ -118,7 +118,7 @@ export default function PatientRouter() {
             </a>
           </div>
           <div
-            className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow"
+            className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border border-gray-200 bg-gray-50 p-3 shadow-sm"
             data-cui-page
           >
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>

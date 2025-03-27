@@ -126,14 +126,14 @@ function SymptomActionsMenu({
           variant="ghost"
           size="icon"
           disabled={disabled}
-          className="h-8 w-8"
+          className="size-8"
         >
-          <DotsVerticalIcon className="h-4 w-4" />
+          <DotsVerticalIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={onToggleNotes}>
-          <Pencil2Icon className="h-4 w-4 mr-2" />
+          <Pencil2Icon className="size-4 mr-2" />
           {showNotes ? t("hide_notes") : t("add_notes")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -142,7 +142,7 @@ function SymptomActionsMenu({
           onClick={onRemove}
           disabled={verificationStatus === "entered_in_error"}
         >
-          <MinusCircledIcon className="h-4 w-4 mr-2" />
+          <MinusCircledIcon className="size-4 mr-2" />
           {verificationStatus === "entered_in_error"
             ? t("already_marked_as_error")
             : t("remove_symptom")}
@@ -439,7 +439,7 @@ export function SymptomQuestion({
   return (
     <div className="space-y-2">
       {symptoms.length > 0 && (
-        <div className="rounded-lg border">
+        <div className="border border-gray-200 rounded-lg">
           <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
             <div className="col-span-5">{t("symptom")}</div>
             <div className="col-span-2 text-center">{t("date")}</div>
