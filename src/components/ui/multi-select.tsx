@@ -56,6 +56,7 @@ export const MultiSelect = React.forwardRef<
   ) => {
     const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+
     React.useEffect(() => {
       setSelectedValues(value);
     }, [value]);
@@ -89,6 +90,14 @@ export const MultiSelect = React.forwardRef<
       }
     };
 
+    const handleTouchStart = (e: React.TouchEvent) => {
+      e.stopPropagation();
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+      e.stopPropagation();
+    };
+
     return (
       <div className="w-full">
         <Popover
@@ -114,17 +123,17 @@ export const MultiSelect = React.forwardRef<
                       return (
                         <Badge
                           key={value}
-                          className="m-1 border-foreground/10 bg-secondary text-black hover:bg-secondary/80"
+                          className="m-1 bg-secondary text-black"
                         >
                           {option?.icon && (
                             <CareIcon
                               icon={option.icon}
-                              className="h-4 w-4 mr-2"
+                              className="size-4 mr-2"
                             />
                           )}
                           {option?.label}
                           <XCircle
-                            className="ml-2 h-4 w-4 cursor-pointer"
+                            className="ml-2 size-4 cursor-pointer"
                             onClick={(event) => {
                               event.stopPropagation();
                               toggleOption(value);
@@ -164,9 +173,15 @@ export const MultiSelect = React.forwardRef<
             align="center"
             onEscapeKeyDown={() => setIsPopoverOpen(false)}
             onWheel={(e) => e.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
           >
             <Command>
-              <CommandList>
+              <CommandList
+                className="max-h-64 overflow-y-auto overflow-x-hidden touch-auto"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+              >
                 <CommandGroup>
                   <CommandItem
                     key="all"
@@ -190,7 +205,7 @@ export const MultiSelect = React.forwardRef<
                         {option?.icon && (
                           <CareIcon
                             icon={option.icon}
-                            className="mr-2 h-4 w-4"
+                            className="mr-2 size-4"
                           />
                         )}
                         <span>{option.label}</span>

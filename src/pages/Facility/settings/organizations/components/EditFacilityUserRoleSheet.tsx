@@ -40,7 +40,9 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { FacilityOrganizationUserRole } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   facilityId: string;
@@ -68,7 +70,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: updateRole } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.facilityOrganization.updateUserRole, {
+      mutate(facilityOrganizationApi.updateUserRole, {
         pathParams: {
           facilityId,
           organizationId: organizationId,
@@ -93,7 +95,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: removeRole } = useMutation({
     mutationFn: () =>
-      mutate(routes.facilityOrganization.removeUserRole, {
+      mutate(facilityOrganizationApi.removeUserRole, {
         pathParams: {
           facilityId,
           organizationId: organizationId,
@@ -140,16 +142,16 @@ export default function EditUserRoleSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
-          <div className="rounded-lg border p-4 space-y-4">
+          <div className="rounded-lg border border-gray-200 p-4 space-y-4">
             <div className="flex items-start gap-4">
               <Avatar
                 name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                className="h-12 w-12"
+                className="size-12"
                 imageUrl={userRole.user.profile_picture_url}
               />
               <div className="flex flex-col flex-1">
                 <span className="font-medium text-lg">
-                  {userRole.user.first_name} {userRole.user.last_name}
+                  {formatName(userRole.user)}
                 </span>
                 <span className="text-sm text-gray-500">
                   {userRole.user.email}
@@ -157,7 +159,7 @@ export default function EditUserRoleSheet({
               </div>
             </div>
 
-            <div className="flex flex-col flex-wrap gap-2 pt-2 border-t">
+            <div className="flex flex-col flex-wrap gap-2 pt-2 border-t border-gray-200">
               <div className="flex flex-wrap">
                 <div className="mr-3">
                   <span className="text-sm text-gray-500">{t("username")}</span>

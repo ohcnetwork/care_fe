@@ -53,6 +53,7 @@ interface ObservationVisualizerProps {
   height?: number;
   gridCols?: number;
   encounterId: string;
+  canAccess: boolean;
 }
 
 interface ChartData {
@@ -103,6 +104,7 @@ export const ObservationVisualizer = ({
   encounterId,
   height = 300,
   gridCols = 2,
+  canAccess,
 }: ObservationVisualizerProps) => {
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
@@ -123,6 +125,7 @@ export const ObservationVisualizer = ({
         codes: allCodes,
       },
     }),
+    enabled: canAccess,
   });
 
   if (isLoading) {
@@ -353,7 +356,7 @@ export const ObservationVisualizer = ({
                             <div className="flex items-center gap-2">
                               <Avatar
                                 name={observations[0].details.enteredBy}
-                                className="h-6 w-6"
+                                className="size-6"
                               />
                               <span>{observations[0].details.enteredBy}</span>
                             </div>

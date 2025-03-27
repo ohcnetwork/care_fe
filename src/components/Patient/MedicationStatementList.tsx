@@ -35,6 +35,7 @@ import medicationStatementApi from "@/types/emr/medicationStatement/medicationSt
 
 interface MedicationStatementListProps {
   patientId: string;
+  canAccess: boolean;
   className?: string;
 }
 
@@ -99,7 +100,7 @@ function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
       <TableCell className="last:rounded-r-md">
         <div className="flex items-center gap-2">
           <Avatar
-            name={formatName(statement.created_by)}
+            name={formatName(statement.created_by, true)}
             className="w-4 h-4"
             imageUrl={statement.created_by.read_profile_picture_url}
           />
@@ -112,6 +113,7 @@ function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
 
 export function MedicationStatementList({
   patientId,
+  canAccess,
   className = "",
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
@@ -122,6 +124,7 @@ export function MedicationStatementList({
     queryFn: query(medicationStatementApi.list, {
       pathParams: { patientId },
     }),
+    enabled: canAccess,
   });
 
   if (isLoading) {
@@ -155,7 +158,7 @@ export function MedicationStatementList({
       className={className}
     >
       <>
-        <Table className="border-separate border-spacing-y-0.5">
+        <Table className="border-separate border-gray-200 border-spacing-y-0.5">
           <TableHeader>
             <TableRow className="rounded-md overflow-hidden bg-gray-100">
               <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600">

@@ -26,8 +26,9 @@ interface QuestionGroupProps {
   clearError: (questionId: string) => void;
   disabled?: boolean;
   activeGroupId?: string;
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
+  isSubQuestion?: boolean;
 }
 
 function isQuestionEnabled(
@@ -92,6 +93,7 @@ export const QuestionGroup = memo(function QuestionGroup({
   activeGroupId,
   facilityId,
   patientId,
+  isSubQuestion = false,
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
@@ -111,6 +113,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         disabled={disabled}
         facilityId={facilityId}
         patientId={patientId}
+        isSubQuestion={isSubQuestion}
       />
     );
   }
@@ -121,14 +124,18 @@ export const QuestionGroup = memo(function QuestionGroup({
     <div
       data-cy="group_styling"
       className={cn(
-        "space-y-4 rounded-lg",
+        "sm:space-y-4 sm:rounded-lg",
         isActive && "ring-2 ring-primary",
         question.styling_metadata?.classes && question.styling_metadata.classes,
       )}
     >
       {question.text && (
-        <div className="space-y-1">
-          <QuestionLabel question={question} groupLabel />
+        <div className="space-y-1 px-2 bg-gray-100 md:bg-transparent">
+          <QuestionLabel
+            question={question}
+            groupLabel
+            isSubQuestion={isSubQuestion}
+          />
           {question.description && (
             <p className="text-sm text-gray-500">{question.description}</p>
           )}
@@ -144,6 +151,7 @@ export const QuestionGroup = memo(function QuestionGroup({
       >
         {question.questions?.map((subQuestion) => (
           <QuestionGroup
+            encounterId={encounterId}
             facilityId={facilityId}
             key={subQuestion.id}
             question={subQuestion}
@@ -154,6 +162,7 @@ export const QuestionGroup = memo(function QuestionGroup({
             disabled={disabled}
             activeGroupId={activeGroupId}
             patientId={patientId}
+            isSubQuestion={true}
           />
         ))}
       </div>

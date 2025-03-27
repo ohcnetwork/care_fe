@@ -12,7 +12,7 @@ import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
@@ -50,7 +50,7 @@ export const PrintPrescription = (props: {
 
   if (!activeMedications?.results?.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_medications_found_for_this_encounter")}
       </div>
     );
@@ -76,7 +76,7 @@ export const PrintPrescription = (props: {
       <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
         <div>
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
+          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
             <img
               src={careConfig.mainLogo?.dark}
               alt="Care Logo"
@@ -148,7 +148,7 @@ export const PrintPrescription = (props: {
               const notes = medication.note;
               return {
                 medicine: medication.medication?.display,
-                status: t(medication.status),
+                status: t(`medication_status_${medication.status}`),
                 dosage: dosage,
                 frequency: instruction?.as_needed_boolean
                   ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
@@ -170,7 +170,7 @@ export const PrintPrescription = (props: {
                 return (
                   <div key={prescriberId} className="text-center">
                     <p className="text-sm text-gray-600 font-semibold">
-                      Dr. {prescriber.first_name} {prescriber.last_name}
+                      {formatName(prescriber)}
                     </p>
                   </div>
                 );

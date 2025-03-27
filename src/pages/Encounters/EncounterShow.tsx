@@ -3,55 +3,59 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
 import PageHeadTitle from "@/components/Common/PageHeadTitle";
-import PageTitle from "@/components/Common/PageTitle";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
+import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
+import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
-import { EncounterUpdatesTab } from "@/pages/Encounters/tabs/EncounterUpdatesTab";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
+import { EncounterDrawingsTab } from "./tabs/EncounterDrawingsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 
 export interface EncounterTabProps {
-  facilityId: string;
   encounter: Encounter;
   patient: Patient;
-  subPage?: string;
 }
 
 const defaultTabs = {
-  // feed: EncounterFeedTab,
-  updates: EncounterUpdatesTab,
+  updates: EncounterOverviewTab,
   plots: EncounterPlotsTab,
   medicines: EncounterMedicinesTab,
   files: EncounterFilesTab,
   notes: EncounterNotesTab,
+  devices: EncounterDevicesTab,
+  drawings: EncounterDrawingsTab,
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
   // pressure_sore: EncounterPressureSoreTab,
 } as Record<string, React.FC<EncounterTabProps>>;
 
 interface Props {
-  facilityId: string;
   patientId: string;
   encounterId: string;
+  facilityId?: string;
   tab?: string;
-  subPage?: string;
 }
 
 export const EncounterShow = (props: Props) => {
-  const { facilityId, encounterId, patientId, subPage } = props;
+  const { encounterId, patientId, facilityId } = props;
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
   const pluginTabs = useCareAppEncounterTabs();
 
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
@@ -59,17 +63,37 @@ export const EncounterShow = (props: Props) => {
     ...pluginTabs,
   };
 
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId ?? "" },
+    }),
+    enabled: !!facilityId,
+  });
+
+  const { canListEncounters, canWriteEncounter } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
+
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounterId },
-      queryParams: {
-        facility: facilityId,
-        patient: patientId,
-      },
+      queryParams: facilityId
+        ? {
+            facility: facilityId,
+          }
+        : {
+            patient: patientId,
+          },
     }),
-    enabled: !!encounterId,
+    enabled: !!encounterId && canListEncounters,
   });
+
+  const canWrite =
+    canWriteEncounter &&
+    !inactiveEncounterStatus.includes(encounterData?.status ?? "");
 
   if (isLoading || !encounterData) {
     return <Loading />;
@@ -78,8 +102,6 @@ export const EncounterShow = (props: Props) => {
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
     patient: encounterData.patient,
-    subPage: subPage,
-    facilityId,
   };
 
   if (!props.tab) {
@@ -100,9 +122,8 @@ export const EncounterShow = (props: Props) => {
     }`;
 
   return (
-    <div>
-      <nav className="relative flex flex-wrap items-start justify-between">
-        <PageTitle title={t("encounter")} />
+    <Page title={t("encounter")} className="block">
+      <nav className="relative flex flex-wrap items-start justify-between mt-4">
         <div
           className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center"
           id="consultationpage-header"
@@ -140,11 +161,12 @@ export const EncounterShow = (props: Props) => {
       </nav>
       <div className="mt-4 xl:mt-0 w-full border-b-2 border-secondary-200">
         <div className="mt-2 xl:mt-0 flex w-full flex-col md:flex-row">
-          <div className="size-full rounded-lg border bg-white text-black shadow">
+          <div className="size-full rounded-lg border border-gray-200 bg-white text-black shadow-sm">
             <PatientInfoCard
               patient={encounterData.patient}
               encounter={encounterData}
               fetchPatientData={() => {}}
+              canWrite={canWrite}
             />
 
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
@@ -170,8 +192,9 @@ export const EncounterShow = (props: Props) => {
                 {keysOf(tabs).map((tab) => (
                   <Link
                     key={tab}
+                    data-cy={`tab-${tab}`}
                     className={tabButtonClasses(props.tab === tab)}
-                    href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterData.id}/${tab}`}
+                    href={`${tab}`}
                   >
                     {t(`ENCOUNTER_TAB__${tab}`)}
                   </Link>
@@ -185,6 +208,6 @@ export const EncounterShow = (props: Props) => {
           <SelectedTab {...encounterTabProps} />
         </div>
       </div>
-    </div>
+    </Page>
   );
 };

@@ -1,6 +1,7 @@
 import { ValidateEnv } from "@julr/vite-plugin-validate-env";
 import federation from "@originjs/vite-plugin-federation";
 import reactScan from "@react-scan/vite-plugin-react-scan";
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import fs from "fs";
@@ -162,11 +163,13 @@ export default defineConfig(({ mode }) => {
   return {
     envPrefix: "REACT_",
     define: {
+      "process.env.IS_PREACT": JSON.stringify("true"),
       __CUSTOM_DESCRIPTION_HTML__: getDescriptionHtml(
         env.REACT_CUSTOM_DESCRIPTION || "",
       ),
     },
     plugins: [
+      tailwindcss(),
       federation({
         name: "core",
         remotes: getRemotes(env.REACT_ENABLED_APPS),

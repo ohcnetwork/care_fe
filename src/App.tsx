@@ -7,8 +7,7 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Suspense } from "react";
 
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 
 import Loading from "@/components/Common/Loading";
 
@@ -48,38 +47,37 @@ const queryClient = new QueryClient({
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Suspense fallback={<Loading />}>
-        <PubSubProvider>
-          <PluginEngine>
-            <HistoryAPIProvider>
-              <AuthUserProvider
-                unauthorized={<Routers.PublicRouter />}
-                otpAuthorized={<Routers.PatientRouter />}
-              >
-                <Routers.AppRouter />
-              </AuthUserProvider>
+    <>
+      <QueryClientProvider client={queryClient}>
+        <Suspense fallback={<Loading />}>
+          <PubSubProvider>
+            <PluginEngine>
+              <HistoryAPIProvider>
+                <AuthUserProvider
+                  unauthorized={<Routers.PublicRouter />}
+                  otpAuthorized={<Routers.PatientRouter />}
+                >
+                  <Routers.AppRouter />
+                </AuthUserProvider>
+              </HistoryAPIProvider>
+              <Toaster
+                position="top-right"
+                theme="light"
+                richColors
+                expand
+                // For `richColors` to work, pass at-least an empty object.
+                // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+                toastOptions={{ closeButton: true }}
+              />
+            </PluginEngine>
+          </PubSubProvider>
+        </Suspense>
 
-              {/* Integrations */}
-              <Integrations.Sentry disabled={!import.meta.env.PROD} />
-            </HistoryAPIProvider>
-            <Sonner
-              position="top-right"
-              theme="light"
-              richColors
-              expand
-              // For `richColors` to work, pass at-least an empty object.
-              // Refer: https://github.com/shadcn-ui/ui/issues/2234.
-              toastOptions={{ closeButton: true }}
-            />
-            <Toaster />
-          </PluginEngine>
-        </PubSubProvider>
-      </Suspense>
-
-      {/* Devtools are not included in production builds by default */}
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+        {/* Devtools are not included in production builds by default */}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+      <Integrations.Sentry disabled={!import.meta.env.PROD} />
+    </>
   );
 };
 

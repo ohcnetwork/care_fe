@@ -13,6 +13,13 @@ export class PatientEncounter {
     return this;
   }
 
+  searchEncounter(patientName: string) {
+    cy.get('[data-cy="search-encounter"]').click();
+    cy.typeIntoField("#encounter-search", patientName);
+    cy.get('[data-cy="search-encounter"]').click();
+    return this;
+  }
+
   clickUpdateEncounter() {
     cy.verifyAndClickElement(
       '[data-cy="update-encounter-option"]',
@@ -28,14 +35,11 @@ export class PatientEncounter {
 
   // Questionnaire actions
   addQuestionnaire(questionnaireName: string) {
-    cy.get('[data-cy="add-questionnaire-button"]').click();
-    cy.get('[role="dialog"] input')
-      .should("be.visible")
-      .type(questionnaireName);
-    cy.get('[role="dialog"] button')
-      .contains(questionnaireName)
-      .should("be.visible")
-      .click();
+    cy.typeAndSelectOption(
+      '[data-cy="add-questionnaire-button"]',
+      questionnaireName,
+      false,
+    );
     return this;
   }
 
@@ -50,22 +54,6 @@ export class PatientEncounter {
         }
       });
     });
-    return this;
-  }
-
-  submitQuestionnaire() {
-    this.clickSubmitQuestionnaire();
-    this.verifyQuestionnaireSubmission();
-    return this;
-  }
-
-  clickSubmitQuestionnaire() {
-    cy.clickSubmitButton("Submit");
-    return this;
-  }
-
-  verifyQuestionnaireSubmission() {
-    cy.verifyNotification("Questionnaire submitted successfully");
     return this;
   }
 
@@ -84,6 +72,45 @@ export class PatientEncounter {
 
   clickPatientEditButton() {
     cy.verifyAndClickElement('[data-cy="edit-patient-button"]', "Edit");
+    return this;
+  }
+
+  clickEncounterMarkAsComplete() {
+    cy.verifyAndClickElement(
+      '[data-cy="mark-encounter-complete"]',
+      "Mark as Complete",
+    );
+    return this;
+  }
+
+  clickConfirmEncounterAsComplete() {
+    cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounter");
+    cy.verifyAndClickElement(
+      '[data-cy="confirm-encounter-complete"]',
+      "Mark as Complete",
+    );
+    cy.wait("@getEncounter").then((interception) => {
+      expect(interception.response?.statusCode).to.eq(200); // Verify status code
+      expect(interception.response?.body).to.have.property(
+        "status",
+        "completed",
+      );
+    });
+    return this;
+  }
+
+  assertEncounterCompleteSuccess() {
+    cy.verifyNotification("Encounter Complete");
+    return this;
+  }
+
+  clickInProgressEncounterFilter() {
+    cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
+    cy.verifyAndClickElement('[data-cy="in-progress-filter"]', "In Progress");
+    cy.wait("@getEncounters", { timeout: 10000 }).then((interception) => {
+      expect(interception.request.url).to.include("status=in_progress");
+      expect(interception.response.statusCode).to.eq(200);
+    });
     return this;
   }
 }

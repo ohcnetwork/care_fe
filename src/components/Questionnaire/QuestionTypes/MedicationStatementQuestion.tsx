@@ -34,12 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -54,10 +49,18 @@ import {
   MedicationStatementStatus,
 } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
+import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+import {
+  FieldDefinitions,
+  useFieldError,
+  validateFields,
+} from "@/types/questionnaire/validation";
+
+import { FieldError } from "./FieldError";
 
 interface MedicationStatementQuestionProps {
   patientId: string;
@@ -70,6 +73,7 @@ interface MedicationStatementQuestionProps {
     note?: string,
   ) => void;
   disabled?: boolean;
+  errors: QuestionValidationError[];
 }
 
 const MEDICATION_STATEMENT_INITIAL_VALUE: MedicationStatementRequest = {
@@ -86,12 +90,43 @@ const MEDICATION_STATEMENT_INITIAL_VALUE: MedicationStatementRequest = {
   note: undefined,
 };
 
+const MEDICATION_STATEMENT_FIELDS: FieldDefinitions = {
+  DOSAGE: {
+    key: "dosage_text",
+    required: true,
+  },
+  PERIOD: {
+    key: "effective_period",
+    required: true,
+    validate: (value: unknown) => {
+      const period = value as { start?: string; end?: string };
+      return !!period?.start && !!period?.end;
+    },
+  },
+} as const;
+
+export function validateMedicationStatementQuestion(
+  values: MedicationStatementRequest[],
+  questionId: string,
+): QuestionValidationError[] {
+  return values.reduce((errors: QuestionValidationError[], value, index) => {
+    // Skip validation for medications marked as entered_in_error
+    if (value.status === "entered_in_error") return errors;
+    return [
+      ...errors,
+      ...validateFields(value, questionId, MEDICATION_STATEMENT_FIELDS, index),
+    ];
+  }, []);
+}
+
 export function MedicationStatementQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
   patientId,
   encounterId,
+  question,
+  errors,
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
   const isPreview = patientId === "preview";
@@ -218,31 +253,36 @@ export function MedicationStatementQuestion({
         <div className="md:overflow-x-auto w-auto pb-2">
           <div className="min-w-fit">
             <div
-              className={cn("max-w-[1600px] relative lg:border rounded-md", {
-                "bg-gray-50/50": !desktopLayout,
-              })}
+              className={cn(
+                "max-w-[1600px] relative lg:border border-gray-200 rounded-md",
+                {
+                  "bg-gray-50/50": !desktopLayout,
+                },
+              )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
-                <div className="font-semibold text-gray-600 p-3 border-r">
+              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_260px_190px_200px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("source")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("status")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("dosage_instructions")}
+                  <span className="text-red-500 ml-0.5">*</span>
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medication_taken_between")}
+                  <span className="text-red-500 ml-0.5">*</span>
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("reason")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("notes")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 sticky right-0 bg-gray-50 shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12" />
@@ -268,7 +308,7 @@ export function MedicationStatementQuestion({
                       >
                         <div
                           className={cn(
-                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-sm text-sm",
+                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-xs text-sm",
                             expandedMedicationIndex === index
                               ? "bg-gray-50"
                               : "bg-gray-100",
@@ -285,42 +325,39 @@ export function MedicationStatementQuestion({
                                 aria-label="Expand Medication Statement"
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-gray-500 hover:text-gray-900"
+                                className="size-8 text-gray-500 hover:text-gray-900"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setExpandedMedicationIndex(index);
                                 }}
                                 disabled={disabled}
                               >
-                                <Pencil2Icon className="h-4 w-4" />
+                                <Pencil2Icon className="size-4" />
                               </Button>
                             )}
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRemoveMedication(index);
-                                    }}
-                                    disabled={
-                                      disabled ||
-                                      medication.status === "entered_in_error"
-                                    }
-                                    className="h-8 w-8"
-                                  >
-                                    <MinusCircledIcon className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {medication.status === "entered_in_error"
-                                    ? t("medication_already_marked_as_error")
-                                    : t("remove_medication")}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <TooltipComponent
+                              content={
+                                medication.status === "entered_in_error"
+                                  ? t("medication_already_marked_as_error")
+                                  : t("remove_medication")
+                              }
+                            >
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveMedication(index);
+                                }}
+                                disabled={
+                                  disabled ||
+                                  medication.status === "entered_in_error"
+                                }
+                                className="size-8"
+                              >
+                                <MinusCircledIcon className="size-4" />
+                              </Button>
+                            </TooltipComponent>
                           </div>
                         </div>
                         <CollapsibleContent>
@@ -333,6 +370,8 @@ export function MedicationStatementQuestion({
                               }
                               onRemove={() => handleRemoveMedication(index)}
                               index={index}
+                              questionId={question.id}
+                              errors={errors}
                             />
                           </div>
                         </CollapsibleContent>
@@ -346,6 +385,8 @@ export function MedicationStatementQuestion({
                         }
                         onRemove={() => handleRemoveMedication(index)}
                         index={index}
+                        questionId={question.id}
+                        errors={errors}
                       />
                     )}
                   </React.Fragment>
@@ -374,6 +415,8 @@ interface MedicationStatementGridRowProps {
   onUpdate?: (medication: Partial<MedicationStatementRequest>) => void;
   onRemove?: () => void;
   index: number;
+  questionId: string;
+  errors?: QuestionValidationError[];
 }
 
 const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
@@ -382,29 +425,32 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
   onUpdate,
   onRemove,
   index,
+  questionId,
+  errors,
 }) => {
   const { t } = useTranslation();
   const desktopLayout = useBreakpoints({ lg: true, default: false });
   const isReadOnly = !!medication.id;
+  const { hasError } = useFieldError(questionId, errors, index);
 
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] border-b hover:bg-gray-50/50",
+        "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_260px_190px_200px_48px] border-b border-gray-200 hover:bg-gray-50/50",
         {
           "opacity-40 pointer-events-none":
             medication.status === "entered_in_error",
         },
       )}
     >
-      <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
+      <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
         <h4 className="text-base font-semibold break-words line-clamp-2 hidden lg:block">
           {index + 1}. {medication.medication?.display}
         </h4>
       </div>
 
       {/* Source */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("source")}</Label>
         <Select
           value={medication.information_source}
@@ -451,7 +497,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
 
       {/* Status */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("status")}</Label>
         <Select
           value={medication.status}
@@ -466,7 +512,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           <SelectContent>
             {MEDICATION_STATEMENT_STATUS.map((status) => (
               <SelectItem key={status} value={status}>
-                {t(`${status}`)}
+                {t(`medication_status_${status}`)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -474,46 +520,71 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
 
       {/* Dosage Instructions */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage_instructions")}
+          <span className="text-red-500 ml-0.5">*</span>
         </Label>
         <Input
           value={medication.dosage_text || ""}
           onChange={(e) => onUpdate?.({ dosage_text: e.target.value })}
           placeholder={t("enter_dosage_instructions")}
           disabled={disabled || isReadOnly}
-          className="h-9 text-sm"
+          className={cn(
+            "h-9 text-sm",
+            hasError(MEDICATION_STATEMENT_FIELDS.DOSAGE.key) &&
+              "border-red-500",
+          )}
+        />
+        <FieldError
+          fieldKey={MEDICATION_STATEMENT_FIELDS.DOSAGE.key}
+          questionId={questionId}
+          errors={errors}
+          index={index}
         />
       </div>
 
       {/* Period */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("medication_taken_between")}
+          <span className="text-red-500 ml-0.5">*</span>
         </Label>
-        <DateRangePicker
-          date={{
-            from: medication.effective_period?.start
-              ? new Date(medication.effective_period?.start)
-              : undefined,
-            to: medication.effective_period?.end
-              ? new Date(medication.effective_period?.end)
-              : undefined,
-          }}
-          onChange={(date) =>
-            onUpdate?.({
-              effective_period: {
-                start: date?.from?.toISOString(),
-                end: date?.to?.toISOString(),
-              },
-            })
-          }
+        <div
+          className={cn(
+            hasError(MEDICATION_STATEMENT_FIELDS.PERIOD.key) &&
+              "border border-red-500 rounded-md",
+          )}
+        >
+          <DateRangePicker
+            date={{
+              from: medication.effective_period?.start
+                ? new Date(medication.effective_period?.start)
+                : undefined,
+              to: medication.effective_period?.end
+                ? new Date(medication.effective_period?.end)
+                : undefined,
+            }}
+            onChange={(date) =>
+              onUpdate?.({
+                effective_period: {
+                  start: date?.from?.toISOString(),
+                  end: date?.to?.toISOString(),
+                },
+              })
+            }
+          />
+        </div>
+        <FieldError
+          fieldKey={MEDICATION_STATEMENT_FIELDS.PERIOD.key}
+          questionId={questionId}
+          errors={errors}
+          index={index}
         />
       </div>
 
       {/* Reason */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("reason")}</Label>
         <Input
           maxLength={100}
@@ -526,7 +597,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
 
       {/* Notes */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("notes")}</Label>
         {desktopLayout ? (
           <>
@@ -566,9 +637,9 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           size="icon"
           onClick={onRemove}
           disabled={disabled}
-          className="h-8 w-8"
+          className="size-8"
         >
-          <MinusCircledIcon className="h-4 w-4" />
+          <MinusCircledIcon className="size-4" />
         </Button>
       </div>
     </div>

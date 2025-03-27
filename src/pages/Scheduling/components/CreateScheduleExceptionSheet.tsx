@@ -34,6 +34,7 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
@@ -151,6 +152,11 @@ export default function CreateScheduleExceptionSheet({
     },
   });
 
+  const { data: isSchedulableResource } = useIsUserSchedulableResource(
+    facilityId,
+    userId,
+  );
+
   const unavailableAllDay = form.watch("unavailable_all_day");
 
   useEffect(() => {
@@ -187,7 +193,10 @@ export default function CreateScheduleExceptionSheet({
     >
       <SheetTrigger asChild>
         {trigger ?? (
-          <Button variant="primary" disabled={isPending}>
+          <Button
+            variant="primary"
+            disabled={isPending || !isSchedulableResource}
+          >
             {t("add_exception")}
           </Button>
         )}
@@ -201,7 +210,7 @@ export default function CreateScheduleExceptionSheet({
         </SheetHeader>
 
         <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
-          <div className="rounded-md bg-white p-4 shadow">
+          <div className="rounded-md bg-white p-4 shadow-sm">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}

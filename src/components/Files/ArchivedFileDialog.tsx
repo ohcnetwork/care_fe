@@ -1,18 +1,16 @@
 import dayjs from "dayjs";
 import { t } from "i18next";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { FileUploadModel } from "@/components/Patient/models";
 
@@ -42,16 +40,11 @@ export default function ArchivedFileDialog({
         <DialogHeader>
           <DialogTitle>
             {t("archived_file")}:{" "}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger className="max-w-[200px] truncate inline-block align-bottom">
-                  {fileName}
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{fileName}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <TooltipComponent content={fileName}>
+              <span className="max-w-sm truncate inline-block align-bottom">
+                {fileName}
+              </span>
+            </TooltipComponent>
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
@@ -59,7 +52,7 @@ export default function ArchivedFileDialog({
             <span className="text-sm text-gray-500">
               {t("archived_reason")}:
             </span>
-            <span>{file?.archive_reason}</span>
+            <span data-cy="archived-reason">{file?.archive_reason}</span>
           </div>
           <div className="flex flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
             <span>
@@ -71,6 +64,17 @@ export default function ArchivedFileDialog({
             </span>
           </div>
         </div>
+        <DialogFooter className="sm:justify-start">
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="secondary"
+              data-cy="archive-dialog-close"
+            >
+              {t("close")}
+            </Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -21,6 +21,10 @@ interface DateTimePickerProps {
   disabled?: boolean;
 }
 
+/**
+ * @deprecated This component will be removed in a future release.
+ * Please use the `Input` component with `type="datetime-local"` instead.
+ */
 export function DateTimePicker({
   value,
   onChange,
@@ -71,7 +75,7 @@ export function DateTimePicker({
             !value && "text-gray-500",
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className="mr-2 size-4" />
           {value ? (
             format(value, "dd/MM/yyyy hh:mm aa")
           ) : (
