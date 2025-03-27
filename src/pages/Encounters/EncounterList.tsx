@@ -202,6 +202,7 @@ export function EncounterList({
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
+                      data-cy="search-encounter"
                       variant="outline"
                       size="sm"
                       className={cn(

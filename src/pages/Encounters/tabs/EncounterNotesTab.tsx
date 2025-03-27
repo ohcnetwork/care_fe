@@ -104,6 +104,7 @@ const ThreadItem = ({
         : "hover:bg-gray-100 hover:border-gray-200",
     )}
     onClick={onClick}
+    data-cy="thread-title"
   >
     <div className="flex items-start justify-between gap-3">
       <div className="flex-1 min-w-0">
@@ -255,6 +256,7 @@ const NewThreadDialog = ({
               placeholder={t("encounter_notes__enter_discussion_title")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              data-cy="new-thread-title-input"
             />
           </div>
         </div>
@@ -267,6 +269,7 @@ const NewThreadDialog = ({
           <Button
             onClick={() => onCreate(title)}
             disabled={!title.trim() || isCreating}
+            data-cy="create-thread-button"
           >
             {isCreating ? (
               <Loader2 className="size-4 animate-spin mr-2" />
@@ -488,6 +491,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
             </div>
             {canWriteCurrentEncounter && (
               <Button
+                data-cy="new-thread-button"
                 variant="outline"
                 size="sm"
                 onClick={() => setShowNewThreadDialog(true)}
@@ -627,7 +631,10 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                 <>
                   {/* Messages List */}
                   <ScrollArea className="flex-1 px-4 h-full max-h-screen">
-                    <div className="flex flex-col-reverse h-full py-4">
+                    <div
+                      className="flex flex-col-reverse h-full py-4"
+                      data-cy="chat-messages"
+                    >
                       <div ref={messagesEndRef} />
                       {messages.length === 0 ? (
                         <div className="text-center py-8">
@@ -669,6 +676,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
+                            data-cy="encounter-notes-chat-message-input"
                             placeholder={t("encounter_notes__type_message")}
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
@@ -683,6 +691,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                             className="flex-1 min-h-20 max-h-[50vh]"
                           />
                           <Button
+                            data-cy="send-chat-message-button"
                             type="submit"
                             size="icon"
                             disabled={
