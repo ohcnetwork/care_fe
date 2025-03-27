@@ -194,7 +194,7 @@ export function EncounterList({
         </Badge>
       }
     >
-      <div className="space-y-4 mt-2 flex flex-col px-6">
+      <div className="space-y-4 mt-4 flex flex-col">
         <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
