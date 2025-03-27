@@ -186,7 +186,7 @@ export default function LocationView({ id, facilityId }: Props) {
                     onClick={handleAddLocation}
                     className="w-full md:w-auto"
                   >
-                    <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
+                    <CareIcon icon="l-plus" className="size-4 mr-2" />
                     {t("add_location")}
                   </Button>
                 )}
@@ -198,7 +198,7 @@ export default function LocationView({ id, facilityId }: Props) {
                     facilityId={facilityId}
                     trigger={
                       <Button variant="outline" className="w-full md:w-auto">
-                        <CareIcon icon="l-building" className="h-4 w-4 mr-2" />
+                        <CareIcon icon="l-building" className="size-4 mr-2" />
                         {t("manage_organization_other")}
                       </Button>
                     }

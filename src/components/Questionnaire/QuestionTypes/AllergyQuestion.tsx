@@ -210,23 +210,23 @@ export function AllergyQuestion({
   return (
     <>
       {allergies.length > 0 && (
-        <div className="rounded-lg border">
+        <div className="rounded-lg border border-gray-200">
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px]"></TableHead>
-                  <TableHead className="w-[220px]">{t("substance")}</TableHead>
-                  <TableHead className="w-[65px] text-center px-0.5">
+                  <TableHead className="w-[10%] max-w-[3rem]"></TableHead>
+                  <TableHead className="w-[40%]">{t("substance")}</TableHead>
+                  <TableHead className="w-[15%] text-center">
                     {t("criticality")}
                   </TableHead>
-                  <TableHead className="w-[85px] text-center px-0.5">
+                  <TableHead className="w-[15%] text-center">
                     {t("status")}
                   </TableHead>
-                  <TableHead className="w-[100px] text-center px-0.5 pr-6">
+                  <TableHead className="w-[15%] text-center">
                     {t("occurrence")}
                   </TableHead>
-                  <TableHead className="w-[35px]"></TableHead>
+                  <TableHead className="w-[5%]">{t("action")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -268,7 +268,7 @@ export function AllergyQuestion({
                       }
                       disabled={disabled || !!allergy.id}
                     >
-                      <SelectTrigger className="h-8 w-[32px] px-0 [&>svg]:hidden flex items-center justify-center">
+                      <SelectTrigger className="h-8 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center">
                         <SelectValue>
                           {allergy.category &&
                             CATEGORY_ICONS[allergy.category as AllergyCategory]}
@@ -295,9 +295,9 @@ export function AllergyQuestion({
                         variant="ghost"
                         size="icon"
                         disabled={disabled}
-                        className="h-8 w-8"
+                        className="size-8"
                       >
-                        <DotsVerticalIcon className="h-4 w-4" />
+                        <DotsVerticalIcon className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -308,7 +308,7 @@ export function AllergyQuestion({
                           })
                         }
                       >
-                        <Pencil2Icon className="h-4 w-4 mr-2" />
+                        <Pencil2Icon className="size-4 mr-2" />
                         {allergy.note !== undefined
                           ? "Hide Notes"
                           : "Add Notes"}
@@ -321,7 +321,7 @@ export function AllergyQuestion({
                             })
                           }
                         >
-                          <CheckCircledIcon className="h-4 w-4 mr-2" />
+                          <CheckCircledIcon className="size-4 mr-2" />
                           {t("mark_active")}
                         </DropdownMenuItem>
                       )}
@@ -333,7 +333,7 @@ export function AllergyQuestion({
                             })
                           }
                         >
-                          <CircleBackslashIcon className="h-4 w-4 mr-2" />
+                          <CircleBackslashIcon className="size-4 mr-2" />
                           {t("mark_inactive")}
                         </DropdownMenuItem>
                       )}
@@ -345,7 +345,7 @@ export function AllergyQuestion({
                             })
                           }
                         >
-                          <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
+                          <CheckCircledIcon className="size-4 mr-2 text-green-600" />
                           {t("mark_resolved")}
                         </DropdownMenuItem>
                       )}
@@ -354,7 +354,7 @@ export function AllergyQuestion({
                         className="text-destructive focus:text-destructive"
                         onClick={() => handleRemoveAllergy(index)}
                       >
-                        <MinusCircledIcon className="h-4 w-4 mr-2" />
+                        <MinusCircledIcon className="size-4 mr-2" />
                         {t("remove_allergy")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -424,7 +424,7 @@ export function AllergyQuestion({
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="h-7 text-sm px-2 justify-start font-normal"
+                          className="h-7 text-sm px-2 justify-start font-normal w-full"
                           disabled={disabled}
                         >
                           {allergy.last_occurrence ? (
@@ -560,13 +560,13 @@ const AllergyTableRow = ({
   return (
     <>
       <TableRow className={rowClassName}>
-        <TableCell className="min-w-[40px] py-1 pr-0">
+        <TableCell className="py-1 pr-0">
           <Select
             value={allergy.category}
             onValueChange={(value) => onUpdate?.({ category: value })}
             disabled={disabled || !!allergy.id}
           >
-            <SelectTrigger className="h-7 w-[32px] px-0 [&>svg]:hidden flex items-center justify-center">
+            <SelectTrigger className="h-7 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center">
               <SelectValue
                 placeholder="Cat"
                 className="text-center h-full flex items-center justify-center m-0 p-0"
@@ -592,16 +592,16 @@ const AllergyTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[220px] font-medium py-1 pl-1">
+        <TableCell className="font-medium py-1 pl-1">
           {allergy.code.display}
         </TableCell>
-        <TableCell className="min-w-[65px] py-1 px-0.5">
+        <TableCell className="py-1 px-0.5">
           <Select
             value={allergy.criticality}
             onValueChange={(value) => onUpdate?.({ criticality: value })}
             disabled={disabled}
           >
-            <SelectTrigger className="h-7 w-[65px] px-1">
+            <SelectTrigger className="h-7 w-full px-1 text-sm">
               <SelectValue placeholder={t("critical")} />
             </SelectTrigger>
             <SelectContent>
@@ -613,7 +613,7 @@ const AllergyTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[85px] py-1 px-0.5">
+        <TableCell className="py-1 px-0.5">
           <Select
             value={allergy.verification_status}
             onValueChange={(value) => {
@@ -625,7 +625,7 @@ const AllergyTableRow = ({
             }}
             disabled={disabled}
           >
-            <SelectTrigger className="h-7 w-[85px] px-1">
+            <SelectTrigger className="h-7 w-full px-1 text-sm">
               <SelectValue placeholder={t("verify")} />
             </SelectTrigger>
             <SelectContent>
@@ -639,12 +639,12 @@ const AllergyTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[100px] py-1 px-1">
+        <TableCell className="py-1 px-1">
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="h-7 text-sm px-2 justify-start font-normal"
+                className="h-7 text-sm px-2 justify-start font-normal w-full"
                 disabled={disabled}
               >
                 {allergy.last_occurrence ? (
@@ -700,7 +700,7 @@ const AllergyTableRow = ({
             </PopoverContent>
           </Popover>
         </TableCell>
-        <TableCell className="min-w-[35px] py-1 px-0">
+        <TableCell className="py-1 px-0 flex justify-center items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -714,14 +714,14 @@ const AllergyTableRow = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleNotesToggle}>
-                <Pencil2Icon className="h-4 w-4 mr-2" />
+                <Pencil2Icon className="size-4 mr-2" />
                 {showNotes ? t("hide_notes") : t("add_notes")}
               </DropdownMenuItem>
               {allergy.clinical_status !== "active" && (
                 <DropdownMenuItem
                   onClick={() => onUpdate?.({ clinical_status: "active" })}
                 >
-                  <CheckCircledIcon className="h-4 w-4 mr-2" />
+                  <CheckCircledIcon className="size-4 mr-2" />
                   {t("mark_active")}
                 </DropdownMenuItem>
               )}
@@ -729,7 +729,7 @@ const AllergyTableRow = ({
                 <DropdownMenuItem
                   onClick={() => onUpdate?.({ clinical_status: "inactive" })}
                 >
-                  <CircleBackslashIcon className="h-4 w-4 mr-2" />
+                  <CircleBackslashIcon className="size-4 mr-2" />
                   {t("mark_inactive")}
                 </DropdownMenuItem>
               )}
@@ -737,7 +737,7 @@ const AllergyTableRow = ({
                 <DropdownMenuItem
                   onClick={() => onUpdate?.({ clinical_status: "resolved" })}
                 >
-                  <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
+                  <CheckCircledIcon className="size-4 mr-2 text-green-600" />
                   {t("mark_resolved")}
                 </DropdownMenuItem>
               )}
@@ -746,7 +746,7 @@ const AllergyTableRow = ({
                 className="text-destructive focus:text-destructive"
                 onClick={onRemove}
               >
-                <MinusCircledIcon className="h-4 w-4 mr-2" />
+                <MinusCircledIcon className="size-4 mr-2" />
                 {t("remove_allergy")}
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -54,7 +54,7 @@ export function BedListing({
               <RadioGroupItem
                 value={bed.id}
                 id={bed.id}
-                className="h-4 w-4"
+                className="size-4"
                 disabled={!isClickable}
                 onClick={(e) => e.stopPropagation()}
               />
@@ -72,7 +72,7 @@ export function BedListing({
                         : "/images/bed-unavailable.svg"
                   }
                   alt="Bed"
-                  className="h-10 w-10 mt-4"
+                  className="size-10 mt-4"
                 />
               </div>
               <p className="text-xs text-center font-medium mt-2">{bed.name}</p>

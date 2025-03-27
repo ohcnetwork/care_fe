@@ -90,7 +90,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
     <div>
       {!phone_number || !year_of_birth || !partial_id ? (
         <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle className="size-4" />
           <AlertDescription>
             {t("missing_required_params_for_patient_verification")}
           </AlertDescription>
@@ -102,7 +102,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
               <div className="flex flex-col justify-between gap-4 gap-y-2 md:flex-row">
                 <div className="flex flex-col gap-4 md:flex-row">
                   <div className="flex flex-row gap-x-4">
-                    <div className="h-10 w-10 flex-shrink-0 md:h-14 md:w-14">
+                    <div className="size-10 shrink-0 md:size-14">
                       <Avatar
                         className="size-10 font-semibold text-secondary-800 md:size-auto"
                         name={patientData.name || "-"}
@@ -149,15 +149,15 @@ export default function VerifyPatient(props: { facilityId: string }) {
                   <Button
                     asChild
                     variant="outline"
-                    className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-gradient-to-br from-blue-50 to-indigo-50 p-0 shadow-md hover:shadow-xl transition-all duration-300"
+                    className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-linear-to-br from-blue-50 to-indigo-50 p-0 shadow-md hover:shadow-xl transition-all duration-300"
                   >
                     <Link
                       href={`/facility/${props.facilityId}/patient/${patientData.id}/book-appointment`}
                       className="p-4 md:p-6"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
+                      <div className="absolute inset-0 bg-linear-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
                       <div className="relative flex w-full items-center gap-3 md:gap-4">
-                        <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                        <div className="flex size-10 md:size-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
                           <CalendarIcon className="size-5 md:size-6 text-primary" />
                         </div>
                         <div className="flex flex-col items-start gap-0.5">
@@ -186,12 +186,12 @@ export default function VerifyPatient(props: { facilityId: string }) {
                       <Button
                         variant="outline"
                         data-cy="create-encounter-button"
-                        className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-gradient-to-br from-emerald-50 to-teal-50 p-0 shadow-md hover:shadow-xl transition-all duration-300 justify-start"
+                        className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-linear-to-br from-emerald-50 to-teal-50 p-0 shadow-md hover:shadow-xl transition-all duration-300 justify-start"
                       >
                         <div className="w-full p-4 md:p-6">
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
+                          <div className="absolute inset-0 bg-linear-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
                           <div className="relative flex w-full items-center gap-3 md:gap-4">
-                            <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                            <div className="flex size-10 md:size-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
                               <CareIcon
                                 icon="l-stethoscope"
                                 className="size-5 md:size-6 text-primary"
@@ -243,7 +243,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                     <div className="rounded-full bg-primary/10 p-2 md:p-3 mb-3 md:mb-4">
                       <CareIcon
                         icon="l-folder-open"
-                        className="h-5 w-5 md:h-6 md:w-6 text-primary"
+                        className="size-5 md:size-6 text-primary"
                       />
                     </div>
                     <h3 className="text-base md:text-lg font-semibold mb-1">
