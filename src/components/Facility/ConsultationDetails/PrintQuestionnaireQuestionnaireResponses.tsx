@@ -186,7 +186,7 @@ export function EncounterDetails({
         />
         <DetailRow
           label={t("mobile_number")}
-          value={encounter && formatPhoneNumber(patient.phone_number)}
+          value={formatPhoneNumber(patient.phone_number)}
           isStrong
         />
       </div>
