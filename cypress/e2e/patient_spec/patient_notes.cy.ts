@@ -35,9 +35,10 @@ describe("Encounter Notes", () => {
   it("Create multiple threads and verify the messages are multi-user contribution supported", () => {
     patientEncounter
       .navigateToEncounters()
-      .openOngoingEncounter()
-      .openEncounterNotesTab();
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails();
     patientNotes
+      .clickNotesTab()
       .clickNewThreadButton()
       .typeThreadTitle(testData.firstThreadTitle)
       .clickCreateThreadButton()

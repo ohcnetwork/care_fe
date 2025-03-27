@@ -4,6 +4,11 @@ export class PatientNotes {
     return this;
   }
 
+  clickNotesTab() {
+    cy.verifyAndClickElement('[data-cy="tab-notes"]', "Notes");
+    return this;
+  }
+
   typeThreadTitle(title: string) {
     cy.typeIntoField('[data-cy="new-thread-title-input"]', title);
     return this;
