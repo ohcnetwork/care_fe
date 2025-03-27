@@ -61,10 +61,10 @@ export default function FacilityOrganizationList({
   const handleOrganizationSelect = useCallback(
     (organization: FacilityOrganization) => {
       navigate(
-        `/facility/${facilityId}/settings/departments/${organization.id}/users`,
+        `/facility/${facilityId}/settings/departments/${organization.id}/${currentTab}`,
       );
     },
-    [facilityId],
+    [facilityId, currentTab],
   );
 
   const handleToggleExpand = useCallback((organizationId: string) => {
@@ -153,17 +153,31 @@ export default function FacilityOrganizationList({
         onToggleExpand={handleToggleExpand}
         onOrganizationSelect={handleOrganizationSelect}
       />
-      <div className="flex-1 bg-white rounded-lg shadow-lg pt-4">
-        {orgParents.length > 0 && (
+      <div className="flex-1 md:bg-white md:rounded-lg md:shadow-lg pt-4">
+        {organizationId && (
           <div className="md:px-6 py-2 flex items-center gap-2 mx-auto max-w-4xl">
             <Breadcrumb>
               <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    asChild
+                    className="hover:text-primary cursor-pointer font-medium text-primary"
+                    onClick={() =>
+                      navigate(`/facility/${facilityId}/settings/${currentTab}`)
+                    }
+                  >
+                    <button type="button">{t("departments")}</button>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                </BreadcrumbItem>
                 {orgParents.reverse().map((parent) => (
                   <React.Fragment key={parent.id}>
                     <BreadcrumbItem>
                       <BreadcrumbLink
                         asChild
-                        className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                        className="hover:text-primary cursor-pointer font-medium text-primary"
                         onClick={() => handleParentClick(parent.id)}
                       >
                         <button type="button">{parent.name}</button>
@@ -175,9 +189,7 @@ export default function FacilityOrganizationList({
                   </React.Fragment>
                 ))}
                 <BreadcrumbItem key={org?.id}>
-                  <span className="text-sm font-semibold text-gray-900">
-                    {org?.name}
-                  </span>
+                  <span className="text-sm">{org?.name}</span>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
