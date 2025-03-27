@@ -120,7 +120,7 @@ export function RelativeDatePicker({
   return (
     <div className="flex flex-col h-[200px]">
       {/* Input and Unit Selection */}
-      <div className="flex flex-col gap-2 p-2 items-center border-b">
+      <div className="flex flex-col gap-2 p-2 items-center border-b border-gray-200">
         <div className="w-full h-full"></div>
 
         <div className="grid grid-cols-2 gap-2">

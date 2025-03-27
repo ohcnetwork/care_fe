@@ -111,7 +111,7 @@ export default function FacilityOrganizationView({
             <div className="relative">
               <CareIcon
                 icon="l-search"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
               />
               <Input
                 placeholder={t("search_by_department_team_name")}

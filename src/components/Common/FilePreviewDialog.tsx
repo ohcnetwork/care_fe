@@ -338,7 +338,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       className="text-white"
                       download={`${file_state.name}.${file_state.extension}`}
                     >
-                      <CareIcon icon="l-file-download" className="h-4 w-4" />
+                      <CareIcon icon="l-file-download" className="size-4" />
                       <span>{t("download")}</span>
                     </a>
                   </Button>
@@ -357,7 +357,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   disabled={index <= 0}
                   aria-label="Previous file"
                 >
-                  <CareIcon icon="l-arrow-left" className="h-4 w-4" />
+                  <CareIcon icon="l-arrow-left" className="size-4" />
                 </Button>
               )}
               <div
@@ -431,7 +431,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   disabled={index >= uploadedFiles.length - 1}
                   aria-label={t("next_file")}
                 >
-                  <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+                  <CareIcon icon="l-arrow-right" className="size-4" />
                 </Button>
               )}
             </div>
@@ -478,7 +478,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         key={index}
                         onClick={button[2] as () => void}
                         className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
+                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
                           index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
                         )}
                         disabled={button[3] as boolean}
@@ -524,7 +524,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         key={index}
                         onClick={button[2] as () => void}
                         className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
+                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
                           index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
                         )}
                         disabled={button[3] as boolean}

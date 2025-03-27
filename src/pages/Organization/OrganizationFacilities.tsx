@@ -155,7 +155,7 @@ export default function OrganizationFacilities({
                             {t("view_facility")}
                             <CareIcon
                               icon="l-arrow-up-right"
-                              className="h-4 w-4"
+                              className="size-4"
                             />
                           </Link>
                         </Button>

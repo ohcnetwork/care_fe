@@ -85,12 +85,12 @@ export const PatientHome = (props: {
     >
       <div className="mt-3 overflow-y-auto" data-testid="patient-dashboard">
         <div className="px-3 md:px-0">
-          <div className="rounded-md bg-white p-3 shadow-sm">
+          <div className="rounded-md bg-white p-3 shadow-xs">
             <div>
               <div className="flex flex-col justify-between gap-4 gap-y-2 md:flex-row">
                 <div className="flex flex-col gap-4 md:flex-row">
                   <div className="flex flex-row gap-x-4">
-                    <div className="h-10 w-10 flex-shrink-0 md:h-14 md:w-14">
+                    <div className="size-10 shrink-0 md:size-14">
                       <Avatar
                         className="size-10 font-semibold text-secondary-800 md:size-auto"
                         name={patientData.name}
@@ -135,7 +135,7 @@ export const PatientHome = (props: {
         </div>
 
         <div
-          className="sticky top-0 z-10 mt-4 w-full border-b bg-gray-50"
+          className="sticky top-0 z-10 mt-4 w-full border-b border-gray-200 bg-gray-50"
           role="navigation"
         >
           <div className="overflow-x-auto pb-3">
@@ -193,7 +193,7 @@ export const PatientHome = (props: {
                 </div>
               </div>
             </section>
-            <hr />
+            <hr className="border-gray-200" />
             <div
               id="actions"
               className="my-2 flex h-full flex-col justify-between space-y-2"

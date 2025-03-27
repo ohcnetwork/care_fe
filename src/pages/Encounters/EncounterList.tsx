@@ -69,7 +69,7 @@ function EmptyState() {
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
-        <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
+        <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">No encounters found</h3>
       <p className="text-sm text-gray-500 mb-4">
@@ -195,7 +195,7 @@ export function EncounterList({
       }
     >
       <div className="space-y-4 mt-2 flex flex-col px-6">
-        <div className="rounded-lg border bg-card shadow-sm flex flex-col">
+        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
@@ -210,7 +210,7 @@ export function EncounterList({
                           "bg-primary/10 text-primary hover:bg-primary/20",
                       )}
                     >
-                      <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-search" className="mr-2 size-4" />
                       {name || encounter_id || external_identifier ? (
                         <span className="truncate">
                           {name || encounter_id || external_identifier}
@@ -351,28 +351,25 @@ export function EncounterList({
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="planned">
                         <div className="flex items-center">
-                          <CareIcon
-                            icon="l-calender"
-                            className="mr-2 h-4 w-4"
-                          />
+                          <CareIcon icon="l-calender" className="mr-2 size-4" />
                           Planned
                         </div>
                       </SelectItem>
                       <SelectItem value="in_progress">
                         <div className="flex items-center">
-                          <CareIcon icon="l-spinner" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-spinner" className="mr-2 size-4" />
                           In Progress
                         </div>
                       </SelectItem>
                       <SelectItem value="completed">
                         <div className="flex items-center">
-                          <CareIcon icon="l-check" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-check" className="mr-2 size-4" />
                           Completed
                         </div>
                       </SelectItem>
                       <SelectItem value="cancelled">
                         <div className="flex items-center">
-                          <CareIcon icon="l-x" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-x" className="mr-2 size-4" />
                           Cancelled
                         </div>
                       </SelectItem>
@@ -399,22 +396,19 @@ export function EncounterList({
                       <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="imp">
                         <div className="flex items-center">
-                          <CareIcon
-                            icon="l-hospital"
-                            className="mr-2 h-4 w-4"
-                          />
+                          <CareIcon icon="l-hospital" className="mr-2 size-4" />
                           Inpatient
                         </div>
                       </SelectItem>
                       <SelectItem value="amb">
                         <div className="flex items-center">
-                          <CareIcon icon="l-user" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-user" className="mr-2 size-4" />
                           Ambulatory
                         </div>
                       </SelectItem>
                       <SelectItem value="obsenc">
                         <div className="flex items-center">
-                          <CareIcon icon="l-eye" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-eye" className="mr-2 size-4" />
                           Observation
                         </div>
                       </SelectItem>
@@ -422,20 +416,20 @@ export function EncounterList({
                         <div className="flex items-center">
                           <CareIcon
                             icon="l-ambulance"
-                            className="mr-2 h-4 w-4"
+                            className="mr-2 size-4"
                           />
                           Emergency
                         </div>
                       </SelectItem>
                       <SelectItem value="vr">
                         <div className="flex items-center">
-                          <CareIcon icon="l-video" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-video" className="mr-2 size-4" />
                           Virtual
                         </div>
                       </SelectItem>
                       <SelectItem value="hh">
                         <div className="flex items-center">
-                          <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-home" className="mr-2 size-4" />
                           Home Health
                         </div>
                       </SelectItem>
@@ -471,7 +465,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-calender" className="mr-2 size-4" />
                         {t("encounter_status__planned")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -485,7 +479,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-spinner" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-spinner" className="mr-2 size-4" />
                         {t("encounter_class__in_progress")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -498,7 +492,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-home" className="mr-2 size-4" />
                         {t("discharge")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -511,7 +505,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-check" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-check" className="mr-2 size-4" />
                         {t("completed")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -524,7 +518,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-x" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-x" className="mr-2 size-4" />
                         {t("cancelled")}
                       </TabsTrigger>
                     </div>
@@ -564,7 +558,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-hospital" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-hospital" className="mr-2 size-4" />
                       {t("encounter_class__imp")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -578,7 +572,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-user" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-user" className="mr-2 size-4" />
                       {t("encounter_class__amb")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -592,7 +586,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-eye" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("encounter_class__obsenc")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -606,7 +600,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-ambulance" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-ambulance" className="mr-2 size-4" />
                       {t("emergency")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -620,7 +614,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-video" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-video" className="mr-2 size-4" />
                       {t("encounter_class__vr")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -634,7 +628,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-home" className="mr-2 size-4" />
                       {t("encounter_class__hh")}
                     </TabsTrigger>
                   </div>

@@ -34,7 +34,7 @@ export function LocationCardList({
         >
           <CardHeader className="p-4">
             <div className="flex justify-between items-center mb-2">
-              <Building2 className="h-5 w-5 text-blue-500" />
+              <Building2 className="size-5 text-blue-500" />
               <Badge
                 variant="secondary"
                 className={LocationTypeBadgeColors[location.form]}
@@ -44,7 +44,7 @@ export function LocationCardList({
             </div>
             <div className="flex justify-between items-center">
               <p className="text-sm font-medium">{location.name}</p>
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="size-5" />
             </div>
           </CardHeader>
         </Card>
