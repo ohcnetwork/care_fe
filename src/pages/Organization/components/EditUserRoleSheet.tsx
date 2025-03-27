@@ -146,11 +146,11 @@ export default function EditUserRoleSheet({
             </SheetDescription>
           </SheetHeader>
           <div className="space-y-6 py-4">
-            <div className="rounded-lg border p-4 space-y-4">
+            <div className="rounded-lg border border-gray-200 p-4 space-y-4">
               <div className="flex items-start gap-4">
                 <Avatar
                   name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                  className="h-12 w-12"
+                  className="size-12"
                   imageUrl={userRole.user.profile_picture_url}
                 />
                 <div className="flex flex-col flex-1">
@@ -163,7 +163,7 @@ export default function EditUserRoleSheet({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
                 <div>
                   <span className="text-sm text-gray-500">{t("username")}</span>
                   <p className="text-sm font-medium">

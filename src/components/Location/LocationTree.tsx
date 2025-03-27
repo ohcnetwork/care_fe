@@ -29,7 +29,7 @@ function LocationNode({
     return (
       <div className="flex flex-col gap-2">
         <div className="flex items-center text-sm">
-          <span className="w-2 h-2 rounded-full bg-gray-400 mr-2" />
+          <span className="size-2 rounded-full bg-gray-400 mr-2" />
           <span
             className={isLast ? "font-semibold" : "text-gray-700 font-medium"}
           >
@@ -52,7 +52,7 @@ function LocationNode({
         <div className="flex items-center text-sm">
           <CareIcon
             icon="l-corner-down-right"
-            className="w-4 h-4 mr-2 mb-1 text-gray-400"
+            className="size-4 mr-2 mb-1 text-gray-400"
           />
           <span
             className={isLast ? "font-semibold" : "text-gray-700 font-medium"}
@@ -87,11 +87,11 @@ export function LocationTree({
             className={`absolute w-px bg-gray-200 h-full ${isLatest ? "top-3" : "-top-3"}`}
           />
           <div
-            className={`h-6 w-6 rounded-full ${isLatest ? "bg-green-100" : "bg-gray-100"} flex items-center justify-center z-10`}
+            className={`size-6 rounded-full ${isLatest ? "bg-green-100" : "bg-gray-100"} flex items-center justify-center z-10`}
           >
             <CareIcon
               icon={isLatest ? "l-location-point" : "l-check"}
-              className={`h-4 w-4 ${isLatest ? "text-green-600" : "text-gray-600"}`}
+              className={`size-4 ${isLatest ? "text-green-600" : "text-gray-600"}`}
             />
           </div>
           {!isLatest && <div className="flex-1 w-px bg-gray-200" />}

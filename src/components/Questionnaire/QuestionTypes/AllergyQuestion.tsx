@@ -210,7 +210,7 @@ export function AllergyQuestion({
   return (
     <>
       {allergies.length > 0 && (
-        <div className="rounded-lg border">
+        <div className="rounded-lg border border-gray-200">
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
@@ -295,9 +295,9 @@ export function AllergyQuestion({
                         variant="ghost"
                         size="icon"
                         disabled={disabled}
-                        className="h-8 w-8"
+                        className="size-8"
                       >
-                        <DotsVerticalIcon className="h-4 w-4" />
+                        <DotsVerticalIcon className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -308,7 +308,7 @@ export function AllergyQuestion({
                           })
                         }
                       >
-                        <Pencil2Icon className="h-4 w-4 mr-2" />
+                        <Pencil2Icon className="size-4 mr-2" />
                         {allergy.note !== undefined
                           ? "Hide Notes"
                           : "Add Notes"}
@@ -321,7 +321,7 @@ export function AllergyQuestion({
                             })
                           }
                         >
-                          <CheckCircledIcon className="h-4 w-4 mr-2" />
+                          <CheckCircledIcon className="size-4 mr-2" />
                           {t("mark_active")}
                         </DropdownMenuItem>
                       )}
@@ -333,7 +333,7 @@ export function AllergyQuestion({
                             })
                           }
                         >
-                          <CircleBackslashIcon className="h-4 w-4 mr-2" />
+                          <CircleBackslashIcon className="size-4 mr-2" />
                           {t("mark_inactive")}
                         </DropdownMenuItem>
                       )}
@@ -345,7 +345,7 @@ export function AllergyQuestion({
                             })
                           }
                         >
-                          <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
+                          <CheckCircledIcon className="size-4 mr-2 text-green-600" />
                           {t("mark_resolved")}
                         </DropdownMenuItem>
                       )}
@@ -354,7 +354,7 @@ export function AllergyQuestion({
                         className="text-destructive focus:text-destructive"
                         onClick={() => handleRemoveAllergy(index)}
                       >
-                        <MinusCircledIcon className="h-4 w-4 mr-2" />
+                        <MinusCircledIcon className="size-4 mr-2" />
                         {t("remove_allergy")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -714,14 +714,14 @@ const AllergyTableRow = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleNotesToggle}>
-                <Pencil2Icon className="h-4 w-4 mr-2" />
+                <Pencil2Icon className="size-4 mr-2" />
                 {showNotes ? t("hide_notes") : t("add_notes")}
               </DropdownMenuItem>
               {allergy.clinical_status !== "active" && (
                 <DropdownMenuItem
                   onClick={() => onUpdate?.({ clinical_status: "active" })}
                 >
-                  <CheckCircledIcon className="h-4 w-4 mr-2" />
+                  <CheckCircledIcon className="size-4 mr-2" />
                   {t("mark_active")}
                 </DropdownMenuItem>
               )}
@@ -729,7 +729,7 @@ const AllergyTableRow = ({
                 <DropdownMenuItem
                   onClick={() => onUpdate?.({ clinical_status: "inactive" })}
                 >
-                  <CircleBackslashIcon className="h-4 w-4 mr-2" />
+                  <CircleBackslashIcon className="size-4 mr-2" />
                   {t("mark_inactive")}
                 </DropdownMenuItem>
               )}
@@ -737,7 +737,7 @@ const AllergyTableRow = ({
                 <DropdownMenuItem
                   onClick={() => onUpdate?.({ clinical_status: "resolved" })}
                 >
-                  <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
+                  <CheckCircledIcon className="size-4 mr-2 text-green-600" />
                   {t("mark_resolved")}
                 </DropdownMenuItem>
               )}
@@ -746,7 +746,7 @@ const AllergyTableRow = ({
                 className="text-destructive focus:text-destructive"
                 onClick={onRemove}
               >
-                <MinusCircledIcon className="h-4 w-4 mr-2" />
+                <MinusCircledIcon className="size-4 mr-2" />
                 {t("remove_allergy")}
               </DropdownMenuItem>
             </DropdownMenuContent>
