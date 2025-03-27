@@ -4,7 +4,7 @@ export class PatientNotes {
     return this;
   }
 
-  clickNotesTab() {
+  openEncounterNotesTab() {
     cy.verifyAndClickElement('[data-cy="tab-notes"]', "Notes");
     return this;
   }

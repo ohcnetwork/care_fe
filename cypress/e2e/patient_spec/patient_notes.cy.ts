@@ -38,7 +38,7 @@ describe("Encounter Notes", () => {
       .clickInProgressEncounterFilter()
       .openFirstEncounterDetails();
     patientNotes
-      .clickNotesTab()
+      .openEncounterNotesTab()
       .clickNewThreadButton()
       .typeThreadTitle(testData.firstThreadTitle)
       .clickCreateThreadButton()

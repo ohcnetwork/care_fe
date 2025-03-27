@@ -113,9 +113,4 @@ export class PatientEncounter {
     });
     return this;
   }
-
-  openEncounterNotesTab() {
-    cy.verifyAndClickElement('[data-cy="tab-notes"]', "Notes");
-    return this;
-  }
 }
