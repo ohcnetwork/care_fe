@@ -65,7 +65,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           className="flex w-full flex-col bg-white px-4 pt-4 lg:flex-row"
           id="patient-infobadges"
         >
-          <div className="flex justify-items-start gap-5 lg:justify-normal">
+          <div className="flex justify-items-start gap-2 lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
               <div className="w-16 min-w-16 bg-secondary-200 h-16 md:size-24 rounded">
                 <Avatar name={patient.name} className="w-full h-full" />

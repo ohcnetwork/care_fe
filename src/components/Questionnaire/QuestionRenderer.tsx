@@ -62,7 +62,7 @@ export function QuestionRenderer({
     FULL_WIDTH_QUESTION_TYPES.includes(question.structured_type);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8 bg-white">
       {questions.map((question) => (
         <div
           key={question.id}

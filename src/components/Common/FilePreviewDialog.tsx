@@ -332,7 +332,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               </div>
               <div className="flex gap-4 mt-2 md:mt-0">
                 {downloadURL && downloadURL.length > 0 && (
-                  <Button variant="primary">
+                  <Button variant="primary" data-cy="file-preview-download">
                     <a
                       href={downloadURL}
                       className="text-white"
@@ -343,7 +343,12 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     </a>
                   </Button>
                 )}
-                <Button variant="outline" type="button" onClick={handleClose}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={handleClose}
+                  data-cy="file-preview-close"
+                >
                   {t("close")}
                 </Button>
               </div>
