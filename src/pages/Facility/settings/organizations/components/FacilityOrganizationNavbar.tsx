@@ -138,10 +138,6 @@ export default function FacilityOrganizationNavbar({
 
   const topLevelOrganizations = allOrganizations?.results || [];
 
-  if (topLevelOrganizations.length === 0) {
-    return null;
-  }
-
   return (
     <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block min-h-[calc(100vh-10rem)] pt-2">
       <div className="p-4">
