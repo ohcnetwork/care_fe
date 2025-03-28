@@ -6,7 +6,7 @@ function getRandomIndex(max: number): number {
 }
 
 // Data Generators
-export function generateName(): string {
+export function generateName(onlyFirstName: boolean = false): string {
   const firstNames = [
     "John",
     "Jane",
@@ -30,7 +30,8 @@ export function generateName(): string {
   const randomFirst = firstNames[getRandomIndex(firstNames.length)];
   const randomLast = lastNames[getRandomIndex(lastNames.length)];
 
-  return `${randomFirst} ${randomLast}`;
+  // Return full name by default, or only first name if specified
+  return onlyFirstName ? randomFirst : `${randomFirst} ${randomLast}`;
 }
 
 export function generatePhoneNumber(): string {
@@ -82,4 +83,42 @@ export function generateUsername(firstName: string): string {
   // Convert to a 4-digit string, ensuring leading zeros
   const randomSuffix = (randomBytes[0] % 10000).toString().padStart(4, "0");
   return `${firstName.toLowerCase()}${randomSuffix}dev`;
+}
+
+export const medicineNames = [
+  "Estriol",
+  "Aspirin",
+  "Ibuprofen",
+  "Paracetamol",
+  "Amoxicillin",
+  "Metformin",
+  "Lisinopril",
+  "Atorvastatin",
+  "Omeprazole",
+  "Simvastatin",
+  "Levothyroxine",
+  "Metoprolol",
+  "Losartan",
+  "Gabapentin",
+  "Hydrochlorothiazide",
+  "Furosemide",
+  "Citalopram",
+  "Sertraline",
+  "Alprazolam",
+  "Clonazepam",
+  "Zolpidem",
+  "Tramadol",
+  "Prednisone",
+  "Warfarin",
+  "Ciprofloxacin",
+  "Azithromycin",
+  "Doxycycline",
+  "Fluoxetine",
+  "Trazodone",
+  "Venlafaxine",
+];
+
+export function getRandomMedicineName(): string {
+  const randomIndex = getRandomIndex(medicineNames.length);
+  return medicineNames[randomIndex];
 }
