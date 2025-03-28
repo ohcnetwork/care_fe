@@ -95,7 +95,7 @@ export default function FacilityOrganizationSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button>
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-plus" className="mr-2 size-4" />
           {t("add_department_team")}
         </Button>
       </SheetTrigger>

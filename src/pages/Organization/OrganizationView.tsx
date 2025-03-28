@@ -86,8 +86,8 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                   {children?.results?.length ? (
                     children.results.map((orgChild: Organization) => (
                       <Card key={orgChild.id} className="flex flex-col h-full">
-                        <CardContent className="p-6 flex-grow">
-                          <div className="space-y-4 flex-grow">
+                        <CardContent className="p-6 grow">
+                          <div className="space-y-4 grow">
                             <div className="space-y-1 mb-2">
                               <h3 className="text-lg font-semibold">
                                 {orgChild.name}
@@ -119,7 +119,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                               {t("view_details")}
                               <CareIcon
                                 icon="l-arrow-right"
-                                className="h-4 w-4"
+                                className="size-4"
                               />
                             </Link>
                           </Button>

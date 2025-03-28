@@ -54,13 +54,16 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  // eslint-disable-next-line react/no-unknown-property
-  <div className="flex items-center border-b px-2" cmdk-input-wrapper="">
-    <MagnifyingGlassIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+  <div
+    className="flex items-center border-b  border-gray-200 px-2"
+    // eslint-disable-next-line react/no-unknown-property
+    cmdk-input-wrapper=""
+  >
+    <MagnifyingGlassIcon className="mr-2 size-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        "flex h-10 w-full focus:border-none rounded-md bg-transparent py-3 text-base sm:text-sm outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-gray-400",
+        "flex h-10 w-full focus:border-none rounded-md bg-transparent py-3 text-base sm:text-sm outline-hidden placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-gray-400 border-gray-200",
         className,
       )}
       {...props}
@@ -131,7 +134,7 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default gap-2 select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-gray-100 data-[selected=true]:text-gray-900 data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 dark:data-[selected=true]:bg-gray-800 dark:data-[selected=true]:text-gray-50",
+      "relative flex cursor-default gap-2 select-none items-center rounded-sm px-2 py-1.5 text-sm outline-hidden data-[disabled=true]:pointer-events-none data-[selected=true]:bg-gray-100 data-[selected=true]:text-gray-900 data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 dark:data-[selected=true]:bg-gray-800 dark:data-[selected=true]:text-gray-50",
       className,
     )}
     {...props}

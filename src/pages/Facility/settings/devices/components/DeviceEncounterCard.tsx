@@ -30,7 +30,7 @@ function EncounterNode({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center text-sm">
-        <span className="w-2 h-2 rounded-full bg-gray-400 mr-2" />
+        <span className="size-2 rounded-full bg-gray-400 mr-2" />
         <span className={!end ? "font-semibold" : "text-gray-700 font-medium"}>
           <Link
             href={`/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
@@ -40,7 +40,7 @@ function EncounterNode({
             {encounter.patient.name}
             <CareIcon
               icon="l-external-link-alt"
-              className="w-3 h-3 opacity-50"
+              className="size-3 opacity-50"
             />
           </Link>
         </span>
@@ -75,11 +75,11 @@ export const DeviceEncounterCard = ({ encounterData }: EncounterCardProps) => {
           className={`absolute w-px bg-gray-200 h-full ${!end ? "top-3" : "-top-3"}`}
         />
         <div
-          className={`h-6 w-6 rounded-full ${!end ? "bg-green-100" : "bg-gray-100"} flex items-center justify-center z-10`}
+          className={`size-6 rounded-full ${!end ? "bg-green-100" : "bg-gray-100"} flex items-center justify-center z-10`}
         >
           <CareIcon
             icon={!end ? "l-location-point" : "l-check"}
-            className={`h-4 w-4 ${!end ? "text-green-600" : "text-gray-600"}`}
+            className={`size-4 ${!end ? "text-green-600" : "text-gray-600"}`}
           />
         </div>
         {!end && <div className="flex-1 w-px bg-gray-200" />}

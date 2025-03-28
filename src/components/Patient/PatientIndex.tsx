@@ -2,7 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { isValidPhoneNumber } from "react-phone-number-input";
+import {
+  formatPhoneNumberIntl,
+  isValidPhoneNumber,
+} from "react-phone-number-input";
 import { toast } from "sonner";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
@@ -82,13 +85,13 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         onClick={handleCreatePatient}
         data-cy="create-new-patient-button"
       >
-        <CareIcon icon="l-plus" className="h-4 w-4" />
+        <CareIcon icon="l-plus" className="size-4" />
         {t("add_new_patient")}
         <kbd
           className={cn(
-            "hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
+            "hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
             outline
-              ? "border-input bg-transparent"
+              ? "border-gray-200 bg-transparent"
               : "bg-white/20 border-white/20 text-white",
           )}
         >
@@ -197,7 +200,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-lg border">
+                      <div className="rounded-lg border border-gray-200">
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -218,7 +221,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                 <TableCell className="font-medium">
                                   {patient.name}
                                 </TableCell>
-                                <TableCell>{patient.phone_number}</TableCell>
+                                <TableCell>
+                                  {formatPhoneNumberIntl(patient.phone_number)}
+                                </TableCell>
                                 <TableCell>
                                   {
                                     GENDER_TYPES.find(
