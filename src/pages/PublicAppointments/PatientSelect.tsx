@@ -190,18 +190,6 @@ export default function PatientSelect({
           <h3 className="text-lg font-medium">
             {t("select_register_patient")}
           </h3>
-          <Button
-            variant="primary_gradient"
-            className="mt-4 sm:mt-0 sm:w-auto"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
-              )
-            }
-          >
-            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-            {t("add_new_patient")}
-          </Button>
         </div>
         {isLoading ? (
           <div className="flex justify-center items-center">
@@ -212,6 +200,18 @@ export default function PatientSelect({
         ) : (
           renderNoPatientFound()
         )}
+        <Button
+          variant="primary_gradient"
+          className="w-1/2 self-center"
+          onClick={() =>
+            navigate(
+              `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
+            )
+          }
+        >
+          <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+          {t("add_new_patient")}
+        </Button>
       </div>
     </div>
   );
