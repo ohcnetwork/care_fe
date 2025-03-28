@@ -56,6 +56,7 @@ function AppointmentDialog({
         queryKey: ["appointment", tokenData?.phoneNumber],
       });
       toast.success(t("appointment_cancelled"));
+      alert("Appointment has been successfully cancelled.");
       setAppointmentDialogOpen(false);
     },
   });
