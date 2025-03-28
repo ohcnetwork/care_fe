@@ -39,11 +39,11 @@ export const EncounterCard = (props: EncounterCardProps) => {
         <div className="flex flex-col items-center">
           {completedEncounterStatus.includes(encounter.status) ? (
             <div className="p-1 rounded-full border border-teal-600 bg-green-100">
-              <BadgeCheck className="w-5 h-5 text-teal-600" />
+              <BadgeCheck className="size-5 text-teal-600" />
             </div>
           ) : (
             <div className="p-1 rounded-full border border-indigo-800 bg-purple-100">
-              <CircleDashed className="w-5 h-5 text-purple-400" />
+              <CircleDashed className="size-5 text-purple-400" />
             </div>
           )}
           <div className="h-full">
@@ -66,9 +66,9 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 )}
               >
                 {completedEncounterStatus.includes(encounter.status) ? (
-                  <BadgeCheck className="w-4 h-4 text-teal-700" />
+                  <BadgeCheck className="size-4 text-teal-700" />
                 ) : (
-                  <CircleDashed className="w-4 h-4 text-indigo-800" />
+                  <CircleDashed className="size-4 text-indigo-800" />
                 )}
                 {t(`encounter_status__${encounter.status}`)}
               </Badge>
@@ -101,7 +101,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
               <div className="w-full mx-3 sm:w-auto">
                 <div className="text-gray-600 text-sm">{t("priority")}</div>
                 <div className="font-semibold text-base flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-yellow-500" />
+                  <Clock className="size-4 text-yellow-500" />
                   {t(`encounter_priority__${encounter.priority.toLowerCase()}`)}
                 </div>
               </div>
@@ -136,7 +136,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
                     }
                     className="flex items-center gap-2"
                   >
-                    <Eye className="w-4 h-4" />
+                    <Eye className="size-4" />
                     <span>{t("view_encounter")}</span>
                   </Link>
                 </Button>

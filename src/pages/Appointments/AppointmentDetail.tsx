@@ -259,7 +259,7 @@ const AppointmentDetails = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4 text-sm">
-            <CalendarIcon className="h-5 w-5 text-gray-600" />
+            <CalendarIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 {format(appointment.token_slot.start_datetime, "MMMM d, yyyy")}
@@ -270,7 +270,7 @@ const AppointmentDetails = ({
             </div>
           </div>
           <div className="flex items-center space-x-4 text-sm">
-            <ClockIcon className="h-5 w-5 text-gray-600" />
+            <ClockIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 {format(appointment.token_slot.start_datetime, "h:mm a")} -{" "}
@@ -301,7 +301,7 @@ const AppointmentDetails = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4 text-sm">
-            <PersonIcon className="h-5 w-5 text-gray-600" />
+            <PersonIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">{appointment.patient.name}</p>
               <p className="text-gray-600">
@@ -329,7 +329,7 @@ const AppointmentDetails = ({
             </div>
           </div>
           <div className="flex items-center space-x-4 text-sm">
-            <MobileIcon className="h-5 w-5 text-gray-600" />
+            <MobileIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 <a
@@ -353,7 +353,7 @@ const AppointmentDetails = ({
             </div>
           </div>
           <div className="flex items-center space-x-4 text-sm">
-            <DrawingPinIcon className="h-5 w-5 text-gray-600" />
+            <DrawingPinIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 {appointment.patient.address || t("no_address_provided")}
@@ -588,7 +588,7 @@ const AppointmentActions = ({
               className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {isCancelling ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="size-4 animate-spin mr-2" />
               ) : (
                 t("confirm")
               )}
@@ -623,7 +623,7 @@ const AppointmentActions = ({
               className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {isCancelling ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="size-4 animate-spin mr-2" />
               ) : (
                 t("confirm")
               )}

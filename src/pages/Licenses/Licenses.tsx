@@ -103,7 +103,7 @@ const SbomPackage = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="block rounded-md border p-2 transition-all duration-300 hover:shadow-lg">
+    <div className="block rounded-md border border-gray-200 p-2 transition-all duration-300 hover:shadow-lg">
       <a
         target="_blank"
         rel="noopener noreferrer"
