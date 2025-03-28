@@ -2,6 +2,7 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
@@ -121,7 +122,10 @@ export const PrintPrescription = (props: {
               />
               <DetailRow
                 label={t("mobile_number")}
-                value={encounter?.patient.phone_number}
+                value={
+                  encounter &&
+                  formatPhoneNumberIntl(encounter.patient.phone_number)
+                }
                 isStrong
               />
             </div>

@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { t } from "i18next";
 import { Loader } from "lucide-react";
 import { useEffect } from "react";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
@@ -270,7 +271,8 @@ export default function TreatmentSummary({
                 <span className="text-gray-600">{t("mobile_number")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold break-words">
-                  {encounter.patient.phone_number}
+                  {encounter.patient.phone_number &&
+                    formatPhoneNumberIntl(encounter.patient.phone_number)}
                 </span>
               </div>
 
