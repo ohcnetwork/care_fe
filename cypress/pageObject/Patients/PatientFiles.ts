@@ -115,14 +115,7 @@ export class PatientFiles {
   }
 
   verifyMultipleFileUploadSuccess(message: string) {
-    cy.get("li[data-sonner-toast]")
-      .should("have.length", 2)
-      .each(($toast) => {
-        cy.wrap($toast)
-          .find("div[data-title]")
-          .should("be.visible")
-          .should("contain", message);
-      });
+    cy.verifyNotification(message);
     return this;
   }
 

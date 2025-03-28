@@ -462,7 +462,7 @@ export function MedicationRequestQuestion({
           </div>
         </div>
       )}
-      <div className="max-w-4xl">
+      <div className="max-w-4xl" data-cy="add-medication-request">
         <ValueSetSelect
           system="system-medication"
           placeholder={t("search_for_medications_to_add")}
@@ -629,15 +629,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </span>
       </div>
       {/* Dosage */}
-      <div
-        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="dosage"
-      >
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
         </Label>
-        <div>
+        <div data-cy="dosage">
           {dosageInstruction?.dose_and_rate?.dose_range ? (
             <Input
               readOnly
@@ -1014,7 +1011,10 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Notes */}
-      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div
+        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        data-cy="notes"
+      >
         <Label className="mb-1.5 block text-sm lg:hidden">{t("notes")}</Label>
         {desktopLayout ? (
           <>
@@ -1050,6 +1050,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       {/* Remove Button */}
       <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-white shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12">
         <Button
+          data-cy="remove-medication"
           variant="ghost"
           size="icon"
           onClick={onRemove}
