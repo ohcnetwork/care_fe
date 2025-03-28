@@ -1,67 +1,48 @@
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
+import { PatientPrescription } from "@/pageObject/Patients/PatientPrescription";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
+import { generateName, getRandomMedicineName } from "@/utils/commonUtils";
+import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
+const patientPrescription = new PatientPrescription();
 
 describe("Patient Prescription Management", () => {
   beforeEach(() => {
+    cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
     cy.loginByApi("test-human");
     cy.visit("/");
   });
 
-  it("should add a new medicine for the patient", () => {
+  it("Add and remove medicine from patient prescription", () => {
+    const dosage = "6";
+    const medicationDetails = {
+      medicineName: getRandomMedicineName(),
+      dosage,
+      dosageInput: `${dosage} Milligram`,
+      frequency: "BID (1-0-1)",
+      instructions: "Until symptoms improve",
+      notes: "testing notes",
+    };
     facilityCreation.selectFacility("GHC Payyanur");
-    const medicineName = "Estriol 1 mg oral tablet";
-    const dosage = 6;
-    const dosageInput = "6 Milligram";
-    const frequency = "BID (1-0-1)";
-    const instructions = "Until symptoms improve";
-    const route = "Sublabial route";
-    const site = "Structure of left deltoid muscle";
-    const method = "Bathe";
-    const notes = "testing notes";
+    const patientName = generateName();
     patientEncounter
       .navigateToEncounters()
-      .openOngoingEncounter()
+      .searchEncounter(patientName)
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails();
+    patientPrescription
       .clickMedicinesTab()
       .clickEditPrescription()
-      .addMedication(
-        medicineName,
-        dosage,
-        dosageInput,
-        frequency,
-        instructions,
-        route,
-        site,
-        method,
-        notes,
-      )
+      .addMedication(medicationDetails)
       .submitQuestionnaire()
       .clickMedicinesTab()
-      .verifyMedication(
-        medicineName,
-        dosageInput,
-        frequency,
-        instructions,
-        route,
-        site,
-        method,
-        notes,
-      )
+      .verifyMedication(medicationDetails)
       .clickEditPrescription()
       .removeMedication()
       .submitQuestionnaire()
       .clickMedicinesTab()
-      .verifyDeletedMedication(
-        medicineName,
-        dosageInput,
-        frequency,
-        instructions,
-        route,
-        site,
-        method,
-        notes,
-      );
+      .verifyDeletedMedication(medicationDetails);
   });
 });
