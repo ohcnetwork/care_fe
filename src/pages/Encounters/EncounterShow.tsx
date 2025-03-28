@@ -3,8 +3,8 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
 import PageHeadTitle from "@/components/Common/PageHeadTitle";
-import PageTitle from "@/components/Common/PageTitle";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
@@ -122,9 +122,8 @@ export const EncounterShow = (props: Props) => {
     }`;
 
   return (
-    <div>
-      <nav className="relative flex flex-wrap items-start justify-between">
-        <PageTitle title={t("encounter")} />
+    <Page title={t("encounter")} className="block">
+      <nav className="relative flex flex-wrap items-start justify-between mt-4">
         <div
           className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center"
           id="consultationpage-header"
@@ -209,6 +208,6 @@ export const EncounterShow = (props: Props) => {
           <SelectedTab {...encounterTabProps} />
         </div>
       </div>
-    </div>
+    </Page>
   );
 };

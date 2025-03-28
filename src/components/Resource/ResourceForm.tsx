@@ -557,7 +557,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   </div>
                 </div>
 
-                <div className="sticky bottom-0 flex justify-end gap-4 border-t border-gray-200 pt-4">
+                <div className="flex justify-end gap-4 border-t border-gray-200 pt-4">
                   <Button
                     type="button"
                     variant="outline"
