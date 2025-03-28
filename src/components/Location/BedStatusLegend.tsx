@@ -30,7 +30,7 @@ export function BedStatusLegend({ className }: BedStatusLegendProps) {
     <div className={`flex items-center gap-4 ${className}`}>
       {statuses.map((status) => (
         <div key={status.label} className="flex items-center gap-2">
-          <div className="relative w-6 h-6">
+          <div className="relative size-6">
             <img
               src={status.image}
               alt={t(status.label)}

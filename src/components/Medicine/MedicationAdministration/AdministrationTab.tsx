@@ -196,7 +196,7 @@ const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
       )}
       {isCurrentSlot && isEndSlot && (
         <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2">
-          <div className="h-2 w-2 rounded-full bg-blue-500" />
+          <div className="size-2 rounded-full bg-blue-500" />
         </div>
       )}
     </div>
@@ -219,7 +219,9 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
 
   return (
     <React.Fragment>
-      <div className={`p-4 border-t ${isInactive ? "bg-gray-100" : ""}`}>
+      <div
+        className={`p-4 border-t border-gray-200 ${isInactive ? "bg-gray-100" : ""}`}
+      >
         <div className="font-semibold truncate">
           {medication.medication?.display}
         </div>
@@ -253,7 +255,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
         return (
           <div
             key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-            className={`p-4 border-t relative text-sm ${isInactive ? "bg-gray-100" : ""}`}
+            className={`p-4 border-t border-gray-200 relative text-sm ${isInactive ? "bg-gray-100" : ""}`}
           >
             {administrationRecords?.map((admin) => {
               const colorClass =
@@ -263,14 +265,14 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
               return (
                 <div
                   key={admin.id}
-                  className={`flex font-medium flex-col rounded-md p-2 mb-2 cursor-pointer border ${colorClass}`}
+                  className={`flex font-medium flex-col rounded-md p-2 mb-2 cursor-pointer border border-gray-200 ${colorClass}`}
                   onClick={() => onEditAdministration(medication, admin)}
                 >
                   <div className="flex justify-between">
                     <div>
                       <CareIcon
                         icon="l-check-circle"
-                        className="h-4 w-4 self-center"
+                        className="size-4 self-center"
                       />
                     </div>
                     <div>
@@ -278,9 +280,9 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className={`h-4 w-4 hover:${colorClass} p-0`}
+                          className={`size-4 hover:${colorClass} p-0`}
                         >
-                          <CareIcon icon="l-notes" className="h-3 w-3" />
+                          <CareIcon icon="l-notes" className="size-3" />
                         </Button>
                       )}
                     </div>
@@ -328,7 +330,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
       })}
 
       <div
-        className={`p-4 border-t flex justify-center ${isInactive ? "bg-gray-100" : ""}`}
+        className={`p-4 border-t border-gray-200 flex justify-center ${isInactive ? "bg-gray-100" : ""}`}
       >
         {ACTIVE_MEDICATION_STATUSES.includes(
           medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
@@ -336,8 +338,8 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
           canWrite && (
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="size-6">
+                  <CareIcon icon="l-ellipsis-h" className="size-4" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-40 p-0">
@@ -351,7 +353,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                     button?.blur();
                   }}
                 >
-                  <CareIcon icon="l-ban" className="mr-2 h-4 w-4" />
+                  <CareIcon icon="l-ban" className="mr-2 size-4" />
                   {t("discontinue")}
                 </Button>
               </PopoverContent>
@@ -665,7 +667,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         )}
         <ScrollArea className="w-full whitespace-nowrap rounded-md">
           <Card className="w-full border-none shadow-none min-w-[640px]">
-            <div className="grid grid-cols-[minmax(200px,2fr),repeat(4,minmax(140px,1fr)),40px]">
+            <div className="grid grid-cols-[minmax(200px,2fr)_repeat(4,minmax(140px,1fr))_40px]">
               {/* Top row without vertical borders */}
               <div className="col-span-full grid grid-cols-subgrid">
                 <div className="flex items-center justify-between p-4 bg-gray-50 border-t border-gray-50">
@@ -681,7 +683,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8 text-gray-400 mr-2"
+                      className="size-8 text-gray-400 mr-2"
                       onClick={handlePreviousSlot}
                       disabled={!canGoBack}
                       title={
@@ -690,7 +692,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                           : ""
                       }
                     >
-                      <CareIcon icon="l-angle-left" className="h-4 w-4" />
+                      <CareIcon icon="l-angle-left" className="size-4" />
                     </Button>
                   </div>
                 </div>
@@ -706,36 +708,36 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-8 w-8 text-gray-400"
+                    className="size-8 text-gray-400"
                     onClick={handleNextSlot}
                     disabled={isTimeInSlot(currentDate, visibleSlots[3])}
                   >
-                    <CareIcon icon="l-angle-right" className="h-4 w-4" />
+                    <CareIcon icon="l-angle-right" className="size-4" />
                   </Button>
                 </div>
               </div>
 
               {/* Main content with borders */}
-              <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r">
+              <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r border-gray-200">
                 {/* Headers */}
-                <div className="p-4 font-medium text-sm border-t bg-[#F3F4F6] text-secondary-700">
+                <div className="p-4 font-medium text-sm border-t border-gray-200 bg-[#F3F4F6] text-secondary-700">
                   {t("medicine")}:
                 </div>
                 {visibleSlots.map((slot, i) => (
                   <div
                     key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                    className="p-4 font-semibold text-xs text-center border-t relative bg-[#F3F4F6] text-secondary-700"
+                    className="p-4 font-semibold text-xs text-center border-t border-gray-200 relative bg-[#F3F4F6] text-secondary-700"
                   >
                     {i === endSlotIndex &&
                       slot.date.getTime() === currentDate.getTime() && (
                         <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2">
-                          <div className="h-2 w-2 rounded-full bg-blue-500" />
+                          <div className="size-2 rounded-full bg-blue-500" />
                         </div>
                       )}
                     {slot.label}
                   </div>
                 ))}
-                <div className="border-t bg-[#F3F4F6]" />
+                <div className="border-t border-gray-200 bg-[#F3F4F6]" />
 
                 {/* Medication rows */}
                 {filteredMedications?.map((medication) => (
@@ -761,7 +763,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               >
                 <CareIcon
                   icon={showStopped ? "l-eye-slash" : "l-eye"}
-                  className="h-4 w-4"
+                  className="size-4"
                 />
                 <span className="text-sm underline">
                   {showStopped ? t("hide") : t("show")}{" "}
@@ -787,7 +789,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               placeholder={t("search_medications")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-500"
+              className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
             />
             {searchQuery && (
               <Button
@@ -808,7 +810,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             onClick={() => setIsSheetOpen(true)}
             disabled={!activeMedications?.results.length}
           >
-            <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-plus" className="mr-2 size-4" />
             {t("administer_medicine")}
           </Button>
         )}

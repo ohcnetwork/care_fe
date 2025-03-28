@@ -82,13 +82,13 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         onClick={handleCreatePatient}
         data-cy="create-new-patient-button"
       >
-        <CareIcon icon="l-plus" className="h-4 w-4" />
+        <CareIcon icon="l-plus" className="size-4" />
         {t("add_new_patient")}
         <kbd
           className={cn(
-            "hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
+            "hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
             outline
-              ? "border-input bg-transparent"
+              ? "border-gray-200 bg-transparent"
               : "bg-white/20 border-white/20 text-white",
           )}
         >
@@ -197,7 +197,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-lg border">
+                      <div className="rounded-lg border border-gray-200">
                         <Table>
                           <TableHeader>
                             <TableRow>

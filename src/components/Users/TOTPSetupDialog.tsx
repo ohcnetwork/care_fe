@@ -78,7 +78,7 @@ export function TOTPSetupDialog({
         <div className="space-y-4 overflow-auto">
           <div className="flex items-center gap-8">
             {setupData.uri && (
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <QRCodeSVG
                   value={setupData.uri}
                   size={128}
@@ -111,7 +111,7 @@ export function TOTPSetupDialog({
                       />
                     ),
                     CareIcon: (
-                      <CareIcon icon="l-copy" className="h-4 w-4 mr-1" />
+                      <CareIcon icon="l-copy" className="size-4 mr-1" />
                     ),
                   }}
                 />
@@ -126,7 +126,7 @@ export function TOTPSetupDialog({
                 <code className="text-indigo-600 text-sm select-all">
                   {setupData.secret_key}
                 </code>
-                <CareIcon icon="l-copy" className="h-4 w-4 text-gray-500" />
+                <CareIcon icon="l-copy" className="size-4 text-gray-500" />
               </div>
             )}
           </div>
@@ -164,7 +164,7 @@ export function TOTPSetupDialog({
                   <>
                     <CareIcon
                       icon="l-spinner"
-                      className="mr-2 h-4 w-4 animate-spin"
+                      className="mr-2 size-4 animate-spin"
                     />
                     {t("verifying")}
                   </>

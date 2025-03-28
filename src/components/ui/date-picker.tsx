@@ -36,7 +36,7 @@ export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
         >
           <CareIcon
             icon="l-calender"
-            className="mr-0 sm:mr-2 h-4 w-4 flex-shrink-0"
+            className="mr-0 sm:mr-2 size-4 shrink-0"
           />
           <span className="truncate">
             {date ? (

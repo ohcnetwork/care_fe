@@ -319,7 +319,7 @@ export default function LocationForm({
             control={form.control}
             name="enableBulkCreation"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -383,7 +383,7 @@ export default function LocationForm({
           form.watch("name").trim() !== "" && (
             <div className="space-y-4 mt-4">
               <Alert className="bg-blue-50 border-blue-200">
-                <Info className="h-4 w-4 text-blue-500" />
+                <Info className="size-4 text-blue-500" />
                 <AlertDescription className="text-blue-700">
                   {t("bulk_bed_creation_info")}
                 </AlertDescription>
@@ -393,7 +393,7 @@ export default function LocationForm({
                 control={form.control}
                 name="customizeNames"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -411,7 +411,7 @@ export default function LocationForm({
               />
 
               {form.watch("customizeNames") ? (
-                <div className="space-y-4 border rounded-md p-4">
+                <div className="space-y-4 border border-gray-200 rounded-md p-4">
                   <div className="flex justify-between items-center flex-wrap gap-2">
                     <h4 className="font-medium">{t("individual_bed_names")}</h4>
                     <Button
@@ -420,7 +420,7 @@ export default function LocationForm({
                       size="sm"
                       onClick={resetToDefaultNames}
                     >
-                      <RotateCcw className="h-4 w-4 mr-2" />
+                      <RotateCcw className="size-4 mr-2" />
                       {t("reset_to_default")}
                     </Button>
                   </div>
@@ -467,7 +467,7 @@ export default function LocationForm({
                     {bedFields.map((field) => (
                       <div
                         key={field.id}
-                        className="px-3 py-1 bg-gray-100 rounded-md shadow-sm"
+                        className="px-3 py-1 bg-gray-100 rounded-md shadow-xs"
                       >
                         {field.name}
                       </div>

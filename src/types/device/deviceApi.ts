@@ -7,6 +7,8 @@ import {
   DeviceList,
   DeviceLocationHistory,
   DeviceWrite,
+  ServiceHistory,
+  ServiceHistoryWriteRequest,
 } from "./device";
 
 export default {
@@ -49,6 +51,30 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<DeviceDetail>(),
     TBody: Type<{ location: string }>(),
+  },
+  serviceHistory: {
+    list: {
+      path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
+      method: HttpMethod.GET,
+      TRes: Type<PaginatedResponse<ServiceHistory>>(),
+    },
+    retrieve: {
+      method: HttpMethod.GET,
+      path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
+      TRes: Type<ServiceHistory>(),
+    },
+    create: {
+      method: HttpMethod.POST,
+      path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
+      TRes: Type<ServiceHistory>(),
+      TBody: Type<ServiceHistoryWriteRequest>(),
+    },
+    update: {
+      method: HttpMethod.PUT,
+      path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
+      TRes: Type<ServiceHistory>(),
+      TBody: Type<ServiceHistoryWriteRequest>(),
+    },
   },
   associateEncounter: {
     path: "/api/v1/facility/{facilityId}/device/{deviceId}/associate_encounter/",

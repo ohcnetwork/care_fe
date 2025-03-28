@@ -7,7 +7,11 @@ export interface IPageTitleProps {
 export default function PageTitle({ title }: IPageTitleProps) {
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = title + " | CARE";
+    if (title) {
+      document.title = title + " | Care";
+    } else {
+      document.title = "Care";
+    }
     return () => {
       document.title = prevTitle;
     };
