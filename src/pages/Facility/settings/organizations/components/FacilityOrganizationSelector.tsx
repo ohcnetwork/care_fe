@@ -216,6 +216,7 @@ export default function FacilityOrganizationSelector(
                   role="combobox"
                   aria-expanded={open}
                   className="w-full justify-between border-dashed"
+                  data-cy="facility-organization"
                 >
                   <span className="truncate text-gray-500">
                     {currentSelection
