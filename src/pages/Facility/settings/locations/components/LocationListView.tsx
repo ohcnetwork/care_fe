@@ -1,10 +1,23 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PenLine } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -19,7 +32,9 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import mutate from "@/Utils/request/mutate";
 import { LocationList as LocationListType } from "@/types/location/location";
+import locationApi from "@/types/location/locationApi";
 
 interface LocationRowProps {
   location: LocationListType;
@@ -32,6 +47,7 @@ interface LocationRowProps {
     React.SetStateAction<Record<string, boolean>>
   >;
   displayExpandAll?: boolean;
+  facilityId: string;
 }
 
 function LocationRow({
@@ -43,8 +59,10 @@ function LocationRow({
   onEdit,
   setExpandedRows,
   displayExpandAll = true,
+  facilityId,
 }: LocationRowProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const isMobile = useBreakpoints({ default: true, sm: false });
   const children = getChildren(location.id);
   const isTopLevel =
@@ -68,9 +86,19 @@ function LocationRow({
       return newExpandedRows;
     });
   };
+  const { mutate: removeLocation } = useMutation({
+    mutationFn: mutate(locationApi.delete, {
+      pathParams: { facility_id: facilityId, id: location.id },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["locations", facilityId],
+      });
+      toast.success(t("location_removed_successfully"));
+    },
+  });
 
   const allExpanded = children.every((child) => expandedRows[child.id]);
-
   return (
     <>
       <TableRow
@@ -93,15 +121,15 @@ function LocationRow({
                 disabled={children.length === 0}
               >
                 {isExpanded ? (
-                  <CareIcon icon="l-angle-down" className="h-5 w-5" />
+                  <CareIcon icon="l-angle-down" className="size-5" />
                 ) : (
-                  <CareIcon icon="l-angle-right" className="h-5 w-5" />
+                  <CareIcon icon="l-angle-right" className="size-5" />
                 )}
               </Button>
             ) : location.parent ? (
               <CareIcon
                 icon="l-corner-down-right-alt"
-                className="h-4 w-4 text-gray-400 ml-4 mr-2"
+                className="size-4 text-gray-400 ml-4 mr-2"
               />
             ) : (
               <div className="w-8" />
@@ -120,13 +148,51 @@ function LocationRow({
                   >
                     <CareIcon
                       icon={allExpanded ? "l-minus" : "l-plus"}
-                      className="h-4 w-4"
+                      className="size-4"
                     />
                     <span className="hidden lg:inline">
                       {t(allExpanded ? "collapse_all" : "expand_all")}
                     </span>
                   </Button>
                 )}
+              </div>
+              <div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="white"
+                      size={isMobile ? "xs" : "sm"}
+                      className="gap-2"
+                      disabled={
+                        location.has_children || !!location.current_encounter
+                      }
+                    >
+                      <CareIcon icon={"l-trash"} className="size-4" />
+                      <span className="hidden lg:inline">{t("delete")}</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t("remove_location", { name: location.name })}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("are_you_sure_want_to_delete", {
+                          name: location.name,
+                        })}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => removeLocation({})}
+                        className={buttonVariants({ variant: "destructive" })}
+                      >
+                        {t("remove")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
 
               <div className="flex items-center gap-2 ml-auto">
@@ -135,7 +201,7 @@ function LocationRow({
                   size={isMobile ? "xs" : "sm"}
                   onClick={() => onEdit(location)}
                 >
-                  <PenLine className="h-4 w-4" />
+                  <PenLine className="size-4" />
                   <span className="hidden lg:inline">{t("edit")}</span>
                 </Button>
 
@@ -144,7 +210,7 @@ function LocationRow({
                     href={`/location/${location.id}`}
                     className="text-gray-900 flex items-center"
                   >
-                    <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                    <CareIcon icon="l-arrow-up-right" className="size-4" />
                     <span className="hidden lg:inline">{t("see_details")}</span>
                   </Link>
                 </Button>
@@ -152,7 +218,7 @@ function LocationRow({
             </div>
           )}
         </TableCell>
-        <TableCell className="hidden sm:table-cell border-l bg-white font-semibold text-gray-900">
+        <TableCell className="hidden sm:table-cell border-l border-gray-200 bg-white font-semibold text-gray-900">
           {t(`location_form__${location.form}`)}
         </TableCell>
       </TableRow>
@@ -167,6 +233,7 @@ function LocationRow({
             indent={indent + 1}
             onEdit={onEdit}
             setExpandedRows={setExpandedRows}
+            facilityId={facilityId}
           />
         ))}
     </>
@@ -185,6 +252,7 @@ interface LocationListViewProps {
   setExpandedRows: React.Dispatch<
     React.SetStateAction<Record<string, boolean>>
   >;
+  facilityId: string;
 }
 
 export function LocationListView({
@@ -197,6 +265,7 @@ export function LocationListView({
   getChildren,
   handleEditLocation,
   setExpandedRows,
+  facilityId,
 }: LocationListViewProps) {
   const { t } = useTranslation();
 
@@ -216,10 +285,10 @@ export function LocationListView({
 
   return (
     <div className="space-y-4">
-      <Table className="border rounded-lg w-full overflow-hidden">
+      <Table className="border border-gray-200 rounded-lg w-full overflow-hidden">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[80%] border text-gray-700 bg-gray-200">
+            <TableHead className="w-[80%] border border-gray-200 text-gray-700 bg-gray-200">
               {t("name")}
             </TableHead>
             <TableHead className="hidden sm:table-cell bg-gray-200 text-gray-700">
@@ -239,6 +308,7 @@ export function LocationListView({
               onEdit={handleEditLocation}
               setExpandedRows={setExpandedRows}
               displayExpandAll={searchQuery ? false : true}
+              facilityId={facilityId}
             />
           ))}
         </TableBody>

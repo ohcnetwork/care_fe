@@ -34,6 +34,7 @@ import { Separator } from "@/components/ui/separator";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
+import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -44,6 +45,7 @@ import deviceApi from "@/types/device/deviceApi";
 
 import DeviceEncounterHistory from "./DeviceEncounterHistory";
 import AssociateLocationSheet from "./components/AssociateLocationSheet";
+import DeviceServiceHistory from "./components/DeviceServiceHistory";
 
 interface Props {
   facilityId: string;
@@ -153,7 +155,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             <DeviceEncounterHistory
               trigger={
                 <Button variant="outline_primary">
-                  <CareIcon icon="l-medkit" className="h-4 w-4" />
+                  <CareIcon icon="l-medkit" className="size-4" />
                   {t("encounter_history")}
                 </Button>
               }
@@ -162,7 +164,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             />
             <Link href={`/devices/${deviceId}/locationHistory`}>
               <Button variant="outline_primary" className="sm:mr-3">
-                <CareIcon icon="l-location-point" className="h-4 w-4" />
+                <CareIcon icon="l-location-point" className="size-4" />
                 {t("location_history")}
               </Button>
             </Link>
@@ -170,7 +172,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
           <div className="flex gap-2 flex-wrap">
             <Link href={`/devices/${deviceId}/edit`}>
               <Button variant="outline">
-                <CareIcon icon="l-pen" className="w-4 h-4" />
+                <CareIcon icon="l-pen" className="size-4" />
                 {t("edit")}
               </Button>
             </Link>
@@ -237,7 +239,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                         className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
                       >
                         {device.current_location.name}
-                        <ExternalLink className="h-3 w-3" />
+                        <ExternalLink className="size-3" />
                       </Link>
                     </>
                   ) : (
@@ -266,12 +268,55 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                         className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
                       >
                         {device.current_encounter.patient.name}
-                        <ExternalLink className="h-3 w-3" />
+                        <ExternalLink className="size-3" />
                       </Link>
                     </>
                   ) : (
                     <span className="text-gray-500">{t("no_encounter")}</span>
                   )}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">
+                  {t("managing_organization")}
+                </h4>
+                <div className="mt-1 flex items-center gap-6">
+                  {device.managing_organization ? (
+                    <>
+                      <Link
+                        href={`/departments/${device.managing_organization.id}`}
+                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                      >
+                        {device.managing_organization.name}
+                        <ExternalLink className="size-3" />
+                      </Link>
+                    </>
+                  ) : (
+                    <span className="text-gray-500">
+                      {t("no_organization")}
+                    </span>
+                  )}
+                  <LinkDepartmentsSheet
+                    entityType="device"
+                    entityId={deviceId}
+                    facilityId={facilityId}
+                    currentOrganizations={
+                      device.managing_organization
+                        ? [device.managing_organization]
+                        : []
+                    }
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["device", facilityId, deviceId],
+                      });
+                    }}
+                    trigger={
+                      <Button variant="outline" size="sm">
+                        {device.managing_organization ? t("change") : t("add")}
+                      </Button>
+                    }
+                    orgType="managing_organization"
+                  />
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -412,13 +457,14 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
           </Card>
         )}
 
+        <DeviceServiceHistory facilityId={facilityId} deviceId={deviceId} />
         {device.care_type && (
           <ErrorBoundary
             fallback={
               <Card className="md:col-span-2 border-red-200 bg-red-50">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-2 text-red-600">
-                    <AlertCircle className="h-5 w-5" />
+                    <AlertCircle className="size-5" />
                     <span>
                       Couldn't load device type specific information.{" "}
                       <strong className="font-semibold capitalize">

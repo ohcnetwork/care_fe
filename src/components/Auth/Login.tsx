@@ -236,12 +236,12 @@ const Login = (props: LoginProps) => {
       ) {
         if (!form[key].match(/\w/)) {
           hasError = true;
-          err[key] = t("field_required");
+          err[key] = "field_required";
         }
       }
       if (!form[key]) {
         hasError = true;
-        err[key] = t("field_required");
+        err[key] = "field_required";
       }
     });
     if (hasError) {
@@ -274,12 +274,12 @@ const Login = (props: LoginProps) => {
     if (typeof form.username === "string") {
       if (!form.username.match(/\w/)) {
         hasError = true;
-        err.username = t("field_required");
+        err.username = "field_required";
       }
     }
     if (!form.username) {
       hasError = true;
-      err.username = t("field_required");
+      err.username = "field_required";
     }
 
     if (hasError) {
@@ -288,7 +288,6 @@ const Login = (props: LoginProps) => {
     }
     return form;
   };
-
   const handleForgetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const valid = validateForgetData();
@@ -416,7 +415,7 @@ const Login = (props: LoginProps) => {
                           />
                           {errors.username && (
                             <p className="text-sm text-red-500">
-                              {errors.username}
+                              {t(errors.username)}
                             </p>
                           )}
                         </div>
@@ -435,7 +434,7 @@ const Login = (props: LoginProps) => {
                           />
                           {errors.password && (
                             <p className="text-sm text-red-500">
-                              {errors.password}
+                              {t(errors.password)}
                             </p>
                           )}
                         </div>
@@ -510,7 +509,7 @@ const Login = (props: LoginProps) => {
                             />
                             {errors.username && (
                               <p className="text-sm text-red-500">
-                                {errors.username}
+                                {t(errors.username)}
                               </p>
                             )}
                           </div>
@@ -576,7 +575,7 @@ const Login = (props: LoginProps) => {
                                   <InputOTPSlot
                                     key={index}
                                     index={index}
-                                    className="w-10 h-10"
+                                    className="size-10"
                                   />
                                 ))}
                               </InputOTPGroup>
