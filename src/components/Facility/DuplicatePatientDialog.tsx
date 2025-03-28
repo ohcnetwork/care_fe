@@ -37,7 +37,7 @@ const DuplicatePatientDialog = (props: Props) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="[&>button:last-child]:hidden w-3/4 max-w-lg max-h-[90vh] overflow-y-auto sm:w-3/4 sm:max-w-xl"
+        className="[&>button:last-child]:hidden w-3/4 md:w-1/2 max-h-[90vh] overflow-y-auto"
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
