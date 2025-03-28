@@ -50,7 +50,7 @@ export function FacilityNavUser({
               data-cy="user-menu-dropdown"
             >
               <Avatar
-                className="h-8 w-8 rounded-lg"
+                className="size-8 rounded-lg"
                 name={`${user.first_name} ${user.last_name}`}
                 imageUrl={user.read_profile_picture_url}
               />
@@ -67,7 +67,6 @@ export function FacilityNavUser({
               )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
