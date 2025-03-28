@@ -155,20 +155,12 @@ const ScheduleTemplateEditor = ({
   const templateFormSchema = z
     .object({
       name: z.string().min(1, t("field_required")),
-      valid_from: z
-        .date({
-          required_error: t("field_required"),
-        })
-        .refine((date) => dayjs(date).isAfter(dayjs().subtract(1, "day")), {
-          message: t("date_must_be_future"),
-        }),
-      valid_to: z
-        .date({
-          required_error: t("field_required"),
-        })
-        .refine((date) => dayjs(date).isAfter(dayjs().subtract(1, "day")), {
-          message: t("date_must_be_future"),
-        }),
+      valid_from: z.date({
+        required_error: t("field_required"),
+      }),
+      valid_to: z.date({
+        required_error: t("field_required"),
+      }),
     })
     .refine(
       (data) =>

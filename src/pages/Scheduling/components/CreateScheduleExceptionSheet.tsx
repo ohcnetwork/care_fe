@@ -67,15 +67,14 @@ export default function CreateScheduleExceptionSheet({
       // Ensure valid_from is today or future
       valid_from: z
         .date({ required_error: t("field_required") })
-        .refine((date) => dayjs(date).isAfter(dayjs().subtract(1, "day")), {
-          message: t("date_must_be_future"),
+        .min(dayjs().startOf("day").toDate(), {
+          message: t("date_must_be_today_or_future"),
         }),
-
-      // Ensure valid_to is strictly after valid_from
+      // Ensure valid_to is today or future
       valid_to: z
         .date({ required_error: t("field_required") })
-        .refine((date) => dayjs(date).isAfter(dayjs().subtract(1, "day")), {
-          message: t("date_must_be_future"),
+        .min(dayjs().startOf("day").toDate(), {
+          message: t("date_must_be_today_or_future"),
         }),
       start_time: z
         .string()

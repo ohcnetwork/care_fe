@@ -86,15 +86,15 @@ export default function CreateScheduleTemplateSheet({
         .date({
           required_error: t("field_required"),
         })
-        .refine((date) => dayjs(date).isAfter(dayjs().subtract(1, "day")), {
-          message: t("date_must_be_future"),
+        .min(dayjs().startOf("day").toDate(), {
+          message: t("date_must_be_today_or_future"),
         }),
       valid_to: z
         .date({
           required_error: t("field_required"),
         })
-        .refine((date) => dayjs(date).isAfter(dayjs().subtract(1, "day")), {
-          message: t("date_must_be_future"),
+        .min(dayjs().startOf("day").toDate(), {
+          message: t("date_must_be_today_or_future"),
         }),
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
