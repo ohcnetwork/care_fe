@@ -39,15 +39,15 @@ export function NavMain({
               >
                 <ActiveLink
                   href={link.url}
-                  activeClass="bg-white text-green-700 shadow"
-                  exactActiveClass="bg-white text-green-700 shadow"
+                  activeClass="bg-white text-green-700 shadow-sm"
+                  exactActiveClass="bg-white text-green-700 shadow-sm"
                 >
                   {link.icon ? (
                     <CareIcon icon={link.icon as IconName} />
                   ) : (
                     <Avatar
                       name={link.name}
-                      className="w-6 h-6 -m-1 rounded-sm"
+                      className="size-6 -m-1 rounded-sm"
                     />
                   )}
 

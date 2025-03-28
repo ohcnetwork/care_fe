@@ -121,7 +121,7 @@ export default function PatientLogin({
         </span>
         <form
           onSubmit={handleSubmit}
-          className="flex mt-2 flex-col gap-4 shadow border p-8 rounded-lg"
+          className="flex mt-2 flex-col gap-4 shadow-sm border border-gray-200 p-8 rounded-lg"
         >
           <div className="space-y-2">
             <Label>{t("phone_number")}</Label>
@@ -141,7 +141,7 @@ export default function PatientLogin({
             type="submit"
             disabled={isSendOTPLoading}
           >
-            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+            <span className="bg-linear-to-b from-white/15 to-transparent"></span>
             {isSendOTPLoading ? (
               <CircularProgress className="text-white" />
             ) : (
@@ -166,7 +166,7 @@ export default function PatientLogin({
         <Form {...OTPForm}>
           <form
             onSubmit={OTPForm.handleSubmit(handleVerifySubmit)}
-            className="flex mt-2 flex-col gap-4 shadow border p-8 rounded-lg"
+            className="flex mt-2 flex-col gap-4 shadow-sm border border-gray-200 p-8 rounded-lg"
           >
             <FormField
               control={OTPForm.control}
@@ -242,7 +242,7 @@ export default function PatientLogin({
               )
         }
       >
-        <CareIcon icon="l-arrow-left" className="h-4 w-4 mr-1" />
+        <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
         <span className="text-sm underline">{t("back")}</span>
       </Button>
       {page === "send" ? renderPhoneNumberForm() : renderVerifyForm()}

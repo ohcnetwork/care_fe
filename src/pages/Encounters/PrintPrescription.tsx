@@ -2,6 +2,7 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
@@ -50,7 +51,7 @@ export const PrintPrescription = (props: {
 
   if (!activeMedications?.results?.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_medications_found_for_this_encounter")}
       </div>
     );
@@ -76,7 +77,7 @@ export const PrintPrescription = (props: {
       <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
         <div>
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
+          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
             <img
               src={careConfig.mainLogo?.dark}
               alt="Care Logo"
@@ -121,7 +122,10 @@ export const PrintPrescription = (props: {
               />
               <DetailRow
                 label={t("mobile_number")}
-                value={encounter?.patient.phone_number}
+                value={
+                  encounter &&
+                  formatPhoneNumberIntl(encounter.patient.phone_number)
+                }
                 isStrong
               />
             </div>

@@ -1,7 +1,8 @@
+import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
+
 import { UserBase } from "@/types/user/user";
 
 import { QuestionnaireResponse as Response } from "./form";
-import { StructuredQuestionType } from "./question";
 import { QuestionnaireDetail } from "./questionnaire";
 
 export type StructuredResponseValue = {

@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -69,7 +70,7 @@ export const Demography = (props: PatientProps) => {
                 href={`tel:${props.number}`}
                 className="text-sm font-medium text-black hover:text-secondary-500"
               >
-                {props.number || "-"}
+                {(props.number && formatPhoneNumberIntl(props.number)) || "-"}
               </a>
             </div>
             {props.number && (
@@ -149,7 +150,8 @@ export const Demography = (props: PatientProps) => {
                 href={`tel:${patientData.phone_number}`}
                 className="text-sm font-medium text-black hover:text-secondary-500"
               >
-                {patientData.phone_number || "-"}
+                {patientData.phone_number &&
+                  formatPhoneNumberIntl(patientData.phone_number)}
               </a>
               <br />
               <a
@@ -248,7 +250,7 @@ export const Demography = (props: PatientProps) => {
                 <div
                   key={i}
                   id={subtab.id}
-                  className="group mt-4 rounded-md bg-white pb-2 pl-5 pt-5 shadow"
+                  className="group mt-4 rounded-md bg-white pb-2 pl-5 pt-5 shadow-sm"
                 >
                   <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
                   <div className="flex flex-row items-center justify-between gap-x-4 mb-4 mr-4">
@@ -257,7 +259,7 @@ export const Demography = (props: PatientProps) => {
                       <Button
                         data-cy="edit-patient-button"
                         variant="outline"
-                        disabled={!!patientData.death_datetime}
+                        disabled={!!patientData.deceased_datetime}
                         onClick={() => handleEditClick(subtab.id)}
                       >
                         <CareIcon icon="l-edit-alt" className="text-md pr-1" />

@@ -140,7 +140,7 @@ function ValidationErrorDisplay({
         <div className="flex items-center gap-2 mb-4">
           <CareIcon
             icon="l-exclamation-circle"
-            className="h-5 w-5 text-red-500"
+            className="size-5 text-red-500"
           />
           <h3 className="font-medium text-red-700">{t("validation_errors")}</h3>
         </div>
@@ -156,7 +156,7 @@ function ValidationErrorDisplay({
           return (
             <div
               key={`server-${index}`}
-              className="bg-white rounded p-3 border border-red-100 shadow-sm"
+              className="bg-white rounded p-3 border border-red-100 shadow-xs"
             >
               <div className="font-medium text-gray-900 mb-1">
                 {getErrorTitle(error)}
@@ -164,7 +164,7 @@ function ValidationErrorDisplay({
               <div className="text-sm text-red-600 flex items-start gap-2">
                 <CareIcon
                   icon="l-exclamation-circle"
-                  className="h-4 w-4 mt-0.5 flex-shrink-0"
+                  className="size-4 mt-0.5 shrink-0"
                 />
                 <span>{error.message}</span>
               </div>
@@ -199,7 +199,7 @@ function ValidationErrorDisplay({
                     }
                   }}
                 >
-                  <CareIcon icon="l-arrow-up" className="mr-1 h-3 w-3" />
+                  <CareIcon icon="l-arrow-up" className="mr-1 size-3" />
                   {t("scroll_to_question")}
                 </Button>
               )}
@@ -222,7 +222,7 @@ function ValidationErrorDisplay({
                   {form.errors.map((error, errorIndex) => (
                     <div
                       key={errorIndex}
-                      className="bg-white rounded p-3 border border-red-100 shadow-sm"
+                      className="bg-white rounded p-3 border border-red-100 shadow-xs"
                     >
                       <div className="text-sm text-gray-600 mb-1">
                         {findQuestionText(form, error.question_id)}
@@ -230,7 +230,7 @@ function ValidationErrorDisplay({
                       <div className="text-sm text-red-600 flex items-start gap-2">
                         <CareIcon
                           icon="l-exclamation-circle"
-                          className="h-4 w-4 mt-0.5 flex-shrink-0"
+                          className="size-4 mt-0.5 shrink-0"
                         />
                         <span>{error.error}</span>
                       </div>
@@ -264,7 +264,7 @@ function ValidationErrorDisplay({
                           }
                         }}
                       >
-                        <CareIcon icon="l-arrow-up" className="mr-1 h-3 w-3" />
+                        <CareIcon icon="l-arrow-up" className="mr-1 size-3" />
                         {t("scroll_to_question")}
                       </Button>
                     </div>
@@ -821,7 +821,7 @@ export function QuestionnaireForm({
                     <>
                       <span className="opacity-0">{t("submit")}</span>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
+                        <div className="size-5 animate-spin rounded-full border-b-2 border-white" />
                       </div>
                     </>
                   ) : (

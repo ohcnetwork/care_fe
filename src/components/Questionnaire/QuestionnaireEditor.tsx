@@ -63,7 +63,6 @@ import {
   Question,
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
-  StructuredQuestionType,
 } from "@/types/questionnaire/question";
 import {
   QuestionStatus,
@@ -724,6 +723,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       createQuestionnaire({
         ...questionnaire,
         organizations: selectedOrgIds,
+        tags: questionnaire.tags.map((tag) => tag.id),
       });
     }
   };
