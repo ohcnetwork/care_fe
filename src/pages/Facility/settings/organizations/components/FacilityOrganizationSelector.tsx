@@ -81,6 +81,7 @@ export default function FacilityOrganizationSelector(
       enabled: !!level.id,
     })),
   });
+
   const handleSelect = (org: FacilityOrganization) => {
     if (org.has_children) {
       if (currentSelection?.id === org.id) {
@@ -124,14 +125,6 @@ export default function FacilityOrganizationSelector(
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
-    if (isOpen && typeof window !== "undefined") {
-      setTimeout(() => {
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          behavior: "smooth",
-        });
-      }, 50);
-    }
     if (!isOpen) {
       setNavigationLevels([]);
       setFacilityOrgSearch("");
@@ -235,10 +228,15 @@ export default function FacilityOrganizationSelector(
               </PopoverTrigger>
               <PopoverContent
                 side="top"
-                className="p-0 w-[var(--radix-popover-trigger-width)]"
+                updatePositionStrategy="always"
+                className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-y-auto"
+                style={{
+                  touchAction: "manipulation",
+                  overscrollBehavior: "contain",
+                }}
               >
                 <Command>
-                  <div className="flex flex-col px-3 py-2 border-b">
+                  <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
                     <span className="font-semibold text-base text-gray-900">
                       {t("select_department")}
                     </span>
@@ -246,7 +244,7 @@ export default function FacilityOrganizationSelector(
                       {t("select_department_description")}
                     </span>
                   </div>
-                  <div className="flex items-center px-3 py-2 border-b">
+                  <div className="flex items-center px-3 py-2 border-b sticky top-[48px] bg-white z-10">
                     {navigationLevels.length > 0 ? (
                       renderNavigationPath()
                     ) : (
@@ -255,7 +253,7 @@ export default function FacilityOrganizationSelector(
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center border-b px-3">
+                  <div className="flex items-center border-b px-3 sticky top-[96px] bg-white z-10">
                     <CommandInput
                       placeholder={t("search_organizations")}
                       onValueChange={setFacilityOrgSearch}
@@ -314,7 +312,7 @@ export default function FacilityOrganizationSelector(
                     </CommandGroup>
                   </CommandList>
                   {currentSelection && (
-                    <div className="flex items-center justify-between px-3 py-2 border-t bg-sky-50/50">
+                    <div className="flex items-center justify-between px-3 py-2 border-t bg-sky-50/50 sticky bottom-0 z-10">
                       <div className="flex flex-col">
                         <span className="text-xs text-gray-500 mb-0.5">
                           {t("selected")}
