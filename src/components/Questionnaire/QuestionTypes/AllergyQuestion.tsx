@@ -184,7 +184,7 @@ const AllergyTableRow = ({
             onValueChange={(value) => onUpdate?.({ criticality: value })}
             disabled={disabled}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-8 md:h-9">
               <SelectValue placeholder={t("critical")} />
             </SelectTrigger>
             <SelectContent>
@@ -208,7 +208,7 @@ const AllergyTableRow = ({
             }}
             disabled={disabled}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-8 md:h-9">
               <SelectValue placeholder={t("verify")} />
             </SelectTrigger>
             <SelectContent>
