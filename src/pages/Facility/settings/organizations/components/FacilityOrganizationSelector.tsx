@@ -226,7 +226,16 @@ export default function FacilityOrganizationSelector(
                   <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
+              <PopoverContent
+                side="top" // Ensures it opens upwards
+                sideOffset={10} // Adds some spacing from the trigger element
+                avoidCollisions={true} // Prevents clipping
+                collisionBoundary={document.body} // Ensures it stays within the viewport
+                collisionPadding={0} // Minimizes extra spacing
+                sticky="always" // Keeps it positioned properly
+                updatePositionStrategy="always" // F
+                className="p-0 w-[var(--radix-popover-trigger-width)]"
+              >
                 <Command>
                   <div className="flex flex-col px-3 py-2 border-b">
                     <span className="font-semibold text-base text-gray-900">
