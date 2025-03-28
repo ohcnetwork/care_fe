@@ -85,13 +85,9 @@ export default function CreateScheduleTemplateSheet({
       valid_from: z.date({
         required_error: t("field_required"),
       }),
-      valid_to: z
-        .date({
-          required_error: t("field_required"),
-        })
-        .max(new Date(), {
-          message: t("valid_to_max_error"),
-        }),
+      valid_to: z.date({
+        required_error: t("field_required"),
+      }),
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
