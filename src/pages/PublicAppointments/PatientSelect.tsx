@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { ArrowLeft } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -115,7 +116,7 @@ export default function PatientSelect({
 
   const renderPatientList = () => {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-0 sm:p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-0 sm:p-4">
         {patients?.map((patient) => (
           <PatientCard
             key={patient.id}
@@ -133,33 +134,24 @@ export default function PatientSelect({
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <div className="flex px-2 pb-4 justify-start">
+      <div className="flex pb-4 justify-start">
         <Button
           variant="outline"
-          className="border border-secondary-400"
           onClick={() =>
             navigate(
               `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
             )
           }
         >
+          <ArrowLeft className="size-4" />
           <span className="text-sm underline">{t("back")}</span>
         </Button>
       </div>
-      <div className="flex flex-col justify-center space-y-4">
-        <h3 className="text-lg font-medium">{t("select_register_patient")}</h3>
-        {isLoading ? (
-          <div className="flex justify-center items-center">
-            <Loading />
-          </div>
-        ) : (patients?.length ?? 0) > 0 ? (
-          renderPatientList()
-        ) : (
-          renderNoPatientFound()
-        )}
+      <div className="flex flex-col sm:flex-row gap-2 justify-between items-center my-6">
+        <h3>{t("select_register_patient")}</h3>
         <Button
           variant="primary_gradient"
-          className="w-1/2 self-center"
+          className="w-full sm:w-auto"
           onClick={() =>
             navigate(
               `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
@@ -169,6 +161,17 @@ export default function PatientSelect({
           <span className="bg-linear-to-b from-white/15 to-transparent"></span>
           {t("add_new_patient")}
         </Button>
+      </div>
+      <div className="flex flex-col justify-center space-y-4">
+        {isLoading ? (
+          <div className="flex justify-center items-center">
+            <Loading />
+          </div>
+        ) : (patients?.length ?? 0) > 0 ? (
+          renderPatientList()
+        ) : (
+          renderNoPatientFound()
+        )}
       </div>
     </div>
   );
