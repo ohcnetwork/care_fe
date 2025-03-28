@@ -390,9 +390,12 @@ export default function PatientRegistration(
                       <PhoneInput
                         {...field}
                         onChange={(value) => {
-                          form.setValue("phone_number", value);
+                          form.setValue("phone_number", value ?? "");
                           if (form.watch("same_phone_number")) {
-                            form.setValue("emergency_phone_number", value);
+                            form.setValue(
+                              "emergency_phone_number",
+                              value ?? "",
+                            );
                           }
                         }}
                         data-cy="patient-phone-input"

@@ -530,7 +530,7 @@ const Login = (props: LoginProps) => {
                           name="phone"
                           value={phone}
                           onChange={(value) => {
-                            setPhone(value);
+                            setPhone(value ?? "");
                             setOtpError("");
                             setOtpValidationError("");
                           }}
