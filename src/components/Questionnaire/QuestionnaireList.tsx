@@ -78,13 +78,16 @@ const RenderCard = ({
           {questionnaireList.map((questionnaire: QuestionnaireDetail) => (
             <Card
               key={questionnaire.id}
-              className="overflow-hidden bg-white rounded-lg cursor-pointer transition-shadow transform hover:shadow-lg"
+              className="overflow-hidden bg-white rounded-lg cursor-pointer"
               onClick={() =>
                 navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
               }
             >
               <CardContent className="p-6 relative flex flex-col">
-                <div className="absolute top-4 right-4">
+                <div className="flex flex-row gap-2 justify-between items-center mb-4 border-b pb-2">
+                  <p className="mt-2 text-l text-left font-bold text-gray-900 line-clamp-1 text-ellipsis ">
+                    {questionnaire.title}
+                  </p>
                   <Badge
                     className={
                       {
@@ -99,44 +102,23 @@ const RenderCard = ({
                     {t(questionnaire.status)}
                   </Badge>
                 </div>
-
-                <div className="mb-4 border-b border-gray-200 pb-2">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("title")}
-                  </h3>
-                  {questionnaire.title && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="w-full">
-                          <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
-                            {questionnaire.title}
-                          </p>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-black text-white z-40">
-                          {questionnaire.title}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-
-                <div className="mb-4">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("slug")}
-                  </h3>
-                  <p className="text-sm text-gray-900 truncate">
-                    {questionnaire.slug}
-                  </p>
-                </div>
-
-                <div className="mb-4 flex-1">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("description")}
-                  </h3>
-                  <p className="text-sm text-gray-900 line-clamp-2">
-                    {questionnaire.description}
-                  </p>
-                </div>
+                {questionnaire.description?.trim() ? (
+                  <div className="mb-4 flex-1">
+                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      {t("description")}
+                    </h3>
+                    <p className="text-sm text-gray-900 line-clamp-2">
+                      {questionnaire.description}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mb-4 flex-1">
+                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      {t("description")}
+                    </h3>
+                    <p className="text-2xl font-light text-gray-500">-</p>
+                  </div>
+                )}
 
                 <div className="mt-4 flex justify-end">
                   <Button

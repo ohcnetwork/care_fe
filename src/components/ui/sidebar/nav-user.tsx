@@ -49,13 +49,13 @@ export function FacilityNavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               data-cy="user-menu-dropdown"
             >
-              {open && (
+              <Avatar
+                className="size-8 rounded-lg"
+                name={`${user.first_name} ${user.last_name}`}
+                imageUrl={user.read_profile_picture_url}
+              />
+              {(open || isMobile) && (
                 <>
-                  <Avatar
-                    className="size-8 rounded-lg"
-                    name={`${user.first_name} ${user.last_name}`}
-                    imageUrl={user.read_profile_picture_url}
-                  />
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
                       {formatName(user)}
@@ -64,15 +64,6 @@ export function FacilityNavUser({
                   </div>
                   <CaretSortIcon className="ml-auto size-4" />
                 </>
-              )}
-              {!open && (
-                <div className="flex flex-row items-center">
-                  <Avatar
-                    name={`${user.first_name} ${user.last_name}`}
-                    className="size-8 rounded-lg"
-                    imageUrl={user.read_profile_picture_url}
-                  />
-                </div>
               )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
