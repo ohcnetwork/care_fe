@@ -77,7 +77,7 @@ export default function PatientLogin({
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
     mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
-      toast.success(t("A verification code has been sent to your phone."));
+      toast.success("A verification code has been sent to your phone");
       if (page === "send") {
         navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
       }
