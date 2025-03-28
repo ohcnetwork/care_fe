@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { formatPhoneNumber } from "react-phone-number-input";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import { cn } from "@/lib/utils";
 
@@ -186,7 +186,7 @@ export function EncounterDetails({
         />
         <DetailRow
           label={t("mobile_number")}
-          value={formatPhoneNumber(patient.phone_number)}
+          value={formatPhoneNumberIntl(patient.phone_number)}
           isStrong
         />
       </div>
