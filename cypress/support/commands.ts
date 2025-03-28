@@ -150,6 +150,18 @@ Cypress.Commands.add("verifyErrorMessages", (errors: ErrorMessageItem[]) => {
   });
 });
 
+Cypress.Commands.add("saveCurrentUrl", () => {
+  cy.url().then((url) => {
+    cy.wrap(url).as("savedCurrentUrl");
+  });
+});
+
+Cypress.Commands.add("navigateToSavedUrl", () => {
+  cy.get<string>("@savedCurrentUrl").then((url) => {
+    cy.visit(url);
+  });
+});
+
 Cypress.Commands.add(
   "typeIntoField",
   (

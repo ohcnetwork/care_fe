@@ -345,7 +345,10 @@ export const PatientUsers = (props: PatientProps) => {
             <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
               <div className="text-sm">
                 <div className="text-gray-500">{t("phone_number")}</div>
-                <div className="font-medium">{user.phone_number}</div>
+                <div className="font-medium">
+                  {user.phone_number &&
+                    formatPhoneNumberIntl(user.phone_number)}
+                </div>
               </div>
               <div className="text-sm">
                 <div className="text-gray-500">{t("user_type")}</div>
