@@ -81,7 +81,6 @@ export default function FacilityOrganizationSelector(
       enabled: !!level.id,
     })),
   });
-
   const handleSelect = (org: FacilityOrganization) => {
     if (org.has_children) {
       if (currentSelection?.id === org.id) {
@@ -125,6 +124,14 @@ export default function FacilityOrganizationSelector(
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
+    if (isOpen && typeof window !== "undefined") {
+      setTimeout(() => {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: "smooth",
+        });
+      }, 50);
+    }
     if (!isOpen) {
       setNavigationLevels([]);
       setFacilityOrgSearch("");
@@ -227,13 +234,7 @@ export default function FacilityOrganizationSelector(
                 </Button>
               </PopoverTrigger>
               <PopoverContent
-                side="top" // Ensures it opens upwards
-                sideOffset={10} // Adds some spacing from the trigger element
-                avoidCollisions={true} // Prevents clipping
-                collisionBoundary={document.body} // Ensures it stays within the viewport
-                collisionPadding={0} // Minimizes extra spacing
-                sticky="always" // Keeps it positioned properly
-                updatePositionStrategy="always" // F
+                side="top"
                 className="p-0 w-[var(--radix-popover-trigger-width)]"
               >
                 <Command>
