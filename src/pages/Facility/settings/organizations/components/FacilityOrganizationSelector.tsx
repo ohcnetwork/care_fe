@@ -208,7 +208,6 @@ export default function FacilityOrganizationSelector(
                 </Button>
               </div>
             ))}
-
             <Popover open={open} onOpenChange={handleOpenChange}>
               <PopoverTrigger asChild>
                 <Button
@@ -229,10 +228,16 @@ export default function FacilityOrganizationSelector(
               <PopoverContent
                 side="top"
                 updatePositionStrategy="always"
-                className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-y-auto"
+                className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
                 style={{
+                  position: "fixed",
+                  bottom: "50px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
                   touchAction: "manipulation",
                   overscrollBehavior: "contain",
+                  WebkitOverflowScrolling: "touch",
+                  zIndex: 1000,
                 }}
               >
                 <Command>
