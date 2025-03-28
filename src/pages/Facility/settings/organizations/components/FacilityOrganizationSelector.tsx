@@ -318,6 +318,7 @@ export default function FacilityOrganizationSelector(
                         size="sm"
                         className="h-8 gap-2"
                         onClick={handleConfirmSelection}
+                        data-cy="confirm-organization"
                       >
                         <span>{t("confirm")}</span>
                         <CareIcon icon="l-check" className="h-4 w-4" />
