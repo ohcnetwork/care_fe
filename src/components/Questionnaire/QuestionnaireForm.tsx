@@ -643,13 +643,10 @@ export function QuestionnaireForm({
 
     // Then, add questionnaire submission requests
     formsWithValidation.forEach((form) => {
-      const nonStructuredResponses = form.responses.filter(
-        (response) => !response.structured_type,
-      );
-      const validResponses = nonStructuredResponses.filter(
+      const validResponses = form.responses.filter(
         (response) =>
-          response.values.length > 0 &&
           !response.structured_type &&
+          response.values.length > 0 &&
           response.values?.[0]?.value !== "",
       );
       if (validResponses.length > 0) {
@@ -688,10 +685,11 @@ export function QuestionnaireForm({
             })),
           },
         });
+        submitBatch({ requests });
+      } else {
+        toast.error("Failed to submit questionnaire");
       }
     });
-
-    submitBatch({ requests });
   };
 
   const scrollToQuestion = (questionnaireId: string, groupId?: string) => {
