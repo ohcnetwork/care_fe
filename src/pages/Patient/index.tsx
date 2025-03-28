@@ -126,7 +126,7 @@ function PatientIndex() {
         </CardHeader>
 
         <CardContent className="mt-2 pt-2 px-6 pb-3">
-          <div className="flex flex-col md:flex-row gap-2 justify-between">
+          <div className="flex flex-col md:flex-row gap-4 justify-between">
             <div className="flex flex-row gap-3 justify-between md:flex-row md:flex-grow md:mr-6">
               <div className="flex flex-col gap-0 items-start md:flex-grow md:mr-4">
                 <span className="text-xs font-medium">{t("location")}: </span>
@@ -138,17 +138,17 @@ function PatientIndex() {
                   </Link>
                 </span>
               </div>
-              <div className="flex flex-col gap-0 items-start md:flex-none w-[80px]">
+              <div className="flex flex-col gap-0 items-start md:flex-none">
                 <span className="text-xs font-medium">{t("status")}: </span>
                 <span>{getStatusChip(appointment.status)}</span>
               </div>
             </div>
             <div className="flex flex-row gap-3 justify-between md:flex-none">
-              <div className="flex flex-col gap-0 items-start w-[130px]">
+              <div className="flex flex-col gap-0 items-start">
                 <span className="text-xs font-medium">{t("date")}: </span>
                 <span className="text-sm">{appointmentDate}</span>
               </div>
-              <div className="flex flex-col gap-0 items-start w-[80px]">
+              <div className="flex flex-col gap-0 items-start">
                 <span className="text-xs font-medium">{t("time_slot")}: </span>
                 <span className="text-sm">{appointmentTimeSlot}</span>
               </div>
