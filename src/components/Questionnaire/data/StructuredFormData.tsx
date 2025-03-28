@@ -140,12 +140,72 @@ const files_questionnaire: QuestionnaireDetail = {
   tags: [],
 };
 
-export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireDetail> = {
-  encounter: encounterQuestionnaire,
-  medication_request: medication_request_questionnaire,
-  allergy_intolerance: allergy_intolerance_questionnaire,
-  medication_statement: medication_statement_questionnaire,
-  diagnosis: diagnosis_questionnaire,
-  symptom: symptom_questionnaire,
-  files: files_questionnaire,
+const time_of_death_questionnaire: QuestionnaireDetail = {
+  id: "time_of_death",
+  slug: "time_of_death",
+  version: "0.0.1",
+  title: "Time of Death",
+  status: "active",
+  subject_type: "patient",
+  questions: [
+    {
+      id: "time_of_death",
+      text: "Time of Death",
+      type: "structured",
+      structured_type: "time_of_death",
+      link_id: "1.1",
+      required: true,
+    },
+  ],
+  tags: [],
 };
+
+export const STRUCTURED_QUESTIONS = [
+  {
+    value: "allergy_intolerance",
+    label: "Allergy Intolerance",
+    questionnaire: allergy_intolerance_questionnaire,
+  },
+  {
+    value: "medication_request",
+    label: "Medication Request",
+    questionnaire: medication_request_questionnaire,
+  },
+  {
+    value: "medication_statement",
+    label: "Medication Statement",
+    questionnaire: medication_statement_questionnaire,
+  },
+  { value: "symptom", label: "Symptom", questionnaire: symptom_questionnaire },
+  {
+    value: "diagnosis",
+    label: "Diagnosis",
+    questionnaire: diagnosis_questionnaire,
+  },
+  {
+    value: "encounter",
+    label: "Encounter",
+    questionnaire: encounterQuestionnaire,
+  },
+  {
+    value: "time_of_death",
+    label: "Time of Death",
+    questionnaire: time_of_death_questionnaire,
+  },
+  { value: "appointment", label: "Appointment" },
+  { value: "files", label: "Files", questionnaire: files_questionnaire },
+] as const;
+
+export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireDetail> =
+  STRUCTURED_QUESTIONS.reduce(
+    (acc, question) => {
+      if ("questionnaire" in question) {
+        acc[question.questionnaire.id] = question.questionnaire;
+      }
+      return acc;
+    },
+    {} as Record<string, QuestionnaireDetail>,
+  );
+
+export type StructuredQuestionType =
+  (typeof STRUCTURED_QUESTIONS)[number]["value"];

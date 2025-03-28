@@ -65,8 +65,8 @@ export function LocationCard({
       <div className="flex flex-col h-full">
         <div className="p-4 sm:p-6">
           <div className="flex items-start gap-4">
-            <div className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500">
-              <Icon className="h-5 w-5" />
+            <div className="size-12 shrink-0 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500">
+              <Icon className="size-5" />
             </div>
 
             <div className="flex grow flex-col min-w-0 overflow-hidden">
@@ -97,7 +97,7 @@ export function LocationCard({
                 </Badge>
                 {location.has_children && (
                   <Badge variant="outline" className="flex items-center gap-1">
-                    <FolderOpen className="h-3 w-3" />
+                    <FolderOpen className="size-3" />
                     {t("has_child_locations")}
                   </Badge>
                 )}
@@ -111,7 +111,7 @@ export function LocationCard({
                 onClick={() => onEdit(location)}
                 className="shrink-0"
               >
-                <PenLine className="h-4 w-4" />
+                <PenLine className="size-4" />
               </Button>
             )}
           </div>
@@ -158,7 +158,7 @@ export function LocationCard({
                 onClick={() => onView?.(location)}
               >
                 {t("view_details")}
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="size-4" />
               </Button>
             </div>
           </div>

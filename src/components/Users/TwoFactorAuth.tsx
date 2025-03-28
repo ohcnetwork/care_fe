@@ -181,7 +181,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
                     <>
                       <CareIcon
                         icon="l-spinner"
-                        className="mr-2 h-4 w-4 animate-spin"
+                        className="mr-2 size-4 animate-spin"
                       />
                     </>
                   ) : (
@@ -205,13 +205,13 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
                       <>
                         <CareIcon
                           icon="l-spinner"
-                          className="mr-2 h-4 w-4 animate-spin"
+                          className="mr-2 size-4 animate-spin"
                         />
                         <span>{t("regenerating")}</span>
                       </>
                     ) : (
                       <>
-                        <CareIcon icon="l-refresh" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-refresh" className="mr-2 size-4" />
                         {t("two_factor_authentication_regenerating_codes")}
                       </>
                     )}
@@ -221,7 +221,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
                     onClick={() => openDisableDialog()}
                     className="hover:bg-red-600 w-auto"
                   >
-                    <CareIcon icon="l-shield" className="mr-2 h-4 w-4" />
+                    <CareIcon icon="l-shield" className="mr-2 size-4" />
                     {t("two_factor_authentication_disable")}
                   </Button>
                 </div>
@@ -282,7 +282,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
         icon={
           <CareIcon
             icon="l-exclamation-triangle"
-            className="text-orange-500 w-5 h-5"
+            className="text-orange-500 size-5"
           />
         }
         buttonVariant="destructive"
@@ -298,9 +298,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
         error={regeneratePasswordError}
         isLoading={isRegenerating}
         buttonText={t("regenerate")}
-        icon={
-          <CareIcon icon="l-refresh" className="text-primary-500 w-5 h-5" />
-        }
+        icon={<CareIcon icon="l-refresh" className="text-primary-500 size-5" />}
         buttonVariant="destructive"
       />
     </>
