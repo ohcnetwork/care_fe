@@ -75,7 +75,7 @@ const consentFormSchema = z
       });
     }
 
-    if (data.period.end && data.date >= data.period.end) {
+    if (data.period.end && data.date > data.period.end) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: t("consent_after_end"),
