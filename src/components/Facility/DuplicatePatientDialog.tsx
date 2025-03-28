@@ -56,7 +56,7 @@ const DuplicatePatientDialog = (props: Props) => {
             </p>
           </div>
           <div>
-            <div className="overflow-auto ">
+            <div className="overflow-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
