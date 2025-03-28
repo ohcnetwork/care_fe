@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 export interface OTPCredential {
   code: string;
 }
@@ -13,6 +15,7 @@ export const autofillOtp = (
         const otp = otpCredential as OTPCredential | null;
         if (otp) {
           onSuccess(otp.code);
+          toast.success(`Your OTP is: ${otp.code}`);
         }
       })
       .catch(() => {
