@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { TFunction } from "i18next";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -126,7 +125,6 @@ export default function PatientSelect({
             getPatienDoBorAge={getPatienDoBorAge}
             createAppointment={createAppointment}
             reason={reason ?? ""}
-            t={t}
           />
         ))}
       </div>
@@ -183,7 +181,6 @@ function PatientCard({
   getPatienDoBorAge,
   createAppointment,
   reason,
-  t,
 }: {
   patient: Patient;
   selectedPatient: string | null;
@@ -191,8 +188,9 @@ function PatientCard({
   getPatienDoBorAge: (patient: Patient) => string;
   createAppointment: (body: AppointmentCreateRequest) => void;
   reason: string;
-  t: TFunction;
 }) {
+  const { t } = useTranslation();
+
   return (
     <Card
       key={patient.id}
