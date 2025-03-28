@@ -101,7 +101,7 @@ function PatientIndex() {
     const appointmentDate = appointmentTime.format("DD MMMM YYYY");
     const appointmentTimeSlot = appointmentTime.format("hh:mm a");
     return (
-      <Card key={appointment.id} className="shadow overflow-hidden">
+      <Card key={appointment.id} className="shadow-sm overflow-hidden">
         <CardHeader className="px-6 pb-3 bg-secondary-200 flex flex-col md:flex-row justify-between">
           <CardTitle>
             <div className="flex flex-col">
@@ -167,7 +167,7 @@ function PatientIndex() {
         {appointments && appointments.length > 0 ? (
           appointments.map((appointment) => getAppointmentCard(appointment))
         ) : (
-          <div className="col-span-full text-center bg-white shadow rounded p-4 font-medium">
+          <div className="col-span-full text-center bg-white shadow-sm rounded p-4 font-medium">
             {t("no_appointments")}
           </div>
         )}

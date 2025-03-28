@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import LocationPicker from "@/components/Common/GeoLocationPicker";
 import { FacilityModel } from "@/components/Facility/models";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
@@ -84,7 +85,7 @@ export default function FacilityForm({
       description: "",
       features: [],
       pincode: "",
-      geo_organization: "",
+      geo_organization: organizationId || "",
       address: "",
       phone_number: "",
       latitude: undefined,
@@ -220,7 +221,7 @@ export default function FacilityForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("basic_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
@@ -315,7 +316,7 @@ export default function FacilityForm({
         </div>
 
         {/* Contact Information */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("contact_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
@@ -398,99 +399,27 @@ export default function FacilityForm({
         </div>
 
         {/* Location Information */}
-        <div className="space-y-4 rounded-lg border p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">{t("location_details")}</h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleGetCurrentLocation}
-              disabled={isGettingLocation}
-              className="flex items-center gap-2"
-              data-cy="get-location-button"
-            >
-              {isGettingLocation ? (
-                <>
-                  <CareIcon icon="l-spinner" className="h-4 w-4 animate-spin" />
-                  {t("getting_location")}
-                </>
-              ) : (
-                <>
-                  <CareIcon icon="l-location-point" className="h-4 w-4" />
-                  {t("get_current_location")}
-                </>
-              )}
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="latitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("latitude")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      onChange={(e) => {
-                        form.setValue(
-                          "latitude",
-                          e.target.value ? Number(e.target.value) : undefined,
-                          { shouldDirty: true },
-                        );
-                      }}
-                      data-cy="facility-latitude"
-                      placeholder={t("enter_latitude")}
-                      disabled={isGettingLocation}
-                      className={isGettingLocation ? "animate-pulse" : ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="longitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("longitude")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      onChange={(e) => {
-                        form.setValue(
-                          "longitude",
-                          e.target.value ? Number(e.target.value) : undefined,
-                          { shouldDirty: true },
-                        );
-                      }}
-                      data-cy="facility-longitude"
-                      placeholder={t("enter_longitude")}
-                      disabled={isGettingLocation}
-                      className={isGettingLocation ? "animate-pulse" : ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
+          <LocationPicker
+            latitude={form.watch("latitude")}
+            longitude={form.watch("longitude")}
+            onLocationSelect={(lat, lng) => {
+              form.setValue("latitude", lat, { shouldDirty: true });
+              form.setValue("longitude", lng, { shouldDirty: true });
+            }}
+            isGettingLocation={isGettingLocation}
+            onGetCurrentLocation={handleGetCurrentLocation}
+          />
         </div>
 
         {/* Visibility Settings */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("visibility_settings")}</h3>
           <FormField
             control={form.control}
             name="is_public"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/5">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4 bg-muted/5">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -526,7 +455,7 @@ export default function FacilityForm({
               <>
                 <CareIcon
                   icon="l-spinner"
-                  className="mr-2 h-4 w-4 animate-spin"
+                  className="mr-2 size-4 animate-spin"
                 />
                 {t("updating_facility")}
               </>
@@ -535,10 +464,7 @@ export default function FacilityForm({
             )
           ) : isPending ? (
             <>
-              <CareIcon
-                icon="l-spinner"
-                className="mr-2 h-4 w-4 animate-spin"
-              />
+              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
               {t("creating_facility")}
             </>
           ) : (

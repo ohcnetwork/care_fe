@@ -74,7 +74,7 @@ const InputComponent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <Input
     className={cn(
-      "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-none focus-visible:border-gray-200",
+      "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
       className,
     )}
     {...props}
@@ -100,7 +100,7 @@ const CountrySelect = ({
 }: CountrySelectProps) => {
   const { t } = useTranslation();
   return (
-    <Popover>
+    <Popover modal>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -128,7 +128,7 @@ const CountrySelect = ({
         <Command>
           <CommandInput
             placeholder={t("search_country")}
-            className="outline-none border-none ring-0 shadow-none"
+            className="outline-hidden border-none ring-0 shadow-none"
           />
           <CommandList>
             <ScrollArea className="h-72">

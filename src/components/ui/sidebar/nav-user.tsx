@@ -27,6 +27,8 @@ import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
+import { formatName } from "@/Utils/utils";
+
 export function FacilityNavUser({
   selectedFacilityId,
 }: {
@@ -34,7 +36,7 @@ export function FacilityNavUser({
 }) {
   const { t } = useTranslation();
   const user = useAuthUser();
-  const { isMobile, open, setOpenMobile } = useSidebar();
+  const { isMobile, open } = useSidebar();
   const { signOut } = useAuthContext();
 
   return (
@@ -45,36 +47,28 @@ export function FacilityNavUser({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              data-cy="user-menu-dropdown"
             >
-              {open && (
+              <Avatar
+                className="size-8 rounded-lg"
+                name={`${user.first_name} ${user.last_name}`}
+                imageUrl={user.read_profile_picture_url}
+              />
+              {(open || isMobile) && (
                 <>
-                  <Avatar
-                    className="h-8 w-8 rounded-lg"
-                    name={`${user.first_name} ${user.last_name}`}
-                    imageUrl={user.read_profile_picture_url}
-                  />
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
-                      {user.first_name} {user.last_name}
+                      {formatName(user)}
                     </span>
                     <span className="truncate text-xs">{user.username}</span>
                   </div>
                   <CaretSortIcon className="ml-auto size-4" />
                 </>
               )}
-              {!open && (
-                <div className="flex flex-row items-center">
-                  <Avatar
-                    name={`${user.first_name} ${user.last_name}`}
-                    className="h-8 w-8 rounded-lg"
-                    imageUrl={user.read_profile_picture_url}
-                  />
-                </div>
-              )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
@@ -82,13 +76,13 @@ export function FacilityNavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar
-                  className="h-8 w-8 rounded-lg"
+                  className="size-8 rounded-lg"
                   name={`${user.first_name} ${user.last_name}`}
                   imageUrl={user.read_profile_picture_url}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {user.first_name} {user.last_name}
+                    {formatName(user)}
                   </span>
                   <span className="truncate text-xs">{user.username}</span>
                 </div>
@@ -97,14 +91,12 @@ export function FacilityNavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
+                data-cy="user-menu-profile"
                 onClick={() => {
                   const profileUrl = selectedFacilityId
                     ? `/facility/${selectedFacilityId}/users/${user.username}`
                     : `/users/${user.username}`;
                   navigate(profileUrl);
-                  if (isMobile) {
-                    setOpenMobile(false);
-                  }
                 }}
               >
                 <BadgeCheck />
@@ -112,7 +104,7 @@ export function FacilityNavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut}>
+            <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
               <LogOut />
               {t("logout")}
             </DropdownMenuItem>
@@ -140,11 +132,12 @@ export function PatientNavUser() {
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              data-cy="user-menu-dropdown"
             >
               {open && (
                 <>
                   <Avatar
-                    className="h-8 w-8 rounded-lg"
+                    className="size-8 rounded-lg"
                     name={patient?.name || phoneNumber}
                   />
                   <div className="grid flex-1 text-left text-sm leading-tight">
@@ -162,14 +155,14 @@ export function PatientNavUser() {
                 <div className="flex flex-row items-center">
                   <Avatar
                     name={patient?.name || phoneNumber}
-                    className="h-8 w-8 rounded-lg"
+                    className="size-8 rounded-lg"
                   />
                 </div>
               )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
@@ -177,7 +170,7 @@ export function PatientNavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar
-                  className="h-8 w-8 rounded-lg"
+                  className="size-8 rounded-lg"
                   name={patient?.name || phoneNumber}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -191,7 +184,7 @@ export function PatientNavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut}>
+            <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
               <LogOut />
               {t("logout")}
             </DropdownMenuItem>

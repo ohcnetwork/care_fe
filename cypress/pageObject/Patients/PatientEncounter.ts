@@ -13,6 +13,13 @@ export class PatientEncounter {
     return this;
   }
 
+  searchEncounter(patientName: string) {
+    cy.get('[data-cy="search-encounter"]').click();
+    cy.typeIntoField("#encounter-search", patientName);
+    cy.get('[data-cy="search-encounter"]').click();
+    return this;
+  }
+
   clickUpdateEncounter() {
     cy.verifyAndClickElement(
       '[data-cy="update-encounter-option"]',
@@ -28,14 +35,11 @@ export class PatientEncounter {
 
   // Questionnaire actions
   addQuestionnaire(questionnaireName: string) {
-    cy.get('[data-cy="add-questionnaire-button"]').click();
-    cy.get('[role="dialog"] input')
-      .should("be.visible")
-      .type(questionnaireName);
-    cy.get('[role="dialog"] button')
-      .contains(questionnaireName)
-      .should("be.visible")
-      .click();
+    cy.typeAndSelectOption(
+      '[data-cy="add-questionnaire-button"]',
+      questionnaireName,
+      false,
+    );
     return this;
   }
 
@@ -50,22 +54,6 @@ export class PatientEncounter {
         }
       });
     });
-    return this;
-  }
-
-  submitQuestionnaire() {
-    this.clickSubmitQuestionnaire();
-    this.verifyQuestionnaireSubmission();
-    return this;
-  }
-
-  clickSubmitQuestionnaire() {
-    cy.clickSubmitButton("Submit");
-    return this;
-  }
-
-  verifyQuestionnaireSubmission() {
-    cy.verifyNotification("Questionnaire submitted successfully");
     return this;
   }
 
@@ -96,10 +84,18 @@ export class PatientEncounter {
   }
 
   clickConfirmEncounterAsComplete() {
+    cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounter");
     cy.verifyAndClickElement(
       '[data-cy="confirm-encounter-complete"]',
       "Mark as Complete",
     );
+    cy.wait("@getEncounter").then((interception) => {
+      expect(interception.response?.statusCode).to.eq(200); // Verify status code
+      expect(interception.response?.body).to.have.property(
+        "status",
+        "completed",
+      );
+    });
     return this;
   }
 

@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
@@ -6,19 +7,21 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   SquarePenIcon,
-  Tags,
   ViewIcon,
 } from "lucide-react";
-import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,27 +31,22 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -63,480 +61,38 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
+import {
+  STRUCTURED_QUESTIONS,
+  StructuredQuestionType,
+} from "@/components/Questionnaire/data/StructuredFormData";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
   Question,
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
-  StructuredQuestionType,
 } from "@/types/questionnaire/question";
-import {
-  QuestionStatus,
-  QuestionnaireDetail,
-  SubjectType,
-} from "@/types/questionnaire/questionnaire";
+import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
+import { ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
-import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import { CodingEditor } from "./CodingEditor";
-import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
-import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
+import { QuestionnaireProperties } from "./QuestionnaireProperties";
 
 interface QuestionnaireEditorProps {
   id?: string;
 }
-
-const STRUCTURED_QUESTION_TYPES = [
-  { value: "allergy_intolerance", label: "Allergy Intolerance" },
-  { value: "medication_request", label: "Medication Request" },
-  { value: "medication_statement", label: "Medication Statement" },
-  { value: "symptom", label: "Symptom" },
-  { value: "diagnosis", label: "Diagnosis" },
-  { value: "encounter", label: "Encounter" },
-  { value: "appointment", label: "Appointment" },
-] as const;
-
 interface Organization {
   id: string;
   name: string;
   description?: string;
-}
-
-interface OrganizationResponse {
-  results: Organization[];
-}
-
-interface TagResponse {
-  results: QuestionnaireTagModel[];
-}
-
-interface QuestionnairePropertiesProps {
-  questionnaire: QuestionnaireDetail;
-  updateQuestionnaireField: <K extends keyof QuestionnaireDetail>(
-    field: K,
-    value: QuestionnaireDetail[K],
-  ) => void;
-  id?: string;
-  organizations?: OrganizationResponse;
-  organizationSelection: {
-    selectedIds: string[];
-    onToggle: (orgId: string) => void;
-    searchQuery: string;
-    setSearchQuery: (query: string) => void;
-    available?: OrganizationResponse;
-    isLoading?: boolean;
-  };
-  tags?: QuestionnaireTagModel[];
-  tagSelection: {
-    selectedIds: string[];
-    onToggle: (tagId: string) => void;
-    searchQuery: string;
-    setSearchQuery: (query: string) => void;
-    available?: TagResponse;
-    isLoading?: boolean;
-  };
-}
-
-function StatusSelector({
-  value,
-  onChange,
-}: {
-  value: QuestionStatus;
-  onChange: (value: QuestionStatus) => void;
-}) {
-  return (
-    <div className="space-y-2 w-fit">
-      <Label htmlFor="status">{t("status")}</Label>
-      <RadioGroup
-        value={value}
-        onValueChange={onChange}
-        className="flex items-center gap-0 border border-gray-300 divide-x rounded-md bg-white [&>div:has([data-state=checked])]:text-primary-500 [&>div:has([data-state=checked])]:bg-primary-200"
-      >
-        {["active", "draft", "retired"].map((status) => (
-          <div
-            key={status}
-            className={cn(
-              "flex items-center px-2 py-1 space-x-2",
-              status === "active" && "rounded-l-md",
-              status === "retired" && "rounded-r-md",
-            )}
-          >
-            <RadioGroupItem value={status} id={`status-${status}`} />
-            <Label
-              htmlFor={`status-${status}`}
-              className="text-sm font-normal text-gray-950"
-            >
-              {t(status)}
-            </Label>
-          </div>
-        ))}
-      </RadioGroup>
-    </div>
-  );
-}
-
-function SubjectTypeSelector({
-  value,
-  onChange,
-}: {
-  value: SubjectType;
-  onChange: (value: SubjectType) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor="subject_type">{t("subject_type")}</Label>
-      <RadioGroup
-        value={value}
-        onValueChange={onChange}
-        className="flex w-fit items-center gap-0 border border-gray-300 divide-x rounded-md bg-white [&>div:has([data-state=checked])]:bg-primary-200"
-      >
-        {[
-          { value: "patient", label: "patient" },
-          { value: "encounter", label: "encounter" },
-        ].map((type) => (
-          <div
-            key={type.value}
-            className={cn(
-              "flex items-center px-2 py-1 space-x-2",
-              type.value === "patient" && "rounded-l-md",
-              type.value === "encounter" && "rounded-r-md",
-            )}
-          >
-            <RadioGroupItem
-              value={type.value}
-              id={`subject-type-${type.value}`}
-            />
-            <Label
-              htmlFor={`subject-type-${type.value}`}
-              className="text-sm font-normal text-gray-950"
-            >
-              {t(type.label)}
-            </Label>
-          </div>
-        ))}
-      </RadioGroup>
-    </div>
-  );
-}
-
-function OrganizationSelector({
-  id,
-  organizations,
-  selection,
-}: {
-  id?: string;
-  organizations?: OrganizationResponse;
-  selection: QuestionnairePropertiesProps["organizationSelection"];
-}) {
-  if (id) {
-    return (
-      <>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {organizations?.results.map((org) => (
-            <Badge
-              key={org.id}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              <Building className="h-3 w-3" />
-              {org.name}
-            </Badge>
-          ))}
-          {(!organizations?.results || organizations.results.length === 0) && (
-            <p className="text-sm text-gray-500">
-              {t("no_organizations_selected")}
-            </p>
-          )}
-        </div>
-        <ManageQuestionnaireOrganizationsSheet
-          questionnaireId={id}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <Building className="mr-2 h-4 w-4" />
-              {t("manage_organizations")}
-            </Button>
-          }
-        />
-      </>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {selection.selectedIds.length > 0 ? (
-          selection.available?.results
-            .filter((org) => selection.selectedIds.includes(org.id))
-            .map((org) => (
-              <Badge
-                key={org.id}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {org.name}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => selection.onToggle(org.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))
-        ) : (
-          <p className="text-sm text-gray-500">
-            {t("no_organizations_selected")}
-          </p>
-        )}
-      </div>
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className="w-full justify-between"
-          >
-            <span className="truncate">{t("select_organizations")}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput
-              placeholder={t("search_organizations")}
-              onValueChange={selection.setSearchQuery}
-            />
-            <CommandList>
-              <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
-              <CommandGroup>
-                {selection.isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  selection.available?.results.map((org) => (
-                    <CommandItem
-                      key={org.id}
-                      value={org.id}
-                      onSelect={() => selection.onToggle(org.id)}
-                    >
-                      <div className="flex flex-1 items-center gap-2">
-                        <Building className="h-4 w-4" />
-                        <span>{org.name}</span>
-                        {org.description && (
-                          <span className="text-xs text-gray-500">
-                            - {org.description}
-                          </span>
-                        )}
-                      </div>
-                      {selection.selectedIds.includes(org.id) && (
-                        <Check className="h-4 w-4" />
-                      )}
-                    </CommandItem>
-                  ))
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-}
-
-function TagSelector({
-  id,
-  selection,
-  questionnaire,
-}: {
-  id?: string;
-  selection: QuestionnairePropertiesProps["tagSelection"];
-  questionnaire: QuestionnaireDetail;
-}) {
-  if (id) {
-    return (
-      <>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {questionnaire.tags.map((tag) => (
-            <Badge
-              key={tag.id}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              <Building className="h-3 w-3" />
-              {tag.name}
-            </Badge>
-          ))}
-          {questionnaire.tags.length === 0 && (
-            <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
-          )}
-        </div>
-        <ManageQuestionnaireTagsSheet
-          questionnaire={questionnaire}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <Tags className="mr-2 h-4 w-4" />
-              {t("manage_tags")}
-            </Button>
-          }
-        />
-      </>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {selection.selectedIds.length > 0 ? (
-          selection.available?.results
-            .filter((tag) => selection.selectedIds.includes(tag.id))
-            .map((tag) => (
-              <Badge
-                key={tag.id}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {tag.name}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => selection.onToggle(tag.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))
-        ) : (
-          <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
-        )}
-      </div>
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className="w-full justify-between"
-          >
-            <span className="truncate">{t("select_tags")}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput
-              placeholder={t("search_tags")}
-              onValueChange={selection.setSearchQuery}
-            />
-            <CommandList>
-              <CommandEmpty>{t("no_tags_found")}</CommandEmpty>
-              <CommandGroup>
-                {selection.isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  selection.available?.results.map((tag) => (
-                    <CommandItem
-                      key={tag.id}
-                      value={tag.id}
-                      onSelect={() => selection.onToggle(tag.id)}
-                    >
-                      <div className="flex flex-1 items-center gap-2">
-                        <Building className="h-4 w-4" />
-                        <span>{tag.name}</span>
-                      </div>
-                      {selection.selectedIds.includes(tag.id) && (
-                        <Check className="h-4 w-4" />
-                      )}
-                    </CommandItem>
-                  ))
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-}
-
-function QuestionnaireProperties({
-  questionnaire,
-  updateQuestionnaireField,
-  id,
-  organizations,
-  organizationSelection,
-  tagSelection,
-}: QuestionnairePropertiesProps) {
-  return (
-    <Card className="border-none bg-transparent shadow-none space-y-4 mt-2 ml-2">
-      <CardHeader className="p-0">
-        <CardTitle>{t("properties")}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6 p-0">
-        <StatusSelector
-          value={questionnaire.status}
-          onChange={(val) => updateQuestionnaireField("status", val)}
-        />
-
-        <SubjectTypeSelector
-          value={questionnaire.subject_type}
-          onChange={(val) => updateQuestionnaireField("subject_type", val)}
-        />
-
-        <div className="space-y-2">
-          <Label>
-            {t("organizations")} <span className="text-red-500">*</span>
-          </Label>
-          <OrganizationSelector
-            id={id}
-            organizations={organizations}
-            selection={organizationSelection}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{t("tags")}</Label>
-          <TagSelector
-            id={id}
-            selection={tagSelection}
-            questionnaire={questionnaire}
-          />
-        </div>
-        <CloneQuestionnaireSheet
-          questionnaire={questionnaire}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
-              {t("clone_questionnaire")}
-            </Button>
-          }
-        />
-
-        <div className="space-y-2">
-          <Label htmlFor="version">{t("version")}</Label>
-          <Input
-            id="version"
-            value={questionnaire.version || "0.0.1"}
-            disabled={true}
-            onChange={(e) =>
-              updateQuestionnaireField("version", e.target.value)
-            }
-          />
-        </div>
-      </CardContent>
-    </Card>
-  );
 }
 
 const LAYOUT_OPTIONS = [
@@ -566,10 +122,10 @@ const LAYOUT_OPTIONS = [
   },
   {
     id: "wide-start",
-    value: "grid grid-cols-[2fr,1fr]",
+    value: "grid grid-cols-[2fr_1fr]",
     label: "Wide Start",
     preview: (
-      <div className="w-full grid grid-cols-[2fr,1fr] gap-1">
+      <div className="w-full grid grid-cols-[2fr_1fr] gap-1">
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
@@ -579,10 +135,10 @@ const LAYOUT_OPTIONS = [
   },
   {
     id: "wide-end",
-    value: "grid grid-cols-[1fr,2fr]",
+    value: "grid grid-cols-[1fr_2fr]",
     label: "Wide End",
     preview: (
-      <div className="w-full grid grid-cols-[1fr,2fr] gap-1">
+      <div className="w-full grid grid-cols-[1fr_2fr] gap-1">
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-200 rounded" />
@@ -614,8 +170,7 @@ function LayoutOptionCard({
       <Label
         htmlFor={optionId}
         className={cn(
-          "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-50",
-          "peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
           isSelected && "border-primary",
         )}
       >
@@ -634,10 +189,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set(),
   );
-  const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [selectedOrgs, setSelectedOrgs] = useState<Organization[]>([]);
+  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
+  const [orgError, setOrgError] = useState<string | undefined>();
   const queryClient = useQueryClient();
 
   const {
@@ -682,6 +238,23 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }),
   });
 
+  // This useMemo will automatically include the new tag in options
+  const tagOptions = useMemo(() => {
+    if (!availableTags?.results) return selectedTags;
+    if (tagSearchQuery) return availableTags.results;
+
+    const availableSlugs = new Set(
+      availableTags.results.map((tag) => tag.slug),
+    );
+
+    // Add selected tags that aren't in availableTags
+    const selectedNotInAvailable = selectedTags.filter(
+      (selectedTag) => !availableSlugs.has(selectedTag.slug),
+    );
+
+    return [...availableTags.results, ...selectedNotInAvailable];
+  }, [availableTags, selectedTags, tagSearchQuery]);
+
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.create),
     onSuccess: (data: QuestionnaireDetail) => {
@@ -706,6 +279,18 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       toast.error("Failed to update questionnaire");
     },
   });
+  const QuestionnaireFormPartialSchema = z.object({
+    title: z.string().trim().min(1, t("field_required")),
+    slug: z
+      .string()
+      .trim()
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 }))
+      .regex(/^[-\w]+$/, {
+        message: t("slug_format_message"),
+      }),
+    description: z.string().optional(),
+  });
 
   const [questionnaire, setQuestionnaire] =
     useState<QuestionnaireDetail | null>(() => {
@@ -725,9 +310,24 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       return null;
     });
 
+  const form = useForm({
+    resolver: zodResolver(QuestionnaireFormPartialSchema),
+    defaultValues: {
+      title: questionnaire?.title ?? "",
+      slug: questionnaire?.slug ?? "",
+      description: questionnaire?.description ?? "",
+    },
+    mode: "onChange",
+  });
+
   useEffect(() => {
     if (initialQuestionnaire) {
       setQuestionnaire(initialQuestionnaire);
+      form.reset({
+        title: initialQuestionnaire.title || "",
+        slug: initialQuestionnaire.slug || "",
+        description: initialQuestionnaire.description || "",
+      });
     }
   }, [initialQuestionnaire]);
 
@@ -735,7 +335,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   if (error) {
     return (
       <Alert variant="destructive">
-        <CareIcon icon="l-exclamation-circle" className="h-4 w-4" />
+        <CareIcon icon="l-exclamation-circle" className="size-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           Failed to load questionnaire. Please try again later.
@@ -746,7 +346,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   if (!questionnaire) {
     return (
       <Alert>
-        <CareIcon icon="l-info-circle" className="h-4 w-4" />
+        <CareIcon icon="l-info-circle" className="size-4" />
         <AlertTitle>Not Found</AlertTitle>
         <AlertDescription>
           {t("no_requested_questionnaires_found")}
@@ -761,14 +361,47 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   ) => {
     setQuestionnaire((prev) => (prev ? { ...prev, [field]: value } : null));
   };
+  const handleValidatedChange = (
+    field: keyof typeof questionnaire,
+    value: any,
+  ) => {
+    updateQuestionnaireField(field, value);
+    form.setValue(field as "title" | "description" | "slug", value, {
+      shouldValidate: true,
+    });
+  };
 
-  const handleSave = () => {
+  const validateOrganizations = (): boolean => {
+    if (id) {
+      if (!organizations?.results || organizations.results.length === 0) {
+        setOrgError(t("organization_selection_required"));
+        return false;
+      }
+      return true;
+    }
+    if (selectedOrgs.length === 0) {
+      setOrgError(t("organization_selection_required"));
+      return false;
+    }
+    setOrgError(undefined);
+    return true;
+  };
+
+  const handleSave = async () => {
+    const isValid = await form.trigger();
+    const hasOrganizations = validateOrganizations();
+
+    if (!isValid || !hasOrganizations) {
+      return;
+    }
+
     if (id) {
       updateQuestionnaire(questionnaire);
     } else {
       createQuestionnaire({
         ...questionnaire,
-        organizations: selectedOrgIds,
+        organizations: selectedOrgs.map((o) => o.id),
+        tags: selectedTags.map((t) => t.id),
       });
     }
   };
@@ -790,19 +423,35 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleToggleOrganization = (orgId: string) => {
-    setSelectedOrgIds((current) =>
-      current.includes(orgId)
-        ? current.filter((id) => id !== orgId)
-        : [...current, orgId],
-    );
+    const newOrg = availableOrganizations?.results.find((o) => o.id === orgId);
+    setSelectedOrgs((current) => {
+      const newSelection = current.some((o) => o.id === orgId)
+        ? current.filter((o) => o.id !== orgId)
+        : newOrg
+          ? [...current, newOrg]
+          : current;
+
+      // Clear error if at least one organization is selected
+      if (newSelection.length > 0) {
+        setOrgError(undefined);
+      }
+
+      return newSelection;
+    });
   };
 
   const handleToggleTag = (tagId: string) => {
-    setSelectedTagIds((current) =>
-      current.includes(tagId)
-        ? current.filter((id) => id !== tagId)
-        : [...current, tagId],
+    const newTag = tagOptions.find((t) => t.id === tagId);
+    const newAdded = newTag ? [...selectedTags, newTag] : selectedTags;
+    setSelectedTags((current) =>
+      current.some((t) => t.id === tagId)
+        ? current.filter((t) => t.id !== tagId)
+        : newAdded,
     );
+  };
+
+  const handleTagCreated = (tag: QuestionnaireTagModel) => {
+    setSelectedTags((current) => [...current, tag]);
   };
 
   return (
@@ -821,7 +470,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             {t("cancel")}
           </Button>
           <Button onClick={handleSave} disabled={isCreating || isUpdating}>
-            <CareIcon icon="l-save" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-save" className="mr-2 size-4" />
             {id ? t("save") : t("create")}
           </Button>
         </div>
@@ -833,11 +482,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       >
         <TabsList className="mb-4">
           <TabsTrigger value="edit">
-            <ViewIcon className="w-4 h-4 mr-2" />
+            <ViewIcon className="size-4 mr-2" />
             {t("edit_form")}
           </TabsTrigger>
           <TabsTrigger value="preview">
-            <SquarePenIcon className="w-4 h-4 mr-2" />
+            <SquarePenIcon className="size-4 mr-2" />
             {t("form_preview")}
           </TabsTrigger>
         </TabsList>
@@ -881,7 +530,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             </span>
                           </button>
                           {hasSubQuestions && question.questions && (
-                            <div className="ml-6 border-l-2 border-muted pl-2 space-y-1">
+                            <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
                               {question.questions.map(
                                 (subQuestion, subIndex) => (
                                   <button
@@ -923,21 +572,24 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   id={id}
                   organizations={organizations}
                   organizationSelection={{
-                    selectedIds: selectedOrgIds,
+                    selectedOrgs: selectedOrgs,
                     onToggle: handleToggleOrganization,
                     searchQuery: orgSearchQuery,
                     setSearchQuery: setOrgSearchQuery,
                     available: availableOrganizations,
                     isLoading: isLoadingAvailableOrganizations,
+                    error: orgError,
+                    setError: setOrgError,
                   }}
                   tags={questionnaire.tags}
                   tagSelection={{
-                    selectedIds: selectedTagIds,
+                    selectedTags: selectedTags,
                     onToggle: handleToggleTag,
                     searchQuery: tagSearchQuery,
                     setSearchQuery: setTagSearchQuery,
-                    available: availableTags,
+                    available: tagOptions,
                     isLoading: isLoadingAvailableTags,
+                    onTagCreated: !id ? handleTagCreated : undefined,
                   }}
                 />
               </div>
@@ -949,43 +601,74 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   <CardTitle>{t("basic_info")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">{t("title")}</Label>
-                    <Input
-                      id="title"
-                      value={questionnaire.title}
-                      onChange={(e) =>
-                        updateQuestionnaireField("title", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="slug">{t("slug")}</Label>
-                    <Input
-                      id="slug"
-                      value={questionnaire.slug}
-                      onChange={(e) =>
-                        updateQuestionnaireField("slug", e.target.value)
-                      }
-                      placeholder="unique-identifier-for-questionnaire"
-                      className="font-mono"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      A unique URL-friendly identifier for this questionnaire
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="desc">{t("description")}</Label>
-                    <Textarea
-                      id="desc"
-                      value={questionnaire.description || ""}
-                      onChange={(e) =>
-                        updateQuestionnaireField("description", e.target.value)
-                      }
-                    />
-                  </div>
+                  <Form {...form}>
+                    <form className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("title")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t("enter_title")}
+                                {...field}
+                                onChange={(e) =>
+                                  handleValidatedChange("title", e.target.value)
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="slug"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("slug")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="unique-identifier-for-questionnaire"
+                                {...field}
+                                onChange={(e) =>
+                                  handleValidatedChange("slug", e.target.value)
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                            <p className="text-sm text-gray-500 mt-1">
+                              A unique URL-friendly identifier for this
+                              questionnaire
+                            </p>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("description")}</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder={t("enter_description")}
+                                {...field}
+                                onChange={(e) =>
+                                  handleValidatedChange(
+                                    "description",
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </form>
+                  </Form>
                 </CardContent>
               </Card>
 
@@ -1019,7 +702,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       );
                     }}
                   >
-                    <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                    <CareIcon icon="l-plus" className="mr-2 size-4" />
                     {t("add_question")}
                   </Button>
                 </CardHeader>
@@ -1094,21 +777,24 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 id={id}
                 organizations={organizations}
                 organizationSelection={{
-                  selectedIds: selectedOrgIds,
+                  selectedOrgs: selectedOrgs,
                   onToggle: handleToggleOrganization,
                   searchQuery: orgSearchQuery,
                   setSearchQuery: setOrgSearchQuery,
                   available: availableOrganizations,
                   isLoading: isLoadingAvailableOrganizations,
+                  error: orgError,
+                  setError: setOrgError,
                 }}
                 tags={questionnaire.tags}
                 tagSelection={{
-                  selectedIds: selectedTagIds,
+                  selectedTags: selectedTags,
                   onToggle: handleToggleTag,
                   searchQuery: tagSearchQuery,
                   setSearchQuery: setTagSearchQuery,
-                  available: availableTags,
+                  available: tagOptions,
                   isLoading: isLoadingAvailableTags,
+                  onTagCreated: handleTagCreated,
                 }}
               />
             </div>
@@ -1170,6 +856,7 @@ function QuestionEditor({
   isLast,
   index,
 }: QuestionEditorProps) {
+  const { t } = useTranslation();
   const {
     text,
     type,
@@ -1185,12 +872,17 @@ function QuestionEditor({
     new Set(),
   );
 
-  const { data: valuesetResponse } = useQuery({
-    queryKey: ["valuesets"],
-    queryFn: query(valuesetApi.list),
+  const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
+  const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
+    queryKey: ["valuesets", valueSetSearchQuery],
+    queryFn: query.debounced(valuesetApi.list, {
+      queryParams: {
+        name: valueSetSearchQuery,
+        status: "active",
+      },
+    }),
+    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
   });
-
-  const valuesets = valuesetResponse?.results || [];
 
   const updateField = <K extends keyof Question>(
     field: K,
@@ -1240,15 +932,15 @@ function QuestionEditor({
             </div>
           </div>
           {isExpanded ? (
-            <ChevronsDownUp className="h-4 w-4 text-gray-500" />
+            <ChevronsDownUp className="size-4 text-gray-500" />
           ) : (
-            <ChevronsUpDown className="h-4 w-4 text-gray-500" />
+            <ChevronsUpDown className="size-4 text-gray-500" />
           )}
         </CollapsibleTrigger>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <CareIcon icon="l-ellipsis-v" className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="size-8">
+              <CareIcon icon="l-ellipsis-v" className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -1259,7 +951,7 @@ function QuestionEditor({
                   onMoveUp?.();
                 }}
               >
-                <ChevronUp className="mr-2 h-4 w-4" />
+                <ChevronUp className="mr-2 size-4" />
                 {t("move_up")}
               </DropdownMenuItem>
             )}
@@ -1270,7 +962,7 @@ function QuestionEditor({
                   onMoveDown?.();
                 }}
               >
-                <ChevronDown className="mr-2 h-4 w-4" />
+                <ChevronDown className="mr-2 size-4" />
                 {t("move_down")}
               </DropdownMenuItem>
             )}
@@ -1282,7 +974,7 @@ function QuestionEditor({
               }}
               className="text-destructive"
             >
-              <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
               {t("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -1334,12 +1026,22 @@ function QuestionEditor({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select question type" />
+                    <SelectValue placeholder="Select question type">
+                      {
+                        SUPPORTED_QUESTION_TYPES.find((t) => t.value === type)
+                          ?.name
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
-                        {type.name}
+                        <div className="flex flex-col items-start">
+                          <span>{type.name}</span>
+                          <span className="text-xs max-w-xs text-muted-foreground whitespace-normal">
+                            {t(type.description)}
+                          </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1359,7 +1061,7 @@ function QuestionEditor({
                       <SelectValue placeholder="Select structured type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {STRUCTURED_QUESTION_TYPES.map((type) => (
+                      {STRUCTURED_QUESTIONS.map((type) => (
                         <SelectItem key={type.value} value={type.value}>
                           {type.label}
                         </SelectItem>
@@ -1379,7 +1081,7 @@ function QuestionEditor({
           </div>
 
           <div className="space-y-6">
-            <div className="border rounded-lg bg-gray-100 p-4">
+            <div className="border rounded-lg border-gray-200 bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">Question Settings</h3>
               <p className="text-sm text-gray-500 mb-4">
                 Configure the basic behavior: mark as required, allow multiple
@@ -1423,7 +1125,7 @@ function QuestionEditor({
               </div>
             </div>
 
-            <div className="border rounded-lg bg-gray-100 p-4">
+            <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">
                 Data Collection Details
               </h3>
@@ -1433,6 +1135,21 @@ function QuestionEditor({
               </p>
               <div className="">
                 <div className="flex flex-wrap gap-4">
+                  {type === "group" && (
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={question.is_component ?? false}
+                        onCheckedChange={(val) =>
+                          updateField("is_component", val)
+                        }
+                        id={`is_component-${getQuestionPath()}`}
+                      />
+                      <Label htmlFor={`is_component-${getQuestionPath()}`}>
+                        {t("is_component")}
+                      </Label>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={question.collect_time ?? false}
@@ -1491,7 +1208,7 @@ function QuestionEditor({
 
           {type === "group" && (
             <div className="space-y-4">
-              <div className="border rounded-lg bg-gray-100 p-4">
+              <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
                 <h3 className="text-sm font-medium mb-2">
                   Group Layout Options
                 </h3>
@@ -1528,45 +1245,70 @@ function QuestionEditor({
             </div>
           )}
 
-          {type === "choice" && (
+          {(type === "choice" || type === "quantity") && (
             <div className="space-y-4">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div>
-                    <CardTitle className="text-base font-medium">
-                      Answer Options
-                    </CardTitle>
-                    <p className="text-sm text-gray-500">
-                      Define possible answers for this question
-                    </p>
-                  </div>
-                  <Select
-                    value={question.answer_value_set ? "valueset" : "custom"}
-                    onValueChange={(val: string) =>
-                      updateField(
-                        "answer_value_set",
-                        val === "custom" ? undefined : "valueset",
-                      )
-                    }
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder={t("select_a_value_set")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="custom">
-                        {t("custom_options")}
-                      </SelectItem>
-                      <SelectItem value="valueset">{t("value_set")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </CardHeader>
+                {question.type === "choice" && (
+                  <>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <div>
+                        <CardTitle className="text-base font-medium">
+                          Answer Options
+                        </CardTitle>
+                        <p className="text-sm text-gray-500">
+                          Define possible answers for this question
+                        </p>
+                      </div>
+                      <Select
+                        value={
+                          question.answer_value_set ? "valueset" : "custom"
+                        }
+                        onValueChange={(val: string) =>
+                          updateField(
+                            "answer_value_set",
+                            val === "custom" ? undefined : "valueset",
+                            {
+                              answer_option: [],
+                            },
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder={t("select_a_value_set")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="custom">
+                            {t("custom_options")}
+                          </SelectItem>
+                          <SelectItem value="valueset">
+                            {t("value_set")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </CardHeader>
+                  </>
+                )}
 
-                {!question.answer_value_set ? (
+                {question.type === "quantity" && (
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div>
+                      <CardTitle className="text-base font-medium">
+                        Quantity
+                      </CardTitle>
+                      <p className="text-sm text-gray-500">
+                        Select the valueset of options for this quantity
+                        question
+                      </p>
+                    </div>
+                  </CardHeader>
+                )}
+
+                {question.type === "choice" && !question.answer_value_set ? (
                   <CardContent className="space-y-4">
                     {(answer_option || []).map((opt, idx) => (
                       <div
                         key={idx}
-                        className="space-y-4 pb-4 border-b last:border-0 last:pb-0"
+                        className="space-y-4 pb-4 border-b border-gray-200 last:border-0 last:pb-0"
                       >
                         <div className="grid grid-cols-2 gap-4">
                           <div>
@@ -1615,7 +1357,7 @@ function QuestionEditor({
                                 updateField("answer_option", newOptions);
                               }}
                             >
-                              <CareIcon icon="l-times" className="h-4 w-4" />
+                              <CareIcon icon="l-times" className="size-4" />
                             </Button>
                           </div>
                         </div>
@@ -1633,33 +1375,30 @@ function QuestionEditor({
                         updateField("answer_option", newOptions);
                       }}
                     >
-                      <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-plus" className="mr-2 size-4" />
                       {t("add_option")}
                     </Button>
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <Select
+                    <Autocomplete
+                      options={(valuesets ?? []).map((valueset) => ({
+                        label: valueset.name,
+                        value: valueset.slug,
+                      }))}
                       value={
                         question.answer_value_set === "valueset"
-                          ? undefined
-                          : question.answer_value_set
+                          ? ""
+                          : (question.answer_value_set ?? "")
                       }
-                      onValueChange={(val: string) =>
+                      onChange={(val: string) =>
                         updateField("answer_value_set", val)
                       }
-                    >
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder={t("select_a_value_set")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {valuesets.map((valueset) => (
-                          <SelectItem key={valueset.id} value={valueset.slug}>
-                            {valueset.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onSearch={setValueSetSearchQuery}
+                      placeholder={t("select_a_value_set")}
+                      isLoading={isFetchingValuesets}
+                      noOptionsMessage={t("no_valuesets_found")}
+                    />
                   </CardContent>
                 )}
               </Card>
@@ -1695,7 +1434,7 @@ function QuestionEditor({
                     );
                   }}
                 >
-                  <CareIcon icon="l-plus" className="h-4 w-4" />
+                  <CareIcon icon="l-plus" className="size-4" />
                   {t("add_sub_question")}
                 </Button>
               </div>
@@ -1785,7 +1524,7 @@ function QuestionEditor({
               {(question.enable_when || []).map((condition, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-[2fr,1fr,2fr] gap-2 items-start"
+                  className="grid grid-cols-[2fr_1fr_2fr] gap-2 items-start"
                 >
                   <div>
                     <Label className="text-xs">Question</Label>
@@ -1958,7 +1697,7 @@ function QuestionEditor({
                         updateField("enable_when", newConditions);
                       }}
                     >
-                      <CareIcon icon="l-times" className="h-4 w-4" />
+                      <CareIcon icon="l-times" className="size-4" />
                     </Button>
                   </div>
                 </div>
@@ -1978,7 +1717,7 @@ function QuestionEditor({
                   ]);
                 }}
               >
-                <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
                 {t("add_condition")}
               </Button>
             </div>

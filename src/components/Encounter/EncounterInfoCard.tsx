@@ -58,9 +58,11 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
   const { encounter, facilityId, hideBorder = false } = props;
   return (
     <Card
+      data-cy={`encounter-card-${encounter.id}`}
+      data-status={encounter.status}
       key={props.encounter.id}
       className={cn(
-        "hover:shadow-lg transition-shadow group",
+        "hover:shadow-lg transition-shadow group md:flex md:flex-col",
         hideBorder && "border-none shadow-none",
       )}
     >
@@ -72,24 +74,28 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           >
             <CardTitle className="group-hover:text-primary transition-colors">
               {encounter.patient.name}
-              {encounter.patient.death_datetime && (
-                <Badge variant="destructive" className="ml-2 py-0">
-                  <h3 className="text-xs font-medium">{t("expired")}</h3>
+              {encounter.patient.deceased_datetime && (
+                <Badge
+                  variant="destructive"
+                  className="ml-2 py-0 border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                >
+                  <h3 className="text-xs font-medium">{t("deceased")}</h3>
                 </Badge>
               )}
             </CardTitle>
           </Link>
         </div>
         <CardDescription className="flex items-center">
-          <CareIcon icon="l-clock" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-clock" className="mr-2 size-4" />
           {encounter.period.start &&
             format(new Date(encounter.period.start), "PPp")}
         </CardDescription>
       </CardHeader>
-      <CardContent className="">
-        <div className="flex flex-col space-y-2">
+      <CardContent className="grow">
+        <div className="flex flex-col justify-between h-full space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <Badge
+              data-cy="encounter-status-badge"
               className={getStatusColor(encounter.status)}
               variant="outline"
             >
@@ -105,14 +111,16 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
               {t(`encounter_priority__${encounter.priority}`)}
             </Badge>
           </div>
-          <Separator className="my-2" />
-          <Link
-            href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
-            className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
-          >
-            View Details
-            <CareIcon icon="l-arrow-right" className="ml-1 h-4 w-4" />
-          </Link>
+          <div>
+            <Separator className="my-2" />
+            <Link
+              href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
+              className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
+            >
+              {t("view_details")}
+              <CareIcon icon="l-arrow-right" className="ml-1 size-4" />
+            </Link>
+          </div>
         </div>
       </CardContent>
     </Card>

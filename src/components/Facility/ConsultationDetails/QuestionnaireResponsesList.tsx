@@ -1,12 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useQueryParams } from "raviger";
+import { ChevronDown } from "lucide-react";
+import { Link, useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 
 import PaginationComponent from "@/components/Common/Pagination";
@@ -16,7 +24,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatDateTime, properCase } from "@/Utils/utils";
+import { formatDateTime, formatName, properCase } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -25,9 +33,9 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 interface Props {
   encounter?: Encounter;
   patientId: string;
-  facilityId?: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
+  canAccess?: boolean;
 }
 
 interface QuestionResponseProps {
@@ -71,14 +79,20 @@ export function formatValue(
 
 function QuestionResponseValue({ question, response }: QuestionResponseProps) {
   if (!response) return null;
-
   return (
     <div>
       <div className="text-xs text-gray-500">{question.text}</div>
       <div className="space-y-1">
         {response.values.map((valueObj, index) => {
-          const value = valueObj.value || valueObj.value_quantity?.value;
-          if (!value) return null;
+          const value = valueObj.value;
+
+          const coding = valueObj.coding;
+
+          const unit = valueObj.unit;
+
+          if (!value && !coding) return null;
+
+          const precedentUnit = unit ? unit : question.unit;
 
           return (
             <div
@@ -86,8 +100,13 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
               className="text-sm font-medium whitespace-pre-wrap"
             >
               {formatValue(value, question.type)}
-              {question.unit?.code && (
-                <span className="ml-1 text-xs">{question.unit.code}</span>
+              {precedentUnit && (
+                <span className="ml-1 text-xs">{precedentUnit.code}</span>
+              )}
+              {coding && (
+                <span className="ml-1 text-xs">
+                  {coding.display} ({coding.code})
+                </span>
               )}
               {index === response.values.length - 1 && response.note && (
                 <span className="ml-2 text-xs text-gray-500">
@@ -115,15 +134,21 @@ function QuestionGroup({
   }[];
   level?: number;
 }) {
-  const hasResponses = responses.some((r) =>
-    group.questions?.some((q) => q.id === r.question_id),
-  );
+  const getHasResponse = (question: Question): boolean => {
+    // Recursively check if a question or any of its nested sub-questions have responses
+    // This ensures grouped fields are displayed even when only sub-questions have responses
+    if (question.type === "group") {
+      return question.questions?.some((q) => getHasResponse(q)) ?? false;
+    }
+    return responses.some((r) => r.question_id === question.id);
+  };
+
+  const hasResponses = getHasResponse(group);
 
   if (!hasResponses) return null;
 
   const containerClass = group.styling_metadata?.containerClasses || "";
   const classes = group.styling_metadata?.classes || "";
-
   return (
     <div className={`space-y-2 ${classes}`}>
       {group.text && (
@@ -215,7 +240,7 @@ function ResponseCard({
         isPrintPreview && "shadow-none",
       )}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between max-sm:flex-col gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <div className="flex items-center gap-2">
@@ -246,7 +271,7 @@ function ResponseCard({
               <Trans
                 i18nKey="by_name"
                 values={{
-                  by: `${item.created_by?.first_name || ""} ${item.created_by?.last_name || ""}${
+                  by: `${formatName(item.created_by)}${
                     item.created_by?.user_type
                       ? ` (${item.created_by.user_type})`
                       : ""
@@ -257,13 +282,34 @@ function ResponseCard({
             </span>
           </div>
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              {t("print")}
+              <ChevronDown className="ml-2 size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <Link href={`questionnaire_response/${item.id}/print`}>
+              <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
+            </Link>
+            <Link
+              href={`questionnaire/${item.questionnaire?.id}/responses/print`}
+            >
+              <DropdownMenuItem>
+                {t("print_all_responses", {
+                  title: item.questionnaire?.title,
+                })}
+              </DropdownMenuItem>
+            </Link>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {item.questionnaire && (
         <div className="mt-4 space-y-4">
           {item.questionnaire?.questions.map((question: Question) => {
             if (question.type === "structured") return null;
-
             if (question.type === "group") {
               return (
                 <QuestionGroup
@@ -298,6 +344,7 @@ export default function QuestionnaireResponsesList({
   patientId,
   isPrintPreview = false,
   onlyUnstructured,
+  canAccess = true,
 }: Props) {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
@@ -318,8 +365,8 @@ export default function QuestionnaireResponsesList({
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
     }),
+    enabled: canAccess,
   });
-
   return (
     <div className="mt-4 gap-4">
       <div className="max-w-full">
@@ -333,7 +380,7 @@ export default function QuestionnaireResponsesList({
               <Card
                 className={cn(
                   "p-6",
-                  isPrintPreview && "shadow-none border-gray",
+                  isPrintPreview && "shadow-none border-gray-200",
                 )}
               >
                 <div className="text-lg font-medium text-gray-500">

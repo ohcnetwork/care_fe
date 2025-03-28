@@ -51,21 +51,16 @@ interface AllergyListProps {
   encounterId?: string;
   className?: string;
   readOnly?: boolean;
-
   encounterStatus?: Encounter["status"];
 }
 
 export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
-  food: <CookingPotIcon className="h-4 w-4" aria-label="Food allergy" />,
-  medication: (
-    <BeakerIcon className="h-4 w-4" aria-label="Medication allergy" />
-  ),
+  food: <CookingPotIcon className="size-4" aria-label="Food allergy" />,
+  medication: <BeakerIcon className="size-4" aria-label="Medication allergy" />,
   environment: (
-    <LeafIcon className="h-4 w-4" aria-label="Environmental allergy" />
+    <LeafIcon className="size-4" aria-label="Environmental allergy" />
   ),
-  biologic: (
-    <HeartPulseIcon className="h-4 w-4" aria-label="Biologic allergy" />
-  ),
+  biologic: <HeartPulseIcon className="size-4" aria-label="Biologic allergy" />,
 };
 
 export function AllergyList({
@@ -193,7 +188,7 @@ export function AllergyList({
           <div className="flex items-center gap-2">
             <Avatar
               name={allergy.created_by.username}
-              className="w-4 h-4"
+              className="size-4"
               imageUrl={allergy.created_by.profile_picture_url}
             />
             <span className="text-sm">{formatName(allergy.created_by)}</span>
@@ -284,10 +279,10 @@ const AllergyListLayout = ({
         <CardTitle>{t("allergies")}</CardTitle>
         {!readOnly && (
           <Link
-            href={`questionnaire/allergy`}
+            href={`questionnaire/allergy_intolerance`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
-            <CareIcon icon="l-pen" className="w-4 h-4" />
+            <CareIcon icon="l-pen" className="size-4" />
             {t("edit")}
           </Link>
         )}
