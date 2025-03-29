@@ -70,4 +70,13 @@ export class PatientDetails {
       "Create Request",
     );
   }
+  saveCurrentUrl() {
+    cy.saveCurrentUrl();
+    return this;
+  }
+
+  navigateToSavedUrl() {
+    cy.navigateToSavedUrl();
+    return this;
+  }
 }

@@ -19,7 +19,7 @@ describe("Resources Management", () => {
   };
 
   beforeEach(() => {
-    cy.loginByApi("devnurse4");
+    cy.loginByApi("devnurse3");
     cy.visit("/");
   });
 
@@ -30,7 +30,10 @@ describe("Resources Management", () => {
       .openFirstEncounterDetails()
       .clickPatientDetailsButton();
 
-    patientDetails.clickResourcesTab().clickCreateRequestButton();
+    patientDetails
+      .clickResourcesTab()
+      .saveCurrentUrl()
+      .clickCreateRequestButton();
 
     resourceCreation
       .selectFacility(testData.facility)
@@ -43,16 +46,8 @@ describe("Resources Management", () => {
       .clickSubmitButton()
       .verifyResourceCreationApiCall()
       .assertResourceCreateSuccess();
-  });
 
-  it("Verify created resource", () => {
-    facilityCreation.selectFacility("GHC Payyanur");
-    patientEncounter
-      .navigateToEncounters()
-      .openFirstEncounterDetails()
-      .clickPatientDetailsButton();
-
-    patientDetails.clickResourcesTab();
+    patientDetails.navigateToSavedUrl();
 
     cy.get("[data-cy='resource-requests-table']").should("be.visible");
     cy.verifyContentPresence("[data-cy='resource-requests-table']", [
