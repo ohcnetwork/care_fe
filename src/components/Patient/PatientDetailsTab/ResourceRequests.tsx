@@ -118,7 +118,7 @@ export const ResourceRequests = (props: PatientProps) => {
                   <TableCell className="text-right">
                     <Button variant="outline" size="sm" asChild>
                       <Link
-                        href={`/facility/${request.origin_facility?.id}/resource/${index}`}
+                        href={`/facility/${request.origin_facility.id}/resource/${request.id}`}
                       >
                         <CareIcon icon="l-eye" className="mr-2" />
                         {t("view")}
