@@ -24,7 +24,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -261,7 +261,7 @@ export function MedicationStatementQuestion({
               )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_260px_190px_200px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_450px_190px_200px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
@@ -436,7 +436,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_260px_190px_200px_48px] border-b border-gray-200 hover:bg-gray-50/50",
+        "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_450px_190px_200px_48px] border-b border-gray-200 hover:bg-gray-50/50",
         {
           "opacity-40 pointer-events-none":
             medication.status === "entered_in_error",
@@ -552,28 +552,45 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
         </Label>
         <div
           className={cn(
+            "flex sm:flex-row flex-col gap-2 w-full justify-between",
             hasError(MEDICATION_STATEMENT_FIELDS.PERIOD.key) &&
               "border border-red-500 rounded-md",
           )}
         >
-          <DateRangePicker
-            date={{
-              from: medication.effective_period?.start
-                ? new Date(medication.effective_period?.start)
-                : undefined,
-              to: medication.effective_period?.end
-                ? new Date(medication.effective_period?.end)
-                : undefined,
-            }}
-            onChange={(date) =>
-              onUpdate?.({
-                effective_period: {
-                  start: date?.from?.toISOString(),
-                  end: date?.to?.toISOString(),
-                },
-              })
-            }
-          />
+          <div className="w-full sm:w-1/2">
+            <CombinedDatePicker
+              value={
+                medication.effective_period?.start
+                  ? new Date(medication.effective_period?.start)
+                  : undefined
+              }
+              onChange={(date) =>
+                onUpdate?.({
+                  effective_period: {
+                    ...medication.effective_period,
+                    start: date?.toISOString(),
+                  },
+                })
+              }
+            />
+          </div>
+          <div className="w-full sm:w-1/2">
+            <CombinedDatePicker
+              value={
+                medication.effective_period?.end
+                  ? new Date(medication.effective_period?.end)
+                  : undefined
+              }
+              onChange={(date) =>
+                onUpdate?.({
+                  effective_period: {
+                    ...medication.effective_period,
+                    end: date?.toISOString(),
+                  },
+                })
+              }
+            />
+          </div>
         </div>
         <FieldError
           fieldKey={MEDICATION_STATEMENT_FIELDS.PERIOD.key}

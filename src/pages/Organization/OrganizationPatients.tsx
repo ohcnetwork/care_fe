@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -152,7 +153,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                                   {patient.name}
                                 </h3>
                                 <p className="text-sm text-gray-500">
-                                  {patient.phone_number}
+                                  {formatPhoneNumberIntl(patient.phone_number)}
                                 </p>
                               </div>
                             </div>
@@ -174,7 +175,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                             <div className="text-sm">
                               <div className="text-gray-500">{t("phone")}</div>
                               <div className="font-medium">
-                                {patient.phone_number}
+                                {formatPhoneNumberIntl(patient.phone_number)}
                               </div>
                             </div>
                             <div className="text-sm">
