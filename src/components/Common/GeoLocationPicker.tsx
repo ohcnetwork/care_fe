@@ -82,12 +82,9 @@ export default function GeoLocationPicker({
             data-cy="get-location-button"
           >
             {isGettingLocation ? (
-              <CareIcon
-                icon="l-spinner"
-                className="h-4 w-4 animate-spin mr-1"
-              />
+              <CareIcon icon="l-spinner" className="size-4 animate-spin mr-1" />
             ) : (
-              <CareIcon icon="l-location-point" className="h-4 w-4 mr-1" />
+              <CareIcon icon="l-location-point" className="size-4 mr-1" />
             )}
             {isGettingLocation
               ? t("getting_location")
@@ -125,7 +122,7 @@ export default function GeoLocationPicker({
         />
       </div>
 
-      <div className="h-[25rem] w-full rounded-lg border overflow-hidden">
+      <div className="h-[25rem] w-full rounded-lg border border-gray-200 overflow-hidden">
         <Map
           height={400}
           center={latitude && longitude ? [latitude, longitude] : undefined}

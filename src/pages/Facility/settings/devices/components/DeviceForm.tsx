@@ -66,7 +66,10 @@ const formSchema = z
     expiration_date: z.string().optional(),
     lot_number: z.string().optional(),
     serial_number: z.string().optional(),
-    registered_name: z.string().min(1, { message: t("required") }),
+    registered_name: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     user_friendly_name: z.string().optional(),
     model_number: z.string().optional(),
     part_number: z.string().optional(),
@@ -435,7 +438,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           {fields.map((field, index) => (
             <div
               key={field.id}
-              className="relative grid gap-3 sm:gap-1 grid-cols-1 sm:grid-cols-[1fr,3fr,auto] py-2"
+              className="relative grid gap-3 sm:gap-1 grid-cols-1 sm:grid-cols-[1fr_3fr_auto] py-2"
             >
               <Button
                 type="button"
@@ -444,7 +447,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 onClick={() => remove(index)}
                 className="h-10 px-2 flex sm:hidden w-1/12 justify-self-end"
               >
-                <CareIcon icon="l-trash" className="h-4 w-4 text-destructive" />
+                <CareIcon icon="l-trash" className="size-4 text-destructive" />
               </Button>
 
               <FormField
@@ -520,7 +523,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 onClick={() => remove(index)}
                 className="h-10 px-2 hidden sm:flex"
               >
-                <CareIcon icon="l-trash" className="h-4 w-4 text-destructive" />
+                <CareIcon icon="l-trash" className="size-4 text-destructive" />
               </Button>
             </div>
           ))}

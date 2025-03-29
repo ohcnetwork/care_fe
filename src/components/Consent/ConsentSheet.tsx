@@ -55,6 +55,7 @@ export function ConsentSheet({
   const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [open, setOpen] = useState(false);
 
   const { data: existingConsents } = useQuery({
     queryKey: ["consents", patientId, encounterId],
@@ -62,10 +63,11 @@ export function ConsentSheet({
       pathParams: { patientId },
       queryParams: { encounter: encounterId },
     }),
+    enabled: open,
   });
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">
@@ -80,7 +82,7 @@ export function ConsentSheet({
           <div className="container">
             <div className="flex justify-between items-center gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
                 <Input
                   placeholder={t("search_existing_consent")}
                   className="pl-10"
@@ -93,7 +95,7 @@ export function ConsentSheet({
                 encounterId={encounterId}
                 trigger={
                   <Button className="flex items-center gap-1">
-                    <Plus className="w-4 h-4" />
+                    <Plus className="size-4" />
                     {t("link_consent")}
                   </Button>
                 }
@@ -291,7 +293,7 @@ function PreviewFile({ file }: PreviewFileProps) {
         pageNumber={1}
         onDocumentLoadSuccess={() => {}}
         scale={1}
-        className="object-cover w-full h-full !overflow-hidden"
+        className="object-cover w-full h-full overflow-hidden!"
       />
     );
   }

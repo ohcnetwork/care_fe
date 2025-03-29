@@ -28,25 +28,6 @@ const AutoExpandingTextarea = forwardRef<
       }
     }, [forwardedRef]);
 
-    useEffect(() => {
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-        const scrollHeight = textareaRef.current.scrollHeight;
-        const computedStyle = window.getComputedStyle(textareaRef.current);
-        const maxHeight = parseInt(
-          computedStyle.getPropertyValue("max-height"),
-        );
-
-        if (scrollHeight > maxHeight) {
-          textareaRef.current.style.height = `${maxHeight}px`;
-          textareaRef.current.style.overflowY = "scroll";
-        } else {
-          textareaRef.current.style.height = `${scrollHeight}px`;
-          textareaRef.current.style.overflowY = "hidden";
-        }
-      }
-    }, [value]);
-
     return (
       <textarea
         ref={textareaRef}
@@ -56,7 +37,7 @@ const AutoExpandingTextarea = forwardRef<
         placeholder={placeholder}
         rows={1}
         style={{ overflow: "hidden", resize: "none" }}
-        className={`flex-1 p-2 rounded-md border border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 placeholder:text-gray-500 ${className || ""}`}
+        className={`flex-1 p-2 rounded-md border border-green-700 focus:outline-hidden focus:ring-1 focus:ring-green-700 placeholder:text-gray-500 ${className || ""}`}
         {...rest}
       />
     );

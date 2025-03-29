@@ -40,7 +40,10 @@ import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
-import { FILE_EXTENSIONS } from "@/common/constants";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FILE_EXTENSIONS,
+} from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -160,31 +163,7 @@ export const FilesTab = (props: FilesTabProps) => {
   const fileUpload = useFileUpload({
     type: type,
     multiple: true,
-    allowedExtensions: [
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "bmp",
-      "tiff",
-      "mp4",
-      "mov",
-      "avi",
-      "wmv",
-      "mp3",
-      "wav",
-      "ogg",
-      "txt",
-      "csv",
-      "rtf",
-      "doc",
-      "odt",
-      "pdf",
-      "xls",
-      "xlsx",
-      "ods",
-      "pdf",
-    ],
+    allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
     onUpload: () => {
       refetch();
@@ -270,6 +249,7 @@ export const FilesTab = (props: FilesTabProps) => {
             <Button
               variant="secondary"
               onClick={() => fileManager.viewFile(file, associatingId)}
+              data-cy="file-view-button"
             >
               <span className="flex flex-row items-center gap-1">
                 <CareIcon icon="l-eye" />
@@ -279,7 +259,7 @@ export const FilesTab = (props: FilesTabProps) => {
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary">
+              <Button variant="secondary" data-cy="file-options-button">
                 <CareIcon icon="l-ellipsis-h" />
               </Button>
             </DropdownMenuTrigger>
@@ -290,6 +270,7 @@ export const FilesTab = (props: FilesTabProps) => {
                   onClick={() => fileManager.downloadFile(file, associatingId)}
                   variant="ghost"
                   className="w-full flex flex-row justify-stretch items-center"
+                  data-cy="file-download-button"
                 >
                   <CareIcon icon="l-arrow-circle-down" className="mr-1" />
                   <span>{t("download")}</span>
@@ -305,6 +286,7 @@ export const FilesTab = (props: FilesTabProps) => {
                       }
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
+                      data-cy="file-archive-option"
                     >
                       <CareIcon icon="l-archive-alt" className="mr-1" />
                       <span>{t("archive")}</span>
@@ -316,6 +298,7 @@ export const FilesTab = (props: FilesTabProps) => {
                       onClick={() => fileManager.editFile(file, associatingId)}
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
+                      data-cy="file-rename-button"
                     >
                       <CareIcon icon="l-pen" className="mr-1" />
                       <span>{t("rename")}</span>
@@ -334,7 +317,11 @@ export const FilesTab = (props: FilesTabProps) => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary" className="text-sm text-secondary-800">
+          <Button
+            variant="secondary"
+            className="text-sm text-secondary-800"
+            data-cy="files-filter-button"
+          >
             <span className="flex flex-row items-center gap-1">
               <CareIcon icon="l-filter" />
               <span>{t("filter")}</span>
@@ -350,6 +337,7 @@ export const FilesTab = (props: FilesTabProps) => {
             onClick={() => {
               updateQuery({ is_archived: "false" });
             }}
+            data-cy="active-files-button"
           >
             <span>{t("active_files")}</span>
           </DropdownMenuItem>
@@ -358,6 +346,7 @@ export const FilesTab = (props: FilesTabProps) => {
             onClick={() => {
               updateQuery({ is_archived: "true" });
             }}
+            data-cy="archived-files-button"
           >
             <span>{t("archived_files")}</span>
           </DropdownMenuItem>
@@ -374,6 +363,7 @@ export const FilesTab = (props: FilesTabProps) => {
           variant="secondary"
           className="cursor-pointer border border-gray-300 bg-white"
           onClick={() => updateQuery({ is_archived: undefined })}
+          data-cy="filter-badge"
         >
           {t(
             qParams.is_archived === "false" ? "active_files" : "archived_files",
@@ -392,6 +382,7 @@ export const FilesTab = (props: FilesTabProps) => {
           <Button
             variant="outline_primary"
             className="flex flex-row items-center"
+            data-cy="add-files-button"
           >
             <CareIcon icon="l-file-upload" className="mr-1" />
             <span>{t("add_files")}</span>
@@ -401,12 +392,14 @@ export const FilesTab = (props: FilesTabProps) => {
         <DropdownMenuContent
           align="end"
           className="w-[calc(100vw-2.5rem)] sm:w-full"
+          data-cy="file-upload-dropdown"
         >
           <DropdownMenuItem
             className="flex flex-row items-center"
             onSelect={(e) => {
               e.preventDefault();
             }}
+            data-cy="choose-file-option"
           >
             <Label
               htmlFor={`file_upload_${type}`}
@@ -423,6 +416,7 @@ export const FilesTab = (props: FilesTabProps) => {
               variant="ghost"
               onClick={() => fileUpload.handleCameraCapture()}
               className="flex flex-row justify-stretch items-center w-full text-primary-900"
+              data-cy="open-camera-button"
             >
               <CareIcon icon="l-camera" />
               <span>{t("open_camera")}</span>
@@ -434,6 +428,7 @@ export const FilesTab = (props: FilesTabProps) => {
               variant="ghost"
               onClick={() => fileUpload.handleAudioCapture()}
               className="flex flex-row justify-stretch items-center w-full text-primary-900"
+              data-cy="record-audio-button"
             >
               <CareIcon icon="l-microphone" />
               <span>{t("record")}</span>
@@ -510,7 +505,7 @@ export const FilesTab = (props: FilesTabProps) => {
     <div className="hidden xl:block">
       <Table className="border-separate border-spacing-y-3 mx-2 lg:max-w-[calc(100%-16px)]">
         <TableHeader>
-          <TableRow className="shadow rounded overflow-hidden">
+          <TableRow className="shadow-sm rounded overflow-hidden">
             <TableHead className="w-[20%] bg-white rounded-l">
               {t("file_name")}
             </TableHead>
@@ -535,7 +530,8 @@ export const FilesTab = (props: FilesTabProps) => {
               return (
                 <TableRow
                   key={file.id}
-                  className={cn("shadow rounded-md overflow-hidden group")}
+                  data-cy={fileName}
+                  className={cn("shadow-sm rounded-md overflow-hidden group")}
                 >
                   <TableCell
                     className={cn(
@@ -601,7 +597,10 @@ export const FilesTab = (props: FilesTabProps) => {
                     {file.is_archived ? (
                       getArchivedMessage(file)
                     ) : (
-                      <DetailButtons file={file} />
+                      <DetailButtons
+                        file={file}
+                        data-cy={fileName + "-details-button"}
+                      />
                     )}
                   </TableCell>
                 </TableRow>

@@ -191,7 +191,7 @@ export default function CreateScheduleExceptionSheet({
         </SheetHeader>
 
         <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
-          <div className="rounded-md bg-white p-4 shadow">
+          <div className="rounded-md bg-white p-4 shadow-sm">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}

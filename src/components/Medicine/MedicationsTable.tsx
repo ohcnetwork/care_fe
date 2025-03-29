@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -51,7 +53,10 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div
+      className="border border-gray-200 rounded-lg overflow-hidden"
+      data-cy="medications-table"
+    >
       <Table>
         <TableHeader>
           <TableRow className="divide-x bg-gray-100">
@@ -77,7 +82,11 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
             return (
               <TableRow
                 key={medication.id}
-                className={`divide-x font-medium ${isInactive ? "bg-gray-100" : ""}`}
+                className={cn(
+                  "divide-x font-medium",
+                  isInactive && "opacity-40",
+                  isInactive && medication.status !== "ended" && "line-through",
+                )}
               >
                 <TableCell className="py-2 px-3">
                   {medication.medication?.display}
