@@ -21,6 +21,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { PasswordInput } from "@/components/ui/input-password";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
@@ -555,7 +560,7 @@ const Login = (props: LoginProps) => {
                             {t("enter_otp")}
                           </Label>
                           <div className="flex justify-center">
-                            <Input
+                            <InputOTP
                               id="otp"
                               name="otp"
                               type="text"
@@ -565,12 +570,21 @@ const Login = (props: LoginProps) => {
                               pattern={REGEXP_ONLY_DIGITS}
                               autoComplete="one-time-code"
                               autoFocus
-                              onChange={(e) => {
-                                setOtp(e.target.value);
+                              onChange={(value) => {
+                                setOtp(value);
                                 setOtpValidationError("");
                               }}
-                              className="text-center size-10"
-                            />
+                            >
+                              <InputOTPGroup>
+                                {[...Array(5)].map((_, index) => (
+                                  <InputOTPSlot
+                                    key={index}
+                                    index={index}
+                                    className="size-10"
+                                  />
+                                ))}
+                              </InputOTPGroup>
+                            </InputOTP>
                           </div>
                           {otpValidationError && (
                             <p className="text-sm text-red-500 text-center">
