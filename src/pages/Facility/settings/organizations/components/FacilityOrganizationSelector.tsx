@@ -233,7 +233,7 @@ export default function FacilityOrganizationSelector(
                 className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
                 style={{
                   position: "fixed",
-                  bottom: isMobile ? "30vh" : "50px",
+                  bottom: isMobile ? "50vh" : "50px",
                   left: "50%",
                   transform: "translateX(-50%)",
                   touchAction: "manipulation",
