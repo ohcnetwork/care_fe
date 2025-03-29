@@ -140,6 +140,7 @@ const Login = (props: LoginProps) => {
         (otp) => {
           setOtp(otp);
           setOtpValidationError("");
+          toast.success(`This is your OTP: ${otp}`);
         },
         () => {
           setOtpValidationError(t("opt_validation_error"));
