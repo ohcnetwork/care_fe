@@ -422,12 +422,14 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           <FormItem>
                             <FormLabel required>{t("assigned_to")}</FormLabel>
                             <FormControl>
-                              <UserSelector
-                                selected={assignedToUser}
-                                onChange={handleUserChange}
-                                placeholder={t("search_users")}
-                                noOptionsMessage={t("no_users_found")}
-                              />
+                              <div data-cy="select-assigned-user">
+                                <UserSelector
+                                  selected={assignedToUser}
+                                  onChange={handleUserChange}
+                                  placeholder={t("search_users")}
+                                  noOptionsMessage={t("no_users_found")}
+                                />
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>

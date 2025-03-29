@@ -127,6 +127,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
+                      data-cy="search-resource"
                       variant="outline"
                       size="sm"
                       className={cn(

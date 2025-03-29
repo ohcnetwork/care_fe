@@ -17,15 +17,18 @@ export class ResourcesCreation {
     return this;
   }
   enterResourceTitle(title: string) {
-    cy.typeIntoField('[data-cy="title-input"]', title);
+    cy.typeIntoField('[data-cy="title-input"]', title, {
+      clearBeforeTyping: true,
+    });
     return this;
   }
 
   enterReasonOfRequest(reason: string) {
-    cy.typeIntoField('[data-cy="reason-input"]', reason);
+    cy.typeIntoField('[data-cy="reason-input"]', reason, {
+      clearBeforeTyping: true,
+    });
     return this;
   }
-
   clickFillMyDetails() {
     cy.verifyAndClickElement(
       '[data-cy="fill_my_details_button"]',
@@ -43,6 +46,10 @@ export class ResourcesCreation {
     cy.intercept("POST", "**/api/v1/resource/").as("createResource");
     return this;
   }
+  interceptResourceUpdateRequest() {
+    cy.intercept("PUT", "**/api/v1/resource/**").as("updatedResource");
+    return this;
+  }
 
   verifyResourceCreationApiCall() {
     cy.wait("@createResource").then((interception) => {
@@ -50,8 +57,24 @@ export class ResourcesCreation {
     });
     return this;
   }
+  verifyResourceUpdationApiCall() {
+    cy.wait("@updatedResource").then((interception) => {
+      expect(interception.response?.statusCode).to.equal(200);
+    });
+    return this;
+  }
   assertResourceCreateSuccess() {
     cy.verifyNotification("Request created successfully");
+    return this;
+  }
+  assertResourceUpdateSuccess() {
+    cy.verifyNotification("Resource updated successfully");
+    return this;
+  }
+  searchResource(name: string) {
+    cy.get('[data-cy="search-resource"]').click();
+    cy.typeIntoField("#resource-search", name);
+    cy.get('[data-cy="search-resource"]').click();
     return this;
   }
 }

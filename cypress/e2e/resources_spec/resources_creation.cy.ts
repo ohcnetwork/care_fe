@@ -17,14 +17,22 @@ describe("Resources Management", () => {
     resourceTitle: "TestCypress",
     reasonOfRequest: "Reason Testing",
   };
+  const updatedTestData = {
+    facility: "DH Eloor",
+    sourceFacility: "GHC Payyanur",
+    status: "Pending",
+    category: "Comfort Devices",
+    resourceTitle: "Updated Resource test title",
+    reasonOfRequest: "Updated Reason Testing",
+  };
 
   beforeEach(() => {
     cy.loginByApi("devnurse3");
     cy.visit("/");
   });
 
-  it("“Create a new resource request and verify it on Resources Board and Patient Detail Page”", () => {
-    facilityCreation.selectFacility("GHC Payyanur");
+  it("Create a new resource request and verify it on Resources Board and Patient Detail Page", () => {
+    facilityCreation.selectFacility(testData.sourceFacility);
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()
@@ -50,13 +58,13 @@ describe("Resources Management", () => {
     patientDetails.navigateToSavedUrl();
 
     cy.get("[data-cy='resource-requests-table']").should("be.visible");
-    cy.verifyContentPresence("[data-cy='resource-requests-table']", [
+    cy.verifyContentPresence("[data-cy='resource-requests-table-row-0']", [
       testData.category,
       testData.resourceTitle,
       testData.status,
     ]);
 
-    cy.get('[data-sidebar="content"]').contains("Resource").click();
+    cy.verifyAndClickElement('[data-sidebar="content"]', "Resource");
     cy.get("[data-cy='tab-outgoing']").click();
     cy.get("[data-cy='tab-outgoing']").should(
       "have.attr",
@@ -69,12 +77,54 @@ describe("Resources Management", () => {
       "data-state",
       "active",
     );
+    resourceCreation.searchResource(testData.resourceTitle);
     cy.verifyContentPresence('[data-cy="resource-card-0"]', [
       testData.resourceTitle,
       testData.reasonOfRequest,
       testData.category,
-      "GHC Payyanur",
+      testData.sourceFacility,
       testData.facility,
+      "View Details",
+    ]);
+
+    patientDetails.navigateToSavedUrl();
+    cy.get("[data-cy='resource-requests-table-row-0']").within(() => {
+      cy.contains("View").click();
+    });
+    cy.verifyAndClickElement(
+      '[data-cy="update-status-button"]',
+      "Update Status",
+    );
+    resourceCreation
+      .selectFacility(updatedTestData.facility)
+      .selectStatus(updatedTestData.status)
+      .selectCategory(updatedTestData.category)
+      .selectAssignedUser("devnurse3")
+      .enterResourceTitle(updatedTestData.resourceTitle)
+      .enterReasonOfRequest(updatedTestData.reasonOfRequest)
+      .interceptResourceUpdateRequest()
+      .clickSubmitButton()
+      .verifyResourceUpdationApiCall()
+      .assertResourceUpdateSuccess();
+    patientDetails.navigateToSavedUrl();
+
+    cy.get("[data-cy='resource-requests-table']").should("be.visible");
+    cy.verifyContentPresence("[data-cy='resource-requests-table']", [
+      updatedTestData.category,
+      updatedTestData.resourceTitle,
+      updatedTestData.status,
+    ]);
+
+    cy.verifyAndClickElement('[data-sidebar="content"]', "Resource");
+    cy.get("[data-cy='tab-outgoing']").click();
+    cy.get("[data-cy='tab-pending']").click();
+    resourceCreation.searchResource(updatedTestData.resourceTitle);
+    cy.verifyContentPresence('[data-cy="resource-card-0"]', [
+      updatedTestData.resourceTitle,
+      updatedTestData.reasonOfRequest,
+      updatedTestData.category,
+      updatedTestData.sourceFacility,
+      updatedTestData.facility,
       "View Details",
     ]);
   });
