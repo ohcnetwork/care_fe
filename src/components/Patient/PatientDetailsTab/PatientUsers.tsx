@@ -48,6 +48,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import roleApi from "@/types/emr/role/roleApi";
 import { UserBase } from "@/types/user/user";
 
 import { PatientProps } from ".";
@@ -64,7 +65,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
-    queryFn: query(routes.role.list),
+    queryFn: query(roleApi.listRoles),
     enabled: open,
   });
 
@@ -345,7 +346,10 @@ export const PatientUsers = (props: PatientProps) => {
             <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
               <div className="text-sm">
                 <div className="text-gray-500">{t("phone_number")}</div>
-                <div className="font-medium">{user.phone_number}</div>
+                <div className="font-medium">
+                  {user.phone_number &&
+                    formatPhoneNumberIntl(user.phone_number)}
+                </div>
               </div>
               <div className="text-sm">
                 <div className="text-gray-500">{t("user_type")}</div>
