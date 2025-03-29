@@ -23,7 +23,7 @@ describe("Resources Management", () => {
     cy.visit("/");
   });
 
-  it("Create a new resource", () => {
+  it("“Create a new resource request and verify it on Resources Board and Patient Detail Page”", () => {
     facilityCreation.selectFacility("GHC Payyanur");
     patientEncounter
       .navigateToEncounters()
