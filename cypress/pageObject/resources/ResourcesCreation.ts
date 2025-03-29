@@ -1,3 +1,12 @@
+export interface ResourceRequestFormData {
+  title: string;
+  status: string;
+  category: string;
+  reason: string;
+  assignedUser: string;
+  facility: string;
+  sourceFacility: string;
+}
 export class ResourcesCreation {
   selectFacility(facility: string) {
     cy.typeAndSelectOption('[data-cy="select-facility"]', facility, false);
@@ -34,6 +43,15 @@ export class ResourcesCreation {
       '[data-cy="fill_my_details_button"]',
       "Fill My Details",
     );
+    return this;
+  }
+
+  fillResourceRequestDetails(data: ResourceRequestFormData) {
+    this.selectFacility(data.facility)
+      .selectStatus(data.status)
+      .selectCategory(data.category)
+      .enterResourceTitle(data.title)
+      .enterReasonOfRequest(data.reason);
     return this;
   }
 
@@ -75,6 +93,46 @@ export class ResourcesCreation {
     cy.get('[data-cy="search-resource"]').click();
     cy.typeIntoField("#resource-search", name);
     cy.get('[data-cy="search-resource"]').click();
+    return this;
+  }
+
+  verifyResourceRequestInPatientPage(data: ResourceRequestFormData) {
+    cy.verifyContentPresence("[data-cy='resource-requests-table']", [
+      data.category,
+      data.title,
+      data.status,
+    ]);
+  }
+
+  verifyResourceCardContent(data: ResourceRequestFormData) {
+    cy.verifyContentPresence('[data-cy="resource-card-0"]', [
+      data.title,
+      data.reason,
+      data.category,
+      data.sourceFacility,
+      data.facility,
+      "View Details",
+    ]);
+    return this;
+  }
+  clickSidebarResource() {
+    cy.verifyAndClickElement('[data-sidebar="content"]', "Resource");
+  }
+
+  clickUpdateStatusButton() {
+    cy.verifyAndClickElement(
+      '[data-cy="update-status-button"]',
+      "Update Status",
+    );
+  }
+  clickViewDetailsButton() {
+    cy.get('[data-cy="resource-card-0"]').within(() => {
+      cy.contains("View Details").click();
+    });
+  }
+
+  clickFilterTab(name: string) {
+    cy.get(`[data-cy='tab-${name}']`).click();
     return this;
   }
 }
