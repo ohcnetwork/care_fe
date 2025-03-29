@@ -561,6 +561,10 @@ const Login = (props: LoginProps) => {
                           </Label>
                           <div className="flex justify-center">
                             <InputOTP
+                              id="otp"
+                              name="otp"
+                              type="text"
+                              inputMode="numeric"
                               value={otp}
                               maxLength={5}
                               pattern={REGEXP_ONLY_DIGITS}
