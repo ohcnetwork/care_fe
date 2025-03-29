@@ -34,16 +34,20 @@ export class ResourcesCreation {
     return this;
   }
 
-  verifyNameFilled(name: string) {
-    cy.get('[data-cy="contact_person"]').should("contain", name);
-    return this;
-  }
-  verifyPhoneNumber(number: string) {
-    cy.get('[data-cy="contact_person_phone"]').should("contain", number);
-  }
-
   clickSubmitButton() {
     cy.clickSubmitButton("Submit");
+    return this;
+  }
+
+  interceptResourceCreationRequest() {
+    cy.intercept("POST", "**/api/v1/resource/").as("createResource");
+    return this;
+  }
+
+  verifyResourceCreationApiCall() {
+    cy.wait("@createResource").then((interception) => {
+      expect(interception.response?.statusCode).to.equal(200);
+    });
     return this;
   }
   assertResourceCreateSuccess() {

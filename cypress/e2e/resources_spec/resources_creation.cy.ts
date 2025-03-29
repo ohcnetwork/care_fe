@@ -9,14 +9,17 @@ const patientDetails = new PatientDetails();
 const resourceCreation = new ResourcesCreation();
 
 describe("Resources Management", () => {
-  const facility = "DH Aluva";
-  const status = "Pending";
-  const category = "Medicines";
-  const resourceTitle = "TestCypress";
-  const reasonOfRequest = "Reason Testing";
+  const testData = {
+    facility: "DH Aluva",
+    sourceFacility: "GHC Payyanur",
+    status: "Pending",
+    category: "Medicines",
+    resourceTitle: "TestCypress",
+    reasonOfRequest: "Reason Testing",
+  };
 
   beforeEach(() => {
-    cy.loginByApi("devnurse");
+    cy.loginByApi("devnurse1");
     cy.visit("/");
   });
 
@@ -30,11 +33,11 @@ describe("Resources Management", () => {
     patientDetails.clickResourcesTab().clickCreateRequestButton();
 
     resourceCreation
-      .selectFacility(facility)
-      .selectStatus(status)
-      .selectCategory(category)
-      .enterResourceTitle(resourceTitle)
-      .enterReasonOfRequest(reasonOfRequest)
+      .selectFacility(testData.facility)
+      .selectStatus(testData.status)
+      .selectCategory(testData.category)
+      .enterResourceTitle(testData.resourceTitle)
+      .enterReasonOfRequest(testData.reasonOfRequest)
       .clickFillMyDetails()
       .clickSubmitButton()
       .assertResourceCreateSuccess();
@@ -50,9 +53,12 @@ describe("Resources Management", () => {
     patientDetails.clickResourcesTab();
 
     cy.get("[data-cy='resource-requests-table']").should("be.visible");
-    cy.get("[data-cy='resource-type-0']").should("contain.text", category);
-    cy.get("[data-cy='title-0']").should("contain.text", resourceTitle);
-    cy.get("[data-cy='status-0']").should("contain.text", status);
+    cy.verifyContentPresence("[data-cy='resource-requests-table']", [
+      testData.category,
+      testData.resourceTitle,
+      testData.status,
+    ]);
+
     cy.get('[data-sidebar="content"]').contains("Resource").click();
     cy.get("[data-cy='tab-outgoing']").click();
     cy.get("[data-cy='tab-outgoing']").should(
@@ -66,17 +72,13 @@ describe("Resources Management", () => {
       "data-state",
       "active",
     );
-    // cy.get(`[data-cy="resource-card-0}"]`, { timeout: 1000 }).should(
-    //   "be.visible",
-    // );
-    // cy.get(`[data-cy="resource-title-0"]`).should(
-    //   "contain.text",
-    //   resourceTitle,
-    // );
-    // cy.get(`[data-cy="resource-reason-0"]`).should(
-    //   "contain.text",
-    //   reasonOfRequest,
-    // );
-    // cy.get(`[data-cy="resource-category-0"]`).should("contain.text", category);
+    cy.verifyContentPresence('[data-cy="resource-card-0"]', [
+      testData.resourceTitle,
+      testData.reasonOfRequest,
+      testData.category,
+      "GHC Payyanur",
+      testData.facility,
+      "View Details",
+    ]);
   });
 });

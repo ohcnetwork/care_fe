@@ -102,33 +102,23 @@ export const ResourceRequests = (props: PatientProps) => {
               </TableRow>
             ) : resourceRequests?.results?.length ? (
               resourceRequests.results.map((request, index) => (
-                <TableRow key={index} data-cy={`row-${index}`}>
-                  <TableCell
-                    data-cy={`resource-type-${index}`}
-                    className="font-medium"
-                  >
+                <TableRow
+                  key={index}
+                  data-cy={`resource-requests-table-row-${index}`}
+                >
+                  <TableCell className="font-medium">
                     {RESOURCE_CATEGORY_CHOICES.find(
                       (item) => item.id === request.category,
                     )?.text || "--"}
                   </TableCell>
-                  <TableCell data-cy={`title-${index}`}>
-                    {request.title}
-                  </TableCell>
-                  <TableCell data-cy={`status-${index}`}>
-                    {getStatusBadge(t(request.status))}
-                  </TableCell>
-                  <TableCell data-cy={`created-on-${index}`}>
-                    {formatDateTime(request.created_date)}
-                  </TableCell>
+                  <TableCell>{request.title}</TableCell>
+                  <TableCell>{getStatusBadge(t(request.status))}</TableCell>
+                  <TableCell>{formatDateTime(request.created_date)}</TableCell>
                   <TableCell>{formatDateTime(request.modified_date)}</TableCell>
-                  <TableCell
-                    data-cy={`actions-${index}`}
-                    className="text-right"
-                  >
+                  <TableCell className="text-right">
                     <Button variant="outline" size="sm" asChild>
                       <Link
                         href={`/facility/${request.origin_facility?.id}/resource/${index}`}
-                        data-cy={`view-button-${index}`}
                       >
                         <CareIcon icon="l-eye" className="mr-2" />
                         {t("view")}
