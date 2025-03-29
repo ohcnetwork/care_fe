@@ -294,7 +294,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       z.object({
         text: z.string().trim().min(1, t("field_required")),
         link_id: z.string().trim().min(1, t("field_required")),
-        dexcription: z.string().optional(),
+        description: z.string().optional(),
         code: z
           .object({
             system: z.string(),
