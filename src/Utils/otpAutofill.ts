@@ -13,11 +13,15 @@ export const autofillOtp = (
     navigator.credentials
       .get({ otp: { transport: ["sms"] } } as CredentialRequestOptions)
       .then((otpCredential) => {
-        toast.success("OTP retrieval initiated."); // Testing toast
-        const otp = otpCredential as OTPCredential | null;
+        if (!otpCredential) {
+          toast.error("No OTP received.");
+          return;
+        }
+
+        const otp = otpCredential as unknown as OTPCredential | null;
         if (otp) {
-          onSuccess(otp.code);
           toast.success(`Your OTP is: ${otp.code}`);
+          onSuccess(otp.code);
         } else {
           toast.error("No OTP received."); // Testing toast
         }
