@@ -102,6 +102,7 @@ export class ResourcesCreation {
       data.title,
       data.status,
     ]);
+    return this;
   }
 
   verifyResourceCardContent(data: ResourceRequestFormData) {

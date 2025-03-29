@@ -58,9 +58,10 @@ describe("Resources Management", () => {
 
     patientDetails.navigateToSavedUrl();
 
-    resourceCreation.verifyResourceRequestInPatientPage(testData);
+    resourceCreation
+      .verifyResourceRequestInPatientPage(testData)
+      .clickSidebarResource();
 
-    resourceCreation.clickSidebarResource();
     resourceCreation
       .clickFilterTab("outgoing")
       .clickFilterTab("pending")
