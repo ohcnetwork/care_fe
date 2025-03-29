@@ -21,14 +21,13 @@ export function QuestionLabel({
   isSubQuestion = false,
 }: QuestionLabelProps) {
   const defaultClass = groupLabel ? defaultGroupClass : defaultInputClass;
-  const isRequired = question.required;
   return (
     <Label className={className ?? defaultClass}>
       <div className="flex flex-col gap-3">
         <div
           className={cn(
-            "absolute h-5 w-1 -ml-6 rounded-full",
-            isRequired ? "bg-indigo-600" : "bg-gray-300",
+            "absolute h-5 w-1 -ml-8 rounded-full",
+            question.required ? "bg-indigo-600" : "bg-gray-300",
           )}
         />
         <div className="flex gap-3 items-center font-bold">
