@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import validators from "@/Utils/validators";
@@ -24,50 +25,54 @@ export interface ContactPoint {
   use: ContactPointUse;
 }
 
-export const contactPointSchema = z.discriminatedUnion("system", [
-  // Phone numbers
-  z.object({
-    system: z.literal("phone"),
-    value: validators().phoneNumber.required,
-    use: z.enum(ContactPointUses),
-  }),
-  // Fax numbers (also using phone validation since they follow same format)
-  z.object({
-    system: z.literal("fax"),
-    value: validators().phoneNumber.required,
-    use: z.enum(ContactPointUses),
-  }),
-  // Email addresses
-  z.object({
-    system: z.literal("email"),
-    value: z.string().email(),
-    use: z.enum(ContactPointUses),
-  }),
-  // URLs
-  z.object({
-    system: z.literal("url"),
-    value: z.string().url(),
-    use: z.enum(ContactPointUses),
-  }),
-  // SMS (also using phone validation)
-  z.object({
-    system: z.literal("sms"),
-    value: validators().phoneNumber.required,
-    use: z.enum(ContactPointUses),
-  }),
-  // Pager (typically numeric, but can vary)
-  z.object({
-    system: z.literal("pager"),
-    value: z
-      .string()
-      .min(1, { message: "Required" })
-      .max(20, { message: "Pager number too long" }),
-    use: z.enum(ContactPointUses),
-  }),
-  // Other (catch-all with basic validation)
-  z.object({
-    system: z.literal("other"),
-    value: z.string().min(1, { message: "Required" }),
-    use: z.enum(ContactPointUses),
-  }),
-]);
+export function useContactPointSchema() {
+  const { t } = useTranslation();
+
+  return z.discriminatedUnion("system", [
+    // Phone numbers
+    z.object({
+      system: z.literal("phone"),
+      value: z.string().min(1, { message: t("field_required") }),
+      use: z.enum(ContactPointUses),
+    }),
+    // Fax numbers (also using phone validation since they follow same format)
+    z.object({
+      system: z.literal("fax"),
+      value: z.string().min(1, { message: t("field_required") }),
+      use: z.enum(ContactPointUses),
+    }),
+    // Email addresses
+    z.object({
+      system: z.literal("email"),
+      value: z.string().email(),
+      use: z.enum(ContactPointUses),
+    }),
+    // URLs
+    z.object({
+      system: z.literal("url"),
+      value: z.string().url(),
+      use: z.enum(ContactPointUses),
+    }),
+    // SMS (also using phone validation)
+    z.object({
+      system: z.literal("sms"),
+      value: validators().phoneNumber.required,
+      use: z.enum(ContactPointUses),
+    }),
+    // Pager (typically numeric, but can vary)
+    z.object({
+      system: z.literal("pager"),
+      value: z
+        .string()
+        .min(1, { message: t("field_required") })
+        .max(20, { message: "Pager number too long" }),
+      use: z.enum(ContactPointUses),
+    }),
+    // Other (catch-all with basic validation)
+    z.object({
+      system: z.literal("other"),
+      value: z.string().min(1, { message: t("field_required") }),
+      use: z.enum(ContactPointUses),
+    }),
+  ]);
+}
