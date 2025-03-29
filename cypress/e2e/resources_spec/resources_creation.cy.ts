@@ -19,7 +19,7 @@ describe("Resources Management", () => {
   };
 
   beforeEach(() => {
-    cy.loginByApi("devnurse1");
+    cy.loginByApi("devnurse4");
     cy.visit("/");
   });
 
