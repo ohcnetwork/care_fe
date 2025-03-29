@@ -108,6 +108,7 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
         </div>
       ) : (
         <div
+          key={JSON.stringify(elements)}
           ref={svgContainerRef}
           className="h-full w-full flex items-center justify-center p-2"
         />
@@ -119,21 +120,22 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
 ExcalidrawPreview.displayName = "ExcalidrawPreview";
 
 export const DrawingTab = (props: DrawingsTabProps) => {
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+  const { qParams, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["name"],
   });
+  const [drawingName, setDrawingName] = useState("");
 
   const associatingId =
     props.type === "encounter" ? props.encounter?.id : props.patientId;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["drawings", associatingId, qParams, resultsPerPage],
+    queryKey: ["drawings", associatingId, qParams, resultsPerPage, drawingName],
     queryFn: query.debounced(metaArtifactApi.list, {
       queryParams: {
         object_type: "drawing",
         associating_type: props.type,
-        name: qParams.name,
+        name: drawingName,
         associating_id: associatingId,
         limit: resultsPerPage,
         offset: (qParams.page - 1) * resultsPerPage,
@@ -148,8 +150,8 @@ export const DrawingTab = (props: DrawingsTabProps) => {
           id="search-by-name"
           name="name"
           placeholder={t("search_drawings")}
-          value={qParams.name}
-          onChange={(e) => updateQuery({ name: e.target.value })}
+          value={drawingName}
+          onChange={(e) => setDrawingName(e.target.value)}
           className="w-full sm:w-1/3"
         />
         <Button variant="white" onClick={() => navigate("drawings/new")}>

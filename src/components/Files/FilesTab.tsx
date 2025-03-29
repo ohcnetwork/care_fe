@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Table,
@@ -29,6 +30,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import { DrawingTab } from "@/components/Common/Drawings/DrawingTab";
 import Loading from "@/components/Common/Loading";
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
@@ -68,6 +70,7 @@ export const FilesTab = (props: FilesTabProps) => {
   const [selectedAudioFile, setSelectedAudioFile] =
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
+  const [fileName, setFileName] = useState("");
   const { hasPermission } = usePermissions();
   const {
     canViewClinicalData,
@@ -124,11 +127,12 @@ export const FilesTab = (props: FilesTabProps) => {
     isLoading: filesLoading,
     refetch,
   } = useQuery({
-    queryKey: ["files", type, associatingId, qParams],
+    queryKey: ["files", type, associatingId, qParams, fileName],
     queryFn: query(routes.viewUpload, {
       queryParams: {
         file_type: type,
         associating_id: associatingId,
+        name: fileName,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         ...(qParams.is_archived !== undefined && {
@@ -141,6 +145,8 @@ export const FilesTab = (props: FilesTabProps) => {
     }),
     enabled: canAccess,
   });
+
+  console.log("name:", fileName);
 
   const fileManager = useFileManager({
     type: type,
@@ -618,7 +624,6 @@ export const FilesTab = (props: FilesTabProps) => {
       </Table>
     </div>
   );
-
   return (
     <div className="space-y-4">
       <div className="z-40">
@@ -708,12 +713,29 @@ export const FilesTab = (props: FilesTabProps) => {
             </>
           )}
           <FileUploadButtons />
+          <Input
+            id="search-by-filename"
+            name="name"
+            placeholder={t("search_files")}
+            value={fileName}
+            onChange={(e) => {
+              setFileName(e.target.value);
+            }}
+            className="w-full pl-8"
+          />
         </div>
         <FilterBadges />
         {fileCategories.map((category) => (
           <TabsContent key={category.value} value={category.value}>
             <RenderTable />
             <RenderCard />
+            <span className="text-lg font-bold">{t("drawings")}</span>
+            <DrawingTab
+              type={props.type}
+              {...(props.type === "patient"
+                ? { patientId: props.patient?.id }
+                : { encounter: props.encounter })}
+            />
           </TabsContent>
         ))}
       </Tabs>

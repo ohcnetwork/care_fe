@@ -59,7 +59,7 @@ export default function ExcalidrawEditor({
       queryClient.invalidateQueries({
         queryKey: ["drawing", drawingId, associatingId],
       });
-      navigate("../drawings");
+      navigate("../files");
     },
   });
 
@@ -111,7 +111,7 @@ export default function ExcalidrawEditor({
     if (isDirty) {
       setIsAlertOpen(true);
     } else {
-      navigate("../drawings");
+      navigate("../files");
     }
   };
 
@@ -140,7 +140,7 @@ export default function ExcalidrawEditor({
               className="bg-red-500 text-gray-50 shadow-sm hover:bg-red-500/90"
               onClick={() => {
                 setIsAlertOpen(false);
-                navigate("../drawings");
+                navigate("../files");
               }}
             >
               {t("discard_changes")}
