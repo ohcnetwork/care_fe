@@ -39,7 +39,9 @@ describe("Resources Management", () => {
       .enterResourceTitle(testData.resourceTitle)
       .enterReasonOfRequest(testData.reasonOfRequest)
       .clickFillMyDetails()
+      .interceptResourceCreationRequest()
       .clickSubmitButton()
+      .verifyResourceCreationApiCall()
       .assertResourceCreateSuccess();
   });
 
