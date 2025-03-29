@@ -19,14 +19,14 @@ export const autofillOtp = (
           onSuccess(otp.code);
           toast.success(`Your OTP is: ${otp.code}`);
         } else {
-          toast.success("No OTP received."); // Testing toast
+          toast.error("No OTP received."); // Testing toast
         }
       })
       .catch(() => {
-        toast.success("OTP retrieval failed."); // Testing toast
+        toast.error("OTP retrieval failed."); // Testing toast
         onError();
       });
   } else {
-    toast.success("OTPCredential API is not available."); // Testing toast
+    toast.error("OTPCredential API is not available."); // Testing toast
   }
 };
