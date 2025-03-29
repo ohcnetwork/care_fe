@@ -13,8 +13,8 @@ export const autofillOtp = (
     navigator.credentials
       .get({ otp: { transport: ["sms"] } } as CredentialRequestOptions)
       .then((otpCredential) => {
-        if (!otpCredential) {
-          toast.error("No OTP received.");
+        if (otpCredential) {
+          toast.error("OTP received.");
           return;
         }
 
