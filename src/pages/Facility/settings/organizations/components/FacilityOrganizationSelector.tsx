@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
+
 import query from "@/Utils/request/query";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
@@ -51,7 +53,7 @@ export default function FacilityOrganizationSelector(
   const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
   const [showAllOrgs, setShowAllOrgs] = useState(false);
   const [open, setOpen] = useState(false);
-
+  const isMobile = useBreakpoints({ default: true, sm: false });
   const { data: rootOrganizations, isLoading: isLoadingRoot } = useQuery({
     queryKey: ["organizations-root", facilityOrgSearch, showAllOrgs],
     queryFn: query.debounced(
@@ -231,7 +233,7 @@ export default function FacilityOrganizationSelector(
                 className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
                 style={{
                   position: "fixed",
-                  bottom: "50px",
+                  bottom: isMobile ? "30vh" : "50px",
                   left: "50%",
                   transform: "translateX(-50%)",
                   touchAction: "manipulation",
