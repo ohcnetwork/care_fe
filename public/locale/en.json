@@ -681,6 +681,7 @@
   "close": "Close",
   "close_scanner": "Close Scanner",
   "code": "Code",
+  "code_verification_required": "Code verification is required",
   "coding": "Coding",
   "collapse_all": "Collapse All",
   "collapse_sidebar": "Collapse Sidebar",

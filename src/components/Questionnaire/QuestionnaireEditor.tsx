@@ -303,7 +303,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           })
           .optional()
           .refine((data) => !data || (data.code && data.display), {
-            message: "Please provide a verified code",
+            message: t("code_verification_required"),
             path: ["display"],
           }),
         unit: z
@@ -314,7 +314,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           })
           .optional()
           .refine((data) => !data || (data.code && data.display), {
-            message: "Code verification is required",
+            message: t("code_verification_required"),
             path: ["display"],
           }),
       }),
