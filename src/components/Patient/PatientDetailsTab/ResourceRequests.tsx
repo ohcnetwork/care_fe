@@ -102,10 +102,7 @@ export const ResourceRequests = (props: PatientProps) => {
               </TableRow>
             ) : resourceRequests?.results?.length ? (
               resourceRequests.results.map((request, index) => (
-                <TableRow
-                  key={index}
-                  data-cy={`resource-requests-table-row-${index}`}
-                >
+                <TableRow key={index}>
                   <TableCell className="font-medium">
                     {RESOURCE_CATEGORY_CHOICES.find(
                       (item) => item.id === request.category,
@@ -128,12 +125,8 @@ export const ResourceRequests = (props: PatientProps) => {
                 </TableRow>
               ))
             ) : (
-              <TableRow data-cy="empty-state-row">
-                <TableCell
-                  colSpan={6}
-                  className="text-center py-4"
-                  data-cy="empty-state"
-                >
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-4">
                   {t("no_resource_requests_found")}
                 </TableCell>
               </TableRow>

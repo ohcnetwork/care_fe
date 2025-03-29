@@ -282,10 +282,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
           </div>
         </div>
 
-        <div
-          className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
-          data-cy="resource-list-cards"
-        >
+        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {isLoading ? (
             <CardGridSkeleton count={6} />
           ) : resources.length === 0 ? (
@@ -302,17 +299,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 >
                   <CardHeader className="space-y-1 pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle
-                        className="group-hover:text-primary transition-colors"
-                        data-cy={`resource-title-${index}`}
-                      >
+                      <CardTitle className="group-hover:text-primary transition-colors">
                         {resource.title}
                       </CardTitle>
                     </div>
-                    <CardDescription
-                      className="line-clamp-2"
-                      data-cy={`resource-reason-${index}`}
-                    >
+                    <CardDescription className="line-clamp-2">
                       {resource.reason}
                     </CardDescription>
                   </CardHeader>
@@ -322,7 +313,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         <Badge
                           variant="outline"
                           className="bg-red-100 text-red-800"
-                          data-cy={`resource-emergency-${index}`}
                         >
                           {t("emergency")}
                         </Badge>
@@ -330,7 +320,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       <Badge
                         variant="outline"
                         className="bg-gray-100 text-gray-800"
-                        data-cy={`resource-category-${index}`}
                       >
                         {
                           RESOURCE_CATEGORY_CHOICES.find(
@@ -343,7 +332,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       <Badge
                         variant="outline"
                         className="bg-gray-100 text-gray-800"
-                        data-cy={`resource-facility-${index}`}
                       >
                         {resource.origin_facility?.name}
                         <CareIcon
@@ -359,7 +347,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <Link
                       href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
                       className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
-                      data-cy={`resource-view-${index}`}
+                      data-cy={`resource-view-details-${index}`}
                     >
                       View Details
                       <CareIcon icon="l-arrow-right" className="ml-1 size-4" />

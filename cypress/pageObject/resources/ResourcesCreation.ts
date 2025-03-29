@@ -127,9 +127,10 @@ export class ResourcesCreation {
     );
   }
   clickViewDetailsButton() {
-    cy.get('[data-cy="resource-card-0"]').within(() => {
-      cy.contains("View Details").click();
-    });
+    cy.verifyAndClickElement(
+      '[data-cy="resource-view-details-0"]',
+      "View Details",
+    );
   }
 
   clickFilterTab(name: string) {
