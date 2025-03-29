@@ -26,7 +26,7 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const [search, setSearch] = useState("");
 
   const { data: searchQuery, isFetching } = useQuery({
-    queryKey: ["valueset", "preview_search", search],
+    queryKey: ["valueset", "preview_search", search, valueset],
     queryFn: query.debounced(valuesetApi.preview_search, {
       queryParams: { search, count: 20 },
       body: {
@@ -69,7 +69,7 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
           noOptionsMessage={
             searchQuery && !isFetching ? t("no_results_found") : t("searching")
           }
-          className="space-y-3 px-1 mt-6"
+          className="px-1 mt-6"
         />
       </SheetContent>
     </Sheet>
