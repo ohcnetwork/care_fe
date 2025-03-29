@@ -369,6 +369,9 @@ export default function FacilityOrganizationSelector(
                       <span className="font-semibold text-base text-gray-900">
                         {t("select_department")}
                       </span>
+                      <span className="text-sm text-gray-500 mt-0.5">
+                        {t("select_department_description")}
+                      </span>
                     </div>
                     <div className="flex items-center px-3 py-2 border-b sticky top-[48px] bg-white z-10">
                       {navigationLevels.length > 0 ? (
