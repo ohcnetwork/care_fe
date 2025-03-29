@@ -22,6 +22,11 @@ function generateAdminLinks(t: TFunction) {
       url: `${baseUrl}/valuesets`,
       icon: "l-list-ol-alt",
     },
+    {
+      name: "Roles",
+      url: `${baseUrl}/roles`,
+      icon: "d-people",
+    },
   ];
 
   return links;
