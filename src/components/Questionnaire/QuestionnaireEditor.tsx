@@ -79,7 +79,7 @@ import {
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
-import { ValuesetBase } from "@/types/valueset/valueset";
+import { TERMINOLOGY_SYSTEMS, ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 import { CodingEditor } from "./CodingEditor";
@@ -290,6 +290,35 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         message: t("slug_format_message"),
       }),
     description: z.string().optional(),
+    questions: z.array(
+      z.object({
+        text: z.string().trim().min(1, t("field_required")),
+        link_id: z.string().trim().min(1, t("field_required")),
+        dexcription: z.string().optional(),
+        code: z
+          .object({
+            system: z.string(),
+            code: z.string().trim(),
+            display: z.string().trim(),
+          })
+          .optional()
+          .refine((data) => !data || (data.code && data.display), {
+            message: "Please provide a verified code",
+            path: ["display"],
+          }),
+        unit: z
+          .object({
+            system: z.string(),
+            code: z.string().trim(),
+            display: z.string(),
+          })
+          .optional()
+          .refine((data) => !data || (data.code && data.display), {
+            message: "Code verification is required",
+            path: ["display"],
+          }),
+      }),
+    ),
   });
 
   const [questionnaire, setQuestionnaire] =
@@ -316,6 +345,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       title: questionnaire?.title ?? "",
       slug: questionnaire?.slug ?? "",
       description: questionnaire?.description ?? "",
+      questions: questionnaire?.questions,
     },
     mode: "onChange",
   });
@@ -327,6 +357,16 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         title: initialQuestionnaire.title || "",
         slug: initialQuestionnaire.slug || "",
         description: initialQuestionnaire.description || "",
+        questions: initialQuestionnaire.questions.map((question: Question) => ({
+          ...question,
+          unit: question.unit
+            ? {
+                system: TERMINOLOGY_SYSTEMS.UCUM,
+                code: question.unit.code,
+                display: question.unit.display,
+              }
+            : undefined,
+        })),
       });
     }
   }, [initialQuestionnaire]);
@@ -596,13 +636,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </div>
 
             <div className="space-y-4 flex-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("basic_info")}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Form {...form}>
-                    <form className="space-y-4">
+              <Form {...form}>
+                <form className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t("basic_info")}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                       <FormField
                         control={form.control}
                         name="title"
@@ -667,108 +707,134 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           </FormItem>
                         )}
                       />
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-
-              <Card className="border-none bg-transparent shadow-none">
-                <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
-                  <div>
-                    <CardTitle>
-                      <p className="text-sm text-gray-700 font-medium mt-1">
-                        {questionnaire.questions?.length || 0} {t("question")}
-                        {questionnaire.questions?.length !== 1 ? "s" : ""}
-                      </p>
-                    </CardTitle>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newQuestion: Question = {
-                        id: crypto.randomUUID(),
-                        link_id: `${questionnaire.questions.length + 1}`,
-                        text: "New Question",
-                        type: "string",
-                        questions: [],
-                      };
-                      updateQuestionnaireField("questions", [
-                        ...questionnaire.questions,
-                        newQuestion,
-                      ]);
-                      setExpandedQuestions(
-                        (prev) => new Set([...prev, newQuestion.id]),
-                      );
-                    }}
-                  >
-                    <CareIcon icon="l-plus" className="mr-2 size-4" />
-                    {t("add_question")}
-                  </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="space-y-6">
-                    {questionnaire.questions.map((question, index) => (
-                      <div
-                        key={question.id}
-                        id={`question-${question.id}`}
-                        className="relative bg-white rounded-lg shadow-md"
-                      >
-                        <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
-                        <QuestionEditor
-                          index={index}
-                          key={question.id}
-                          question={question}
-                          onChange={(updatedQuestion) => {
-                            const newQuestions = [...questionnaire.questions];
-                            newQuestions[index] = updatedQuestion;
-                            updateQuestionnaireField("questions", newQuestions);
-                          }}
-                          onDelete={() => {
-                            const newQuestions = questionnaire.questions.filter(
-                              (_, i) => i !== index,
-                            );
-                            updateQuestionnaireField("questions", newQuestions);
-                          }}
-                          isExpanded={expandedQuestions.has(question.id)}
-                          onToggleExpand={() =>
-                            toggleQuestionExpanded(question.id)
-                          }
-                          depth={0}
-                          onMoveUp={() => {
-                            if (index > 0) {
-                              const newQuestions = [...questionnaire.questions];
-                              [newQuestions[index - 1], newQuestions[index]] = [
-                                newQuestions[index],
-                                newQuestions[index - 1],
-                              ];
-                              updateQuestionnaireField(
-                                "questions",
-                                newQuestions,
-                              );
-                            }
-                          }}
-                          onMoveDown={() => {
-                            if (index < questionnaire.questions.length - 1) {
-                              const newQuestions = [...questionnaire.questions];
-                              [newQuestions[index], newQuestions[index + 1]] = [
-                                newQuestions[index + 1],
-                                newQuestions[index],
-                              ];
-                              updateQuestionnaireField(
-                                "questions",
-                                newQuestions,
-                              );
-                            }
-                          }}
-                          isFirst={index === 0}
-                          isLast={index === questionnaire.questions.length - 1}
-                        />
+                    </CardContent>
+                  </Card>
+                  <Card className="border-none bg-transparent shadow-none">
+                    <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
+                      <div>
+                        <CardTitle>
+                          <p className="text-sm text-gray-700 font-medium mt-1">
+                            {questionnaire.questions?.length || 0}{" "}
+                            {t("question")}
+                            {questionnaire.questions?.length !== 1 ? "s" : ""}
+                          </p>
+                        </CardTitle>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const newQuestion: Question = {
+                            id: crypto.randomUUID(),
+                            link_id: `${questionnaire.questions.length + 1}`,
+                            text: "New Question",
+                            type: "string",
+                            questions: [],
+                          };
+                          handleValidatedChange("questions", [
+                            ...questionnaire.questions,
+                            newQuestion,
+                          ]);
+                          setExpandedQuestions(
+                            (prev) => new Set([...prev, newQuestion.id]),
+                          );
+                        }}
+                      >
+                        <CareIcon icon="l-plus" className="mr-2 size-4" />
+                        {t("add_question")}
+                      </Button>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="space-y-6">
+                        {questionnaire.questions.map((question, index) => (
+                          <div
+                            key={question.id}
+                            id={`question-${question.id}`}
+                            className="relative bg-white rounded-lg shadow-md"
+                          >
+                            <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
+                            <QuestionEditor
+                              form={form}
+                              index={index}
+                              key={question.id}
+                              question={question}
+                              onChange={(updatedQuestion) => {
+                                const newQuestions = [
+                                  ...questionnaire.questions,
+                                ];
+                                newQuestions[index] = updatedQuestion;
+                                handleValidatedChange(
+                                  "questions",
+                                  newQuestions,
+                                );
+                              }}
+                              onDelete={() => {
+                                const newQuestions =
+                                  questionnaire.questions.filter(
+                                    (_, i) => i !== index,
+                                  );
+                                handleValidatedChange(
+                                  "questions",
+                                  newQuestions,
+                                );
+                              }}
+                              isExpanded={expandedQuestions.has(question.id)}
+                              onToggleExpand={() =>
+                                toggleQuestionExpanded(question.id)
+                              }
+                              depth={0}
+                              onMoveUp={() => {
+                                if (index > 0) {
+                                  const newQuestions = [
+                                    ...questionnaire.questions,
+                                  ];
+                                  [
+                                    newQuestions[index - 1],
+                                    newQuestions[index],
+                                  ] = [
+                                    newQuestions[index],
+                                    newQuestions[index - 1],
+                                  ];
+                                  handleValidatedChange(
+                                    "questions",
+                                    newQuestions,
+                                  );
+                                }
+                              }}
+                              onMoveDown={() => {
+                                if (
+                                  index <
+                                  questionnaire.questions.length - 1
+                                ) {
+                                  const newQuestions = [
+                                    ...questionnaire.questions,
+                                  ];
+                                  [
+                                    newQuestions[index],
+                                    newQuestions[index + 1],
+                                  ] = [
+                                    newQuestions[index + 1],
+                                    newQuestions[index],
+                                  ];
+                                  handleValidatedChange(
+                                    "questions",
+                                    newQuestions,
+                                  );
+                                }
+                              }}
+                              isFirst={index === 0}
+                              isLast={
+                                index === questionnaire.questions.length - 1
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </form>
+              </Form>
             </div>
             <div className="space-y-4 w-60 hidden lg:block">
               <QuestionnaireProperties
@@ -828,6 +894,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 }
 
 interface QuestionEditorProps {
+  form: ReturnType<typeof useForm<any>>;
   index: number;
   question: Question;
   onChange: (updated: Question) => void;
@@ -843,6 +910,7 @@ interface QuestionEditorProps {
 }
 
 function QuestionEditor({
+  form,
   question,
   onChange,
   onDelete,
@@ -868,11 +936,9 @@ function QuestionEditor({
     code,
     unit,
   } = question;
-
   const [expandedSubQuestions, setExpandedSubQuestions] = useState<Set<string>>(
     new Set(),
   );
-
   const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
   const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
     queryKey: ["valuesets", valueSetSearchQuery],
@@ -986,29 +1052,64 @@ function QuestionEditor({
         <div className="p-2 pt-0 space-y-4 mt-2">
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label>Question Text</Label>
-              <Input
-                value={text}
-                onChange={(e) => updateField("text", e.target.value)}
+              <FormField
+                control={form.control}
+                name={`questions.${index}.text`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("question_text")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => updateField("text", e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
             <div className="flex-1">
-              <Label>Link ID</Label>
-              <Input
-                value={question.link_id}
-                onChange={(e) => updateField("link_id", e.target.value)}
-                placeholder="Unique identifier for this question"
+              <FormField
+                control={form.control}
+                name={`questions.${index}.link_id`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("link_id")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => updateField("link_id", e.target.value)}
+                        placeholder="Unique identifier for this question"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
           </div>
 
           <div>
-            <Label>{t("description")}</Label>
-            <Textarea
-              value={question.description || ""}
-              onChange={(e) => updateField("description", e.target.value)}
-              placeholder="Additional context or instructions for this question"
-              className="h-20"
+            <FormField
+              control={form.control}
+              name={`questions.${index}.description`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("description")}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      onChange={(e) =>
+                        updateField("description", e.target.value)
+                      }
+                      placeholder="Additional context or instructions for this question"
+                      className="h-20"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
 
@@ -1076,16 +1177,22 @@ function QuestionEditor({
             {type !== "structured" && type !== "group" && (
               <div className="flex flex-col gap-2">
                 <CodingEditor
+                  questionIndex={index}
                   code={code}
                   onChange={(newCode) => updateField("code", newCode)}
                   label={t("coding")}
+                  type="code"
+                  form={form}
                 />
                 <CodingEditor
+                  questionIndex={index}
                   code={unit}
                   onChange={(newCode) => updateField("unit", newCode)}
                   defaultSystem="UCUM"
                   label={t("unit")}
+                  type="unit"
                   disableSystemSelect
+                  form={form}
                 />
               </div>
             )}
@@ -1361,7 +1468,8 @@ function QuestionEditor({
                               variant="ghost"
                               size="icon"
                               className="mt-8"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
                                 const newOptions = answer_option?.filter(
                                   (_, i) => i !== idx,
                                 );
@@ -1378,7 +1486,8 @@ function QuestionEditor({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
                         const newOption = { value: "" };
                         const newOptions = answer_option
                           ? [...answer_option, newOption]
@@ -1428,7 +1537,8 @@ function QuestionEditor({
                   variant="ghost"
                   size="sm"
                   className="underline text-gray-950 font-semibold"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     const newQuestion: Question = {
                       id: crypto.randomUUID(),
                       link_id: `Q-${Date.now()}`,
@@ -1457,6 +1567,7 @@ function QuestionEditor({
                     className="relative bg-white rounded-lg shadow-md"
                   >
                     <QuestionEditor
+                      form={form}
                       index={idx}
                       key={subQuestion.id}
                       question={subQuestion}
@@ -1701,7 +1812,8 @@ function QuestionEditor({
                       variant="ghost"
                       size="sm"
                       className="mt-5"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
                         const newConditions = question.enable_when?.filter(
                           (_, i) => i !== idx,
                         );
@@ -1716,7 +1828,8 @@ function QuestionEditor({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   const newCondition: EnableWhen = {
                     question: "",
                     operator: "equals",

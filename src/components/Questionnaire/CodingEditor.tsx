@@ -1,5 +1,6 @@
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -18,6 +19,13 @@ import {
 } from "@/components/ui/select";
 
 import mutate from "@/Utils/request/mutate";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/src/components/ui/form";
 import { Code } from "@/types/questionnaire/code";
 import {
   TERMINOLOGY_SYSTEMS,
@@ -27,9 +35,12 @@ import {
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface CodingEditorProps {
+  questionIndex: number;
   code?: Code;
+  type: "code" | "unit";
   defaultSystem?: TerminologySystem;
   label: string;
+  form: ReturnType<typeof useForm<any>>;
   disableSystemSelect?: boolean;
   onChange: (code: Code | undefined) => void;
 }
@@ -39,6 +50,9 @@ export function CodingEditor({
   onChange,
   defaultSystem,
   label,
+  type,
+  form,
+  questionIndex,
   disableSystemSelect,
 }: CodingEditorProps) {
   const { t } = useTranslation();
@@ -65,7 +79,8 @@ export function CodingEditor({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault();
             onChange({
               system: TERMINOLOGY_SYSTEMS[defaultSystem ?? "LOINC"],
               code: "",
@@ -90,7 +105,8 @@ export function CodingEditor({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               onChange(undefined);
             }}
           >
@@ -102,54 +118,89 @@ export function CodingEditor({
 
       <CardContent className="space-y-4">
         <div>
-          <Label>{t("system")}</Label>
-          <Select
-            value={code.system}
-            onValueChange={(value) => {
-              onChange({
-                ...code,
-                system: value,
-                code: "",
-                display: "",
-              });
-            }}
-            disabled={disableSystemSelect}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select system" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(TERMINOLOGY_SYSTEMS).map(([key, value]) => (
-                <SelectItem key={key} value={value}>
-                  {key}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FormField
+            control={form.control}
+            name={`questions.${questionIndex}.${type}.system`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("system")}</FormLabel>
+                <FormControl>
+                  <Select
+                    {...field}
+                    onValueChange={(value) => {
+                      onChange({
+                        ...code,
+                        system: value,
+                        code: "",
+                        display: "",
+                      });
+                    }}
+                    disabled={disableSystemSelect}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select system" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(TERMINOLOGY_SYSTEMS).map(
+                        ([key, value]) => (
+                          <SelectItem key={key} value={value}>
+                            {key}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <div className="grid grid-cols-[1fr_1fr_auto] gap-4 items-start">
           <div>
-            <Label>{t("code")}</Label>
-            <Input
-              value={code.code}
-              onChange={(e) => {
-                onChange({
-                  ...code,
-                  code: e.target.value,
-                  display: "",
-                });
-              }}
-              placeholder="Enter code"
+            <FormField
+              control={form.control}
+              name={`questions.${questionIndex}.${type}.code`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("code")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onChange({
+                          ...code,
+                          code: e.target.value,
+                          display: "",
+                        });
+                      }}
+                      placeholder="Enter code"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
           <div>
-            <Label>{t("display")}</Label>
-            <Input
-              value={code.display}
-              placeholder="Unverified"
-              className={!code.display ? "text-gray-500" : undefined}
-              readOnly
+            <FormField
+              control={form.control}
+              name={`questions.${questionIndex}.${type}.display`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("display")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Unverified"
+                      className={!code.display ? "text-gray-500" : undefined}
+                      readOnly
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
           <div className="pt-6">
@@ -158,7 +209,8 @@ export function CodingEditor({
               variant="outline"
               size="icon"
               disabled={isPending}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 if (!code.system || !code.code) {
                   toast.error("Please select a system and enter a code first");
                   return;
