@@ -51,7 +51,8 @@ export class ResourcesCreation {
       .selectStatus(data.status)
       .selectCategory(data.category)
       .enterResourceTitle(data.title)
-      .enterReasonOfRequest(data.reason);
+      .enterReasonOfRequest(data.reason)
+      .clickFillMyDetails();
     return this;
   }
 

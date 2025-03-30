@@ -50,7 +50,6 @@ describe("Resources Management", () => {
 
     resourceCreation
       .fillResourceRequestDetails(testData as ResourceRequestFormData)
-      .clickFillMyDetails()
       .interceptResourceCreationRequest()
       .clickSubmitButton()
       .verifyResourceCreationApiCall()
