@@ -115,7 +115,7 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
         variant="ghost"
         size="icon"
         onClick={togglePlay}
-        className="h-6 w-6"
+        className="size-6"
       >
         <CareIcon icon={isPlaying ? "l-pause" : "l-play"} />
       </Button>

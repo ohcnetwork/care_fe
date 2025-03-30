@@ -121,15 +121,15 @@ function LocationRow({
                 disabled={children.length === 0}
               >
                 {isExpanded ? (
-                  <CareIcon icon="l-angle-down" className="h-5 w-5" />
+                  <CareIcon icon="l-angle-down" className="size-5" />
                 ) : (
-                  <CareIcon icon="l-angle-right" className="h-5 w-5" />
+                  <CareIcon icon="l-angle-right" className="size-5" />
                 )}
               </Button>
             ) : location.parent ? (
               <CareIcon
                 icon="l-corner-down-right-alt"
-                className="h-4 w-4 text-gray-400 ml-4 mr-2"
+                className="size-4 text-gray-400 ml-4 mr-2"
               />
             ) : (
               <div className="w-8" />
@@ -148,7 +148,7 @@ function LocationRow({
                   >
                     <CareIcon
                       icon={allExpanded ? "l-minus" : "l-plus"}
-                      className="h-4 w-4"
+                      className="size-4"
                     />
                     <span className="hidden lg:inline">
                       {t(allExpanded ? "collapse_all" : "expand_all")}
@@ -167,7 +167,7 @@ function LocationRow({
                         location.has_children || !!location.current_encounter
                       }
                     >
-                      <CareIcon icon={"l-trash"} className="h-4 w-4" />
+                      <CareIcon icon={"l-trash"} className="size-4" />
                       <span className="hidden lg:inline">{t("delete")}</span>
                     </Button>
                   </AlertDialogTrigger>
@@ -201,7 +201,7 @@ function LocationRow({
                   size={isMobile ? "xs" : "sm"}
                   onClick={() => onEdit(location)}
                 >
-                  <PenLine className="h-4 w-4" />
+                  <PenLine className="size-4" />
                   <span className="hidden lg:inline">{t("edit")}</span>
                 </Button>
 
@@ -210,7 +210,7 @@ function LocationRow({
                     href={`/location/${location.id}`}
                     className="text-gray-900 flex items-center"
                   >
-                    <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                    <CareIcon icon="l-arrow-up-right" className="size-4" />
                     <span className="hidden lg:inline">{t("see_details")}</span>
                   </Link>
                 </Button>
@@ -218,7 +218,7 @@ function LocationRow({
             </div>
           )}
         </TableCell>
-        <TableCell className="hidden sm:table-cell border-l bg-white font-semibold text-gray-900">
+        <TableCell className="hidden sm:table-cell border-l border-gray-200 bg-white font-semibold text-gray-900">
           {t(`location_form__${location.form}`)}
         </TableCell>
       </TableRow>
@@ -285,10 +285,10 @@ export function LocationListView({
 
   return (
     <div className="space-y-4">
-      <Table className="border rounded-lg w-full overflow-hidden">
+      <Table className="border border-gray-200 rounded-lg w-full overflow-hidden">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[80%] border text-gray-700 bg-gray-200">
+            <TableHead className="w-[80%] border border-gray-200 text-gray-700 bg-gray-200">
               {t("name")}
             </TableHead>
             <TableHead className="hidden sm:table-cell bg-gray-200 text-gray-700">
