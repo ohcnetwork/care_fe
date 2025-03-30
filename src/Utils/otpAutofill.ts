@@ -1,33 +1,46 @@
-import { useEffect } from "react";
+import { toast } from "sonner";
 
-interface OtpCredentialRequestOptions extends CredentialRequestOptions {
-  otp?: { transport: string[] };
+export interface OTPCredential {
+  code: string;
 }
 
-const autofillOtp = (
-  setOtp: (otp: string) => void,
-  setOtpValidationError: (error: string) => void,
+export const autofillOtp = (
+  onSuccess: (otp: string) => void,
+  onError: () => void,
 ) => {
-  useEffect(() => {
-    if (!("OTPCredential" in window)) return;
+  if ("OTPCredential" in window && navigator.credentials) {
+    toast.success("OTPCredential API is available.");
 
     const ac = new AbortController();
-
     navigator.credentials
       .get({
         otp: { transport: ["sms"] },
         signal: ac.signal,
-      } as OtpCredentialRequestOptions)
-      .then((otp: any) => {
-        setOtp(otp.code);
-        setOtpValidationError("");
+      } as CredentialRequestOptions)
+      .then((otpCredential) => {
+        if (!otpCredential) {
+          toast.error("No OTP received.");
+          onError();
+          return;
+        }
+
+        const otp = otpCredential as unknown as OTPCredential;
+
+        if (otp.code) {
+          toast.success(`Your OTP is: ${otp.code}`);
+          onSuccess(otp.code);
+          ac.abort();
+        } else {
+          toast.error("Received OTP is invalid.");
+          onError();
+        }
       })
-      .catch((err) => {
-        console.error("OTP Retrieval Failed:", err);
+      .catch((error) => {
+        toast.error("OTP retrieval failed.");
+        console.error("OTP retrieval error:", error);
+        onError();
       });
-
-    return () => ac.abort();
-  }, [setOtp, setOtpValidationError]);
+  } else {
+    toast.error("OTPCredential API is not available.");
+  }
 };
-
-export default autofillOtp;
