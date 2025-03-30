@@ -49,38 +49,38 @@ describe("Resources Management", () => {
       .clickCreateRequestButton();
 
     resourceCreation
-      .fillResourceRequestDetails(testData as ResourceRequestFormData)
-      .interceptResourceCreationRequest()
-      .clickSubmitButton()
-      .verifyResourceCreationApiCall()
-      .assertResourceCreateSuccess();
+      .fillResourceRequestForm(testData as ResourceRequestFormData)
+      .interceptCreateRequest()
+      .submitForm()
+      .verifyCreateRequest()
+      .assertCreationSuccess();
 
     patientDetails.navigateToSavedUrl();
 
     resourceCreation
-      .verifyResourceRequestInPatientPage(testData)
-      .clickSidebarResource()
-      .clickFilterTab("outgoing")
-      .clickFilterTab("pending")
+      .verifyResourceInPatientPage(testData)
+      .navigateToResources()
+      .applyFilter("outgoing")
+      .applyFilter("pending")
       .searchResource(testData.title)
-      .verifyResourceCardContent(testData)
-      .clickViewDetailsButton()
-      .clickUpdateStatusButton()
-      .fillResourceRequestDetails(updatedTestData as ResourceRequestFormData)
+      .verifyResourceCardDetails(testData)
+      .openResourceDetails()
+      .updateResourceStatus()
+      .fillResourceRequestForm(updatedTestData as ResourceRequestFormData)
       .selectAssignedUser(updatedTestData.assignedUser)
-      .interceptResourceUpdateRequest()
-      .clickSubmitButton()
-      .verifyResourceUpdationApiCall()
-      .assertResourceUpdateSuccess();
+      .interceptUpdateRequest()
+      .submitForm()
+      .verifyUpdateRequest()
+      .assertUpdateSuccess();
 
     patientDetails.navigateToSavedUrl();
 
     resourceCreation
-      .verifyResourceRequestInPatientPage(updatedTestData)
-      .clickSidebarResource()
-      .clickFilterTab("outgoing")
-      .clickFilterTab("pending")
+      .verifyResourceInPatientPage(updatedTestData)
+      .navigateToResources()
+      .applyFilter("outgoing")
+      .applyFilter("pending")
       .searchResource(updatedTestData.title)
-      .verifyResourceCardContent(updatedTestData);
+      .verifyResourceCardDetails(updatedTestData);
   });
 });

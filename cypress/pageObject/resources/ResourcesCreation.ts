@@ -7,15 +7,18 @@ export interface ResourceRequestFormData {
   facility: string;
   sourceFacility: string;
 }
+
 export class ResourcesCreation {
   selectFacility(facility: string) {
     cy.typeAndSelectOption('[data-cy="select-facility"]', facility, false);
     return this;
   }
+
   selectStatus(status: string) {
     cy.clickAndSelectOption('[data-cy="select-status-dropdown"]', status);
     return this;
   }
+
   selectCategory(category: string) {
     cy.clickAndSelectOption('[data-cy="select-category-dropdown"]', category);
     return this;
@@ -25,20 +28,22 @@ export class ResourcesCreation {
     cy.typeAndSelectOption('[data-cy="select-assigned-user"]', user, false);
     return this;
   }
-  enterResourceTitle(title: string) {
+
+  enterTitle(title: string) {
     cy.typeIntoField('[data-cy="title-input"]', title, {
       clearBeforeTyping: true,
     });
     return this;
   }
 
-  enterReasonOfRequest(reason: string) {
+  enterReason(reason: string) {
     cy.typeIntoField('[data-cy="reason-input"]', reason, {
       clearBeforeTyping: true,
     });
     return this;
   }
-  clickFillMyDetails() {
+
+  autoFillDetails() {
     cy.verifyAndClickElement(
       '[data-cy="fill_my_details_button"]',
       "Fill My Details",
@@ -46,58 +51,63 @@ export class ResourcesCreation {
     return this;
   }
 
-  fillResourceRequestDetails(data: ResourceRequestFormData) {
+  fillResourceRequestForm(data: ResourceRequestFormData) {
     this.selectFacility(data.facility)
       .selectStatus(data.status)
       .selectCategory(data.category)
-      .enterResourceTitle(data.title)
-      .enterReasonOfRequest(data.reason)
-      .clickFillMyDetails();
+      .enterTitle(data.title)
+      .enterReason(data.reason)
+      .autoFillDetails();
     return this;
   }
 
-  clickSubmitButton() {
+  submitForm() {
     cy.clickSubmitButton("Submit");
     return this;
   }
 
-  interceptResourceCreationRequest() {
+  interceptCreateRequest() {
     cy.intercept("POST", "**/api/v1/resource/").as("createResource");
     return this;
   }
-  interceptResourceUpdateRequest() {
-    cy.intercept("PUT", "**/api/v1/resource/**").as("updatedResource");
+
+  interceptUpdateRequest() {
+    cy.intercept("PUT", "**/api/v1/resource/**").as("updateResource");
     return this;
   }
 
-  verifyResourceCreationApiCall() {
+  verifyCreateRequest() {
     cy.wait("@createResource").then((interception) => {
       expect(interception.response?.statusCode).to.equal(200);
     });
     return this;
   }
-  verifyResourceUpdationApiCall() {
-    cy.wait("@updatedResource").then((interception) => {
+
+  verifyUpdateRequest() {
+    cy.wait("@updateResource").then((interception) => {
       expect(interception.response?.statusCode).to.equal(200);
     });
     return this;
   }
-  assertResourceCreateSuccess() {
+
+  assertCreationSuccess() {
     cy.verifyNotification("Request created successfully");
     return this;
   }
-  assertResourceUpdateSuccess() {
+
+  assertUpdateSuccess() {
     cy.verifyNotification("Resource updated successfully");
     return this;
   }
-  searchResource(name: string) {
+
+  searchResource(title: string) {
     cy.get('[data-cy="search-resource"]').click();
-    cy.typeIntoField("#resource-search", name);
+    cy.typeIntoField("#resource-search", title);
     cy.get('[data-cy="search-resource"]').click();
     return this;
   }
 
-  verifyResourceRequestInPatientPage(data: ResourceRequestFormData) {
+  verifyResourceInPatientPage(data: ResourceRequestFormData) {
     cy.verifyContentPresence("[data-cy='resource-requests-table']", [
       data.category,
       data.title,
@@ -106,7 +116,7 @@ export class ResourcesCreation {
     return this;
   }
 
-  verifyResourceCardContent(data: ResourceRequestFormData) {
+  verifyResourceCardDetails(data: ResourceRequestFormData) {
     cy.verifyContentPresence('[data-cy="resource-card-0"]', [
       data.title,
       data.reason,
@@ -117,19 +127,21 @@ export class ResourcesCreation {
     ]);
     return this;
   }
-  clickSidebarResource() {
+
+  navigateToResources() {
     cy.verifyAndClickElement('[data-sidebar="content"]', "Resource");
     return this;
   }
 
-  clickUpdateStatusButton() {
+  updateResourceStatus() {
     cy.verifyAndClickElement(
       '[data-cy="update-status-button"]',
       "Update Status",
     );
     return this;
   }
-  clickViewDetailsButton() {
+
+  openResourceDetails() {
     cy.verifyAndClickElement(
       '[data-cy="resource-view-details-0"]',
       "View Details",
@@ -137,7 +149,7 @@ export class ResourcesCreation {
     return this;
   }
 
-  clickFilterTab(name: string) {
+  applyFilter(name: string) {
     cy.get(`[data-cy='tab-${name}']`).click();
     return this;
   }
