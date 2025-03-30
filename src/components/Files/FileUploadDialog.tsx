@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -37,6 +37,18 @@ export default function FileUploadDialog({
     onOpenChange(open);
   };
   const [isPdf, setIsPdf] = useState(false);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  useEffect(() => {
+    const urls = fileUpload.files
+      .filter((file) => file.type.startsWith("image/"))
+      .map((file) => URL.createObjectURL(file));
+    setPreviewUrls(urls);
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [fileUpload.files]);
+
   return (
     <Dialog
       open={open}
@@ -53,11 +65,18 @@ export default function FileUploadDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 pr-5 max-h-[70vh] overflow-y-auto">
-          {isPdf ? (
-            <>
-              {fileUpload.files.map((file, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+          {fileUpload.files.map((file, index) => (
+            <div key={index} className="space-y-2">
+              {file.type.startsWith("image/") && previewUrls[index] ? (
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-full max-w-md overflow-hidden rounded-lg">
+                    <img
+                      src={previewUrls[index]}
+                      alt="Preview"
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between w-full gap-2 rounded-md bg-secondary-300 px-4 py-2">
                     <span
                       className="flex items-center truncate"
                       title={file.name}
@@ -79,37 +98,7 @@ export default function FileUploadDialog({
                     </Button>
                   </div>
                 </div>
-              ))}
-              <div>
-                <Label
-                  htmlFor="upload-file-name-0"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  {t("enter_file_name")}
-                </Label>
-                <Input
-                  name="file_name_0"
-                  type="text"
-                  id="upload-file-name-0"
-                  required
-                  value={fileUpload.fileNames[0] || ""}
-                  disabled={fileUpload.uploading}
-                  onChange={(e) => {
-                    fileUpload.setFileName(e.target.value);
-                    fileUpload.setError(null);
-                  }}
-                  className="ml-0.5 mb-1"
-                />
-                {fileUpload.error && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {fileUpload.error}
-                  </p>
-                )}
-              </div>
-            </>
-          ) : (
-            fileUpload.files.map((file, index) => (
-              <div key={index} className="space-y-2">
+              ) : (
                 <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
                   <span
                     className="flex items-center truncate"
@@ -131,36 +120,36 @@ export default function FileUploadDialog({
                     <CareIcon icon="l-times" />
                   </Button>
                 </div>
-                <div>
-                  <Label
-                    htmlFor={`upload-file-name-${index}`}
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    {t("enter_file_name")}
-                  </Label>
+              )}
+              <div>
+                <Label
+                  htmlFor={`upload-file-name-${index}`}
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  {t("enter_file_name")}
+                </Label>
 
-                  <Input
-                    name={`file_name_${index}`}
-                    type="text"
-                    id={`upload-file-name-${index}`}
-                    required
-                    value={fileUpload.fileNames[index] || ""}
-                    disabled={fileUpload.uploading}
-                    onChange={(e) => {
-                      fileUpload.setFileName(e.target.value, index);
-                      fileUpload.setError(null);
-                    }}
-                    className="ml-0.5 mb-0.5"
-                  />
-                  {!fileUpload.fileNames[index] && fileUpload.error && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {fileUpload.error}
-                    </p>
-                  )}
-                </div>
+                <Input
+                  name={`file_name_${index}`}
+                  type="text"
+                  id={`upload-file-name-${index}`}
+                  required
+                  value={fileUpload.fileNames[index] || ""}
+                  disabled={fileUpload.uploading}
+                  onChange={(e) => {
+                    fileUpload.setFileName(e.target.value, index);
+                    fileUpload.setError(null);
+                  }}
+                  className="ml-0.5 mb-0.5"
+                />
+                {!fileUpload.fileNames[index] && fileUpload.error && (
+                  <p className="mt-2 text-sm text-red-600">
+                    {fileUpload.error}
+                  </p>
+                )}
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
         {fileUpload.files.length > 1 && (
           <div className="flex items-center gap-2 mt-4">
