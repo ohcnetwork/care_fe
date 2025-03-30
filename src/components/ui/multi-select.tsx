@@ -191,6 +191,7 @@ export const MultiSelect = React.forwardRef<
                   >
                     <Checkbox
                       checked={selectedValues.length === options.length}
+                      className="border-primary-300 data-[state=checked]:bg-primary-600 data-[state=checked]:border-primary-600"
                     />
                     <span>{t("select_all")}</span>
                   </CommandItem>
@@ -202,7 +203,10 @@ export const MultiSelect = React.forwardRef<
                         onSelect={() => toggleOption(option.value)}
                         className="cursor-pointer"
                       >
-                        <Checkbox checked={isSelected} />
+                        <Checkbox
+                          checked={isSelected}
+                          className="border-primary-300 data-[state=checked]:bg-primary-600 data-[state=checked]:border-primary-600"
+                        />
                         {option?.icon && (
                           <CareIcon
                             icon={option.icon}
