@@ -136,16 +136,7 @@ const Login = (props: LoginProps) => {
       setOtpError("");
       toast.success(t("send_otp_success"));
 
-      autofillOtp(
-        (otp) => {
-          setOtp(otp);
-          setOtpValidationError("");
-          toast.success(`This is your OTP: ${otp}`);
-        },
-        () => {
-          setOtpValidationError(t("opt_validation_error"));
-        },
-      );
+      autofillOtp(setOtp, setOtpValidationError);
     },
     onError: (error: any) => {
       const errors = error?.data || [];
