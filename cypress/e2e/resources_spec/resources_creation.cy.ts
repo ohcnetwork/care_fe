@@ -60,19 +60,13 @@ describe("Resources Management", () => {
 
     resourceCreation
       .verifyResourceRequestInPatientPage(testData)
-      .clickSidebarResource();
-
-    resourceCreation
+      .clickSidebarResource()
       .clickFilterTab("outgoing")
       .clickFilterTab("pending")
-      .searchResource(testData.title);
-
-    resourceCreation
+      .searchResource(testData.title)
       .verifyResourceCardContent(testData)
-      .clickViewDetailsButton();
-
-    resourceCreation.clickUpdateStatusButton();
-    resourceCreation
+      .clickViewDetailsButton()
+      .clickUpdateStatusButton()
       .fillResourceRequestDetails(updatedTestData as ResourceRequestFormData)
       .selectAssignedUser(updatedTestData.assignedUser)
       .interceptResourceUpdateRequest()
@@ -82,14 +76,12 @@ describe("Resources Management", () => {
 
     patientDetails.navigateToSavedUrl();
 
-    resourceCreation.verifyResourceRequestInPatientPage(updatedTestData);
-
-    resourceCreation.clickSidebarResource();
-
     resourceCreation
+      .verifyResourceRequestInPatientPage(updatedTestData)
+      .clickSidebarResource()
       .clickFilterTab("outgoing")
       .clickFilterTab("pending")
-      .searchResource(updatedTestData.title);
-    resourceCreation.verifyResourceCardContent(updatedTestData);
+      .searchResource(updatedTestData.title)
+      .verifyResourceCardContent(updatedTestData);
   });
 });

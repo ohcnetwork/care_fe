@@ -118,6 +118,7 @@ export class ResourcesCreation {
   }
   clickSidebarResource() {
     cy.verifyAndClickElement('[data-sidebar="content"]', "Resource");
+    return this;
   }
 
   clickUpdateStatusButton() {
@@ -125,12 +126,14 @@ export class ResourcesCreation {
       '[data-cy="update-status-button"]',
       "Update Status",
     );
+    return this;
   }
   clickViewDetailsButton() {
     cy.verifyAndClickElement(
       '[data-cy="resource-view-details-0"]',
       "View Details",
     );
+    return this;
   }
 
   clickFilterTab(name: string) {
