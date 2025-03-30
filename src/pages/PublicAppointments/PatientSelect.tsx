@@ -6,6 +6,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -198,11 +200,12 @@ function PatientCard({
     <Card
       key={patient.id}
       onClick={() => setSelectedPatient(patient.id)}
-      className={`cursor-pointer transition-all duration-200 rounded-xl shadow-md border ${
+      className={cn(
+        "cursor-pointer transition-all duration-200 rounded-xl shadow-md border",
         selectedPatient === patient.id
           ? "border-primary shadow-lg"
-          : "hover:border-gray-300"
-      }`}
+          : "hover:border-gray-300",
+      )}
     >
       <CardHeader>
         <CardTitle className="capitalize text-lg font-semibold">
