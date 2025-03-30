@@ -122,3 +122,40 @@ export function getRandomMedicineName(): string {
   const randomIndex = getRandomIndex(medicineNames.length);
   return medicineNames[randomIndex];
 }
+
+export const resourceNames = [
+  "Wheelchair",
+  "Oxygen Cylinder",
+  "Defibrillator",
+  "Syringe Pump",
+  "Nebulizer",
+  "Hospital Bed",
+  "ECG Machine",
+  "Ultrasound Scanner",
+  "Surgical Mask",
+  "Gloves",
+  "IV Drip Stand",
+  "Ventilator",
+  "Patient Monitor",
+  "Blood Pressure Monitor",
+  "Glucometer",
+  "Stethoscope",
+  "Pulse Oximeter",
+  "Crutches",
+  "Walking Stick",
+  "Thermometer",
+  "First Aid Kit",
+  "Sterile Dressing",
+  "Compression Bandage",
+  "Hearing Aid",
+  "Prosthetic Limb",
+  "Suction Machine",
+  "Endoscope",
+  "Blood Warmer",
+  "Rehabilitation Walker",
+];
+
+export function getRandomResourceName(): string {
+  const randomIndex = getRandomIndex(resourceNames.length);
+  return resourceNames[randomIndex];
+}

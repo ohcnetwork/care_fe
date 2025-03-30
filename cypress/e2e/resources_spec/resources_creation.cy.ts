@@ -5,6 +5,7 @@ import {
   ResourceRequestFormData,
   ResourcesCreation,
 } from "@/pageObject/resources/ResourcesCreation";
+import { getRandomResourceName } from "@/utils/commonUtils";
 
 const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
@@ -17,7 +18,7 @@ describe("Resources Management", () => {
     sourceFacility: "GHC Payyanur",
     status: "Pending",
     category: "Medicines",
-    title: "TestCypress",
+    title: getRandomResourceName(),
     reason: "Reason Testing",
     assignedUser: "devnurse3",
   };
@@ -26,7 +27,7 @@ describe("Resources Management", () => {
     sourceFacility: "GHC Payyanur",
     status: "Pending",
     category: "Comfort Devices",
-    title: "Updated Resource test title",
+    title: getRandomResourceName(),
     reason: "Updated Reason Testing",
     assignedUser: "devnurse3",
   };
