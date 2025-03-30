@@ -41,7 +41,7 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
-import { autofillOtp } from "@/Utils/otpAutofill";
+import autofillOtp from "@/Utils/otpAutofill";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
