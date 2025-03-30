@@ -1,5 +1,9 @@
 import { useEffect } from "react";
 
+interface OtpCredentialRequestOptions extends CredentialRequestOptions {
+  otp?: { transport: string[] };
+}
+
 const autofillOtp = (
   setOtp: (otp: string) => void,
   setOtpValidationError: (error: string) => void,
@@ -11,13 +15,12 @@ const autofillOtp = (
 
     navigator.credentials
       .get({
-        // @ts-expect-error: Using experimental OTPCredential API
-        otp: { transport: ["sms"] } as any,
+        otp: { transport: ["sms"] },
         signal: ac.signal,
-      })
+      } as OtpCredentialRequestOptions)
       .then((otp: any) => {
         setOtp(otp.code);
-        setOtpValidationError(""); // Clear error on successful OTP retrieval
+        setOtpValidationError("");
       })
       .catch((err) => {
         console.error("OTP Retrieval Failed:", err);
