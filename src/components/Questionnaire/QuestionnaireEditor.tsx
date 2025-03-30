@@ -1062,6 +1062,7 @@ function QuestionEditor({
                       <Input
                         {...field}
                         onChange={(e) => updateField("text", e.target.value)}
+                        placeholder="Add a text"
                       />
                     </FormControl>
                     <FormMessage />
