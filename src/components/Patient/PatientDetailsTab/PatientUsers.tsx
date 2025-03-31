@@ -48,6 +48,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import roleApi from "@/types/emr/role/roleApi";
 import { UserBase } from "@/types/user/user";
 
 import { PatientProps } from ".";
@@ -64,7 +65,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
-    queryFn: query(routes.role.list),
+    queryFn: query(roleApi.listRoles),
     enabled: open,
   });
 
