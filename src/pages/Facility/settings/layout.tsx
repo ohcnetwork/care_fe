@@ -15,9 +15,7 @@ import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 import { GeneralSettings } from "./general/general";
 import LocationList from "./locations/LocationList";
 import LocationView from "./locations/LocationView";
-import FacilityOrganizationIndex from "./organizations/FacilityOrganizationIndex";
-import FacilityOrganizationUsers from "./organizations/FacilityOrganizationUsers";
-import FacilityOrganizationView from "./organizations/FacilityOrganizationView";
+import FacilityOrganizationList from "./organizations/FacilityOrganizationList";
 
 interface SettingsLayoutProps {
   facilityId: string;
@@ -25,12 +23,13 @@ interface SettingsLayoutProps {
 
 const getRoutes = (facilityId: string) => ({
   "/general": () => <GeneralSettings facilityId={facilityId} />,
-  "/departments": () => <FacilityOrganizationIndex facilityId={facilityId} />,
-  "/departments/:id": ({ id }: { id: string }) => (
-    <FacilityOrganizationView facilityId={facilityId} id={id} />
-  ),
-  "/departments/:id/users": ({ id }: { id: string }) => (
-    <FacilityOrganizationUsers facilityId={facilityId} id={id} />
+  "/departments": () => <FacilityOrganizationList facilityId={facilityId} />,
+  "/departments/:id/:tab": ({ id, tab }: { id: string; tab: string }) => (
+    <FacilityOrganizationList
+      facilityId={facilityId}
+      organizationId={id}
+      currentTab={tab}
+    />
   ),
   "/locations": () => <LocationList facilityId={facilityId} />,
   "/location/:id": ({ id }: { id: string }) => (
@@ -85,7 +84,9 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
 
   // Extract the current tab from the URL
   const currentPath = window.location.pathname;
-  const currentTab = currentPath.split("/").pop() || "general";
+  const basePathPattern = new RegExp(`${basePath}/([^/]+)`);
+  const match = currentPath.match(basePathPattern);
+  const currentTab = match?.[1] || "general";
 
   return (
     <div className="container mx-auto p-4">

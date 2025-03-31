@@ -70,7 +70,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
                         name={
                           patientUserContext.selectedPatient?.name || "User"
                         }
-                        className="h-5 w-5"
+                        className="size-5"
                       />
                       <div className="flex flex-row items-center justify-between w-full gap-2">
                         <span className="font-semibold truncate max-w-32">
@@ -88,7 +88,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
                         name={
                           patientUserContext.selectedPatient?.name || "User"
                         }
-                        className="h-4 w-4"
+                        className="size-4"
                       />
                     </div>
                   )}
@@ -106,7 +106,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
           {patientUserContext.patients?.map((patient) => (
             <SelectItem key={patient.id} value={patient.id}>
               <div className="flex flex-row items-center gap-2">
-                <Avatar name={patient.name} className="h-5 w-5" />
+                <Avatar name={patient.name} className="size-5" />
                 {patient.name}
               </div>
             </SelectItem>
