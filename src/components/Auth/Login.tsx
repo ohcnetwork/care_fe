@@ -41,7 +41,6 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
-// import { autofillOtp } from "@/Utils/otpAutofill";
 import { useWebOTP } from "@/Utils/otpAutofill";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -142,7 +141,6 @@ const Login = (props: LoginProps) => {
         startListening((otp) => {
           setOtp(otp);
           setOtpValidationError("");
-          toast.success(`This is your OTP: ${otp}`);
           if (otp.length === 5) {
             handleVerifyOtp(otp);
           }
