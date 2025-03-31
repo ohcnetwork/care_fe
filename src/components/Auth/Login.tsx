@@ -575,10 +575,6 @@ const Login = (props: LoginProps) => {
                           </Label>
                           <div className="flex justify-center">
                             <InputOTP
-                              id="otp"
-                              name="otp"
-                              type="text"
-                              inputMode="numeric"
                               value={otp}
                               maxLength={5}
                               pattern={REGEXP_ONLY_DIGITS}
@@ -611,11 +607,6 @@ const Login = (props: LoginProps) => {
                         </div>
                       )}
 
-                      {isOtpSent && otp && (
-                        <p className="text-center text-lg font-semibold text-gray-700">
-                          {t("your_otp_is", { otp })}
-                        </p>
-                      )}
                       <Button
                         type="submit"
                         className="w-full"
