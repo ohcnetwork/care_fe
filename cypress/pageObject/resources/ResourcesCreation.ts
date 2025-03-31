@@ -51,13 +51,23 @@ export class ResourcesCreation {
     return this;
   }
 
+  verifyAutoFillDetails(selector: string, value: string) {
+    cy.get(selector).should("have.value", value);
+    return this;
+  }
+
   fillResourceRequestForm(data: ResourceRequestFormData) {
     this.selectFacility(data.facility)
       .selectStatus(data.status)
       .selectCategory(data.category)
       .enterTitle(data.title)
       .enterReason(data.reason)
-      .autoFillDetails();
+      .autoFillDetails()
+      .verifyAutoFillDetails('[data-cy="contact_person"]', "dev nurse3")
+      .verifyAutoFillDetails(
+        '[data-cy="contact_person_phone"]',
+        "+91 98556 98569",
+      );
     return this;
   }
 
