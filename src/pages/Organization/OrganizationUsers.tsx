@@ -174,13 +174,16 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                 </Card>
               ) : (
                 users?.results?.map((userRole) => (
-                  <Card key={userRole.id} className="flex flex-col max-w-full">
-                    <CardContent className="p-3 flex flex-col gap-3 sm:p-4">
+                  <Card
+                    key={userRole.id}
+                    className="flex flex-col h-full max-w-full"
+                  >
+                    <CardContent className="p-3 flex flex-col gap-3 sm:p-4 h-full justify-between">
                       <div className="flex items-start gap-2">
                         <Avatar
                           name={`${userRole.user.first_name} ${userRole.user.last_name}`}
                           imageUrl={userRole.user.profile_picture_url}
-                          className="h-10 w-10 flex-shrink-0 sm:h-12 sm:w-12 lg:h-14 lg:w-14 text-lg sm:text-xl lg:text-2xl"
+                          className="size-10 sm:size-12 lg:size-14 text-lg sm:text-xl lg:text-2xl flex-shrink-0"
                         />
                         <div className="flex flex-col min-w-0 flex-1">
                           <div className="flex flex-col gap-1">

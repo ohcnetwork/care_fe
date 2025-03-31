@@ -229,7 +229,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   <Avatar
                     imageUrl={userData.profile_picture_url}
                     name={`${userData.first_name} ${userData.last_name}`}
-                    className="h-96 w-96 self-center rounded-sm"
+                    className="size-96 self-center rounded-sm"
                   />
 
                   <div className="flex grow flex-col px-4">
@@ -317,7 +317,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         {selectedSlot?.id && (
           <div className="container mx-auto flex flex-row justify-end mt-6">
             {(isCreatingAppointment || isCancellingAppointment) && (
-              <Loader2 className="h-4 w-4 animate-spin self-center mr-2" />
+              <Loader2 className="size-4 animate-spin self-center mr-2" />
             )}
             <Button
               variant="primary_gradient"
@@ -337,9 +337,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 }
               }}
             >
-              <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+              <span className="bg-linear-to-b from-white/15 to-transparent"></span>
               {appointmentId ? t("reschedule_appointment") : t("continue")}
-              <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+              <CareIcon icon="l-arrow-right" className="size-4" />
             </Button>
           </div>
         )}
