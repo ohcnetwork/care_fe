@@ -31,7 +31,6 @@ import {
 } from "@/types/facility/facility";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
-import { RoleResponse } from "@/types/organization/organization";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,
@@ -404,15 +403,6 @@ const routes = {
     path: "/api/v1/patient/{patientId}/observation/analyse/",
     method: "POST",
     TRes: Type<ObservationAnalyzeResponse>(),
-  },
-
-  // Role Routes
-  role: {
-    list: {
-      path: "/api/v1/role/",
-      method: "GET",
-      TRes: {} as RoleResponse,
-    },
   },
 
   // Notes Routes

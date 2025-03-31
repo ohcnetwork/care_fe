@@ -39,10 +39,10 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import roleApi from "@/types/emr/role/roleApi";
 import { OrganizationUserRole } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -68,7 +68,7 @@ export default function EditUserRoleSheet({
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
-    queryFn: query(routes.role.list),
+    queryFn: query(roleApi.listRoles),
     enabled: open,
   });
 
