@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -25,7 +26,6 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -62,19 +62,9 @@ function EmptyState() {
 export default function ResourceList({ facilityId }: { facilityId: string }) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["title"],
+    disableCache: true,
   });
-  const { status, title, outgoing } = qParams;
-
-  const searchOptions = [
-    {
-      key: "title",
-      label: "Title",
-      type: "text" as const,
-      placeholder: t("search_by_resource_title"),
-      value: title || "",
-    },
-  ];
+  const { status, title, flow } = qParams;
 
   const isActive = !status || !COMPLETED.includes(status);
   const currentStatuses = isActive ? ACTIVE : COMPLETED;
@@ -82,6 +72,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   // Set default status based on active/completed tab
   const defaultStatus = isActive ? "pending" : "completed";
   const currentStatus = status || defaultStatus;
+  const currentFlow = flow || "outgoing";
 
   const { data: queryResources, isLoading } = useQuery<
     PaginatedResponse<ResourceRequest>
@@ -89,11 +80,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
     queryKey: ["resources", facilityId, qParams],
     queryFn: query.debounced(routes.listResourceRequests, {
       queryParams: {
-        status: currentStatus,
+        status: currentStatus == "all" ? undefined : currentStatus,
         title,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
-        ...(outgoing
+        ...(currentFlow == "outgoing"
           ? { origin_facility: facilityId }
           : { assigned_facility: facilityId }),
       },
@@ -144,48 +135,38 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[20rem] p-3"
+                    className="w-[20rem] p-4 bg-white shadow-lg rounded-lg border border-gray-200"
                     align="start"
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
                     <div className="space-y-4">
-                      <h4 className="font-medium leading-none">
+                      <h5 className="font-semibold text-gray-800">
                         {t("search_resource")}
-                      </h4>
-                      <SearchByMultipleFields
+                      </h5>
+                      <Input
                         id="resource-search"
-                        options={searchOptions}
-                        initialOptionIndex={0}
-                        onFieldChange={() =>
+                        onChange={(e) =>
                           updateQuery({
                             status: currentStatus,
-                            title: undefined,
+                            title: e.target.value,
                           })
                         }
-                        onSearch={(key, value) =>
-                          updateQuery({
-                            status: currentStatus,
-                            [key]: value || undefined,
-                          })
-                        }
-                        className="w-full border-none shadow-none"
+                        className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 px-3 py-2 text-sm"
                         autoFocus
+                        placeholder={t("search_by_resource_title")}
                       />
                     </div>
                   </PopoverContent>
                 </Popover>
                 <div className="items-center">
-                  <Tabs
-                    value={outgoing ? "outgoing" : "incoming"}
-                    className="w-full"
-                  >
+                  <Tabs value={currentFlow} className="w-full">
                     <TabsList className="bg-transparent p-0 h-8">
                       <TabsTrigger
                         value="outgoing"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                         onClick={() =>
                           updateQuery({
-                            outgoing: true,
+                            flow: "outgoing",
                             title,
                           })
                         }
@@ -197,7 +178,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                         onClick={() =>
                           updateQuery({
-                            outgoing: false,
+                            flow: "incoming",
                             title,
                           })
                         }
@@ -249,6 +230,19 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
             <div className="p-4 h-auto overflow-hidden">
               <Tabs value={currentStatus} className="w-full">
                 <TabsList className="bg-transparent p-0 h-auto flex-wrap justify-start gap-y-2 overflow-auto">
+                  <TabsTrigger
+                    key="all"
+                    value="all"
+                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                    onClick={() =>
+                      updateQuery({
+                        status: "all",
+                        title,
+                      })
+                    }
+                  >
+                    {t("all_status")}
+                  </TabsTrigger>
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger
                       key={statusOption}
