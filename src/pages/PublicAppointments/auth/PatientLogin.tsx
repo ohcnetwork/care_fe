@@ -32,7 +32,6 @@ import CircularProgress from "@/components/Common/CircularProgress";
 import useAppHistory from "@/hooks/useAppHistory";
 import { useAuthContext } from "@/hooks/useAuthUser";
 
-import { autofillOtp } from "@/Utils/otpAutofill";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { TokenData } from "@/types/auth/otp";
@@ -81,16 +80,6 @@ export default function PatientLogin({
       if (page === "send") {
         navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
       }
-
-      autofillOtp(
-        (otp) => {
-          OTPForm.setValue("pin", otp);
-          OTPForm.clearErrors("pin");
-        },
-        () => {
-          OTPForm.setError("pin", { message: t("opt_validation_error") });
-        },
-      );
     },
   });
 

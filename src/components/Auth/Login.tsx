@@ -41,7 +41,8 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
-import { autofillOtp } from "@/Utils/otpAutofill";
+// import { autofillOtp } from "@/Utils/otpAutofill";
+import { useWebOTP } from "@/Utils/otpAutofill";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
@@ -107,6 +108,7 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
+  const { startListening, stopListening, isSupported } = useWebOTP();
   const [resendOtpCountdown, setResendOtpCountdown] =
     useState(resendOtpTimeout);
 
@@ -136,16 +138,16 @@ const Login = (props: LoginProps) => {
       setOtpError("");
       toast.success(t("send_otp_success"));
 
-      autofillOtp(
-        (otp) => {
+      if (isSupported) {
+        startListening((otp) => {
           setOtp(otp);
           setOtpValidationError("");
           toast.success(`This is your OTP: ${otp}`);
-        },
-        () => {
-          setOtpValidationError(t("opt_validation_error"));
-        },
-      );
+          if (otp.length === 5) {
+            handleVerifyOtp(otp);
+          }
+        });
+      }
     },
     onError: (error: any) => {
       const errors = error?.data || [];
@@ -157,6 +159,18 @@ const Login = (props: LoginProps) => {
       }
     },
   });
+
+  const handleVerifyOtp = (otp: string) => {
+    if (otp.length === 5) {
+      setOtpValidationError("");
+
+      verifyOtp({ phone_number: phone, otp });
+
+      stopListening();
+    } else {
+      setOtpValidationError(t("otp_validation_error"));
+    }
+  };
 
   // Verify OTP Mutation
   const { mutate: verifyOtp, isPending: verifyOtpPending } = useMutation({
@@ -573,6 +587,9 @@ const Login = (props: LoginProps) => {
                               onChange={(value) => {
                                 setOtp(value);
                                 setOtpValidationError("");
+                                if (value.length === 5) {
+                                  handleVerifyOtp(value);
+                                }
                               }}
                             >
                               <InputOTPGroup>
