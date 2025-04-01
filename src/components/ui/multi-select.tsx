@@ -123,13 +123,13 @@ export const MultiSelect = React.forwardRef<
                       return (
                         <Badge
                           key={value}
-                          className="m-1 transition-all duration-200 ease-in-out hover:bg-primary-600 hover:text-white hover:border-primary-700 hover:shadow-md hover:scale-105 cursor-pointer group"
-                          variant="primary"
+                          className="m-1 cursor-pointer"
+                          variant="secondary"
                         >
                           {option?.icon && (
                             <CareIcon
                               icon={option.icon}
-                              className="size-4 mr-2 group-hover:text-white"
+                              className="size-4 mr-2"
                             />
                           )}
                           {option?.label}
