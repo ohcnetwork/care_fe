@@ -29,7 +29,7 @@ const logo = (value?: string, fallback?: ILogo) => {
 
 const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
-
+  sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
   urls: {
     dashboard: env.REACT_DASHBOARD_URL,
     github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",

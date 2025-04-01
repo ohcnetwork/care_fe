@@ -50,6 +50,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import query from "@/Utils/request/query";
 import {
   DoseRange,
+  INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_INTENT,
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequest,
@@ -359,104 +360,115 @@ export function MedicationRequestQuestion({
                   "bg-transparent": !desktopLayout,
                 })}
               >
-                {medications.map((medication, index) => (
-                  <React.Fragment key={index}>
-                    {!desktopLayout ? (
-                      <Collapsible
-                        open={expandedMedicationIndex === index}
-                        onOpenChange={() => {
-                          setExpandedMedicationIndex(
-                            expandedMedicationIndex === index ? null : index,
-                          );
-                        }}
-                        className="border-b last:border-b-0"
-                      >
-                        <div
-                          className={cn(
-                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-xs text-sm",
-                            expandedMedicationIndex === index
-                              ? "bg-gray-50"
-                              : "bg-gray-100",
-                          )}
+                {medications.map((medication, index) => {
+                  const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
+                    medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
+                  );
+
+                  return (
+                    <React.Fragment key={medication.id}>
+                      {!desktopLayout ? (
+                        <Collapsible
+                          open={expandedMedicationIndex === index}
+                          onOpenChange={() => {
+                            setExpandedMedicationIndex(
+                              expandedMedicationIndex === index ? null : index,
+                            );
+                          }}
+                          className="border-b last:border-b-0"
                         >
-                          <CollapsibleTrigger className="flex-1 text-left">
-                            <div className="font-medium text-gray-900">
-                              {medication.medication?.display}
-                            </div>
-                          </CollapsibleTrigger>
-                          <div className="flex items-center gap-1">
-                            {expandedMedicationIndex !== index && (
-                              <Button
-                                aria-label="Expand Medication Request"
-                                variant="ghost"
-                                size="icon"
-                                className="size-8 text-gray-500 hover:text-gray-900"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setExpandedMedicationIndex(index);
-                                }}
-                                disabled={disabled}
-                              >
-                                <Pencil2Icon className="size-4" />
-                              </Button>
+                          <div
+                            className={cn(
+                              "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-sm text-sm",
+                              isInactive ? "opacity-40" : "hover:bg-gray-50/50",
+                              expandedMedicationIndex === index
+                                ? "bg-gray-50"
+                                : "bg-gray-100",
                             )}
-                            <TooltipComponent
-                              content={
-                                medication.status === "entered_in_error"
-                                  ? t("medication_already_marked_as_error")
-                                  : t("remove_medication")
-                              }
-                            >
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveMedication(index);
-                                }}
-                                disabled={
-                                  disabled ||
-                                  medication.status === "entered_in_error"
-                                }
-                                className="size-8"
-                                data-cy="remove-medication"
+                          >
+                            <CollapsibleTrigger className="flex-1 text-left">
+                              <div
+                                className={cn(
+                                  "font-medium text-gray-900",
+                                  isInactive &&
+                                    medication.status !== "ended" &&
+                                    "line-through",
+                                )}
                               >
-                                <MinusCircledIcon className="size-4" />
-                              </Button>
-                            </TooltipComponent>
+                                {medication.medication?.display}
+                              </div>
+                            </CollapsibleTrigger>
+                            <div className="flex items-center gap-1">
+                              {expandedMedicationIndex !== index && (
+                                <Button
+                                  aria-label="Expand Medication Request"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-8 text-gray-500 hover:text-gray-900"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedMedicationIndex(index);
+                                  }}
+                                  disabled={disabled}
+                                >
+                                  <Pencil2Icon className="size-4" />
+                                </Button>
+                              )}
+                              <TooltipComponent
+                                content={
+                                  medication.status === "entered_in_error"
+                                    ? t("medication_already_marked_as_error")
+                                    : t("remove_medication")
+                                }
+                              >
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveMedication(index);
+                                  }}
+                                  disabled={isInactive || disabled}
+                                  className="size-8"
+                                  data-cy="remove-medication"
+                                >
+                                  <MinusCircledIcon className="size-4" />
+                                </Button>
+                              </TooltipComponent>
+                            </div>
                           </div>
-                        </div>
-                        <CollapsibleContent>
-                          <div className="py-4 space-y-4 bg-white mx-2 mb-1">
-                            <MedicationRequestGridRow
-                              medication={medication}
-                              disabled={disabled}
-                              onUpdate={(updates) =>
-                                handleUpdateMedication(index, updates)
-                              }
-                              onRemove={() => handleRemoveMedication(index)}
-                              index={index}
-                              questionId={questionnaireResponse.question_id}
-                              errors={errors}
-                            />
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    ) : (
-                      <MedicationRequestGridRow
-                        medication={medication}
-                        disabled={disabled}
-                        onUpdate={(updates) =>
-                          handleUpdateMedication(index, updates)
-                        }
-                        onRemove={() => handleRemoveMedication(index)}
-                        index={index}
-                        questionId={questionnaireResponse.question_id}
-                        errors={errors}
-                      />
-                    )}
-                  </React.Fragment>
-                ))}
+                          <CollapsibleContent>
+                            <div className="py-4 space-y-4 bg-white mx-2 mb-1">
+                              <MedicationRequestGridRow
+                                medication={medication}
+                                disabled={disabled}
+                                onUpdate={(updates) =>
+                                  handleUpdateMedication(index, updates)
+                                }
+                                onRemove={() => handleRemoveMedication(index)}
+                                index={index}
+                                questionId={questionnaireResponse.question_id}
+                                errors={errors}
+                              />
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      ) : (
+                        <MedicationRequestGridRow
+                          medication={medication}
+                          disabled={disabled || isInactive}
+                          onUpdate={(updates) =>
+                            handleUpdateMedication(index, updates)
+                          }
+                          onRemove={() => handleRemoveMedication(index)}
+                          index={index}
+                          questionId={questionnaireResponse.question_id}
+                          errors={errors}
+                        />
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -617,14 +629,20 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       className={cn(
         "grid grid-cols-1 lg:grid-cols-[280px_180px_170px_160px_300px_180px_250px_180px_160px_200px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50",
         {
-          "opacity-40 pointer-events-none":
-            medication.status === "entered_in_error",
+          "opacity-40 pointer-events-none": disabled,
         },
       )}
     >
       {/* Medicine Name */}
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
-        <span className="break-words line-clamp-2 hidden lg:block">
+        <span
+          className={cn(
+            "break-words line-clamp-2 hidden lg:block",
+            disabled &&
+              medication.status !== "entered_in_error" &&
+              "line-through",
+          )}
+        >
           {medication.medication?.display}
         </span>
       </div>

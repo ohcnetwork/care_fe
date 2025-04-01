@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
@@ -10,8 +11,10 @@ import {
 } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
@@ -34,6 +37,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -182,6 +193,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
+  const [orgError, setOrgError] = useState<string | undefined>();
   const queryClient = useQueryClient();
 
   const {
@@ -267,6 +279,18 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       toast.error("Failed to update questionnaire");
     },
   });
+  const QuestionnaireFormPartialSchema = z.object({
+    title: z.string().trim().min(1, t("field_required")),
+    slug: z
+      .string()
+      .trim()
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 }))
+      .regex(/^[-\w]+$/, {
+        message: t("slug_format_message"),
+      }),
+    description: z.string().optional(),
+  });
 
   const [questionnaire, setQuestionnaire] =
     useState<QuestionnaireDetail | null>(() => {
@@ -286,9 +310,24 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       return null;
     });
 
+  const form = useForm({
+    resolver: zodResolver(QuestionnaireFormPartialSchema),
+    defaultValues: {
+      title: questionnaire?.title ?? "",
+      slug: questionnaire?.slug ?? "",
+      description: questionnaire?.description ?? "",
+    },
+    mode: "onChange",
+  });
+
   useEffect(() => {
     if (initialQuestionnaire) {
       setQuestionnaire(initialQuestionnaire);
+      form.reset({
+        title: initialQuestionnaire.title || "",
+        slug: initialQuestionnaire.slug || "",
+        description: initialQuestionnaire.description || "",
+      });
     }
   }, [initialQuestionnaire]);
 
@@ -322,8 +361,40 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   ) => {
     setQuestionnaire((prev) => (prev ? { ...prev, [field]: value } : null));
   };
+  const handleValidatedChange = (
+    field: keyof typeof questionnaire,
+    value: any,
+  ) => {
+    updateQuestionnaireField(field, value);
+    form.setValue(field as "title" | "description" | "slug", value, {
+      shouldValidate: true,
+    });
+  };
 
-  const handleSave = () => {
+  const validateOrganizations = (): boolean => {
+    if (id) {
+      if (!organizations?.results || organizations.results.length === 0) {
+        setOrgError(t("organization_selection_required"));
+        return false;
+      }
+      return true;
+    }
+    if (selectedOrgs.length === 0) {
+      setOrgError(t("organization_selection_required"));
+      return false;
+    }
+    setOrgError(undefined);
+    return true;
+  };
+
+  const handleSave = async () => {
+    const isValid = await form.trigger();
+    const hasOrganizations = validateOrganizations();
+
+    if (!isValid || !hasOrganizations) {
+      return;
+    }
+
     if (id) {
       updateQuestionnaire(questionnaire);
     } else {
@@ -353,12 +424,20 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const handleToggleOrganization = (orgId: string) => {
     const newOrg = availableOrganizations?.results.find((o) => o.id === orgId);
-    const newAdded = newOrg ? [...selectedOrgs, newOrg] : selectedOrgs;
-    setSelectedOrgs((current) =>
-      current.some((o) => o.id === orgId)
+    setSelectedOrgs((current) => {
+      const newSelection = current.some((o) => o.id === orgId)
         ? current.filter((o) => o.id !== orgId)
-        : newAdded,
-    );
+        : newOrg
+          ? [...current, newOrg]
+          : current;
+
+      // Clear error if at least one organization is selected
+      if (newSelection.length > 0) {
+        setOrgError(undefined);
+      }
+
+      return newSelection;
+    });
   };
 
   const handleToggleTag = (tagId: string) => {
@@ -499,6 +578,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     setSearchQuery: setOrgSearchQuery,
                     available: availableOrganizations,
                     isLoading: isLoadingAvailableOrganizations,
+                    error: orgError,
+                    setError: setOrgError,
                   }}
                   tags={questionnaire.tags}
                   tagSelection={{
@@ -520,43 +601,74 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   <CardTitle>{t("basic_info")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">{t("title")}</Label>
-                    <Input
-                      id="title"
-                      value={questionnaire.title}
-                      onChange={(e) =>
-                        updateQuestionnaireField("title", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="slug">{t("slug")}</Label>
-                    <Input
-                      id="slug"
-                      value={questionnaire.slug}
-                      onChange={(e) =>
-                        updateQuestionnaireField("slug", e.target.value)
-                      }
-                      placeholder="unique-identifier-for-questionnaire"
-                      className="font-mono"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      A unique URL-friendly identifier for this questionnaire
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="desc">{t("description")}</Label>
-                    <Textarea
-                      id="desc"
-                      value={questionnaire.description || ""}
-                      onChange={(e) =>
-                        updateQuestionnaireField("description", e.target.value)
-                      }
-                    />
-                  </div>
+                  <Form {...form}>
+                    <form className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("title")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t("enter_title")}
+                                {...field}
+                                onChange={(e) =>
+                                  handleValidatedChange("title", e.target.value)
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="slug"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("slug")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="unique-identifier-for-questionnaire"
+                                {...field}
+                                onChange={(e) =>
+                                  handleValidatedChange("slug", e.target.value)
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                            <p className="text-sm text-gray-500 mt-1">
+                              A unique URL-friendly identifier for this
+                              questionnaire
+                            </p>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("description")}</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder={t("enter_description")}
+                                {...field}
+                                onChange={(e) =>
+                                  handleValidatedChange(
+                                    "description",
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </form>
+                  </Form>
                 </CardContent>
               </Card>
 
@@ -671,6 +783,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   setSearchQuery: setOrgSearchQuery,
                   available: availableOrganizations,
                   isLoading: isLoadingAvailableOrganizations,
+                  error: orgError,
+                  setError: setOrgError,
                 }}
                 tags={questionnaire.tags}
                 tagSelection={{
@@ -1153,7 +1267,9 @@ function QuestionEditor({
                           updateField(
                             "answer_value_set",
                             val === "custom" ? undefined : "valueset",
-                            { answer_option: [] },
+                            {
+                              answer_option: [],
+                            },
                           )
                         }
                       >
