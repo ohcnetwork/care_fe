@@ -227,7 +227,7 @@ export function EncounterList({
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
                     <SearchInput
-                      id="encounter-search"
+                      data-cy="encounter-search"
                       options={searchOptions}
                       initialOptionIndex={Math.max(
                         searchOptions.findIndex(
