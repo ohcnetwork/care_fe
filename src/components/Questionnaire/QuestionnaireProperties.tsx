@@ -50,6 +50,8 @@ interface QuestionnairePropertiesProps {
     setSearchQuery: (query: string) => void;
     available?: OrganizationResponse;
     isLoading?: boolean;
+    error: string | undefined;
+    setError: (error?: string) => void;
   };
   tags?: QuestionnaireTagModel[];
   tagSelection: {
@@ -169,9 +171,7 @@ function OrganizationSelector({
             </Badge>
           ))}
           {(!organizations?.results || organizations.results.length === 0) && (
-            <p className="text-sm text-gray-500">
-              {t("no_organizations_selected")}
-            </p>
+            <p className="text-sm text-red-500">{selection.error}</p>
           )}
         </div>
         <ManageQuestionnaireOrganizationsSheet
@@ -214,7 +214,9 @@ function OrganizationSelector({
           </p>
         )}
       </div>
-
+      {selection.error && (
+        <p className="text-sm text-red-500">{selection.error}</p>
+      )}
       <Autocomplete
         options={(selection.available?.results ?? []).map((org) => ({
           label: org.name,
@@ -222,7 +224,10 @@ function OrganizationSelector({
           description: org.description,
         }))}
         value=""
-        onChange={selection.onToggle}
+        onChange={(value) => {
+          selection.onToggle(value);
+          if (selection.error) selection.setError(undefined);
+        }}
         onSearch={selection.setSearchQuery}
         placeholder={t("select_organizations")}
         isLoading={selection.isLoading}

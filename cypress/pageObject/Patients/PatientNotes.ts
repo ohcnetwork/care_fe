@@ -4,6 +4,11 @@ export class PatientNotes {
     return this;
   }
 
+  openEncounterNotesTab() {
+    cy.verifyAndClickElement('[data-cy="tab-notes"]', "Notes");
+    return this;
+  }
+
   typeThreadTitle(title: string) {
     cy.typeIntoField('[data-cy="new-thread-title-input"]', title);
     return this;
@@ -17,10 +22,7 @@ export class PatientNotes {
 
   // **4️⃣ Message Handling**
   typeMessage(message: string) {
-    cy.get('[data-cy="encounter-notes-chat-message-input"]')
-      .should("be.visible")
-      .clear()
-      .type(message);
+    cy.typeIntoField('[data-cy="encounter-notes-chat-message-input"]', message);
     return this;
   }
 
