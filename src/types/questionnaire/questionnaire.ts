@@ -19,8 +19,10 @@ export interface QuestionnaireDetail {
   tags: QuestionnaireTagModel[];
 }
 
-export interface QuestionnaireCreate extends Omit<QuestionnaireDetail, "id"> {
+export interface QuestionnaireCreate
+  extends Omit<QuestionnaireDetail, "id" | "tags"> {
   organizations: string[];
+  tags: string[];
 }
 
 export interface QuestionnaireForms {

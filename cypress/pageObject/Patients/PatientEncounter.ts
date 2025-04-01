@@ -13,6 +13,13 @@ export class PatientEncounter {
     return this;
   }
 
+  searchEncounter(patientName: string) {
+    cy.get('[data-cy="search-encounter"]').click();
+    cy.typeIntoField("#encounter-search", patientName);
+    cy.get('[data-cy="search-encounter"]').click();
+    return this;
+  }
+
   clickUpdateEncounter() {
     cy.verifyAndClickElement(
       '[data-cy="update-encounter-option"]',
@@ -47,22 +54,6 @@ export class PatientEncounter {
         }
       });
     });
-    return this;
-  }
-
-  submitQuestionnaire() {
-    this.clickSubmitQuestionnaire();
-    this.verifyQuestionnaireSubmission();
-    return this;
-  }
-
-  clickSubmitQuestionnaire() {
-    cy.clickSubmitButton("Submit");
-    return this;
-  }
-
-  verifyQuestionnaireSubmission() {
-    cy.verifyNotification("Questionnaire submitted successfully");
     return this;
   }
 

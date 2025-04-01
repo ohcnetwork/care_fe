@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -62,7 +63,7 @@ export default function DevicesList({ facilityId }: Props) {
   );
 
   // Use TanStack Query with query.debounced for API call
-  const { data, isLoading } = useQuery({
+  const { data: devices, isLoading } = useQuery({
     queryKey: ["devices", facilityId, qParams],
     queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
@@ -79,7 +80,18 @@ export default function DevicesList({ facilityId }: Props) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <PageTitle title={t("devices")} />
+          <PageTitle title={t("devices")} className="mt-2" />
+          <Badge
+            className="bg-purple-50 text-purple-700 text-sm font-medium rounded-xl px-3 w-max"
+            variant="outline"
+          >
+            {isLoading
+              ? t("loading")
+              : t("entity_count", {
+                  count: devices?.count ?? 0,
+                  entity: t("device"),
+                })}
+          </Badge>
         </div>
 
         {pluginDevices.length > 0 ? (
@@ -87,7 +99,7 @@ export default function DevicesList({ facilityId }: Props) {
             <DropdownMenuTrigger asChild>
               <Button variant="white" className="flex items-center gap-2">
                 {t("add_device")}
-                <CareIcon icon="l-angle-down" className="h-4 w-4" />
+                <CareIcon icon="l-angle-down" className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -100,7 +112,7 @@ export default function DevicesList({ facilityId }: Props) {
                     asChild
                   >
                     <Link href={`/devices/create?type=${pluginDevice.type}`}>
-                      <DeviceIcon className="h-4 w-4 mr-1" />
+                      <DeviceIcon className="size-4 mr-1" />
                       {pluginDevice.type}
                     </Link>
                   </DropdownMenuItem>
@@ -108,7 +120,7 @@ export default function DevicesList({ facilityId }: Props) {
               })}
               <DropdownMenuItem asChild>
                 <Link href="/devices/create">
-                  <CubeIcon className="h-4 w-4 mr-1" />
+                  <CubeIcon className="size-4 mr-1" />
                   {t("other")}
                 </Link>
               </DropdownMenuItem>
@@ -117,7 +129,7 @@ export default function DevicesList({ facilityId }: Props) {
         ) : (
           <Button variant="white" asChild>
             <Link href="/devices/create">
-              <PlusIcon className="h-4 w-4" />
+              <PlusIcon className="size-4" />
               {t("add_device")}
             </Link>
           </Button>
@@ -126,7 +138,7 @@ export default function DevicesList({ facilityId }: Props) {
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
             placeholder={t("search_devices")}
             value={qParams.search_text || ""}
@@ -145,7 +157,7 @@ export default function DevicesList({ facilityId }: Props) {
               ) : (
                 t("filter_by_type")
               )}
-              <CaretSortIcon className="ml-2 h-4 w-4" />
+              <CaretSortIcon className="ml-2 size-4" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[200px] p-2">
@@ -167,7 +179,7 @@ export default function DevicesList({ facilityId }: Props) {
                     className="w-full capitalize justify-start font-normal"
                     onClick={() => handleCareTypeChange(device.type)}
                   >
-                    <DeviceIcon className="mr-2 h-4 w-4" />
+                    <DeviceIcon className="mr-2 size-4" />
                     {device.type}
                   </Button>
                 );
@@ -184,8 +196,8 @@ export default function DevicesList({ facilityId }: Props) {
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data?.results?.length ? (
-              data.results.map((device) => (
+            {devices?.results?.length ? (
+              devices.results.map((device) => (
                 <DeviceCard key={device.id} device={device} />
               ))
             ) : (
@@ -198,9 +210,9 @@ export default function DevicesList({ facilityId }: Props) {
               </Card>
             )}
           </div>
-          {data && data.count > resultsPerPage && (
+          {devices && devices.count > resultsPerPage && (
             <div className="flex justify-center">
-              <Pagination totalCount={data.count} />
+              <Pagination totalCount={devices.count} />
             </div>
           )}
         </div>
