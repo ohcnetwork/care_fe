@@ -173,7 +173,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <div className="space-y-6">
               <SearchInput
                 initialOptionIndex={0}
-                id="patient-search"
+                data-cy="patient-search"
                 options={searchOptions}
                 onSearch={handleSearch}
                 className="w-full"

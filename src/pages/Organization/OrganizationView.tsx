@@ -74,7 +74,6 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               </div>
               <div className="w-72">
                 <SearchInput
-                  id="search-by-name"
                   options={searchOptions}
                   initialOptionIndex={0}
                   onSearch={(key, value) =>

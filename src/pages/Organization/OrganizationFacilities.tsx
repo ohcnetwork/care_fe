@@ -89,7 +89,6 @@ export default function OrganizationFacilities({
 
             <div className="flex gap-2">
               <SearchInput
-                id="search-by-facility-name"
                 options={searchOptions}
                 initialOptionIndex={0}
                 onSearch={(key, value) =>

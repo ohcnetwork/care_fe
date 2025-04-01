@@ -151,7 +151,6 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             </div>
             <div className="flex gap-2">
               <SearchInput
-                id="user-search"
                 options={searchOptions}
                 initialOptionIndex={Math.max(
                   searchOptions.findIndex((option) => option.value !== ""),

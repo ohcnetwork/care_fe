@@ -37,7 +37,7 @@ interface SearchOption {
 }
 
 interface SearchInputProps {
-  id: string;
+  id?: string;
   options: SearchOption[];
   onSearch: (key: string, value: string) => void;
   initialOptionIndex: number;
@@ -48,6 +48,7 @@ interface SearchInputProps {
   enableOptionButtons?: boolean;
   onFieldChange?: (options: SearchOption) => void;
   autoFocus?: boolean;
+  "data-cy"?: string;
 }
 
 const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
@@ -92,6 +93,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   onFieldChange,
   enableOptionButtons = true,
   autoFocus = false,
+  "data-cy": dataCy,
 }) => {
   const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] =
@@ -196,6 +198,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
               onChange={(value) => setSearchValue(value)}
               className={inputClassName}
               autoFocus={autoFocus}
+              data-cy={dataCy}
             />
             {!isSingleOption && <KeyboardShortcutHint open={open} />}
           </div>
@@ -215,6 +218,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                   "grow border-none shadow-none focus-visible:ring-0",
                 inputClassName,
               )}
+              data-cy={dataCy}
             />
             {!isSingleOption && <KeyboardShortcutHint open={open} />}
           </div>

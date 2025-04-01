@@ -113,7 +113,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
             </div>
 
             <SearchInput
-              id="patient-search"
+              data-cy="patient-search"
               options={searchOptions}
               initialOptionIndex={Math.max(
                 searchOptions.findIndex((option) => option.value !== ""),
