@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -112,7 +112,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
               </div>
             </div>
 
-            <SearchByMultipleFields
+            <SearchInput
               id="patient-search"
               options={searchOptions}
               initialOptionIndex={Math.max(

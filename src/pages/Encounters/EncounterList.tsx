@@ -25,7 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
@@ -222,29 +222,24 @@ export function EncounterList({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[20rem] p-3"
+                    className="w-[20rem] p-0"
                     align="start"
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
-                    <div className="space-y-4">
-                      <h4 className="font-medium leading-none">
-                        {t("search_encounters")}
-                      </h4>
-                      <SearchByMultipleFields
-                        id="encounter-search"
-                        options={searchOptions}
-                        initialOptionIndex={Math.max(
-                          searchOptions.findIndex(
-                            (option) => option.value !== "",
-                          ),
-                          0,
-                        )}
-                        onFieldChange={handleFieldChange}
-                        onSearch={handleSearch}
-                        className="w-full border-none shadow-none"
-                        autoFocus
-                      />
-                    </div>
+                    <SearchInput
+                      id="encounter-search"
+                      options={searchOptions}
+                      initialOptionIndex={Math.max(
+                        searchOptions.findIndex(
+                          (option) => option.value !== "",
+                        ),
+                        0,
+                      )}
+                      onFieldChange={handleFieldChange}
+                      onSearch={handleSearch}
+                      className="w-full"
+                      autoFocus
+                    />
                   </PopoverContent>
                 </Popover>
 

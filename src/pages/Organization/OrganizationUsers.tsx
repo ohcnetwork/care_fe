@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
@@ -150,7 +150,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
               </div>
             </div>
             <div className="flex gap-2">
-              <SearchByMultipleFields
+              <SearchInput
                 id="user-search"
                 options={searchOptions}
                 initialOptionIndex={Math.max(

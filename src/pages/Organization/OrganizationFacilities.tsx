@@ -6,9 +6,9 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -38,6 +38,14 @@ export default function OrganizationFacilities({
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
     useFilters({ limit: 15, disableCache: true });
+  const searchOptions = [
+    {
+      key: "name",
+      type: "text" as const,
+      placeholder: "Search Facilities by name",
+      value: qParams.name || "",
+    },
+  ];
 
   const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
@@ -80,18 +88,16 @@ export default function OrganizationFacilities({
             </div>
 
             <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Search facilities..."
-                value={qParams.name || ""}
-                onChange={(e) =>
+              <SearchInput
+                id="search-by-facility-name"
+                options={searchOptions}
+                initialOptionIndex={0}
+                onSearch={(key, value) =>
                   updateQuery({
-                    name: e.target.value,
-                    page: 1,
+                    [key]: value || undefined,
                   })
                 }
-                className="max-w-sm"
-                data-cy="search-facility"
+                className="w-full max-w-sm border-none shadow-none"
               />
             </div>
 

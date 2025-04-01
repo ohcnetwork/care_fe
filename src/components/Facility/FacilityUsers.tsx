@@ -4,10 +4,10 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
+import SearchInput from "@/components/Common/SearchInput";
 import {
   CardGridSkeleton,
   TableSkeleton,
@@ -29,7 +29,16 @@ export default function FacilityUsers(props: { facilityId: string }) {
   const [activeTab, setActiveTab] = useView("users", "card");
 
   const { facilityId } = props;
-
+  const { username, page } = qParams;
+  const searchOptions = [
+    {
+      key: "username",
+      label: "Username",
+      type: "text" as const,
+      placeholder: t("search_by_username"),
+      value: username || "",
+    },
+  ];
   let usersList: JSX.Element = <></>;
 
   const { data: userListData, isFetching: userListFetching } = useQuery({
@@ -37,9 +46,9 @@ export default function FacilityUsers(props: { facilityId: string }) {
     queryFn: query.debounced(routes.facility.getUsers, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        username: qParams.username,
+        username: username,
         limit: resultsPerPage,
-        offset: (qParams.page - 1) * resultsPerPage,
+        offset: (page - 1) * resultsPerPage,
       },
     }),
     enabled: !!facilityId,
@@ -85,13 +94,16 @@ export default function FacilityUsers(props: { facilityId: string }) {
     >
       <hr className="mt-4 border-gray-200" />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 m-5 ml-0">
-        <Input
+        <SearchInput
           id="search-by-username"
-          name="username"
-          onChange={(e) => updateQuery({ username: e.target.value })}
-          value={qParams.username}
-          placeholder={t("search_by_username")}
-          className="w-full max-w-sm"
+          options={searchOptions}
+          initialOptionIndex={0}
+          onSearch={(key, value) =>
+            updateQuery({
+              [key]: value || undefined,
+            })
+          }
+          className="w-full max-w-sm border-none shadow-none"
         />
         <Tabs
           value={activeTab}

@@ -36,7 +36,7 @@ interface SearchOption {
   component?: React.ComponentType<HTMLDivElement>;
 }
 
-interface SearchByMultipleFieldsProps {
+interface SearchInputProps {
   id: string;
   options: SearchOption[];
   onSearch: (key: string, value: string) => void;
@@ -80,7 +80,7 @@ const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
   );
 };
 
-const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
+const SearchInput: React.FC<SearchInputProps> = ({
   id,
   options,
   onSearch,
@@ -183,7 +183,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     }
   }, [searchValue]);
 
-  const renderSearchInput = useMemo(() => {
+  const renderInput = useMemo(() => {
     switch (selectedOption.type) {
       case "phone":
         return (
@@ -211,7 +211,8 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
               className={cn(
-                "grow border-none shadow-none focus-visible:ring-0",
+                !isSingleOption &&
+                  "grow border-none shadow-none focus-visible:ring-0",
                 inputClassName,
               )}
             />
@@ -239,13 +240,13 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         aria-expanded={open}
         aria-controls="search-options"
         aria-haspopup="listbox"
-        className="flex items-center rounded-t-lg"
+        className="flex items-center rounded-t-lg gap-1"
       >
         {!isSingleOption && (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 className="focus:ring-0 px-2 ml-1"
                 size="sm"
                 onClick={() => setOpen(true)}
@@ -336,14 +337,14 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             </PopoverContent>
           </Popover>
         )}
-        <div className="w-full">{renderSearchInput}</div>
+        <div className="w-full">{renderInput}</div>
       </div>
       {error && (
         <div className="px-2 mb-1 text-xs font-medium tracking-wide transition-opacity duration-300 error-text text-danger-500">
           {t("phone_number_validation_error")}
         </div>
       )}
-      {enableOptionButtons && (
+      {enableOptionButtons && !isSingleOption && (
         <div className="flex flex-wrap gap-2 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
           {options.map((option, i) => (
             <Button
@@ -382,4 +383,4 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   );
 };
 
-export default SearchByMultipleFields;
+export default SearchInput;

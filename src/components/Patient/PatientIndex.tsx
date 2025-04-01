@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/table";
 
 import Loading from "@/components/Common/Loading";
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import SearchInput from "@/components/Common/SearchInput";
 
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
@@ -171,13 +171,12 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
           <div>
             <div className="space-y-6">
-              <SearchByMultipleFields
+              <SearchInput
                 initialOptionIndex={0}
                 id="patient-search"
                 options={searchOptions}
                 onSearch={handleSearch}
                 className="w-full"
-                autoFocus
               />
 
               <div className="min-h-[200px]" id="patient-search-results">

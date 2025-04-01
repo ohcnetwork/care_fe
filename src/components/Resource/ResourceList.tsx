@@ -16,7 +16,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -26,6 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -73,6 +73,15 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   const defaultStatus = isActive ? "pending" : "completed";
   const currentStatus = status || defaultStatus;
   const currentFlow = flow || "outgoing";
+  const searchOptions = [
+    {
+      key: "title",
+      label: "Title",
+      type: "text" as const,
+      placeholder: t("search_by_resource_title"),
+      value: title || "",
+    },
+  ];
 
   const { data: queryResources, isLoading } = useQuery<
     PaginatedResponse<ResourceRequest>
@@ -135,25 +144,27 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[20rem] p-4 bg-white shadow-lg rounded-lg border border-gray-200"
+                    className="w-[20rem]"
                     align="start"
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
-                    <div className="space-y-4">
-                      <h5 className="font-semibold text-gray-800">
-                        {t("search_resource")}
-                      </h5>
-                      <Input
-                        id="resource-search"
-                        onChange={(e) =>
-                          updateQuery({
-                            title: e.target.value,
-                          })
-                        }
-                        autoFocus
-                        placeholder={t("search_by_resource_title")}
-                      />
-                    </div>
+                    <SearchInput
+                      id="resource-search"
+                      options={searchOptions}
+                      initialOptionIndex={0}
+                      onFieldChange={() =>
+                        updateQuery({
+                          title: undefined,
+                        })
+                      }
+                      onSearch={(key, value) =>
+                        updateQuery({
+                          [key]: value || undefined,
+                        })
+                      }
+                      className="w-full border-none shadow-none"
+                      autoFocus
+                    />
                   </PopoverContent>
                 </Popover>
                 <div className="items-center">
