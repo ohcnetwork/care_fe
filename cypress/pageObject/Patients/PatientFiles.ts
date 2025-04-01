@@ -216,7 +216,7 @@ export class PatientFiles {
   }
 
   closeFilePreview() {
-    cy.get("button svg.lucide.lucide-x").parent("button").click();
+    cy.contains("button", "Close").click();
     return this;
   }
 

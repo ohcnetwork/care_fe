@@ -5,7 +5,7 @@ export class UserProfile {
   }
 
   clickUserProfile() {
-    cy.get('[data-cy="user-menu-profile"]').click({ force: true });
+    cy.get('[data-cy="user-menu-profile"]').click();
     return this;
   }
 
