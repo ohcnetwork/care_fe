@@ -167,7 +167,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         onClick={() =>
                           updateQuery({
                             flow: "outgoing",
-                            title,
                           })
                         }
                       >
@@ -179,7 +178,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         onClick={() =>
                           updateQuery({
                             flow: "incoming",
-                            title,
                           })
                         }
                       >
@@ -202,7 +200,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       onClick={() =>
                         updateQuery({
                           status: "pending",
-                          title,
                         })
                       }
                     >
@@ -214,7 +211,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       onClick={() =>
                         updateQuery({
                           status: "completed",
-                          title,
                         })
                       }
                     >
@@ -237,7 +233,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     onClick={() =>
                       updateQuery({
                         status: "all",
-                        title,
                       })
                     }
                   >
@@ -251,7 +246,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       onClick={() =>
                         updateQuery({
                           status: statusOption,
-                          title,
                         })
                       }
                     >
