@@ -123,22 +123,26 @@ export const MultiSelect = React.forwardRef<
                       return (
                         <Badge
                           key={value}
-                          className="m-1 cursor-pointer"
+                          className={cn(
+                            "m-1 cursor-pointer bg-gray-100 text-gray-900 hover:bg-gray-700 hover:text-white transition-colors",
+                            "group",
+                          )}
                           variant="secondary"
                         >
                           {option?.icon && (
                             <CareIcon
                               icon={option.icon}
-                              className="size-4 mr-2"
+                              className="size-4 mr-2 group-hover:text-white"
                             />
                           )}
                           {option?.label}
                           <XCircle
-                            className="ml-2 size-4 cursor-pointer opacity-70 hover:opacity-100 group-hover:text-white"
+                            className="ml-2 size-4 cursor-pointer opacity-70 hover:opacity-100 hover:text-white"
                             onClick={(event) => {
                               event.stopPropagation();
                               toggleOption(value);
                             }}
+                            aria-label={`Remove ${option?.label}`}
                           />
                         </Badge>
                       );
@@ -191,7 +195,8 @@ export const MultiSelect = React.forwardRef<
                   >
                     <Checkbox
                       checked={selectedValues.length === options.length}
-                      className="border-primary-300 data-[state=checked]:bg-primary-600 data-[state=checked]:border-primary-600"
+                      className="border-gray-300 data-[state=checked]:bg-gray-700 data-[state=checked]:border-gray-700"
+                      aria-label="Select all options"
                     />
                     <span>{t("select_all")}</span>
                   </CommandItem>
@@ -205,7 +210,8 @@ export const MultiSelect = React.forwardRef<
                       >
                         <Checkbox
                           checked={isSelected}
-                          className="border-primary-300 data-[state=checked]:bg-primary-600 data-[state=checked]:border-primary-600"
+                          className="border-gray-300 data-[state=checked]:bg-gray-700 data-[state=checked]:border-gray-700"
+                          aria-label={`Select ${option.label}`}
                         />
                         {option?.icon && (
                           <CareIcon
