@@ -216,7 +216,7 @@ export class PatientFiles {
   }
 
   closeFilePreview() {
-    cy.verifyAndClickElement("[data-cy='file-preview-close']", "Close");
+    cy.get("button svg.lucide.lucide-x").parent("button").click();
     return this;
   }
 
