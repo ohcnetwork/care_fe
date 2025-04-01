@@ -54,7 +54,7 @@ export function FacilitySwitcher({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg max-h-screen overflow-y-auto"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg max-h-screen overflow-y-auto"
             align="start"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
@@ -78,7 +78,7 @@ export function FacilitySwitcher({
                     "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
                 )}
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
+                <div className="flex size-6 items-center justify-center rounded-sm border border-gray-200">
                   <Hospital className="size-4 shrink-0" />
                 </div>
                 {facility.name}
