@@ -9,7 +9,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
@@ -130,15 +130,7 @@ const AllergyTableRow = ({
           : ""
   }`;
 
-  const handleNotesToggle = () => {
-    if (showNotes) {
-      setShowNotes(false);
-      onUpdate?.({ note: undefined });
-    } else {
-      setShowNotes(true);
-      onUpdate?.({ note: "" });
-    }
-  };
+  const handleToggleNotes = useCallback(() => setShowNotes((n) => !n), []);
 
   return (
     <>
@@ -200,11 +192,9 @@ const AllergyTableRow = ({
           <Select
             value={allergy.verification_status}
             onValueChange={(value) => {
-              if (value in ALLERGY_VERIFICATION_STATUS) {
-                onUpdate?.({
-                  verification_status: value as AllergyVerificationStatus,
-                });
-              }
+              onUpdate?.({
+                verification_status: value as AllergyVerificationStatus,
+              });
             }}
             disabled={disabled}
           >
@@ -249,9 +239,13 @@ const AllergyTableRow = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleNotesToggle}>
+              <DropdownMenuItem onClick={handleToggleNotes}>
                 <Pencil2Icon className="size-4 mr-2" />
-                {showNotes ? t("hide_notes") : t("add_notes")}
+                {showNotes
+                  ? t("hide_notes")
+                  : allergy.note != ""
+                    ? t("show_notes")
+                    : t("add_notes")}
               </DropdownMenuItem>
               {allergy.clinical_status !== "active" && (
                 <DropdownMenuItem

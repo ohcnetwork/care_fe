@@ -811,7 +811,11 @@ const DiagnosisTableRow = ({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
                 <Pencil2Icon className="size-4 mr-2" />
-                {showNotes ? t("hide_notes") : t("add_notes")}
+                {showNotes
+                  ? t("hide_notes")
+                  : diagnosis.note != ""
+                    ? t("show_notes")
+                    : t("add_notes")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

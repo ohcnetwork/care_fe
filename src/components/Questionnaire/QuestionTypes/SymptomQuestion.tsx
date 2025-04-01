@@ -123,12 +123,14 @@ function SymptomActionsMenu({
   disabled,
   onToggleNotes,
   onRemove,
+  symptom,
 }: {
   showNotes: boolean;
   verificationStatus: string;
   disabled?: boolean;
   onToggleNotes: () => void;
   onRemove: () => void;
+  symptom: SymptomRequest;
 }) {
   return (
     <DropdownMenu>
@@ -145,7 +147,11 @@ function SymptomActionsMenu({
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={onToggleNotes}>
           <Pencil2Icon className="size-4 mr-2" />
-          {showNotes ? t("hide_notes") : t("add_notes")}
+          {showNotes
+            ? t("hide_notes")
+            : symptom.note != ""
+              ? t("show_notes")
+              : t("add_notes")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -440,6 +446,7 @@ const SymptomRow = React.memo(function SymptomRow({
         </TableCell>
         <TableCell className="text-center">
           <SymptomActionsMenu
+            symptom={symptom}
             showNotes={showNotes}
             verificationStatus={symptom.verification_status}
             disabled={disabled}
