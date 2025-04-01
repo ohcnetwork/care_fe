@@ -41,11 +41,11 @@ import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS,
+  ENCOUNTER_CLASSES_ICONS,
   ENCOUNTER_PRIORITY,
   Encounter,
   EncounterClass,
   EncounterRequest,
-  encounterClasses,
 } from "@/types/emr/encounter";
 
 interface Props {
@@ -157,8 +157,9 @@ export default function CreateEncounterForm({
                     {t("type_of_encounter")}
                   </FormLabel>
                   <div className="grid grid-cols-2 gap-3">
-                    {encounterClasses().map(
-                      ({ value, label, icon: Icon, description }) => (
+                    {ENCOUNTER_CLASS.map((value) => {
+                      const Icon = ENCOUNTER_CLASSES_ICONS[value];
+                      return (
                         <Button
                           key={value}
                           type="button"
@@ -173,14 +174,16 @@ export default function CreateEncounterForm({
                         >
                           <div className="flex flex-col items-center text-center">
                             <Icon className="size-6" />
-                            <div className="text-sm font-bold">{label}</div>
+                            <div className="text-sm font-bold">
+                              {t(`encounter_class__${value}`)}
+                            </div>
                             <div className="text-wrap text-center text-xs text-gray-500">
-                              {description}
+                              {t(`encounter_class_description__${value}`)}
                             </div>
                           </div>
                         </Button>
-                      ),
-                    )}
+                      );
+                    })}
                   </div>
                   <FormMessage />
                 </FormItem>
