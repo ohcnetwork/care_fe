@@ -39,7 +39,10 @@ import { FileUploadModel } from "@/components/Patient/models";
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 
-import { FILE_EXTENSIONS } from "@/common/constants";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FILE_EXTENSIONS,
+} from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -121,7 +124,7 @@ export const DischargeTab = ({
   const fileUpload = useFileUpload({
     type: type,
     multiple: true,
-    allowedExtensions: ["pdf", "doc", "docx", "txt"],
+    allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
     onUpload: () => {
       refetch();
@@ -583,7 +586,6 @@ export const DischargeTab = ({
         associatingId={encounterId}
         type={type}
       />
-
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
         <FilterButton />
         <FileUploadButtons />
