@@ -147,7 +147,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         id="resource-search"
                         onChange={(e) =>
                           updateQuery({
-                            status: currentStatus,
                             title: e.target.value,
                           })
                         }
