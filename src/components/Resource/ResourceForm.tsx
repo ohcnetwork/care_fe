@@ -231,7 +231,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     <Page
       title={id ? t("update_resource_request") : t("create_resource_request")}
     >
-      <div className="container mx-auto max-w-4xl">
+      <div className="container mx-auto max-w-4xl  space-y-6 p-4 md:p-6">
         <Card>
           <CardContent className="mt-4">
             <Form {...form}>
