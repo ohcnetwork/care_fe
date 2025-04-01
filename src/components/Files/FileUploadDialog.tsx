@@ -68,7 +68,7 @@ export default function FileUploadDialog({
           {fileUpload.files.map((file, index) => (
             <div key={index} className="space-y-2">
               {file.type.startsWith("image/") && previewUrls[index] ? (
-                <div className="flex flex-col items-center space-y-2">
+                <div className="flex flex-col items-center space-y-2 p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
                   <div className="w-full max-w-md overflow-hidden rounded-lg">
                     <img
                       src={previewUrls[index]}
@@ -99,26 +99,28 @@ export default function FileUploadDialog({
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
-                  <span
-                    className="flex items-center truncate"
-                    title={file.name}
-                  >
-                    <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
-                    <span className="truncate">
-                      {file.name.length > 40
-                        ? `${file.name.substring(0, 30)}...`
-                        : file.name}
+                <div className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
+                  <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+                    <span
+                      className="flex items-center truncate"
+                      title={file.name}
+                    >
+                      <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
+                      <span className="truncate">
+                        {file.name.length > 40
+                          ? `${file.name.substring(0, 30)}...`
+                          : file.name}
+                      </span>
                     </span>
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => fileUpload.removeFile(index)}
-                    disabled={fileUpload.uploading}
-                  >
-                    <CareIcon icon="l-times" />
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => fileUpload.removeFile(index)}
+                      disabled={fileUpload.uploading}
+                    >
+                      <CareIcon icon="l-times" />
+                    </Button>
+                  </div>
                 </div>
               )}
               <div>
