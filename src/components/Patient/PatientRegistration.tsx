@@ -232,6 +232,9 @@ export default function PatientRegistration(
     if (facilityId) {
       createPatient({
         ...values,
+        emergency_phone_number: values.same_phone_number
+          ? values.phone_number
+          : values.emergency_phone_number,
         permanent_address: values.same_address
           ? values.address
           : values.permanent_address,
