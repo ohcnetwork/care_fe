@@ -549,7 +549,6 @@ export default function CreateScheduleTemplateSheet({
                                         <Label className="text-sm font-light">
                                           {t("number_of_slots")}
                                         </Label>
-                                        <FormMessage />
                                         <FormControl>
                                           <Input
                                             type="number"
@@ -565,6 +564,7 @@ export default function CreateScheduleTemplateSheet({
                                             }}
                                           />
                                         </FormControl>
+                                        <FormMessage />
                                       </FormItem>
                                     )}
                                   />
