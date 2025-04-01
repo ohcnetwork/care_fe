@@ -63,18 +63,15 @@ export default function CreateScheduleExceptionSheet({
   const formSchema = z
     .object({
       reason: z.string().min(1, t("field_required")),
-
-      // Ensure valid_from is today or future
       valid_from: z
         .date({ required_error: t("field_required") })
         .min(dayjs().startOf("day").toDate(), {
-          message: t("a_schedule_cannot_be_created_in_the_past."),
+          message: t("schedule_exception_creation_for_past_validation_error"),
         }),
-      // Ensure valid_to is today or future
       valid_to: z
         .date({ required_error: t("field_required") })
         .min(dayjs().startOf("day").toDate(), {
-          message: t("date_must_be_today_or_future"),
+          message: t("schedule_exception_creation_for_past_validation_error"),
         }),
       start_time: z
         .string()
@@ -110,8 +107,7 @@ export default function CreateScheduleExceptionSheet({
       },
     )
     .refine(
-      (data) =>
-        dayjs(data.valid_to).isAfter(dayjs(data.valid_from).subtract(1, "day")),
+      (data) => !dayjs(data.valid_to).isAfter(dayjs(data.valid_from), "day"),
       {
         message: t("to_date_equal_or_after_from_date"),
         path: ["valid_to"],
