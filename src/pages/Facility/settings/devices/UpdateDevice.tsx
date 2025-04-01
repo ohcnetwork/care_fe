@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -43,6 +44,7 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
             facilityId={facilityId}
             device={device}
             onSuccess={() => {
+              toast.success(t("device_updated"));
               goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
             }}
           />
