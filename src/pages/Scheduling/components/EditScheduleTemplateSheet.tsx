@@ -851,7 +851,6 @@ const NewAvailabilityCard = ({
                             <Label className="text-sm font-light">
                               {t("number_of_slots")}
                             </Label>
-                            <FormMessage />
                             <FormControl>
                               <Input
                                 type="number"
@@ -865,6 +864,7 @@ const NewAvailabilityCard = ({
                                 }}
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
