@@ -150,7 +150,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                             title: e.target.value,
                           })
                         }
-                        className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 px-3 py-2 text-sm"
                         autoFocus
                         placeholder={t("search_by_resource_title")}
                       />
