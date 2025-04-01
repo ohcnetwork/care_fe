@@ -63,10 +63,10 @@ export class ResourcesCreation {
       .enterTitle(data.title)
       .enterReason(data.reason)
       .autoFillDetails()
-      .verifyAutoFillDetails('[data-cy="contact_person"]', "dev nurse3")
+      .verifyAutoFillDetails('[data-cy="contact_person"]', "Dev Nurse")
       .verifyAutoFillDetails(
         '[data-cy="contact_person_phone"]',
-        "+91 98556 98569",
+        "+91 98767 57676",
       );
     return this;
   }
