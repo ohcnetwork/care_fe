@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import { TooltipComponent } from "@/components/ui/tooltip";
 
@@ -99,7 +100,7 @@ export const ContactInfoDetails = ({ user }: UserViewDetailsProps) => {
         <LabelValue
           id="phone_number"
           label={t("phone_number")}
-          value={user.phone_number}
+          value={user.phone_number && formatPhoneNumberIntl(user.phone_number)}
         />
       </div>
     </div>

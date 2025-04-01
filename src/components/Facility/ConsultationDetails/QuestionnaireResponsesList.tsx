@@ -79,7 +79,6 @@ export function formatValue(
 
 function QuestionResponseValue({ question, response }: QuestionResponseProps) {
   if (!response) return null;
-
   return (
     <div>
       <div className="text-xs text-gray-500">{question.text}</div>
@@ -135,15 +134,21 @@ function QuestionGroup({
   }[];
   level?: number;
 }) {
-  const hasResponses = responses.some((r) =>
-    group.questions?.some((q) => q.id === r.question_id),
-  );
+  const getHasResponse = (question: Question): boolean => {
+    // Recursively check if a question or any of its nested sub-questions have responses
+    // This ensures grouped fields are displayed even when only sub-questions have responses
+    if (question.type === "group") {
+      return question.questions?.some((q) => getHasResponse(q)) ?? false;
+    }
+    return responses.some((r) => r.question_id === question.id);
+  };
+
+  const hasResponses = getHasResponse(group);
 
   if (!hasResponses) return null;
 
   const containerClass = group.styling_metadata?.containerClasses || "";
   const classes = group.styling_metadata?.classes || "";
-
   return (
     <div className={`space-y-2 ${classes}`}>
       {group.text && (
@@ -305,7 +310,6 @@ function ResponseCard({
         <div className="mt-4 space-y-4">
           {item.questionnaire?.questions.map((question: Question) => {
             if (question.type === "structured") return null;
-
             if (question.type === "group") {
               return (
                 <QuestionGroup
@@ -363,7 +367,6 @@ export default function QuestionnaireResponsesList({
     }),
     enabled: canAccess,
   });
-
   return (
     <div className="mt-4 gap-4">
       <div className="max-w-full">

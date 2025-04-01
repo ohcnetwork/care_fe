@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -52,7 +53,10 @@ const DuplicatePatientDialog = (props: Props) => {
           <div>
             <p className="text-sm leading-relaxed">
               {t("patient_records_found_description")}(
-              <span className="font-bold">{patientList[0].phone_number}</span>)
+              <span className="font-bold">
+                {formatPhoneNumberIntl(patientList[0].phone_number)}
+              </span>
+              )
             </p>
           </div>
           <div>
