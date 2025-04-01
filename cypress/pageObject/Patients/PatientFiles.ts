@@ -216,6 +216,7 @@ export class PatientFiles {
   }
 
   closeFilePreview() {
+    cy.get('[data-cy="file-preview-download"]').should("be.visible");
     cy.contains("button", "Close").click();
     return this;
   }
