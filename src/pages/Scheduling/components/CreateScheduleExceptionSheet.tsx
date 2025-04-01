@@ -67,7 +67,7 @@ export default function CreateScheduleExceptionSheet({
       // Ensure valid_from is today or future
       valid_from: z
         .date({ required_error: t("field_required") })
-        .refine((date) => date >= startOfDay(new Date()), {
+        .min(dayjs().startOf("day").toDate(), {
           message: t("a_schedule_cannot_be_created_in_the_past."),
         }),
       // Ensure valid_to is today or future
