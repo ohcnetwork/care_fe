@@ -25,7 +25,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
@@ -229,14 +229,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   <Avatar
                     imageUrl={userData.profile_picture_url}
                     name={`${userData.first_name} ${userData.last_name}`}
-                    className="h-96 w-96 self-center rounded-sm"
+                    className="size-96 self-center rounded-sm"
                   />
 
                   <div className="flex grow flex-col px-4">
                     <h3 className="truncate text-xl font-semibold">
-                      {userData.user_type === "doctor"
-                        ? `Dr. ${userData.first_name} ${userData.last_name}`
-                        : `${userData.first_name} ${userData.last_name}`}
+                      {formatName(userData)}
                     </h3>
                     <p className="text-sm text-gray-500 truncate">
                       {userData.user_type}
@@ -265,9 +263,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 {appointmentId
                   ? t("reschedule_appointment_with")
                   : t("book_an_appointment_with")}{" "}
-                {userData.user_type === "doctor"
-                  ? `Dr. ${userData.first_name} ${userData.last_name}`
-                  : `${userData.first_name} ${userData.last_name}`}
+                {formatName(userData)}
               </span>
               <div>
                 <Label className="mb-2">{t("reason_for_visit")}</Label>
@@ -302,7 +298,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                               onClick={() =>
                                 setSelectedSlot({ ...slot, availability })
                               }
-                              selectedDate={selectedDate}
+                              allowOngoingSlots={false}
                             />
                           ))}
                         </div>
@@ -321,7 +317,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         {selectedSlot?.id && (
           <div className="container mx-auto flex flex-row justify-end mt-6">
             {(isCreatingAppointment || isCancellingAppointment) && (
-              <Loader2 className="h-4 w-4 animate-spin self-center mr-2" />
+              <Loader2 className="size-4 animate-spin self-center mr-2" />
             )}
             <Button
               variant="primary_gradient"
@@ -341,9 +337,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 }
               }}
             >
-              <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+              <span className="bg-linear-to-b from-white/15 to-transparent"></span>
               {appointmentId ? t("reschedule_appointment") : t("continue")}
-              <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+              <CareIcon icon="l-arrow-right" className="size-4" />
             </Button>
           </div>
         )}

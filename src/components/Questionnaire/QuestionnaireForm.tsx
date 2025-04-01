@@ -18,6 +18,9 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
+import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
+import { FileUploadQuestion } from "@/types/files/files";
 import {
   DetailedValidationError,
   QuestionValidationError,
@@ -30,8 +33,13 @@ import type {
 import type { Question } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import { QuestionRenderer } from "./QuestionRenderer";
+import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
+import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
+import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
+import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
@@ -42,11 +50,17 @@ export interface QuestionnaireFormState {
   errors: QuestionValidationError[];
 }
 
-interface BatchRequest {
+interface FormBatchRequest {
   url: string;
   method: string;
   body: Record<string, any>;
   reference_id: string;
+}
+
+interface ServerValidationError {
+  reference_id: string;
+  message: string;
+  status_code: number;
 }
 
 export interface QuestionnaireFormProps {
@@ -56,8 +70,243 @@ export interface QuestionnaireFormProps {
   subjectType?: string;
   onSubmit?: () => void;
   onCancel?: () => void;
-  facilityId: string;
+  facilityId?: string;
 }
+
+interface ValidationErrorDisplayProps {
+  questionnaireForms: QuestionnaireFormState[];
+  serverErrors?: ServerValidationError[];
+}
+
+function ValidationErrorDisplay({
+  questionnaireForms,
+  serverErrors,
+}: ValidationErrorDisplayProps) {
+  const hasErrors =
+    questionnaireForms.some((form) => form.errors.length > 0) ||
+    (serverErrors?.length ?? 0) > 0;
+
+  if (!hasErrors) return null;
+
+  const findQuestionText = (
+    form: QuestionnaireFormState,
+    questionId: string,
+  ): string | undefined => {
+    const findInQuestions = (questions: Question[]): string | undefined => {
+      for (const q of questions) {
+        if (q.id === questionId) return q.text;
+        if (q.type === "group" && q.questions) {
+          const found = findInQuestions(q.questions);
+          if (found) return found;
+        }
+      }
+    };
+    return (
+      findInQuestions(form.questionnaire.questions) || t("unknown_question")
+    );
+  };
+
+  const getErrorTitle = (error: ServerValidationError) => {
+    // Find matching questionnaire title first
+    const form = questionnaireForms.find(
+      (f) => f.questionnaire.id === error.reference_id,
+    );
+    if (form) {
+      return form.questionnaire.title;
+    }
+
+    // For other cases, transform the reference_id into a readable title
+    return error.reference_id
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const findStructuredQuestionId = (
+    forms: QuestionnaireFormState[],
+    structuredType: string,
+  ): { questionId: string; form: QuestionnaireFormState } | undefined => {
+    for (const form of forms) {
+      const response = form.responses.find(
+        (r) => r.structured_type === structuredType,
+      );
+      if (response) {
+        return { questionId: response.question_id, form };
+      }
+    }
+    return undefined;
+  };
+
+  return (
+    <div className="mx-4 mt-8 max-w-4xl">
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4 space-y-6">
+        <div className="flex items-center gap-2 mb-4">
+          <CareIcon
+            icon="l-exclamation-circle"
+            className="size-5 text-red-500"
+          />
+          <h3 className="font-medium text-red-700">Validation Errors</h3>
+        </div>
+
+        {/* Server-level errors */}
+        {serverErrors?.map((error, index) => {
+          // Find the structured question if this is a structured data error
+          const structuredQuestion = findStructuredQuestionId(
+            questionnaireForms,
+            error.reference_id,
+          );
+
+          return (
+            <div
+              key={`server-${index}`}
+              className="bg-white rounded p-3 border border-red-100 shadow-xs"
+            >
+              <div className="font-medium text-gray-900 mb-1">
+                {getErrorTitle(error)}
+              </div>
+              <div className="text-sm text-red-600 flex items-start gap-2">
+                <CareIcon
+                  icon="l-exclamation-circle"
+                  className="size-4 mt-0.5 shrink-0"
+                />
+                <span>{error.message}</span>
+              </div>
+              {structuredQuestion && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 h-8 text-xs"
+                  onClick={() => {
+                    const element = document.querySelector(
+                      `[data-question-id="${structuredQuestion.questionId}"]`,
+                    );
+                    if (element) {
+                      element.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+                      element.classList.add(
+                        "ring-2",
+                        "ring-red-500",
+                        "ring-offset-2",
+                        "rounded",
+                      );
+                      setTimeout(() => {
+                        element.classList.remove(
+                          "ring-2",
+                          "ring-red-500",
+                          "ring-offset-2",
+                          "rounded",
+                        );
+                      }, 2000);
+                    }
+                  }}
+                >
+                  <CareIcon icon="l-arrow-up" className="mr-1 size-3" />
+                  {t("scroll_to_question")}
+                </Button>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Form-level errors */}
+        {questionnaireForms.map(
+          (form, index) =>
+            form.errors.length > 0 && (
+              <div
+                key={`${form.questionnaire.id}-${index}`}
+                className="space-y-3"
+              >
+                <h3 className="font-medium text-gray-900">
+                  {form.questionnaire.title}
+                </h3>
+                <div className="space-y-3">
+                  {form.errors.map((error, errorIndex) => (
+                    <div
+                      key={errorIndex}
+                      className="bg-white rounded p-3 border border-red-100 shadow-xs"
+                    >
+                      <div className="text-sm text-gray-600 mb-1">
+                        {findQuestionText(form, error.question_id)}
+                      </div>
+                      <div className="text-sm text-red-600 flex items-start gap-2">
+                        <CareIcon
+                          icon="l-exclamation-circle"
+                          className="size-4 mt-0.5 shrink-0"
+                        />
+                        <span>{error.error}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2 h-8 text-xs"
+                        onClick={() => {
+                          const element = document.querySelector(
+                            `[data-question-id="${error.question_id}"]`,
+                          );
+                          if (element) {
+                            element.scrollIntoView({
+                              behavior: "smooth",
+                              block: "center",
+                            });
+                            element.classList.add(
+                              "ring-2",
+                              "ring-red-500",
+                              "ring-offset-2",
+                              "rounded",
+                            );
+                            setTimeout(() => {
+                              element.classList.remove(
+                                "ring-2",
+                                "ring-red-500",
+                                "ring-offset-2",
+                                "rounded",
+                              );
+                            }, 2000);
+                          }
+                        }}
+                      >
+                        <CareIcon icon="l-arrow-up" className="mr-1 size-3" />
+                        {t("scroll_to_question")}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ),
+        )}
+      </div>
+    </div>
+  );
+}
+
+const STRUCTURED_TYPE_VALIDATORS = {
+  appointment: (response: ResponseValue | undefined, questionId: string) => {
+    const appointmentData =
+      (response?.value as CreateAppointmentQuestion[]) || [];
+    return validateAppointmentQuestion(appointmentData[0], questionId);
+  },
+  medication_statement: (
+    response: ResponseValue | undefined,
+    questionId: string,
+  ) => {
+    const medicationData =
+      (response?.value as MedicationStatementRequest[]) || [];
+    return validateMedicationStatementQuestion(medicationData, questionId);
+  },
+  medication_request: (
+    response: ResponseValue | undefined,
+    questionId: string,
+  ) => {
+    const medicationData = (response?.value as MedicationRequest[]) || [];
+    return validateMedicationRequestQuestion(medicationData, questionId);
+  },
+  files: (response: ResponseValue | undefined, quesitonId: string) => {
+    const files = (response?.value as FileUploadQuestion[]) || [];
+    return validateFileUploadQuestion(files, quesitonId);
+  },
+} as const;
 
 export function QuestionnaireForm({
   questionnaireSlug,
@@ -72,6 +321,7 @@ export function QuestionnaireForm({
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
   >([]);
+  const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
@@ -92,13 +342,91 @@ export function QuestionnaireForm({
   const { mutate: submitBatch, isPending } = useMutation({
     mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
+      setServerErrors(undefined);
       toast.success(t("questionnaire_submitted_successfully"));
       onSubmit?.();
     },
     onError: (error) => {
-      const errorData = error.cause;
+      const errorData = error.cause as {
+        results: Array<{
+          reference_id: string;
+          status_code: number;
+          data:
+            | {
+                errors?: Array<{
+                  question_id?: string;
+                  msg?: string;
+                  error?: string;
+                  type?: string;
+                  loc?: string[];
+                }>;
+              }
+            | Array<{
+                errors: Array<{
+                  type: string;
+                  loc: string[];
+                  msg: string;
+                }>;
+              }>;
+        }>;
+      };
+
       if (errorData?.results) {
-        handleSubmissionError(errorData.results as ValidationErrorResponse[]);
+        const results = errorData.results;
+
+        // Only process failed requests (status_code !== 200)
+        const failedResults = results.filter(
+          (result) => result.status_code !== 200,
+        );
+
+        setServerErrors(
+          failedResults.map((result) => {
+            const reference_id = result.reference_id || "";
+            let message = t("validation_failed");
+
+            // Handle array-style structured data errors
+            if (Array.isArray(result.data)) {
+              const errors = result.data.flatMap((d) => d.errors || []);
+              if (errors.length > 0) {
+                message = errors
+                  .map((e) => {
+                    if (e.loc) {
+                      return `${e.loc.join(" > ")}: ${e.msg}`;
+                    }
+                    return e.msg;
+                  })
+                  .join(", ");
+              }
+            }
+            // Handle regular errors
+            else if (result.data?.errors) {
+              const firstError = result.data.errors[0];
+              if (firstError.loc) {
+                message = `${firstError.loc.join(" > ")}: ${firstError.msg}`;
+              } else {
+                message =
+                  firstError.msg || firstError.error || t("validation_failed");
+              }
+            }
+
+            return {
+              reference_id,
+              message,
+              status_code: result.status_code,
+            };
+          }),
+        );
+
+        // Handle form-level validation errors
+        const validationResults = failedResults.filter(
+          (r) =>
+            !Array.isArray(r.data) &&
+            r.data?.errors?.some((e) => e.question_id),
+        );
+
+        if (validationResults.length > 0) {
+          handleSubmissionError(validationResults as ValidationErrorResponse[]);
+        }
       }
       toast.error(t("questionnaire_submission_failed"));
     },
@@ -215,7 +543,6 @@ export function QuestionnaireForm({
     // Validate all required fields
     const formsWithValidation = formsWithClearedErrors.map((form) => {
       const errors: QuestionValidationError[] = [];
-
       const validateQuestion = (q: Question) => {
         // Handle nested questions in groups
         if (q.type === "group" && q.questions) {
@@ -224,12 +551,23 @@ export function QuestionnaireForm({
         }
 
         if (q.required) {
+          // Handle appointment validation
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
-            (v) => v.value !== undefined && v.value !== null && v.value !== "",
+            (v) =>
+              v.value !== undefined &&
+              v.value !== null &&
+              v.value !== "" &&
+              (Array.isArray(v.value) ? v.value.length > 0 : true),
           );
 
-          if (!hasValue) {
+          const hasProperty = (arr: any[] | undefined, prop: string) =>
+            Array.isArray(arr) && arr.some((item) => item?.[prop] != null);
+
+          const hasCoding = hasProperty(response?.values, "coding");
+          const hasUnit = hasProperty(response?.values, "unit");
+
+          if (!hasValue && !hasCoding && !hasUnit) {
             errors.push({
               question_id: q.id,
               error: t("field_required"),
@@ -237,6 +575,22 @@ export function QuestionnaireForm({
               msg: t("field_required"),
             });
             firstErrorId = firstErrorId ? firstErrorId : q.id;
+          }
+        }
+
+        if (q.type === "structured" && q.structured_type) {
+          const response = form.responses.find((r) => r.question_id === q.id);
+          const validator =
+            STRUCTURED_TYPE_VALIDATORS[
+              q.structured_type as keyof typeof STRUCTURED_TYPE_VALIDATORS
+            ];
+
+          if (validator) {
+            const validationErrors = validator(response?.values?.[0], q.id);
+            errors.push(...validationErrors);
+            if (validationErrors.length > 0) {
+              firstErrorId = firstErrorId ? firstErrorId : q.id;
+            }
           }
         }
       };
@@ -248,37 +602,42 @@ export function QuestionnaireForm({
     setQuestionnaireForms(formsWithValidation);
 
     if (firstErrorId) {
-      const element = document.querySelector(
-        `[data-question-id="${firstErrorId}"]`,
-      );
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-
-    if (formsWithValidation.some((form) => form.errors.length > 0)) {
+      setTimeout(() => {
+        const element = document.querySelector(
+          `[data-question-id="${firstErrorId}"]`,
+        );
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
       return;
     }
 
     // Continue with existing submission logic...
-    const requests: BatchRequest[] = [];
+    const requests: FormBatchRequest[] = [];
     if (encounterId && patientId) {
       const context = { facilityId, patientId, encounterId };
-      // First, collect all structured data requests if encounterId is provided
+      const structuredPromises: Promise<FormBatchRequest[]>[] = [];
+
       formsWithValidation.forEach((form) => {
         form.responses.forEach((response) => {
           if (response.structured_type) {
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
-              const structuredRequests = getStructuredRequests(
-                response.structured_type,
-                structuredData,
-                context,
+              structuredPromises.push(
+                getStructuredRequests(
+                  response.structured_type,
+                  structuredData,
+                  context,
+                ),
               );
-              requests.push(...structuredRequests);
             }
           }
         });
+      });
+
+      const structuredRequestsArrays = await Promise.all(structuredPromises);
+
+      structuredRequestsArrays.forEach((requestArray) => {
+        requests.push(...requestArray);
       });
     }
 
@@ -294,7 +653,7 @@ export function QuestionnaireForm({
           method: "POST",
           reference_id: form.questionnaire.id,
           body: {
-            resource_id: encounterId,
+            resource_id: encounterId ? encounterId : patientId,
             encounter: encounterId,
             patient: patientId,
             results: nonStructuredResponses
@@ -311,8 +670,15 @@ export function QuestionnaireForm({
                       value: value.value.toISOString(),
                     };
                   }
-                  if (value.value_code) {
-                    return { value_code: value.value_code };
+                  if (value.unit) {
+                    return {
+                      value: value.value?.toString(),
+                      unit: value.unit,
+                      coding: value.coding,
+                    };
+                  }
+                  if (value.coding) {
+                    return { coding: value.coding };
                   }
                   return { value: String(value.value) };
                 }),
@@ -328,10 +694,29 @@ export function QuestionnaireForm({
     submitBatch({ requests });
   };
 
+  const scrollToQuestion = (questionnaireId: string, groupId?: string) => {
+    setActiveQuestionnaireId(questionnaireId);
+    setActiveGroupId(groupId);
+
+    let element: Element | null;
+
+    if (groupId) {
+      element = document.querySelector(`[data-group-id="${groupId}"]`);
+    } else {
+      element = document.querySelector(
+        `[data-questionnaire-id="${questionnaireId}"]`,
+      );
+    }
+
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <div className="flex gap-4">
       {/* Left Navigation */}
-      <div className="w-64 border-r p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
+      <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         {questionnaireForms.map((form) => (
           <div key={form.questionnaire.id} className="space-y-2">
             <button
@@ -340,7 +725,7 @@ export function QuestionnaireForm({
                 activeQuestionnaireId === form.questionnaire.id &&
                   "bg-gray-100 text-green-600",
               )}
-              onClick={() => setActiveQuestionnaireId(form.questionnaire.id)}
+              onClick={() => scrollToQuestion(form.questionnaire.id)}
               disabled={isPending}
             >
               {form.questionnaire.title}
@@ -356,10 +741,9 @@ export function QuestionnaireForm({
                       activeGroupId === group.id &&
                         "bg-gray-100 text-green-600",
                     )}
-                    onClick={() => {
-                      setActiveQuestionnaireId(form.questionnaire.id);
-                      setActiveGroupId(group.id);
-                    }}
+                    onClick={() =>
+                      scrollToQuestion(form.questionnaire.id, group.id)
+                    }
                     disabled={isPending}
                   >
                     {group.text}
@@ -376,9 +760,10 @@ export function QuestionnaireForm({
         {questionnaireForms.map((form, index) => (
           <div
             key={`${form.questionnaire.id}-${index}`}
-            className="rounded-lg py-6 px-4 space-y-6"
+            className="rounded-lg py-6 space-y-6"
+            data-questionnaire-id={form.questionnaire.id}
           >
-            <div className="flex justify-between items-center max-w-4xl">
+            <div className="flex justify-between items-center max-w-4xl p-2">
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">
                   {form.questionnaire.title}
@@ -389,8 +774,7 @@ export function QuestionnaireForm({
                   </p>
                 )}
               </div>
-
-              {form.questionnaire.id !== questionnaireData?.id && (
+              {form.questionnaire.slug !== questionnaireSlug && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -514,7 +898,7 @@ export function QuestionnaireForm({
                     <>
                       <span className="opacity-0">{t("submit")}</span>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
+                        <div className="size-5 animate-spin rounded-full border-b-2 border-white" />
                       </div>
                     </>
                   ) : (
@@ -523,6 +907,11 @@ export function QuestionnaireForm({
                 </Button>
               </div>
             )}
+
+            <ValidationErrorDisplay
+              questionnaireForms={questionnaireForms}
+              serverErrors={serverErrors}
+            />
           </>
         )}
 
@@ -535,7 +924,7 @@ export function QuestionnaireForm({
         <DebugPreview
           data={questionnaireForms}
           title="QuestionnaireForm"
-          className="p-4 space-y-6 max-w-4xl"
+          className="p-4 space-y-6 max-w-4xl m-2"
         />
       </div>
     </div>

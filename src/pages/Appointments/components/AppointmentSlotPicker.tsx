@@ -1,5 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { format, isBefore, isSameDay, startOfToday } from "date-fns";
+import {
+  format,
+  isBefore,
+  isPast,
+  isSameDay,
+  isToday,
+  isWithinInterval,
+  startOfToday,
+} from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,6 +18,7 @@ import Calendar from "@/CAREUI/interactive/Calendar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -25,6 +34,7 @@ interface AppointmentSlotPickerProps {
   resourceId?: string;
   onSlotSelect: (slotId: string | undefined) => void;
   selectedSlotId?: string;
+  onSlotDetailsChange?: (slot: TokenSlot) => void;
 }
 
 export function AppointmentSlotPicker({
@@ -32,6 +42,7 @@ export function AppointmentSlotPicker({
   resourceId,
   onSlotSelect,
   selectedSlotId,
+  onSlotDetailsChange,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -55,10 +66,55 @@ export function AppointmentSlotPicker({
     enabled: !!resourceId && !!selectedDate,
   });
 
+  const slotsTodayQuery = useQuery({
+    queryKey: ["slots", facilityId, resourceId, dateQueryString(new Date())],
+    queryFn: query(scheduleApis.slots.getSlotsForDay, {
+      pathParams: { facility_id: facilityId },
+      body: {
+        user: resourceId ?? "",
+        day: dateQueryString(new Date()),
+      },
+    }),
+    enabled: !!resourceId,
+  });
+
+  // Update slot details when a slot is selected
+  const handleSlotSelect = (slotId: string | undefined) => {
+    onSlotSelect(slotId);
+    if (slotId && onSlotDetailsChange) {
+      const allSlots = slotsQuery.data?.results || [];
+      const selectedSlot = allSlots.find((slot) => slot.id === slotId);
+
+      if (selectedSlot) {
+        onSlotDetailsChange(selectedSlot);
+      }
+    }
+  };
+
   const renderDay = (date: Date) => {
     const isSelected = isSameDay(date, selectedDate);
     const isBeforeToday = isBefore(date, startOfToday());
-    const availability = heatmapQuery.data?.[dateQueryString(date)];
+
+    const availability = (() => {
+      // If the date is today and there are slots for today, ignore the heatmap
+      // as the heatmap does not account for past slots and instead compute
+      // the availability for the day based on the slots that are currently
+      // available
+      if (isToday(date) && slotsTodayQuery.data) {
+        const slots = slotsTodayQuery.data.results.filter(
+          (slot) => !isPast(slot.end_datetime),
+        );
+        return {
+          booked_slots: slots.reduce((a, s) => a + s.allocated, 0),
+          total_slots: slots.reduce(
+            (acc, slot) => acc + slot.availability.tokens_per_slot,
+            0,
+          ),
+        };
+      }
+
+      return heatmapQuery.data?.[dateQueryString(date)];
+    })();
 
     if (
       heatmapQuery.isFetching ||
@@ -71,15 +127,19 @@ export function AppointmentSlotPicker({
           disabled
           onClick={() => {
             setSelectedDate(date);
-            onSlotSelect(undefined);
           }}
           className={cn(
-            "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border border-gray-200",
+            "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border border-gray-200 cursor-not-allowed",
             isSelected ? "ring-2 ring-primary-500" : "",
           )}
         >
           <div className="relative z-10">
             <span>{date.getDate()}</span>
+            {!heatmapQuery.isFetching && (
+              <span className="text-xs text-gray-400 block">
+                {t("no_slots")}
+              </span>
+            )}
           </div>
         </button>
       );
@@ -95,7 +155,6 @@ export function AppointmentSlotPicker({
         disabled={isBeforeToday || isFullyBooked}
         onClick={() => {
           setSelectedDate(date);
-          onSlotSelect(undefined);
         }}
         className={cn(
           "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border-2 hover:scale-105 hover:shadow-md transition-all",
@@ -116,7 +175,7 @@ export function AppointmentSlotPicker({
                     : "text-primary-500",
               )}
             >
-              {tokensLeft} left
+              {t("tokens_left", { count: tokensLeft })}
             </span>
           )}
         </div>
@@ -144,7 +203,6 @@ export function AppointmentSlotPicker({
           month={selectedMonth}
           onMonthChange={(month) => {
             setSelectedMonth(month);
-            onSlotSelect(undefined);
           }}
           renderDay={renderDay}
           className="mb-6"
@@ -156,51 +214,61 @@ export function AppointmentSlotPicker({
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium">{t("available_time_slots")}</h3>
         </div>
-        <ScrollArea>
-          <div className="max-h-96">
-            {slotsQuery.data == null && (
-              <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
-                <p className="text-gray-400">
-                  {t("to_view_available_slots_select_resource_and_date")}
-                </p>
-              </div>
-            )}
-            {slotsQuery.data?.results.length === 0 && (
-              <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
-                <p className="text-gray-400">
-                  {t("no_slots_available_for_this_date")}
-                </p>
-              </div>
-            )}
-            {!!slotsQuery.data?.results.length &&
-              groupSlotsByAvailability(slotsQuery.data.results).map(
-                ({ availability, slots }) => (
-                  <div key={availability.name}>
-                    <h4 className="text-lg font-semibold mb-3">
-                      {availability.name}
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {slots.map((slot) => (
-                        <TokenSlotButton
-                          key={slot.id}
-                          slot={slot}
-                          availability={availability}
-                          selectedSlotId={selectedSlotId}
-                          onClick={() => {
-                            onSlotSelect(
-                              selectedSlotId === slot.id ? undefined : slot.id,
-                            );
-                          }}
-                          selectedDate={selectedDate}
-                        />
-                      ))}
-                    </div>
-                    <Separator className="my-6" />
-                  </div>
-                ),
-              )}
+        {slotsQuery.isFetching ? (
+          <div className="flex flex-wrap gap-4">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Skeleton key={index} className="h-10 w-20" />
+            ))}
           </div>
-        </ScrollArea>
+        ) : (
+          <ScrollArea>
+            <div className="max-h-96">
+              {slotsQuery.data == null && (
+                <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
+                  <p className="text-gray-400">
+                    {t("to_view_available_slots_select_resource_and_date")}
+                  </p>
+                </div>
+              )}
+              {slotsQuery.data?.results.length === 0 && (
+                <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
+                  <p className="text-gray-400">
+                    {t("no_slots_available_for_this_date")}
+                  </p>
+                </div>
+              )}
+              {!!slotsQuery.data?.results.length &&
+                groupSlotsByAvailability(slotsQuery.data.results).map(
+                  ({ availability, slots }) => (
+                    <div key={availability.name}>
+                      <h4 className="text-lg font-semibold mb-3">
+                        {availability.name}
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {slots.map((slot) => (
+                          <TokenSlotButton
+                            key={slot.id}
+                            slot={slot}
+                            availability={availability}
+                            selectedSlotId={selectedSlotId}
+                            onClick={() => {
+                              handleSlotSelect(
+                                selectedSlotId === slot.id
+                                  ? undefined
+                                  : slot.id,
+                              );
+                            }}
+                            allowOngoingSlots={true}
+                          />
+                        ))}
+                      </div>
+                      <Separator className="my-6" />
+                    </div>
+                  ),
+                )}
+            </div>
+          </ScrollArea>
+        )}
       </div>
     </>
   );
@@ -211,18 +279,22 @@ export const TokenSlotButton = ({
   availability,
   selectedSlotId,
   onClick,
-  selectedDate,
+  allowOngoingSlots,
 }: {
   slot: Omit<TokenSlot, "availability">;
   availability: TokenSlot["availability"];
   selectedSlotId: string | undefined;
   onClick: () => void;
-  selectedDate: Date;
+  allowOngoingSlots: boolean;
 }) => {
+  const { t } = useTranslation();
+
   const percentage = slot.allocated / availability.tokens_per_slot;
-  const isPastSlot =
-    isSameDay(selectedDate, new Date()) &&
-    isBefore(slot.start_datetime, new Date());
+
+  const isOngoingSlot = isWithinInterval(new Date(), {
+    start: slot.start_datetime,
+    end: slot.end_datetime,
+  });
 
   return (
     <Button
@@ -230,8 +302,11 @@ export const TokenSlotButton = ({
       size="lg"
       variant={selectedSlotId === slot.id ? "primary" : "outline"}
       onClick={onClick}
-      disabled={slot.allocated === availability.tokens_per_slot || isPastSlot}
-      className="flex flex-col items-center group gap-0 w-24"
+      disabled={
+        slot.allocated === availability.tokens_per_slot ||
+        (!allowOngoingSlots && isOngoingSlot)
+      }
+      className="flex flex-col items-center group gap-0 w-24 relative"
     >
       <span className="font-semibold">
         {format(slot.start_datetime, "HH:mm")}
@@ -249,7 +324,18 @@ export const TokenSlotButton = ({
           selectedSlotId === slot.id && "text-white",
         )}
       >
-        {availability.tokens_per_slot - slot.allocated} left
+        {isOngoingSlot ? (
+          <>
+            {t("live")} •{" "}
+            {t("tokens_left", {
+              count: availability.tokens_per_slot - slot.allocated,
+            })}
+          </>
+        ) : (
+          t("tokens_left", {
+            count: availability.tokens_per_slot - slot.allocated,
+          })
+        )}
       </span>
     </Button>
   );

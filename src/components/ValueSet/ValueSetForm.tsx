@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -73,7 +72,7 @@ function ConceptFields({
           (concept) => concept.code === response.metadata.code,
         );
 
-        if (conceptIndex && conceptIndex !== -1) {
+        if (conceptIndex != undefined && conceptIndex !== -1) {
           parentForm.setValue(
             `compose.${type}.${nestIndex}.concept.${conceptIndex}.display`,
             response.metadata.display,
@@ -112,7 +111,7 @@ function ConceptFields({
           size="sm"
           onClick={() => append({ code: "", display: "" })}
         >
-          <PlusIcon className="h-4 w-4 mr-2" />
+          <PlusIcon className="size-4 mr-2" />
           Add Concept
         </Button>
       </div>
@@ -164,7 +163,7 @@ function ConceptFields({
             onClick={() => handleVerify(index)}
             disabled={lookupMutation.isPending}
           >
-            <UpdateIcon className="h-4 w-4" />
+            <UpdateIcon className="size-4" />
           </Button>
           <Button
             type="button"
@@ -172,7 +171,7 @@ function ConceptFields({
             size="icon"
             onClick={() => remove(index)}
           >
-            <TrashIcon className="h-4 w-4" />
+            <TrashIcon className="size-4" />
           </Button>
         </div>
       ))}
@@ -203,7 +202,7 @@ function FilterFields({
           size="sm"
           onClick={() => append({ property: "", op: "", value: "" })}
         >
-          <PlusIcon className="h-4 w-4 mr-2" />
+          <PlusIcon className="size-4 mr-2" />
           Add Filter
         </Button>
       </div>
@@ -248,7 +247,7 @@ function FilterFields({
             size="icon"
             onClick={() => remove(index)}
           >
-            <TrashIcon className="h-4 w-4" />
+            <TrashIcon className="size-4" />
           </Button>
         </div>
       ))}
@@ -286,7 +285,7 @@ function RuleFields({
             })
           }
         >
-          <PlusIcon className="h-4 w-4 mr-2" />
+          <PlusIcon className="size-4 mr-2" />
           Add Rule
         </Button>
       </CardHeader>
@@ -329,7 +328,7 @@ function RuleFields({
                 size="icon"
                 onClick={() => remove(index)}
               >
-                <TrashIcon className="h-4 w-4" />
+                <TrashIcon className="size-4" />
               </Button>
             </div>
             <ConceptFields nestIndex={index} type={type} parentForm={form} />
@@ -341,65 +340,72 @@ function RuleFields({
   );
 }
 
-const valuesetFormSchema = z.object({
-  name: z.string().min(1, t("field_required")),
-  slug: z.string().min(1, t("field_required")),
-  description: z.string(),
-  status: z.enum(["active", "draft", "retired", "unknown"]),
-  is_system_defined: z.boolean(),
-  compose: z.object({
-    include: z.array(
-      z.object({
-        system: z.string(),
-        concept: z
-          .array(
-            z.object({
-              code: z.string(),
-              display: z.string(),
-            }),
-          )
-          .optional(),
-        filter: z
-          .array(
-            z.object({
-              property: z.string(),
-              op: z.string(),
-              value: z.string(),
-            }),
-          )
-          .optional(),
-      }),
-    ),
-    exclude: z.array(
-      z.object({
-        system: z.string(),
-        concept: z
-          .array(
-            z.object({
-              code: z.string(),
-              display: z.string(),
-            }),
-          )
-          .optional(),
-        filter: z
-          .array(
-            z.object({
-              property: z.string(),
-              op: z.string(),
-              value: z.string(),
-            }),
-          )
-          .optional(),
-      }),
-    ),
-  }),
-});
 export function ValueSetForm({
   initialData,
   onSubmit,
   isSubmitting,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
+  const valuesetFormSchema = z.object({
+    name: z.string().trim().min(1, t("field_required")),
+    slug: z
+      .string()
+      .trim()
+      .min(5, t("field_required"))
+      .max(25, t("max_character_validation", { length: 25 }))
+      .regex(/^[-\w]+$/, {
+        message: t("slug_format_message"),
+      }),
+    description: z.string(),
+    status: z.enum(["active", "draft", "retired", "unknown"]),
+    is_system_defined: z.boolean(),
+    compose: z.object({
+      include: z.array(
+        z.object({
+          system: z.string(),
+          concept: z
+            .array(
+              z.object({
+                code: z.string(),
+                display: z.string(),
+              }),
+            )
+            .optional(),
+          filter: z
+            .array(
+              z.object({
+                property: z.string(),
+                op: z.string(),
+                value: z.string(),
+              }),
+            )
+            .optional(),
+        }),
+      ),
+      exclude: z.array(
+        z.object({
+          system: z.string(),
+          concept: z
+            .array(
+              z.object({
+                code: z.string(),
+                display: z.string(),
+              }),
+            )
+            .optional(),
+          filter: z
+            .array(
+              z.object({
+                property: z.string(),
+                op: z.string(),
+                value: z.string(),
+              }),
+            )
+            .optional(),
+        }),
+      ),
+    }),
+  });
 
   const { goBack } = useAppHistory();
 

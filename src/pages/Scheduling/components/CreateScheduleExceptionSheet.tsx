@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isBefore, isToday, parse, startOfDay } from "date-fns";
+import dayjs from "dayjs";
 import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -34,6 +34,7 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
@@ -69,14 +70,12 @@ export default function CreateScheduleExceptionSheet({
         .refine((date) => date >= startOfDay(new Date()), {
           message: t("a_schedule_cannot_be_created_in_the_past."),
         }),
-
-      // Ensure valid_to is strictly after valid_from
+      // Ensure valid_to is today or future
       valid_to: z
         .date({ required_error: t("field_required") })
-        .refine((date) => date > new Date(), {
-          message: t("date_must_be_future"),
+        .min(dayjs().startOf("day").toDate(), {
+          message: t("date_must_be_today_or_future"),
         }),
-
       start_time: z
         .string()
         .min(1, t("field_required")) as unknown as z.ZodType<Time>,
@@ -90,30 +89,34 @@ export default function CreateScheduleExceptionSheet({
     .refine(
       (data) => {
         if (data.unavailable_all_day) return true;
-
-        const now = new Date();
-
-        const startTime = parse(data.start_time, "HH:mm", new Date());
-        const endTime = parse(data.end_time, "HH:mm", new Date());
-
+        const startTime = dayjs(data.start_time, "HH:mm");
+        const endTime = dayjs(data.end_time, "HH:mm");
         // If the date is today, ensure start_time and end_time are in the future
-        if (isToday(data.valid_from)) {
-          return isBefore(now, startTime) && isBefore(startTime, endTime);
+        if (dayjs(data.valid_from).isSame(dayjs(), "day")) {
+          return dayjs().isBefore(startTime) && startTime.isBefore(endTime);
         }
-
         // Ensure start_time is before end_time
-        return isBefore(startTime, endTime);
+        return startTime.isBefore(endTime);
       },
-      {
-        message: t("start_time_must_be_in_the_future"),
-        path: ["start_time"],
+      (data) => {
+        const startTime = dayjs(data.start_time, "HH:mm");
+        const endTime = dayjs(data.end_time, "HH:mm");
+        return {
+          message: startTime.isBefore(endTime)
+            ? t("start_time_must_be_before_end_time")
+            : t("start_time_must_be_in_the_future"),
+          path: ["start_time"],
+        };
       },
     )
-
-    .refine((data) => data.valid_from <= data.valid_to, {
-      message: t("from_date_must_be_before_to_date"),
-      path: ["valid_from"],
-    });
+    .refine(
+      (data) =>
+        dayjs(data.valid_to).isAfter(dayjs(data.valid_from).subtract(1, "day")),
+      {
+        message: t("to_date_equal_or_after_from_date"),
+        path: ["valid_to"],
+      },
+    );
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -152,6 +155,11 @@ export default function CreateScheduleExceptionSheet({
     },
   });
 
+  const { data: isSchedulableResource } = useIsUserSchedulableResource(
+    facilityId,
+    userId,
+  );
+
   const unavailableAllDay = form.watch("unavailable_all_day");
 
   useEffect(() => {
@@ -188,7 +196,10 @@ export default function CreateScheduleExceptionSheet({
     >
       <SheetTrigger asChild>
         {trigger ?? (
-          <Button variant="primary" disabled={isPending}>
+          <Button
+            variant="primary"
+            disabled={isPending || !isSchedulableResource}
+          >
             {t("add_exception")}
           </Button>
         )}
@@ -202,7 +213,7 @@ export default function CreateScheduleExceptionSheet({
         </SheetHeader>
 
         <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
-          <div className="rounded-md bg-white p-4 shadow">
+          <div className="rounded-md bg-white p-4 shadow-sm">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}

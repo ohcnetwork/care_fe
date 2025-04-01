@@ -12,20 +12,20 @@ import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { usePluginRoutes } from "@/hooks/useCareApps";
+import useSidebarState from "@/hooks/useSidebarState";
 
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
+import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
 import PatientRoutes from "@/Routers/routes/PatientRoutes";
 import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
+import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
-
-import OrganizationRoutes from "./routes/OrganizationRoutes";
-import AdminRoutes from "./routes/adminRoutes";
 
 // List of paths where the sidebar should be hidden
 const PATHS_WITHOUT_SIDEBAR = ["/", "/session-expired"];
@@ -87,7 +87,7 @@ export default function AppRouter() {
   const appPages = useRoutes(routes);
   const adminPages = useRoutes(AdminRouter);
 
-  const sidebarFor = appPages ? SidebarFor.FACILITY : SidebarFor.ADMIN;
+  const sidebarFor = adminPages ? SidebarFor.ADMIN : SidebarFor.FACILITY;
 
   const pages = appPages || adminPages || <ErrorPage />;
 
@@ -95,8 +95,10 @@ export default function AppRouter() {
   const currentPath = window.location.pathname;
   const shouldShowSidebar = !PATHS_WITHOUT_SIDEBAR.includes(currentPath);
 
+  const sidebarOpen = useSidebarState();
+
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={sidebarOpen}>
       <PermissionProvider
         userPermissions={user?.permissions || []}
         isSuperAdmin={user?.is_superuser || false}
@@ -106,9 +108,9 @@ export default function AppRouter() {
         )}
         <main
           id="pages"
-          className="flex flex-col flex-1 min-h-[calc(100svh-theme(spacing.4))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border rounded-lg shadow bg-gray-50 focus:outline-none"
+          className="flex flex-col flex-1 max-w-full min-h-[calc(100svh-(--spacing(4)))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border border-gray-200 rounded-lg shadow-sm bg-gray-50 focus:outline-hidden"
         >
-          <div className="relative z-10 flex h-16 bg-white shadow shrink-0 md:hidden">
+          <div className="relative z-10 flex h-16 bg-white shadow-sm shrink-0 md:hidden">
             <div className="flex items-center">
               {shouldShowSidebar && <SidebarTrigger />}
             </div>

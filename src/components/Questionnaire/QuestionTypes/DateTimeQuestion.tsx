@@ -92,7 +92,7 @@ export function DateTimeQuestion({
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex sm:gap-2 flex-wrap">
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -104,7 +104,7 @@ export function DateTimeQuestion({
             )}
             disabled={disabled}
           >
-            <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-calender" className="mr-2 size-4" />
             {currentValue ? format(currentValue, "PPP") : t("pick_a_date")}
           </Button>
         </PopoverTrigger>
@@ -119,7 +119,7 @@ export function DateTimeQuestion({
       </Popover>
       <Input
         type="time"
-        className="w-[150px]"
+        className="sm:w-[150px] border-t-0 sm:border-t border-gray-200"
         value={formatTime(currentValue)}
         onChange={handleTimeChange}
         disabled={disabled || !currentValue}

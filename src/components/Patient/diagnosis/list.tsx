@@ -1,17 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Link } from "raviger";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
+import { ACTIVE_DIAGNOSIS_CLINICAL_STATUS } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 
 import { DiagnosisTable } from "./DiagnosisTable";
@@ -19,59 +19,45 @@ import { DiagnosisTable } from "./DiagnosisTable";
 interface DiagnosisListProps {
   patientId: string;
   encounterId?: string;
-  facilityId?: string;
   className?: string;
+  readOnly?: boolean;
 }
 
 export function DiagnosisList({
   patientId,
   encounterId,
-  facilityId,
-  className,
+  className = "",
+  readOnly = false,
 }: DiagnosisListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
-
-  const { data: diagnoses, isLoading } = useQuery({
-    queryKey: ["diagnosis", patientId, encounterId],
+  const { data: diagnoses, isLoading: isDiagnosesLoading } = useQuery({
+    queryKey: ["encounter_diagnosis", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
-      queryParams: encounterId ? { encounter: encounterId } : undefined,
+      queryParams: {
+        category: ["encounter_diagnosis"],
+        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+        exclude_verification_status: "entered_in_error",
+        ...(encounterId ? { encounter: encounterId } : {}),
+      },
     }),
   });
 
-  if (isLoading) {
+  const { data: chronicConditions, isLoading: isChronicConditionsLoading } =
+    useQuery({
+      queryKey: ["chronic_condition", patientId, encounterId],
+      queryFn: query(diagnosisApi.listDiagnosis, {
+        pathParams: { patientId },
+        queryParams: {
+          category: "chronic_condition",
+          clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+          exclude_verification_status: "entered_in_error",
+        },
+      }),
+    });
+
+  if (!diagnoses?.results.length && !chronicConditions?.results.length) {
     return (
-      <DiagnosisListLayout
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-        className={className}
-      >
-        <CardContent className="px-2 pb-2">
-          <Skeleton className="h-[100px] w-full" />
-        </CardContent>
-      </DiagnosisListLayout>
-    );
-  }
-
-  const filteredDiagnoses = diagnoses?.results?.filter(
-    (diagnosis) =>
-      showEnteredInError ||
-      diagnosis.verification_status !== "entered_in_error",
-  );
-
-  const hasEnteredInErrorRecords = diagnoses?.results?.some(
-    (diagnosis) => diagnosis.verification_status === "entered_in_error",
-  );
-
-  if (!filteredDiagnoses?.length) {
-    return (
-      <DiagnosisListLayout
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-        className={className}
-      >
+      <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
         </CardContent>
@@ -80,60 +66,44 @@ export function DiagnosisList({
   }
 
   return (
-    <DiagnosisListLayout
-      facilityId={facilityId}
-      patientId={patientId}
-      encounterId={encounterId}
-      className={className}
-    >
-      <>
-        <DiagnosisTable
-          diagnoses={[
-            ...filteredDiagnoses.filter(
-              (diagnosis) =>
-                diagnosis.verification_status !== "entered_in_error",
-            ),
-            ...(showEnteredInError
-              ? filteredDiagnoses.filter(
-                  (diagnosis) =>
-                    diagnosis.verification_status === "entered_in_error",
-                )
-              : []),
-          ]}
-        />
-
-        {hasEnteredInErrorRecords && !showEnteredInError && (
-          <>
-            <div className="border-b border-dashed border-gray-200 my-2" />
-            <div className="flex justify-center">
-              <Button
-                variant="ghost"
-                size="xs"
-                onClick={() => setShowEnteredInError(true)}
-                className="text-xs underline text-gray-950"
-              >
-                {t("view_all")}
-              </Button>
-            </div>
-          </>
+    <DiagnosisListLayout className={className} readOnly={readOnly}>
+      <div className="space-y-2">
+        {isChronicConditionsLoading && (
+          <CardContent className="px-2 pb-2">
+            <Skeleton className="h-[100px] w-full" />
+            <Skeleton className="h-[100px] w-full" />
+          </CardContent>
         )}
-      </>
+        {chronicConditions?.results.length ? (
+          <DiagnosisTable
+            diagnoses={chronicConditions?.results}
+            title={t("chronic_condition", {
+              count: 2,
+            })}
+          />
+        ) : null}
+        {isDiagnosesLoading && (
+          <CardContent className="px-2 pb-2">
+            <Skeleton className="h-[100px] w-full" />
+            <Skeleton className="h-[100px] w-full" />
+          </CardContent>
+        )}
+        {diagnoses?.results?.length ? (
+          <DiagnosisTable diagnoses={diagnoses.results} />
+        ) : null}
+      </div>
     </DiagnosisListLayout>
   );
 }
 
 const DiagnosisListLayout = ({
-  facilityId,
-  patientId,
-  encounterId,
   children,
   className,
+  readOnly = false,
 }: {
-  facilityId?: string;
-  patientId: string;
-  encounterId?: string;
   children: ReactNode;
   className?: string;
+  readOnly?: boolean;
 }) => {
   return (
     <Card className={cn("rounded-sm ", className)}>
@@ -141,12 +111,12 @@ const DiagnosisListLayout = ({
         className={cn("px-4 pt-4 pb-2 flex justify-between flex-row")}
       >
         <CardTitle>{t("diagnoses")}</CardTitle>
-        {facilityId && encounterId && (
+        {!readOnly && (
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
+            href={`questionnaire/diagnosis`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
-            <CareIcon icon="l-pen" className="w-4 h-4" />
+            <CareIcon icon="l-pen" className="size-4" />
             {t("edit")}
           </Link>
         )}

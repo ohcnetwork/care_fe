@@ -2,15 +2,14 @@ import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
+
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import {
-  Question,
-  StructuredQuestionType,
-} from "@/types/questionnaire/question";
+import { Question } from "@/types/questionnaire/question";
 
 import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
 
@@ -29,7 +28,7 @@ interface QuestionRendererProps {
   disabled?: boolean;
   activeGroupId?: string;
   encounterId?: string;
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
 }
 
@@ -63,7 +62,7 @@ export function QuestionRenderer({
     FULL_WIDTH_QUESTION_TYPES.includes(question.structured_type);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8 bg-white">
       {questions.map((question) => (
         <div
           key={question.id}

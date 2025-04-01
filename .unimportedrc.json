@@ -12,10 +12,10 @@
   "ignoreUnused": [
     "@fontsource/figtree",
     "@originjs/vite-plugin-federation",
+    "@tailwindcss/vite",
     "@vitejs/plugin-react",
     "browserslist-useragent-regexp",
-    "cross-env",
-    "postcss-loader"
+    "cross-env"
   ],
   "ignoreUnresolved": [
     [
@@ -28,6 +28,27 @@
       "@/supportedBrowsers",
       [
         "src/components/ErrorPages/BrowserWarning.tsx"
+      ]
+    ],
+    [
+      "tailwindcss/colors",
+      [
+        "node_modules/@tailwindcss/forms/src/index.js",
+        "node_modules/@tailwindcss/typography/src/styles.js"
+      ]
+    ],
+    [
+      "tailwindcss/defaultTheme",
+      [
+        "node_modules/@tailwindcss/forms/src/index.js"
+      ]
+    ],
+    [
+      "tailwindcss/plugin",
+      [
+        "node_modules/@tailwindcss/forms/src/index.js",
+        "node_modules/@tailwindcss/typography/src/index.js",
+        "node_modules/@tailwindcss/container-queries/dist/index.js"
       ]
     ],
     [

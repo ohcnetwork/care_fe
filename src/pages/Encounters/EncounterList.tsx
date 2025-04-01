@@ -1,6 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { Link } from "raviger";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,13 +8,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -35,6 +27,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -45,40 +38,12 @@ import { Encounter, EncounterPriority } from "@/types/emr/encounter";
 
 interface EncounterListProps {
   encounters?: Encounter[];
-  facilityId?: string;
+  facilityId: string;
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "planned":
-      return "bg-blue-100 text-blue-800";
-    case "in_progress":
-      return "bg-yellow-100 text-yellow-800";
-    case "completed":
-      return "bg-green-100 text-green-800";
-    case "cancelled":
-      return "bg-red-100 text-red-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "stat":
-      return "bg-red-100 text-red-800";
-    case "urgent":
-      return "bg-orange-100 text-orange-800";
-    case "asap":
-      return "bg-yellow-100 text-yellow-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
-
 const buildQueryParams = (
+  facilityId: string,
   status?: string,
-  facilityId?: string,
   encounterClass?: string,
   priority?: string,
 ) => {
@@ -104,7 +69,7 @@ function EmptyState() {
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
-        <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
+        <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">No encounters found</h3>
       <p className="text-sm text-gray-500 mb-4">
@@ -161,7 +126,7 @@ export function EncounterList({
     queryKey: ["encounters", facilityId, qParams],
     queryFn: query.debounced(routes.encounter.list, {
       queryParams: {
-        ...buildQueryParams(status, facilityId, encounterClass, priority),
+        ...buildQueryParams(facilityId, status, encounterClass, priority),
         name,
         external_identifier,
         limit: resultsPerPage,
@@ -229,14 +194,15 @@ export function EncounterList({
         </Badge>
       }
     >
-      <div className="space-y-4 mt-2 flex flex-col px-6">
-        <div className="rounded-lg border bg-card shadow-sm flex flex-col">
+      <div className="space-y-4 mt-4 flex flex-col">
+        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
+                      data-cy="search-encounter"
                       variant="outline"
                       size="sm"
                       className={cn(
@@ -245,7 +211,7 @@ export function EncounterList({
                           "bg-primary/10 text-primary hover:bg-primary/20",
                       )}
                     >
-                      <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-search" className="mr-2 size-4" />
                       {name || encounter_id || external_identifier ? (
                         <span className="truncate">
                           {name || encounter_id || external_identifier}
@@ -386,28 +352,25 @@ export function EncounterList({
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="planned">
                         <div className="flex items-center">
-                          <CareIcon
-                            icon="l-calender"
-                            className="mr-2 h-4 w-4"
-                          />
+                          <CareIcon icon="l-calender" className="mr-2 size-4" />
                           Planned
                         </div>
                       </SelectItem>
                       <SelectItem value="in_progress">
                         <div className="flex items-center">
-                          <CareIcon icon="l-spinner" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-spinner" className="mr-2 size-4" />
                           In Progress
                         </div>
                       </SelectItem>
                       <SelectItem value="completed">
                         <div className="flex items-center">
-                          <CareIcon icon="l-check" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-check" className="mr-2 size-4" />
                           Completed
                         </div>
                       </SelectItem>
                       <SelectItem value="cancelled">
                         <div className="flex items-center">
-                          <CareIcon icon="l-x" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-x" className="mr-2 size-4" />
                           Cancelled
                         </div>
                       </SelectItem>
@@ -434,22 +397,19 @@ export function EncounterList({
                       <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="imp">
                         <div className="flex items-center">
-                          <CareIcon
-                            icon="l-hospital"
-                            className="mr-2 h-4 w-4"
-                          />
+                          <CareIcon icon="l-hospital" className="mr-2 size-4" />
                           Inpatient
                         </div>
                       </SelectItem>
                       <SelectItem value="amb">
                         <div className="flex items-center">
-                          <CareIcon icon="l-user" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-user" className="mr-2 size-4" />
                           Ambulatory
                         </div>
                       </SelectItem>
                       <SelectItem value="obsenc">
                         <div className="flex items-center">
-                          <CareIcon icon="l-eye" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-eye" className="mr-2 size-4" />
                           Observation
                         </div>
                       </SelectItem>
@@ -457,20 +417,20 @@ export function EncounterList({
                         <div className="flex items-center">
                           <CareIcon
                             icon="l-ambulance"
-                            className="mr-2 h-4 w-4"
+                            className="mr-2 size-4"
                           />
                           Emergency
                         </div>
                       </SelectItem>
                       <SelectItem value="vr">
                         <div className="flex items-center">
-                          <CareIcon icon="l-video" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-video" className="mr-2 size-4" />
                           Virtual
                         </div>
                       </SelectItem>
                       <SelectItem value="hh">
                         <div className="flex items-center">
-                          <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
+                          <CareIcon icon="l-home" className="mr-2 size-4" />
                           Home Health
                         </div>
                       </SelectItem>
@@ -494,7 +454,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        {t("all")}
+                        {t("all_status")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="planned"
@@ -506,10 +466,11 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-calender" className="mr-2 size-4" />
                         {t("encounter_status__planned")}
                       </TabsTrigger>
                       <TabsTrigger
+                        data-cy="in-progress-filter"
                         value="in_progress"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                         onClick={() =>
@@ -519,7 +480,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-spinner" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-spinner" className="mr-2 size-4" />
                         {t("encounter_class__in_progress")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -532,7 +493,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-home" className="mr-2 size-4" />
                         {t("discharge")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -545,7 +506,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-check" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-check" className="mr-2 size-4" />
                         {t("completed")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -558,7 +519,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-x" className="mr-2 h-4 w-4" />
+                        <CareIcon icon="l-x" className="mr-2 size-4" />
                         {t("cancelled")}
                       </TabsTrigger>
                     </div>
@@ -585,7 +546,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      {t("all")}
+                      {t("all_types")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="imp"
@@ -598,7 +559,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-hospital" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-hospital" className="mr-2 size-4" />
                       {t("encounter_class__imp")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -612,7 +573,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-user" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-user" className="mr-2 size-4" />
                       {t("encounter_class__amb")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -626,7 +587,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-eye" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("encounter_class__obsenc")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -640,7 +601,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-ambulance" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-ambulance" className="mr-2 size-4" />
                       {t("emergency")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -654,7 +615,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-video" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-video" className="mr-2 size-4" />
                       {t("encounter_class__vr")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -668,7 +629,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-home" className="mr-2 size-4" />
                       {t("encounter_class__hh")}
                     </TabsTrigger>
                   </div>
@@ -679,7 +640,7 @@ export function EncounterList({
         </div>
 
         <div
-          className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
           data-cy="encounter-list-cards"
         >
           {isLoading ? (
@@ -691,70 +652,11 @@ export function EncounterList({
           ) : (
             <>
               {encounters.map((encounter: Encounter) => (
-                <Card
+                <EncounterInfoCard
                   key={encounter.id}
-                  className="hover:shadow-lg transition-shadow group"
-                >
-                  <CardHeader className="space-y-1 pb-2">
-                    <div className="flex items-center justify-between">
-                      <Link
-                        href={`/facility/${facilityId}/patient/${encounter.patient.id}`}
-                        className="hover:text-primary"
-                      >
-                        <CardTitle className="group-hover:text-primary transition-colors">
-                          {encounter.patient.name}
-                          {encounter.patient.death_datetime && (
-                            <Badge variant="destructive" className="ml-2 py-0">
-                              <h3 className="text-xs font-medium">
-                                {t("expired")}
-                              </h3>
-                            </Badge>
-                          )}
-                        </CardTitle>
-                      </Link>
-                    </div>
-                    <CardDescription className="flex items-center">
-                      <CareIcon icon="l-clock" className="mr-2 h-4 w-4" />
-                      {encounter.period.start &&
-                        format(new Date(encounter.period.start), "PPp")}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="">
-                    <div className="flex flex-col space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge
-                          className={getStatusColor(encounter.status)}
-                          variant="outline"
-                        >
-                          {t(`encounter_status__${encounter.status}`)}
-                        </Badge>
-                        <Badge
-                          className="bg-gray-100 text-gray-800"
-                          variant="outline"
-                        >
-                          {t(`encounter_class__${encounter.encounter_class}`)}
-                        </Badge>
-                        <Badge
-                          className={getPriorityColor(encounter.priority)}
-                          variant="outline"
-                        >
-                          {t(`encounter_priority__${encounter.priority}`)}
-                        </Badge>
-                      </div>
-                      <Separator className="my-2" />
-                      <Link
-                        href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
-                        className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
-                      >
-                        View Details
-                        <CareIcon
-                          icon="l-arrow-right"
-                          className="ml-1 h-4 w-4"
-                        />
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                  encounter={encounter}
+                  facilityId={facilityId}
+                />
               ))}
               {queryEncounters?.count &&
                 queryEncounters.count > resultsPerPage && (

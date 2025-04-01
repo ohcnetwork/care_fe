@@ -35,24 +35,25 @@ export const UserStatusIndicator = ({
       className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}
     >
       {isUserOnline(user) || isAuthUser ? (
-        <Badge variant="secondary" className="bg-green-100 whitespace-nowrap">
-          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-green-500 mr-2" />
+        <Badge variant="outline" className="bg-green-100 whitespace-nowrap">
+          <span className="inline-block size-2 shrink-0 rounded-full bg-green-500 mr-2" />
           <span className="text-xs text-green-700">{t("online")}</span>
         </Badge>
       ) : user.last_login ? (
-        <Badge variant="secondary" className="bg-yellow-100 whitespace-nowrap">
-          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
+        <Badge variant="outline" className="bg-yellow-100 whitespace-nowrap">
+          <span className="inline-block size-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
           <span className="text-xs text-yellow-700">
             {relativeTime(user.last_login)}
           </span>
         </Badge>
       ) : (
         <Badge
-          variant="secondary"
-          className="bg-gray-100 whitespace-nowrap text-wrap"
+          variant="outline"
+          className="bg-gray-100 whitespace-nowrap text-xs text-gray-700"
         >
-          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-gray-500 mr-2" />
-          <span className="text-xs text-gray-700">{t("never_logged_in")}</span>
+          <span className="inline-block size-2 shrink-0 rounded-full bg-gray-500 mr-2" />
+          <span className="hidden lg:inline">{t("never_logged_in")}</span>
+          <span className="lg:hidden">{t("never")}</span>
         </Badge>
       )}
     </span>
@@ -65,23 +66,22 @@ const UserCard = ({ user }: { user: UserBase }) => {
       <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
         <div className="flex items-start gap-3">
           <Avatar
-            name={formatName(user)}
+            name={formatName(user, true)}
             imageUrl={
               "profile_picture_url" in user ? user.profile_picture_url : ""
             }
-            className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl flex-shrink-0"
+            className="size-12 sm:size-14 text-xl sm:text-2xl shrink-0"
           />
 
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex flex-col gap-1">
               <div className="flex items-start justify-between">
                 <h1 className="text-base font-bold break-words pr-2 w-[50%] text-wrap">
-                  {user.first_name} {user.last_name}
+                  {formatName(user)}
                 </h1>
-                <span className="text-sm text-gray-500">
-                  <UserStatusIndicator user={user} />
-                </span>
+                <UserStatusIndicator user={user} />
               </div>
+
               <span className="text-sm text-gray-500 mr-2 break-words">
                 {user.username}
               </span>
@@ -155,8 +155,8 @@ const UserListRow = ({ user }: { user: UserBase }) => {
             imageUrl={
               "profile_picture_url" in user ? user.profile_picture_url : ""
             }
-            name={formatName(user) ?? ""}
-            className="h-10 w-10 text-lg"
+            name={formatName(user, true) ?? ""}
+            className="size-10 text-lg"
           />
           <div className="flex flex-col">
             <h1 id={`name-${user.username}`} className="text-sm font-medium">
@@ -230,7 +230,7 @@ export default function UserListAndCardView({
           )}
         </>
       ) : (
-        <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+        <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow-sm">
           <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
             {t("no_users_found")}
           </div>

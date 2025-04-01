@@ -76,7 +76,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         name: z.string(),
       })
       .nullable(),
-    assigned_to: z.string().min(1, { message: t("field_required") }),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
     reason: z.string().min(1, { message: t("field_required") }),
@@ -85,6 +84,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       .min(1, { message: t("field_required") }),
     referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),
+    assigned_to: id
+      ? z.string().min(1, { message: t("field_required") })
+      : z.string().optional(),
   });
 
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
@@ -190,7 +192,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     queryKey: ["facilities", facilitySearch],
     queryFn: query.debounced(facilityApi.getAllFacilities, {
       queryParams: {
-        search_text: facilitySearch,
+        search_text: facilitySearch ? facilitySearch : undefined,
         limit: 50,
       },
     }),
@@ -246,12 +248,14 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       >
                         <CareIcon
                           icon="l-user"
-                          className="h-5 w-5 text-blue-700"
+                          className="size-5 text-blue-700"
                         />
-                        <AlertDescription className="text-sm text-blue-700">
-                          {t("linked_patient")}:{" "}
-                          <span className="font-medium">
-                            {patientData.name}
+                        <AlertDescription className="text-sm text-blue-700 whitespace-nowrap">
+                          <span>
+                            {t("linked_patient")}:{" "}
+                            <strong className="font-medium">
+                              {patientData.name}
+                            </strong>
                           </span>
                         </AlertDescription>
                       </Link>
@@ -409,24 +413,27 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="assigned_to"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel required>{t("assigned_to")}</FormLabel>
-                          <FormControl>
-                            <UserSelector
-                              selected={assignedToUser}
-                              onChange={handleUserChange}
-                              placeholder={t("search_users")}
-                              noOptionsMessage={t("no_users_found")}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+
+                    {id && (
+                      <FormField
+                        control={form.control}
+                        name="assigned_to"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel required>{t("assigned_to")}</FormLabel>
+                            <FormControl>
+                              <UserSelector
+                                selected={assignedToUser}
+                                onChange={handleUserChange}
+                                placeholder={t("search_users")}
+                                noOptionsMessage={t("no_users_found")}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </div>
                 </div>
                 <Separator />
@@ -502,7 +509,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       onClick={fillMyDetails}
                       className="shrink-0"
                     >
-                      <CareIcon icon="l-user" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-user" className="mr-2 size-4" />
                       {t("fill_my_details")}
                     </Button>
                   </div>
@@ -550,7 +557,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   </div>
                 </div>
 
-                <div className="sticky bottom-0 flex justify-end gap-4 border-t pt-4">
+                <div className="flex justify-end gap-4 border-t border-gray-200 pt-4">
                   <Button
                     type="button"
                     variant="outline"
@@ -570,7 +577,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     {isPending && (
                       <CareIcon
                         icon="l-spinner"
-                        className="mr-2 h-4 w-4 animate-spin"
+                        className="mr-2 size-4 animate-spin"
                       />
                     )}
                     {isPending ? t("submitting") : t("submit")}

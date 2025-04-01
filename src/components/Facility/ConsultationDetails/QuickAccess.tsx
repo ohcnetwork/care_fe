@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+import { Link, navigate, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -6,7 +6,9 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import EncounterActions from "@/components/Encounter/EncounterActions";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
+import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
@@ -15,18 +17,26 @@ import { Encounter } from "@/types/emr/encounter";
 
 interface QuickAccessProps {
   encounter: Encounter;
+  canEdit: boolean;
 }
 
-export default function QuickAccess({ encounter }: QuickAccessProps) {
+export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
   const { t } = useTranslation();
-  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
+  const questionnaireOptions = useQuestionnaireOptions(
+    "encounter_actions",
+    canEdit,
+  );
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityId = subpathMatch?.facilityId;
 
   return (
     <div className="flex flex-col gap-6">
       {/* Questionnaire Section */}
-      {encounter.status !== "completed" && (
+      {canEdit && facilityId && (
         <section className="space-y-2 p-2">
-          <h3 className="text-lg font-semibold mb-3">{t("questionnaire")}</h3>
+          <h3 className="text-lg font-semibold mb-3">
+            {t("questionnaire_one")}
+          </h3>
           <div className="space-y-3 p-2 font-semibold">
             {questionnaireOptions.map((option) => (
               <Link
@@ -35,14 +45,32 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
                 className="flex items-center gap-2 text-sm hover:text-gray-500 text-gray-900"
                 data-cy="update-encounter-option"
               >
-                <CareIcon icon="l-file-alt" className="h-4 w-4 text-gray-950" />
+                <CareIcon icon="l-file-alt" className="size-4 text-gray-950" />
                 {t(option.title)}
               </Link>
             ))}
           </div>
+          <QuestionnaireSearch
+            placeholder={t("choose_questionnaire")}
+            subjectType="encounter"
+            onSelect={(selected) =>
+              navigate(
+                `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/${selected.slug}`,
+              )
+            }
+          />
           <div className="w-full border-t border-dashed border-gray-300" />
         </section>
       )}
+
+      {/* Encounter Actions */}
+      <section>
+        <h3 className="text-lg font-medium text-gray-950 mb-1">
+          {t("actions")}
+        </h3>
+
+        <EncounterActions encounter={encounter} />
+      </section>
 
       {/* Departments and Teams */}
       <section>
@@ -64,7 +92,7 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
                   className="text-sm font-semibold border-gray-400 text-gray-950"
                 >
                   {t("update_department")}
-                  <CareIcon icon="l-plus" className="ml-1 h-3 w-3" />
+                  <CareIcon icon="l-plus" className="ml-1 size-3" />
                 </Button>
               </div>
             }
@@ -89,7 +117,7 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
                         {stringifyNestedObject(org)}
                       </Badge>
                     ))
-                  : t("no_organizations_added_yet")}
+                  : t("no_organization_added_yet", { count: 0 })}
               </div>
             }
           />

@@ -124,7 +124,7 @@ export default function ResourceDetails({
 
   return (
     <Page title={t("request_details")}>
-      <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
+      <div className="max-w-7xl space-y-6 p-4 md:p-6">
         {/* Action Buttons */}
         <div className="flex items-center justify-between">
           <div className="flex flex-wrap gap-2 w-full">
@@ -134,7 +134,7 @@ export default function ResourceDetails({
               }
               className="w-full sm:w-auto"
             >
-              <CareIcon icon="l-file-alt" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-file-alt" className="mr-2 size-4" />
               {t("request_letter")}
             </Button>
             <Button
@@ -144,7 +144,7 @@ export default function ResourceDetails({
                 navigate(`/facility/${facilityId}/resource/${id}/update`)
               }
             >
-              <CareIcon icon="l-pen" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-pen" className="mr-2 size-4" />
               {t("update_status")}
             </Button>
           </div>

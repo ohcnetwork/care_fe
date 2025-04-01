@@ -15,9 +15,12 @@ import UserSummaryTab from "@/components/Users/UserSummary";
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName, keysOf } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 
 export interface UserHomeProps {
   username?: string;
@@ -31,13 +34,14 @@ export interface TabChildProp {
 
 export default function UserHome(props: UserHomeProps) {
   const { tab } = props;
-  let { username } = props;
+  let { username, facilityId } = props;
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const { goBack } = useAppHistory();
   if (!username) {
     username = authUser.username;
   }
+  const { hasPermission } = usePermissions();
+  const { goBack } = useAppHistory();
 
   const {
     data: userData,
@@ -51,6 +55,19 @@ export default function UserHome(props: UserHomeProps) {
       },
     }),
   });
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["getFacilityDetails", props.facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId ?? "" },
+    }),
+    enabled: !!facilityId,
+  });
+
+  const { canViewSchedule } = getPermissions(
+    hasPermission,
+    facilityId ? (facilityData?.permissions ?? []) : authUser.permissions,
+  );
 
   if (isError) {
     goBack("/");
@@ -67,7 +84,7 @@ export default function UserHome(props: UserHomeProps) {
     },
     AVAILABILITY: {
       body: UserAvailabilityTab,
-      hidden: !props.facilityId,
+      hidden: !props.facilityId || !canViewSchedule,
     },
   } satisfies Record<string, TabChildProp>;
 
@@ -126,7 +143,11 @@ export default function UserHome(props: UserHomeProps) {
                 </div>
               </div>
             </div>
-            <SelectedTab userData={userData} username={username} {...props} />
+            <SelectedTab
+              userData={userData}
+              username={username}
+              permissions={facilityData?.permissions ?? []}
+            />
           </>
         }
       </Page>
