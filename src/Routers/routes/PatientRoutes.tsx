@@ -1,7 +1,7 @@
 import { Redirect } from "raviger";
 import { Suspense, lazy } from "react";
 
-import { DrawingTab } from "@/components/Common/Drawings/DrawingTab";
+import { DrawingPage } from "@/components/Common/Drawings/DrawingPage";
 import Loading from "@/components/Common/Loading";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
@@ -85,7 +85,7 @@ const PatientRoutes: AppRoutes = {
       />
     </Suspense>
   ),
-  "/patient/:patientId/drawings": () => <DrawingTab type="patient" />,
+  "/patient/:patientId/drawings": () => <DrawingPage type="patient" />,
 
   "/patient/:patientId/drawings/new": ({ patientId }) => {
     return (

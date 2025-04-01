@@ -108,7 +108,6 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
         </div>
       ) : (
         <div
-          key={JSON.stringify(elements)}
           ref={svgContainerRef}
           className="h-full w-full flex items-center justify-center p-2"
         />
@@ -119,23 +118,22 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
 
 ExcalidrawPreview.displayName = "ExcalidrawPreview";
 
-export const DrawingTab = (props: DrawingsTabProps) => {
-  const { qParams, Pagination, resultsPerPage } = useFilters({
+export const DrawingPage = (props: DrawingsTabProps) => {
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["name"],
   });
-  const [drawingName, setDrawingName] = useState("");
 
   const associatingId =
     props.type === "encounter" ? props.encounter?.id : props.patientId;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["drawings", associatingId, qParams, resultsPerPage, drawingName],
+    queryKey: ["drawings", associatingId, qParams, resultsPerPage],
     queryFn: query.debounced(metaArtifactApi.list, {
       queryParams: {
         object_type: "drawing",
         associating_type: props.type,
-        name: drawingName,
+        name: qParams.name,
         associating_id: associatingId,
         limit: resultsPerPage,
         offset: (qParams.page - 1) * resultsPerPage,
@@ -150,8 +148,8 @@ export const DrawingTab = (props: DrawingsTabProps) => {
           id="search-by-name"
           name="name"
           placeholder={t("search_drawings")}
-          value={drawingName}
-          onChange={(e) => setDrawingName(e.target.value)}
+          value={qParams.name}
+          onChange={(e) => updateQuery({ name: e.target.value })}
           className="w-full sm:w-1/3"
         />
         <Button variant="white" onClick={() => navigate("drawings/new")}>
@@ -185,7 +183,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
                         elements={drawing.object_value.elements}
                       />
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-center p-2">
+                    <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-center p-2">
                       <span className="text-white font-medium flex items-center gap-1">
                         <CareIcon icon="l-eye" />
                         {t("view")}
@@ -196,7 +194,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
                     <div className="flex items-center space-x-2 mb-2">
                       <CareIcon
                         icon="l-edit"
-                        className="text-xl text-primary-600 flex-shrink-0"
+                        className="text-xl text-primary-600 shrink-0"
                       />
                       <span className="font-medium truncate">
                         {drawing.name}
