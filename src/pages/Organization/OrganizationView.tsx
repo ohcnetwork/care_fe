@@ -72,6 +72,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                     updateQuery({ name: e.target.value });
                   }}
                   className="w-full"
+                  autoFocus
                 />
               </div>
             </div>

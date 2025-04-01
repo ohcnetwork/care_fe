@@ -92,6 +92,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
           value={qParams.username}
           placeholder={t("search_by_username")}
           className="w-full max-w-sm"
+          autoFocus
         />
         <Tabs
           value={activeTab}

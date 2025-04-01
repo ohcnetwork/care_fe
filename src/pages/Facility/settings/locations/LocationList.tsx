@@ -264,6 +264,7 @@ export default function LocationList({ facilityId }: Props) {
               setSearchQuery(e.target.value);
             }}
             className="w-full text-xs lg:text-sm"
+            autoFocus
           />
           <Button
             variant="primary"

@@ -92,6 +92,7 @@ export default function OrganizationFacilities({
                 }
                 className="max-w-sm"
                 data-cy="search-facility"
+                autoFocus
               />
             </div>
 

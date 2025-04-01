@@ -144,6 +144,7 @@ export default function DevicesList({ facilityId }: Props) {
             value={qParams.search_text || ""}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-9"
+            autoFocus
           />
         </div>
         <Popover>

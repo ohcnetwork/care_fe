@@ -265,6 +265,7 @@ export default function LocationContent({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="w-full"
+              autoFocus
             />
           </div>
         </div>

@@ -397,6 +397,7 @@ const Login = (props: LoginProps) => {
                             data-cy="username"
                             value={form.username}
                             onChange={handleChange}
+                            autoFocus
                             className={cn(
                               errors.username &&
                                 "border-red-500 focus-visible:ring-red-500",

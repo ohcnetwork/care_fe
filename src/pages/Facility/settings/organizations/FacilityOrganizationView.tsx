@@ -120,6 +120,7 @@ export default function FacilityOrganizationView({
                   updateQuery({ search: e.target.value || undefined });
                 }}
                 className="w-full pl-8"
+                autoFocus
               />
             </div>
           </div>
