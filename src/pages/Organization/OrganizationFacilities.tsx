@@ -98,6 +98,7 @@ export default function OrganizationFacilities({
                   })
                 }
                 className="w-full max-w-sm border-none shadow-none"
+                data-cy="search-facility"
               />
             </div>
 
