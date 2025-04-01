@@ -485,7 +485,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         <CareIcon icon="l-corner-up-left" className="text-lg" />
                         {t("rotate_left")}
                       </Button>
-
                       <Button
                         variant="ghost"
                         onClick={() => handleRotate(90)}
