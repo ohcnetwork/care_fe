@@ -232,6 +232,9 @@ export default function PatientRegistration(
     if (facilityId) {
       createPatient({
         ...values,
+        permanent_address: values.same_address
+          ? values.address
+          : values.permanent_address,
         facility: facilityId,
         ward_old: undefined,
       });
