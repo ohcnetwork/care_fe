@@ -1,4 +1,3 @@
-import { t } from "i18next";
 import { z } from "zod";
 
 export const ContactPointSystems = [
@@ -23,7 +22,7 @@ export interface ContactPoint {
   use: ContactPointUse;
 }
 
-export default () => ({
+export default (t: (key: string) => string) => ({
   contactPoint: z.discriminatedUnion("system", [
     // Phone numbers
     z.object({
