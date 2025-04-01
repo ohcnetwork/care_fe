@@ -301,7 +301,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
+      <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 rounded-lg p-4 shadow-xl md:p-6 overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-sm text-gray-600">
             {t("file_preview")}
@@ -343,14 +343,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     </a>
                   </Button>
                 )}
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={handleClose}
-                  data-cy="file-preview-close"
-                >
-                  {t("close")}
-                </Button>
               </div>
             </div>
             <div className="flex flex-1 items-center justify-center">
