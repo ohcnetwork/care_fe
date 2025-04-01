@@ -93,7 +93,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
     return (
       <div className="space-y-4">
         <CardListSkeleton count={1} />
-        <CardGridSkeleton count={4} />;
+        <CardGridSkeleton count={4} />
       </div>
     );
   }
