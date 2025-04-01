@@ -80,12 +80,12 @@ export default function TreatmentSummary({
   const canAccess = canViewEncounter || canViewClinicalData;
 
   useEffect(() => {
-    if (!canAccess) {
+    if (!canAccess && !encounterLoading) {
       toast.error(t("no_permission_to_view_page"));
       goBack();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAccess]);
+  }, [canAccess, encounterLoading]);
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query.paginated(allergyIntoleranceApi.getAllergy, {
