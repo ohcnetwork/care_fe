@@ -707,7 +707,7 @@ const DiagnosisTableRow = ({
         <TableCell className="py-1">
           <div className="flex items-center space-x-2 min-w-0">
             <div
-              className="font-medium text-sm truncate flex-1"
+              className="font-medium text-sm truncate max-w-[12rem]"
               title={diagnosis.code.display}
             >
               {diagnosis.code.display}
