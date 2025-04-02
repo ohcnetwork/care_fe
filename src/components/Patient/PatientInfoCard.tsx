@@ -454,9 +454,14 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           </div>
         </div>
         <div
-          className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
+          className="flex flex-col mt-4 items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
+          <PLUGIN_Component
+            __name="PatientInfoCardQuickActions"
+            encounter={encounter}
+            className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+          />
           {!disableButtons && (
             <div
               className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
