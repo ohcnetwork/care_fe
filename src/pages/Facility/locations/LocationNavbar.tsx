@@ -66,18 +66,18 @@ function LocationTreeNode({
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="size-6"
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(location.id);
             }}
           >
             {isLoading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+              <div className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
             ) : isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="size-4" />
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="size-4" />
             )}
           </Button>
         ) : (
@@ -87,7 +87,7 @@ function LocationTreeNode({
           className="flex items-center flex-1 text-sm gap-2"
           onClick={() => onSelect(location)}
         >
-          <Icon className="h-4 w-4" />
+          <Icon className="size-4" />
           <span className="truncate">{location.name}</span>
         </div>
       </div>

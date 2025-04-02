@@ -14,8 +14,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
 import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -47,6 +48,10 @@ import {
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -56,6 +61,7 @@ import {
   saveElementAsImage,
   stringifyNestedObject,
 } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { FacilityData } from "@/types/facility/facility";
 import {
@@ -75,8 +81,10 @@ interface Props {
 export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
+  const { goBack } = useAppHistory();
 
-  const facilityQuery = useQuery({
+  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
     queryKey: ["facility", props.facilityId],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: {
@@ -85,7 +93,10 @@ export default function AppointmentDetail(props: Props) {
     }),
   });
 
-  const appointmentQuery = useQuery({
+  const { canViewAppointments, canUpdateAppointment, canCreateAppointment } =
+    getPermissions(hasPermission, facilityData?.permissions ?? []);
+
+  const { data: appointment } = useQuery({
     queryKey: ["appointment", props.appointmentId],
     queryFn: query(scheduleApis.appointments.retrieve, {
       pathParams: {
@@ -93,6 +104,7 @@ export default function AppointmentDetail(props: Props) {
         id: props.appointmentId,
       },
     }),
+    enabled: canViewAppointments,
   });
 
   const redirectToPatientPage = () => {
@@ -104,6 +116,14 @@ export default function AppointmentDetail(props: Props) {
       },
     });
   };
+
+  useEffect(() => {
+    if (!canViewAppointments && !isFacilityLoading) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack(`/facility/${props.facilityId}/overview`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canViewAppointments, isFacilityLoading]);
 
   const { mutate: updateAppointment, isPending } = useMutation<
     Appointment,
@@ -126,10 +146,7 @@ export default function AppointmentDetail(props: Props) {
     },
   });
 
-  const appointment = appointmentQuery.data;
-  const facility = facilityQuery.data;
-
-  if (!facility || !appointment) {
+  if (!facilityData || !appointment) {
     return <Loading />;
   }
 
@@ -145,15 +162,15 @@ export default function AppointmentDetail(props: Props) {
           )}
         >
           <AppointmentDetails
-            appointment={appointmentQuery.data}
-            facility={facilityQuery.data}
+            appointment={appointment}
+            facility={facilityData}
           />
           <div className="mt-3">
             <div id="section-to-print" className="print:w-[400px] print:pt-4">
               <div id="appointment-token-card" className="bg-gray-50 md:p-4">
                 <AppointmentTokenCard
-                  appointment={appointmentQuery.data}
-                  facility={facilityQuery.data}
+                  appointment={appointment}
+                  facility={facilityData}
                 />
               </div>
             </div>
@@ -176,15 +193,20 @@ export default function AppointmentDetail(props: Props) {
                 <span>{t("save")}</span>
               </Button>
             </div>
-            <Separator className="my-4" />
-            <div className="md:mx-6 mt-10">
-              <AppointmentActions
-                facilityId={props.facilityId}
-                appointment={appointment}
-                onChange={(status) => updateAppointment({ status })}
-                onViewPatient={redirectToPatientPage}
-              />
-            </div>
+            {canUpdateAppointment && (
+              <>
+                <Separator className="my-4" />
+                <div className="md:mx-6 mt-10">
+                  <AppointmentActions
+                    facilityId={props.facilityId}
+                    appointment={appointment}
+                    onChange={(status) => updateAppointment({ status })}
+                    onViewPatient={redirectToPatientPage}
+                    canCreateAppointment={canCreateAppointment}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -236,7 +258,7 @@ const AppointmentDetails = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4 text-sm">
-            <CalendarIcon className="h-5 w-5 text-gray-600" />
+            <CalendarIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 {format(appointment.token_slot.start_datetime, "MMMM d, yyyy")}
@@ -247,7 +269,7 @@ const AppointmentDetails = ({
             </div>
           </div>
           <div className="flex items-center space-x-4 text-sm">
-            <ClockIcon className="h-5 w-5 text-gray-600" />
+            <ClockIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 {format(appointment.token_slot.start_datetime, "h:mm a")} -{" "}
@@ -278,7 +300,7 @@ const AppointmentDetails = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4 text-sm">
-            <PersonIcon className="h-5 w-5 text-gray-600" />
+            <PersonIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">{appointment.patient.name}</p>
               <p className="text-gray-600">
@@ -306,14 +328,14 @@ const AppointmentDetails = ({
             </div>
           </div>
           <div className="flex items-center space-x-4 text-sm">
-            <MobileIcon className="h-5 w-5 text-gray-600" />
+            <MobileIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 <a
                   href={`tel:${appointment.patient.phone_number}`}
                   className="text-primary hover:underline"
                 >
-                  {appointment.patient.phone_number}
+                  {formatPhoneNumberIntl(appointment.patient.phone_number)}
                 </a>
               </p>
               <p className="text-gray-600">
@@ -323,14 +345,16 @@ const AppointmentDetails = ({
                     href={`tel:${appointment.patient.emergency_phone_number}`}
                     className="text-primary hover:underline"
                   >
-                    {appointment.patient.emergency_phone_number}
+                    {formatPhoneNumberIntl(
+                      appointment.patient.emergency_phone_number,
+                    )}
                   </a>
                 )}
               </p>
             </div>
           </div>
           <div className="flex items-center space-x-4 text-sm">
-            <DrawingPinIcon className="h-5 w-5 text-gray-600" />
+            <DrawingPinIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 {appointment.patient.address || t("no_address_provided")}
@@ -379,6 +403,7 @@ interface AppointmentActionsProps {
   appointment: Appointment;
   onChange: (status: Appointment["status"]) => void;
   onViewPatient: () => void;
+  canCreateAppointment: boolean;
 }
 
 const AppointmentActions = ({
@@ -386,6 +411,7 @@ const AppointmentActions = ({
   appointment,
   onChange,
   onViewPatient,
+  canCreateAppointment,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -442,51 +468,53 @@ const AppointmentActions = ({
         {t("view_patient")}
       </Button>
 
-      <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="lg">
-            <CalendarIcon className="size-4 mr-2" />
-            {t("reschedule")}
-          </Button>
-        </SheetTrigger>
-        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
-          </SheetHeader>
+      {canCreateAppointment && (
+        <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="lg">
+              <CalendarIcon className="size-4 mr-2" />
+              {t("reschedule")}
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
+            </SheetHeader>
 
-          <div className="mt-6">
-            <AppointmentSlotPicker
-              facilityId={facilityId}
-              resourceId={appointment.user?.id}
-              selectedSlotId={selectedSlotId}
-              onSlotSelect={setSelectedSlotId}
-            />
+            <div className="mt-6">
+              <AppointmentSlotPicker
+                facilityId={facilityId}
+                resourceId={appointment.user?.id}
+                selectedSlotId={selectedSlotId}
+                onSlotSelect={setSelectedSlotId}
+              />
 
-            <div className="flex justify-end gap-2 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsRescheduleOpen(false);
-                  setSelectedSlotId(undefined);
-                }}
-              >
-                {t("cancel")}
-              </Button>
-              <Button
-                variant="default"
-                disabled={!selectedSlotId || isRescheduling}
-                onClick={() => {
-                  if (selectedSlotId) {
-                    rescheduleAppointment({ new_slot: selectedSlotId });
-                  }
-                }}
-              >
-                {isRescheduling ? t("rescheduling") : t("reschedule")}
-              </Button>
+              <div className="flex justify-end gap-2 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsRescheduleOpen(false);
+                    setSelectedSlotId(undefined);
+                  }}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  variant="default"
+                  disabled={!selectedSlotId || isRescheduling}
+                  onClick={() => {
+                    if (selectedSlotId) {
+                      rescheduleAppointment({ new_slot: selectedSlotId });
+                    }
+                  }}
+                >
+                  {isRescheduling ? t("rescheduling") : t("reschedule")}
+                </Button>
+              </div>
             </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+          </SheetContent>
+        </Sheet>
+      )}
 
       {currentStatus === "booked" && (
         <>
@@ -561,7 +589,7 @@ const AppointmentActions = ({
               className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {isCancelling ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="size-4 animate-spin mr-2" />
               ) : (
                 t("confirm")
               )}
@@ -596,7 +624,7 @@ const AppointmentActions = ({
               className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {isCancelling ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="size-4 animate-spin mr-2" />
               ) : (
                 t("confirm")
               )}
