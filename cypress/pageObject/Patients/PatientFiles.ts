@@ -115,14 +115,7 @@ export class PatientFiles {
   }
 
   verifyMultipleFileUploadSuccess(message: string) {
-    cy.get("li[data-sonner-toast]")
-      .should("have.length", 2)
-      .each(($toast) => {
-        cy.wrap($toast)
-          .find("div[data-title]")
-          .should("be.visible")
-          .should("contain", message);
-      });
+    cy.verifyNotification(message);
     return this;
   }
 
@@ -210,9 +203,7 @@ export class PatientFiles {
   }
 
   saveCurrentUrl() {
-    cy.url().then((url) => {
-      cy.wrap(url).as("savedPatientFileUrl");
-    });
+    cy.saveCurrentUrl();
     return this;
   }
 
@@ -225,7 +216,8 @@ export class PatientFiles {
   }
 
   closeFilePreview() {
-    cy.verifyAndClickElement("[data-cy='file-preview-close']", "Close");
+    cy.get('[data-cy="file-preview-download"]').should("be.visible");
+    cy.contains("button", "Close").click();
     return this;
   }
 
@@ -245,9 +237,7 @@ export class PatientFiles {
   }
 
   navigateToSavedUrl() {
-    cy.get<string>("@savedPatientFileUrl").then((url) => {
-      cy.visit(url);
-    });
+    cy.navigateToSavedUrl();
     return this;
   }
 }

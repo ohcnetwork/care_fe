@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
-import UserCard from "@/components/Users/UserCard";
+import { UserCard } from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 

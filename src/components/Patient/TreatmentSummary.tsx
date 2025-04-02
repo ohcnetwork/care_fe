@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { t } from "i18next";
 import { Loader } from "lucide-react";
 import { useEffect } from "react";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
@@ -79,12 +80,12 @@ export default function TreatmentSummary({
   const canAccess = canViewEncounter || canViewClinicalData;
 
   useEffect(() => {
-    if (!canAccess) {
+    if (!canAccess && !encounterLoading) {
       toast.error(t("no_permission_to_view_page"));
       goBack();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAccess]);
+  }, [canAccess, encounterLoading]);
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query.paginated(allergyIntoleranceApi.getAllergy, {
@@ -270,7 +271,8 @@ export default function TreatmentSummary({
                 <span className="text-gray-600">{t("mobile_number")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold break-words">
-                  {encounter.patient.phone_number}
+                  {encounter.patient.phone_number &&
+                    formatPhoneNumberIntl(encounter.patient.phone_number)}
                 </span>
               </div>
 

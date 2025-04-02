@@ -5,10 +5,12 @@ import { useTranslation } from "react-i18next";
 
 import {
   Card,
+  CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import Page from "@/components/Common/Page";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -57,14 +59,18 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   ];
 
   return (
-    <div className="">
-      <div className="container p-6 mx-auto space-y-8">
+    <Page title="">
+      <div className="container mx-auto space-y-8">
         {/* Welcome Header */}
-        <div className="p-6 bg-white rounded-lg shadow-xs">
+        <div className="rounded-lg">
           <div className="flex items-center gap-4 mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Hey {user?.first_name}
+              <h1 className="text-4xl font-bold text-gray-900">
+                {t("hey_user", {
+                  user: [user.prefix, user.first_name]
+                    .filter(Boolean)
+                    .join(" "),
+                })}
               </h1>
               <p className="text-gray-500">
                 {t("welcome_back_to_hospital_dashboard")}
@@ -85,10 +91,10 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                 <Link
                   key={shortcut.href}
                   href={shortcut.href}
-                  className="block h-full transition-all duration-200 hover:scale-102 hover:shadow-md"
+                  className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"
                 >
-                  <Card className="h-full border-0 shadow-xs hover:bg-gray-50">
-                    <CardHeader className="flex flex-row items-center h-full gap-4">
+                  <Card className="h-full border-0 shadow rounded-xl p-4">
+                    <CardContent className="p-0 flex flex-row items-center h-full gap-4">
                       <div className="p-2 rounded-lg bg-primary/10">
                         <shortcut.icon className="size-6 text-primary" />
                       </div>
@@ -100,14 +106,14 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                           {shortcut.description}
                         </CardDescription>
                       </div>
-                    </CardHeader>
+                    </CardContent>
                   </Card>
                 </Link>
               ))}
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 }
 

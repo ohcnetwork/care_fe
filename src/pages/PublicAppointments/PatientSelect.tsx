@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -170,7 +171,7 @@ export default function PatientSelect({
                       <div className="text-xs text-gray-500">{patient.id}</div>
                     </td>
                     <td className="p-4 align-middle text-left">
-                      {patient.phone_number}
+                      {formatPhoneNumberIntl(patient.phone_number)}
                     </td>
                     <td className="p-4 align-middle text-left">
                       {getPatienDoBorAge(patient)}

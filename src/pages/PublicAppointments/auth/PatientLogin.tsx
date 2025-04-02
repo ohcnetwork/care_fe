@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -73,10 +74,10 @@ export default function PatientLogin({
       `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
     );
   }
-
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
     mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
+      toast.success(t("send_otp_success"));
       if (page === "send") {
         navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
       }
@@ -217,12 +218,18 @@ export default function PatientLogin({
                 t("verify_otp")
               )}
             </Button>
-            <a
-              className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
-              onClick={() => sendOTP({ phone_number: phoneNumber })}
-            >
-              {t("didnt_receive_a_message")} {t("resend_otp")}
-            </a>
+            {isSendOTPLoading ? (
+              <div className="w-full flex justify-center">
+                <CircularProgress className="text-secondary-800" />
+              </div>
+            ) : (
+              <a
+                className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
+                onClick={() => sendOTP({ phone_number: phoneNumber })}
+              >
+                {t("didnt_receive_a_message")} {t("resend_otp")}
+              </a>
+            )}
           </form>
         </Form>
       </div>
