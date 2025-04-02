@@ -1,6 +1,6 @@
 {
   "name": "care_fe",
-  "version": "3.4.0",
+  "version": "3.0.5",
   "description": "Care is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States.",
   "private": true,
   "repository": {
@@ -36,7 +36,7 @@
     "supported-browsers": "node ./scripts/generate-supported-browsers.mjs",
     "build": "npm run setup && npm run build:meta && npm run supported-browsers && npm run build:react",
     "setup": "tsx scripts/setup-care-apps.ts",
-    "postinstall": "tsx scripts/install-platform-deps.ts && tsx scripts/generate-sbom-data.ts && tsx scripts/generate-headers.ts",
+    "postinstall": "tsx scripts/install-platform-deps.ts && tsx scripts/generate-headers.ts",
     "test": "snyk test",
     "cypress:open": "cross-env NODE_ENV=development cypress open",
     "cypress:run": "cross-env NODE_ENV=development cypress run",
