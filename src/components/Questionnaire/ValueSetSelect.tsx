@@ -1,5 +1,5 @@
 import { CaretSortIcon, StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -71,6 +71,7 @@ export default function ValueSetSelect({
   const isMobile = useBreakpoints({ default: true, sm: false });
   const [activeTab, setActiveTab] = useState(0);
   const [isClearingFavourites, setIsClearingFavourites] = useState(false);
+  const queryClient = useQueryClient();
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
@@ -86,24 +87,24 @@ export default function ValueSetSelect({
   });
 
   const addFavouriteMutation = useMutation({
-    mutationFn: (body: { code: string }) =>
-      mutate(valuesetRoutes.addFavourite, {
-        pathParams: { slug: system },
-        body,
-      })(body),
+    mutationFn: mutate(valuesetRoutes.addFavourite, {
+      pathParams: { slug: system },
+    }),
     onSuccess: () => {
-      favouritesQuery.refetch();
+      queryClient.invalidateQueries({
+        queryKey: ["valueset", system, "favourites"],
+      });
     },
   });
 
   const removeFavouriteMutation = useMutation({
-    mutationFn: (body: { code: string }) =>
-      mutate(valuesetRoutes.removeFavourite, {
-        pathParams: { slug: system },
-        body,
-      })(body),
+    mutationFn: mutate(valuesetRoutes.removeFavourite, {
+      pathParams: { slug: system },
+    }),
     onSuccess: () => {
-      favouritesQuery.refetch();
+      queryClient.invalidateQueries({
+        queryKey: ["valueset", system, "favourites"],
+      });
     },
   });
 
@@ -112,7 +113,9 @@ export default function ValueSetSelect({
       pathParams: { slug: system },
     }),
     onSuccess: () => {
-      favouritesQuery.refetch();
+      queryClient.invalidateQueries({
+        queryKey: ["valueset", system, "favourites"],
+      });
       setIsClearingFavourites(false);
     },
   });
@@ -125,13 +128,13 @@ export default function ValueSetSelect({
   });
 
   const addRecentMutation = useMutation({
-    mutationFn: (body: Code) =>
-      mutate(valuesetRoutes.addRecentView, {
-        pathParams: { slug: system },
-        body,
-      })(body),
+    mutationFn: mutate(valuesetRoutes.addRecentView, {
+      pathParams: { slug: system },
+    }),
     onSuccess: () => {
-      recentsQuery.refetch();
+      queryClient.invalidateQueries({
+        queryKey: ["valueset", system, "recents"],
+      });
     },
   });
 
