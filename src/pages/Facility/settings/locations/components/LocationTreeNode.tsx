@@ -35,28 +35,24 @@ export function LocationTreeNode({
 }: LocationTreeNodeProps) {
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = location.id === selectedLocationId;
+  const LocationTypeIcon = location.form
+    ? LocationTypeIcons[location.form as LocationForm]
+    : null;
 
-  // Query for this node's children
   const { data: nodeChildren, isLoading } = useQuery({
     queryKey: ["locations", facilityId, "children", location.id, "kind"],
-    queryFn: query.paginated(locationApi.list, {
+    queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: location.id,
+        mode: "kind",
       },
-      pageSize: 100,
     }),
     enabled: isExpanded || location.has_children,
   });
 
   const hasChildren =
-    location.has_children ||
-    (nodeChildren?.results && nodeChildren.results.length > 0);
-
-  // Get the icon component from LocationTypeIcons
-  const LocationTypeIcon = location.form
-    ? LocationTypeIcons[location.form as LocationForm]
-    : null;
+    location.has_children || (nodeChildren?.results?.length ?? 0) > 0;
 
   return (
     <div className="space-y-1">
@@ -65,34 +61,33 @@ export function LocationTreeNode({
           "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100",
           isSelected && "bg-blue-100 text-blue-800",
         )}
-        style={{ paddingLeft: `${level + 1}rem` }}
       >
         {hasChildren ? (
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="size-4"
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(location.id);
             }}
           >
             {isLoading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+              <div className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
             ) : isExpanded ? (
-              <CareIcon icon="l-angle-down" className="h-4 w-4" />
+              <CareIcon icon="l-angle-down" className="size-4" />
             ) : (
-              <CareIcon icon="l-angle-right" className="h-4 w-4" />
+              <CareIcon icon="l-angle-right" className="size-4" />
             )}
           </Button>
         ) : (
           <span className="w-6" />
         )}
         <div
-          className="flex items-center flex-1 text-sm gap-2"
+          className="flex items-center flex-1 text-sm gap-2 w-0"
           onClick={() => onLocationSelect(location)}
         >
-          {LocationTypeIcon && <LocationTypeIcon className="h-4 w-4" />}
+          {LocationTypeIcon && <LocationTypeIcon className="size-4 shrink-0" />}
           <span className="truncate">{location.name}</span>
         </div>
       </div>

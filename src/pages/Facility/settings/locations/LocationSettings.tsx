@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useCallback, useState } from "react";
+import { navigate } from "raviger";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -14,7 +15,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -33,7 +33,6 @@ interface LocationSettingsProps {
   locationId?: string;
 }
 
-// Helper function to get parent chain for a location
 function getParentChain(location: LocationListType): Set<string> {
   const parentIds = new Set<string>();
   let current = location.parent;
@@ -52,29 +51,18 @@ export default function LocationSettings({
 }: LocationSettingsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-
-  // State for view mode (list or map)
   const [activeTab, setActiveTab] = useView("locations", "list");
-
-  // State for location navigation
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    locationId || null,
-  );
   const [expandedLocations, setExpandedLocations] = useState<Set<string>>(
     new Set(),
   );
-
-  // State for location content
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [locationToEdit, setLocationToEdit] = useState<LocationListType | null>(
     null,
   );
-
   const ITEMS_PER_PAGE = 9;
 
-  // Fetch facility data for the facility name
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(routes.facility.show, {
@@ -82,132 +70,65 @@ export default function LocationSettings({
     }),
   });
 
-  // Fetch all locations for the navigation tree
-  const { data: allLocations, isLoading: isLoadingLocations } = useQuery({
+  const { data: allLocations } = useQuery({
     queryKey: ["locations", facilityId, "all"],
-    queryFn: query.paginated(locationApi.list, {
+    queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: {
-        // Removed mode filter to include both "kind" and "instance" (beds)
-      },
-      pageSize: 100,
+      queryParams: { mode: "kind" },
     }),
   });
 
-  // Fetch details of the selected location
-  const { data: selectedLocation } = useQuery({
-    queryKey: ["location", facilityId, selectedLocationId],
-    queryFn: query(locationApi.get, {
-      pathParams: {
-        facility_id: facilityId,
-        id: selectedLocationId as string,
-      },
-    }),
-    enabled: !!selectedLocationId,
-  });
-
-  // Fetch organizations linked to the selected location
   const { data: _locationOrgs } = useQuery({
-    queryKey: ["location", selectedLocationId, "organizations"],
+    queryKey: ["location", locationId, "organizations"],
     queryFn: query(locationApi.getOrganizations, {
-      pathParams: { facility_id: facilityId, id: selectedLocationId as string },
+      pathParams: { facility_id: facilityId, id: locationId as string },
     }),
-    enabled: !!selectedLocationId,
+    enabled: !!locationId,
   });
 
-  // Fetch child locations of the selected location
-  const { data: childLocations, isLoading: isLoadingChildren } = useQuery({
+  const { data: childLocations } = useQuery({
     queryKey: [
       "locations",
       facilityId,
       "children",
-      selectedLocationId,
+      locationId,
       currentPage,
       searchQuery,
     ],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        parent: selectedLocationId || undefined,
+        parent: locationId || "",
         limit: ITEMS_PER_PAGE,
         offset: (currentPage - 1) * ITEMS_PER_PAGE,
         name: searchQuery || undefined,
+        mode: locationId ? undefined : "kind",
       },
     }),
     enabled: true,
   });
 
-  // Fetch parent locations for breadcrumb if selectedLocation is a LocationDetail
-  const { data: _parentLocations = [] } = useQuery({
-    queryKey: ["locations", facilityId, "breadcrumbs", selectedLocationId],
-    queryFn: query.paginated(locationApi.list, {
+  const { data: mapLocations } = useQuery({
+    queryKey: ["locations", facilityId, "map"],
+    queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        // Removed mode filter to include both "kind" and "instance" (beds)
+        limit: 1000,
       },
-      pageSize: 1000,
     }),
-    enabled: !!selectedLocationId && !!selectedLocation,
-    select: (data: { results: LocationListType[] }) => {
-      if (!selectedLocation) return [];
-
-      // Build breadcrumb chain manually from all locations
-      const allLocations = data.results || [];
-      const breadcrumbChain: { id: string; name: string }[] = [];
-      breadcrumbChain.push({
-        id: selectedLocation.id,
-        name: selectedLocation.name,
-      });
-
-      // Look for parent relationships in all locations
-      const locationMap = new Map<string, LocationListType>();
-      allLocations.forEach((loc: LocationListType) => {
-        locationMap.set(loc.id, loc);
-      });
-
-      // Find parent chain
-      let currentLocation = allLocations.find(
-        (loc: LocationListType) => loc.id === selectedLocationId && loc.parent,
-      );
-
-      while (currentLocation?.parent) {
-        const parentLocation = locationMap.get(currentLocation.parent.id);
-        if (parentLocation) {
-          breadcrumbChain.unshift({
-            id: parentLocation.id,
-            name: parentLocation.name,
-          });
-          currentLocation = parentLocation;
-        } else {
-          break;
-        }
-      }
-
-      return breadcrumbChain;
-    },
+    enabled: activeTab === "map",
   });
 
-  // Commenting out unused breadcrumbs - we'll keep parentLocations for possible future use
-  // const _breadcrumbs = useMemo(() => {
-  //   return parentLocations;
-  // }, [parentLocations]);
-
-  // Handle location selection
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
-      setSelectedLocationId(location.id);
-      setSearchQuery("");
-      setCurrentPage(1);
-
-      // Expand the parent chain
+      navigate(`/facility/${facilityId}/settings/location/${location.id}`);
       const parentIds = getParentChain(location);
       parentIds.add(location.id);
       setExpandedLocations(new Set([...expandedLocations, ...parentIds]));
     },
-    [expandedLocations],
+    [expandedLocations, facilityId],
   );
 
-  // Toggle expanded state of a location in the navigation
   const handleToggleExpand = useCallback((locationId: string) => {
     setExpandedLocations((prev) => {
       const next = new Set(prev);
@@ -220,46 +141,36 @@ export default function LocationSettings({
     });
   }, []);
 
-  // Handle search input change
   const handleSearchChange = useCallback((value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
   }, []);
 
-  // Handle page change for child locations pagination
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
-
-  // Handle adding a new location
   const handleAddLocation = useCallback(() => {
     setLocationToEdit(null);
     setIsSheetOpen(true);
   }, []);
 
-  // Handle editing a location
   const handleEditLocation = useCallback((location: LocationListType) => {
     setLocationToEdit(location);
     setIsSheetOpen(true);
   }, []);
 
-  // Handle closing the location form sheet
   const handleSheetClose = useCallback(() => {
     setIsSheetOpen(false);
     setLocationToEdit(null);
     queryClient.invalidateQueries({ queryKey: ["locations", facilityId] });
-    if (selectedLocationId) {
+    if (locationId) {
       queryClient.invalidateQueries({
-        queryKey: ["location", facilityId, selectedLocationId],
+        queryKey: ["location", facilityId, locationId],
       });
     }
-  }, [facilityId, queryClient, selectedLocationId]);
+  }, [facilityId, queryClient, locationId]);
 
   return (
     <Page title={t("locations")} hideTitleOnPage className="p-0">
       <div className="container mx-auto px-2 sm:px-4 pb-8">
-        {/* List/Map view toggle - simplified without background */}
-        <div className="flex items-center mb-2 sm:mb-4 ">
+        <div className="flex items-center mb-2 sm:mb-4">
           <Tabs
             value={activeTab}
             onValueChange={(value) => setActiveTab(value as "list" | "map")}
@@ -290,7 +201,6 @@ export default function LocationSettings({
         </div>
 
         <div className="flex">
-          {/* Left sidebar navigation - hidden in map view */}
           {activeTab !== "map" && (
             <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block flex-shrink-0">
               <div className="p-4">
@@ -298,12 +208,7 @@ export default function LocationSettings({
               </div>
               <ScrollArea className="h-[calc(100vh-14rem)]">
                 <div className="p-2">
-                  {isLoadingLocations ? (
-                    <div className="p-4">
-                      <CardGridSkeleton count={3} />
-                    </div>
-                  ) : allLocations?.results &&
-                    allLocations.results.length > 0 ? (
+                  {allLocations?.results?.length ? (
                     allLocations.results
                       .filter(
                         (loc) =>
@@ -314,7 +219,7 @@ export default function LocationSettings({
                           key={location.id}
                           location={location}
                           facilityId={facilityId}
-                          selectedLocationId={selectedLocation?.id || null}
+                          selectedLocationId={locationId || null}
                           expandedLocations={expandedLocations}
                           onToggleExpand={handleToggleExpand}
                           onLocationSelect={handleLocationSelect}
@@ -330,36 +235,34 @@ export default function LocationSettings({
             </div>
           )}
 
-          {/* Main content area - full width in map view */}
           <div
             className={cn(
-              "flex-1 p-3 sm:p-6 space-y-3 sm:space-y-4 rounded-lg bg-white shadow-lg overflow-hidden",
-              activeTab !== "map" && "ml-0 md:ml-4",
+              "flex-1 space-y-3 sm:space-y-4 rounded-lg  md:shadow-lg overflow-hidden",
+              activeTab !== "map" && "ml-0 md:ml-4 md:bg-white md:p-4 ",
             )}
           >
-            {/* Map view takes full content area */}
             {activeTab === "map" ? (
               <LocationMap
-                locations={allLocations?.results || []}
-                onLocationClick={handleEditLocation}
+                locations={mapLocations?.results || []}
+                onLocationClick={handleLocationSelect}
                 facilityName={facilityData?.name || t("facility")}
                 searchQuery={searchQuery}
-                isEditing={isSheetOpen}
+                //isEditing={isSheetOpen}
               />
             ) : (
-              /* List view with header content */
               <>
-                {selectedLocationId ? (
+                {locationId ? (
                   <LocationView
-                    id={selectedLocationId}
+                    id={locationId}
                     facilityId={facilityId}
                     isNested={true}
-                    onBackToParent={() => setSelectedLocationId(null)}
+                    onBackToParent={() =>
+                      navigate(`/facility/${facilityId}/settings/locations`)
+                    }
                     onSelectLocation={handleLocationSelect}
                   />
                 ) : (
                   <>
-                    {/* Content header for top-level view */}
                     <div className="flex flex-col justify-between items-start gap-2 sm:gap-4">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h2 className="text-xl font-semibold">
@@ -386,50 +289,39 @@ export default function LocationSettings({
                       </div>
                     </div>
 
-                    {/* Location children grid */}
                     <div className="space-y-4 overflow-hidden">
-                      {isLoadingChildren ? (
-                        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                          <CardGridSkeleton count={6} />
-                        </div>
-                      ) : (
-                        <div className="space-y-4 overflow-hidden">
-                          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                            {childLocations?.results?.length ? (
-                              childLocations.results.map(
-                                (childLocation: LocationListType) => (
-                                  <LocationCard
-                                    key={childLocation.id}
-                                    location={childLocation}
-                                    onEdit={handleEditLocation}
-                                    onView={handleLocationSelect}
-                                    facilityId={facilityId}
-                                  />
-                                ),
-                              )
-                            ) : (
-                              <Card className="col-span-full">
-                                <CardContent className="p-4 text-center text-gray-500">
-                                  {searchQuery
-                                    ? t("no_locations_found")
-                                    : t("no_child_locations_found")}
-                                </CardContent>
-                              </Card>
-                            )}
+                      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
+                        {childLocations?.results?.length ? (
+                          childLocations.results.map(
+                            (childLocation: LocationListType) => (
+                              <LocationCard
+                                key={childLocation.id}
+                                location={childLocation}
+                                onEdit={handleEditLocation}
+                                onView={handleLocationSelect}
+                                facilityId={facilityId}
+                              />
+                            ),
+                          )
+                        ) : (
+                          <Card className="col-span-full">
+                            <CardContent className="p-4 text-center text-gray-500">
+                              {t("no_locations_found")}
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                      {childLocations &&
+                        childLocations.count > ITEMS_PER_PAGE && (
+                          <div className="flex justify-center mt-2 sm:mt-4">
+                            <Pagination
+                              data={{ totalCount: childLocations.count }}
+                              onChange={setCurrentPage}
+                              defaultPerPage={ITEMS_PER_PAGE}
+                              cPage={currentPage}
+                            />
                           </div>
-                          {childLocations &&
-                            childLocations.count > ITEMS_PER_PAGE && (
-                              <div className="flex justify-center mt-2 sm:mt-4">
-                                <Pagination
-                                  data={{ totalCount: childLocations.count }}
-                                  onChange={(page) => handlePageChange(page)}
-                                  defaultPerPage={ITEMS_PER_PAGE}
-                                  cPage={currentPage}
-                                />
-                              </div>
-                            )}
-                        </div>
-                      )}
+                        )}
                     </div>
                   </>
                 )}
@@ -438,13 +330,12 @@ export default function LocationSettings({
           </div>
         </div>
 
-        {/* Location edit/add sheet */}
         <LocationSheet
           open={isSheetOpen}
           onOpenChange={handleSheetClose}
           location={locationToEdit || undefined}
           facilityId={facilityId}
-          parentId={selectedLocationId || undefined}
+          parentId={locationId || undefined}
         />
       </div>
     </Page>

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -46,7 +46,6 @@ export default function LocationView({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
@@ -61,6 +60,7 @@ export default function LocationView({
       pathParams: { facility_id: facilityId, id },
     }),
   });
+
   const { data: locationOrganizations } = useQuery({
     queryKey: ["location", id, "organizations"],
     queryFn: query(locationApi.getOrganizations, {
@@ -99,11 +99,8 @@ export default function LocationView({
 
   const handleViewLocation = (location: LocationList) => {
     if (isNested && onSelectLocation) {
-      // When nested in LocationSettings, use the provided callback for navigation
-      // No need to call onBackToParent first, just directly select the new location
       onSelectLocation(location);
     } else {
-      // For standalone view, use raviger navigation to the appropriate settings URL
       navigate(`/facility/${facilityId}/settings/location/${location.id}`);
     }
   };
@@ -114,19 +111,14 @@ export default function LocationView({
   };
 
   const handleBreadcrumbClick = (breadcrumbId: string) => {
-    if (!isNested) return; // For standalone view, use the Link component
+    if (!isNested) return;
 
-    if (breadcrumbId === id) {
-      // Current location, do nothing
-      return;
-    }
+    if (breadcrumbId === id) return;
 
     if (onSelectLocation) {
-      // For parent locations, we need to navigate to that location
       const locationForNavigation = { id: breadcrumbId } as LocationList;
       onSelectLocation(locationForNavigation);
     } else if (onBackToParent) {
-      // Fallback to parent navigation if onSelectLocation is not provided
       onBackToParent();
     }
   };
@@ -138,29 +130,26 @@ export default function LocationView({
       </div>
     );
 
-  // Use a generic type that works with API responses without being too strict
   const generateBreadcrumbs = (locationData: any) => {
     const breadcrumbs = [];
     let current = locationData;
 
-    // Add the current location
     breadcrumbs.unshift({
       name: current.name,
       id: current.id,
     });
 
-    // Add all parent locations in the chain
-    while (current?.parent && current.parent.id) {
+    while (current?.parent?.id) {
       breadcrumbs.unshift({
         name: current.parent.name || "",
         id: current.parent.id,
       });
-      // Move up to the parent
       current = current.parent;
     }
 
     return breadcrumbs;
   };
+
   const breadcrumbs = location ? generateBreadcrumbs(location) : [];
 
   return (
@@ -219,7 +208,7 @@ export default function LocationView({
       </Breadcrumb>
 
       <Page hideTitleOnPage title={location?.name || t("location")}>
-        <div className="space-y-6 px-4">
+        <div className="space-y-6">
           <div className="flex flex-col justify-between items-start gap-4">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl font-semibold">{location?.name}</h2>
@@ -235,8 +224,8 @@ export default function LocationView({
                 {location?.status}
               </Badge>
             </div>
-            <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
-              <div className="w-full md:w-72">
+            <div className="flex flex-col xl:flex-row justify-between items-start w-full gap-4">
+              <div className="w-full xl:w-72">
                 <Input
                   placeholder={t("search_by_name")}
                   value={searchQuery}
@@ -247,7 +236,7 @@ export default function LocationView({
                   className="w-full"
                 />
               </div>
-              <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+              <div className="flex flex-col lg:flex-row gap-2 w-full lg:w-auto justify-evenly">
                 {location && "mode" in location && location.mode === "kind" && (
                   <Button
                     variant="primary"
@@ -283,12 +272,12 @@ export default function LocationView({
 
           <div className="space-y-4">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
                 <CardGridSkeleton count={6} />
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
                   {children?.results?.length ? (
                     children.results.map((child) => (
                       <LocationCard
@@ -313,7 +302,7 @@ export default function LocationView({
                   <div className="flex justify-center mt-4">
                     <Pagination
                       data={{ totalCount: children.count }}
-                      onChange={(page) => setPage(page)}
+                      onChange={setPage}
                       defaultPerPage={limit}
                       cPage={page}
                     />

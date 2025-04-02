@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, ChevronUp, Hospital } from "lucide-react";
+import { ChevronDown, ChevronRight, Hospital } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ReactFlow, {
@@ -10,7 +10,6 @@ import ReactFlow, {
   MarkerType,
   Node,
   NodeProps,
-  Panel,
   Position,
   ReactFlowProvider,
   useReactFlow,
@@ -40,7 +39,6 @@ interface LocationMapProps {
   onLocationClick: (location: LocationListType) => void;
   facilityName: string;
   searchQuery?: string;
-  isEditing?: boolean;
 }
 
 const CustomNode = ({ data }: NodeProps) => {
@@ -307,34 +305,12 @@ function LocationMapContent({
   onLocationClick,
   facilityName,
   searchQuery,
-  isEditing,
 }: LocationMapProps) {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const { fitView, setViewport, getViewport } = useReactFlow();
+  const { fitView } = useReactFlow();
   const { t } = useTranslation();
   const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
-  const [savedViewport, setSavedViewport] = useState<{
-    x: number;
-    y: number;
-    zoom: number;
-  } | null>(null);
-
-  // Save viewport when opening edit
-  useEffect(() => {
-    if (isEditing) {
-      const currentViewport = getViewport();
-      setSavedViewport(currentViewport);
-    }
-  }, [isEditing, getViewport]);
-
-  // Restore viewport when closing edit
-  useEffect(() => {
-    if (!isEditing && savedViewport && nodes.length > 0) {
-      setViewport(savedViewport);
-      setSavedViewport(null); // Clear saved viewport after restoring
-    }
-  }, [isEditing, savedViewport, setViewport, nodes]);
 
   // Get root locations
   const rootLocations = useMemo(
@@ -343,6 +319,47 @@ function LocationMapContent({
         (loc) => !loc.parent || Object.keys(loc.parent).length === 0,
       ),
     [locations],
+  );
+
+  const toggleNode = useCallback(
+    (nodeId: string) => {
+      setExpandedNodes((prev) => {
+        const isExpanding = !prev.includes(nodeId);
+        const newExpandedNodes = isExpanding
+          ? [...prev, nodeId]
+          : prev.filter((id) => id !== nodeId);
+
+        requestAnimationFrame(() => {
+          if (isExpanding) {
+            // Get all immediate children of the node
+            const childNodes = locations
+              .filter((loc) => loc.parent?.id === nodeId)
+              .map((child) => ({ id: child.id }));
+
+            // Include both parent and children in the view with adjusted padding
+            fitView({
+              padding: childNodes.length > 4 ? 0.5 : 0.3,
+              minZoom: 0.2,
+              maxZoom: 0.8,
+              duration: 400,
+              nodes: [{ id: nodeId }, ...childNodes],
+            });
+          } else {
+            // When collapsing, focus directly on the clicked node
+            fitView({
+              padding: 0.2,
+              minZoom: 0.2,
+              maxZoom: 1,
+              duration: 500,
+              nodes: [{ id: nodeId }],
+            });
+          }
+        });
+
+        return newExpandedNodes;
+      });
+    },
+    [fitView, locations],
   );
 
   // Effect to handle search updates
@@ -414,67 +431,6 @@ function LocationMapContent({
       }, 100);
     }
   }, [searchQuery, fitView]);
-
-  const toggleNode = useCallback(
-    (nodeId: string) => {
-      setExpandedNodes((prev) => {
-        const isExpanding = !prev.includes(nodeId);
-        const newExpandedNodes = isExpanding
-          ? [...prev, nodeId]
-          : prev.filter((id) => id !== nodeId);
-
-        requestAnimationFrame(() => {
-          if (isExpanding) {
-            // Get all immediate children of the node
-            const childNodes = locations
-              .filter((loc) => loc.parent?.id === nodeId)
-              .map((child) => ({ id: child.id }));
-
-            // Include both parent and children in the view with adjusted padding
-            fitView({
-              padding: childNodes.length > 4 ? 0.5 : 0.3,
-              minZoom: 0.2,
-              maxZoom: 0.8,
-              duration: 400,
-              nodes: [{ id: nodeId }, ...childNodes],
-            });
-          } else {
-            // When collapsing, focus directly on the clicked node
-            fitView({
-              padding: 0.2,
-              minZoom: 0.2,
-              maxZoom: 1,
-              duration: 500,
-              nodes: [{ id: nodeId }],
-            });
-          }
-        });
-
-        return newExpandedNodes;
-      });
-    },
-    [fitView, locations],
-  );
-
-  const toggleAllNodes = useCallback(() => {
-    setExpandedNodes((prev) => {
-      const isExpanding = prev.length !== locations.length;
-      const newExpandedNodes = isExpanding
-        ? locations.map((loc) => loc.id)
-        : [];
-
-      setTimeout(() => {
-        fitView({
-          padding: 0.2,
-          minZoom: 0.1,
-          maxZoom: 0.8,
-          duration: 800,
-        });
-      }, 100);
-
-      return newExpandedNodes;
-    });
-  }, [locations, fitView]);
 
   // Generate nodes and edges
   useEffect(() => {
@@ -563,7 +519,7 @@ function LocationMapContent({
           },
         }}
         proOptions={{ hideAttribution: true }}
-        fitView={!savedViewport && !isEditing}
+        fitView={true}
         fitViewOptions={{
           padding: 0.2,
           minZoom: 0.2,
@@ -580,29 +536,6 @@ function LocationMapContent({
       >
         <Background />
         <Controls showFitView={true} showZoom={true} showInteractive={false} />
-        <Panel
-          position="top-right"
-          className="bg-white/80 backdrop-blur-xs rounded-lg p-2 shadow-xs"
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleAllNodes}
-            className="flex items-center gap-2"
-          >
-            {expandedNodes.length === locations.length ? (
-              <>
-                <ChevronUp className="size-4" />
-                {t("collapse_all")}
-              </>
-            ) : (
-              <>
-                <ChevronDown className="size-4" />
-                {t("expand_all")}
-              </>
-            )}
-          </Button>
-        </Panel>
       </ReactFlow>
     </div>
   );
