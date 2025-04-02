@@ -49,6 +49,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
+import facilityApi from "@/types/facility/facilityApi";
 import type {
   Organization,
   OrganizationParent,
@@ -127,7 +128,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   );
 
   const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
-    mutationFn: mutate(routes.deleteFacility, {
+    mutationFn: mutate(facilityApi.deleteFacility, {
       pathParams: { id: facilityId },
     }),
     onSuccess: () => {
