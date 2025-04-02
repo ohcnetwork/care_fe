@@ -235,35 +235,11 @@ export default function CreateEncounterForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="ASAP">{t("asap")}</SelectItem>
-                        <SelectItem value="callback_results">
-                          {t("callback_results")}
-                        </SelectItem>
-                        <SelectItem value="callback_for_scheduling">
-                          {t("callback_for_scheduling")}
-                        </SelectItem>
-                        <SelectItem value="elective">
-                          {t("elective")}
-                        </SelectItem>
-                        <SelectItem value="emergency">
-                          {t("emergency")}
-                        </SelectItem>
-                        <SelectItem value="preop">{t("preop")}</SelectItem>
-                        <SelectItem value="as_needed">
-                          {t("as_needed")}
-                        </SelectItem>
-                        <SelectItem value="routine">{t("routine")}</SelectItem>
-                        <SelectItem value="rush_reporting">
-                          {t("rush_reporting")}
-                        </SelectItem>
-                        <SelectItem value="stat">{t("stat")}</SelectItem>
-                        <SelectItem value="timing_critical">
-                          {t("timing_critical")}
-                        </SelectItem>
-                        <SelectItem value="use_as_directed">
-                          {t("use_as_directed")}
-                        </SelectItem>
-                        <SelectItem value="urgent">{t("urgent")}</SelectItem>
+                        {ENCOUNTER_PRIORITY.map((priority) => (
+                          <SelectItem key={priority} value={priority}>
+                            {t(`encounter_priority__${priority}`)}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
