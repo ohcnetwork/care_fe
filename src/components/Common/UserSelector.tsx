@@ -127,10 +127,10 @@ export default function UserSelector({
                         {user.username}
                       </span>
                     </span>
+                    {selected?.id === user.id && (
+                      <CheckIcon className="ml-auto" />
+                    )}
                   </div>
-                  {selected?.id === user.id && (
-                    <CheckIcon className="ml-auto" />
-                  )}
                 </CommandItem>
               ))}
             </CommandGroup>

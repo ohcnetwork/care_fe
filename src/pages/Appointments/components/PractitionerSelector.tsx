@@ -125,10 +125,10 @@ export const PractitionerSelector = ({
                         {user.username}
                       </span>
                     </span>
+                    {selected?.username === user.username && (
+                      <CheckIcon className="ml-auto" />
+                    )}
                   </PopoverClose>
-                  {selected?.username === user.username && (
-                    <CheckIcon className="ml-auto" />
-                  )}
                 </CommandItem>
               ))}
             </CommandGroup>
