@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { isWithinInterval } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
@@ -137,7 +138,20 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const groupedSlots = useMemo(() => {
     if (!slotsQuery.data?.results || slotsQuery.data.results.length === 0)
       return [];
-    return groupSlotsByAvailability(slotsQuery.data.results);
+    const slots = groupSlotsByAvailability(slotsQuery.data.results).filter(
+      (slot) => {
+        const { slots } = slot;
+        const upcomingSlots = slots.filter((slot) => {
+          const isOngoingSlot = isWithinInterval(new Date(), {
+            start: slot.start_datetime,
+            end: slot.end_datetime,
+          });
+          return !isOngoingSlot;
+        });
+        return upcomingSlots && upcomingSlots.length > 0;
+      },
+    );
+    return slots;
   }, [slotsQuery.data?.results]);
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
@@ -301,6 +315,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                               onClick={() =>
                                 setSelectedSlot({ ...slot, availability })
                               }
+                              allowOngoingSlots={false}
                             />
                           ))}
                         </div>
