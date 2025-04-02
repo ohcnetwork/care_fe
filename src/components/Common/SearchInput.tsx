@@ -36,8 +36,8 @@ interface SearchOption {
   component?: React.ComponentType<HTMLDivElement>;
 }
 
-interface SearchInputProps {
-  id?: string;
+interface SearchInputProps
+  extends Omit<React.ComponentProps<"input">, "onChange" | "value" | "ref"> {
   options: SearchOption[];
   onSearch: (key: string, value: string) => void;
   className?: string;
@@ -46,7 +46,6 @@ interface SearchInputProps {
   enableOptionButtons?: boolean;
   onFieldChange?: (options: SearchOption) => void;
   autoFocus?: boolean;
-  "data-cy"?: string;
 }
 
 const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
@@ -82,38 +81,34 @@ const SearchInputFieldRenderer = ({
   selectedOption,
   searchValue,
   setSearchValue,
-  id,
   inputRef,
   inputClassName,
   autoFocus,
   isSingleOption,
   open,
-  dataCy,
+  ...prop
 }: {
   selectedOption: SearchOption;
   searchValue: string;
   setSearchValue: (value: string) => void;
-  id?: string;
   inputRef?: React.RefObject<HTMLInputElement>;
   inputClassName?: string;
   autoFocus?: boolean;
   isSingleOption: boolean;
   open: boolean;
-  dataCy?: string;
 }) => {
   switch (selectedOption.type) {
     case "phone":
       return (
         <div className="relative">
           <PhoneInput
-            id={id}
             name={selectedOption.key}
             placeholder={selectedOption.placeholder}
             value={searchValue}
             onChange={setSearchValue}
             className={inputClassName}
             autoFocus={autoFocus}
-            data-cy={dataCy}
+            {...prop}
           />
           {!isSingleOption && <KeyboardShortcutHint open={open} />}
         </div>
@@ -122,7 +117,6 @@ const SearchInputFieldRenderer = ({
       return (
         <div className="relative">
           <Input
-            id={id}
             type="text"
             placeholder={selectedOption.placeholder}
             ref={inputRef}
@@ -133,7 +127,7 @@ const SearchInputFieldRenderer = ({
                 "grow border-none shadow-none focus-visible:ring-0",
               inputClassName,
             )}
-            data-cy={dataCy}
+            {...prop}
           />
           {!isSingleOption && <KeyboardShortcutHint open={open} />}
         </div>
@@ -150,7 +144,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   onFieldChange,
   enableOptionButtons = true,
   autoFocus = false,
-  "data-cy": dataCy,
+  ...props
 }) => {
   const initialOptionIndex = useMemo(
     () =>
@@ -248,13 +242,12 @@ const SearchInput: React.FC<SearchInputProps> = ({
         selectedOption={selectedOption}
         searchValue={searchValue}
         setSearchValue={setSearchValue}
-        id={id}
         inputRef={inputRef}
         inputClassName={inputClassName}
         autoFocus={autoFocus}
         isSingleOption={isSingleOption}
         open={open}
-        dataCy={dataCy}
+        {...props}
       />
     ),
     [selectedOption, searchValue, inputClassName, open],
