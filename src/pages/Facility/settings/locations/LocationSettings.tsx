@@ -169,11 +169,13 @@ export default function LocationSettings({
 
   return (
     <Page title={t("locations")} hideTitleOnPage className="p-0">
-      <div className="container mx-auto px-2 sm:px-4 pb-8">
-        <div className="flex items-center mb-2 sm:mb-4">
+      <div className="container mx-auto">
+        <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
+          <h3>{t("locations")}</h3>
           <Tabs
             value={activeTab}
             onValueChange={(value) => setActiveTab(value as "list" | "map")}
+            className="mt-2 sm:mt-0"
           >
             <TabsList className="flex">
               <TabsTrigger
@@ -203,11 +205,8 @@ export default function LocationSettings({
         <div className="flex">
           {activeTab !== "map" && (
             <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block flex-shrink-0">
-              <div className="p-4">
-                <h2 className="text-lg font-semibold">{t("locations")}</h2>
-              </div>
               <ScrollArea className="h-[calc(100vh-14rem)]">
-                <div className="p-2">
+                <div className="p-4">
                   {allLocations?.results?.length ? (
                     allLocations.results
                       .filter(
@@ -263,11 +262,6 @@ export default function LocationSettings({
                 ) : (
                   <>
                     <div className="flex flex-col justify-between items-start gap-2 sm:gap-4">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h2 className="text-xl font-semibold">
-                          {t("locations")}
-                        </h2>
-                      </div>
                       <div className="flex flex-col md:flex-row justify-between items-center w-full gap-4">
                         <Input
                           placeholder={t("search_by_name")}
