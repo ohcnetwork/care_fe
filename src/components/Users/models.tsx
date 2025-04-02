@@ -27,13 +27,11 @@ export type UserFacilityModel = {
   name: string;
 };
 
-export type UserModel = UserBareMinimum & {
+export type AuthUserModel = UserBareMinimum & {
   external_id: string;
-  video_connect_link: string;
   phone_number?: string;
   alt_phone_number?: string;
   gender?: Gender;
-  read_profile_picture_url?: string;
   date_of_birth: Date | null | string;
   is_superuser?: boolean;
   verified?: boolean;

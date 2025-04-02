@@ -8,7 +8,7 @@ import {
   CreateFileResponse,
   FileUploadModel,
 } from "@/components/Patient/models";
-import { UpdatePasswordForm, UserModel } from "@/components/Users/models";
+import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
@@ -144,13 +144,13 @@ const routes = {
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
-    TRes: Type<UserModel>(),
+    TRes: Type<AuthUserModel>(),
   },
 
   deleteProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
     method: "DELETE",
-    TRes: Type<UserModel>(),
+    TRes: Type<AuthUserModel>(),
     TBody: Type<void>(),
   },
 
