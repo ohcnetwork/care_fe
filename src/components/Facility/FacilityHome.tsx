@@ -302,9 +302,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
               </div>
             </div>
 
-            <div className="mt-2 space-y-2">
-              <div className="flex justify-end gap-2 max-sm:flex-col sm:mt-4 mt-12 flex-wrap">
-                {user.is_superuser && (
+            <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
+              {user.is_superuser && (
+                <div className="flex max-sm:flex-col mt-2 sm:mt-4">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -341,29 +341,32 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                )}
-                {canUpdateFacility && (
-                  <div className="flex justify-end gap-2 max-sm:flex-col flex-wrap">
-                    <PLUGIN_Component
-                      __name="FacilityHomeActions"
-                      facility={facilityData}
-                    />
-                    <EditFacilitySheet
-                      facilityId={facilityId}
-                      trigger={
-                        <Button
-                          className="cursor-pointer font-semibold"
-                          variant="outline"
-                          size="sm"
-                        >
-                          <CareIcon icon="l-pen" />
-                          {t("edit_facility_details")}
-                        </Button>
-                      }
-                    />
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
+              {canUpdateFacility && (
+                <div className="flex max-sm:flex-col mt-10 sm:mt-4">
+                  <PLUGIN_Component
+                    __name="FacilityHomeActions"
+                    facility={facilityData}
+                  />
+                  <EditFacilitySheet
+                    facilityId={facilityId}
+                    trigger={
+                      <Button
+                        className="cursor-pointer font-semibold"
+                        variant="outline"
+                        size="sm"
+                      >
+                        <CareIcon icon="l-pen" />
+                        {t("edit_facility_details")}
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="mt-2 space-y-2">
               <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
                 <Card className="basis-1/2">
                   <CardContent className="p-6 flex flex-col h-full">
