@@ -228,7 +228,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl  space-y-6 p-4 md:p-6">
+    <div className="container mx-auto max-w-4xl space-y-6 p-4 md:p-6">
       <PageTitle
         title={id ? t("update_resource_request") : t("create_resource_request")}
       />
