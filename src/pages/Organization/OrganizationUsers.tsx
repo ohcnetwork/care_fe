@@ -221,7 +221,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                           </div>
                         </div>
                       </div>
-                      <div className="mt-4 bg-gray-50 rounded-md flex justify-end gap-2">
+                      <div className="mt-4 bg-gray-50 rounded-md flex justify-end gap-3 p-2">
                         {canManageOrganizationUsers && (
                           <EditUserRoleSheet
                             organizationId={id}
