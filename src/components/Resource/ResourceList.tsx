@@ -62,7 +62,7 @@ function EmptyState() {
 export default function ResourceList({ facilityId }: { facilityId: string }) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
+    cacheBlacklist: ["title"],
   });
   const { status, title, flow } = qParams;
 
