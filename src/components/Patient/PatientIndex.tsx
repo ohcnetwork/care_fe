@@ -101,15 +101,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     );
   }
 
-  const searchOptions = [
-    {
-      key: "phone_number",
-      type: "phone" as const,
-      placeholder: t("search_by_phone_number"),
-      value: phoneNumber,
-    },
-  ];
-
   const handleSearch = useCallback((key: string, value: string) => {
     if (key === "phone_number") {
       setPhoneNumberQuery({
@@ -174,7 +165,14 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               <SearchInput
                 initialOptionIndex={0}
                 data-cy="patient-search"
-                options={searchOptions}
+                options={[
+                  {
+                    key: "phone_number",
+                    type: "phone" as const,
+                    placeholder: t("search_by_phone_number"),
+                    value: phoneNumber,
+                  },
+                ]}
                 onSearch={handleSearch}
                 className="w-full"
               />

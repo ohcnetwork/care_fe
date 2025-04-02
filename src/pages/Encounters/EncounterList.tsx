@@ -149,21 +149,18 @@ export function EncounterList({
   const searchOptions = [
     {
       key: "name",
-      label: "Patient Name",
       type: "text" as const,
       placeholder: "Search by patient name",
       value: name || "",
     },
     {
       key: "encounter_id",
-      label: "Encounter ID",
       type: "text" as const,
       placeholder: "Search by encounter ID",
       value: encounter_id || "",
     },
     {
       key: "external_identifier",
-      label: "External ID",
       type: "text" as const,
       placeholder: "Search by external ID",
       value: external_identifier || "",

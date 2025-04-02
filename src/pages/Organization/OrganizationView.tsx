@@ -32,14 +32,6 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
     limit: 15,
     disableCache: true,
   });
-  const searchOptions = [
-    {
-      key: "name",
-      type: "text" as const,
-      placeholder: "Search by name",
-      value: qParams.name || "",
-    },
-  ];
 
   const { data: children, isFetching } = useQuery({
     queryKey: ["organization", id, "children", qParams],
@@ -74,7 +66,14 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               </div>
               <div className="w-72">
                 <SearchInput
-                  options={searchOptions}
+                  options={[
+                    {
+                      key: "name",
+                      type: "text" as const,
+                      placeholder: "Search by name",
+                      value: qParams.name || "",
+                    },
+                  ]}
                   initialOptionIndex={0}
                   onSearch={(key, value) =>
                     updateQuery({

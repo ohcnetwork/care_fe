@@ -73,15 +73,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   const defaultStatus = isActive ? "pending" : "completed";
   const currentStatus = status || defaultStatus;
   const currentFlow = flow || "outgoing";
-  const searchOptions = [
-    {
-      key: "title",
-      label: "Title",
-      type: "text" as const,
-      placeholder: t("search_by_resource_title"),
-      value: title || "",
-    },
-  ];
 
   const { data: queryResources, isLoading } = useQuery<
     PaginatedResponse<ResourceRequest>
@@ -150,7 +141,14 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   >
                     <SearchInput
                       id="resource-search"
-                      options={searchOptions}
+                      options={[
+                        {
+                          key: "title",
+                          type: "text" as const,
+                          placeholder: t("search_by_resource_title"),
+                          value: title || "",
+                        },
+                      ]}
                       initialOptionIndex={0}
                       onFieldChange={() =>
                         updateQuery({

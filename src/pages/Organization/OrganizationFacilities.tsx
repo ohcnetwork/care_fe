@@ -38,14 +38,6 @@ export default function OrganizationFacilities({
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
     useFilters({ limit: 15, disableCache: true });
-  const searchOptions = [
-    {
-      key: "name",
-      type: "text" as const,
-      placeholder: "Search Facilities by name",
-      value: qParams.name || "",
-    },
-  ];
 
   const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
@@ -89,7 +81,14 @@ export default function OrganizationFacilities({
 
             <div className="flex gap-2">
               <SearchInput
-                options={searchOptions}
+                options={[
+                  {
+                    key: "name",
+                    type: "text" as const,
+                    placeholder: "Search Facilities by name",
+                    value: qParams.name || "",
+                  },
+                ]}
                 initialOptionIndex={0}
                 onSearch={(key, value) =>
                   updateQuery({
