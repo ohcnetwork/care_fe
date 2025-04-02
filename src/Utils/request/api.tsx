@@ -8,11 +8,7 @@ import {
   CreateFileResponse,
   FileUploadModel,
 } from "@/components/Patient/models";
-import {
-  UpdatePasswordForm,
-  UserAssignedModel,
-  UserModel,
-} from "@/components/Users/models";
+import { UpdatePasswordForm, UserModel } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
@@ -198,7 +194,7 @@ const routes = {
 
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
-    TRes: Type<PaginatedResponse<UserAssignedModel>>(),
+    TRes: Type<PaginatedResponse<UserBase>>(),
   },
 
   // Download Api
