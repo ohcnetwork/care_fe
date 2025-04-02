@@ -97,7 +97,6 @@ export function FacilitiesPage() {
               value: qParams.name || "",
             },
           ]}
-          initialOptionIndex={0}
           className="w-[calc(100vw-2rem)] sm:max-w-min sm:min-w-64"
           onSearch={(key, value) => updateQuery({ name: value })}
         />

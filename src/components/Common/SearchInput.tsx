@@ -40,11 +40,9 @@ interface SearchInputProps {
   id?: string;
   options: SearchOption[];
   onSearch: (key: string, value: string) => void;
-  initialOptionIndex: number;
   className?: string;
   inputClassName?: string;
   buttonClassName?: string;
-  clearSearch?: { value: boolean; params?: string[] };
   enableOptionButtons?: boolean;
   onFieldChange?: (options: SearchOption) => void;
   autoFocus?: boolean;
@@ -146,16 +144,22 @@ const SearchInput: React.FC<SearchInputProps> = ({
   id,
   options,
   onSearch,
-  initialOptionIndex,
   className,
   inputClassName,
   buttonClassName,
-  clearSearch,
   onFieldChange,
   enableOptionButtons = true,
   autoFocus = false,
   "data-cy": dataCy,
 }) => {
+  const initialOptionIndex = useMemo(
+    () =>
+      Math.max(
+        options.findIndex((option) => option.value !== ""),
+        0,
+      ),
+    [options],
+  );
   const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] =
     useState(initialOptionIndex);
@@ -166,14 +170,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
   const isSingleOption = options.length == 1;
-
-  useEffect(() => {
-    if (clearSearch?.value) {
-      setSearchValue("");
-      inputRef.current?.focus();
-    }
-  }, [clearSearch?.value]);
-
   const handleOptionChange = useCallback(
     (index: number) => {
       setSelectedOptionIndex(index);

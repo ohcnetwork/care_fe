@@ -74,7 +74,6 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                       value: qParams.name || "",
                     },
                   ]}
-                  initialOptionIndex={0}
                   onSearch={(key, value) =>
                     updateQuery({
                       [key]: value || undefined,

@@ -152,10 +152,6 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             <div className="flex gap-2">
               <SearchInput
                 options={searchOptions}
-                initialOptionIndex={Math.max(
-                  searchOptions.findIndex((option) => option.value !== ""),
-                  0,
-                )}
                 onSearch={handleSearch}
                 onFieldChange={handleFieldChange}
                 className="w-full"

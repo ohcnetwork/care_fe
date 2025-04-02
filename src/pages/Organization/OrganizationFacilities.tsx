@@ -89,7 +89,6 @@ export default function OrganizationFacilities({
                     value: qParams.name || "",
                   },
                 ]}
-                initialOptionIndex={0}
                 onSearch={(key, value) =>
                   updateQuery({
                     [key]: value || undefined,

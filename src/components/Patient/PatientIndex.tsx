@@ -163,7 +163,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div>
             <div className="space-y-6">
               <SearchInput
-                initialOptionIndex={0}
                 data-cy="patient-search"
                 options={[
                   {

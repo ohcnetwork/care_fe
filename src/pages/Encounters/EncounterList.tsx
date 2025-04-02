@@ -226,12 +226,6 @@ export function EncounterList({
                     <SearchInput
                       data-cy="encounter-search"
                       options={searchOptions}
-                      initialOptionIndex={Math.max(
-                        searchOptions.findIndex(
-                          (option) => option.value !== "",
-                        ),
-                        0,
-                      )}
                       onFieldChange={handleFieldChange}
                       onSearch={handleSearch}
                       className="w-full"

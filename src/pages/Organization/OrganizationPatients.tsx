@@ -115,10 +115,6 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
             <SearchInput
               data-cy="patient-search"
               options={searchOptions}
-              initialOptionIndex={Math.max(
-                searchOptions.findIndex((option) => option.value !== ""),
-                0,
-              )}
               onSearch={handleSearch}
               onFieldChange={handleFieldChange}
             />

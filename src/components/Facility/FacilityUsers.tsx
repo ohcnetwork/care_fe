@@ -93,7 +93,6 @@ export default function FacilityUsers(props: { facilityId: string }) {
               value: qParams.username || "",
             },
           ]}
-          initialOptionIndex={0}
           onSearch={(key, value) =>
             updateQuery({
               [key]: value || undefined,

@@ -149,7 +149,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                           value: title || "",
                         },
                       ]}
-                      initialOptionIndex={0}
                       onFieldChange={() =>
                         updateQuery({
                           title: undefined,
