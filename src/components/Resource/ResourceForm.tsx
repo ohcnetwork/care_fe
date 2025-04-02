@@ -413,27 +413,27 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         </FormItem>
                       )}
                     />
+                    {id && (
+                      <FormField
+                        control={form.control}
+                        name="assigned_to"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel required>{t("assigned_to")}</FormLabel>
+                            <FormControl>
+                              <UserSelector
+                                selected={assignedToUser}
+                                onChange={handleUserChange}
+                                placeholder={t("search_users")}
+                                noOptionsMessage={t("no_users_found")}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </div>
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="assigned_to"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel required>{t("assigned_to")}</FormLabel>
-                          <FormControl>
-                            <UserSelector
-                              selected={assignedToUser}
-                              onChange={handleUserChange}
-                              placeholder={t("search_users")}
-                              noOptionsMessage={t("no_users_found")}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </div>
                 <Separator />
 
