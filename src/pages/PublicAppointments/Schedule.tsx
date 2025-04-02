@@ -213,7 +213,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   if (!userData) {
     return <Loading />;
   }
-  console.log(groupSlotsByAvailability(slotsQuery.data?.results || []));
   return (
     <div className="flex flex-col">
       <div className="container mx-auto px-4 py-8">
