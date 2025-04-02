@@ -44,7 +44,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
   const { goBack } = useAppHistory();
   const { hasPermission } = usePermissions();
 
-  const { data: facilityData, isLoading } = useQuery({
+  const { data: facilityData, isLoading: facilityLoading } = useQuery({
     queryKey: ["facility", props.facilityId],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: props.facilityId },
@@ -57,6 +57,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
   const {
     mutate: verifyPatient,
     data: patientData,
+    isPending: patientLoading,
     isError,
   } = useMutation({
     mutationFn: mutate(routes.patient.search_retrieve),
@@ -68,7 +69,9 @@ export default function VerifyPatient(props: { facilityId: string }) {
     },
   });
 
-  const { data: encounters } = useQuery<PaginatedResponse<Encounter>>({
+  const { data: encounters, isLoading: encounterLoading } = useQuery<
+    PaginatedResponse<Encounter>
+  >({
     queryKey: ["encounters", patientData?.id],
     queryFn: query(routes.encounter.list, {
       queryParams: {
@@ -89,7 +92,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
       });
     }
   }, [phone_number, year_of_birth, partial_id, verifyPatient]);
-  if ((props.facilityId && isLoading) || (!patientData && !isError)) {
+  if (patientLoading || facilityLoading || encounterLoading) {
     return (
       <div className="space-y-4">
         <CardListSkeleton count={1} />
