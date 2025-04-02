@@ -32,6 +32,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -141,6 +142,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
       queryClient.invalidateQueries({
         queryKey: ["currentUser"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["facility", facilityId],
+      });
       navigate("/");
     },
   });
@@ -203,7 +207,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     }
   };
 
-  if (isLoading || !facilityData) {
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -215,6 +219,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
       {t("recommended_aspect_ratio_for", { aspectRatio: "16:9" })}
     </>
   );
+
+  if (!facilityData) {
+    return <ErrorPage />;
+  }
 
   return (
     <div>
