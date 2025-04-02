@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -36,7 +37,15 @@ const DuplicatePatientDialog = (props: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-3/4 md:w-1/2">
+      <DialogContent
+        className="[&>button:last-child]:hidden w-3/4 md:w-1/2"
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{t("patient_records_found")}</DialogTitle>
         </DialogHeader>
@@ -44,7 +53,10 @@ const DuplicatePatientDialog = (props: Props) => {
           <div>
             <p className="text-sm leading-relaxed">
               {t("patient_records_found_description")}(
-              <span className="font-bold">{patientList[0].phone_number}</span>)
+              <span className="font-bold">
+                {formatPhoneNumberIntl(patientList[0].phone_number)}
+              </span>
+              )
             </p>
           </div>
           <div>
@@ -119,14 +131,6 @@ const DuplicatePatientDialog = (props: Props) => {
         </div>
         <DialogFooter>
           <div className="mt-4 flex flex-col justify-between sm:flex-row gap-2">
-            <Button
-              onClick={() => onOpenChange(false)}
-              className="gap-1"
-              variant={"secondary"}
-            >
-              <CareIcon icon="l-times" className="text-lg" />
-              {t("close")}
-            </Button>
             <Button
               onClick={() => handleOk(action)}
               disabled={!action}

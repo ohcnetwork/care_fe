@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -95,7 +96,7 @@ export default function PatientSelect({
 
   const renderNoPatientFound = () => {
     return (
-      <div className="">
+      <div>
         <span className="text-base font-medium">
           {t("no_patients_found_phone_number")}
         </span>
@@ -130,7 +131,7 @@ export default function PatientSelect({
               <th className="w-1/6 px-4 py-2 text-left">{t("sex")}</th>
             </tr>
           </thead>
-          <tbody className="divide-y rounded-lg border bg-card">
+          <tbody className="divide-y rounded-lg border border-gray-200 bg-card">
             {patients?.map((patient) => (
               <tr
                 key={patient.id}
@@ -170,7 +171,7 @@ export default function PatientSelect({
                       <div className="text-xs text-gray-500">{patient.id}</div>
                     </td>
                     <td className="p-4 align-middle text-left">
-                      {patient.phone_number}
+                      {formatPhoneNumberIntl(patient.phone_number)}
                     </td>
                     <td className="p-4 align-middle text-left">
                       {getPatienDoBorAge(patient)}
@@ -223,7 +224,7 @@ export default function PatientSelect({
             )
           }
         >
-          <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+          <span className="bg-linear-to-b from-white/15 to-transparent"></span>
           {t("add_new_patient")}
         </Button>
       </div>

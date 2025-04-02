@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -73,10 +74,10 @@ export default function PatientLogin({
       `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
     );
   }
-
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
     mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
+      toast.success(t("send_otp_success"));
       if (page === "send") {
         navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
       }
@@ -121,7 +122,7 @@ export default function PatientLogin({
         </span>
         <form
           onSubmit={handleSubmit}
-          className="flex mt-2 flex-col gap-4 shadow border p-8 rounded-lg"
+          className="flex mt-2 flex-col gap-4 shadow-sm border border-gray-200 p-8 rounded-lg"
         >
           <div className="space-y-2">
             <Label>{t("phone_number")}</Label>
@@ -141,7 +142,7 @@ export default function PatientLogin({
             type="submit"
             disabled={isSendOTPLoading}
           >
-            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+            <span className="bg-linear-to-b from-white/15 to-transparent"></span>
             {isSendOTPLoading ? (
               <CircularProgress className="text-white" />
             ) : (
@@ -166,7 +167,7 @@ export default function PatientLogin({
         <Form {...OTPForm}>
           <form
             onSubmit={OTPForm.handleSubmit(handleVerifySubmit)}
-            className="flex mt-2 flex-col gap-4 shadow border p-8 rounded-lg"
+            className="flex mt-2 flex-col gap-4 shadow-sm border border-gray-200 p-8 rounded-lg"
           >
             <FormField
               control={OTPForm.control}
@@ -217,12 +218,18 @@ export default function PatientLogin({
                 t("verify_otp")
               )}
             </Button>
-            <a
-              className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
-              onClick={() => sendOTP({ phone_number: phoneNumber })}
-            >
-              {t("didnt_receive_a_message")} {t("resend_otp")}
-            </a>
+            {isSendOTPLoading ? (
+              <div className="w-full flex justify-center">
+                <CircularProgress className="text-secondary-800" />
+              </div>
+            ) : (
+              <a
+                className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
+                onClick={() => sendOTP({ phone_number: phoneNumber })}
+              >
+                {t("didnt_receive_a_message")} {t("resend_otp")}
+              </a>
+            )}
           </form>
         </Form>
       </div>
@@ -242,7 +249,7 @@ export default function PatientLogin({
               )
         }
       >
-        <CareIcon icon="l-arrow-left" className="h-4 w-4 mr-1" />
+        <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
         <span className="text-sm underline">{t("back")}</span>
       </Button>
       {page === "send" ? renderPhoneNumberForm() : renderVerifyForm()}

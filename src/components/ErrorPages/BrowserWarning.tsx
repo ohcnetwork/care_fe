@@ -60,7 +60,7 @@ const BrowserWarning = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="sticky top-0 z-50 flex h-24 w-full items-center justify-center bg-gray-800 bg-opacity-60 text-center text-gray-300">
+      <div className="sticky top-0 z-50 flex h-32 w-full items-center justify-center bg-gray-700/85 text-center text-gray-300">
         <div>
           <h2 className="text-lg font-medium">{t("unsupported_browser")}</h2>
           <p className="text-sm">
