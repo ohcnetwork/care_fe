@@ -87,14 +87,14 @@ export default function CreateScheduleTemplateSheet({
           required_error: t("field_required"),
         })
         .min(dayjs().startOf("day").toDate(), {
-          message: t("date_must_be_today_or_future"),
+          message: t("schedule_creation_for_past_validation_error"),
         }),
       valid_to: z
         .date({
           required_error: t("field_required"),
         })
         .min(dayjs().startOf("day").toDate(), {
-          message: t("date_must_be_today_or_future"),
+          message: t("schedule_creation_for_past_validation_error"),
         }),
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
@@ -153,8 +153,7 @@ export default function CreateScheduleTemplateSheet({
         .min(1, t("schedule_sessions_min_error")),
     })
     .refine(
-      (data) =>
-        dayjs(data.valid_to).isAfter(dayjs(data.valid_from).subtract(1, "day")),
+      (data) => !dayjs(data.valid_to).isAfter(dayjs(data.valid_from), "day"),
       {
         message: t("to_date_equal_or_after_from_date"),
         path: ["valid_to"],

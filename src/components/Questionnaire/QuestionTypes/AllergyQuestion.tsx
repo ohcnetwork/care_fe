@@ -9,10 +9,10 @@ import {
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,12 +22,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { RelativeDatePicker } from "@/components/ui/relative-date-picker";
 import {
   Select,
   SelectContent,
@@ -43,7 +37,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { CATEGORY_ICONS } from "@/components/Patient/allergy/list";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -121,9 +114,6 @@ export function AllergyQuestion({
   const allergies =
     (questionnaireResponse.values?.[0]?.value as AllergyIntoleranceRequest[]) ||
     [];
-  const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
-    "absolute",
-  );
 
   const { data: patientAllergies } = useQuery({
     queryKey: ["allergies", patientId],
@@ -237,8 +227,6 @@ export function AllergyQuestion({
                     disabled={disabled}
                     onUpdate={(updates) => handleUpdateAllergy(index, updates)}
                     onRemove={() => handleRemoveAllergy(index)}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
                   />
                 ))}
               </TableBody>
@@ -420,71 +408,20 @@ export function AllergyQuestion({
                       {t("occurrence")}
                     </Label>
 
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="h-7 text-sm px-2 justify-start font-normal w-full"
-                          disabled={disabled}
-                        >
-                          {allergy.last_occurrence ? (
-                            new Date(
-                              allergy.last_occurrence,
-                            ).toLocaleDateString()
-                          ) : (
-                            <span className="text-muted-foreground">
-                              {t("select_date")}
-                            </span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="p-0 w-auto" align="start">
-                        <Tabs
-                          value={activeTab}
-                          onValueChange={(v) =>
-                            setActiveTab(v as "absolute" | "relative")
-                          }
-                        >
-                          <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="absolute">
-                              {t("absolute_date")}
-                            </TabsTrigger>
-                            <TabsTrigger value="relative">
-                              {t("relative_date")}
-                            </TabsTrigger>
-                          </TabsList>
-                          <TabsContent value="absolute" className="p-0">
-                            <Calendar
-                              mode="single"
-                              selected={
-                                allergy.last_occurrence
-                                  ? new Date(allergy.last_occurrence)
-                                  : undefined
-                              }
-                              onSelect={(date: Date | undefined) => {
-                                handleUpdateAllergy(index, {
-                                  last_occurrence: dateQueryString(date),
-                                });
-                              }}
-                            />
-                          </TabsContent>
-                          <TabsContent value="relative" className="p-0">
-                            <RelativeDatePicker
-                              value={
-                                allergy.last_occurrence
-                                  ? new Date(allergy.last_occurrence)
-                                  : undefined
-                              }
-                              onDateChange={(date) =>
-                                handleUpdateAllergy(index, {
-                                  last_occurrence: dateQueryString(date),
-                                })
-                              }
-                            />
-                          </TabsContent>
-                        </Tabs>
-                      </PopoverContent>
-                    </Popover>
+                    <CombinedDatePicker
+                      value={
+                        allergy.last_occurrence
+                          ? new Date(allergy.last_occurrence)
+                          : undefined
+                      }
+                      onChange={(date) =>
+                        handleUpdateAllergy(index, {
+                          last_occurrence: dateQueryString(date),
+                        })
+                      }
+                      disabled={disabled}
+                      buttonClassName="h-7 text-sm px-2 justify-start font-normal w-full"
+                    />
                   </div>
                 </div>
 
@@ -519,21 +456,19 @@ export function AllergyQuestion({
     </>
   );
 }
+
 interface AllergyItemProps {
   allergy: AllergyIntoleranceRequest;
   disabled?: boolean;
   onUpdate?: (allergy: Partial<AllergyIntoleranceRequest>) => void;
   onRemove?: () => void;
-  activeTab: "absolute" | "relative";
-  setActiveTab: Dispatch<SetStateAction<"absolute" | "relative">>;
 }
+
 const AllergyTableRow = ({
   allergy,
   disabled,
   onUpdate,
   onRemove,
-  activeTab,
-  setActiveTab,
 }: AllergyItemProps) => {
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
 
@@ -640,65 +575,18 @@ const AllergyTableRow = ({
           </Select>
         </TableCell>
         <TableCell className="py-1 px-1">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-7 text-sm px-2 justify-start font-normal w-full"
-                disabled={disabled}
-              >
-                {allergy.last_occurrence ? (
-                  new Date(allergy.last_occurrence).toLocaleDateString()
-                ) : (
-                  <span className="text-muted-foreground">
-                    {t("select_date")}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-auto" align="start">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) =>
-                  setActiveTab(v as "absolute" | "relative")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="absolute">
-                    {t("absolute_date")}
-                  </TabsTrigger>
-                  <TabsTrigger value="relative">
-                    {t("relative_date")}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="absolute" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      allergy.last_occurrence
-                        ? new Date(allergy.last_occurrence)
-                        : undefined
-                    }
-                    onSelect={(date: Date | undefined) => {
-                      onUpdate?.({ last_occurrence: dateQueryString(date) });
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="relative" className="p-0">
-                  <RelativeDatePicker
-                    value={
-                      allergy.last_occurrence
-                        ? new Date(allergy.last_occurrence)
-                        : undefined
-                    }
-                    onDateChange={(date) => {
-                      onUpdate?.({ last_occurrence: dateQueryString(date) });
-                    }}
-                  />
-                </TabsContent>
-              </Tabs>
-            </PopoverContent>
-          </Popover>
+          <CombinedDatePicker
+            value={
+              allergy.last_occurrence
+                ? new Date(allergy.last_occurrence)
+                : undefined
+            }
+            onChange={(date) =>
+              onUpdate?.({ last_occurrence: dateQueryString(date) })
+            }
+            disabled={disabled}
+            buttonClassName="h-7 text-sm px-2 justify-start font-normal w-full"
+          />
         </TableCell>
         <TableCell className="py-1 px-0 flex justify-center items-center">
           <DropdownMenu>
