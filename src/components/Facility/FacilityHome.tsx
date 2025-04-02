@@ -135,6 +135,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
       toast.success(
         t("facility_deleted_successfully", { name: facilityData?.name }),
       );
+      queryClient.invalidateQueries({
+        queryKey: ["facilities"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["currentUser"],
+      });
       navigate("/");
     },
   });
