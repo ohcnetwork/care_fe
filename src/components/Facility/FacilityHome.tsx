@@ -320,7 +320,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           className={cn(
                             buttonVariants({ variant: "destructive" }),
                           )}
-                          // disabled={isDeleting}
+                          disabled={isDeleting}
                         >
                           {isDeleting ? t("deleting") : t("delete")}
                         </AlertDialogAction>
