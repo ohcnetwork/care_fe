@@ -91,22 +91,26 @@ export default function CreateScheduleExceptionSheet({
         if (data.unavailable_all_day) return true;
         const startTime = dayjs(data.start_time, "HH:mm");
         const endTime = dayjs(data.end_time, "HH:mm");
-        // If the date is today, ensure start_time and end_time are in the future
-        if (dayjs(data.valid_from).isSame(dayjs(), "day")) {
-          return dayjs().isBefore(startTime) && startTime.isBefore(endTime);
-        }
-        // Ensure start_time is before end_time
         return startTime.isBefore(endTime);
       },
+      {
+        message: t("start_time_must_be_before_end_time"),
+        path: ["start_time"],
+      },
+    )
+    .refine(
       (data) => {
+        if (data.unavailable_all_day) return true;
         const startTime = dayjs(data.start_time, "HH:mm");
-        const endTime = dayjs(data.end_time, "HH:mm");
-        return {
-          message: startTime.isBefore(endTime)
-            ? t("start_time_must_be_before_end_time")
-            : t("start_time_must_be_in_the_future"),
-          path: ["start_time"],
-        };
+        const now = dayjs();
+        if (dayjs(data.valid_from).isSame(now, "day")) {
+          return now.isBefore(startTime);
+        }
+        return true;
+      },
+      {
+        message: t("start_time_must_be_in_the_future"),
+        path: ["start_time"],
       },
     )
     .refine(
