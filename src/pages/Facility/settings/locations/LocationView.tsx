@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
@@ -54,7 +55,7 @@ export default function LocationView({
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const limit = 12;
 
-  const { data: location } = useQuery({
+  const { data: location, isLoading: isLocationLoading } = useQuery({
     queryKey: ["location", facilityId, id],
     queryFn: query(locationApi.get, {
       pathParams: { facility_id: facilityId, id },
@@ -122,13 +123,6 @@ export default function LocationView({
       onBackToParent();
     }
   };
-
-  if (!location)
-    return (
-      <div className="p-4">
-        <CardGridSkeleton count={6} />
-      </div>
-    );
 
   const generateBreadcrumbs = (locationData: any) => {
     const breadcrumbs = [];
@@ -211,18 +205,28 @@ export default function LocationView({
         <div className="space-y-6">
           <div className="flex flex-col justify-between items-start gap-4">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-xl font-semibold">{location?.name}</h2>
-              <Badge variant="outline">
-                {t(`location_form__${location?.form}`)}
-              </Badge>
-              <Badge
-                variant={
-                  location?.status === "active" ? "default" : "secondary"
-                }
-                className="capitalize"
-              >
-                {location?.status}
-              </Badge>
+              {isLocationLoading ? (
+                <>
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-24" />
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl font-semibold">{location?.name}</h2>
+                  <Badge variant="outline">
+                    {t(`location_form__${location?.form}`)}
+                  </Badge>
+                  <Badge
+                    variant={
+                      location?.status === "active" ? "default" : "secondary"
+                    }
+                    className="capitalize"
+                  >
+                    {location?.status}
+                  </Badge>
+                </>
+              )}
             </div>
             <div className="flex flex-col xl:flex-row justify-between items-start w-full gap-4">
               <div className="w-full xl:w-72">
@@ -237,17 +241,20 @@ export default function LocationView({
                 />
               </div>
               <div className="flex flex-col lg:flex-row gap-2 w-full lg:w-auto justify-evenly">
-                {location && "mode" in location && location.mode === "kind" && (
-                  <Button
-                    variant="primary"
-                    onClick={handleAddLocation}
-                    className="w-full sm:w-auto"
-                  >
-                    <CareIcon icon="l-plus" className="size-4 mr-2" />
-                    {t("add_location")}
-                  </Button>
-                )}
-                {locationOrganizations && (
+                {!isLocationLoading &&
+                  location &&
+                  "mode" in location &&
+                  location.mode === "kind" && (
+                    <Button
+                      variant="primary"
+                      onClick={handleAddLocation}
+                      className="w-full sm:w-auto"
+                    >
+                      <CareIcon icon="l-plus" className="size-4 mr-2" />
+                      {t("add_location")}
+                    </Button>
+                  )}
+                {!isLocationLoading && locationOrganizations && (
                   <LinkDepartmentsSheet
                     entityType="location"
                     entityId={id}
@@ -273,7 +280,7 @@ export default function LocationView({
           <div className="space-y-4">
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
-                <CardGridSkeleton count={6} />
+                <CardGridSkeleton count={4} />
               </div>
             ) : (
               <>

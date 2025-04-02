@@ -247,7 +247,6 @@ export default function LocationSettings({
                 onLocationClick={handleLocationSelect}
                 facilityName={facilityData?.name || t("facility")}
                 searchQuery={searchQuery}
-                //isEditing={isSheetOpen}
               />
             ) : (
               <>
