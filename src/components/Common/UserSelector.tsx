@@ -61,7 +61,7 @@ export default function UserSelector({
         <Button
           variant="outline"
           role="combobox"
-          className="min-w-60 justify-start w-full"
+          className="min-w-60 justify-start"
         >
           {selected ? (
             <div className="flex items-center gap-2">
