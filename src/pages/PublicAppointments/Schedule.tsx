@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -134,6 +134,11 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       toast.error(t("error_fetching_slots_data"));
     }
   }
+  const groupedSlots = useMemo(() => {
+    if (!slotsQuery.data?.results || slotsQuery.data.results.length === 0)
+      return [];
+    return groupSlotsByAvailability(slotsQuery.data.results);
+  }, [slotsQuery.data?.results]);
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
@@ -208,7 +213,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   if (!userData) {
     return <Loading />;
   }
-
+  console.log(groupSlotsByAvailability(slotsQuery.data?.results || []));
   return (
     <div className="flex flex-col">
       <div className="container mx-auto px-4 py-8">
@@ -280,10 +285,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 highlightToday={false}
               />
               <div className="space-y-6">
-                {slotsQuery.data?.results &&
-                slotsQuery.data.results.length > 0 ? (
-                  groupSlotsByAvailability(slotsQuery.data.results).map(
-                    ({ availability, slots }) => (
+                {groupedSlots.length > 0 ? (
+                  <>
+                    {groupedSlots.map(({ availability, slots }) => (
                       <div key={availability.name}>
                         <h4 className="text-lg font-semibold mb-3">
                           {availability.name}
@@ -298,13 +302,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                               onClick={() =>
                                 setSelectedSlot({ ...slot, availability })
                               }
-                              allowOngoingSlots={false}
                             />
                           ))}
                         </div>
                       </div>
-                    ),
-                  )
+                    ))}
+                  </>
                 ) : (
                   <div>{t("no_slots_available")}</div>
                 )}

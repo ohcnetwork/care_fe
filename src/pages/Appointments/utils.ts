@@ -5,6 +5,7 @@ import {
   eachDayOfInterval,
   format,
   isPast,
+  isWithinInterval,
   max,
   startOfToday,
 } from "date-fns";
@@ -18,7 +19,10 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
-export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
+export const groupSlotsByAvailability = (
+  slots: TokenSlot[],
+  allowOngoingSlots: boolean = false,
+) => {
   const result: {
     availability: TokenSlot["availability"];
     slots: Omit<TokenSlot, "availability">[];
@@ -26,6 +30,13 @@ export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
 
   for (const slot of slots) {
     if (isPast(slot.end_datetime)) {
+      continue;
+    }
+    const isOngoingSlot = isWithinInterval(new Date(), {
+      start: slot.start_datetime,
+      end: slot.end_datetime,
+    });
+    if (!allowOngoingSlots && isOngoingSlot) {
       continue;
     }
     const availability = slot.availability;
