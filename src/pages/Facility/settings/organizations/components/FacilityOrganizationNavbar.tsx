@@ -54,14 +54,20 @@ function OrganizationTreeNode({
           isSelected && "bg-blue-100 text-blue-800",
         )}
         style={{ paddingLeft: `${level}rem` }}
+        onClick={(_e) => {
+          if (organization.has_children) {
+            onToggleExpand(organization.id);
+          }
+          onSelect(organization);
+        }}
       >
         {organization.has_children ? (
           <Button
             variant="ghost"
             size="icon"
             className="h-6 w-6"
-            onClick={(e) => {
-              e.stopPropagation();
+            onClick={(_e) => {
+              _e.stopPropagation();
               onToggleExpand(organization.id);
             }}
           >
@@ -76,10 +82,7 @@ function OrganizationTreeNode({
         ) : (
           <span className="w-6" />
         )}
-        <div
-          onClick={() => onSelect(organization)}
-          className="flex items-center flex-1 text-sm gap-2 cursor-pointer"
-        >
+        <div className="flex items-center flex-1 text-sm gap-2">
           <span className="truncate">{organization.name}</span>
         </div>
       </div>
