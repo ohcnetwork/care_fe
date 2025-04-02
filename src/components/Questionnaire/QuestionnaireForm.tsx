@@ -685,11 +685,9 @@ export function QuestionnaireForm({
             })),
           },
         });
-        submitBatch({ requests });
-      } else {
-        toast.error("Failed to submit questionnaire");
       }
     });
+    submitBatch({ requests });
   };
 
   const scrollToQuestion = (questionnaireId: string, groupId?: string) => {
