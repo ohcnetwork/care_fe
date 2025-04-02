@@ -123,10 +123,7 @@ export const MultiSelect = React.forwardRef<
                       return (
                         <Badge
                           key={value}
-                          className={cn(
-                            "m-1 cursor-pointer bg-gray-100 text-gray-900 hover:bg-gray-700 hover:text-white transition-colors",
-                            "group",
-                          )}
+                          className="m-1 cursor-pointer bg-gray-100 text-gray-900 hover:bg-gray-700 hover:text-white transition-colors group"
                           variant="secondary"
                         >
                           {option?.icon && (
@@ -195,7 +192,6 @@ export const MultiSelect = React.forwardRef<
                   >
                     <Checkbox
                       checked={selectedValues.length === options.length}
-                      className="border-gray-300 data-[state=checked]:bg-gray-700 data-[state=checked]:border-gray-700"
                       aria-label="Select all options"
                     />
                     <span>{t("select_all")}</span>
@@ -210,7 +206,6 @@ export const MultiSelect = React.forwardRef<
                       >
                         <Checkbox
                           checked={isSelected}
-                          className="border-gray-300 data-[state=checked]:bg-gray-700 data-[state=checked]:border-gray-700"
                           aria-label={`Select ${option.label}`}
                         />
                         {option?.icon && (
