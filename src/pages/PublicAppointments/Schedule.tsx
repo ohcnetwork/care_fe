@@ -337,7 +337,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 }
               }}
             >
-              <span className="bg-linear-to-b from-white/15 to-transparent"></span>
               {appointmentId ? t("reschedule_appointment") : t("continue")}
               <CareIcon icon="l-arrow-right" className="size-4" />
             </Button>
