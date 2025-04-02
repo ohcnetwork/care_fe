@@ -80,7 +80,68 @@ const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
     </div>
   );
 };
-
+const SearchInputFieldRenderer = ({
+  selectedOption,
+  searchValue,
+  setSearchValue,
+  id,
+  inputRef,
+  inputClassName,
+  autoFocus,
+  isSingleOption,
+  open,
+  dataCy,
+}: {
+  selectedOption: SearchOption;
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+  id?: string;
+  inputRef?: React.RefObject<HTMLInputElement>;
+  inputClassName?: string;
+  autoFocus?: boolean;
+  isSingleOption: boolean;
+  open: boolean;
+  dataCy?: string;
+}) => {
+  switch (selectedOption.type) {
+    case "phone":
+      return (
+        <div className="relative">
+          <PhoneInput
+            id={id}
+            name={selectedOption.key}
+            placeholder={selectedOption.placeholder}
+            value={searchValue}
+            onChange={setSearchValue}
+            className={inputClassName}
+            autoFocus={autoFocus}
+            data-cy={dataCy}
+          />
+          {!isSingleOption && <KeyboardShortcutHint open={open} />}
+        </div>
+      );
+    default:
+      return (
+        <div className="relative">
+          <Input
+            id={id}
+            type="text"
+            placeholder={selectedOption.placeholder}
+            ref={inputRef}
+            value={searchValue}
+            onChange={(event) => setSearchValue(event.target.value)}
+            className={cn(
+              !isSingleOption &&
+                "grow border-none shadow-none focus-visible:ring-0",
+              inputClassName,
+            )}
+            data-cy={dataCy}
+          />
+          {!isSingleOption && <KeyboardShortcutHint open={open} />}
+        </div>
+      );
+  }
+};
 const SearchInput: React.FC<SearchInputProps> = ({
   id,
   options,
@@ -185,46 +246,23 @@ const SearchInput: React.FC<SearchInputProps> = ({
     }
   }, [searchValue]);
 
-  const renderInput = useMemo(() => {
-    switch (selectedOption.type) {
-      case "phone":
-        return (
-          <div className="relative">
-            <PhoneInput
-              id={id}
-              name={selectedOption.key}
-              placeholder={selectedOption.placeholder}
-              value={searchValue}
-              onChange={(value) => setSearchValue(value)}
-              className={inputClassName}
-              autoFocus={autoFocus}
-              data-cy={dataCy}
-            />
-            {!isSingleOption && <KeyboardShortcutHint open={open} />}
-          </div>
-        );
-      default:
-        return (
-          <div className="relative">
-            <Input
-              id={id}
-              type="text"
-              placeholder={selectedOption.placeholder}
-              ref={inputRef}
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              className={cn(
-                !isSingleOption &&
-                  "grow border-none shadow-none focus-visible:ring-0",
-                inputClassName,
-              )}
-              data-cy={dataCy}
-            />
-            {!isSingleOption && <KeyboardShortcutHint open={open} />}
-          </div>
-        );
-    }
-  }, [selectedOption, searchValue, t, inputClassName, open]);
+  const renderInput = useMemo(
+    () => (
+      <SearchInputFieldRenderer
+        selectedOption={selectedOption}
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+        id={id}
+        inputRef={inputRef}
+        inputClassName={inputClassName}
+        autoFocus={autoFocus}
+        isSingleOption={isSingleOption}
+        open={open}
+        dataCy={dataCy}
+      />
+    ),
+    [selectedOption, searchValue, inputClassName, open],
+  );
 
   useEffect(() => {
     if (autoFocus) {
