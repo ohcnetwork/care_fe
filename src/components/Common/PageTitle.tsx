@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -8,7 +8,6 @@ export interface PageTitleProps {
   title: string;
   className?: string;
   componentRight?: ReactNode;
-  focusOnLoad?: boolean;
   isInsidePage?: boolean;
   changePageMetadata?: boolean;
   hideTitleOnPage?: boolean;
@@ -18,24 +17,12 @@ export default function PageTitle({
   title,
   className = "",
   componentRight = <></>,
-  focusOnLoad = false,
   isInsidePage = false,
   changePageMetadata = true,
   hideTitleOnPage,
 }: PageTitleProps) {
-  const divRef = useRef<any>();
-
-  useEffect(() => {
-    if (divRef.current && focusOnLoad) {
-      divRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [divRef, focusOnLoad]);
-
   return (
-    <div
-      ref={divRef}
-      className={cn(!isInsidePage && "mb-2 md:mb-4", className)}
-    >
+    <div className={cn(!isInsidePage && "mb-2 md:mb-4", className)}>
       {changePageMetadata && <PageHeadTitle title={title} />}
 
       <div
