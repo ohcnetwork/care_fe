@@ -153,11 +153,8 @@ export default function CreateScheduleTemplateSheet({
         .min(1, t("schedule_sessions_min_error")),
     })
     .refine(
-      (data) => !dayjs(data.valid_to).isAfter(dayjs(data.valid_from), "day"),
-      {
-        message: t("to_date_equal_or_after_from_date"),
-        path: ["valid_to"],
-      },
+      (data) => dayjs(data.valid_to).isAfter(dayjs(data.valid_from), "day"),
+      { message: "valid_to must be after valid_from" },
     );
 
   const form = useForm<z.infer<typeof formSchema>>({
