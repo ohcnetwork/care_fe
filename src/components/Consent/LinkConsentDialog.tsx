@@ -186,6 +186,7 @@ export default function LinkConsentDialog({
       mfa_enabled: authUser.mfa_enabled || false,
       last_login: authUser.last_login || new Date().toISOString(),
       profile_picture_url: authUser.read_profile_picture_url || "",
+      deleted: authUser.deleted || false,
     };
 
     createConsent({
