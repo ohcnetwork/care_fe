@@ -88,6 +88,11 @@ export function LocationSheet({
   const [searchTerm, setSearchTerm] = useState("");
   const [locationsPage, setLocationsPage] = useState(1);
   const [bedsPage, setBedsPage] = useState(1);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [locationToDelete, setLocationToDelete] = useState<{
+    location: string;
+    id: string;
+  } | null>(null);
   const [hasMoreLocations, setHasMoreLocations] = useState(true);
   const [hasMoreBeds, setHasMoreBeds] = useState(true);
   const queryClient = useQueryClient();
@@ -347,11 +352,51 @@ export function LocationSheet({
       timeConfig,
     });
   };
-
+  const deleteMutation = useMutation({
+    mutationFn: ({ location, id }: { location: string; id: string }) => {
+      return mutate(locationApi.deleteAssociation, {
+        pathParams: {
+          facility_external_id: facilityId,
+          location_external_id: location,
+          external_id: id,
+        },
+      })({ encounter: encounter.id, status: "completed" });
+    },
+    onSuccess: () => {
+      toast.success(t("location_deleted_successfully"));
+      queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
+    },
+    onError: (error: {
+      cause?: {
+        results?: Array<{
+          reference_id: string;
+          status_code: number;
+          data: {
+            errors?: Array<{
+              msg?: string;
+              error?: string;
+              type?: string;
+              loc?: string[];
+            }>;
+          };
+        }>;
+      };
+    }) => {
+      const errorMessage =
+        error?.cause?.results?.[0]?.data?.errors?.[0]?.msg ||
+        t("error_deleting_location");
+      toast.error(errorMessage);
+    },
+  });
   const handleCancelPlan = () => {
     const currentLocation = getCurrentLocations().plannedLocations[0];
     if (!currentLocation) return;
 
+    setLocationToDelete({
+      location: currentLocation.location.id,
+      id: currentLocation.id,
+    });
+    setShowDeleteDialog(true);
     setSheetState((prev) => ({
       ...prev,
       screen: "modify",
@@ -363,7 +408,16 @@ export function LocationSheet({
       },
     }));
   };
+  const confirmDeletePlan = () => {
+    if (!locationToDelete) return;
 
+    deleteMutation.mutate({
+      location: locationToDelete.location,
+      id: locationToDelete.id,
+    });
+    setShowDeleteDialog(false);
+    setLocationToDelete(null);
+  };
   const handleConfirmTime = async () => {
     const requests = [];
     const { activeLocation, plannedLocations } = getCurrentLocations();
@@ -834,6 +888,29 @@ export function LocationSheet({
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleDischargeConfirm}>
               {t("proceed")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("are_you_sure_cancel_plan")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setLocationToDelete(null);
+              }}
+            >
+              {t("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeletePlan}>
+              {t("confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
