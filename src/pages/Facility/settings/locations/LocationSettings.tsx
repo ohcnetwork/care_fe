@@ -245,8 +245,10 @@ export default function LocationSettings({
               <LocationMap
                 locations={mapLocations?.results || []}
                 onLocationClick={handleLocationSelect}
+                onLocationEdit={handleEditLocation}
                 facilityName={facilityData?.name || t("facility")}
                 searchQuery={searchQuery}
+                isEditing={isSheetOpen}
               />
             ) : (
               <>

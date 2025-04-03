@@ -37,8 +37,10 @@ const ROOT_SPACING = 50;
 interface LocationMapProps {
   locations: LocationListType[];
   onLocationClick: (location: LocationListType) => void;
+  onLocationEdit?: (location: LocationListType) => void;
   facilityName: string;
   searchQuery?: string;
+  isEditing?: boolean;
 }
 
 const CustomNode = ({ data }: NodeProps) => {
@@ -54,6 +56,11 @@ const CustomNode = ({ data }: NodeProps) => {
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     data.onToggle(data.id);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    data.onEdit(data.id);
   };
 
   return (
@@ -76,11 +83,11 @@ const CustomNode = ({ data }: NodeProps) => {
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[97%] h-full border-2 border-gray-200 rounded-lg bg-white" />
         </>
       )}
-      <div
-        onClick={() => data.onClick({ id: data.id })}
-        className="relative w-60 bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-200"
-      >
-        <div className="p-4">
+      <div className="relative w-60 bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-200">
+        <div
+          className="p-4 cursor-pointer hover:bg-gray-50"
+          onClick={handleEdit}
+        >
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-md shrink-0">
               <Icon className="size-5" />
@@ -103,30 +110,30 @@ const CustomNode = ({ data }: NodeProps) => {
               <p className="text-sm text-gray-500 truncate">{data.type}</p>
             </div>
           </div>
-          {hasChildren && (
-            <div
-              className="flex justify-center mt-2 border-t border-gray-200 pt-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 hover:bg-gray-100 transition-colors"
-                onClick={handleToggle}
-              >
-                <span className="text-sm mr-2 text-gray-600">
-                  {data.childCount} {t("level_inside")}
-                </span>
-                {data.form !== "facility" &&
-                  (data.isExpanded ? (
-                    <ChevronDown className="size-4 text-gray-600" />
-                  ) : (
-                    <ChevronRight className="size-4 text-gray-600" />
-                  ))}
-              </Button>
-            </div>
-          )}
         </div>
+        {hasChildren && (
+          <div
+            className="flex justify-center m-2 border-t border-gray-200 pt-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 hover:bg-gray-100 transition-colors"
+              onClick={handleToggle}
+            >
+              <span className="text-sm mr-2 text-gray-600">
+                {data.childCount} {t("level_inside")}
+              </span>
+              {data.form !== "facility" &&
+                (data.isExpanded ? (
+                  <ChevronDown className="size-4 text-gray-600" />
+                ) : (
+                  <ChevronRight className="size-4 text-gray-600" />
+                ))}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -191,6 +198,7 @@ function createLocationNode(
   toggleNode: (id: string) => void,
   onLocationClick: (location: LocationListType) => void,
   t: (key: string) => string,
+  onLocationEdit?: (location: LocationListType) => void,
 ): Node {
   return {
     id: location.id,
@@ -205,6 +213,7 @@ function createLocationNode(
       isExpanded,
       onToggle: toggleNode,
       onClick: (_loc: LocationListType) => onLocationClick(location),
+      onEdit: onLocationEdit ? () => onLocationEdit(location) : undefined,
     },
   };
 }
@@ -241,6 +250,7 @@ function processLocationHierarchy(
   toggleNode: (id: string) => void,
   onLocationClick: (location: LocationListType) => void,
   t: (key: string) => string,
+  onLocationEdit?: (location: LocationListType) => void,
 ): { nodes: Node[]; edges: Edge[] } {
   const isExpanded = expandedNodes.includes(location.id);
   const childLocations = locations.filter(
@@ -258,6 +268,7 @@ function processLocationHierarchy(
     toggleNode,
     onLocationClick,
     t,
+    onLocationEdit,
   );
   result.nodes.push(node);
 
@@ -290,6 +301,7 @@ function processLocationHierarchy(
         toggleNode,
         onLocationClick,
         t,
+        onLocationEdit,
       );
       result.nodes.push(...childResult.nodes);
       result.edges.push(...childResult.edges);
@@ -303,6 +315,7 @@ function processLocationHierarchy(
 function LocationMapContent({
   locations,
   onLocationClick,
+  onLocationEdit,
   facilityName,
   searchQuery,
 }: LocationMapProps) {
@@ -474,6 +487,7 @@ function LocationMapContent({
             toggleNode,
             onLocationClick,
             t,
+            onLocationEdit,
           );
 
         newNodes.push(...locationNodes);
@@ -493,6 +507,7 @@ function LocationMapContent({
     expandedNodes,
     toggleNode,
     onLocationClick,
+    onLocationEdit,
     t,
     rootLocations,
     facilityName,
