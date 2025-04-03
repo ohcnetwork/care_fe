@@ -149,7 +149,7 @@ function SymptomActionsMenu({
           <Pencil2Icon className="size-4 mr-2" />
           {showNotes
             ? t("hide_notes")
-            : symptom.note != ""
+            : symptom.note
               ? t("show_notes")
               : t("add_notes")}
         </DropdownMenuItem>
@@ -211,7 +211,6 @@ const SymptomRow = React.memo(function SymptomRow({
   );
 
   const handleRemove = useCallback(() => onRemove(index), [index, onRemove]);
-  const handleToggleNotes = useCallback(() => setShowNotes((n) => !n), []);
 
   // For mobile view - Card Layout
   if (isMobile) {
@@ -450,7 +449,7 @@ const SymptomRow = React.memo(function SymptomRow({
             showNotes={showNotes}
             verificationStatus={symptom.verification_status}
             disabled={disabled}
-            onToggleNotes={handleToggleNotes}
+            onToggleNotes={() => setShowNotes((n) => !n)}
             onRemove={handleRemove}
           />
         </TableCell>

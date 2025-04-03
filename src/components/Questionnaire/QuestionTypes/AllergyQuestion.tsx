@@ -9,7 +9,9 @@ import {
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
@@ -119,22 +121,16 @@ const AllergyTableRow = ({
   onRemove,
 }: AllergyTableRowProps) => {
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
-
-  const rowClassName = `${
-    allergy.verification_status === "entered_in_error"
-      ? "opacity-40 pointer-events-none"
-      : allergy.clinical_status === "inactive"
-        ? "opacity-60"
-        : allergy.clinical_status === "resolved"
-          ? "line-through"
-          : ""
-  }`;
-
-  const handleToggleNotes = useCallback(() => setShowNotes((n) => !n), []);
-
   return (
     <>
-      <TableRow className={rowClassName}>
+      <TableRow
+        className={cn(
+          allergy.verification_status === "entered_in_error" &&
+            "opacity-40 pointer-events-none",
+          allergy.clinical_status === "inactive" && "opacity-60",
+          allergy.clinical_status === "resolved" && "line-through",
+        )}
+      >
         <TableCell className="py-1 pr-0">
           <Select
             value={allergy.category}
@@ -239,11 +235,11 @@ const AllergyTableRow = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleToggleNotes}>
+              <DropdownMenuItem onClick={() => setShowNotes((n) => !n)}>
                 <Pencil2Icon className="size-4 mr-2" />
                 {showNotes
                   ? t("hide_notes")
-                  : allergy.note != ""
+                  : allergy.note
                     ? t("show_notes")
                     : t("add_notes")}
               </DropdownMenuItem>

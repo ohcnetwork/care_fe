@@ -695,15 +695,15 @@ const DiagnosisTableRow = ({
 }: DiagnosisItemProps) => {
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
 
-  const rowClassName = `${
-    diagnosis.verification_status === "entered_in_error"
-      ? "opacity-40 pointer-events-none"
-      : ""
-  } ${diagnosis.category === "chronic_condition" ? "bg-yellow-50/50" : ""}`;
-
   return (
     <>
-      <TableRow className={rowClassName}>
+      <TableRow
+        className={cn(
+          diagnosis.verification_status === "entered_in_error" &&
+            "opacity-40 pointer-events-none",
+          diagnosis.category === "chronic_condition" && "bg-yellow-50/50",
+        )}
+      >
         <TableCell className="py-1">
           <div className="flex items-center space-x-2 min-w-0">
             <div
@@ -813,7 +813,7 @@ const DiagnosisTableRow = ({
                 <Pencil2Icon className="size-4 mr-2" />
                 {showNotes
                   ? t("hide_notes")
-                  : diagnosis.note != ""
+                  : diagnosis.note
                     ? t("show_notes")
                     : t("add_notes")}
               </DropdownMenuItem>
