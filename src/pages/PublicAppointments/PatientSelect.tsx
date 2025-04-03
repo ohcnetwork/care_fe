@@ -26,6 +26,85 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 
+interface PatientCardProps {
+  patient: Patient;
+  selectedPatient: string | null;
+  setSelectedPatient: (patientId: string | null) => void;
+  getPatienDobOrAge: (patient: Patient) => string;
+}
+
+function PatientCard({
+  patient,
+  selectedPatient,
+  setSelectedPatient,
+  getPatienDobOrAge,
+}: PatientCardProps) {
+  const { t } = useTranslation();
+
+  return (
+    <Card
+      key={patient.id}
+      onClick={() => setSelectedPatient(patient.id)}
+      className={cn(
+        "cursor-pointer transition-all duration-200 rounded-xl shadow-md border",
+        selectedPatient === patient.id
+          ? "border-primary shadow-lg"
+          : "hover:border-gray-300",
+      )}
+    >
+      <CardHeader>
+        <CardTitle className="capitalize text-lg font-semibold">
+          {patient.name}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground font-medium">
+            {t("date_of_birth_age")}:
+          </span>
+          <span className="text-sm font-semibold">
+            {getPatienDobOrAge(patient)}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground font-medium">
+            {t("sex")}:
+          </span>
+          <span className="text-sm font-semibold">
+            {t(`GENDER__${patient.gender}`)}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PatientList({
+  patients,
+  selectedPatient,
+  setSelectedPatient,
+  getPatienDobOrAge,
+}: {
+  patients: Patient[];
+  selectedPatient: string | null;
+  setSelectedPatient: (patientId: string | null) => void;
+  getPatienDobOrAge: (patient: Patient) => string;
+}) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-0 sm:p-4">
+      {patients?.map((patient) => (
+        <PatientCard
+          key={patient.id}
+          patient={patient}
+          selectedPatient={selectedPatient}
+          setSelectedPatient={setSelectedPatient}
+          getPatienDobOrAge={getPatienDobOrAge}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function PatientSelect({
   facilityId,
   staffId,
@@ -107,7 +186,7 @@ export default function PatientSelect({
     );
   };
 
-  const getPatienDoBorAge = (patient: Patient) => {
+  const getPatienDobOrAge = (patient: Patient) => {
     if (patient.date_of_birth) {
       return dayjs(patient.date_of_birth).format("DD MMM YYYY");
     }
@@ -116,26 +195,19 @@ export default function PatientSelect({
     return `${age} years`;
   };
 
-  const renderPatientList = () => {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-0 sm:p-4">
-        {patients?.map((patient) => (
-          <PatientCard
-            key={patient.id}
-            patient={patient}
-            selectedPatient={selectedPatient}
-            setSelectedPatient={setSelectedPatient}
-            getPatienDoBorAge={getPatienDoBorAge}
-            createAppointment={createAppointment}
-            reason={reason ?? ""}
-          />
-        ))}
-      </div>
-    );
+  const handleConfirm = () => {
+    if (!selectedPatient) return;
+    const selectedPatientData = patients?.find((p) => p.id === selectedPatient);
+    if (!selectedPatientData) return;
+
+    createAppointment({
+      patient: selectedPatientData.id ?? "",
+      reason_for_visit: reason ?? "",
+    });
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
+    <div className="container mx-auto p-4 max-w-4xl pb-32">
       <div className="flex pb-4 justify-start">
         <Button
           variant="outline"
@@ -170,94 +242,30 @@ export default function PatientSelect({
             <Loading />
           </div>
         ) : (patients?.length ?? 0) > 0 ? (
-          renderPatientList()
+          <PatientList
+            patients={patients ?? []}
+            selectedPatient={selectedPatient}
+            setSelectedPatient={setSelectedPatient}
+            getPatienDobOrAge={getPatienDobOrAge}
+          />
         ) : (
           renderNoPatientFound()
         )}
       </div>
-    </div>
-  );
-}
 
-function PatientCard({
-  patient,
-  selectedPatient,
-  setSelectedPatient,
-  getPatienDoBorAge,
-  createAppointment,
-  reason,
-}: {
-  patient: Patient;
-  selectedPatient: string | null;
-  setSelectedPatient: (patientId: string | null) => void;
-  getPatienDoBorAge: (patient: Patient) => string;
-  createAppointment: (body: AppointmentCreateRequest) => void;
-  reason: string;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <Card
-      key={patient.id}
-      onClick={() => setSelectedPatient(patient.id)}
-      className={cn(
-        "cursor-pointer transition-all duration-200 rounded-xl shadow-md border",
-        selectedPatient === patient.id
-          ? "border-primary shadow-lg"
-          : "hover:border-gray-300",
-      )}
-    >
-      <CardHeader>
-        <CardTitle className="capitalize text-lg font-semibold">
-          {patient.name}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="flex justify-between">
-          <span className="text-sm text-muted-foreground font-medium">
-            {t("date_of_birth_age")}:
-          </span>
-          <span className="text-sm font-semibold">
-            {getPatienDoBorAge(patient)}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-muted-foreground font-medium">
-            {t("sex")}:
-          </span>
-          <span className="text-sm font-semibold">
-            {t(`GENDER__${patient.gender}`)}
-          </span>
-        </div>
-
-        {selectedPatient === patient.id && (
-          <div className="mt-4 flex flex-row gap-3">
-            <Button
-              variant="destructive"
-              className="w-1/2 md:w-auto"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedPatient(null);
-              }}
-            >
+      {/* Sticky bottom bar */}
+      {selectedPatient && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg">
+          <div className="container mx-auto max-w-4xl flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setSelectedPatient(null)}>
               {t("cancel")}
             </Button>
-            <Button
-              variant="primary"
-              className="w-1/2 md:w-auto"
-              onClick={(e) => {
-                e.stopPropagation();
-                createAppointment({
-                  patient: patient.id ?? "",
-                  reason_for_visit: reason ?? "",
-                });
-              }}
-            >
+            <Button variant="primary" onClick={handleConfirm}>
               {t("confirm")}
             </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 }
