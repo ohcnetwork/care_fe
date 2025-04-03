@@ -136,6 +136,11 @@ const SidebarProvider = React.forwardRef<
         toggleSidebar,
       ],
     );
+    React.useEffect(() => {
+      if (isMobile) {
+        setOpen(true); // Ensure the sidebar is open in mobile view
+      }
+    }, [isMobile]);
 
     return (
       <SidebarContext.Provider value={contextValue}>

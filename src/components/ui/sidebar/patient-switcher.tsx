@@ -90,11 +90,6 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
                         }
                         className="h-4 w-4"
                       />
-                      <div className="flex flex-row items-center justify-between w-full gap-2 pl-3 lg:hidden md:hidden">
-                        <span className="font-semibold truncate max-w-32">
-                          {patientUserContext.selectedPatient?.name}
-                        </span>
-                      </div>
                     </div>
                   )}
                 </>
