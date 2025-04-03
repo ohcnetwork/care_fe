@@ -153,7 +153,7 @@ export default function LocationView({
           <BreadcrumbItem>
             <BreadcrumbLink
               asChild={!isNested}
-              className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+              className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
               onClick={isNested && onBackToParent ? onBackToParent : undefined}
             >
               {isNested ? (
@@ -176,7 +176,7 @@ export default function LocationView({
                 <>
                   <BreadcrumbLink
                     asChild={!isNested}
-                    className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                    className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
                     onClick={
                       isNested
                         ? () => handleBreadcrumbClick(breadcrumb.id)

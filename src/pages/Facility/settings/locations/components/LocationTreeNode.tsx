@@ -81,7 +81,7 @@ export function LocationTreeNode({
             )}
           </Button>
         ) : (
-          <span className="w-6" />
+          <span className="w-2" />
         )}
         <div
           className="flex items-center flex-1 text-sm gap-2 w-0"
