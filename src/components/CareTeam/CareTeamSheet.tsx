@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -58,6 +58,7 @@ export function EmptyState() {
 export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
   const [members, setMembers] = useState<CareTeamMemberWithUser[]>(
     encounter.care_team.map((member) => ({
       user_id: member.member.id,
@@ -89,6 +90,9 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
     }),
     onSuccess: () => {
       setOpen(false);
+      queryClient.invalidateQueries({
+        queryKey: ["encounter", encounter.id],
+      });
     },
   });
 
