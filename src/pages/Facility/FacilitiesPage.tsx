@@ -92,7 +92,7 @@ export function FacilitiesPage() {
           options={[
             {
               key: "facility_search_placeholder_text",
-              type: "text" as const,
+              type: "text",
               placeholder: t("facility_search_placeholder_text"),
               value: qParams.name || "",
             },

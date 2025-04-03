@@ -145,7 +145,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       options={[
                         {
                           key: "title",
-                          type: "text" as const,
+                          type: "text",
                           placeholder: t("search_by_resource_title"),
                           value: title || "",
                         },

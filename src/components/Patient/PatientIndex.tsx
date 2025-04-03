@@ -167,7 +167,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                 options={[
                   {
                     key: "phone_number",
-                    type: "phone" as const,
+                    type: "phone",
                     placeholder: t("search_by_phone_number"),
                     value: phoneNumber,
                   },
