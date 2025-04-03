@@ -17,7 +17,7 @@ const IconIndex: React.FC = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success("Icon copied to clipboard successfully");
+    toast.success(t("icon_copy_successfully"));
   };
 
   return (
