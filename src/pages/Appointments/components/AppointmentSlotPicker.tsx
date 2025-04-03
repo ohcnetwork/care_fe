@@ -279,7 +279,7 @@ export const TokenSlotButton = ({
   availability,
   selectedSlotId,
   onClick,
-  allowOngoingSlots,
+  allowOngoingSlots = false,
 }: {
   slot: Omit<TokenSlot, "availability">;
   availability: TokenSlot["availability"];
@@ -296,16 +296,17 @@ export const TokenSlotButton = ({
     end: slot.end_datetime,
   });
 
+  if (!allowOngoingSlots && isOngoingSlot) {
+    return null;
+  }
+
   return (
     <Button
       key={slot.id}
       size="lg"
       variant={selectedSlotId === slot.id ? "primary" : "outline"}
       onClick={onClick}
-      disabled={
-        slot.allocated === availability.tokens_per_slot ||
-        (!allowOngoingSlots && isOngoingSlot)
-      }
+      disabled={slot.allocated === availability.tokens_per_slot}
       className="flex flex-col items-center group gap-0 w-24 relative"
     >
       <span className="font-semibold">

@@ -74,6 +74,14 @@ const consentFormSchema = z
         path: ["source_attachments"],
       });
     }
+
+    if (data.period.end && data.date > data.period.end) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("consent_after_end"),
+        path: ["date"],
+      });
+    }
   });
 
 type ConsentFormValues = z.infer<typeof consentFormSchema>;
@@ -114,7 +122,6 @@ export default function LinkConsentDialog({
   });
 
   const handleSuccess = () => {
-    toast.success(t("consent_created_successfully"));
     queryClient.invalidateQueries({
       queryKey: ["consents", patientId, encounterId],
     });
@@ -132,6 +139,7 @@ export default function LinkConsentDialog({
     onSuccess: async (response) => {
       if (form.getValues("source_attachments")?.length === 0) {
         handleSuccess();
+        toast.success(t("consent_created_successfully"));
         return;
       }
 
