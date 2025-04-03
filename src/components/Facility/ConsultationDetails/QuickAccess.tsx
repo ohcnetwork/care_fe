@@ -45,7 +45,7 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
                 className="flex items-center gap-2 text-sm hover:text-gray-500 text-gray-900"
                 data-cy="update-encounter-option"
               >
-                <CareIcon icon="l-file-alt" className="h-4 w-4 text-gray-950" />
+                <CareIcon icon="l-file-alt" className="size-4 text-gray-950" />
                 {t(option.title)}
               </Link>
             ))}
@@ -92,7 +92,7 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
                   className="text-sm font-semibold border-gray-400 text-gray-950"
                 >
                   {t("update_department")}
-                  <CareIcon icon="l-plus" className="ml-1 h-3 w-3" />
+                  <CareIcon icon="l-plus" className="ml-1 size-3" />
                 </Button>
               </div>
             }

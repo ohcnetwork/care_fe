@@ -1,9 +1,11 @@
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
+import { PatientPrescription } from "@/pageObject/Patients/PatientPrescription";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
+const patientPrescription = new PatientPrescription();
 
 describe("Patient Encounter Questionnaire", () => {
   beforeEach(() => {
@@ -26,8 +28,8 @@ describe("Patient Encounter Questionnaire", () => {
       .openFirstEncounterDetails()
       .clickUpdateEncounter()
       .addQuestionnaire("Arterial Blood Gas")
-      .fillQuestionnaire(abgValues)
-      .submitQuestionnaire()
-      .verifyOverviewValues(Object.values(abgValues));
+      .fillQuestionnaire(abgValues);
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifyOverviewValues(Object.values(abgValues));
   });
 });

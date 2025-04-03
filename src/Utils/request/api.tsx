@@ -31,7 +31,6 @@ import {
 } from "@/types/facility/facility";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
-import { RoleResponse } from "@/types/organization/organization";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,
@@ -200,14 +199,6 @@ const routes = {
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
     TRes: Type<PaginatedResponse<UserAssignedModel>>(),
-  },
-
-  // Download Api
-  deleteFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<void>(),
   },
 
   // Patient
@@ -404,15 +395,6 @@ const routes = {
     path: "/api/v1/patient/{patientId}/observation/analyse/",
     method: "POST",
     TRes: Type<ObservationAnalyzeResponse>(),
-  },
-
-  // Role Routes
-  role: {
-    list: {
-      path: "/api/v1/role/",
-      method: "GET",
-      TRes: {} as RoleResponse,
-    },
   },
 
   // Notes Routes

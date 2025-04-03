@@ -2,7 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import {
   format,
   isBefore,
+  isPast,
   isSameDay,
+  isToday,
   isWithinInterval,
   startOfToday,
 } from "date-fns";
@@ -64,6 +66,18 @@ export function AppointmentSlotPicker({
     enabled: !!resourceId && !!selectedDate,
   });
 
+  const slotsTodayQuery = useQuery({
+    queryKey: ["slots", facilityId, resourceId, dateQueryString(new Date())],
+    queryFn: query(scheduleApis.slots.getSlotsForDay, {
+      pathParams: { facility_id: facilityId },
+      body: {
+        user: resourceId ?? "",
+        day: dateQueryString(new Date()),
+      },
+    }),
+    enabled: !!resourceId,
+  });
+
   // Update slot details when a slot is selected
   const handleSlotSelect = (slotId: string | undefined) => {
     onSlotSelect(slotId);
@@ -80,7 +94,27 @@ export function AppointmentSlotPicker({
   const renderDay = (date: Date) => {
     const isSelected = isSameDay(date, selectedDate);
     const isBeforeToday = isBefore(date, startOfToday());
-    const availability = heatmapQuery.data?.[dateQueryString(date)];
+
+    const availability = (() => {
+      // If the date is today and there are slots for today, ignore the heatmap
+      // as the heatmap does not account for past slots and instead compute
+      // the availability for the day based on the slots that are currently
+      // available
+      if (isToday(date) && slotsTodayQuery.data) {
+        const slots = slotsTodayQuery.data.results.filter(
+          (slot) => !isPast(slot.end_datetime),
+        );
+        return {
+          booked_slots: slots.reduce((a, s) => a + s.allocated, 0),
+          total_slots: slots.reduce(
+            (acc, slot) => acc + slot.availability.tokens_per_slot,
+            0,
+          ),
+        };
+      }
+
+      return heatmapQuery.data?.[dateQueryString(date)];
+    })();
 
     if (
       heatmapQuery.isFetching ||
@@ -245,7 +279,7 @@ export const TokenSlotButton = ({
   availability,
   selectedSlotId,
   onClick,
-  allowOngoingSlots,
+  allowOngoingSlots = false,
 }: {
   slot: Omit<TokenSlot, "availability">;
   availability: TokenSlot["availability"];
@@ -262,16 +296,17 @@ export const TokenSlotButton = ({
     end: slot.end_datetime,
   });
 
+  if (!allowOngoingSlots && isOngoingSlot) {
+    return null;
+  }
+
   return (
     <Button
       key={slot.id}
       size="lg"
       variant={selectedSlotId === slot.id ? "primary" : "outline"}
       onClick={onClick}
-      disabled={
-        slot.allocated === availability.tokens_per_slot ||
-        (!allowOngoingSlots && isOngoingSlot)
-      }
+      disabled={slot.allocated === availability.tokens_per_slot}
       className="flex flex-col items-center group gap-0 w-24 relative"
     >
       <span className="font-semibold">
