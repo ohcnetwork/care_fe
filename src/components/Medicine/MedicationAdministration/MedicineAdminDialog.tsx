@@ -67,7 +67,7 @@ export const MedicineAdminDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="max-h-screen overflow-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl">
@@ -78,7 +78,7 @@ export const MedicineAdminDialog = ({
           </div>
         </DialogHeader>
 
-        <div className="py-0 sm:py-4">
+        <div className="py-4">
           <MedicineAdminForm
             formId="single"
             medication={medication}

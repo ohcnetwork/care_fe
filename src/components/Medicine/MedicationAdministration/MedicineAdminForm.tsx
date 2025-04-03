@@ -190,7 +190,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   };
 
   return (
-    <div className="space-y-2 sm:space-y-6">
+    <div className="space-y-6">
       <div className="space-y-1">
         <h3 className="text-lg font-semibold">
           {medication.medication?.display}
