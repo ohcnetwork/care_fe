@@ -57,7 +57,10 @@ const ORG_TYPES = [
 type OrgType = (typeof ORG_TYPES)[number]["value"];
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: t("field_required") }),
+  name: z
+    .string()
+    .trim()
+    .min(1, { message: t("field_required") }),
   description: z.string().optional(),
   org_type: z.enum(["dept", "team"]),
 });
