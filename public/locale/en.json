@@ -1234,6 +1234,7 @@
   "error_404": "Error 404",
   "error_creating_consent": "Error creating consent",
   "error_deleting_location": "Error while deleting location",
+   "error_fetching_facility_data": "Error while fetching facility data",
   "error_deleting_shifting": "Error while deleting Shifting record",
   "error_fetching_slots_data": "Error while fetching slots data",
   "error_fetching_user_data": "Error while fetching user data",
