@@ -54,7 +54,8 @@ function OrganizationTreeNode({
           isSelected && "bg-blue-100 text-blue-800",
         )}
         style={{ paddingLeft: `${level}rem` }}
-        onClick={(_e) => {
+        onClick={(e) => {
+          e.preventDefault();
           if (organization.has_children) {
             onToggleExpand(organization.id);
           }
@@ -66,8 +67,8 @@ function OrganizationTreeNode({
             variant="ghost"
             size="icon"
             className="h-6 w-6"
-            onClick={(_e) => {
-              _e.stopPropagation();
+            onClick={(e) => {
+              e.stopPropagation();
               onToggleExpand(organization.id);
             }}
           >

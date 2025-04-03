@@ -61,6 +61,13 @@ function LocationTreeNode({
           isSelected && "bg-blue-100 text-blue-800",
         )}
         style={{ paddingLeft: `${level}rem` }}
+        onClick={(e) => {
+          e.preventDefault();
+          if (hasChildren) {
+            onToggleExpand(location.id);
+          }
+          onSelect(location);
+        }}
       >
         {hasChildren ? (
           <Button
@@ -83,10 +90,7 @@ function LocationTreeNode({
         ) : (
           <span className="w-6" />
         )}
-        <div
-          className="flex items-center flex-1 text-sm gap-2"
-          onClick={() => onSelect(location)}
-        >
+        <div className="flex items-center flex-1 text-sm gap-2">
           <Icon className="size-4" />
           <span className="truncate">{location.name}</span>
         </div>
