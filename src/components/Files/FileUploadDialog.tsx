@@ -56,7 +56,7 @@ export default function FileUploadDialog({
       aria-labelledby="file-upload-dialog"
     >
       <DialogContent
-        className="mb-8 rounded-lg p-5 max-w-fit md:max-w-[30rem]"
+        className="mb-8 rounded-lg p-5 max-w-fit md:max-w-[30rem] shadow-[0_3px_10px_rgba(0,0,0,0.12)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.16)] transition-all duration-200"
         aria-describedby="file-upload"
       >
         <DialogHeader>
@@ -66,10 +66,10 @@ export default function FileUploadDialog({
         </DialogHeader>
         <div className="space-y-6 pr-5 max-h-[70vh] overflow-y-auto">
           {fileUpload.files.map((file, index) => (
-            <div key={index} className="space-y-2">
+            <div key={index} className="space-y-4">
               {file.type.startsWith("image/") && previewUrls[index] ? (
-                <div className="flex flex-col items-center space-y-2 p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
-                  <div className="w-full max-w-md overflow-hidden rounded-lg">
+                <>
+                  <div className="w-full max-w-md overflow-hidden rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.2)] transition-all duration-200 border-2 border-black">
                     <img
                       src={previewUrls[index]}
                       alt="Preview"
@@ -97,38 +97,36 @@ export default function FileUploadDialog({
                       <CareIcon icon="l-times" />
                     </Button>
                   </div>
-                </div>
+                </>
               ) : (
-                <div className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
-                  <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
-                    <span
-                      className="flex items-center truncate"
-                      title={file.name}
-                    >
-                      <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
-                      <span className="truncate">
-                        {file.name.length > 40
-                          ? `${file.name.substring(0, 30)}...`
-                          : file.name}
-                      </span>
+                <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+                  <span
+                    className="flex items-center truncate"
+                    title={file.name}
+                  >
+                    <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
+                    <span className="truncate">
+                      {file.name.length > 40
+                        ? `${file.name.substring(0, 30)}...`
+                        : file.name}
                     </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => fileUpload.removeFile(index)}
-                      disabled={fileUpload.uploading}
-                    >
-                      <CareIcon icon="l-times" />
-                    </Button>
-                  </div>
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => fileUpload.removeFile(index)}
+                    disabled={fileUpload.uploading}
+                  >
+                    <CareIcon icon="l-times" />
+                  </Button>
                 </div>
               )}
-              <div>
+              <div className="rounded-lg p-5 bg-white border border-gray-200 shadow-sm hover:border-gray-300 transition-all duration-200">
                 <Label
                   htmlFor={`upload-file-name-${index}`}
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  {t("enter_file_name")}
+                  {t("enter_file_name")} {index + 1}
                 </Label>
 
                 <Input
@@ -142,7 +140,7 @@ export default function FileUploadDialog({
                     fileUpload.setFileName(e.target.value, index);
                     fileUpload.setError(null);
                   }}
-                  className="ml-0.5 mb-0.5"
+                  className="border border-gray-300 focus:border-gray-400 rounded-md px-3 py-1.5 w-full"
                 />
                 {!fileUpload.fileNames[index] && fileUpload.error && (
                   <p className="mt-2 text-sm text-red-600">
