@@ -100,7 +100,7 @@ const MEDICATION_STATEMENT_FIELDS: FieldDefinitions = {
     required: true,
     validate: (value: unknown) => {
       const period = value as { start?: string; end?: string };
-      return !!period?.start && !!period?.end;
+      return !!period?.start;
     },
   },
 } as const;
