@@ -170,7 +170,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
             className="border border-secondary-300"
             onClick={() => fileUpload.removeFile(index)}
           >
-            <CareIcon icon="l-trash" className="w-4 h-4" />
+            <CareIcon icon="l-trash" className="size-4" />
           </Button>
         </div>
       ))}

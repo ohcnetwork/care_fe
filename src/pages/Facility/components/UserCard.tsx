@@ -9,14 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { UserAssignedModel } from "@/components/Users/models";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { formatName } from "@/Utils/utils";
+import { UserBase } from "@/types/user/user";
 
 interface Props {
-  user: UserAssignedModel;
+  user: UserBase;
   className?: string;
   facilityId: string;
 }
@@ -41,9 +41,9 @@ export function UserCard({ user, className, facilityId }: Props) {
         <div className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <Avatar
-              imageUrl={user.read_profile_picture_url}
+              imageUrl={user.profile_picture_url}
               name={formatName(user, true)}
-              className="h-32 w-32 rounded-lg"
+              className="size-32 rounded-lg"
             />
 
             <div className="flex grow flex-col min-w-0">
@@ -51,13 +51,6 @@ export function UserCard({ user, className, facilityId }: Props) {
                 {formatName(user)}
               </h3>
               <p className="text-sm text-gray-500">{user.user_type}</p>
-
-              {user.qualification && (
-                <>
-                  <p className="text-xs mt-3">{t("education")}: </p>
-                  <p className="text-sm text-gray-500">{user.qualification}</p>
-                </>
-              )}
             </div>
           </div>
         </div>

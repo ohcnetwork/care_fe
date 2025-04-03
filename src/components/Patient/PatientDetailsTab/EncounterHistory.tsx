@@ -85,7 +85,7 @@ const EncounterHistory = (props: PatientProps) => {
                         >
                           <div className="p-4 md:p-6 w-full">
                             <div className="flex w-full items-center gap-3 md:gap-4">
-                              <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl">
+                              <div className="flex size-10 md:size-12 items-center justify-center rounded-xl">
                                 <CareIcon
                                   icon="l-stethoscope"
                                   className="size-5 md:size-6 text-primary"

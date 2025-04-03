@@ -2,12 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
-import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
@@ -16,6 +17,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { formatDateTime, relativeTime } from "@/Utils/utils";
 import { Patient } from "@/types/emr/newPatient";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -144,14 +146,14 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                             <div className="flex items-start space-x-4">
                               <Avatar
                                 name={patient.name || ""}
-                                className="h-10 w-10"
+                                className="size-10"
                               />
                               <div>
                                 <h3 className="text-sm font-medium text-gray-900">
                                   {patient.name}
                                 </h3>
                                 <p className="text-sm text-gray-500">
-                                  {patient.phone_number}
+                                  {formatPhoneNumberIntl(patient.phone_number)}
                                 </p>
                               </div>
                             </div>
@@ -164,7 +166,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                               <div>
                                 <CareIcon
                                   icon="l-arrow-up-right"
-                                  className="h-4 w-4"
+                                  className="size-4"
                                 />
                               </div>
                             </Button>
@@ -173,7 +175,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                             <div className="text-sm">
                               <div className="text-gray-500">{t("phone")}</div>
                               <div className="font-medium">
-                                {patient.phone_number}
+                                {formatPhoneNumberIntl(patient.phone_number)}
                               </div>
                             </div>
                             <div className="text-sm">
@@ -193,12 +195,17 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                               </div>
                             )}
                           </div>
-                          <div className="mt-4 pt-4 border-t">
-                            <RecordMeta
-                              className="text-sm text-gray-500"
-                              prefix="Last updated"
-                              time={patient.modified_date}
-                            />
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <div className="text-sm text-gray-500">
+                              {t("last_modified")}{" "}
+                              <TooltipComponent
+                                content={formatDateTime(patient.modified_date)}
+                              >
+                                <span className="underline underline-offset-2">
+                                  {relativeTime(patient.modified_date)}
+                                </span>
+                              </TooltipComponent>
+                            </div>
                           </div>
                         </div>
                       </CardContent>

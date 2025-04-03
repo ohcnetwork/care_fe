@@ -69,7 +69,9 @@ function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
       </TableCell>
       <TableCell>
         {[statement.effective_period?.start, statement.effective_period?.end]
-          .map((date) => formatDateTime(date))
+          .map((date, ind) =>
+            date ? formatDateTime(date) : ind === 1 ? t("ongoing") : "",
+          )
           .join(" - ")}
       </TableCell>
       <TableCell>{statement.reason}</TableCell>
@@ -158,7 +160,7 @@ export function MedicationStatementList({
       className={className}
     >
       <>
-        <Table className="border-separate border-spacing-y-0.5">
+        <Table className="border-separate border-gray-200 border-spacing-y-0.5">
           <TableHeader>
             <TableRow className="rounded-md overflow-hidden bg-gray-100">
               <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600">

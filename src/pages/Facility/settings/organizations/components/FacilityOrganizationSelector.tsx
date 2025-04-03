@@ -148,7 +148,7 @@ export default function FacilityOrganizationSelector(
         {level > 0 && (
           <CareIcon
             icon="l-arrow-right"
-            className="h-3.5 w-3.5 text-gray-400 flex-shrink-0"
+            className="h-3.5 w-3.5 text-gray-400 shrink-0"
           />
         )}
         <div className="flex-1 flex items-center gap-2">
@@ -167,7 +167,7 @@ export default function FacilityOrganizationSelector(
               className="cursor-pointer p-1 hover:bg-gray-100 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={() => handleEdit(level)}
             >
-              <CareIcon icon="l-pen" className="h-4 w-4 text-gray-500" />
+              <CareIcon icon="l-pen" className="size-4 text-gray-500" />
             </div>
           )}
         </div>
@@ -200,7 +200,7 @@ export default function FacilityOrganizationSelector(
       <div className="space-y-3">
         {selectedOrganization && (
           <div className="flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5">
-            <Building className="h-4 w-4 text-sky-600 flex-shrink-0" />
+            <Building className="size-4 text-sky-600 shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm text-sky-900 truncate">
                 {selectedOrganization.name}
@@ -214,10 +214,10 @@ export default function FacilityOrganizationSelector(
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900"
+              className="size-8 p-0 text-gray-500 hover:text-gray-900"
               onClick={handleRemoveOrganization}
             >
-              <X className="h-4 w-4" />
+              <X className="size-4" />
               <span className="sr-only">{t("remove_organization")}</span>
             </Button>
           </div>

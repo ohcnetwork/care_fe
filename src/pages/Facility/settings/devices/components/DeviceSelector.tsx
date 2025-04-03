@@ -75,7 +75,7 @@ export function DeviceSearch({
             placeholder={t("search_devices")}
             value={search}
             onValueChange={setSearch}
-            className="outline-none border-none ring-0 shadow-none"
+            className="outline-hidden border-none ring-0 shadow-none"
           />
           {isPending ? (
             <CardListSkeleton count={3} />
