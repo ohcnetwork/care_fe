@@ -22,7 +22,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
-import { Command, CommandDrawer, CommandList } from "@/components/ui/command";
+import { Command, CommandList } from "@/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -770,7 +771,7 @@ export function SymptomQuestion({
             onSelect={handleCodeSelect}
             disabled={disabled}
           />
-          <CommandDrawer
+          <Sheet
             open={showSymptomSelection}
             onOpenChange={setShowSymptomSelection}
           >
@@ -790,9 +791,17 @@ export function SymptomQuestion({
                       <CareIcon icon="l-times" className="h-5 w-5" />
                     </Button>
                   </div>
-                  <CommandList className="max-h-[100vh] overflow-y-auto pb-1">
-                    {symptomDetailsContent}
-                  </CommandList>
+                  <SheetContent
+                    side="bottom"
+                    className="px-0 pt-2 pb-0 rounded-t-lg"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+                    <div className="mt-6 h-full">
+                      <CommandList className="max-h-[calc(80vh-2rem)] overflow-y-auto">
+                        {symptomDetailsContent}
+                      </CommandList>
+                    </div>
+                  </SheetContent>
                 </>
               ) : (
                 <>
@@ -809,20 +818,28 @@ export function SymptomQuestion({
                       <CareIcon icon="l-times" className="h-5 w-5" />
                     </Button>
                   </div>
-                  <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
-                    <ValueSetSelect
-                      system="system-condition-code"
-                      placeholder={t("search_symptom")}
-                      onSelect={handleCodeSelect}
-                      disabled={disabled}
-                      hideTrigger={true}
-                      controlledOpen={true}
-                    />
-                  </CommandList>
+                  <SheetContent
+                    side="bottom"
+                    className=" px-0 pt-2 pb-0 rounded-t-lg"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+                    <div className="mt-6 h-full">
+                      <CommandList className="overflow-y-auto">
+                        <ValueSetSelect
+                          system="system-condition-code"
+                          placeholder={t("search_symptom")}
+                          onSelect={handleCodeSelect}
+                          disabled={disabled}
+                          hideTrigger={true}
+                          controlledOpen={true}
+                        />
+                      </CommandList>
+                    </div>
+                  </SheetContent>
                 </>
               )}
             </Command>
-          </CommandDrawer>
+          </Sheet>
         </>
       ) : (
         <ValueSetSelect
