@@ -475,7 +475,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           <Separator />
 
           <div className="space-y-6">
-            <div className="flex flex-col lg:flex-row gap-2 lg:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium">
                   {t("contact_information")}
