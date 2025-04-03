@@ -130,7 +130,7 @@ const DiagnosisListLayout = ({
     <Card className={cn("rounded-sm ", className)}>
       <CardHeader
         className={cn(
-          "px-4 pt-4 pb-2 flex justify-between flex-row",
+          "px-4 pt-2 pb-2 flex justify-between flex-row space-y-0",
           count != 0 && "cursor-pointer",
         )}
         onClick={onToggle}
