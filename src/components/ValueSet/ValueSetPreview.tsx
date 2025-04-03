@@ -31,8 +31,8 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
       queryParams: { search, count: 20 },
       body: {
         ...valueset,
-        name: "terminologies",
-        slug: "terminologies",
+        name: valueset.name + "terminologies",
+        slug: valueset.slug + "terminologies",
         compose: valueset.compose.include[0]?.system
           ? valueset.compose
           : {
