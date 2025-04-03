@@ -298,10 +298,18 @@ export default function TreatmentSummary({
               </div>
 
               <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                <span className="text-gray-600">{t("consulting_doctor")}</span>
+                <span className="text-gray-600">{t("care_team")}</span>
                 <span className="text-gray-600">:</span>
-                <span className="font-semibold">
-                  {formatName(encounter.created_by)}
+                <span className="font-semibold break-words">
+                  {encounter.care_team
+                    .map(
+                      (member) =>
+                        formatName(member.member) +
+                        " (" +
+                        member.role.display +
+                        ")",
+                    )
+                    .join(", ")}
                 </span>
               </div>
 
