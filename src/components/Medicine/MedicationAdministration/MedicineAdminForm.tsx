@@ -329,7 +329,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       <div className="space-y-2">
         <Label>{t("start_time")}</Label>
-        <div className="flex flex-row gap-2">
+        <div className="flex gap-2">
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -337,8 +337,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 className={cn(
                   "flex-1 justify-start text-left font-normal",
                   !administrationRequest.occurrence_period_start &&
-                    "text-gray-500",
-                  "text-sm",
+                    "text-gray-500 text-sm",
                 )}
                 disabled={!isPastTime || !!administrationRequest.id}
               >
@@ -387,7 +386,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       <div className="space-y-2">
         <Label>{t("end_time")}</Label>
-        <div className="flex flex-row gap-2">
+        <div className="flex gap-2">
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -395,8 +394,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 className={cn(
                   "flex-1 justify-start text-left font-normal",
                   !administrationRequest.occurrence_period_end &&
-                    "text-gray-500",
-                  "text-sm",
+                    "text-gray-500 text-sm",
                 )}
                 disabled={
                   !isPastTime ||
