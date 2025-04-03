@@ -1,3 +1,14 @@
+import {
+  Ambulance,
+  BedDouble,
+  Building2,
+  Home,
+  LucideIcon,
+  MonitorSmartphone,
+  Stethoscope,
+} from "lucide-react";
+
+import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
@@ -79,6 +90,15 @@ export const ENCOUNTER_STATUS = [
   "unknown",
 ] as const;
 
+export const ENCOUNTER_CLASSES_ICONS = {
+  imp: BedDouble,
+  amb: Ambulance,
+  obsenc: Stethoscope,
+  emer: Building2,
+  vr: MonitorSmartphone,
+  hh: Home,
+} as const satisfies Record<EncounterClass, LucideIcon>;
+
 export type EncounterAdmitSources = (typeof ENCOUNTER_ADMIT_SOURCE)[number];
 
 export type EncounterClass = (typeof ENCOUNTER_CLASS)[number];
@@ -149,6 +169,7 @@ export interface Encounter {
   current_location: LocationList;
   location_history: LocationHistory[];
   permissions: string[];
+  care_team: CareTeamResponse[];
 }
 
 export interface EncounterEditRequest {
