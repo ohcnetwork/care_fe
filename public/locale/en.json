@@ -707,6 +707,8 @@
   "confirm_delete": "Confirm Delete",
   "confirm_discontinue": "Confirm Discontinue",
   "confirm_password": "Confirm Password",
+  "confirm_removing_member": "Confirm Removing Member",
+  "confirm_removing_member_description": "Are you sure you want to remove this member from the care team?",
   "confirm_selection": "Confirm Selection",
   "confirm_transfer_complete": "Confirm Transfer Complete!",
   "confirm_unavailability": "Confirm Unavailability",

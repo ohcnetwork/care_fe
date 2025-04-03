@@ -4,6 +4,16 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,7 +31,6 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
-import { CareTeamMember } from "@/types/careTeam/careTeam";
 import careTeamApi from "@/types/careTeam/careTeamApi";
 import { Encounter } from "@/types/emr/encounter";
 import { Code } from "@/types/questionnaire/code";
@@ -31,8 +40,6 @@ type CareTeamSheetProps = {
   trigger: React.ReactNode;
   encounter: Encounter;
 };
-
-type CareTeamMemberWithUser = CareTeamMember & { user: UserBase };
 
 export function EmptyState() {
   const { t } = useTranslation();
@@ -53,30 +60,18 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const [members, setMembers] = useState<CareTeamMemberWithUser[]>(
-    encounter.care_team.map((member) => ({
-      user_id: member.member.id,
-      role: member.role,
-      user: member.member,
-    })),
-  );
   const [selectedUser, setSelectedUser] = useState<UserBase | undefined>();
   const [selectedRole, setSelectedRole] = useState<Code | null>(null);
+  const [memberToRemove, setMemberToRemove] = useState<number | null>(null);
 
   // Reset state when sheet is closed
   useEffect(() => {
     if (!open) {
       setSelectedUser(undefined);
       setSelectedRole(null);
-      setMembers(
-        encounter.care_team.map((member) => ({
-          user_id: member.member.id,
-          role: member.role,
-          user: member.member,
-        })),
-      );
+      setMemberToRemove(null);
     }
-  }, [open, encounter.care_team]);
+  }, [open]);
 
   const { mutate: saveCareTeam, isPending } = useMutation({
     mutationFn: mutate(careTeamApi.setCareTeam, {
@@ -93,24 +88,27 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
     if (!selectedUser || !selectedRole) return;
 
     // Check if user is already in the team
-    if (members.some((member) => member.user_id === selectedUser.id)) {
+    if (
+      encounter.care_team.some((member) => member.member.id === selectedUser.id)
+    ) {
       toast.error(t("member_already_added"));
       return;
     }
 
     const newMembers = [
-      ...members,
+      ...encounter.care_team.map((member) => ({
+        user_id: member.member.id,
+        role: member.role,
+      })),
       {
         user_id: selectedUser.id,
         role: selectedRole,
-        user: selectedUser,
       },
     ];
 
-    setMembers(newMembers);
     saveCareTeam(
       {
-        members: newMembers.map(({ user_id, role }) => ({ user_id, role })),
+        members: newMembers,
       },
       {
         onSuccess: () => {
@@ -123,12 +121,23 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
     setSelectedRole(null);
   };
 
-  const handleRemoveMember = (index: number) => {
-    const newMembers = members.filter((_, i) => i !== index);
-    setMembers(newMembers);
+  const confirmRemoveMember = (index: number) => {
+    setMemberToRemove(index);
+  };
+
+  const handleRemoveMember = () => {
+    if (memberToRemove === null) return;
+
+    const newMembers = encounter.care_team
+      .filter((_, i) => i !== memberToRemove)
+      .map((member) => ({
+        user_id: member.member.id,
+        role: member.role,
+      }));
+
     saveCareTeam(
       {
-        members: newMembers.map(({ user_id, role }) => ({ user_id, role })),
+        members: newMembers,
       },
       {
         onSuccess: () => {
@@ -136,19 +145,32 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
         },
       },
     );
+
+    setMemberToRemove(null);
   };
 
   const handleMakePrimary = (index: number) => {
     if (index === 0) return; // Already primary
 
-    const newMembers = [...members];
-    const [movedMember] = newMembers.splice(index, 1);
-    newMembers.unshift(movedMember);
+    // Create a new array with the selected member moved to the top
+    const newMembers = [
+      // First add the member that should be primary
+      {
+        user_id: encounter.care_team[index].member.id,
+        role: encounter.care_team[index].role,
+      },
+      // Then add all other members except the one being moved
+      ...encounter.care_team
+        .filter((_, i) => i !== index)
+        .map((member) => ({
+          user_id: member.member.id,
+          role: member.role,
+        })),
+    ];
 
-    setMembers(newMembers);
     saveCareTeam(
       {
-        members: newMembers.map(({ user_id, role }) => ({ user_id, role })),
+        members: newMembers,
       },
       {
         onSuccess: () => {
@@ -175,7 +197,7 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                 <UserSelector
                   selected={selectedUser}
                   onChange={setSelectedUser}
-                  placeholder={t("select_member")}
+                  placeholder={t("select_doctor")}
                 />
               </div>
               <ValueSetSelect
@@ -195,24 +217,24 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
             </div>
 
             <div className="space-y-2">
-              {members.length === 0 ? (
+              {encounter.care_team.length === 0 ? (
                 <EmptyState />
               ) : (
-                members.map((member, index) => (
+                encounter.care_team.map((member, index) => (
                   <div
-                    key={member.user_id}
+                    key={member.member.id}
                     className="flex items-center justify-between gap-2 rounded-lg border p-2"
                   >
                     <div className="flex items-center gap-2">
                       <Avatar
-                        name={formatName(member.user)}
-                        imageUrl={member.user?.profile_picture_url}
+                        name={formatName(member.member)}
+                        imageUrl={member.member?.profile_picture_url}
                         className="size-8"
                       />
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="font-medium">
-                            {formatName(member.user)}
+                            {formatName(member.member)}
                           </p>
                           {index === 0 && (
                             <Badge variant="primary" className="font-normal">
@@ -226,7 +248,7 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 flex-col-reverse md:flex-row">
                       {index !== 0 && (
                         <Button
                           variant="outline"
@@ -241,8 +263,9 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleRemoveMember(index)}
+                        onClick={() => confirmRemoveMember(index)}
                         disabled={isPending}
+                        className="cursor-pointer self-end"
                       >
                         <X className="size-4" />
                       </Button>
@@ -253,6 +276,28 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
             </div>
           </div>
         </ScrollArea>
+
+        <AlertDialog
+          open={memberToRemove !== null}
+          onOpenChange={(open) => !open && setMemberToRemove(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {t("confirm_removing_member")}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("confirm_removing_member_description")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleRemoveMember}>
+                {t("remove")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </SheetContent>
     </Sheet>
   );
