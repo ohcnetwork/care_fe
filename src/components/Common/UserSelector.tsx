@@ -33,6 +33,7 @@ interface Props {
   placeholder?: string;
   noOptionsMessage?: string;
   popoverClassName?: string;
+  users?: UserBase[];
 }
 
 export default function UserSelector({
@@ -41,6 +42,7 @@ export default function UserSelector({
   placeholder,
   noOptionsMessage,
   popoverClassName,
+  users,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -53,7 +55,7 @@ export default function UserSelector({
     }),
   });
 
-  const users = data?.results || [];
+  const usersList = users || data?.results || [];
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -100,7 +102,7 @@ export default function UserSelector({
                 : noOptionsMessage || t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {users.map((user: UserBase) => (
+              {usersList.map((user: UserBase) => (
                 <CommandItem
                   key={user.id}
                   value={user.id}
