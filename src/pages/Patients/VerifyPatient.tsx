@@ -18,6 +18,10 @@ import {
 } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
+import {
+  CardGridSkeleton,
+  CardListSkeleton,
+} from "@/components/Common/SkeletonLoading";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { EncounterCard } from "@/components/Facility/EncounterCard";
 
@@ -28,7 +32,6 @@ import { getPermissions } from "@/common/Permissions";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter } from "@/types/emr/encounter";
@@ -40,7 +43,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
   const { goBack } = useAppHistory();
   const { hasPermission } = usePermissions();
 
-  const { data: facilityData } = useQuery({
+  const { data: facilityData, isLoading: facilityLoading } = useQuery({
     queryKey: ["facility", props.facilityId],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: props.facilityId },
@@ -53,6 +56,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
   const {
     mutate: verifyPatient,
     data: patientData,
+    isPending: isVerifyingPatient,
     isError,
   } = useMutation({
     mutationFn: mutate(routes.patient.search_retrieve),
@@ -64,7 +68,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
     },
   });
 
-  const { data: encounters } = useQuery<PaginatedResponse<Encounter>>({
+  const { data: encounters, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounters", patientData?.id],
     queryFn: query(routes.encounter.list, {
       queryParams: {
@@ -86,6 +90,14 @@ export default function VerifyPatient(props: { facilityId: string }) {
     }
   }, [phone_number, year_of_birth, partial_id, verifyPatient]);
 
+  if (isVerifyingPatient || facilityLoading || encounterLoading) {
+    return (
+      <div className="space-y-4">
+        <CardListSkeleton count={1} />
+        <CardGridSkeleton count={4} />
+      </div>
+    );
+  }
   return (
     <div>
       {!phone_number || !year_of_birth || !partial_id ? (

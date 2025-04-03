@@ -1,12 +1,11 @@
 import { LazyExoticComponent } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-import { UserAssignedModel } from "@/components/Users/models";
-
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { DeviceDetail } from "@/types/device/device";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
+import { UserBase } from "@/types/user/user";
 
 import { AppRoutes } from "./Routers/AppRouter";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
@@ -14,7 +13,7 @@ import { pluginMap } from "./pluginMap";
 import { FacilityData } from "./types/facility/facility";
 
 export type DoctorConnectButtonComponentType = React.FC<{
-  user: UserAssignedModel;
+  user: UserBase;
 }>;
 
 export type ScribeComponentType = React.FC<{
@@ -28,6 +27,11 @@ export type PatientHomeActionsComponentType = React.FC<{
 }>;
 
 export type PatientInfoCardActionsComponentType = React.FC<{
+  encounter: Encounter;
+  className?: string;
+}>;
+
+export type PatientInfoCardQuickActionsComponentType = React.FC<{
   encounter: Encounter;
   className?: string;
 }>;
@@ -58,6 +62,7 @@ export type SupportedPluginComponents = {
   Scribe: ScribeComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
+  PatientInfoCardQuickActions: PatientInfoCardQuickActionsComponentType;
   PatientInfoCardMarkAsComplete: PatientInfoCardMarkAsCompleteComponentType;
   FacilityHomeActions: FacilityHomeActionsComponentType;
   PatientRegistrationForm: PatientRegistrationFormComponentType;
