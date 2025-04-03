@@ -39,4 +39,5 @@ export type AuthUserModel = UserBareMinimum & {
   organizations?: Organization[];
   permissions: string[];
   mfa_enabled?: boolean;
+  deleted: boolean;
 };

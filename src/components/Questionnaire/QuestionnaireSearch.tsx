@@ -8,7 +8,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandDrawer,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -20,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -80,7 +80,7 @@ export function QuestionnaireSearch({
         onValueChange={setSearch}
         autoFocus
       />
-      <CommandList>
+      <CommandList className="overflow-y-auto">
         <CommandEmpty>
           {isLoading ? (
             <div className="space-y-2 p-4">
@@ -114,29 +114,37 @@ export function QuestionnaireSearch({
 
   if (isMobile) {
     return (
-      <>
-        <Button
-          data-cy="add-questionnaire-button"
-          variant="outline"
-          role="combobox"
-          onClick={() => setIsOpen(true)}
-          className="w-full justify-between"
-          disabled={disabled || isLoading}
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>
+          <Button
+            data-cy="add-questionnaire-button"
+            variant="outline"
+            role="combobox"
+            className="w-full justify-between"
+            disabled={disabled || isLoading}
+          >
+            {isLoading ? (
+              <>
+                <CareIcon
+                  icon="l-spinner"
+                  className="mr-2 size-4 animate-spin"
+                />
+                {t("loading")}
+              </>
+            ) : (
+              <span>{placeholder || t("add_questionnaire")}</span>
+            )}
+            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent
+          side="bottom"
+          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
         >
-          {isLoading ? (
-            <>
-              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
-              {t("loading")}
-            </>
-          ) : (
-            <span>{placeholder || t("add_questionnaire")}</span>
-          )}
-          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-        </Button>
-        <CommandDrawer open={isOpen} onOpenChange={setIsOpen}>
-          {content}
-        </CommandDrawer>
-      </>
+          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+          <div className="mt-6 h-full">{content}</div>
+        </SheetContent>
+      </Sheet>
     );
   }
 
