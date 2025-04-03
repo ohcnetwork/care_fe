@@ -1,15 +1,29 @@
 import careConfig from "@careConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
-import { Hospital } from "lucide-react";
+import { Hospital, Trash2 } from "lucide-react";
+import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 import { TooltipComponent } from "@/components/ui/tooltip";
@@ -18,6 +32,9 @@ import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+
+import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
@@ -33,6 +50,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
+import facilityApi from "@/types/facility/facilityApi";
 import type {
   Organization,
   OrganizationParent,
@@ -93,6 +111,7 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
 
 export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
+  const user = useAuthUser();
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
@@ -109,17 +128,26 @@ export const FacilityHome = ({ facilityId }: Props) => {
     facilityData?.root_org_permissions ?? [],
   );
 
-  /*   const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
-    mutationFn: mutate(routes.deleteFacility, {
+  const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
+    mutationFn: mutate(facilityApi.deleteFacility, {
       pathParams: { id: facilityId },
     }),
     onSuccess: () => {
       toast.success(
         t("facility_deleted_successfully", { name: facilityData?.name }),
       );
-      navigate("/facility");
+      queryClient.invalidateQueries({
+        queryKey: ["facilities"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["currentUser"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["facility", facilityId],
+      });
+      navigate("/");
     },
-  }); */
+  });
 
   const { mutateAsync: deleteAvatar } = useMutation({
     mutationFn: mutate(routes.deleteFacilityCoverImage, {
@@ -179,7 +207,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     }
   };
 
-  if (isLoading || !facilityData) {
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -191,6 +219,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
       {t("recommended_aspect_ratio_for", { aspectRatio: "16:9" })}
     </>
   );
+
+  if (!facilityData) {
+    return <ErrorPage />;
+  }
 
   return (
     <div>
@@ -247,39 +279,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       </TooltipComponent>
                     </div>
                   </div>
-                  <div className="shrink-0">
-                    {/* <AlertDialog>
-                      TODO: add delete facility
-                      <AlertDialogTrigger asChild>
-                        <Trash2 className="mr-2 size-4" />
-                        {t("delete_facility")}
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t("delete_facility")}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("delete_facility_confirmation", {
-                              name: facilityData?.name,
-                            })}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                          <div
-                            onClick={() => deleteFacility()}
-                            className={cn(
-                              buttonVariants({ variant: "destructive" }),
-                            )}
-                            // disabled={isDeleting}
-                          >
-                            {isDeleting ? t("deleting") : t("delete")}
-                          </div>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog> */}
-                  </div>
                 </div>
               </div>
               <div className="absolute right-0 bottom-0 p-1 text-white [@media(max-width:55rem)]:top-0">
@@ -303,9 +302,49 @@ export const FacilityHome = ({ facilityId }: Props) => {
               </div>
             </div>
 
-            <div className="mt-2 space-y-2">
+            <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
+              {user.is_superuser && (
+                <div className="flex max-sm:flex-col mt-2 sm:mt-4">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        className="cursor-pointer font-semibold"
+                        variant="destructive"
+                        size="sm"
+                      >
+                        <Trash2 className="mr-2 size-4" />
+                        {t("delete_facility")}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          {t("delete_facility")}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {t("delete_facility_confirmation", {
+                            name: facilityData?.name,
+                          })}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteFacility()}
+                          className={cn(
+                            buttonVariants({ variant: "destructive" }),
+                          )}
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? t("deleting") : t("delete")}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
               {canUpdateFacility && (
-                <div className="flex justify-end gap-2 max-sm:flex-col sm:mt-4 mt-12 flex-wrap">
+                <div className="flex max-sm:flex-col mt-10 sm:mt-4">
                   <PLUGIN_Component
                     __name="FacilityHomeActions"
                     facility={facilityData}
@@ -325,6 +364,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   />
                 </div>
               )}
+            </div>
+
+            <div className="mt-2 space-y-2">
               <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
                 <Card className="basis-1/2">
                   <CardContent className="p-6 flex flex-col h-full">

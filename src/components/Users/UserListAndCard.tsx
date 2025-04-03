@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { Link, usePathParams } from "raviger";
+import { Link, navigate, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -15,6 +15,13 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
+
+interface UserCardProps {
+  user: UserBase;
+  roleName: string;
+  actions?: React.ReactNode;
+  facility?: string;
+}
 
 export const UserStatusIndicator = ({
   user,
@@ -59,29 +66,34 @@ export const UserStatusIndicator = ({
     </span>
   );
 };
-const UserCard = ({ user }: { user: UserBase }) => {
-  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+export function UserCard(props: UserCardProps) {
+  const { user, actions, roleName, facility } = props;
+
+  const { t } = useTranslation();
+
   return (
-    <Card key={user.id} className="h-full">
-      <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
+    <Card
+      key={user.id}
+      className={`h-full ${user.deleted ? "opacity-60" : ""}`}
+    >
+      <CardContent className="p-4 flex flex-col h-full justify-between">
         <div className="flex items-start gap-3">
           <Avatar
-            name={formatName(user, true)}
-            imageUrl={
-              "profile_picture_url" in user ? user.profile_picture_url : ""
-            }
-            className="size-12 sm:size-14 text-xl sm:text-2xl shrink-0"
+            name={`${user.first_name} ${user.last_name}`}
+            imageUrl={user.profile_picture_url}
+            className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl flex-shrink-0"
           />
 
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex flex-col gap-1">
               <div className="flex items-start justify-between">
-                <h1 className="text-base font-bold break-words pr-2 w-[50%] text-wrap">
+                <h1 className="text-base font-bold break-words pr-2">
                   {formatName(user)}
                 </h1>
-                <UserStatusIndicator user={user} />
+                <span className="text-sm text-gray-500">
+                  <UserStatusIndicator user={user} />
+                </span>
               </div>
-
               <span className="text-sm text-gray-500 mr-2 break-words">
                 {user.username}
               </span>
@@ -89,9 +101,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
             <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
               <div>
                 <div className="text-gray-500">{t("role")}</div>
-                <div className="font-medium truncate">
-                  {user.user_type ?? "-"}
-                </div>
+                <div className="font-medium truncate">{roleName}</div>
               </div>
               <div>
                 <div className="text-gray-500">{t("phone_number")}</div>
@@ -104,29 +114,50 @@ const UserCard = ({ user }: { user: UserBase }) => {
             </div>
           </div>
         </div>
-
-        <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end">
-          <Button
-            asChild
-            id={`see-details-${user.username}`}
-            variant="outline"
-            size="sm"
-          >
-            <Link href={`/facility/${facilityId}/users/${user.username}`}>
-              <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
-              <span>{t("see_details")}</span>
-            </Link>
-          </Button>
+        <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
+          {!user.deleted ? (
+            <>
+              {actions}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigate(
+                    `${facility ? `/facility/${facility}/users/${user.username}` : `/users/${user.username}`}`,
+                  );
+                }}
+              >
+                <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
+                <span>{t("see_details")}</span>
+              </Button>
+            </>
+          ) : (
+            <div className="bg-gray-200 rounded-md px-2 py-1 text-sm inline-block">
+              <CareIcon icon="l-archive" className="mr-2" />
+              {t("archived")}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
   );
+}
+export const UserGrid = ({ users }: { users?: UserBase[] }) => {
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+      {users?.map((user) => (
+        <UserCard
+          facility={facilityId}
+          key={user.id}
+          user={user}
+          roleName={user.user_type}
+        />
+      ))}
+    </div>
+  );
 };
-export const UserGrid = ({ users }: { users?: UserBase[] }) => (
-  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-    {users?.map((user) => <UserCard key={user.id} user={user} />)}
-  </div>
-);
 
 const UserListHeader = () => {
   return (

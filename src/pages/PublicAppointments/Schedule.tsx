@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { isWithinInterval } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -107,7 +108,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     toast.error(t("error_fetching_user_data"));
   }
 
-  const slotsQuery = useQuery<{ results: TokenSlot[] }>({
+  const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, staffId, selectedDate],
     queryFn: query(PublicAppointmentApi.getSlotsForDay, {
       body: {
@@ -120,6 +121,14 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       },
       silent: true,
     }),
+    select: (data: { results: TokenSlot[] }) => {
+      return data.results.filter((slot) => {
+        return !isWithinInterval(new Date(), {
+          start: slot.start_datetime,
+          end: slot.end_datetime,
+        });
+      });
+    },
     enabled: !!selectedDate && !!tokenData.token,
   });
 
@@ -280,9 +289,8 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 highlightToday={false}
               />
               <div className="space-y-6">
-                {slotsQuery.data?.results &&
-                slotsQuery.data.results.length > 0 ? (
-                  groupSlotsByAvailability(slotsQuery.data.results).map(
+                {slotsQuery.data && slotsQuery.data.length > 0 ? (
+                  groupSlotsByAvailability(slotsQuery.data).map(
                     ({ availability, slots }) => (
                       <div key={availability.name}>
                         <h4 className="text-lg font-semibold mb-3">
@@ -298,7 +306,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                               onClick={() =>
                                 setSelectedSlot({ ...slot, availability })
                               }
-                              allowOngoingSlots={false}
                             />
                           ))}
                         </div>
