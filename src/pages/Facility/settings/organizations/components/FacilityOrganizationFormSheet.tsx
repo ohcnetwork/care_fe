@@ -189,7 +189,7 @@ export default function FacilityOrganizationFormSheet({
               name="name"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -233,7 +233,7 @@ export default function FacilityOrganizationFormSheet({
               name="description"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t("description")}</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
