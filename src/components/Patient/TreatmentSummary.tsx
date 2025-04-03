@@ -479,7 +479,13 @@ export default function TreatmentSummary({
                       medication.effective_period?.start,
                       medication.effective_period?.end,
                     ]
-                      .map((date) => formatDateTime(date))
+                      .map((date, ind) =>
+                        date
+                          ? formatDateTime(date)
+                          : ind === 1
+                            ? t("ongoing")
+                            : "",
+                      )
                       .join(" - "),
                     reason: medication.reason,
                     notes: medication.note,
