@@ -124,7 +124,6 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     manufacture_date: undefined,
     registered_name: "",
     contact: [],
-    metadata: {},
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
