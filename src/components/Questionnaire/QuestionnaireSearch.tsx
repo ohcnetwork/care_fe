@@ -139,7 +139,7 @@ export function QuestionnaireSearch({
         </SheetTrigger>
         <SheetContent
           side="bottom"
-          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-[10px]"
+          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
         >
           <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
           <div className="mt-6 h-full">{content}</div>
