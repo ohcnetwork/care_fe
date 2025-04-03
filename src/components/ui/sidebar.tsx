@@ -138,7 +138,7 @@ const SidebarProvider = React.forwardRef<
     );
     React.useEffect(() => {
       if (isMobile) {
-        setOpen(true); // Ensure the sidebar is open in mobile view
+        setOpen(true);
       }
     }, [isMobile]);
 
