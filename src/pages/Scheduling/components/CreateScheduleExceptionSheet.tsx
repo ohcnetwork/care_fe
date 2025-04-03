@@ -60,6 +60,7 @@ export default function CreateScheduleExceptionSheet({
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
   const [qParams, _setQParams] = useQueryParams<QueryParams>();
   const setQParams = (p: QueryParams) => _setQParams(p, { replace: false });
+
   const formSchema = z
     .object({
       reason: z.string().min(1, t("field_required")),
@@ -92,7 +93,7 @@ export default function CreateScheduleExceptionSheet({
       },
       {
         message: t("start_time_must_be_before_end_time"),
-        path: ["start_time"],
+        path: ["end_time"],
       },
     )
     .refine(

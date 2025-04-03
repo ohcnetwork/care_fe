@@ -83,16 +83,12 @@ export default function CreateScheduleTemplateSheet({
     .object({
       name: z.string().min(1, t("field_required")),
       valid_from: z
-        .date({
-          required_error: t("field_required"),
-        })
+        .date({ required_error: t("field_required") })
         .min(dayjs().startOf("day").toDate(), {
           message: t("schedule_creation_for_past_validation_error"),
         }),
       valid_to: z
-        .date({
-          required_error: t("field_required"),
-        })
+        .date({ required_error: t("field_required") })
         .min(dayjs().startOf("day").toDate(), {
           message: t("schedule_creation_for_past_validation_error"),
         }),
