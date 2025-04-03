@@ -24,7 +24,7 @@ interface LocationTreeNodeProps {
   facilityId: string;
 }
 
-function LocationTreeNode({
+export function LocationTreeNode({
   location,
   selectedLocationId,
   onSelect,
@@ -33,7 +33,6 @@ function LocationTreeNode({
   level = 0,
   facilityId,
 }: LocationTreeNodeProps) {
-  const hasChildren = location.has_children;
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = location.id === selectedLocationId;
   const Icon =
@@ -52,6 +51,9 @@ function LocationTreeNode({
     }),
     enabled: isExpanded,
   });
+
+  const hasChildren =
+    location.has_children || (children?.results?.length ?? 0) > 0;
 
   return (
     <div className="space-y-1">
@@ -81,10 +83,10 @@ function LocationTreeNode({
             )}
           </Button>
         ) : (
-          <span className="w-6" />
+          <span className="w-2" />
         )}
         <div
-          className="flex items-center flex-1 text-sm gap-2"
+          className="flex items-center flex-1 text-sm gap-2 w-0"
           onClick={() => onSelect(location)}
         >
           <Icon className="size-4" />

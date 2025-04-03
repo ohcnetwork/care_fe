@@ -20,6 +20,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
+import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -27,7 +28,6 @@ import LocationMap from "./LocationMap";
 import LocationSheet from "./LocationSheet";
 import LocationView from "./LocationView";
 import { LocationCard } from "./components/LocationCard";
-import { LocationTreeNode } from "./components/LocationTreeNode";
 
 interface LocationSettingsProps {
   facilityId: string;
@@ -222,7 +222,7 @@ export default function LocationSettings({
                           selectedLocationId={locationId || null}
                           expandedLocations={expandedLocations}
                           onToggleExpand={handleToggleExpand}
-                          onLocationSelect={handleLocationSelect}
+                          onSelect={handleLocationSelect}
                         />
                       ))
                   ) : (
