@@ -433,99 +433,19 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               )}
             </div>
             <div className="flex items-center justify-center">
-              <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-4">
+              <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-2">
                 {file_state.isImage && (
                   <>
-                    {[
-                      [
-                        t("zoom_in"),
-                        "l-search-plus",
-                        handleZoomIn,
-                        file_state.zoom === zoom_values.length,
-                      ],
-                      [
-                        `${25 * file_state.zoom}%`,
-                        false,
-                        () => {
-                          setFileState({ ...file_state, zoom: 4 });
-                        },
-                        false,
-                      ],
-                      [
-                        t("zoom_out"),
-                        "l-search-minus",
-                        handleZoomOut,
-                        file_state.zoom === 1,
-                      ],
-                      [
-                        t("rotate_left"),
-                        "l-corner-up-left",
-                        () => handleRotate(-90),
-                        false,
-                      ],
-                      [
-                        t("rotate_right"),
-                        "l-corner-up-right",
-                        () => handleRotate(90),
-                        false,
-                      ],
+                    {[ 
+                      [t("zoom_in"), "l-search-plus", handleZoomIn, file_state.zoom === zoom_values.length],
+                      [`${25 * file_state.zoom}%`, false, () => { setFileState({ ...file_state, zoom: 4 }); }, false],
+                      [t("zoom_out"), "l-search-minus", handleZoomOut, file_state.zoom === 1],
                     ].map((button, index) => (
                       <Button
                         variant="ghost"
                         key={index}
                         onClick={button[2] as () => void}
-                        className={cn(
-                          "z-50 rounded bg-white/60 text-black backdrop-blur-sm transition hover:bg-white/70",
-                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
-                        )}
-                        disabled={button[3] as boolean}
-                      >
-                        <div>
-                          {button[1] && (
-                            <CareIcon
-                              icon={button[1] as IconName}
-                              className="text-lg"
-                            />
-                          )}
-                          <div>{button[0] as string}</div>
-                        </div>
-                      </Button>
-                    ))}
-                  </>
-                )}
-                {file_state.extension === "pdf" && (
-                  <>
-                    {[
-                      [t("zoom_in"), "l-search-plus", handleZoomIn, scale >= 2],
-                      [`${Math.round(scale * 100)}%`, false, () => {}, false],
-                      [
-                        t("zoom_out"),
-                        "l-search-minus",
-                        handleZoomOut,
-                        scale <= 0.5,
-                      ],
-                      [
-                        t("previous"),
-                        "l-arrow-left",
-                        () => setPage((prev) => prev - 1),
-                        page === 1,
-                      ],
-                      [`${page}/${numPages}`, false, () => ({}), false],
-                      [
-                        t("next"),
-                        "l-arrow-right",
-                        () => setPage((prev) => prev + 1),
-                        page === numPages,
-                      ],
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button[2] as () => void}
-                        className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
-                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
-                        )}
+                        className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70 max-md:col-span-2"
                         disabled={button[3] as boolean}
                       >
                         {button[1] && (
@@ -537,10 +457,81 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         {button[0] as string}
                       </Button>
                     ))}
+                    <div className="col-span-5 flex justify-center gap-2 mt-2">
+                      {[ 
+                        [t("rotate_left"), "l-corner-up-left", () => handleRotate(-90), false],
+                        [t("rotate_right"), "l-corner-up-right", () => handleRotate(90), false],
+                      ].map((button, index) => (
+                        <Button
+                          variant="ghost"
+                          key={index}
+                          onClick={button[2] as () => void}
+                          className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70 max-md:col-span-2"
+                          disabled={button[3] as boolean}
+                        >
+                          {button[1] && (
+                            <CareIcon
+                              icon={button[1] as IconName}
+                              className="mr-2 text-lg"
+                            />
+                          )}
+                          {button[0] as string}
+                        </Button>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {file_state.extension === "pdf" && (
+                  <>
+                    {[ 
+                      [t("zoom_in"), "l-search-plus", handleZoomIn, scale >= 2],
+                      [`${Math.round(scale * 100)}%`, false, () => {}, false],
+                      [t("zoom_out"), "l-search-minus", handleZoomOut, scale <= 0.5],
+                    ].map((button, index) => (
+                      <Button
+                        variant="ghost"
+                        key={index}
+                        onClick={button[2] as () => void}
+                        className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70 max-md:col-span-2"
+                        disabled={button[3] as boolean}
+                      >
+                        {button[1] && (
+                          <CareIcon
+                            icon={button[1] as IconName}
+                            className="mr-2 text-lg"
+                          />
+                        )}
+                        {button[0] as string}
+                      </Button>
+                    ))}
+                    <div className="col-span-5 flex justify-center gap-2 mt-2">
+                      {[ 
+                        [t("previous"), "l-arrow-left", () => setPage((prev) => prev - 1), page === 1],
+                        [`${page}/${numPages}`, false, () => ({}), false],
+                        [t("next"), "l-arrow-right", () => setPage((prev) => prev + 1), page === numPages],
+                      ].map((button, index) => (
+                        <Button
+                          variant="ghost"
+                          key={index}
+                          onClick={button[2] as () => void}
+                          className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70 max-md:col-span-2"
+                          disabled={button[3] as boolean}
+                        >
+                          {button[1] && (
+                            <CareIcon
+                              icon={button[1] as IconName}
+                              className="mr-2 text-lg"
+                            />
+                          )}
+                          {button[0] as string}
+                        </Button>
+                      ))}
+                    </div>
                   </>
                 )}
               </div>
             </div>
+
           </>
         ) : (
           <div className="flex h-[50vh] md:h-[75vh] items-center justify-center">
