@@ -1,17 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, UserRound, X } from "lucide-react";
+import { GripVertical, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -45,7 +39,7 @@ export function EmptyState() {
   return (
     <div className="flex min-h-[200px] flex-col items-center justify-center gap-1 p-8 text-center">
       <div className="rounded-full bg-secondary/10 p-3">
-        <UserRound className="text-3xl text-gray-500" />
+        <GripVertical className="text-3xl text-gray-500" />
       </div>
       <div className="max-w-[300px] space-y-1">
         <h3 className="font-medium">{t("no_care_team_members")}</h3>
@@ -89,7 +83,6 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
       pathParams: { encounterId: encounter.id },
     }),
     onSuccess: () => {
-      setOpen(false);
       queryClient.invalidateQueries({
         queryKey: ["encounter", encounter.id],
       });
@@ -105,47 +98,64 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
       return;
     }
 
-    setMembers([
+    const newMembers = [
       ...members,
       {
         user_id: selectedUser.id,
         role: selectedRole,
         user: selectedUser,
       },
-    ]);
+    ];
+
+    setMembers(newMembers);
+    saveCareTeam(
+      {
+        members: newMembers.map(({ user_id, role }) => ({ user_id, role })),
+      },
+      {
+        onSuccess: () => {
+          toast.success(t("member_added_successfully"));
+        },
+      },
+    );
 
     setSelectedUser(undefined);
     setSelectedRole(null);
   };
 
   const handleRemoveMember = (index: number) => {
-    setMembers(members.filter((_, i) => i !== index));
-  };
-
-  const handleMoveUp = (index: number) => {
-    if (index === 0) return;
-    const newMembers = [...members];
-    [newMembers[index - 1], newMembers[index]] = [
-      newMembers[index],
-      newMembers[index - 1],
-    ];
+    const newMembers = members.filter((_, i) => i !== index);
     setMembers(newMembers);
+    saveCareTeam(
+      {
+        members: newMembers.map(({ user_id, role }) => ({ user_id, role })),
+      },
+      {
+        onSuccess: () => {
+          toast.success(t("member_removed_successfully"));
+        },
+      },
+    );
   };
 
-  const handleMoveDown = (index: number) => {
-    if (index === members.length - 1) return;
+  const handleMakePrimary = (index: number) => {
+    if (index === 0) return; // Already primary
+
     const newMembers = [...members];
-    [newMembers[index], newMembers[index + 1]] = [
-      newMembers[index + 1],
-      newMembers[index],
-    ];
-    setMembers(newMembers);
-  };
+    const [movedMember] = newMembers.splice(index, 1);
+    newMembers.unshift(movedMember);
 
-  const handleSave = () => {
-    saveCareTeam({
-      members: members.map(({ user_id, role }) => ({ user_id, role })),
-    });
+    setMembers(newMembers);
+    saveCareTeam(
+      {
+        members: newMembers.map(({ user_id, role }) => ({ user_id, role })),
+      },
+      {
+        onSuccess: () => {
+          toast.success(t("primary_member_updated"));
+        },
+      },
+    );
   };
 
   return (
@@ -165,7 +175,7 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                 <UserSelector
                   selected={selectedUser}
                   onChange={setSelectedUser}
-                  placeholder={t("select_doctor")}
+                  placeholder={t("select_member")}
                 />
               </div>
               <ValueSetSelect
@@ -177,7 +187,7 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
               <Button
                 size="icon"
                 onClick={handleAddMember}
-                disabled={!selectedUser || !selectedRole}
+                disabled={!selectedUser || !selectedRole || isPending}
                 className="w-full md:w-auto px-2 cursor-pointer"
               >
                 {t("add")}
@@ -217,35 +227,22 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <UserRound className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {index > 0 && (
-                            <DropdownMenuItem
-                              onClick={() => handleMoveUp(index)}
-                            >
-                              <ChevronUp className="mr-2 size-4" />
-                              {t("move_up")}
-                            </DropdownMenuItem>
-                          )}
-                          {index < members.length - 1 && (
-                            <DropdownMenuItem
-                              onClick={() => handleMoveDown(index)}
-                            >
-                              <ChevronDown className="mr-2 size-4" />
-                              {t("move_down")}
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      {index !== 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleMakePrimary(index)}
+                          disabled={isPending}
+                          className="cursor-pointer"
+                        >
+                          {t("mark_as_primary")}
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRemoveMember(index)}
+                        disabled={isPending}
                       >
                         <X className="size-4" />
                       </Button>
@@ -256,23 +253,6 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
             </div>
           </div>
         </ScrollArea>
-
-        <div className="mt-6 flex justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setOpen(false)}
-            className="cursor-pointer"
-          >
-            {t("cancel")}
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isPending || members.length === 0}
-            className="cursor-pointer"
-          >
-            {isPending ? t("saving") : t("save")}
-          </Button>
-        </div>
       </SheetContent>
     </Sheet>
   );

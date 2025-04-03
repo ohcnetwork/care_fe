@@ -302,13 +302,7 @@ export default function TreatmentSummary({
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold break-words">
                   {encounter.care_team
-                    .map(
-                      (member) =>
-                        formatName(member.member) +
-                        " (" +
-                        member.role.display +
-                        ")",
-                    )
+                    .map((member) => formatName(member.member))
                     .join(", ")}
                 </span>
               </div>
