@@ -50,8 +50,8 @@ interface Props {
 }
 
 const ORG_TYPES = [
-  { value: "dept", label: "Department" },
-  { value: "team", label: "Team" },
+  { value: "dept", label: t("department") },
+  { value: "team", label: t("team") },
 ] as const;
 
 type OrgType = (typeof ORG_TYPES)[number]["value"];
