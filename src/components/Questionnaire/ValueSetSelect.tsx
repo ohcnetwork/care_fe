@@ -222,7 +222,7 @@ export default function ValueSetSelect({
         >
           <TabsList className="flex">
             <TabsTrigger value={"0"}>{t("search")}</TabsTrigger>
-            <TabsTrigger value={"1"}>{t("favourites")}</TabsTrigger>
+            <TabsTrigger value={"1"}>{t("starred")}</TabsTrigger>
           </TabsList>
         </Tabs>
         <CommandEmpty>
@@ -249,7 +249,7 @@ export default function ValueSetSelect({
             <CommandGroup>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-normal text-gray-700 p-1">
-                  {t("favourites")}
+                  {t("starred")}
                 </span>
                 {!!favourites?.length && (
                   <button>
@@ -265,7 +265,7 @@ export default function ValueSetSelect({
               {favouritesQuery.isFetched &&
                 favouritesQuery.data?.length === 0 && (
                   <div className="flex items-center flex-col justify-center h-[200px] md:h-[250px] text-xs text-gray-500">
-                    {t("no_favourites", {
+                    {t("no_starred", {
                       star: "☆",
                     })}
                   </div>
@@ -287,9 +287,7 @@ export default function ValueSetSelect({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            {t("are_you_sure_clear_favourites")}
-          </AlertDialogTitle>
+          <AlertDialogTitle>{t("are_you_sure_clear_starred")}</AlertDialogTitle>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={() => setIsClearingFavourites(false)}>
