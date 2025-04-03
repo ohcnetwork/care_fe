@@ -78,7 +78,7 @@ export const MedicineAdminDialog = ({
           </div>
         </DialogHeader>
 
-        <div className="py-4">
+        <div className="py-0 sm:py-4">
           <MedicineAdminForm
             formId="single"
             medication={medication}
