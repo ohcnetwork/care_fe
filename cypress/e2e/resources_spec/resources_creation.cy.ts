@@ -28,7 +28,7 @@ describe("Resources Management", () => {
     category: "Comfort Devices",
     title: "Updated Resource test title",
     reason: "Updated Reason Testing",
-    assignedUser: "devnurse3",
+    assignedUser: "devnurse2",
   };
 
   beforeEach(() => {
@@ -40,6 +40,7 @@ describe("Resources Management", () => {
     facilityCreation.selectFacility(testData.sourceFacility);
     patientEncounter
       .navigateToEncounters()
+      .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
       .clickPatientDetailsButton();
 
