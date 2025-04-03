@@ -337,7 +337,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 className={cn(
                   "flex-1 justify-start text-left font-normal",
                   !administrationRequest.occurrence_period_start &&
-                    "text-gray-500 text-sm",
+                    "text-gray-500",
                 )}
                 disabled={!isPastTime || !!administrationRequest.id}
               >
@@ -373,7 +373,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           </Popover>
           <Input
             type="time"
-            className="w-full text-sm"
+            className="w-full max-w-[6rem] sm:max-w-[9.5rem] text-sm sm:text-base"
             value={formatTime(administrationRequest.occurrence_period_start)}
             onChange={(e) => handleTimeChange(e, true)}
             disabled={!isPastTime || !!administrationRequest.id}
@@ -394,7 +394,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 className={cn(
                   "flex-1 justify-start text-left font-normal",
                   !administrationRequest.occurrence_period_end &&
-                    "text-gray-500 text-sm",
+                    "text-gray-500",
                 )}
                 disabled={
                   !isPastTime ||
@@ -435,7 +435,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           </Popover>
           <Input
             type="time"
-            className="w-full text-sm"
+            className="w-full max-w-[6rem] sm:max-w-[9.5rem] text-sm sm:text-base"
             value={formatTime(administrationRequest.occurrence_period_end)}
             onChange={(e) => handleTimeChange(e, false)}
             disabled={
