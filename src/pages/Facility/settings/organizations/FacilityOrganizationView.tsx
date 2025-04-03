@@ -20,7 +20,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
-import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
+import FacilityOrganizationFormSheet from "./components/FacilityOrganizationFormSheet";
 
 interface Props {
   id?: string;
@@ -30,9 +30,14 @@ interface Props {
 
 function OrganizationCard({
   org,
+  facilityId,
+  parentId,
+  editPermission,
 }: {
   org: FacilityOrganization;
   facilityId: string;
+  parentId?: string;
+  editPermission: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -52,11 +57,25 @@ function OrganizationCard({
                 </Badge>
               </div>
             </div>
-            <Button variant="white" size="sm" className="font-semibold" asChild>
-              <Link href={`/departments/${org.id}/departments`}>
-                {t("see_details")}
-              </Link>
-            </Button>
+            <div className="flex flex-row gap-2">
+              {editPermission && (
+                <FacilityOrganizationFormSheet
+                  facilityId={facilityId}
+                  parentId={parentId}
+                  org={org}
+                />
+              )}
+              <Button
+                variant="white"
+                size="sm"
+                className="font-semibold"
+                asChild
+              >
+                <Link href={`/departments/${org.id}/departments`}>
+                  {t("see_details")}
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
@@ -98,10 +117,8 @@ export default function FacilityOrganizationView({
     }),
   });
 
-  const { canCreateFacilityOrganization } = getPermissions(
-    hasPermission,
-    permissions,
-  );
+  const { canCreateFacilityOrganization, canManageFacilityOrganization } =
+    getPermissions(hasPermission, permissions);
 
   return (
     <div className="space-y-6 mx-auto max-w-4xl">
@@ -125,7 +142,7 @@ export default function FacilityOrganizationView({
           </div>
           <div className="w-auto">
             {canCreateFacilityOrganization && (
-              <CreateFacilityOrganizationSheet
+              <FacilityOrganizationFormSheet
                 facilityId={facilityId}
                 parentId={id}
               />
@@ -146,7 +163,9 @@ export default function FacilityOrganizationView({
                 <OrganizationCard
                   key={org.id}
                   org={org}
+                  editPermission={canManageFacilityOrganization}
                   facilityId={facilityId}
+                  parentId={id}
                 />
               ))
             ) : (
