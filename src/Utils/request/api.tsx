@@ -201,14 +201,6 @@ const routes = {
     TRes: Type<PaginatedResponse<UserAssignedModel>>(),
   },
 
-  // Download Api
-  deleteFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<void>(),
-  },
-
   // Patient
 
   searchPatient: {
