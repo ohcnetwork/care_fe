@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { isWithinInterval } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -42,6 +41,10 @@ interface AppointmentsProps {
   appointmentId?: string;
 }
 
+interface SlotsByDay {
+  [date: string]: TokenSlot[];
+}
+
 export function ScheduleAppointment(props: AppointmentsProps) {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
@@ -49,6 +52,8 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
+  const [monthSlots, setMonthSlots] = useState<SlotsByDay>({});
+  const [loadingSlots, setLoadingSlots] = useState<boolean>(false);
   const [reason, setReason] = useState("");
   const queryClient = useQueryClient();
 
@@ -104,11 +109,61 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     enabled: !!facilityId && !!staffId,
   });
 
+  const getDaysInMonth = (date: Date): Date[] => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    return Array.from(
+      { length: totalDays },
+      (_, index) => new Date(year, month, index + 1),
+    );
+  };
+
+  useEffect(() => {
+    async function fetchMonthSlots() {
+      setLoadingSlots(true);
+      const daysInMonth = getDaysInMonth(selectedMonth);
+      try {
+        const responses = await Promise.all(
+          daysInMonth.map((day) => {
+            const controller = new AbortController();
+            return query(PublicAppointmentApi.getSlotsForDay, {
+              body: {
+                facility: facilityId,
+                user: staffId,
+                day: dateQueryString(day),
+              },
+              headers: {
+                Authorization: `Bearer ${tokenData.token}`,
+              },
+              silent: true,
+            })({ signal: controller.signal });
+          }),
+        );
+        // Map each day to its results (or empty array if no results)
+        const slotsMap: SlotsByDay = daysInMonth.reduce((acc, day, index) => {
+          acc[day.toDateString()] = responses[index]?.results || [];
+          return acc;
+        }, {} as SlotsByDay);
+        setMonthSlots(slotsMap);
+      } catch (error: any) {
+        console.error("Error fetching slots for month:", error);
+        toast.error("Failed to fetch slots for the month.");
+      } finally {
+        setLoadingSlots(false);
+      }
+    }
+
+    if (tokenData?.token && selectedMonth) {
+      fetchMonthSlots();
+    }
+  }, [selectedMonth, facilityId, staffId, tokenData]);
+
   if (userError) {
     toast.error(t("error_fetching_user_data"));
   }
 
-  const slotsQuery = useQuery({
+  const slotsQuery = useQuery<{ results: TokenSlot[] }>({
     queryKey: ["slots", facilityId, staffId, selectedDate],
     queryFn: query(PublicAppointmentApi.getSlotsForDay, {
       body: {
@@ -121,14 +176,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       },
       silent: true,
     }),
-    select: (data: { results: TokenSlot[] }) => {
-      return data.results.filter((slot) => {
-        return !isWithinInterval(new Date(), {
-          start: slot.start_datetime,
-          end: slot.end_datetime,
-        });
-      });
-    },
     enabled: !!selectedDate && !!tokenData.token,
   });
 
@@ -201,15 +248,20 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const renderDay = (date: Date) => {
     const isSelected = date.toDateString() === selectedDate?.toDateString();
 
+    const slotsForDay = monthSlots[date.toDateString()] || [];
+    const hasSlots = slotsForDay.length > 0;
     return (
       <button
         onClick={() => setSelectedDate(date)}
         className={cn(
-          "h-full w-full hover:bg-gray-50 rounded-lg",
+          "h-full w-full hover:bg-gray-50 rounded-lg relative",
           isSelected ? "bg-white ring-2 ring-primary-500" : "bg-gray-100",
         )}
       >
         <span>{date.getDate()}</span>
+        {hasSlots && (
+          <div className="absolute bottom-1 left-1/2 right-1 w-2 h-2 bg-green-500 rounded-full" />
+        )}
       </button>
     );
   };
@@ -217,7 +269,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   if (!userData) {
     return <Loading />;
   }
-
+  if (loadingSlots) {
+    return <Loading />;
+  }
   return (
     <div className="flex flex-col">
       <div className="container mx-auto px-4 py-8">
@@ -289,8 +343,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 highlightToday={false}
               />
               <div className="space-y-6">
-                {slotsQuery.data && slotsQuery.data.length > 0 ? (
-                  groupSlotsByAvailability(slotsQuery.data).map(
+                {slotsQuery.data?.results &&
+                slotsQuery.data.results.length > 0 ? (
+                  groupSlotsByAvailability(slotsQuery.data.results).map(
                     ({ availability, slots }) => (
                       <div key={availability.name}>
                         <h4 className="text-lg font-semibold mb-3">
@@ -306,6 +361,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                               onClick={() =>
                                 setSelectedSlot({ ...slot, availability })
                               }
+                              allowOngoingSlots={false}
                             />
                           ))}
                         </div>
@@ -344,6 +400,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 }
               }}
             >
+              <span className="bg-linear-to-b from-white/15 to-transparent"></span>
               {appointmentId ? t("reschedule_appointment") : t("continue")}
               <CareIcon icon="l-arrow-right" className="size-4" />
             </Button>
