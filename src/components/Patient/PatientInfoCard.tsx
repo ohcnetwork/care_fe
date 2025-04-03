@@ -7,6 +7,7 @@ import {
   Clock,
   Droplet,
   SignatureIcon,
+  UserRound,
 } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -28,6 +29,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { Avatar } from "@/components/Common/Avatar";
 import { ConsentSheet } from "@/components/Consent/ConsentSheet";
 import EncounterActions from "@/components/Encounter/EncounterActions";
@@ -448,15 +450,31 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       }
                     />
                   </Badge>
+                  <Badge variant="outline">
+                    <CareTeamSheet
+                      encounter={encounter}
+                      trigger={
+                        <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                          <UserRound className="size-4 text-green-600" />
+                          {t("manage_care_team")}
+                        </div>
+                      }
+                    />
+                  </Badge>
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div
-          className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
+          className="flex flex-col mt-4 items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
+          <PLUGIN_Component
+            __name="PatientInfoCardQuickActions"
+            encounter={encounter}
+            className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+          />
           {!disableButtons && (
             <div
               className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"

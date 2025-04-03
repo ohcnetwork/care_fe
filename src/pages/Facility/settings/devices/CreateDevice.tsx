@@ -1,5 +1,6 @@
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Separator } from "@/components/ui/separator";
 
@@ -23,6 +24,7 @@ export default function CreateDevice({ facilityId }: Props) {
         <DeviceForm
           facilityId={facilityId}
           onSuccess={() => {
+            toast.success(t("device_registered"));
             navigate(`/facility/${facilityId}/settings/devices`);
           }}
         />
