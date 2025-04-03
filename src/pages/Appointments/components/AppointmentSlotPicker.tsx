@@ -258,7 +258,6 @@ export function AppointmentSlotPicker({
                                   : slot.id,
                               );
                             }}
-                            allowOngoingSlots={true}
                           />
                         ))}
                       </div>
@@ -279,13 +278,11 @@ export const TokenSlotButton = ({
   availability,
   selectedSlotId,
   onClick,
-  allowOngoingSlots = false,
 }: {
   slot: Omit<TokenSlot, "availability">;
   availability: TokenSlot["availability"];
   selectedSlotId: string | undefined;
   onClick: () => void;
-  allowOngoingSlots: boolean;
 }) => {
   const { t } = useTranslation();
 
