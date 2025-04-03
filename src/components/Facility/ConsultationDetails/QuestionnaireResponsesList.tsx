@@ -72,6 +72,10 @@ export function formatValue(
     case "decimal":
     case "integer":
       return typeof value === "number" ? value.toString() : value.toString();
+    case "boolean":
+      return value === "true" ? t("yes") : t("no");
+    case "time":
+      return value.toString().slice(0, 5);
     default:
       return value.toString();
   }
