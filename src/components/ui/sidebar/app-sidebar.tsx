@@ -25,10 +25,10 @@ import { OrgNav } from "@/components/ui/sidebar/org-nav";
 import { OrganizationSwitcher } from "@/components/ui/sidebar/organization-switcher";
 import { PatientNav } from "@/components/ui/sidebar/patient-nav";
 
-import { UserFacilityModel, UserModel } from "@/components/Users/models";
+import { AuthUserModel, UserFacilityModel } from "@/components/Users/models";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  user?: UserModel;
+  user?: AuthUserModel;
   facilitySidebar?: boolean;
   sidebarFor?: SidebarFor;
 }
