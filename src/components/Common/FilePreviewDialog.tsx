@@ -312,7 +312,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
               <div>
                 <TooltipComponent content={fileName}>
-                  <p className="text-2xl font-bold text-gray-800 truncate">
+                  <p className="text-2xl font-bold text-gray-800">
                     {fileNameTooltip}
                   </p>
                 </TooltipComponent>
@@ -432,106 +432,152 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </Button>
               )}
             </div>
-            <div className="flex items-center justify-center">
-              <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-2">
+            <div className="mt-4 flex flex-col items-center space-y-2">
+              <div className="flex justify-center space-x-2">
                 {file_state.isImage && (
                   <>
-                    {[ 
-                      [t("zoom_in"), "l-search-plus", handleZoomIn, file_state.zoom === zoom_values.length],
-                      [`${25 * file_state.zoom}%`, false, () => { setFileState({ ...file_state, zoom: 4 }); }, false],
-                      [t("zoom_out"), "l-search-minus", handleZoomOut, file_state.zoom === 1],
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button[2] as () => void}
-                        className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70 max-md:col-span-2"
-                        disabled={button[3] as boolean}
-                      >
-                        {button[1] && (
-                          <CareIcon
-                            icon={button[1] as IconName}
-                            className="mr-2 text-lg"
-                          />
-                        )}
-                        {button[0] as string}
-                      </Button>
-                    ))}
-                    <div className="col-span-5 flex justify-center gap-2 mt-2">
-                      {[ 
-                        [t("rotate_left"), "l-corner-up-left", () => handleRotate(-90), false],
-                        [t("rotate_right"), "l-corner-up-right", () => handleRotate(90), false],
-                      ].map((button, index) => (
-                        <Button
-                          variant="ghost"
-                          key={index}
-                          onClick={button[2] as () => void}
-                          className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70 max-md:col-span-2"
-                          disabled={button[3] as boolean}
-                        >
-                          {button[1] && (
-                            <CareIcon
-                              icon={button[1] as IconName}
-                              className="mr-2 text-lg"
-                            />
-                          )}
-                          {button[0] as string}
-                        </Button>
-                      ))}
-                    </div>
+                    <Button
+                      variant="ghost"
+                      onClick={handleZoomOut}
+                      disabled={file_state.zoom === 1}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                    >
+                      <CareIcon
+                        icon={"l-search-minus" as IconName}
+                        className="mr-2 text-lg"
+                      />
+                      {t("zoom_out")}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setFileState({ ...file_state, zoom: 4 });
+                      }}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                    >
+                      {`${25 * file_state.zoom}%`}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={handleZoomIn}
+                      disabled={file_state.zoom === zoom_values.length}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                    >
+                      <CareIcon
+                        icon={"l-search-plus" as IconName}
+                        className="mr-2 text-lg"
+                      />
+                      {t("zoom_in")}
+                    </Button>
                   </>
                 )}
                 {file_state.extension === "pdf" && (
                   <>
-                    {[ 
-                      [t("zoom_in"), "l-search-plus", handleZoomIn, scale >= 2],
-                      [`${Math.round(scale * 100)}%`, false, () => {}, false],
-                      [t("zoom_out"), "l-search-minus", handleZoomOut, scale <= 0.5],
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button[2] as () => void}
-                        className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70 max-md:col-span-2"
-                        disabled={button[3] as boolean}
-                      >
-                        {button[1] && (
-                          <CareIcon
-                            icon={button[1] as IconName}
-                            className="mr-2 text-lg"
-                          />
-                        )}
-                        {button[0] as string}
-                      </Button>
-                    ))}
-                    <div className="col-span-5 flex justify-center gap-2 mt-2">
-                      {[ 
-                        [t("previous"), "l-arrow-left", () => setPage((prev) => prev - 1), page === 1],
-                        [`${page}/${numPages}`, false, () => ({}), false],
-                        [t("next"), "l-arrow-right", () => setPage((prev) => prev + 1), page === numPages],
-                      ].map((button, index) => (
-                        <Button
-                          variant="ghost"
-                          key={index}
-                          onClick={button[2] as () => void}
-                          className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70 max-md:col-span-2"
-                          disabled={button[3] as boolean}
-                        >
-                          {button[1] && (
-                            <CareIcon
-                              icon={button[1] as IconName}
-                              className="mr-2 text-lg"
-                            />
-                          )}
-                          {button[0] as string}
-                        </Button>
-                      ))}
-                    </div>
+                    <Button
+                      variant="ghost"
+                      onClick={handleZoomOut}
+                      disabled={scale <= 0.5}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                    >
+                      <CareIcon
+                        icon={"l-search-minus" as IconName}
+                        className="mr-2 text-lg"
+                      />
+                      {t("zoom_out")}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                      disabled
+                    >
+                      {`${Math.round(scale * 100)}%`}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={handleZoomIn}
+                      disabled={scale >= 2}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                    >
+                      <CareIcon
+                        icon={"l-search-plus" as IconName}
+                        className="mr-2 text-lg"
+                      />
+                      {t("zoom_in")}
+                    </Button>
+                  </>
+                )}
+              </div>
+              <div className="flex justify-center space-x-2">
+                {file_state.isImage && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleRotate(-90)}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                    >
+                      <CareIcon
+                        icon={"l-corner-up-left" as IconName}
+                        className="mr-2 text-lg"
+                      />
+                      {t("rotate_left")}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleRotate(90)}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                    >
+                      <CareIcon
+                        icon={"l-corner-up-right" as IconName}
+                        className="mr-2 text-lg"
+                      />
+                      {t("rotate_right")}
+                    </Button>
+                  </>
+                )}
+                {file_state.extension === "pdf" && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setPage((prev) => prev - 1)}
+                      disabled={page === 1}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                    >
+                      <CareIcon
+                        icon={"l-arrow-left" as IconName}
+                        className="mr-2 text-lg"
+                      />
+                      {t("previous")}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                      disabled
+                    >
+                      {`${page}/${numPages}`}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={() => setPage((prev) => prev + 1)}
+                      disabled={page === numPages}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                    >
+                      <CareIcon
+                        icon={"l-arrow-right" as IconName}
+                        className="mr-2 text-lg"
+                      />
+                      {t("next")}
+                    </Button>
                   </>
                 )}
               </div>
             </div>
-
           </>
         ) : (
           <div className="flex h-[50vh] md:h-[75vh] items-center justify-center">
