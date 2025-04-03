@@ -232,6 +232,12 @@ export default function PatientRegistration(
     if (facilityId) {
       createPatient({
         ...values,
+        emergency_phone_number: values.same_phone_number
+          ? values.phone_number
+          : values.emergency_phone_number,
+        permanent_address: values.same_address
+          ? values.address
+          : values.permanent_address,
         facility: facilityId,
         ward_old: undefined,
       });
@@ -339,7 +345,7 @@ export default function PatientRegistration(
 
   return (
     <Page title={title}>
-      <hr className="mt-4" />
+      <hr className="mt-4 border-gray-200" />
       <div className="relative mt-4 flex flex-col md:flex-row gap-4">
         <SectionNavigator sections={sidebarItems} className="hidden md:flex" />
 
@@ -391,7 +397,7 @@ export default function PatientRegistration(
                         {...field}
                         onChange={(value) => {
                           form.setValue("phone_number", value);
-                          if (form.watch("same_phone_number")) {
+                          if (form.getValues("same_phone_number")) {
                             form.setValue("emergency_phone_number", value);
                           }
                         }}
@@ -652,7 +658,7 @@ export default function PatientRegistration(
                 {(isDeceased || form.watch("deceased_datetime")) && (
                   <div className="mt-4">
                     <div className="flex items-center gap-2 mb-4 text-gray-500">
-                      <InfoIcon className="w-4 h-4" />
+                      <InfoIcon className="size-4" />
                       <p className="text-sm text-gray-500">
                         {t("deceased_disclaimer")}
                       </p>
@@ -698,7 +704,7 @@ export default function PatientRegistration(
                         {...field}
                         onChange={(e) => {
                           form.setValue("address", e.target.value);
-                          if (form.watch("same_address")) {
+                          if (form.getValues("same_address")) {
                             form.setValue("permanent_address", e.target.value);
                           }
                         }}
@@ -719,7 +725,7 @@ export default function PatientRegistration(
                                   if (v) {
                                     form.setValue(
                                       "permanent_address",
-                                      form.watch("address"),
+                                      form.getValues("address"),
                                     );
                                   }
                                 }}
