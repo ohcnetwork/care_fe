@@ -15,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -86,7 +87,7 @@ export default function LocationSettings({
     enabled: !!locationId,
   });
 
-  const { data: childLocations } = useQuery({
+  const { data: childLocations, isLoading } = useQuery({
     queryKey: [
       "locations",
       facilityId,
@@ -95,7 +96,7 @@ export default function LocationSettings({
       currentPage,
       searchQuery,
     ],
-    queryFn: query(locationApi.list, {
+    queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: locationId || "",
@@ -265,7 +266,7 @@ export default function LocationSettings({
                       <div className="flex flex-col md:flex-row justify-between items-center w-full gap-4">
                         <Input
                           placeholder={t("search_by_name")}
-                          value={searchQuery}
+                          defaultValue={searchQuery}
                           onChange={(e) => handleSearchChange(e.target.value)}
                           className="w-full lg:w-72"
                         />
@@ -284,7 +285,9 @@ export default function LocationSettings({
 
                     <div className="space-y-4 overflow-hidden">
                       <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                        {childLocations?.results?.length ? (
+                        {isLoading ? (
+                          <CardGridSkeleton count={4} />
+                        ) : childLocations?.results?.length ? (
                           childLocations.results.map(
                             (childLocation: LocationListType) => (
                               <LocationCard
