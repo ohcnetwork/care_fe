@@ -29,7 +29,7 @@ import {
 interface PatientCardProps {
   patient: Patient;
   selectedPatient: string | null;
-  setSelectedPatient: (patientId: string | null) => void;
+  setSelectedPatient: (patientId: string) => void;
   getPatienDobOrAge: (patient: Patient) => string;
 }
 
