@@ -19,7 +19,7 @@ const formatKey = (key: string) => {
     .join(" ");
 };
 
-const notifyError = (error: any) => {
+const notifyError = (error: any, t: any) => {
   let errorMsg = "";
 
   if (
@@ -38,7 +38,7 @@ const notifyError = (error: any) => {
     if (errorMsg.length > 0) {
       toast.error(errorMsg);
     } else {
-      toast.error("Something went wrong , please upload different image");
+      toast.error(t("something_went_wrong"));
     }
     return;
   }
@@ -69,10 +69,10 @@ const notifyError = (error: any) => {
  * 400 Bad Request handler
  * @deprecated TODO: add a better error handler
  */
-export const BadRequest = ({ errs }: { errs: any }) => {
+export const BadRequest = ({ errs }: { errs: any }, t: any) => {
   if (Array.isArray(errs)) {
-    errs.forEach((error) => notifyError(error));
+    errs.forEach((error) => notifyError(error, t));
   } else {
-    notifyError(errs);
+    notifyError(errs, t);
   }
 };

@@ -40,7 +40,7 @@ export function handleHttpError(error: Error) {
       return;
     }
 
-    Notifications.BadRequest({ errs });
+    Notifications.BadRequest({ errs }, t);
     return;
   }
 
