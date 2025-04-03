@@ -149,6 +149,7 @@ export default function ValueSetSelect({
     <Popover
       open={controlledOpen || internalOpen}
       onOpenChange={setInternalOpen}
+      modal={true}
     >
       {!hideTrigger && (
         <PopoverTrigger asChild disabled={disabled}>

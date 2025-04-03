@@ -1,3 +1,4 @@
+import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
@@ -149,6 +150,7 @@ export interface Encounter {
   current_location: LocationList;
   location_history: LocationHistory[];
   permissions: string[];
+  care_team: CareTeamResponse[];
 }
 
 export interface EncounterEditRequest {
