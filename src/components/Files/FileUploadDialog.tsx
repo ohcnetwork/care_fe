@@ -69,7 +69,7 @@ export default function FileUploadDialog({
             <div key={index} className="space-y-4">
               {file.type.startsWith("image/") && previewUrls[index] ? (
                 <>
-                  <div className="w-full max-w-md overflow-hidden rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.2)] transition-all duration-200 border-2 border-black">
+                  <div className="w-full max-w-md overflow-hidden rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.2)] transition-all duration-200 border-2 border-gray-600">
                     <img
                       src={previewUrls[index]}
                       alt="Preview"
