@@ -434,15 +434,13 @@ export function AllergyQuestion({
             {allergies.map((allergy, index) => (
               <div
                 key={index}
-                className={`p-3 space-y-3 ${
-                  allergy.verification_status === "entered_in_error"
-                    ? "opacity-40 pointer-events-none"
-                    : allergy.clinical_status === "inactive"
-                      ? "opacity-60"
-                      : allergy.clinical_status === "resolved"
-                        ? "line-through"
-                        : ""
-                }`}
+                className={cn(
+                  "p-3 space-y-3",
+                  allergy.verification_status === "entered_in_error" &&
+                    "opacity-40 pointer-events-none",
+                  allergy.clinical_status === "inactive" && "opacity-60",
+                  allergy.clinical_status === "resolved" && "line-through",
+                )}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

@@ -1071,7 +1071,7 @@ function CategorySelector({
   gridCols?: string;
 }) {
   return (
-    <div className={`grid ${gridCols} gap-4`}>
+    <div className={cn("grid gap-4", gridCols)}>
       {categories.map((category) => (
         <div
           key={category}
