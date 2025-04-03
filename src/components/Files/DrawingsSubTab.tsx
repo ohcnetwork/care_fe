@@ -24,6 +24,8 @@ export interface DrawingsTabProps {
   type: "encounter" | "patient";
   patientId?: string;
   encounter?: Encounter;
+  qParams: any;
+  updateQuery: (params: any) => void;
 }
 
 interface ExcalidrawPreviewProps {
@@ -118,21 +120,26 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
 
 ExcalidrawPreview.displayName = "ExcalidrawPreview";
 
-export const DrawingPage = (props: DrawingsTabProps) => {
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+export const DrawingPage = ({
+  type,
+  qParams,
+  updateQuery,
+  patientId,
+  encounter,
+}: DrawingsTabProps) => {
+  const { Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["name"],
   });
 
-  const associatingId =
-    props.type === "encounter" ? props.encounter?.id : props.patientId;
+  const associatingId = type === "encounter" ? encounter?.id : patientId;
 
   const { data, isLoading } = useQuery({
     queryKey: ["drawings", associatingId, qParams, resultsPerPage],
     queryFn: query.debounced(metaArtifactApi.list, {
       queryParams: {
         object_type: "drawing",
-        associating_type: props.type,
+        associating_type: type,
         name: qParams.name,
         associating_id: associatingId,
         limit: resultsPerPage,
@@ -142,16 +149,22 @@ export const DrawingPage = (props: DrawingsTabProps) => {
   });
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-4 gap-2">
-        <Input
-          id="search-by-name"
-          name="name"
-          placeholder={t("search_drawings")}
-          value={qParams.name}
-          onChange={(e) => updateQuery({ name: e.target.value })}
-          className="w-full sm:w-1/3"
-        />
+    <div className="p-4 -ml-2 -mt-2">
+      <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
+        <div className="relative flex-1 min-w-[300px] max-w-[400px]">
+          <CareIcon
+            icon="l-search"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+          />
+          <Input
+            id="search-by-name"
+            name="name"
+            placeholder={t("search_drawings")}
+            value={qParams.name || ""}
+            onChange={(e) => updateQuery({ name: e.target.value })}
+            className="pl-10"
+          />
+        </div>
         <Button variant="white" onClick={() => navigate("drawings/new")}>
           <CareIcon icon="l-pen" />
           {t("new_drawing")}

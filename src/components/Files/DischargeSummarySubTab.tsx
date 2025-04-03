@@ -71,7 +71,6 @@ export const DischargeTab = ({
   const [selectedAudioFile, setSelectedAudioFile] =
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
-  const [fileName, setFileName] = useState("");
   const queryClient = useQueryClient();
 
   const { mutate: generateDischargeSummary, isPending: isGenerating } =
@@ -90,12 +89,12 @@ export const DischargeTab = ({
     isLoading: filesLoading,
     refetch,
   } = useQuery({
-    queryKey: ["discharge_files", encounterId, qParams, fileName],
+    queryKey: ["discharge_files", encounterId, qParams],
     queryFn: query.debounced(routes.viewUpload, {
       queryParams: {
         file_type: type,
         associating_id: encounterId,
-        name: fileName,
+        name: qParams.name,
         file_category: "discharge_summary",
         limit: qParams.limit,
         offset: ((qParams.page || 1) - 1) * qParams.limit,
@@ -586,43 +585,52 @@ export const DischargeTab = ({
         associatingId={encounterId}
         type={type}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
-        <FilterButton />
-        <FileUploadButtons />
-        <Button
-          variant="outline_primary"
-          className="flex flex-row items-center"
-          onClick={async () => {
-            await queryClient.invalidateQueries({
-              queryKey: ["discharge_files"],
-            });
-            toast.success(t("refreshed"));
-          }}
-        >
-          <CareIcon icon="l-sync" />
-          <span className="ml-2">{t("refresh")}</span>
-        </Button>
-        <Button
-          variant="primary"
-          className="flex flex-row items-center"
-          onClick={() => generateDischargeSummary()}
-          disabled={isGenerating}
-        >
-          <CareIcon icon="l-file-medical" className="hidden sm:block" />
-          <span>
+      <div className="flex flex-wrap items-center gap-3 mt-2 ml-2">
+        <div className="relative flex-1 min-w-[250px] sm:min-w-[300px] max-w-[400px]">
+          <CareIcon
+            icon="l-search"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+          />
+          <Input
+            id="search-by-filename"
+            name="name"
+            placeholder={t("search_files")}
+            value={qParams.name || ""}
+            onChange={(e) => updateQuery({ name: e.target.value })}
+            className="w-full pl-8"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <FilterButton />
+          <Button
+            variant="outline_primary"
+            className="min-w-[100px] sm:min-w-[120px]"
+            onClick={async () => {
+              await queryClient.invalidateQueries({
+                queryKey: ["discharge_files"],
+              });
+              toast.success(t("refreshed"));
+            }}
+          >
+            <CareIcon icon="l-sync" className="mr-2" />
+            {t("refresh")}
+          </Button>
+
+          <Button
+            variant="primary"
+            className="min-w-[100px] sm:min-w-[120px]"
+            onClick={() => generateDischargeSummary()}
+            disabled={isGenerating}
+          >
+            <CareIcon icon="l-file-medical" className="hidden sm:block mr-2" />
             {isGenerating ? t("generating") : t("generate_discharge_summary")}
-          </span>
-        </Button>
-        <Input
-          id="search-by-filename"
-          name="name"
-          placeholder={t("search_files")}
-          value={fileName}
-          onChange={(e) => {
-            setFileName(e.target.value);
-          }}
-          className="w-full pl-8 ml-1"
-        />
+          </Button>
+        </div>
+
+        <div className="w-full sm:w-auto ml-auto">
+          <FileUploadButtons />
+        </div>
       </div>
 
       <FilterBadges />

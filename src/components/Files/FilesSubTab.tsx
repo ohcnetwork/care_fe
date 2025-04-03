@@ -76,7 +76,6 @@ export const FilesPage = ({
   const [selectedAudioFile, setSelectedAudioFile] =
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
-  const [fileName, setFileName] = useState("");
   const { hasPermission } = usePermissions();
   const { canViewClinicalData, canViewEncounter } = getPermissions(
     hasPermission,
@@ -92,12 +91,12 @@ export const FilesPage = ({
     isLoading: filesLoading,
     refetch,
   } = useQuery({
-    queryKey: ["files", type, associatingId, qParams, fileName],
+    queryKey: ["files", type, associatingId, qParams],
     queryFn: query.debounced(routes.viewUpload, {
       queryParams: {
         file_type: type,
         associating_id: associatingId,
-        name: fileName,
+        name: qParams.name,
         limit: qParams.limit,
         offset: ((qParams.page || 1) - 1) * qParams.limit,
         ...(qParams.is_archived !== undefined && {
@@ -594,21 +593,31 @@ export const FilesPage = ({
         associatingId={associatingId}
         type={type}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
-        <FilterButton />
-        <FileUploadButtons />
-        <Input
-          id="search-by-filename"
-          name="name"
-          placeholder={t("search_files")}
-          value={fileName}
-          onChange={(e) => {
-            setFileName(e.target.value);
-          }}
-          className="w-full pl-8 ml-1"
-        />
-      </div>
+      <div className="flex flex-wrap items-center gap-3 mt-2 ml-2">
+        <div className="relative flex-1 min-w-[300px] max-w-[400px]">
+          <CareIcon
+            icon="l-search"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+          />
+          <Input
+            id="search-by-filename"
+            name="name"
+            placeholder={t("search_files")}
+            value={qParams.name || ""}
+            onChange={(e) => updateQuery({ name: e.target.value })}
+            className="w-full pl-8"
+          />
+        </div>
 
+        <div className="flex items-center gap-2">
+          <FilterButton />
+        </div>
+
+        {/* FileUploadButtons pushed to the right */}
+        <div className="ml-auto">
+          <FileUploadButtons />
+        </div>
+      </div>
       <FilterBadges />
       <RenderTable />
       <RenderCard />

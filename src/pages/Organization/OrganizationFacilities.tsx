@@ -78,7 +78,6 @@ export default function OrganizationFacilities({
               </div>
               {canCreateFacility && <AddFacilitySheet organizationId={id} />}
             </div>
-
             <div className="flex gap-2">
               <Input
                 type="text"

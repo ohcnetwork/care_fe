@@ -2,9 +2,9 @@ import { t } from "i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { DrawingPage } from "@/components/Common/Drawings/DrawingPage";
-import { DischargeTab } from "@/components/Files/DischargeSummary";
-import { FilesPage } from "@/components/Files/FilesPage";
+import { DischargeTab } from "@/components/Files/DischargeSummarySubTab";
+import { DrawingPage } from "@/components/Files/DrawingsSubTab";
+import { FilesPage } from "@/components/Files/FilesSubTab";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -53,10 +53,11 @@ export const FilesTab = (props: FilesTabsProps) => {
             file: value,
             is_archived: undefined,
             page: undefined,
+            name: undefined,
           })
         }
       >
-        <TabsList className="bg-gray-200 py-0 w-fit mt-2 ml-3">
+        <TabsList className="bg-gray-200 py-0 w-fit mt-2 ml-2">
           <TabsTrigger
             value="all"
             className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
@@ -105,12 +106,13 @@ export const FilesTab = (props: FilesTabsProps) => {
 
         <TabsContent value="drawings">
           <div>
-            <span className="text-lg font-bold ml-3">{t("drawings")}</span>
             <DrawingPage
               type={props.type}
               {...(props.type === "patient"
                 ? { patientId: props.patient?.id }
                 : { encounter: props.encounter })}
+              qParams={qParams}
+              updateQuery={updateQuery}
             />
           </div>
         </TabsContent>
