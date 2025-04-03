@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandDrawer,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -18,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -119,7 +119,7 @@ export default function Autocomplete({
         className="outline-hidden border-none ring-0 shadow-none"
         autoFocus
       />
-      <CommandList>
+      <CommandList className="overflow-y-auto">
         {isLoading ? (
           <CardListSkeleton count={3} />
         ) : (
@@ -161,37 +161,44 @@ export default function Autocomplete({
 
   if (isMobile) {
     return (
-      <>
-        <Button
-          title={
-            value
-              ? freeInput
-                ? inputValue || value
-                : selectedOption?.label
-              : undefined
-          }
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn("w-full justify-between", className)}
-          disabled={disabled}
-          data-cy={dataCy}
-          type="button"
-          onClick={() => setOpen(true)}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button
+            title={
+              value
+                ? freeInput
+                  ? inputValue || value
+                  : selectedOption?.label
+                : undefined
+            }
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn("w-full justify-between", className)}
+            disabled={disabled}
+            data-cy={dataCy}
+            type="button"
+          >
+            <span className="overflow-hidden">
+              {value
+                ? freeInput
+                  ? inputValue || value
+                  : selectedOption?.label
+                : placeholder}
+            </span>
+            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent
+          side="bottom"
+          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
         >
-          <span className="overflow-hidden">
-            {value
-              ? freeInput
-                ? inputValue || value
-                : selectedOption?.label
-              : placeholder}
-          </span>
-          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-        </Button>
-        <CommandDrawer open={open} onOpenChange={setOpen}>
-          {commandContent}
-        </CommandDrawer>
-      </>
+          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+          <div className="mt-6 h-full">
+            <Command>{commandContent}</Command>
+          </div>
+        </SheetContent>
+      </Sheet>
     );
   }
 

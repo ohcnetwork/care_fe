@@ -298,10 +298,12 @@ export default function TreatmentSummary({
               </div>
 
               <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                <span className="text-gray-600">{t("consulting_doctor")}</span>
+                <span className="text-gray-600">{t("care_team")}</span>
                 <span className="text-gray-600">:</span>
-                <span className="font-semibold">
-                  {formatName(encounter.created_by)}
+                <span className="font-semibold break-words">
+                  {encounter.care_team
+                    .map((member) => formatName(member.member))
+                    .join(", ")}
                 </span>
               </div>
 
@@ -479,7 +481,13 @@ export default function TreatmentSummary({
                       medication.effective_period?.start,
                       medication.effective_period?.end,
                     ]
-                      .map((date) => formatDateTime(date))
+                      .map((date, ind) =>
+                        date
+                          ? formatDateTime(date)
+                          : ind === 1
+                            ? t("ongoing")
+                            : "",
+                      )
                       .join(" - "),
                     reason: medication.reason,
                     notes: medication.note,
