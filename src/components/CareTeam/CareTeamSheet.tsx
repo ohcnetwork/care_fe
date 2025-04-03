@@ -197,7 +197,7 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                 <UserSelector
                   selected={selectedUser}
                   onChange={setSelectedUser}
-                  placeholder={t("select_doctor")}
+                  placeholder={t("select_member")}
                 />
               </div>
               <ValueSetSelect
@@ -223,52 +223,69 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                 encounter.care_team.map((member, index) => (
                   <div
                     key={member.member.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border p-2"
+                    className="flex flex-col gap-2 rounded-lg border p-2"
                   >
-                    <div className="flex items-center gap-2">
-                      <Avatar
-                        name={formatName(member.member)}
-                        imageUrl={member.member?.profile_picture_url}
-                        className="size-8"
-                      />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">
-                            {formatName(member.member)}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Avatar
+                          name={formatName(member.member)}
+                          imageUrl={member.member?.profile_picture_url}
+                          className="size-8"
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">
+                              {formatName(member.member)}
+                            </p>
+                            {index === 0 && (
+                              <Badge variant="primary" className="font-normal">
+                                {t("primary")}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            {member.role.display}
                           </p>
-                          {index === 0 && (
-                            <Badge variant="primary" className="font-normal">
-                              {t("primary")}
-                            </Badge>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 flex-col-reverse md:flex-row">
+                        <div className="hidden md:block">
+                          {index !== 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleMakePrimary(index)}
+                              disabled={isPending}
+                              className="cursor-pointer"
+                            >
+                              {t("mark_as_primary")}
+                            </Button>
                           )}
                         </div>
-                        <p className="text-sm text-gray-500">
-                          {member.role.display}
-                        </p>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => confirmRemoveMember(index)}
+                          disabled={isPending}
+                          className="cursor-pointer self-end"
+                        >
+                          <X className="size-4" />
+                        </Button>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-1 flex-col-reverse md:flex-row">
+                    <div className="md:hidden">
                       {index !== 0 && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleMakePrimary(index)}
                           disabled={isPending}
-                          className="cursor-pointer"
+                          className="cursor-pointer w-full"
                         >
                           {t("mark_as_primary")}
                         </Button>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => confirmRemoveMember(index)}
-                        disabled={isPending}
-                        className="cursor-pointer self-end"
-                      >
-                        <X className="size-4" />
-                      </Button>
                     </div>
                   </div>
                 ))
