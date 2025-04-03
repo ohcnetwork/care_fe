@@ -41,13 +41,13 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     {
       key: "username",
       type: "text" as const,
-      placeholder: "Search by username",
+      placeholder: t("search_by_username"),
       value: qParams.name || "",
     },
     {
       key: "phone_number",
       type: "phone" as const,
-      placeholder: "Search by phone number",
+      placeholder: t("search_by_phone_number"),
       value: qParams.phone_number || "",
     },
   ];

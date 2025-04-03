@@ -85,7 +85,7 @@ export default function OrganizationFacilities({
                   {
                     key: "name",
                     type: "text" as const,
-                    placeholder: "Search Facilities by name",
+                    placeholder: t("search_by_name"),
                     value: qParams.name || "",
                   },
                 ]}

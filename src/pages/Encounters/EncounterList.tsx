@@ -87,6 +87,7 @@ export function EncounterList({
     limit: 15,
     cacheBlacklist: ["name", "encounter_id", "external_identifier"],
   });
+  const { t } = useTranslation();
   const {
     status,
     encounter_class: encounterClass,
@@ -150,19 +151,19 @@ export function EncounterList({
     {
       key: "name",
       type: "text" as const,
-      placeholder: "Search by patient name",
+      placeholder: t("search_by_patient_name"),
       value: name || "",
     },
     {
       key: "encounter_id",
       type: "text" as const,
-      placeholder: "Search by encounter ID",
+      placeholder: t("search_by_encounter_id"),
       value: encounter_id || "",
     },
     {
       key: "external_identifier",
       type: "text" as const,
-      placeholder: "Search by external ID",
+      placeholder: t("search_by_external_id"),
       value: external_identifier || "",
     },
   ];
@@ -171,8 +172,6 @@ export function EncounterList({
     propEncounters ||
     queryEncounters?.results ||
     (queryEncounter ? [queryEncounter] : []);
-
-  const { t } = useTranslation();
 
   return (
     <Page
