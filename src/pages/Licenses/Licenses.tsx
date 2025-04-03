@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CopyIcon } from "lucide-react";
@@ -16,8 +17,8 @@ import { getPackageUrl } from "@/pages/Licenses/utils";
 import { LicensesSbom } from "@/types/license";
 
 const sbomUrlMap = {
-  frontend: "/sbom/care_fe-sbom.json",
-  backend: "/sbom/care-sbom.json",
+  frontend: `${careConfig.sbomBaseUrl}/care_fe/sbom.json`,
+  backend: `${careConfig.sbomBaseUrl}/care/sbom.json`,
 };
 
 export const LicensesPage = () => {
@@ -103,7 +104,7 @@ const SbomPackage = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="block rounded-md border p-2 transition-all duration-300 hover:shadow-lg">
+    <div className="block rounded-md border border-gray-200 p-2 transition-all duration-300 hover:shadow-lg">
       <a
         target="_blank"
         rel="noopener noreferrer"

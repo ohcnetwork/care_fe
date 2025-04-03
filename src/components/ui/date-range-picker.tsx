@@ -41,7 +41,7 @@ export function DateRangePicker({
               !date && "text-gray-500",
             )}
           >
-            <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-calender" className="mr-2 size-4" />
             {date?.from ? (
               date.to ? (
                 <>

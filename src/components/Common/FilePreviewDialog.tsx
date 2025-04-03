@@ -301,7 +301,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
+      <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 rounded-lg p-4 shadow-xl md:p-6 overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-sm text-gray-600">
             {t("file_preview")}
@@ -332,20 +332,17 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               </div>
               <div className="flex gap-4 mt-2 md:mt-0">
                 {downloadURL && downloadURL.length > 0 && (
-                  <Button variant="primary">
+                  <Button variant="primary" data-cy="file-preview-download">
                     <a
                       href={downloadURL}
                       className="text-white"
                       download={`${file_state.name}.${file_state.extension}`}
                     >
-                      <CareIcon icon="l-file-download" className="h-4 w-4" />
+                      <CareIcon icon="l-file-download" className="size-4" />
                       <span>{t("download")}</span>
                     </a>
                   </Button>
                 )}
-                <Button variant="outline" type="button" onClick={handleClose}>
-                  {t("close")}
-                </Button>
               </div>
             </div>
             <div className="flex flex-1 items-center justify-center">
@@ -357,7 +354,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   disabled={index <= 0}
                   aria-label="Previous file"
                 >
-                  <CareIcon icon="l-arrow-left" className="h-4 w-4" />
+                  <CareIcon icon="l-arrow-left" className="size-4" />
                 </Button>
               )}
               <div
@@ -431,7 +428,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   disabled={index >= uploadedFiles.length - 1}
                   aria-label={t("next_file")}
                 >
-                  <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+                  <CareIcon icon="l-arrow-right" className="size-4" />
                 </Button>
               )}
             </div>
@@ -478,18 +475,20 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         key={index}
                         onClick={button[2] as () => void}
                         className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
+                          "z-50 rounded bg-white/60 text-black backdrop-blur-sm transition hover:bg-white/70",
                           index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
                         )}
                         disabled={button[3] as boolean}
                       >
-                        {button[1] && (
-                          <CareIcon
-                            icon={button[1] as IconName}
-                            className="mr-2 text-lg"
-                          />
-                        )}
-                        {button[0] as string}
+                        <div>
+                          {button[1] && (
+                            <CareIcon
+                              icon={button[1] as IconName}
+                              className="text-lg"
+                            />
+                          )}
+                          <div>{button[0] as string}</div>
+                        </div>
                       </Button>
                     ))}
                   </>
@@ -524,7 +523,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         key={index}
                         onClick={button[2] as () => void}
                         className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
+                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
                           index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
                         )}
                         disabled={button[3] as boolean}

@@ -99,7 +99,7 @@ export default function DevicesList({ facilityId }: Props) {
             <DropdownMenuTrigger asChild>
               <Button variant="white" className="flex items-center gap-2">
                 {t("add_device")}
-                <CareIcon icon="l-angle-down" className="h-4 w-4" />
+                <CareIcon icon="l-angle-down" className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -112,7 +112,7 @@ export default function DevicesList({ facilityId }: Props) {
                     asChild
                   >
                     <Link href={`/devices/create?type=${pluginDevice.type}`}>
-                      <DeviceIcon className="h-4 w-4 mr-1" />
+                      <DeviceIcon className="size-4 mr-1" />
                       {pluginDevice.type}
                     </Link>
                   </DropdownMenuItem>
@@ -120,7 +120,7 @@ export default function DevicesList({ facilityId }: Props) {
               })}
               <DropdownMenuItem asChild>
                 <Link href="/devices/create">
-                  <CubeIcon className="h-4 w-4 mr-1" />
+                  <CubeIcon className="size-4 mr-1" />
                   {t("other")}
                 </Link>
               </DropdownMenuItem>
@@ -129,7 +129,7 @@ export default function DevicesList({ facilityId }: Props) {
         ) : (
           <Button variant="white" asChild>
             <Link href="/devices/create">
-              <PlusIcon className="h-4 w-4" />
+              <PlusIcon className="size-4" />
               {t("add_device")}
             </Link>
           </Button>
@@ -138,7 +138,7 @@ export default function DevicesList({ facilityId }: Props) {
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
             placeholder={t("search_devices")}
             value={qParams.search_text || ""}
@@ -157,7 +157,7 @@ export default function DevicesList({ facilityId }: Props) {
               ) : (
                 t("filter_by_type")
               )}
-              <CaretSortIcon className="ml-2 h-4 w-4" />
+              <CaretSortIcon className="ml-2 size-4" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[200px] p-2">
@@ -179,7 +179,7 @@ export default function DevicesList({ facilityId }: Props) {
                     className="w-full capitalize justify-start font-normal"
                     onClick={() => handleCareTypeChange(device.type)}
                   >
-                    <DeviceIcon className="mr-2 h-4 w-4" />
+                    <DeviceIcon className="mr-2 size-4" />
                     {device.type}
                   </Button>
                 );

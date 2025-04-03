@@ -100,7 +100,7 @@ export const EncounterDevicesTab = ({ encounter }: EncounterTabProps) => {
                               <div>
                                 <div className="flex items-center gap-1 text-gray-900 group-hover:text-primary-600 group-hover:underline">
                                   <span>{device.registered_name}</span>
-                                  <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100" />
+                                  <ExternalLink className="size-3 opacity-70 group-hover:opacity-100" />
                                 </div>
                                 {device.user_friendly_name && (
                                   <div className="text-sm text-gray-500">

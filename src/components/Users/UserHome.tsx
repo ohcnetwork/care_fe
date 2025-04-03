@@ -106,7 +106,6 @@ export default function UserHome(props: UserHomeProps) {
     <>
       <Page
         title={formatName(userData) || userData.username || t("manage_user")}
-        focusOnLoad={true}
         hideTitleOnPage
       >
         {
