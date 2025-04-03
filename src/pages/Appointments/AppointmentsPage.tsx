@@ -237,14 +237,16 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   );
 }
 
-export default function AppointmentsPage(props: { facilityId?: string }) {
+export default function AppointmentsPage({
+  facilityId,
+}: {
+  facilityId: string;
+}) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
     limit: 15,
   });
-
-  const facilityId = props.facilityId ?? authUser.home_facility!;
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
 
