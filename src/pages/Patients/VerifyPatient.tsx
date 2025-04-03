@@ -32,7 +32,6 @@ import { getPermissions } from "@/common/Permissions";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter } from "@/types/emr/encounter";
@@ -57,7 +56,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
   const {
     mutate: verifyPatient,
     data: patientData,
-    isPending: patientLoading,
+    isPending: isVerifyingPatient,
     isError,
   } = useMutation({
     mutationFn: mutate(routes.patient.search_retrieve),
@@ -69,9 +68,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
     },
   });
 
-  const { data: encounters, isLoading: encounterLoading } = useQuery<
-    PaginatedResponse<Encounter>
-  >({
+  const { data: encounters, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounters", patientData?.id],
     queryFn: query(routes.encounter.list, {
       queryParams: {
@@ -92,7 +89,8 @@ export default function VerifyPatient(props: { facilityId: string }) {
       });
     }
   }, [phone_number, year_of_birth, partial_id, verifyPatient]);
-  if (patientLoading || facilityLoading || encounterLoading) {
+
+  if (isVerifyingPatient || facilityLoading || encounterLoading) {
     return (
       <div className="space-y-4">
         <CardListSkeleton count={1} />
