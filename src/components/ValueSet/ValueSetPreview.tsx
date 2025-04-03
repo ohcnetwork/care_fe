@@ -26,7 +26,7 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const [search, setSearch] = useState("");
 
   const { data: searchQuery, isFetching } = useQuery({
-    queryKey: ["valueset", "preview_search", search, valueset],
+    queryKey: ["valueset", "preview_search", search, valueset.compose],
     queryFn: query.debounced(valuesetApi.preview_search, {
       queryParams: { search, count: 20 },
       body: {
