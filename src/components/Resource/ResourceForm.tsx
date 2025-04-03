@@ -284,6 +284,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           </FormLabel>
                           <FormControl>
                             <Autocomplete
+                              data-cy="select-facility"
                               options={mergeAutocompleteOptions(
                                 facilityOptions ?? [],
                                 field.value
@@ -364,7 +365,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger data-cy="select-status-dropdown">
                                 <SelectValue placeholder={t("select_status")} />
                               </SelectTrigger>
                             </FormControl>
@@ -392,7 +393,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger data-cy="select-category-dropdown">
                                 <SelectValue
                                   placeholder={t("category_description")}
                                 />
@@ -413,7 +414,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         </FormItem>
                       )}
                     />
-
                     {id && (
                       <FormField
                         control={form.control}
@@ -422,12 +422,14 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           <FormItem>
                             <FormLabel required>{t("assigned_to")}</FormLabel>
                             <FormControl>
-                              <UserSelector
-                                selected={assignedToUser}
-                                onChange={handleUserChange}
-                                placeholder={t("search_users")}
-                                noOptionsMessage={t("no_users_found")}
-                              />
+                              <div data-cy="select-assigned-user">
+                                <UserSelector
+                                  selected={assignedToUser}
+                                  onChange={handleUserChange}
+                                  placeholder={t("search_users")}
+                                  noOptionsMessage={t("no_users_found")}
+                                />
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -456,6 +458,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         <FormLabel required>{t("request_title")}</FormLabel>
                         <FormControl>
                           <Input
+                            data-cy="title-input"
                             {...field}
                             placeholder={t("request_title_placeholder")}
                             onChange={(value) => field.onChange(value)}
@@ -478,6 +481,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         <FormControl>
                           <Textarea
                             {...field}
+                            data-cy="reason-input"
                             placeholder={t("request_reason_placeholder")}
                             onChange={(value) => field.onChange(value)}
                           />
@@ -508,6 +512,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       variant="outline"
                       onClick={fillMyDetails}
                       className="shrink-0"
+                      data-cy="fill_my_details_button"
                     >
                       <CareIcon icon="l-user" className="mr-2 size-4" />
                       {t("fill_my_details")}
@@ -525,6 +530,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                             <Input
                               {...field}
                               onChange={(value) => field.onChange(value)}
+                              data-cy="contact_person"
                             />
                           </FormControl>
                           <FormDescription>
@@ -544,6 +550,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           <FormControl>
                             <PhoneInput
                               {...field}
+                              data-cy="contact_person_phone"
                               onChange={(value) => field.onChange(value)}
                             />
                           </FormControl>
