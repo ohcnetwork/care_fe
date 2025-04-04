@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "raviger";
-import React, { useState } from "react";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
@@ -32,12 +33,20 @@ import { LocationCard } from "./components/LocationCard";
 interface Props {
   id: string;
   facilityId: string;
+  isNested?: boolean;
+  onBackToParent?: () => void;
+  onSelectLocation?: (location: LocationList) => void;
 }
 
-export default function LocationView({ id, facilityId }: Props) {
+export default function LocationView({
+  id,
+  facilityId,
+  isNested,
+  onBackToParent,
+  onSelectLocation,
+}: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
@@ -46,12 +55,13 @@ export default function LocationView({ id, facilityId }: Props) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const limit = 12;
 
-  const { data: location } = useQuery({
+  const { data: location, isLoading: isLocationLoading } = useQuery({
     queryKey: ["location", facilityId, id],
     queryFn: query(locationApi.get, {
       pathParams: { facility_id: facilityId, id },
     }),
   });
+
   const { data: locationOrganizations } = useQuery({
     queryKey: ["location", id, "organizations"],
     queryFn: query(locationApi.getOrganizations, {
@@ -88,29 +98,52 @@ export default function LocationView({ id, facilityId }: Props) {
     setIsSheetOpen(true);
   };
 
+  const handleViewLocation = (location: LocationList) => {
+    if (isNested && onSelectLocation) {
+      onSelectLocation(location);
+    } else {
+      navigate(`/facility/${facilityId}/settings/location/${location.id}`);
+    }
+  };
+
   const handleSheetClose = () => {
     setIsSheetOpen(false);
     setSelectedLocation(null);
   };
 
-  if (!location)
-    return (
-      <div className="p-4">
-        <CardGridSkeleton count={6} />
-      </div>
-    );
-  const generateBreadcrumbs = (location: any) => {
+  const handleBreadcrumbClick = (breadcrumbId: string) => {
+    if (!isNested) return;
+
+    if (breadcrumbId === id) return;
+
+    if (onSelectLocation) {
+      const locationForNavigation = { id: breadcrumbId } as LocationList;
+      onSelectLocation(locationForNavigation);
+    } else if (onBackToParent) {
+      onBackToParent();
+    }
+  };
+
+  const generateBreadcrumbs = (locationData: any) => {
     const breadcrumbs = [];
-    let current = location;
-    while (current?.id) {
+    let current = locationData;
+
+    breadcrumbs.unshift({
+      name: current.name,
+      id: current.id,
+    });
+
+    while (current?.parent?.id) {
       breadcrumbs.unshift({
-        name: current.name,
-        id: current.id,
+        name: current.parent.name || "",
+        id: current.parent.id,
       });
       current = current.parent;
     }
+
     return breadcrumbs;
   };
+
   const breadcrumbs = location ? generateBreadcrumbs(location) : [];
 
   return (
@@ -119,56 +152,84 @@ export default function LocationView({ id, facilityId }: Props) {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink
-              asChild
-              className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+              asChild={!isNested}
+              className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
+              onClick={isNested && onBackToParent ? onBackToParent : undefined}
             >
-              <Link href={`/locations`}>{t("home")}</Link>
+              {isNested ? (
+                <span>{t("home")}</span>
+              ) : (
+                <Link href={`/facility/${facilityId}/settings/locations`}>
+                  {t("home")}
+                </Link>
+              )}
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           {breadcrumbs.map((breadcrumb, index) => (
-            <React.Fragment key={breadcrumb.id}>
-              <BreadcrumbItem>
-                {index === breadcrumbs.length - 1 ? (
-                  <span className="font-semibold text-gray-900">
-                    {breadcrumb.name}
-                  </span>
-                ) : (
-                  <>
-                    <BreadcrumbLink
-                      asChild
-                      className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
-                    >
-                      <Link href={`${breadcrumb.id}`}>{breadcrumb.name}</Link>
-                    </BreadcrumbLink>
-                  </>
-                )}
-              </BreadcrumbItem>
-              {index != breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-            </React.Fragment>
+            <BreadcrumbItem key={breadcrumb.id}>
+              {index === breadcrumbs.length - 1 ? (
+                <span className="font-semibold text-gray-900">
+                  {breadcrumb.name}
+                </span>
+              ) : (
+                <>
+                  <BreadcrumbLink
+                    asChild={!isNested}
+                    className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
+                    onClick={
+                      isNested
+                        ? () => handleBreadcrumbClick(breadcrumb.id)
+                        : undefined
+                    }
+                  >
+                    {isNested ? (
+                      <span>{breadcrumb.name}</span>
+                    ) : (
+                      <Link
+                        href={`/facility/${facilityId}/settings/location/${breadcrumb.id}`}
+                      >
+                        {breadcrumb.name}
+                      </Link>
+                    )}
+                  </BreadcrumbLink>
+                  <BreadcrumbSeparator />
+                </>
+              )}
+            </BreadcrumbItem>
           ))}
         </BreadcrumbList>
       </Breadcrumb>
 
-      <Page title={location?.name || t("location")}>
-        <div className="space-y-6 ml-3 md:ml-0">
+      <Page hideTitleOnPage title={location?.name || t("location")}>
+        <div className="space-y-6">
           <div className="flex flex-col justify-between items-start gap-4">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg font-semibold">{t("locations")}</h2>
-              <Badge variant="outline">
-                {t(`location_form__${location?.form}`)}
-              </Badge>
-              <Badge
-                variant={
-                  location?.status === "active" ? "default" : "secondary"
-                }
-                className="capitalize"
-              >
-                {location?.status}
-              </Badge>
+              {isLocationLoading ? (
+                <>
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-24" />
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl font-semibold">{location?.name}</h2>
+                  <Badge variant="outline">
+                    {t(`location_form__${location?.form}`)}
+                  </Badge>
+                  <Badge
+                    variant={
+                      location?.status === "active" ? "default" : "secondary"
+                    }
+                    className="capitalize"
+                  >
+                    {location?.status}
+                  </Badge>
+                </>
+              )}
             </div>
-            <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
-              <div className="w-full md:w-72">
+            <div className="flex flex-col xl:flex-row justify-between items-start w-full gap-4">
+              <div className="w-full xl:w-72">
                 <Input
                   placeholder={t("search_by_name")}
                   value={searchQuery}
@@ -179,18 +240,21 @@ export default function LocationView({ id, facilityId }: Props) {
                   className="w-full"
                 />
               </div>
-              <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-                {location && "mode" in location && location.mode === "kind" && (
-                  <Button
-                    variant="primary"
-                    onClick={handleAddLocation}
-                    className="w-full md:w-auto"
-                  >
-                    <CareIcon icon="l-plus" className="size-4 mr-2" />
-                    {t("add_location")}
-                  </Button>
-                )}
-                {locationOrganizations && (
+              <div className="flex flex-col lg:flex-row gap-2 w-full lg:w-auto justify-evenly">
+                {!isLocationLoading &&
+                  location &&
+                  "mode" in location &&
+                  location.mode === "kind" && (
+                    <Button
+                      variant="primary"
+                      onClick={handleAddLocation}
+                      className="w-full sm:w-auto"
+                    >
+                      <CareIcon icon="l-plus" className="size-4 mr-2" />
+                      {t("add_location")}
+                    </Button>
+                  )}
+                {!isLocationLoading && locationOrganizations && (
                   <LinkDepartmentsSheet
                     entityType="location"
                     entityId={id}
@@ -212,54 +276,58 @@ export default function LocationView({ id, facilityId }: Props) {
               </div>
             </div>
           </div>
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <CardGridSkeleton count={6} />
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {children?.results?.length ? (
-                  children.results.map((childLocation: LocationList) => (
-                    <LocationCard
-                      key={childLocation.id}
-                      location={childLocation}
-                      onEdit={handleEditLocation}
-                      facilityId={facilityId}
-                    />
-                  ))
-                ) : (
-                  <Card className="col-span-full">
-                    <CardContent className="p-6 text-center text-gray-500">
-                      {searchQuery
-                        ? t("no_locations_found")
-                        : t("no_child_locations_found")}
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-              {children && children.count > limit && (
-                <div className="flex justify-center">
-                  <Pagination
-                    data={{ totalCount: children.count }}
-                    onChange={(page, _) => setPage(page)}
-                    defaultPerPage={limit}
-                    cPage={page}
-                  />
-                </div>
-              )}
-            </div>
-          )}
 
-          <LocationSheet
-            open={isSheetOpen}
-            onOpenChange={handleSheetClose}
-            facilityId={facilityId}
-            location={selectedLocation || undefined}
-            parentId={id}
-          />
+          <div className="space-y-4">
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
+                <CardGridSkeleton count={2} />
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
+                  {children?.results?.length ? (
+                    children.results.map((child) => (
+                      <LocationCard
+                        key={child.id}
+                        location={child}
+                        onEdit={handleEditLocation}
+                        onView={handleViewLocation}
+                        facilityId={facilityId}
+                      />
+                    ))
+                  ) : (
+                    <Card className="col-span-full">
+                      <CardContent className="p-4 text-center text-gray-500">
+                        {searchQuery
+                          ? t("no_locations_found")
+                          : t("no_child_locations_found")}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+                {children && children.count > limit && (
+                  <div className="flex justify-center mt-4">
+                    <Pagination
+                      data={{ totalCount: children.count }}
+                      onChange={setPage}
+                      defaultPerPage={limit}
+                      cPage={page}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </Page>
+
+      <LocationSheet
+        open={isSheetOpen}
+        onOpenChange={handleSheetClose}
+        facilityId={facilityId}
+        location={selectedLocation || undefined}
+        parentId={id}
+      />
     </>
   );
 }
