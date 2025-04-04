@@ -300,16 +300,13 @@ export default function TreatmentSummary({
               {encounter.care_team[0] && (
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">
-                    {t("primary_treating_doctor")}
+                    {encounter.care_team[0].role?.display}
                   </span>
                   <span className="text-gray-600">:</span>
                   <span className="flex flex-row">
                     <div className="flex flex-col">
                       <div className="font-semibold">
                         {formatName(encounter.care_team[0].member)}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {encounter.care_team[0].role?.display}
                       </div>
                     </div>
                   </span>
