@@ -18,7 +18,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import { UserFacilityModel } from "@/components/Users/models";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { formatName } from "@/Utils/utils";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
@@ -60,7 +60,7 @@ export default function UserDashboard() {
     availableTabs.length > 0 ? availableTabs[0] : null,
   );
 
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
