@@ -75,7 +75,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         id: z.string(),
         name: z.string(),
       })
-      .nullable()
       .refine((val) => val !== null, {
         message: t("assigned_facility_required"),
       }),
