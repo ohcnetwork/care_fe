@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, Hospital } from "lucide-react";
+import { ChevronDown, ChevronRight, Hospital, Pencil } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ReactFlow, {
@@ -83,11 +83,8 @@ const CustomNode = ({ data }: NodeProps) => {
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[97%] h-full border-2 border-gray-200 rounded-lg bg-white" />
         </>
       )}
-      <div className="relative w-60 bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-200">
-        <div
-          className="p-4 cursor-pointer hover:bg-gray-50"
-          onClick={handleEdit}
-        >
+      <div className="relative w-65 bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-200">
+        <div className="p-4 pb-2 cursor-pointer" onClick={handleEdit}>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-md shrink-0">
               <Icon className="size-5" />
@@ -109,6 +106,7 @@ const CustomNode = ({ data }: NodeProps) => {
               </TooltipProvider>
               <p className="text-sm text-gray-500 truncate">{data.type}</p>
             </div>
+            {data.form !== "facility" && <Pencil className="size-4" />}
           </div>
         </div>
         {hasChildren && (
@@ -122,7 +120,7 @@ const CustomNode = ({ data }: NodeProps) => {
               className="h-8 px-2 hover:bg-gray-100 transition-colors"
               onClick={handleToggle}
             >
-              <span className="text-sm mr-2 text-gray-600">
+              <span className="text-sm text-gray-600">
                 {data.childCount} {t("level_inside")}
               </span>
               {data.form !== "facility" &&
