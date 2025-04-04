@@ -64,7 +64,7 @@ export function LocationSearch({
       <PopoverTrigger asChild disabled={disabled}>
         <div
           className={cn(
-            "w-full h-9 px-3 rounded-lg border border-gray-300 text-sm shadow-sm transition-colors bg-white flex items-center justify-between cursor-pointer text-gray-950",
+            "w-full h-9 px-3 rounded-lg border border-gray-200 text-sm shadow-sm transition-colors bg-white flex items-center justify-between cursor-pointer text-gray-950",
             className,
           )}
           role="combobox"
@@ -92,7 +92,7 @@ export function LocationSearch({
           <CommandInput
             placeholder="Search locations..."
             value={search}
-            className="outline-none border-none ring-0 shadow-none"
+            className="outline-hidden border-none ring-0 shadow-none"
             onValueChange={setSearch}
           />
           <CommandEmpty>{t("no_locations_found")}</CommandEmpty>

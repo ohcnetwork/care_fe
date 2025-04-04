@@ -47,7 +47,7 @@ function EmptyState() {
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
-        <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
+        <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">
         {t("no_questionnaires_found")}
@@ -78,13 +78,16 @@ const RenderCard = ({
           {questionnaireList.map((questionnaire: QuestionnaireDetail) => (
             <Card
               key={questionnaire.id}
-              className="overflow-hidden bg-white rounded-lg cursor-pointer transition-shadow transform hover:shadow-lg"
+              className="overflow-hidden bg-white rounded-lg cursor-pointer"
               onClick={() =>
                 navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
               }
             >
               <CardContent className="p-6 relative flex flex-col">
-                <div className="absolute top-4 right-4">
+                <div className="flex flex-row gap-2 justify-between items-center mb-4 border-b pb-2">
+                  <p className="mt-2 text-l text-left font-bold text-gray-900 line-clamp-1 text-ellipsis ">
+                    {questionnaire.title}
+                  </p>
                   <Badge
                     className={
                       {
@@ -99,44 +102,23 @@ const RenderCard = ({
                     {t(questionnaire.status)}
                   </Badge>
                 </div>
-
-                <div className="mb-4 border-b pb-2">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("title")}
-                  </h3>
-                  {questionnaire.title && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="w-full">
-                          <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
-                            {questionnaire.title}
-                          </p>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-black text-white z-40">
-                          {questionnaire.title}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-
-                <div className="mb-4">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("slug")}
-                  </h3>
-                  <p className="text-sm text-gray-900 truncate">
-                    {questionnaire.slug}
-                  </p>
-                </div>
-
-                <div className="mb-4 flex-1">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("description")}
-                  </h3>
-                  <p className="text-sm text-gray-900 line-clamp-2">
-                    {questionnaire.description}
-                  </p>
-                </div>
+                {questionnaire.description?.trim() ? (
+                  <div className="mb-4 flex-1">
+                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      {t("description")}
+                    </h3>
+                    <p className="text-sm text-gray-900 line-clamp-2">
+                      {questionnaire.description}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mb-4 flex-1">
+                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      {t("description")}
+                    </h3>
+                    <p className="text-2xl font-light text-gray-500">-</p>
+                  </div>
+                )}
 
                 <div className="mt-4 flex justify-end">
                   <Button
@@ -150,7 +132,7 @@ const RenderCard = ({
                     }}
                     className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
                   >
-                    <EyeIcon className="w-4 h-4 mr-1" />
+                    <EyeIcon className="size-4 mr-1" />
                     {t("View")}
                   </Button>
                 </div>
@@ -172,7 +154,7 @@ const RenderTable = ({
 }) => {
   const navigate = useNavigate();
   return (
-    <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow overflow-x-auto">
+    <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow-sm overflow-x-auto">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : questionnaireList.length === 0 ? (
@@ -224,7 +206,7 @@ const RenderTable = ({
                       size="sm"
                       className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
                     >
-                      <EyeIcon className="w-4 h-4 mr-0" />
+                      <EyeIcon className="size-4 mr-0" />
                       {t("view")}
                     </Button>
                   </div>
@@ -278,21 +260,21 @@ export function QuestionnaireList() {
             >
               <TabsList>
                 <TabsTrigger value="active">
-                  <FileCheckIcon className="w-4 h-4 mr-2 " />
+                  <FileCheckIcon className="size-4 mr-2 " />
                   {t("active")}
                 </TabsTrigger>
                 <TabsTrigger value="draft">
-                  <NotepadTextDashedIcon className="w-4 h-4 mr-2" />
+                  <NotepadTextDashedIcon className="size-4 mr-2" />
                   {t("draft")}
                 </TabsTrigger>
                 <TabsTrigger value="retired">
-                  <ArchiveIcon className="w-4 h-4 mr-2" />
+                  <ArchiveIcon className="size-4 mr-2" />
                   {t("retired")}
                 </TabsTrigger>
               </TabsList>
             </Tabs>
             <div className="relative md:min-w-80 w-full">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
               <Input
                 placeholder={t("search_questionnaires")}
                 className="pl-10"
@@ -304,7 +286,7 @@ export function QuestionnaireList() {
 
           <div className="flex items-center md:self-start">
             <Button onClick={() => navigate("/admin/questionnaire/create")}>
-              <PlusIcon className="w-4 h-4" />
+              <PlusIcon className="size-4" />
               {t("create_questionnaire")}
             </Button>
           </div>

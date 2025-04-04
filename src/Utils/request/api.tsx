@@ -8,11 +8,7 @@ import {
   CreateFileResponse,
   FileUploadModel,
 } from "@/components/Patient/models";
-import {
-  UpdatePasswordForm,
-  UserAssignedModel,
-  UserModel,
-} from "@/components/Users/models";
+import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
@@ -31,7 +27,6 @@ import {
 } from "@/types/facility/facility";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
-import { RoleResponse } from "@/types/organization/organization";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,
@@ -149,13 +144,13 @@ const routes = {
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
-    TRes: Type<UserModel>(),
+    TRes: Type<AuthUserModel>(),
   },
 
   deleteProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
     method: "DELETE",
-    TRes: Type<UserModel>(),
+    TRes: Type<AuthUserModel>(),
     TBody: Type<void>(),
   },
 
@@ -199,15 +194,7 @@ const routes = {
 
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
-    TRes: Type<PaginatedResponse<UserAssignedModel>>(),
-  },
-
-  // Download Api
-  deleteFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<void>(),
+    TRes: Type<PaginatedResponse<UserBase>>(),
   },
 
   // Patient
@@ -404,15 +391,6 @@ const routes = {
     path: "/api/v1/patient/{patientId}/observation/analyse/",
     method: "POST",
     TRes: Type<ObservationAnalyzeResponse>(),
-  },
-
-  // Role Routes
-  role: {
-    list: {
-      path: "/api/v1/role/",
-      method: "GET",
-      TRes: {} as RoleResponse,
-    },
   },
 
   // Notes Routes

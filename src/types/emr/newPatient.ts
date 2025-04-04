@@ -26,7 +26,7 @@ export interface Patient {
   pincode: string;
   date_of_birth: string;
   age?: string;
-  death_datetime?: string;
+  deceased_datetime?: string;
   blood_group?: BloodGroupChoices;
   year_of_birth: number;
   created_date: string;
