@@ -781,7 +781,15 @@ export function LocationSheet({
             </SheetTitle>
           </SheetHeader>
 
-          <Tabs defaultValue="assign" className="mt-2">
+          <Tabs
+            defaultValue="assign"
+            className="mt-2"
+            onValueChange={() => {
+              setSearchTerm("");
+              setSelectedLocation(null);
+              setLocationHistory([]);
+            }}
+          >
             <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
               <TabsTrigger
                 value="assign"
