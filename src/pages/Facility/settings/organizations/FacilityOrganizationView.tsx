@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -135,8 +135,8 @@ export default function FacilityOrganizationView({
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <CardGridSkeleton count={4} />
+        <div className="grid grid-cols-1  gap-3">
+          <CardListSkeleton count={4} />
         </div>
       ) : (
         <div className="space-y-6">
