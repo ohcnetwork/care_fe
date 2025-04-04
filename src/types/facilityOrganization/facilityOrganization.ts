@@ -32,11 +32,7 @@ export interface FacilityOrganizationCreate {
   parent?: string;
 }
 
-export interface FacilityOrganizationEdit {
-  name: string;
-  description?: string;
-  org_type: org_type;
-  parent?: string;
+export interface FacilityOrganizationEdit extends FacilityOrganizationCreate {
   facility: string;
 }
 
