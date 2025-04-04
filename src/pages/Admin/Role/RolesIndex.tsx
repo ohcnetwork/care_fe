@@ -82,23 +82,17 @@ export function RolesIndex() {
   return (
     <Page title="Roles">
       <p className="text-gray-600">{t("manage_and_view_roles")}</p>
-
-      <div
-        className={`overflow-auto mt-4`}
-        style={{
-          ...tableDimensions,
-        }}
-      >
-        <Table>
+      <div className="mt-4 overflow-hidden">
+        <Table className="table-fixed w-full">
           <TableHeader>
             <TableRow>
-              <TableHead className="md:sticky bg-gray-50 left-0 z-20 whitespace-nowrap">
+              <TableHead className="md:sticky bg-gray-50 left-0 z-20 whitespace-nowrap w-[250px] min-w-[250px] max-w-[250px]">
                 {t("permission")}
               </TableHead>
               {roles.map((role) => (
                 <TableHead
                   key={role.id}
-                  className="whitespace-nowrap h-[120px] max-w-[30px] min-w-[30px] sticky top-0 z-10 "
+                  className="sticky top-0 z-10 w-[60px] min-w-[60px] max-w-[60px] h-[120px]"
                 >
                   <div className="text-sm transform -rotate-90 w-[100px] px-2 origin-center -translate-x-1/3">
                     {role.name}
@@ -107,6 +101,16 @@ export function RolesIndex() {
               ))}
             </TableRow>
           </TableHeader>
+        </Table>
+      </div>
+      <div
+        className="overflow-auto"
+        style={{
+          height: tableDimensions.height,
+          width: tableDimensions.width,
+        }}
+      >
+        <Table>
           <TableBody>
             {allPermissions.map((permission) => (
               <TableRow key={permission.slug}>
