@@ -23,7 +23,9 @@ import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
+import { OrgSelectorPopover } from "./ManageQuestionnaireOrganizationsSheet";
 import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
+import { TagSelector as TagSelectorPopover } from "./ManageQuestionnaireTagsSheet";
 
 interface Organization {
   id: string;
@@ -217,6 +219,7 @@ function OrganizationSelector({
       {selection.error && (
         <p className="text-sm text-red-500">{selection.error}</p>
       )}
+
       <Autocomplete
         options={(selection.available?.results ?? []).map((org) => ({
           label: org.name,
@@ -232,6 +235,17 @@ function OrganizationSelector({
         placeholder={t("select_organizations")}
         isLoading={selection.isLoading}
         noOptionsMessage={t("no_organizations_found")}
+      />
+      <OrgSelectorPopover
+        selectedIds={selection.selectedOrgs.map((org) => org.id)}
+        onToggle={(value) => {
+          selection.onToggle(value);
+          if (selection.error) selection.setError(undefined);
+        }}
+        searchQuery={selection.searchQuery}
+        onSearchChange={selection.setSearchQuery}
+        isLoading={selection.isLoading}
+        organizations={selection.available}
       />
     </div>
   );
@@ -314,6 +328,14 @@ function TagSelector({
         placeholder={t("select_tags")}
         isLoading={selection.isLoading}
         noOptionsMessage={t("no_tags_found")}
+      />
+      <TagSelectorPopover
+        selectedTags={selection.selectedTags}
+        onToggle={selection.onToggle}
+        searchQuery={selection.searchQuery}
+        onSearchChange={selection.setSearchQuery}
+        isLoading={selection.isLoading}
+        tagOptions={selection.available}
       />
 
       {!id && (
