@@ -71,6 +71,8 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   // { id: 1600, text: "District War Room" },
   { id: 3000, text: "Non Governmental Organization" },
   { id: 4000, text: "Community Based Organization" },
+  { id: 5000, text: "Taluk Head Quarters Hospital" },
+  { id: 6000, text: "General Hospital" },
 ];
 
 export const GENDER_TYPES = [
