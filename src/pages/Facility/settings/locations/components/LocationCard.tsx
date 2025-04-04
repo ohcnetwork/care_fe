@@ -30,22 +30,41 @@ interface Props {
   location: LocationList;
   onEdit?: (location: LocationList) => void;
   onView?: (location: LocationList) => void;
+  onMoveUp?: (location: LocationList) => void;
+  onMoveDown?: (location: LocationList) => void;
   className?: string;
   facilityId: string;
+  index?: number;
+  totalCount?: number;
+  isFirstPage?: boolean;
+  isLastPage?: boolean;
 }
 
 export function LocationCard({
   location,
   onEdit,
   onView,
+  onMoveUp,
+  onMoveDown,
   className,
   facilityId,
+  index = 0,
+  totalCount = 0,
+  isFirstPage = true,
+  isLastPage = true,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons] ||
     Folder;
+
+  const isFirst = index === 0;
+  const isLast = totalCount > 0 && index === totalCount - 1;
+
+  // Only hide buttons if we're at absolute boundaries
+  const hideUpButton = isFirstPage && isFirst;
+  const hideDownButton = isLastPage && isLast;
 
   const { mutate: removeLocation } = useMutation({
     mutationFn: mutate(locationApi.delete, {
@@ -117,37 +136,87 @@ export function LocationCard({
         </div>
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
-          <div className="flex justify-between">
-            {!location.has_children && !location.current_encounter && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="white">
-                    <CareIcon icon="l-trash" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t("remove_location", { name: location.name })}
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("are_you_sure_want_to_delete", {
-                        name: location.name,
-                      })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => removeLocation({})}
-                      className={buttonVariants({ variant: "destructive" })}
-                    >
-                      {t("remove")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              {!location.has_children && !location.current_encounter && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="white">
+                      <CareIcon icon="l-trash" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t("remove_location", { name: location.name })}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("are_you_sure_want_to_delete", {
+                          name: location.name,
+                        })}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => removeLocation({})}
+                        className={buttonVariants({ variant: "destructive" })}
+                      >
+                        {t("remove")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+              {onMoveUp && !hideUpButton && (
+                <Button
+                  variant="white"
+                  onClick={() => onMoveUp(location)}
+                  title={
+                    isFirst && !isFirstPage
+                      ? t("move_to_previous_page")
+                      : t("move_up")
+                  }
+                  aria-label={
+                    isFirst && !isFirstPage
+                      ? t("move_to_previous_page")
+                      : t("move_up")
+                  }
+                  className="relative"
+                >
+                  <span className="block xl:hidden">
+                    <CareIcon icon="l-arrow-up" />
+                  </span>
+                  <span className="hidden xl:block">
+                    <CareIcon icon="l-arrow-left" />
+                  </span>
+                </Button>
+              )}
+              {onMoveDown && !hideDownButton && (
+                <Button
+                  variant="white"
+                  onClick={() => onMoveDown(location)}
+                  title={
+                    isLast && !isLastPage
+                      ? t("move_to_next_page")
+                      : t("move_down")
+                  }
+                  aria-label={
+                    isLast && !isLastPage
+                      ? t("move_to_next_page")
+                      : t("move_down")
+                  }
+                  className="relative"
+                >
+                  <span className="block xl:hidden">
+                    <CareIcon icon="l-arrow-down" />
+                  </span>
+                  <span className="hidden xl:block">
+                    <CareIcon icon="l-arrow-right" />
+                  </span>
+                </Button>
+              )}
+            </div>
             <div className="ml-auto">
               <Button
                 variant="outline"

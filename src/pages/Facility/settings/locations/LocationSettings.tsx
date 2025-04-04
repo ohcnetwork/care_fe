@@ -1,7 +1,9 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence } from "framer-motion";
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -17,7 +19,9 @@ import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { handleLocationReorder } from "@/Utils/locationOrder";
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
@@ -27,7 +31,7 @@ import locationApi from "@/types/location/locationApi";
 import LocationMap from "./LocationMap";
 import LocationSheet from "./LocationSheet";
 import LocationView from "./LocationView";
-import { LocationCard } from "./components/LocationCard";
+import { AnimatedLocationCard } from "./components/AnimatedLocationCard";
 
 interface LocationSettingsProps {
   facilityId: string;
@@ -75,7 +79,10 @@ export default function LocationSettings({
     queryKey: ["locations", facilityId, "all"],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode: "kind" },
+      queryParams: {
+        mode: "kind",
+        ordering: "sort_index",
+      },
     }),
   });
 
@@ -104,6 +111,7 @@ export default function LocationSettings({
         offset: (currentPage - 1) * ITEMS_PER_PAGE,
         name: searchQuery || undefined,
         mode: locationId ? undefined : "kind",
+        ordering: "sort_index",
       },
     }),
     enabled: true,
@@ -115,9 +123,67 @@ export default function LocationSettings({
       pathParams: { facility_id: facilityId },
       queryParams: {
         limit: 1000,
+        ordering: "sort_index",
       },
     }),
     enabled: activeTab === "map",
+  });
+
+  const { mutate: updateLocationOrder } = useMutation({
+    mutationFn: (params: {
+      locations: { locationId: string; data: any }[];
+      previousData?: any;
+      onSuccess?: () => void;
+    }) => {
+      const batchRequests = params.locations.map(
+        ({ locationId, data }, index) => ({
+          url: locationApi.update.path
+            .replace("{facility_id}", facilityId)
+            .replace("{id}", locationId),
+          method: locationApi.update.method,
+          reference_id: `location_${index}`,
+          body: {
+            ...data,
+            id: locationId,
+          },
+        }),
+      );
+
+      return mutate(routes.batchRequest)({
+        requests: batchRequests,
+      });
+    },
+    onSuccess: (data, variables) => {
+      // Only invalidate queries if there's no custom onSuccess handler
+      if (!variables.onSuccess) {
+        queryClient.invalidateQueries({
+          queryKey: ["locations", facilityId, "children", locationId],
+        });
+        toast.success(t("location_order_updated"));
+      } else {
+        // Call the custom onSuccess handler
+        variables.onSuccess();
+        toast.success(t("location_order_updated"));
+      }
+    },
+    onError: (error, variables) => {
+      // Revert the optimistic update if API call fails
+      if (variables.previousData) {
+        queryClient.setQueryData(
+          [
+            "locations",
+            facilityId,
+            "children",
+            locationId,
+            currentPage,
+            searchQuery,
+          ],
+          variables.previousData,
+        );
+      }
+      toast.error(t("failed_to_update_order"));
+      console.error("Failed to update location order:", error);
+    },
   });
 
   const handleLocationSelect = useCallback(
@@ -167,6 +233,54 @@ export default function LocationSettings({
       });
     }
   }, [facilityId, queryClient, locationId]);
+
+  const handleMove = useCallback(
+    (location: LocationListType, direction: "up" | "down") => {
+      if (!childLocations?.results) return;
+
+      handleLocationReorder({
+        location,
+        locations: childLocations.results,
+        queryClient,
+        queryKey: [
+          "locations",
+          facilityId,
+          "children",
+          locationId,
+          currentPage,
+          searchQuery,
+        ],
+        previousData: childLocations,
+        direction,
+        updateMutation: updateLocationOrder,
+        currentPage,
+        setPage: setCurrentPage,
+        isFirstPage: currentPage === 1,
+        isLastPage: childLocations.count <= currentPage * ITEMS_PER_PAGE,
+        itemsPerPage: ITEMS_PER_PAGE,
+      });
+    },
+    [
+      childLocations,
+      updateLocationOrder,
+      facilityId,
+      locationId,
+      currentPage,
+      searchQuery,
+      queryClient,
+      ITEMS_PER_PAGE,
+    ],
+  );
+
+  const handleMoveUp = useCallback(
+    (location: LocationListType) => handleMove(location, "up"),
+    [handleMove],
+  );
+
+  const handleMoveDown = useCallback(
+    (location: LocationListType) => handleMove(location, "down"),
+    [handleMove],
+  );
 
   return (
     <Page title={t("locations")} hideTitleOnPage className="p-0">
@@ -264,7 +378,7 @@ export default function LocationSettings({
                   />
                 ) : (
                   <>
-                    <div className="flex flex-col justify-between items-start gap-2 sm:gap-4">
+                    <div className="flex flex-col justify-between items-start gap-2 sm:gap-4 md:pt-4 md:px-4">
                       <div className="flex flex-col md:flex-row justify-between items-center w-full gap-4">
                         <Input
                           placeholder={t("search_by_name")}
@@ -285,22 +399,36 @@ export default function LocationSettings({
                       </div>
                     </div>
 
-                    <div className="space-y-4 overflow-hidden">
-                      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-4 overflow-hidden md:px-4">
+                      <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
                         {isLoading ? (
                           <CardGridSkeleton count={2} />
                         ) : childLocations?.results?.length ? (
-                          childLocations.results.map(
-                            (childLocation: LocationListType) => (
-                              <LocationCard
-                                key={childLocation.id}
-                                location={childLocation}
-                                onEdit={handleEditLocation}
-                                onView={handleLocationSelect}
-                                facilityId={facilityId}
-                              />
-                            ),
-                          )
+                          <AnimatePresence initial={false} mode="popLayout">
+                            {childLocations.results.map(
+                              (
+                                childLocation: LocationListType,
+                                index: number,
+                              ) => (
+                                <AnimatedLocationCard
+                                  key={childLocation.id}
+                                  location={childLocation}
+                                  onEdit={handleEditLocation}
+                                  onView={handleLocationSelect}
+                                  onMoveUp={handleMoveUp}
+                                  onMoveDown={handleMoveDown}
+                                  facilityId={facilityId}
+                                  index={index}
+                                  totalCount={childLocations.results.length}
+                                  isFirstPage={currentPage === 1}
+                                  isLastPage={
+                                    childLocations.count <=
+                                    currentPage * ITEMS_PER_PAGE
+                                  }
+                                />
+                              ),
+                            )}
+                          </AnimatePresence>
                         ) : (
                           <Card className="col-span-full">
                             <CardContent className="p-4 text-center text-gray-500">

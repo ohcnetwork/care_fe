@@ -1,7 +1,9 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence } from "framer-motion";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -23,12 +25,15 @@ import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
+import { handleLocationReorder } from "@/Utils/locationOrder";
+import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
-import { LocationCard } from "./components/LocationCard";
+import { AnimatedLocationCard } from "./components/AnimatedLocationCard";
 
 interface Props {
   id: string;
@@ -84,8 +89,65 @@ export default function LocationView({
         offset: (page - 1) * limit,
         limit,
         name: searchQuery || undefined,
+        ordering: "sort_index",
       },
     }),
+  });
+
+  const { mutate: updateLocationOrder } = useMutation({
+    mutationFn: (params: {
+      locations: { locationId: string; data: any }[];
+      previousData?: any;
+      onSuccess?: () => void;
+    }) => {
+      const batchRequests = params.locations.map(
+        ({ locationId, data }, index) => ({
+          url: locationApi.update.path
+            .replace("{facility_id}", facilityId)
+            .replace("{id}", locationId),
+          method: locationApi.update.method,
+          reference_id: `location_${index}`,
+          body: {
+            ...data,
+            id: locationId,
+          },
+        }),
+      );
+
+      return mutate(routes.batchRequest)({
+        requests: batchRequests,
+      });
+    },
+    onSuccess: (data, variables) => {
+      // Only invalidate queries if there's no custom onSuccess handler
+      if (!variables.onSuccess) {
+        queryClient.invalidateQueries({
+          queryKey: ["locations", facilityId, id, "children"],
+        });
+        toast.success(t("location_order_updated"));
+      } else {
+        // Call the custom onSuccess handler
+        variables.onSuccess();
+        toast.success(t("location_order_updated"));
+      }
+    },
+    onError: (error, variables) => {
+      // Revert the optimistic update if API call fails
+      if (variables.previousData) {
+        queryClient.setQueryData(
+          [
+            "locations",
+            facilityId,
+            id,
+            "children",
+            { page, limit, searchQuery },
+          ],
+          variables.previousData,
+        );
+      }
+      toast.error(t("failed_to_update_order"));
+      console.error("Failed to update location order:", error);
+    },
   });
 
   const handleAddLocation = () => {
@@ -145,6 +207,36 @@ export default function LocationView({
   };
 
   const breadcrumbs = location ? generateBreadcrumbs(location) : [];
+
+  const handleMove = (location: LocationList, direction: "up" | "down") => {
+    if (!children?.results) return;
+
+    handleLocationReorder({
+      location,
+      locations: children.results,
+      queryClient,
+      queryKey: [
+        "locations",
+        facilityId,
+        id,
+        "children",
+        { page, limit, searchQuery },
+      ],
+      previousData: children,
+      direction,
+      updateMutation: updateLocationOrder,
+      currentPage: page,
+      setPage,
+      isFirstPage: page === 1,
+      isLastPage: children.count <= page * limit,
+      itemsPerPage: limit,
+    });
+  };
+
+  const handleMoveUp = (location: LocationList) => handleMove(location, "up");
+
+  const handleMoveDown = (location: LocationList) =>
+    handleMove(location, "down");
 
   return (
     <>
@@ -286,15 +378,23 @@ export default function LocationView({
               <>
                 <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
                   {children?.results?.length ? (
-                    children.results.map((child) => (
-                      <LocationCard
-                        key={child.id}
-                        location={child}
-                        onEdit={handleEditLocation}
-                        onView={handleViewLocation}
-                        facilityId={facilityId}
-                      />
-                    ))
+                    <AnimatePresence initial={false} mode="popLayout">
+                      {children.results.map((child, index) => (
+                        <AnimatedLocationCard
+                          key={child.id}
+                          location={child}
+                          onEdit={handleEditLocation}
+                          onView={handleViewLocation}
+                          onMoveUp={handleMoveUp}
+                          onMoveDown={handleMoveDown}
+                          facilityId={facilityId}
+                          index={index}
+                          totalCount={children.results.length}
+                          isFirstPage={page === 1}
+                          isLastPage={children.count <= page * limit}
+                        />
+                      ))}
+                    </AnimatePresence>
                   ) : (
                     <Card className="col-span-full">
                       <CardContent className="p-4 text-center text-gray-500">

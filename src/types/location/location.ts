@@ -45,6 +45,7 @@ export interface LocationList extends LocationBase {
   has_children: boolean;
   parent?: LocationList;
   current_encounter?: Encounter;
+  sort_index?: number;
 }
 
 export interface LocationWrite extends LocationBase {
