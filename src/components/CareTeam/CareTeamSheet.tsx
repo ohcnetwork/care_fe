@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,9 +35,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import UserSelector from "@/components/Common/UserSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import careTeamApi from "@/types/careTeam/careTeamApi";
 import { Encounter } from "@/types/emr/encounter";
@@ -70,19 +68,6 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
   const [selectedUser, setSelectedUser] = useState<UserBase | undefined>();
   const [selectedRole, setSelectedRole] = useState<Code | null>(null);
   const [memberToRemove, setMemberToRemove] = useState<UserBase | undefined>();
-
-  const { data: users } = useQuery({
-    queryKey: ["facilityUsers", encounter.facility.id],
-    queryFn: query.debounced(routes.facility.getUsers, {
-      pathParams: { facility_id: encounter.facility.id },
-      queryParams: {
-        username: "",
-        limit: 100,
-        offset: 0,
-      },
-    }),
-    enabled: !!encounter.facility.id,
-  });
 
   // Reset state when sheet is closed
   useEffect(() => {
@@ -218,7 +203,7 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                   selected={selectedUser}
                   onChange={setSelectedUser}
                   placeholder={t("select_member")}
-                  users={users?.results}
+                  facilityId={encounter.facility.id}
                 />
               </div>
               <ValueSetSelect
