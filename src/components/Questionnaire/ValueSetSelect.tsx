@@ -124,7 +124,7 @@ export default function ValueSetSelect({
             variant="outline"
             role="combobox"
             className={cn(
-              "w-full justify-between border border-primary rounded-md p-5",
+              "w-full justify-between border border-primary rounded-md px-5",
               wrapTextForSmallScreen
                 ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
                 : "truncate",

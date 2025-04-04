@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, ChevronUp, Hospital } from "lucide-react";
+import { ChevronDown, ChevronRight, Hospital, Pencil } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ReactFlow, {
@@ -10,7 +10,6 @@ import ReactFlow, {
   MarkerType,
   Node,
   NodeProps,
-  Panel,
   Position,
   ReactFlowProvider,
   useReactFlow,
@@ -38,6 +37,7 @@ const ROOT_SPACING = 50;
 interface LocationMapProps {
   locations: LocationListType[];
   onLocationClick: (location: LocationListType) => void;
+  onLocationEdit?: (location: LocationListType) => void;
   facilityName: string;
   searchQuery?: string;
   isEditing?: boolean;
@@ -56,6 +56,11 @@ const CustomNode = ({ data }: NodeProps) => {
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     data.onToggle(data.id);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    data.onEdit(data.id);
   };
 
   return (
@@ -78,11 +83,8 @@ const CustomNode = ({ data }: NodeProps) => {
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[97%] h-full border-2 border-gray-200 rounded-lg bg-white" />
         </>
       )}
-      <div
-        onClick={() => data.onClick({ id: data.id })}
-        className="relative w-60 bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-200"
-      >
-        <div className="p-4">
+      <div className="relative w-65 bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-200">
+        <div className="p-4 pb-2 cursor-pointer" onClick={handleEdit}>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-md shrink-0">
               <Icon className="size-5" />
@@ -104,31 +106,32 @@ const CustomNode = ({ data }: NodeProps) => {
               </TooltipProvider>
               <p className="text-sm text-gray-500 truncate">{data.type}</p>
             </div>
+            {data.form !== "facility" && <Pencil className="size-4" />}
           </div>
-          {hasChildren && (
-            <div
-              className="flex justify-center mt-2 border-t border-gray-200 pt-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 hover:bg-gray-100 transition-colors"
-                onClick={handleToggle}
-              >
-                <span className="text-sm mr-2 text-gray-600">
-                  {data.childCount} {t("level_inside")}
-                </span>
-                {data.form !== "facility" &&
-                  (data.isExpanded ? (
-                    <ChevronDown className="size-4 text-gray-600" />
-                  ) : (
-                    <ChevronRight className="size-4 text-gray-600" />
-                  ))}
-              </Button>
-            </div>
-          )}
         </div>
+        {hasChildren && (
+          <div
+            className="flex justify-center m-2 border-t border-gray-200 pt-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 hover:bg-gray-100 transition-colors"
+              onClick={handleToggle}
+            >
+              <span className="text-sm text-gray-600">
+                {data.childCount} {t("level_inside")}
+              </span>
+              {data.form !== "facility" &&
+                (data.isExpanded ? (
+                  <ChevronDown className="size-4 text-gray-600" />
+                ) : (
+                  <ChevronRight className="size-4 text-gray-600" />
+                ))}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -193,6 +196,7 @@ function createLocationNode(
   toggleNode: (id: string) => void,
   onLocationClick: (location: LocationListType) => void,
   t: (key: string) => string,
+  onLocationEdit?: (location: LocationListType) => void,
 ): Node {
   return {
     id: location.id,
@@ -207,6 +211,7 @@ function createLocationNode(
       isExpanded,
       onToggle: toggleNode,
       onClick: (_loc: LocationListType) => onLocationClick(location),
+      onEdit: onLocationEdit ? () => onLocationEdit(location) : undefined,
     },
   };
 }
@@ -243,6 +248,7 @@ function processLocationHierarchy(
   toggleNode: (id: string) => void,
   onLocationClick: (location: LocationListType) => void,
   t: (key: string) => string,
+  onLocationEdit?: (location: LocationListType) => void,
 ): { nodes: Node[]; edges: Edge[] } {
   const isExpanded = expandedNodes.includes(location.id);
   const childLocations = locations.filter(
@@ -260,6 +266,7 @@ function processLocationHierarchy(
     toggleNode,
     onLocationClick,
     t,
+    onLocationEdit,
   );
   result.nodes.push(node);
 
@@ -292,6 +299,7 @@ function processLocationHierarchy(
         toggleNode,
         onLocationClick,
         t,
+        onLocationEdit,
       );
       result.nodes.push(...childResult.nodes);
       result.edges.push(...childResult.edges);
@@ -305,36 +313,15 @@ function processLocationHierarchy(
 function LocationMapContent({
   locations,
   onLocationClick,
+  onLocationEdit,
   facilityName,
   searchQuery,
-  isEditing,
 }: LocationMapProps) {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const { fitView, setViewport, getViewport } = useReactFlow();
+  const { fitView } = useReactFlow();
   const { t } = useTranslation();
   const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
-  const [savedViewport, setSavedViewport] = useState<{
-    x: number;
-    y: number;
-    zoom: number;
-  } | null>(null);
-
-  // Save viewport when opening edit
-  useEffect(() => {
-    if (isEditing) {
-      const currentViewport = getViewport();
-      setSavedViewport(currentViewport);
-    }
-  }, [isEditing, getViewport]);
-
-  // Restore viewport when closing edit
-  useEffect(() => {
-    if (!isEditing && savedViewport && nodes.length > 0) {
-      setViewport(savedViewport);
-      setSavedViewport(null); // Clear saved viewport after restoring
-    }
-  }, [isEditing, savedViewport, setViewport, nodes]);
 
   // Get root locations
   const rootLocations = useMemo(
@@ -343,6 +330,47 @@ function LocationMapContent({
         (loc) => !loc.parent || Object.keys(loc.parent).length === 0,
       ),
     [locations],
+  );
+
+  const toggleNode = useCallback(
+    (nodeId: string) => {
+      setExpandedNodes((prev) => {
+        const isExpanding = !prev.includes(nodeId);
+        const newExpandedNodes = isExpanding
+          ? [...prev, nodeId]
+          : prev.filter((id) => id !== nodeId);
+
+        requestAnimationFrame(() => {
+          if (isExpanding) {
+            // Get all immediate children of the node
+            const childNodes = locations
+              .filter((loc) => loc.parent?.id === nodeId)
+              .map((child) => ({ id: child.id }));
+
+            // Include both parent and children in the view with adjusted padding
+            fitView({
+              padding: childNodes.length > 4 ? 0.5 : 0.3,
+              minZoom: 0.2,
+              maxZoom: 0.8,
+              duration: 400,
+              nodes: [{ id: nodeId }, ...childNodes],
+            });
+          } else {
+            // When collapsing, focus directly on the clicked node
+            fitView({
+              padding: 0.2,
+              minZoom: 0.2,
+              maxZoom: 1,
+              duration: 500,
+              nodes: [{ id: nodeId }],
+            });
+          }
+        });
+
+        return newExpandedNodes;
+      });
+    },
+    [fitView, locations],
   );
 
   // Effect to handle search updates
@@ -415,67 +443,6 @@ function LocationMapContent({
     }
   }, [searchQuery, fitView]);
 
-  const toggleNode = useCallback(
-    (nodeId: string) => {
-      setExpandedNodes((prev) => {
-        const isExpanding = !prev.includes(nodeId);
-        const newExpandedNodes = isExpanding
-          ? [...prev, nodeId]
-          : prev.filter((id) => id !== nodeId);
-
-        requestAnimationFrame(() => {
-          if (isExpanding) {
-            // Get all immediate children of the node
-            const childNodes = locations
-              .filter((loc) => loc.parent?.id === nodeId)
-              .map((child) => ({ id: child.id }));
-
-            // Include both parent and children in the view with adjusted padding
-            fitView({
-              padding: childNodes.length > 4 ? 0.5 : 0.3,
-              minZoom: 0.2,
-              maxZoom: 0.8,
-              duration: 400,
-              nodes: [{ id: nodeId }, ...childNodes],
-            });
-          } else {
-            // When collapsing, focus directly on the clicked node
-            fitView({
-              padding: 0.2,
-              minZoom: 0.2,
-              maxZoom: 1,
-              duration: 500,
-              nodes: [{ id: nodeId }],
-            });
-          }
-        });
-
-        return newExpandedNodes;
-      });
-    },
-    [fitView, locations],
-  );
-
-  const toggleAllNodes = useCallback(() => {
-    setExpandedNodes((prev) => {
-      const isExpanding = prev.length !== locations.length;
-      const newExpandedNodes = isExpanding
-        ? locations.map((loc) => loc.id)
-        : [];
-
-      setTimeout(() => {
-        fitView({
-          padding: 0.2,
-          minZoom: 0.1,
-          maxZoom: 0.8,
-          duration: 800,
-        });
-      }, 100);
-
-      return newExpandedNodes;
-    });
-  }, [locations, fitView]);
-
   // Generate nodes and edges
   useEffect(() => {
     const newNodes: Node[] = [];
@@ -518,6 +485,7 @@ function LocationMapContent({
             toggleNode,
             onLocationClick,
             t,
+            onLocationEdit,
           );
 
         newNodes.push(...locationNodes);
@@ -537,6 +505,7 @@ function LocationMapContent({
     expandedNodes,
     toggleNode,
     onLocationClick,
+    onLocationEdit,
     t,
     rootLocations,
     facilityName,
@@ -563,7 +532,7 @@ function LocationMapContent({
           },
         }}
         proOptions={{ hideAttribution: true }}
-        fitView={!savedViewport && !isEditing}
+        fitView={true}
         fitViewOptions={{
           padding: 0.2,
           minZoom: 0.2,
@@ -580,29 +549,6 @@ function LocationMapContent({
       >
         <Background />
         <Controls showFitView={true} showZoom={true} showInteractive={false} />
-        <Panel
-          position="top-right"
-          className="bg-white/80 backdrop-blur-xs rounded-lg p-2 shadow-xs"
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleAllNodes}
-            className="flex items-center gap-2"
-          >
-            {expandedNodes.length === locations.length ? (
-              <>
-                <ChevronUp className="size-4" />
-                {t("collapse_all")}
-              </>
-            ) : (
-              <>
-                <ChevronDown className="size-4" />
-                {t("expand_all")}
-              </>
-            )}
-          </Button>
-        </Panel>
       </ReactFlow>
     </div>
   );
