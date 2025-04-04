@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { GripVertical, X } from "lucide-react";
+import { MoreVertical, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -16,6 +16,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -46,11 +52,10 @@ export function EmptyState() {
   return (
     <div className="flex min-h-[200px] flex-col items-center justify-center gap-1 p-8 text-center">
       <div className="rounded-full bg-secondary/10 p-3">
-        <GripVertical className="text-3xl text-gray-500" />
+        <UserRound className="text-3xl text-gray-500" />
       </div>
       <div className="max-w-[300px] space-y-1">
         <h3 className="font-medium">{t("no_care_team_members")}</h3>
-        <p className="text-sm text-gray-500">{t("add_care_team_members")}</p>
       </div>
     </div>
   );
@@ -62,14 +67,14 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
   const queryClient = useQueryClient();
   const [selectedUser, setSelectedUser] = useState<UserBase | undefined>();
   const [selectedRole, setSelectedRole] = useState<Code | null>(null);
-  const [memberToRemove, setMemberToRemove] = useState<number | null>(null);
+  const [memberToRemove, setMemberToRemove] = useState<UserBase | undefined>();
 
   // Reset state when sheet is closed
   useEffect(() => {
     if (!open) {
       setSelectedUser(undefined);
       setSelectedRole(null);
-      setMemberToRemove(null);
+      setMemberToRemove(undefined);
     }
   }, [open]);
 
@@ -121,15 +126,15 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
     setSelectedRole(null);
   };
 
-  const confirmRemoveMember = (index: number) => {
-    setMemberToRemove(index);
+  const confirmRemoveMember = (member: UserBase) => {
+    setMemberToRemove(member);
   };
 
   const handleRemoveMember = () => {
-    if (memberToRemove === null) return;
+    if (!memberToRemove) return;
 
     const newMembers = encounter.care_team
-      .filter((_, i) => i !== memberToRemove)
+      .filter((member) => member.member.id !== memberToRemove.id)
       .map((member) => ({
         user_id: member.member.id,
         role: member.role,
@@ -146,7 +151,7 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
       },
     );
 
-    setMemberToRemove(null);
+    setMemberToRemove(undefined);
   };
 
   const handleMakePrimary = (index: number) => {
@@ -183,14 +188,14 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-3xl">
-        <SheetHeader className="space-y-1">
+      <SheetContent className="w-full sm:max-w-3xl pr-0">
+        <SheetHeader className="space-y-1 mr-2">
           <SheetTitle className="text-xl font-semibold">
             {t("manage_care_team")}
           </SheetTitle>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100vh-12rem)] mt-6">
+        <ScrollArea className="h-full my-6 pb-12 pr-6">
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row gap-2">
               <div className="flex flex-col">
@@ -198,6 +203,7 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                   selected={selectedUser}
                   onChange={setSelectedUser}
                   placeholder={t("select_member")}
+                  facilityId={encounter.facility.id}
                 />
               </div>
               <ValueSetSelect
@@ -263,29 +269,51 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                             </Button>
                           )}
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => confirmRemoveMember(index)}
-                          disabled={isPending}
-                          className="cursor-pointer self-end"
-                        >
-                          <X className="size-4" />
-                        </Button>
+                        <div className="md:hidden">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled={isPending}
+                                className="cursor-pointer"
+                              >
+                                <MoreVertical className="size-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {index !== 0 && (
+                                <DropdownMenuItem
+                                  onClick={() => handleMakePrimary(index)}
+                                  disabled={isPending}
+                                >
+                                  {t("mark_as_primary")}
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  confirmRemoveMember(member.member)
+                                }
+                                disabled={isPending}
+                                className="text-destructive"
+                              >
+                                {t("remove")}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        <div className="hidden md:block">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => confirmRemoveMember(member.member)}
+                            disabled={isPending}
+                            className="cursor-pointer"
+                          >
+                            <X className="size-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="md:hidden">
-                      {index !== 0 && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleMakePrimary(index)}
-                          disabled={isPending}
-                          className="cursor-pointer w-full"
-                        >
-                          {t("mark_as_primary")}
-                        </Button>
-                      )}
                     </div>
                   </div>
                 ))
@@ -295,8 +323,8 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
         </ScrollArea>
 
         <AlertDialog
-          open={memberToRemove !== null}
-          onOpenChange={(open) => !open && setMemberToRemove(null)}
+          open={!!memberToRemove}
+          onOpenChange={(open) => !open && setMemberToRemove(undefined)}
         >
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -304,7 +332,9 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                 {t("confirm_removing_member")}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                {t("confirm_removing_member_description")}
+                {t("confirm_removing_member_description", {
+                  member: memberToRemove ? formatName(memberToRemove) : "",
+                })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
