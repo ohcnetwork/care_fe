@@ -352,9 +352,12 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   className="mr-4"
                   onClick={() => handleNext(index - 1)}
                   disabled={index <= 0}
-                  aria-label="Previous file"
+                  aria-label={t("previous_file")}
                 >
-                  <CareIcon icon="l-arrow-left" className="size-4" />
+                  <CareIcon
+                    icon={"l-arrow-left" as IconName}
+                    className="size-4"
+                  />
                 </Button>
               )}
               <div
@@ -382,7 +385,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   >
                     <img
                       src={fileUrl}
-                      alt="file"
+                      alt={t("file")}
                       className={cn(
                         "max-h-full max-w-full select-none object-contain",
                         zoom_values[file_state.zoom - 1],
@@ -413,7 +416,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center">
                     <CareIcon
-                      icon="l-file"
+                      icon={"l-file" as IconName}
                       className="mb-4 text-5xl text-secondary-600"
                     />
                     {t("file_preview_not_supported")}
@@ -428,7 +431,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   disabled={index >= uploadedFiles.length - 1}
                   aria-label={t("next_file")}
                 >
-                  <CareIcon icon="l-arrow-right" className="size-4" />
+                  <CareIcon
+                    icon={"l-arrow-right" as IconName}
+                    className="size-4"
+                  />
                 </Button>
               )}
             </div>
@@ -446,14 +452,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         icon={"l-search-minus" as IconName}
                         className="mr-2 text-lg"
                       />
-                      {t("zoom_out")}
                     </Button>
 
                     <Button
                       variant="ghost"
-                      onClick={() => {
-                        setFileState({ ...file_state, zoom: 4 });
-                      }}
+                      onClick={() => setFileState({ ...file_state, zoom: 4 })}
                       className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
                       {`${25 * file_state.zoom}%`}
@@ -469,7 +472,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         icon={"l-search-plus" as IconName}
                         className="mr-2 text-lg"
                       />
-                      {t("zoom_in")}
                     </Button>
                   </>
                 )}
@@ -485,7 +487,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         icon={"l-search-minus" as IconName}
                         className="mr-2 text-lg"
                       />
-                      {t("zoom_out")}
                     </Button>
 
                     <Button
@@ -506,7 +507,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         icon={"l-search-plus" as IconName}
                         className="mr-2 text-lg"
                       />
-                      {t("zoom_in")}
                     </Button>
                   </>
                 )}
@@ -516,26 +516,14 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   <>
                     <Button
                       variant="ghost"
-                      onClick={() => handleRotate(-90)}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
-                    >
-                      <CareIcon
-                        icon={"l-corner-up-left" as IconName}
-                        className="mr-2 text-lg"
-                      />
-                      {t("rotate_left")}
-                    </Button>
-
-                    <Button
-                      variant="ghost"
                       onClick={() => handleRotate(90)}
                       className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
                       <CareIcon
                         icon={"l-corner-up-right" as IconName}
-                        className="mr-2 text-lg"
+                        className="text-lg size-4"
                       />
-                      {t("rotate_right")}
+                      {t("rotate")}
                     </Button>
                   </>
                 )}
@@ -549,9 +537,8 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     >
                       <CareIcon
                         icon={"l-arrow-left" as IconName}
-                        className="mr-2 text-lg"
+                        className="mr-2 size-4"
                       />
-                      {t("previous")}
                     </Button>
 
                     <Button
@@ -568,11 +555,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       disabled={page === numPages}
                       className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
-                      <CareIcon
-                        icon={"l-arrow-right" as IconName}
-                        className="mr-2 text-lg"
-                      />
-                      {t("next")}
+                      <CareIcon icon="l-arrow-right" className="mr-2 size-4" />
                     </Button>
                   </>
                 )}
