@@ -6,6 +6,7 @@ import {
   ChevronUp,
   ChevronsDownUp,
   ChevronsUpDown,
+  ClipboardCopyIcon,
   SquarePenIcon,
   ViewIcon,
 } from "lucide-react";
@@ -58,6 +59,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
@@ -469,6 +471,22 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <Button variant="outline" onClick={handleCancel}>
             {t("cancel")}
           </Button>
+          {id && (
+            <TooltipComponent content={t("copy_questionnaire_to_clipboard")}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    JSON.stringify(initialQuestionnaire, null, 2),
+                  );
+                  toast.success(t("questionnaire_copied_to_clipboard"));
+                }}
+              >
+                <ClipboardCopyIcon className="mr-2 size-4" />
+                {t("copy")}
+              </Button>
+            </TooltipComponent>
+          )}
           <Button onClick={handleSave} disabled={isCreating || isUpdating}>
             <CareIcon icon="l-save" className="mr-2 size-4" />
             {id ? t("save") : t("create")}
