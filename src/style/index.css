@@ -82,7 +82,7 @@
 
   @media print {
     @page {
-      margin-top: 0;
+      margin-top: -200px;
     }
     body * {
       visibility: hidden;
@@ -93,7 +93,7 @@
       -webkit-print-color-adjust: exact;
     }
     #section-to-print {
-      position: absolute;
+      position: relative;
       left: 0;
       top: 0;
     }
