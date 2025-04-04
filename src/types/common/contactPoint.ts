@@ -22,7 +22,7 @@ export interface ContactPoint {
   use: ContactPointUse;
 }
 
-export default (t: (key: string) => string) => ({
+export const contactPoint = (t: (key: string) => string) => ({
   contactPoint: z.discriminatedUnion("system", [
     // Phone numbers
     z.object({

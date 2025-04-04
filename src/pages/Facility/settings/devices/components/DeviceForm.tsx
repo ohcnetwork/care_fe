@@ -38,7 +38,7 @@ import {
   usePluginDevice,
   usePluginDevices,
 } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
-import contactPoint, { ContactPointSystems } from "@/types/common/contactPoint";
+import { ContactPointSystems, contactPoint } from "@/types/common/contactPoint";
 import {
   DeviceAvailabilityStatuses,
   DeviceList,
