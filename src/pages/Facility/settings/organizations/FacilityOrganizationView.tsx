@@ -58,7 +58,7 @@ function OrganizationCard({
               </div>
             </div>
             <div className="flex flex-row gap-2">
-              {editPermission && (
+              {editPermission && org.org_type !== "root" && (
                 <FacilityOrganizationFormSheet
                   facilityId={facilityId}
                   parentId={parentId}
