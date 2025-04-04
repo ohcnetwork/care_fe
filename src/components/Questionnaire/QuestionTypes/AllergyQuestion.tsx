@@ -134,7 +134,9 @@ const AllergyTableRow = ({
         <TableCell className="py-1 pr-0">
           <Select
             value={allergy.category}
-            onValueChange={(value) => onUpdate?.({ category: value })}
+            onValueChange={(value: AllergyCategory) =>
+              onUpdate?.({ category: value })
+            }
             disabled={disabled || !!allergy.id}
           >
             <SelectTrigger className="h-8 md:h-9 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center">
@@ -142,8 +144,7 @@ const AllergyTableRow = ({
                 placeholder="Cat"
                 className="text-center h-full flex items-center justify-center m-0 p-0"
               >
-                {allergy.category &&
-                  CATEGORY_ICONS[allergy.category as AllergyCategory]}
+                {allergy.category && CATEGORY_ICONS[allergy.category]}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -446,28 +447,30 @@ export function AllergyQuestion({
                   <div className="flex items-center gap-2">
                     <Select
                       value={allergy.category}
-                      onValueChange={(value) =>
+                      onValueChange={(value: AllergyCategory) =>
                         handleUpdateAllergy(index, { category: value })
                       }
                       disabled={disabled || !!allergy.id}
                     >
                       <SelectTrigger className="h-8 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center">
                         <SelectValue>
-                          {allergy.category &&
-                            CATEGORY_ICONS[allergy.category as AllergyCategory]}
+                          {allergy.category && CATEGORY_ICONS[allergy.category]}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.entries(ALLERGY_CATEGORIES).map(
-                          ([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                              <div className="flex items-center gap-2">
-                                {CATEGORY_ICONS[value as AllergyCategory]}
-                                <span>{label}</span>
-                              </div>
-                            </SelectItem>
-                          ),
-                        )}
+                        {(
+                          Object.entries(ALLERGY_CATEGORIES) as [
+                            AllergyCategory,
+                            string,
+                          ][]
+                        ).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            <div className="flex items-center gap-2">
+                              {CATEGORY_ICONS[value]}
+                              <span>{label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <span className="font-medium">{allergy.code.display}</span>
