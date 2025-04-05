@@ -6,12 +6,35 @@ import { viewPort } from "@/utils/viewPort";
 const facilityCreation = new FacilityCreation();
 const patientLocation = new PatientLocation();
 
-describe("Add a new Location and associate to an Encounter", () => {
+describe("Manage locations association to an encounter", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
     cy.loginByApi("devdoctor3");
     cy.visit("/");
     facilityCreation.selectFacility("GHC Payyanur");
+  });
+
+  it("Manage a bed association to an encounter", () => {
+    patientLocation
+      .navigateToEncounters()
+      .clickPlannedEncounterFilter()
+      .openFirstEncounterDetails()
+
+      // Associate New Location to the first planned encounter
+      .clickAddLocationBadge()
+      .selectLocationBuilding("Block C")
+      .clickShowAvailableBeds()
+      .selectLocationBed("ICU")
+      .clickAssignBedButton()
+      .clickSaveBedButton()
+      .assertLocationAssociationSuccess()
+
+      // mark current location as completed
+      .clickAssociatedLocationBadge()
+      .clickUpdateLocationButton()
+      .clickCompleteBedStayButton()
+      .clickCompleteBedButton()
+      .assertLocationCompletedSuccess();
   });
 
   it("Create a new Location", () => {
@@ -34,7 +57,7 @@ describe("Add a new Location and associate to an Encounter", () => {
       {
         form: "Bed",
         name: "ICU",
-        bedsCount: "5 Beds",
+        bedsCount: "2 Beds",
         description: "Location 1 description",
         status: "Active",
         opStatus: "Operational",
@@ -50,62 +73,47 @@ describe("Add a new Location and associate to an Encounter", () => {
       .navigateToSettings()
       .clickLocationTab()
 
-      // Create Room Location with Room data
-      .clickAddLocation()
+      // Open Existing Location created by a super admin
+      .searchLocation("Block B")
+      .openFirstExistingLocation()
+
+      // Create Room Location with Room data and verify and delete it
+      .clickChildAddLocation()
       .fillLocationData(roomData)
       .interceptLocationCreationRequest()
       .submitLocationForm()
       .verifyLocationCreationAPICall()
       .assertLocationCreationSuccess()
+      .searchChildLocation(roomData.name)
+      .interceptLocationDeletionAPICall()
+      .clickFirstDeleteLocationButton()
+      .assertLocationDeletionSuccess()
+      .verifyLocationDeletionAPICall()
 
       // Create House Location with House data
-      .clickAddLocation()
+      .clickChildAddLocation()
       .fillLocationData(houseData)
       .interceptLocationCreationRequest()
       .submitLocationForm()
       .verifyLocationCreationAPICall()
       .assertLocationCreationSuccess()
+      .searchChildLocation(houseData.name)
+      .interceptLocationDeletionAPICall()
+      .clickFirstDeleteLocationButton()
+      .assertLocationDeletionSuccess()
+      .verifyLocationDeletionAPICall()
 
       // Create Multiple Bed Locations with Beds data
-      .clickAddLocation()
+      .clickChildAddLocation()
       .fillLocationData(bedData)
       .interceptLocationCreationRequest()
       .submitLocationForm()
       .verifyLocationCreationAPICall()
-      .assertMultipleBedsCreationSuccess(bedData.bedsCount);
-  });
-
-  it("Dissociate existing Location from encounter and associate new location", () => {
-    const now = new Date();
-    now.setDate(now.getDate() + 1);
-    const endTime = now.toISOString().slice(0, 16);
-    patientLocation
-      .navigateToEncounters()
-      .clickPlannedEncounterFilter()
-      .openFirstEncounterDetails()
-
-      // Associate New Location to the first planned encounter
-      .clickAddLocationBadge()
-      .searchBedLocation("ICU 5")
-      .interceptLocationCreationRequest()
-      .submitLocationAssociation()
-      .assertLocationAssociationSuccess()
-
-      // Dissociate Current Location assuming a location is already associated
-      .clickAssociatedLocationBadge()
-      .clickUpdateLocationButton()
-      .searchBedLocation("ICU 5")
-      .interceptLocationCreationRequest()
-
-      // Associate new location without dissociating current location and verify error
-      .submitLocationAssociation()
-      .verifyLocationAssociationFailAPICall()
-
-      // Dissociate Current Location and associate new location
-      .setStatusCompleted()
-      .fillEndTime(endTime)
-      .interceptLocationUpdationRequest()
-      .clickSaveStatusButton()
-      .assertLocationStatusUpdateSuccess();
+      .assertMultipleBedsCreationSuccess(bedData.bedsCount)
+      .searchChildLocation(bedData.name)
+      .interceptLocationDeletionAPICall()
+      .clickFirstDeleteLocationButton()
+      .assertLocationDeletionSuccess()
+      .verifyLocationDeletionAPICall();
   });
 });

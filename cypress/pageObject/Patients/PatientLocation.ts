@@ -10,7 +10,7 @@ export interface LocationData {
 export class PatientLocation {
   private selectors = {
     locationForm: '[data-cy="location-form-options"]',
-    addLocationButton: '[data-cy="add-location-button"]',
+    addChildLocationButton: '[data-cy="add-child-location-button"]',
     sidebarContent: '[data-sidebar="content"]',
     locationTab: '[data-cy="settings-locations-tab"]',
     nameInput: '[data-cy="location-name-input"]',
@@ -22,13 +22,58 @@ export class PatientLocation {
     currentLocationBadge: '[data-cy="current-location-badge"]',
     addLocationBadge: '[data-cy="add-encounter-location"]',
     updateLocationButton: '[data-cy="update-encounter-location-button"]',
-    endDateInput: '[data-cy="location-end-date-time"]',
-    associatedLocationStatus: '[data-cy="associated-location-status"]',
-    saveStatusButton: '[data-cy="update-associated-location-status-button"]',
-    locationSearchTrigger: '[data-cy="location-search-trigger"]',
-    submitLocationAssociation:
-      '[data-cy="submit-encounter-location-association"]',
+    locationList: '[data-cy="location-assign-screen"]',
+    submitLocationAssociation: '[data-cy="location-navigation-buttons"]',
+    saveBedButton: '[data-cy="location-card-wrapper-save-button"]',
+    completeBedStayButton: '[data-cy="complete-bed-stay-button"]',
+    locationCard: '[data-cy="location-card-container"]',
+    locationSearchInput: '[data-cy="location-search-input"]',
+    viewDetailsLocationButton: '[data-cy="view-details-location-button"]',
+    locationChildSearchInput: '[data-cy="location-child-search-input"]',
+    deleteLocationButton: '[data-cy="delete-location-button"]',
+    removeLocationButton: '[data-cy="remove-location-button"]',
+    showAvailableBeds: "#available-only",
   };
+
+  openFirstExistingLocation() {
+    cy.get(this.selectors.viewDetailsLocationButton).first().click();
+    return this;
+  }
+
+  clickFirstDeleteLocationButton() {
+    cy.get(this.selectors.deleteLocationButton).first().click();
+    cy.verifyAndClickElement(this.selectors.removeLocationButton, "Remove");
+    return this;
+  }
+
+  interceptLocationDeletionAPICall() {
+    cy.intercept("DELETE", `**/api/v1/facility/**`).as("deleteLocation");
+    return this;
+  }
+
+  verifyLocationDeletionAPICall() {
+    cy.wait("@deleteLocation").then((interception) => {
+      expect(interception.response?.statusCode).to.eq(204);
+    });
+    return this;
+  }
+
+  assertLocationDeletionSuccess() {
+    cy.verifyNotification("Location removed successfully");
+    return this;
+  }
+
+  searchLocation(locationName: string) {
+    cy.typeIntoField(this.selectors.locationSearchInput, locationName);
+    return this;
+  }
+
+  searchChildLocation(locationName: string) {
+    cy.typeIntoField(this.selectors.locationChildSearchInput, locationName, {
+      clearBeforeTyping: true,
+    });
+    return this;
+  }
 
   // Navigation
   navigateToSettings() {
@@ -41,8 +86,11 @@ export class PatientLocation {
     return this;
   }
 
-  clickAddLocation() {
-    cy.verifyAndClickElement(this.selectors.addLocationButton, "Add Location");
+  clickChildAddLocation() {
+    cy.verifyAndClickElement(
+      this.selectors.addChildLocationButton,
+      "Add Location",
+    );
     return this;
   }
 
@@ -158,7 +206,7 @@ export class PatientLocation {
   }
 
   clickAddLocationBadge() {
-    cy.get(this.selectors.addLocationBadge).click();
+    cy.verifyAndClickElement(this.selectors.addLocationBadge, "Add Location");
     return this;
   }
 
@@ -170,63 +218,54 @@ export class PatientLocation {
     return this;
   }
 
-  searchBedLocation(locationName: string) {
-    cy.typeAndSelectOption(this.selectors.locationSearchTrigger, locationName);
+  selectLocationBuilding(locationName: string) {
+    cy.verifyAndClickElement(this.selectors.locationList, locationName);
     return this;
   }
 
-  submitLocationAssociation() {
+  selectLocationBed(locationName: string) {
+    cy.verifyAndClickElement(this.selectors.locationList, locationName);
+    return this;
+  }
+
+  clickShowAvailableBeds() {
+    cy.get(this.selectors.showAvailableBeds).click();
+    return this;
+  }
+
+  clickAssignBedButton() {
     cy.verifyAndClickElement(
       this.selectors.submitLocationAssociation,
-      "Create Location Association",
+      "Assign Bed Now",
     );
     return this;
   }
 
-  setStatusCompleted() {
-    cy.clickAndSelectOption(
-      this.selectors.associatedLocationStatus,
-      "Completed",
-    );
-    return this;
-  }
-
-  fillEndTime(dateTime: string) {
-    cy.typeIntoField(this.selectors.endDateInput, dateTime, {
-      clearBeforeTyping: true,
-    });
-    return this;
-  }
-
-  interceptLocationUpdationRequest() {
-    cy.intercept("PUT", `**/api/v1/facility/**`).as("updateLocation");
-    return this;
-  }
-
-  clickSaveStatusButton() {
-    cy.verifyAndClickElement(this.selectors.saveStatusButton, "Save");
-    return this;
-  }
-
-  verifyLocationUpdateAPICall() {
-    cy.wait("@updateLocation").its("response.statusCode").should("eq", 200);
-    return this;
-  }
-
-  verifyLocationAssociationFailAPICall() {
-    cy.wait("@createLocation").its("response.statusCode").should("eq", 400);
-    return this;
-  }
-
-  assertLocationStatusUpdateSuccess() {
-    this.verifyLocationUpdateAPICall();
-    cy.verifyNotification("Location association updated successfully");
+  assertLocationCompletedSuccess() {
+    cy.verifyNotification("Bed Assigned Successfully");
     return this;
   }
 
   assertLocationAssociationSuccess() {
-    this.verifyLocationCreationAPICall();
-    cy.verifyNotification("Location association created successfully");
+    cy.verifyNotification("Bed Assigned Successfully");
+    return this;
+  }
+
+  clickSaveBedButton() {
+    cy.verifyAndClickElement(this.selectors.saveBedButton, "Save");
+    return this;
+  }
+
+  clickCompleteBedButton() {
+    cy.verifyAndClickElement(this.selectors.saveBedButton, "Complete");
+    return this;
+  }
+
+  clickCompleteBedStayButton() {
+    cy.verifyAndClickElement(
+      this.selectors.completeBedStayButton,
+      "Complete Bed Stay",
+    );
     return this;
   }
 }
