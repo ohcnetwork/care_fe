@@ -297,15 +297,21 @@ export default function TreatmentSummary({
                 </span>
               </div>
 
-              <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                <span className="text-gray-600">{t("care_team")}</span>
-                <span className="text-gray-600">:</span>
-                <span className="font-semibold break-words">
-                  {encounter.care_team
-                    .map((member) => formatName(member.member))
-                    .join(", ")}
-                </span>
-              </div>
+              {encounter.care_team[0] && (
+                <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
+                  <span className="text-gray-600">
+                    {encounter.care_team[0].role?.display}
+                  </span>
+                  <span className="text-gray-600">:</span>
+                  <span className="flex flex-row">
+                    <div className="flex flex-col">
+                      <div className="font-semibold">
+                        {formatName(encounter.care_team[0].member)}
+                      </div>
+                    </div>
+                  </span>
+                </div>
+              )}
 
               {encounter.external_identifier && (
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
@@ -332,6 +338,39 @@ export default function TreatmentSummary({
               )}
             </div>
           </div>
+
+          {/* Care Team Section */}
+          <div className="mt-4 space-y-4">
+            {encounter.care_team.length > 0 && (
+              <div className="space-y-4">
+                {/* Other Consultants */}
+                {encounter.care_team.length > 1 && (
+                  <div className="border border-gray-100 p-3 rounded-sm">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">
+                      {t("care_team")}
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {encounter.care_team.map((member, index) => (
+                        <div key={index} className="flex items-start">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-semibold truncate">
+                              {formatName(member.member)}
+                            </div>
+                            {member.role?.display && (
+                              <div className="text-sm text-gray-500 truncate">
+                                {member.role.display}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Medical Information */}
           <div className="space-y-6">
             {/* Allergies */}
