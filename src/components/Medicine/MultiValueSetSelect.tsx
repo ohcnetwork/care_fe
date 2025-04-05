@@ -55,6 +55,7 @@ export function MultiValueSetSelect({
           <Button
             variant="outline"
             role="combobox"
+            disabled={disabled}
             className={cn(
               "w-full justify-start h-auto min-h-10 py-2",
               "text-left",
@@ -88,7 +89,7 @@ export function MultiValueSetSelect({
                           variant="ghost"
                           size="icon"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="size-4" />
                         </Button>
                       </div>
                     ),

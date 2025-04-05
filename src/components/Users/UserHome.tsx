@@ -1,7 +1,8 @@
-import { Link, navigate } from "raviger";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -11,12 +12,15 @@ import UserAvailabilityTab from "@/components/Users/UserAvailabilityTab";
 import UserBanner from "@/components/Users/UserBanner";
 import UserSummaryTab from "@/components/Users/UserSummary";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { classNames, formatName, keysOf } from "@/Utils/utils";
-import { UserBase } from "@/types/user/user";
+import query from "@/Utils/request/query";
+import { formatName, keysOf } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 
 export interface UserHomeProps {
   username?: string;
@@ -30,36 +34,46 @@ export interface TabChildProp {
 
 export default function UserHome(props: UserHomeProps) {
   const { tab } = props;
-  let { username } = props;
-  const [userData, setUserData] = useState<UserBase>();
+  let { username, facilityId } = props;
   const { t } = useTranslation();
   const authUser = useAuthUser();
   if (!username) {
     username = authUser.username;
   }
-  const loggedInUser = username === authUser.username;
+  const { hasPermission } = usePermissions();
+  const { goBack } = useAppHistory();
 
-  const { loading, refetch: refetchUserDetails } = useTanStackQueryInstead(
-    routes.getUserDetails,
-    {
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["getUserDetails", username],
+    queryFn: query(routes.getUserDetails, {
       pathParams: {
         username: username,
       },
-      onResponse: ({ res, data, error }) => {
-        if (res?.status === 200 && data) {
-          setUserData(data);
-        } else if (res?.status === 400) {
-          navigate("/users");
-        } else if (error) {
-          toast.error(
-            t("error_fetching_user_details") + (error?.message || ""),
-          );
-        }
-      },
-    },
+    }),
+  });
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["getFacilityDetails", props.facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId ?? "" },
+    }),
+    enabled: !!facilityId,
+  });
+
+  const { canViewSchedule } = getPermissions(
+    hasPermission,
+    facilityId ? (facilityData?.permissions ?? []) : authUser.permissions,
   );
 
-  if (loading || !userData) {
+  if (isError) {
+    goBack("/");
+  }
+
+  if (isLoading || !userData) {
     return <Loading />;
   }
 
@@ -70,7 +84,7 @@ export default function UserHome(props: UserHomeProps) {
     },
     AVAILABILITY: {
       body: UserAvailabilityTab,
-      hidden: !props.facilityId,
+      hidden: !props.facilityId || !canViewSchedule,
     },
   } satisfies Record<string, TabChildProp>;
 
@@ -88,24 +102,10 @@ export default function UserHome(props: UserHomeProps) {
     ? `/facility/${props.facilityId}/users/${username}`
     : `/users/${username}`;
 
-  const usernameCrumb = {
-    [username]: { name: loggedInUser ? "Profile" : username },
-  };
-
-  const hideUsersCrumb = { users: { hide: true } };
-
-  const crumbsReplacements = {
-    ...usernameCrumb,
-    ...(!props.facilityId && hideUsersCrumb),
-  };
-
   return (
     <>
       <Page
         title={formatName(userData) || userData.username || t("manage_user")}
-        crumbsReplacements={crumbsReplacements}
-        focusOnLoad={true}
-        backUrl={props.facilityId ? `/users` : "/"}
         hideTitleOnPage
       >
         {
@@ -124,7 +124,7 @@ export default function UserHome(props: UserHomeProps) {
                         return (
                           <Link
                             key={p}
-                            className={classNames(
+                            className={cn(
                               "min-w-max-content cursor-pointer whitespace-nowrap text-sm font-semibold capitalize",
                               currentTab === p
                                 ? "border-b-2 border-primary-500 text-primary-600 hover:border-secondary-300"
@@ -145,8 +145,7 @@ export default function UserHome(props: UserHomeProps) {
             <SelectedTab
               userData={userData}
               username={username}
-              {...props}
-              refetchUserData={refetchUserDetails}
+              permissions={facilityData?.permissions ?? []}
             />
           </>
         }

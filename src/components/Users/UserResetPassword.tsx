@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/form";
 import { PasswordInput } from "@/components/ui/input-password";
 
-import { validateRule } from "@/components/Users/UserFormValidations";
+import { ValidationHelper } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
 
 import routes from "@/Utils/request/api";
@@ -91,7 +91,7 @@ export default function UserResetPassword({
   };
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6">
       {!isEditing && (
         <div className="mb-4 flex justify-start">
           <Button
@@ -101,8 +101,8 @@ export default function UserResetPassword({
             variant="primary"
           >
             <CareIcon
-              icon={isEditing ? "l-times" : "l-edit"}
-              className="h-4 w-4"
+              icon={isEditing ? "l-times" : "l-pen"}
+              className="size-4"
             />
             {t("update_password")}
           </Button>
@@ -152,36 +152,33 @@ export default function UserResetPassword({
                           className="text-small mt-2 pl-2 text-secondary-500"
                           aria-live="polite"
                         >
-                          {validateRule(
-                            field.value.length >= 8,
-                            t("password_length_validation"),
-                            !field.value,
-                            t("password_length_met"),
-                          )}
-                          {validateRule(
-                            /[a-z]/.test(field.value),
-                            t("password_lowercase_validation"),
-                            !field.value,
-                            t("password_lowercase_met"),
-                          )}
-                          {validateRule(
-                            /[A-Z]/.test(field.value),
-                            t("password_uppercase_validation"),
-                            !field.value,
-                            t("password_uppercase_met"),
-                          )}
-                          {validateRule(
-                            /\d/.test(field.value),
-                            t("password_number_validation"),
-                            !field.value,
-                            t("password_number_met"),
-                          )}
-                          {validateRule(
-                            field.value !== form.watch("old_password"),
-                            t("new_password_same_as_old"),
-                            !field.value,
-                            t("new_password_different_from_old"),
-                          )}
+                          <ValidationHelper
+                            isInputEmpty={!field.value}
+                            successMessage={t("password_success_message")}
+                            validations={[
+                              {
+                                description: "password_length_validation",
+                                fulfilled: field.value.length >= 8,
+                              },
+                              {
+                                description: "password_lowercase_validation",
+                                fulfilled: /[a-z]/.test(field.value),
+                              },
+                              {
+                                description: "password_uppercase_validation",
+                                fulfilled: /[A-Z]/.test(field.value),
+                              },
+                              {
+                                description: "password_number_validation",
+                                fulfilled: /\d/.test(field.value),
+                              },
+                              {
+                                description: "new_password_same_as_old",
+                                fulfilled:
+                                  field.value !== form.watch("old_password"),
+                              },
+                            ]}
+                          />
                         </div>
                       ) : (
                         <FormMessage />
@@ -231,7 +228,7 @@ export default function UserResetPassword({
                 {isPending && (
                   <CareIcon
                     icon="l-spinner"
-                    className="mr-2 h-4 w-4 animate-spin"
+                    className="mr-2 size-4 animate-spin"
                   />
                 )}
                 {isPending ? t("updating") : t("update_password")}

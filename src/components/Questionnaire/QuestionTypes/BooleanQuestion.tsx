@@ -1,13 +1,20 @@
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
 interface BooleanQuestionProps {
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
   clearError: () => void;
 }
@@ -24,15 +31,16 @@ export function BooleanQuestion({
       value={questionnaireResponse.values[0]?.value?.toString()}
       onValueChange={(value) => {
         clearError();
-        updateQuestionnaireResponseCB({
-          ...questionnaireResponse,
-          values: [
+        updateQuestionnaireResponseCB(
+          [
             {
               type: "boolean",
               value: value === "true",
             },
           ],
-        });
+          questionnaireResponse.question_id,
+          questionnaireResponse.note,
+        );
       }}
       disabled={disabled}
     >

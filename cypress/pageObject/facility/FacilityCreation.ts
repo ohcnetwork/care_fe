@@ -1,7 +1,11 @@
 export class FacilityCreation {
   // Navigation
-  navigateToOrganization(orgName: string) {
-    cy.verifyAndClickElement('[data-cy="organization-list"]', orgName);
+  navigateToGovernance(governanceName: string) {
+    cy.verifyAndClickElement('[data-cy="dashboard-sections"]', "Governance");
+    cy.verifyAndClickElement(
+      '[data-cy="governance-panel-list"]',
+      governanceName,
+    );
   }
 
   navigateToFacilitiesList() {
@@ -9,7 +13,7 @@ export class FacilityCreation {
   }
 
   selectFacility(facilityName: string) {
-    cy.verifyAndClickElement("[data-cy='facility-list']", facilityName);
+    cy.verifyAndClickElement("[data-cy='facilities-panel-list']", facilityName);
     return this;
   }
 
@@ -69,9 +73,8 @@ export class FacilityCreation {
     this.enterAddress(address);
   }
 
-  fillLocationDetails(latitude: string, longitude: string) {
-    this.enterLatitude(latitude);
-    this.enterLongitude(longitude);
+  fillLocationDetails(location: string) {
+    cy.typeAndSelectOption('[data-cy="location-search"]', location);
   }
 
   makePublicFacility() {
@@ -94,7 +97,7 @@ export class FacilityCreation {
       { label: "Address", message: "Address is required" },
       {
         label: "Phone Number",
-        message: "Phone number must start with +91 followed by 10 digits",
+        message: "This field is required",
       },
       { label: "Pincode", message: "Invalid Pincode" },
     ]);
@@ -126,7 +129,18 @@ export class FacilityCreation {
       .should("not.be.empty");
   }
 
-  fillLocationHierarchy(location: { localBody: string; ward: string }) {
+  fillLocationHierarchy(location: {
+    state: string;
+    district: string;
+    localBody: string;
+    ward: string;
+  }) {
+    cy.typeAndSelectOption('[data-cy="select-state"]', location.state, false);
+    cy.typeAndSelectOption(
+      '[data-cy="select-district"]',
+      location.district,
+      false,
+    );
     // Don't verify selection for local body (false parameter)
     cy.typeAndSelectOption(
       '[data-cy="select-local_body"]',

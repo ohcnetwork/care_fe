@@ -1,15 +1,11 @@
+import careConfig from "@careConfig";
 import { differenceInMinutes, format } from "date-fns";
 import { toPng } from "html-to-image";
-import { toast } from "sonner";
-
-import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
-import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
 import { Patient } from "@/types/emr/newPatient";
 import { PatientModel } from "@/types/emr/patient";
-import { Quantity } from "@/types/questionnaire/quantity";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -43,18 +39,27 @@ export const relativeDate = (date: DateLike, withoutSuffix = false) => {
   } at ${obj.format(TIME_FORMAT)}`;
 };
 
-export const formatName = (user: { first_name: string; last_name: string }) => {
-  return `${user.first_name} ${user.last_name}`;
-};
-
-export const formatDisplayName = (user: {
-  first_name: string;
-  last_name: string;
-  username: string;
-}) => {
-  return user.first_name && user.last_name
-    ? `${user.first_name} ${user.last_name}`
-    : user.first_name || user.username || "User";
+export const formatName = (
+  user: {
+    first_name: string;
+    last_name: string;
+    prefix?: string | null;
+    suffix?: string | null;
+    username: string;
+  },
+  hidePrefixSuffix: boolean = false,
+) => {
+  return (
+    [
+      hidePrefixSuffix ? undefined : user.prefix,
+      user.first_name,
+      user.last_name,
+      hidePrefixSuffix ? undefined : user.suffix,
+    ]
+      .map((s) => s?.trim())
+      .filter(Boolean)
+      .join(" ") || user.username
+  );
 };
 
 export const relativeTime = (time?: DateLike) => {
@@ -93,172 +98,20 @@ function _isAppleDevice() {
  */
 export const isAppleDevice = _isAppleDevice();
 
-/**
- * Conditionally concatenate classes. An alternate replacement for `clsx`.
- *
- * **Example Usage:**
- * ```tsx
- * <div className={classNames("md:flex", true && "p-0", false && "p-10")} />
- * // "md:flex p-0"
- * ```
- *
- * @deprecated Use `cn` from `@/lib/utils` instead.
- */
-export const classNames = (...classes: (string | boolean | undefined)[]) => {
-  return classes.filter(Boolean).join(" ");
-};
-
-export const getPincodeDetails = async (pincode: string, apiKey: string) => {
-  const response = await fetch(
-    `https://api.data.gov.in/resource/6176ee09-3d56-4a3b-8115-21841576b2f6?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`,
-  );
-  const data = await response.json();
-  if (!data.records || data.records.length === 0) {
-    toast.error("Invalid pincode");
-    return null;
-  }
-  return data.records[0];
-};
-
 export const isUserOnline = (user: { last_login: DateLike }) => {
   return user.last_login
     ? dayjs().subtract(5, "minutes").isBefore(user.last_login)
     : false;
 };
 
-export interface CountryData {
-  flag: string;
-  name: string;
-  code: string;
-}
+export const isAndroidDevice = /android/i.test(navigator.userAgent);
 
-export const parsePhoneNumber = (phoneNumber: string, countryCode?: string) => {
-  if (!phoneNumber) return "";
-  if (phoneNumber === "+91") return "";
-  const phoneCodes: Record<string, CountryData> = phoneCodesJson;
-  let parsedNumber = phoneNumber.replace(/[-+() ]/g, "");
-  if (parsedNumber.length < 12) return "";
-  if (countryCode && phoneCodes[countryCode]) {
-    parsedNumber = phoneCodes[countryCode].code + parsedNumber;
-  } else if (!phoneNumber.startsWith("+")) {
-    return undefined;
-  }
-  parsedNumber = "+" + parsedNumber;
-  return parsedNumber;
-};
-
-export const formatPhoneNumber = (phoneNumber: string) => {
-  if (phoneNumber.startsWith("+91")) {
-    phoneNumber = phoneNumber.startsWith("+910")
-      ? phoneNumber.slice(4)
-      : phoneNumber.slice(3);
-    const landline_code = IN_LANDLINE_AREA_CODES.find((code) =>
-      phoneNumber.startsWith(code),
-    );
-    if (landline_code === undefined)
-      return "+91" + " " + phoneNumber.slice(0, 5) + " " + phoneNumber.slice(5);
-    const subscriber_no_length = 10 - landline_code.length;
-    return (
-      "+91" +
-      " " +
-      landline_code +
-      " " +
-      phoneNumber.slice(
-        landline_code.length,
-        subscriber_no_length / 2 + landline_code.length,
-      ) +
-      " " +
-      phoneNumber.slice(subscriber_no_length / 2 + landline_code.length)
-    );
-  } else if (phoneNumber.startsWith("1800")) {
-    return "1800" + " " + phoneNumber.slice(4, 7) + " " + phoneNumber.slice(7);
-  } else if (phoneNumber.startsWith("+")) {
-    const countryCode = getCountryCode(phoneNumber);
-    if (!countryCode) return phoneNumber;
-    const phoneCodes: Record<string, CountryData> = phoneCodesJson;
-    return (
-      "+" +
-      phoneCodes[countryCode].code +
-      " " +
-      phoneNumber.slice(phoneCodes[countryCode].code.length + 1)
-    );
-  }
-  return phoneNumber;
-};
-
-export const getCountryCode = (phoneNumber: string) => {
-  if (phoneNumber.startsWith("+")) {
-    const phoneCodes: Record<string, CountryData> = phoneCodesJson;
-    const phoneCodesArr = Object.keys(phoneCodes);
-    phoneNumber = phoneNumber.slice(1);
-    const allMatchedCountries: { name: string; code: string }[] = [];
-    for (let i = 0; i < phoneCodesArr.length; i++) {
-      if (
-        phoneNumber.startsWith(
-          phoneCodes[phoneCodesArr[i]].code.replaceAll("-", ""),
-        )
-      ) {
-        allMatchedCountries.push({
-          name: phoneCodesArr[i],
-          code: phoneCodes[phoneCodesArr[i]].code.replaceAll("-", ""),
-        });
-      }
-    }
-    // returns the country which is longest in case there are multiple matches
-    if (allMatchedCountries.length === 0) return undefined;
-    const matchedCountry = allMatchedCountries.reduce((max, country) =>
-      max.code > country.code ? max : country,
-    );
-    const sameCodeCountries = allMatchedCountries.filter(
-      (country) => country.code === matchedCountry.code,
-    );
-    if (matchedCountry === undefined) return undefined;
-    // some countries share same country code but differ in area codes
-    // The area codes are checked for such countries
-    if (matchedCountry.code == "1") {
-      const areaCode = phoneNumber.substring(1, 4);
-      return (
-        sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode),
-        )?.name ?? "US"
-      );
-    } else if (matchedCountry.code === "262") {
-      const areaCode = phoneNumber.substring(3, 6);
-      return sameCodeCountries.find((country) =>
-        AREACODES[country.name]?.includes(areaCode),
-      )?.name;
-    } else if (matchedCountry.code === "61") {
-      const areaCode = phoneNumber.substring(2, 7);
-      return (
-        sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode),
-        )?.name ?? "AU"
-      );
-    } else if (matchedCountry.code === "599") {
-      const areaCode = phoneNumber.substring(3, 4);
-      return (
-        sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode),
-        )?.name ?? "CW"
-      );
-    } else if (matchedCountry.code == "7") {
-      const areaCode = phoneNumber.substring(1, 2);
-      return (
-        sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode),
-        )?.name ?? "RU"
-      );
-    } else if (matchedCountry.code == "47") {
-      const areaCode = phoneNumber.substring(2, 4);
-      return (
-        sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode),
-        )?.name ?? "NO"
-      );
-    }
-    return matchedCountry.name;
-  }
-  return undefined;
+export const getMapUrl = (latitude: string, longitude: string) => {
+  return isAndroidDevice
+    ? `geo:${latitude},${longitude}`
+    : careConfig.mapFallbackUrlTemplate
+        .replace("{lat}", latitude)
+        .replace("{long}", longitude);
 };
 
 const getRelativeDateSuffix = (abbreviated: boolean) => {
@@ -273,7 +126,6 @@ export const formatPatientAge = (
   obj: PatientModel | Patient,
   abbreviated = false,
 ) => {
-  if (obj.age != null) return `${obj.age} Y`;
   const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
@@ -282,7 +134,7 @@ export const formatPatientAge = (
   );
 
   const end = dayjs(
-    obj.death_datetime ? new Date(obj.death_datetime) : new Date(),
+    obj.deceased_datetime ? new Date(obj.deceased_datetime) : new Date(),
   );
 
   const years = end.diff(start, "years");
@@ -304,20 +156,6 @@ export const formatPatientAge = (
     return `${month}${suffixes.month} ${day}${suffixes.day}`;
   }
   return `${day}${suffixes.day}`;
-};
-
-export const mergeQueryOptions = <T extends object>(
-  selected: T[],
-  queryOptions: T[],
-  compareBy: (obj: T) => T[keyof T],
-) => {
-  if (!selected.length) return queryOptions;
-  return [
-    ...selected,
-    ...queryOptions.filter(
-      (option) => !selected.find((s) => compareBy(s) === compareBy(option)),
-    ),
-  ];
 };
 
 /**
@@ -358,12 +196,6 @@ export const getMonthStartAndEnd = (date: Date) => {
     start: new Date(date.getFullYear(), date.getMonth(), 1),
     end: new Date(date.getFullYear(), date.getMonth() + 1, 0),
   };
-};
-
-export const displayQuantity = (quantity?: Quantity) => {
-  if (!quantity) return "N/A";
-
-  return [quantity.value ?? "N/A", quantity.unit].join(" ");
 };
 
 /**
@@ -413,3 +245,86 @@ export const conditionalAttribute = <T>(
 ) => {
   return condition ? attributes : {};
 };
+
+export const conditionalArrayAttribute = <T>(
+  condition: boolean,
+  attributes: T[],
+) => {
+  return condition ? attributes : [];
+};
+
+export const stringifyNestedObject = <
+  T extends { name: string; parent?: Partial<T> },
+>(
+  obj: T,
+  separator: string | React.ReactNode = ", ",
+  reverse: boolean = false,
+) => {
+  const levels: string[] = [];
+
+  let current: Partial<T> | undefined = obj;
+  while (current?.name) {
+    levels.push(current.name);
+    current = current.parent;
+  }
+
+  if (reverse) {
+    levels.reverse();
+  }
+
+  if (typeof separator === "string") {
+    return levels.join(separator);
+  }
+
+  return levels.reduce((acc: (string | React.ReactNode)[], curr, i) => {
+    if (i === 0) return [curr];
+    return [...acc, separator, curr];
+  }, []);
+};
+
+export const mergeAutocompleteOptions = (
+  options: { label: string; value: string }[],
+  value?: { label: string; value: string },
+) => {
+  if (!value) return options;
+  if (options.find((o) => o.value === value.value)) return options;
+  return [value, ...options];
+};
+
+export const readFileAsDataURL = async (file: File) => {
+  let result_base64 = await new Promise((resolve) => {
+    let fileReader = new FileReader();
+    fileReader.onload = () => resolve(fileReader.result);
+    fileReader.readAsDataURL(file);
+  });
+
+  return result_base64 as string;
+};
+export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
+  if (!pastDate) {
+    return [];
+  }
+
+  const intervals = [];
+  let current = new Date(pastDate);
+  let currentEnd = new Date();
+
+  while (currentEnd >= current) {
+    let currentStart = new Date(currentEnd);
+    currentStart.setDate(currentStart.getDate() - 6);
+
+    if (currentStart < current) {
+      currentStart = current;
+    }
+
+    intervals.push({
+      start: currentStart,
+      end: currentEnd,
+    });
+
+    currentEnd = new Date(currentStart);
+    currentEnd.setDate(currentEnd.getDate() - 1);
+  }
+
+  return intervals;
+}

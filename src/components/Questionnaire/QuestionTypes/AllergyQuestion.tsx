@@ -8,16 +8,11 @@ import {
   Pencil2Icon,
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import {
-  BeakerIcon,
-  CookingPotIcon,
-  HeartPulseIcon,
-  LeafIcon,
-} from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { t } from "i18next";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,23 +38,34 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { CATEGORY_ICONS } from "@/components/Patient/allergy/list";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import {
-  AllergyIntolerance,
-  AllergyIntoleranceRequest,
+  ALLERGY_VERIFICATION_STATUS,
+  type AllergyIntolerance,
+  type AllergyIntoleranceRequest,
+  type AllergyVerificationStatus,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
-import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { Question } from "@/types/questionnaire/question";
+import type { Code } from "@/types/questionnaire/code";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
+import type { Question } from "@/types/questionnaire/question";
 
 interface AllergyQuestionProps {
   patientId: string;
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -80,13 +86,6 @@ const ALLERGY_CATEGORIES: Record<AllergyCategory, string> = {
   biologic: "Biologic",
 };
 
-const CATEGORY_ICONS: Record<AllergyCategory, React.ReactNode> = {
-  food: <CookingPotIcon className="h-4 w-4" />,
-  medication: <BeakerIcon className="h-4 w-4" />,
-  environment: <LeafIcon className="h-4 w-4" />,
-  biologic: <HeartPulseIcon className="h-4 w-4" />,
-};
-
 function convertToAllergyRequest(
   allergy: AllergyIntolerance,
 ): AllergyIntoleranceRequest {
@@ -97,7 +96,9 @@ function convertToAllergyRequest(
     verification_status: allergy.verification_status,
     category: allergy.category,
     criticality: allergy.criticality,
-    last_occurrence: allergy.last_occurrence,
+    last_occurrence: allergy.last_occurrence
+      ? dateQueryString(new Date(allergy.last_occurrence))
+      : undefined,
     note: allergy.note,
     encounter: allergy.encounter,
   };
@@ -109,6 +110,7 @@ export function AllergyQuestion({
   disabled,
   patientId,
 }: AllergyQuestionProps) {
+  const isPreview = patientId === "preview";
   const allergies =
     (questionnaireResponse.values?.[0]?.value as AllergyIntoleranceRequest[]) ||
     [];
@@ -117,25 +119,24 @@ export function AllergyQuestion({
     queryKey: ["allergies", patientId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
+      queryParams: {
+        limit: 100,
+      },
     }),
+    enabled: !isPreview,
   });
 
   useEffect(() => {
-    if (patientAllergies?.results && !allergies.length) {
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+    if (patientAllergies?.results) {
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "allergy_intolerance",
             value: patientAllergies.results.map(convertToAllergyRequest),
           },
         ],
-      });
-      if (patientAllergies.count > patientAllergies.results.length) {
-        toast.info(
-          `Showing first ${patientAllergies.results.length} of ${patientAllergies.count} allergies`,
-        );
-      }
+        questionnaireResponse.question_id,
+      );
     }
   }, [patientAllergies]);
 
@@ -144,18 +145,43 @@ export function AllergyQuestion({
       ...allergies,
       { ...ALLERGY_INITIAL_VALUE, code },
     ] as AllergyIntoleranceRequest[];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "allergy_intolerance", value: newAllergies }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "allergy_intolerance", value: newAllergies }],
+      questionnaireResponse.question_id,
+    );
   };
 
   const handleRemoveAllergy = (index: number) => {
-    const newAllergies = allergies.filter((_, i) => i !== index);
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "allergy_intolerance", value: newAllergies }],
-    });
+    const allergy = allergies[index];
+    if (allergy.id) {
+      // For existing records, update verification status to entered_in_error
+      const newAllergies = allergies.map((a, i) =>
+        i === index
+          ? { ...a, verification_status: "entered_in_error" as const }
+          : a,
+      ) as AllergyIntoleranceRequest[];
+      updateQuestionnaireResponseCB(
+        [
+          {
+            type: "allergy_intolerance",
+            value: newAllergies,
+          },
+        ],
+        questionnaireResponse.question_id,
+      );
+    } else {
+      // For new records, remove them completely
+      const newAllergies = allergies.filter((_, i) => i !== index);
+      updateQuestionnaireResponseCB(
+        [
+          {
+            type: "allergy_intolerance",
+            value: newAllergies,
+          },
+        ],
+        questionnaireResponse.question_id,
+      );
+    }
   };
 
   const handleUpdateAllergy = (
@@ -165,32 +191,32 @@ export function AllergyQuestion({
     const newAllergies = allergies.map((allergy, i) =>
       i === index ? { ...allergy, ...updates } : allergy,
     );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "allergy_intolerance", value: newAllergies }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "allergy_intolerance", value: newAllergies }],
+      questionnaireResponse.question_id,
+    );
   };
 
   return (
     <>
       {allergies.length > 0 && (
-        <div className="rounded-lg border">
+        <div className="rounded-lg border border-gray-200">
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px]"></TableHead>
-                  <TableHead className="w-[220px]">Substance</TableHead>
-                  <TableHead className="w-[65px] text-center px-0.5">
-                    Critical
+                  <TableHead className="w-[10%] max-w-[3rem]"></TableHead>
+                  <TableHead className="w-[40%]">{t("substance")}</TableHead>
+                  <TableHead className="w-[15%] text-center">
+                    {t("criticality")}
                   </TableHead>
-                  <TableHead className="w-[85px] text-center px-0.5">
-                    Status
+                  <TableHead className="w-[15%] text-center">
+                    {t("status")}
                   </TableHead>
-                  <TableHead className="w-[100px] text-center px-0.5 pr-6">
-                    Occurrence
+                  <TableHead className="w-[15%] text-center">
+                    {t("occurrence")}
                   </TableHead>
-                  <TableHead className="w-[35px]"></TableHead>
+                  <TableHead className="w-[5%]">{t("action")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -212,11 +238,13 @@ export function AllergyQuestion({
               <div
                 key={index}
                 className={`p-3 space-y-3 ${
-                  allergy.clinical_status === "inactive"
-                    ? "opacity-60"
-                    : allergy.clinical_status === "resolved"
-                      ? "line-through"
-                      : ""
+                  allergy.verification_status === "entered_in_error"
+                    ? "opacity-40 pointer-events-none"
+                    : allergy.clinical_status === "inactive"
+                      ? "opacity-60"
+                      : allergy.clinical_status === "resolved"
+                        ? "line-through"
+                        : ""
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -226,9 +254,9 @@ export function AllergyQuestion({
                       onValueChange={(value) =>
                         handleUpdateAllergy(index, { category: value })
                       }
-                      disabled={disabled}
+                      disabled={disabled || !!allergy.id}
                     >
-                      <SelectTrigger className="h-8 w-[32px] px-0 [&>svg]:hidden flex items-center justify-center">
+                      <SelectTrigger className="h-8 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center">
                         <SelectValue>
                           {allergy.category &&
                             CATEGORY_ICONS[allergy.category as AllergyCategory]}
@@ -255,9 +283,9 @@ export function AllergyQuestion({
                         variant="ghost"
                         size="icon"
                         disabled={disabled}
-                        className="h-8 w-8"
+                        className="size-8"
                       >
-                        <DotsVerticalIcon className="h-4 w-4" />
+                        <DotsVerticalIcon className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -268,7 +296,7 @@ export function AllergyQuestion({
                           })
                         }
                       >
-                        <Pencil2Icon className="h-4 w-4 mr-2" />
+                        <Pencil2Icon className="size-4 mr-2" />
                         {allergy.note !== undefined
                           ? "Hide Notes"
                           : "Add Notes"}
@@ -281,8 +309,8 @@ export function AllergyQuestion({
                             })
                           }
                         >
-                          <CheckCircledIcon className="h-4 w-4 mr-2" />
-                          Mark Active
+                          <CheckCircledIcon className="size-4 mr-2" />
+                          {t("mark_active")}
                         </DropdownMenuItem>
                       )}
                       {allergy.clinical_status !== "inactive" && (
@@ -293,8 +321,8 @@ export function AllergyQuestion({
                             })
                           }
                         >
-                          <CircleBackslashIcon className="h-4 w-4 mr-2" />
-                          Mark Inactive
+                          <CircleBackslashIcon className="size-4 mr-2" />
+                          {t("mark_inactive")}
                         </DropdownMenuItem>
                       )}
                       {allergy.clinical_status !== "resolved" && (
@@ -305,8 +333,8 @@ export function AllergyQuestion({
                             })
                           }
                         >
-                          <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
-                          Mark Resolved
+                          <CheckCircledIcon className="size-4 mr-2 text-green-600" />
+                          {t("mark_resolved")}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
@@ -314,8 +342,8 @@ export function AllergyQuestion({
                         className="text-destructive focus:text-destructive"
                         onClick={() => handleRemoveAllergy(index)}
                       >
-                        <MinusCircledIcon className="h-4 w-4 mr-2" />
-                        Remove Allergy
+                        <MinusCircledIcon className="size-4 mr-2" />
+                        {t("remove_allergy")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -323,7 +351,9 @@ export function AllergyQuestion({
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label className="text-xs text-gray-500">Criticality</Label>
+                    <Label className="text-xs text-gray-500">
+                      {t("criticality")}
+                    </Label>
                     <Select
                       value={allergy.criticality}
                       onValueChange={(value) =>
@@ -337,7 +367,7 @@ export function AllergyQuestion({
                       <SelectContent>
                         <SelectItem value="low">Low</SelectItem>
                         <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="unable-to-assess">
+                        <SelectItem value="unable_to_assess">
                           Unable to Assess
                         </SelectItem>
                       </SelectContent>
@@ -345,12 +375,15 @@ export function AllergyQuestion({
                   </div>
 
                   <div>
-                    <Label className="text-xs text-gray-500">Status</Label>
+                    <Label className="text-xs text-gray-500">
+                      {t("status")}
+                    </Label>
                     <Select
                       value={allergy.verification_status}
                       onValueChange={(value) =>
                         handleUpdateAllergy(index, {
-                          verification_status: value,
+                          verification_status:
+                            value as AllergyVerificationStatus,
                         })
                       }
                       disabled={disabled}
@@ -359,32 +392,44 @@ export function AllergyQuestion({
                         <SelectValue placeholder="Verify" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                        <SelectItem value="unconfirmed">Unconfirmed</SelectItem>
-                        <SelectItem value="refuted">Refuted</SelectItem>
+                        {Object.entries(ALLERGY_VERIFICATION_STATUS).map(
+                          ([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ),
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <Label className="text-xs text-gray-500">Occurrence</Label>
-                    <Input
-                      type="date"
-                      value={allergy.last_occurrence || ""}
-                      onChange={(e) =>
+                    <Label className="text-xs text-gray-500">
+                      {t("occurrence")}
+                    </Label>
+
+                    <CombinedDatePicker
+                      value={
+                        allergy.last_occurrence
+                          ? new Date(allergy.last_occurrence)
+                          : undefined
+                      }
+                      onChange={(date) =>
                         handleUpdateAllergy(index, {
-                          last_occurrence: e.target.value,
+                          last_occurrence: dateQueryString(date),
                         })
                       }
                       disabled={disabled}
-                      className="h-8 mt-1"
+                      buttonClassName="h-7 text-sm px-2 justify-start font-normal w-full"
                     />
                   </div>
                 </div>
 
                 {allergy.note !== undefined && (
                   <div>
-                    <Label className="text-xs text-gray-500">Notes</Label>
+                    <Label className="text-xs text-gray-500">
+                      {t("notes")}
+                    </Label>
                     <Input
                       type="text"
                       placeholder="Add notes about the allergy..."
@@ -404,19 +449,21 @@ export function AllergyQuestion({
       )}
       <ValueSetSelect
         system="system-allergy-code"
-        placeholder="Search for allergies to add"
+        placeholder={t("search_for_allergies_to_add")}
         onSelect={handleAddAllergy}
         disabled={disabled}
       />
     </>
   );
 }
+
 interface AllergyItemProps {
   allergy: AllergyIntoleranceRequest;
   disabled?: boolean;
   onUpdate?: (allergy: Partial<AllergyIntoleranceRequest>) => void;
   onRemove?: () => void;
 }
+
 const AllergyTableRow = ({
   allergy,
   disabled,
@@ -426,11 +473,13 @@ const AllergyTableRow = ({
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
 
   const rowClassName = `group ${
-    allergy.clinical_status === "inactive"
-      ? "opacity-60"
-      : allergy.clinical_status === "resolved"
-        ? "line-through"
-        : ""
+    allergy.verification_status === "entered_in_error"
+      ? "opacity-40 pointer-events-none"
+      : allergy.clinical_status === "inactive"
+        ? "opacity-60"
+        : allergy.clinical_status === "resolved"
+          ? "line-through"
+          : ""
   }`;
 
   const handleNotesToggle = () => {
@@ -446,13 +495,13 @@ const AllergyTableRow = ({
   return (
     <>
       <TableRow className={rowClassName}>
-        <TableCell className="min-w-[40px] py-1 pr-0">
+        <TableCell className="py-1 pr-0">
           <Select
             value={allergy.category}
             onValueChange={(value) => onUpdate?.({ category: value })}
-            disabled={disabled}
+            disabled={disabled || !!allergy.id}
           >
-            <SelectTrigger className="h-7 w-[32px] px-0 [&>svg]:hidden flex items-center justify-center">
+            <SelectTrigger className="h-7 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center">
               <SelectValue
                 placeholder="Cat"
                 className="text-center h-full flex items-center justify-center m-0 p-0"
@@ -478,53 +527,68 @@ const AllergyTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[220px] font-medium py-1 pl-1">
+        <TableCell className="font-medium py-1 pl-1">
           {allergy.code.display}
         </TableCell>
-        <TableCell className="min-w-[65px] py-1 px-0.5">
+        <TableCell className="py-1 px-0.5">
           <Select
             value={allergy.criticality}
             onValueChange={(value) => onUpdate?.({ criticality: value })}
             disabled={disabled}
           >
-            <SelectTrigger className="h-7 w-[65px] px-1">
-              <SelectValue placeholder="Critical" />
+            <SelectTrigger className="h-7 w-full px-1 text-sm">
+              <SelectValue placeholder={t("critical")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="unable-to-assess">Unable to Assess</SelectItem>
+              <SelectItem value="low">{t("low")}</SelectItem>
+              <SelectItem value="high">{t("high")}</SelectItem>
+              <SelectItem value="unable_to_assess">
+                {t("unable_to_assess")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[85px] py-1 px-0.5">
+        <TableCell className="py-1 px-0.5">
           <Select
             value={allergy.verification_status}
-            onValueChange={(value) =>
-              onUpdate?.({ verification_status: value })
-            }
+            onValueChange={(value) => {
+              if (value in ALLERGY_VERIFICATION_STATUS) {
+                onUpdate?.({
+                  verification_status: value as AllergyVerificationStatus,
+                });
+              }
+            }}
             disabled={disabled}
           >
-            <SelectTrigger className="h-7 w-[85px] px-1">
-              <SelectValue placeholder="Verify" />
+            <SelectTrigger className="h-7 w-full px-1 text-sm">
+              <SelectValue placeholder={t("verify")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="unconfirmed">Unconfirmed</SelectItem>
-              <SelectItem value="refuted">Refuted</SelectItem>
+              {Object.entries(ALLERGY_VERIFICATION_STATUS).map(
+                ([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ),
+              )}
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[100px] py-1 px-1">
-          <Input
-            type="date"
-            value={allergy.last_occurrence || ""}
-            onChange={(e) => onUpdate?.({ last_occurrence: e.target.value })}
+        <TableCell className="py-1 px-1">
+          <CombinedDatePicker
+            value={
+              allergy.last_occurrence
+                ? new Date(allergy.last_occurrence)
+                : undefined
+            }
+            onChange={(date) =>
+              onUpdate?.({ last_occurrence: dateQueryString(date) })
+            }
             disabled={disabled}
-            className="h-7 text-sm w-[100px] px-1"
+            buttonClassName="h-7 text-sm px-2 justify-start font-normal w-full"
           />
         </TableCell>
-        <TableCell className="min-w-[35px] py-1 px-0">
+        <TableCell className="py-1 px-0 flex justify-center items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -538,31 +602,31 @@ const AllergyTableRow = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleNotesToggle}>
-                <Pencil2Icon className="h-4 w-4 mr-2" />
-                {showNotes ? "Hide Notes" : "Add Notes"}
+                <Pencil2Icon className="size-4 mr-2" />
+                {showNotes ? t("hide_notes") : t("add_notes")}
               </DropdownMenuItem>
               {allergy.clinical_status !== "active" && (
                 <DropdownMenuItem
                   onClick={() => onUpdate?.({ clinical_status: "active" })}
                 >
-                  <CheckCircledIcon className="h-4 w-4 mr-2" />
-                  Mark Active
+                  <CheckCircledIcon className="size-4 mr-2" />
+                  {t("mark_active")}
                 </DropdownMenuItem>
               )}
               {allergy.clinical_status !== "inactive" && (
                 <DropdownMenuItem
                   onClick={() => onUpdate?.({ clinical_status: "inactive" })}
                 >
-                  <CircleBackslashIcon className="h-4 w-4 mr-2" />
-                  Mark Inactive
+                  <CircleBackslashIcon className="size-4 mr-2" />
+                  {t("mark_inactive")}
                 </DropdownMenuItem>
               )}
               {allergy.clinical_status !== "resolved" && (
                 <DropdownMenuItem
                   onClick={() => onUpdate?.({ clinical_status: "resolved" })}
                 >
-                  <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
-                  Mark Resolved
+                  <CheckCircledIcon className="size-4 mr-2 text-green-600" />
+                  {t("mark_resolved")}
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
@@ -570,8 +634,8 @@ const AllergyTableRow = ({
                 className="text-destructive focus:text-destructive"
                 onClick={onRemove}
               >
-                <MinusCircledIcon className="h-4 w-4 mr-2" />
-                Remove Allergy
+                <MinusCircledIcon className="size-4 mr-2" />
+                {t("remove_allergy")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -580,10 +644,10 @@ const AllergyTableRow = ({
       {showNotes && (
         <TableRow>
           <TableCell colSpan={6} className="px-4 py-2">
-            <Label className="text-xs text-gray-500">Notes</Label>
+            <Label className="text-xs text-gray-500">{t("notes")}</Label>
             <Input
               type="text"
-              placeholder="Add notes about the allergy..."
+              placeholder={t("add_notes_about_the_allergy")}
               value={allergy.note ?? ""}
               onChange={(e) => onUpdate?.({ note: e.target.value })}
               disabled={disabled}

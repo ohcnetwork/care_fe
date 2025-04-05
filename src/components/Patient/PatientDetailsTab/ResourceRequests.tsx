@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -25,17 +25,18 @@ import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { PatientProps } from ".";
 
 export const ResourceRequests = (props: PatientProps) => {
-  const { patientData, facilityId, id } = props;
+  const { patientData, facilityId } = props;
+  const patientId = patientData.id;
   const { t } = useTranslation();
 
   const { data: resourceRequests, isLoading: loading } = useQuery({
-    queryKey: ["resourceRequests", id],
+    queryKey: ["resourceRequests", patientId],
     queryFn: query(routes.listResourceRequests, {
       queryParams: {
-        related_patient: id,
+        related_patient: patientId,
       },
     }),
-    enabled: !!id,
+    enabled: !!patientId,
   });
 
   const getStatusBadge = (status: ResourceRequest["status"]) => {
@@ -64,21 +65,24 @@ export const ResourceRequests = (props: PatientProps) => {
         <h2 className="text-2xl font-semibold leading-tight">
           {t("resource_requests")}
         </h2>
-        <Button
-          variant="outline_primary"
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/resource/new?related_patient=${patientData.id}`,
-            )
-          }
-        >
-          <CareIcon icon="l-plus" className="mr-2" />
-          {t("create_resource_request")}
-        </Button>
+        {facilityId && (
+          <Button
+            variant="outline_primary"
+            asChild
+            data-cy="create-request-button"
+          >
+            <Link
+              href={`/facility/${facilityId}/resource/new?related_patient=${patientData.id}`}
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              {t("create_resource_request")}
+            </Link>
+          </Button>
+        )}
       </div>
 
-      <div className="rounded-lg border bg-white">
-        <Table>
+      <div className="rounded-lg border border-gray-200 bg-white">
+        <Table data-cy="resource-requests-table">
           <TableHeader>
             <TableRow>
               <TableHead>{t("resource_type")}</TableHead>
@@ -97,25 +101,25 @@ export const ResourceRequests = (props: PatientProps) => {
                 </TableCell>
               </TableRow>
             ) : resourceRequests?.results?.length ? (
-              resourceRequests.results.map((request) => (
-                <TableRow key={request.id}>
+              resourceRequests.results.map((request, index) => (
+                <TableRow key={index}>
                   <TableCell className="font-medium">
                     {RESOURCE_CATEGORY_CHOICES.find(
                       (item) => item.id === request.category,
                     )?.text || "--"}
                   </TableCell>
                   <TableCell>{request.title}</TableCell>
-                  <TableCell>{getStatusBadge(request.status)}</TableCell>
+                  <TableCell>{getStatusBadge(t(request.status))}</TableCell>
                   <TableCell>{formatDateTime(request.created_date)}</TableCell>
                   <TableCell>{formatDateTime(request.modified_date)}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/resource/${request.id}`)}
-                    >
-                      <CareIcon icon="l-eye" className="mr-2" />
-                      {t("view")}
+                    <Button variant="outline" size="sm" asChild>
+                      <Link
+                        href={`/facility/${request.origin_facility.id}/resource/${request.id}`}
+                      >
+                        <CareIcon icon="l-eye" className="mr-2" />
+                        {t("view")}
+                      </Link>
                     </Button>
                   </TableCell>
                 </TableRow>

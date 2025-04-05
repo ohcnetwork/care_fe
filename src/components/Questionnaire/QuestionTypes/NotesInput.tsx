@@ -14,14 +14,14 @@ import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 
 interface NotesInputProps {
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  handleUpdateNote: (note: string) => void;
   disabled?: boolean;
   className?: string;
 }
 
 export function NotesInput({
   questionnaireResponse,
-  updateQuestionnaireResponseCB,
+  handleUpdateNote,
   disabled,
   className,
 }: NotesInputProps) {
@@ -38,6 +38,7 @@ export function NotesInput({
             size="sm"
             className="h-full w-28 text-sm font-normal text-gray-700 hover:text-gray-900"
             disabled={disabled}
+            data-cy="notes"
           >
             {hasNotes ? (
               <div className="w-1.5 h-1.5 rounded-full bg-orange-400 " />
@@ -50,15 +51,11 @@ export function NotesInput({
         <PopoverContent className="bg-yellow-100 border border-yellow-200 text-gray-900 shadow-lg p-2">
           <Textarea
             value={notes}
-            onChange={(e) =>
-              updateQuestionnaireResponseCB({
-                ...questionnaireResponse,
-                note: e.target.value,
-              })
-            }
+            onChange={(e) => handleUpdateNote(e.target.value)}
             className=" border-yellow-200 focus-visible:border-yellow-300 focus-visible:ring-yellow-300"
             placeholder="Add notes..."
             disabled={disabled}
+            data-cy="notes-textarea"
           />
         </PopoverContent>
       </Popover>

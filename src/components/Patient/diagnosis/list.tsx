@@ -1,9 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
+import { Link } from "raviger";
+import { ReactNode } from "react";
+
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
+import { ACTIVE_DIAGNOSIS_CLINICAL_STATUS } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 
 import { DiagnosisTable } from "./DiagnosisTable";
@@ -11,51 +19,109 @@ import { DiagnosisTable } from "./DiagnosisTable";
 interface DiagnosisListProps {
   patientId: string;
   encounterId?: string;
+  className?: string;
+  readOnly?: boolean;
 }
 
-export function DiagnosisList({ patientId, encounterId }: DiagnosisListProps) {
-  const { data: diagnoses, isLoading } = useQuery({
-    queryKey: ["diagnosis", patientId, encounterId],
+export function DiagnosisList({
+  patientId,
+  encounterId,
+  className = "",
+  readOnly = false,
+}: DiagnosisListProps) {
+  const { data: diagnoses, isLoading: isDiagnosesLoading } = useQuery({
+    queryKey: ["encounter_diagnosis", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
-      queryParams: encounterId ? { encounter: encounterId } : undefined,
+      queryParams: {
+        category: ["encounter_diagnosis"],
+        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+        exclude_verification_status: "entered_in_error",
+        ...(encounterId ? { encounter: encounterId } : {}),
+      },
     }),
   });
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Diagnoses</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[100px] w-full" />
-        </CardContent>
-      </Card>
-    );
-  }
+  const { data: chronicConditions, isLoading: isChronicConditionsLoading } =
+    useQuery({
+      queryKey: ["chronic_condition", patientId, encounterId],
+      queryFn: query(diagnosisApi.listDiagnosis, {
+        pathParams: { patientId },
+        queryParams: {
+          category: "chronic_condition",
+          clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+          exclude_verification_status: "entered_in_error",
+        },
+      }),
+    });
 
-  if (!diagnoses?.results?.length) {
+  if (!diagnoses?.results.length && !chronicConditions?.results.length) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Diagnoses</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">No diagnoses recorded</p>
+      <DiagnosisListLayout className={className} readOnly={readOnly}>
+        <CardContent className="px-2 pb-3 pt-2">
+          <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
         </CardContent>
-      </Card>
+      </DiagnosisListLayout>
     );
   }
 
   return (
-    <Card className="p-0">
-      <CardHeader className="px-4 py-0 pt-4">
-        <CardTitle>Diagnoses</CardTitle>
-      </CardHeader>
-      <CardContent className="p-2">
-        <DiagnosisTable diagnoses={diagnoses.results} />
-      </CardContent>
-    </Card>
+    <DiagnosisListLayout className={className} readOnly={readOnly}>
+      <div className="space-y-2">
+        {isChronicConditionsLoading && (
+          <CardContent className="px-2 pb-2">
+            <Skeleton className="h-[100px] w-full" />
+            <Skeleton className="h-[100px] w-full" />
+          </CardContent>
+        )}
+        {chronicConditions?.results.length ? (
+          <DiagnosisTable
+            diagnoses={chronicConditions?.results}
+            title={t("chronic_condition", {
+              count: 2,
+            })}
+          />
+        ) : null}
+        {isDiagnosesLoading && (
+          <CardContent className="px-2 pb-2">
+            <Skeleton className="h-[100px] w-full" />
+            <Skeleton className="h-[100px] w-full" />
+          </CardContent>
+        )}
+        {diagnoses?.results?.length ? (
+          <DiagnosisTable diagnoses={diagnoses.results} />
+        ) : null}
+      </div>
+    </DiagnosisListLayout>
   );
 }
+
+const DiagnosisListLayout = ({
+  children,
+  className,
+  readOnly = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  readOnly?: boolean;
+}) => {
+  return (
+    <Card className={cn("rounded-sm ", className)}>
+      <CardHeader
+        className={cn("px-4 pt-4 pb-2 flex justify-between flex-row")}
+      >
+        <CardTitle>{t("diagnoses")}</CardTitle>
+        {!readOnly && (
+          <Link
+            href={`questionnaire/diagnosis`}
+            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
+          >
+            <CareIcon icon="l-pen" className="size-4" />
+            {t("edit")}
+          </Link>
+        )}
+      </CardHeader>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
+    </Card>
+  );
+};

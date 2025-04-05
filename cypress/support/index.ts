@@ -1,4 +1,4 @@
-import { ErrorMessageItem } from "./commands";
+import { ErrorMessageItem } from "@/support/commands";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -6,12 +6,7 @@ declare global {
     interface Chainable<Subject> {
       loginByApi(role: string): Chainable<Subject>;
       verifyNotification(msg: string): Chainable<Subject>;
-      awaitUrl(
-        url: string,
-        disableLoginVerification?: boolean,
-      ): Chainable<Subject>;
       getAttached(selector: string): Chainable<Subject>;
-      clearAllFilters(): Chainable<Subject>;
       clickSubmitButton(buttonText?: string): Chainable<Element>;
       clickCancelButton(buttonText?: string): Chainable<Element>;
       typeAndSelectOption(
@@ -37,6 +32,8 @@ declare global {
         selector: string,
         texts: string[],
       ): Chainable<Element>;
+      saveCurrentUrl(): Chainable<Subject>;
+      navigateToSavedUrl(): Chainable<Subject>;
       verifyErrorMessages(errors: ErrorMessageItem[]): Chainable<void>;
       typeIntoField(
         selector: string,

@@ -8,20 +8,12 @@ import {
   CreateFileResponse,
   FileUploadModel,
 } from "@/components/Patient/models";
-import {
-  UpdatePasswordForm,
-  UserAssignedModel,
-  UserModel,
-} from "@/components/Users/models";
+import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
-import {
-  AppointmentPatient,
-  AppointmentPatientRegister,
-} from "@/pages/Patient/Utils";
+import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
+import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
-import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
   Observation,
@@ -33,17 +25,8 @@ import {
   CreateFacility,
   FacilityData,
 } from "@/types/facility/facility";
-import {
-  FacilityOrganization,
-  FacilityOrganizationCreate,
-  FacilityOrganizationResponse,
-} from "@/types/facilityOrganization/facilityOrganization";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
-import {
-  OrganizationUserRole,
-  RoleResponse,
-} from "@/types/organization/organization";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,
@@ -70,6 +53,8 @@ export interface JwtTokenObtainPair {
   access: string;
   refresh: string;
 }
+
+export type LoginResponse = JwtTokenObtainPair | MFAAuthenticationToken;
 
 export interface LoginCredentials {
   username: string;
@@ -102,8 +87,14 @@ const routes = {
     path: "/api/v1/auth/login/",
     method: "POST",
     noAuth: true,
-    TRes: Type<JwtTokenObtainPair>(),
+    TRes: Type<LoginResponse>(),
     TBody: Type<LoginCredentials>(),
+  },
+
+  logout: {
+    path: "/api/v1/auth/logout/",
+    method: "POST",
+    TBody: Type<JwtTokenObtainPair>(),
   },
 
   token_refresh: {
@@ -111,11 +102,6 @@ const routes = {
     method: "POST",
     TRes: Type<JwtTokenObtainPair>(),
     TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
-  },
-
-  token_verify: {
-    path: "/api/v1/auth/token/verify/",
-    method: "POST",
   },
 
   checkResetToken: {
@@ -158,39 +144,21 @@ const routes = {
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
-    TRes: Type<UserModel>(),
-  },
-
-  userList: {
-    path: "/api/v1/users/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<UserModel>>(),
+    TRes: Type<AuthUserModel>(),
   },
 
   deleteProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
     method: "DELETE",
-    TRes: Type<UserModel>(),
+    TRes: Type<AuthUserModel>(),
+    TBody: Type<void>(),
   },
 
   deleteUser: {
     path: "/api/v1/users/{username}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
-  },
-
-  // Facility Endpoints
-
-  getPermittedFacilities: {
-    path: "/api/v1/facility/",
-    TRes: Type<PaginatedResponse<FacilityModel>>(),
-  },
-
-  createFacility: {
-    path: "/api/v1/facility/",
-    method: "POST",
-    TRes: Type<FacilityModel>(),
-    TBody: Type<FacilityRequest>(),
+    TBody: Type<void>(),
   },
 
   getPermittedFacility: {
@@ -216,11 +184,7 @@ const routes = {
     path: "/api/v1/facility/{id}/cover_image/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
-  },
-
-  getFacilityUsers: {
-    path: "/api/v1/facility/{facility_id}/get_users/",
-    TRes: Type<PaginatedResponse<UserAssignedModel>>(),
+    TBody: Type<void>(),
   },
 
   getScheduleAbleFacilityUser: {
@@ -230,14 +194,7 @@ const routes = {
 
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
-    TRes: Type<PaginatedResponse<UserAssignedModel>>(),
-  },
-
-  // Download Api
-  deleteFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
+    TRes: Type<PaginatedResponse<UserBase>>(),
   },
 
   // Patient
@@ -330,11 +287,6 @@ const routes = {
     path: "/api/v1/resource/{id}/",
     method: "GET",
     TRes: Type<ResourceRequest>(),
-  },
-  downloadResourceRequests: {
-    path: "/api/v1/resource/",
-    method: "GET",
-    TRes: Type<string>(),
   },
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
@@ -440,55 +392,6 @@ const routes = {
     method: "POST",
     TRes: Type<ObservationAnalyzeResponse>(),
   },
-  facilityOrganization: {
-    list: {
-      path: "/api/v1/facility/{facilityId}/organizations/",
-      method: "GET",
-      TRes: {} as FacilityOrganizationResponse,
-    },
-    get: {
-      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/",
-      method: "GET",
-      TRes: {} as FacilityOrganization,
-    },
-    create: {
-      path: "/api/v1/facility/{facilityId}/organizations/",
-      method: "POST",
-      TRes: {} as FacilityOrganization,
-      TBody: {} as FacilityOrganizationCreate,
-    },
-    listUsers: {
-      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
-      method: "GET",
-      TRes: {} as PaginatedResponse<OrganizationUserRole>,
-    },
-    assignUser: {
-      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
-      method: "POST",
-      TRes: {} as OrganizationUserRole,
-      TBody: {} as { user: string; role: string },
-    },
-    updateUserRole: {
-      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
-      method: "PUT",
-      TRes: {} as OrganizationUserRole,
-      TBody: {} as { user: string; role: string },
-    },
-    removeUserRole: {
-      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
-      method: "DELETE",
-      TRes: {} as Record<string, never>,
-    },
-  },
-
-  // Role Routes
-  role: {
-    list: {
-      path: "/api/v1/role/",
-      method: "GET",
-      TRes: {} as RoleResponse,
-    },
-  },
 
   // Notes Routes
   notes: {
@@ -551,9 +454,14 @@ const routes = {
     },
     removeOrganization: {
       path: "/api/v1/encounter/{encounterId}/organizations_remove/",
-      method: "POST",
+      method: "DELETE",
       TRes: Type<Encounter>(),
       TBody: Type<{ organization: string }>(),
+    },
+    generateDischargeSummary: {
+      path: "/api/v1/encounter/{encounterId}/generate_discharge_summary/",
+      method: "POST",
+      TRes: Type<{ detail: string }>(),
     },
   },
 
@@ -619,14 +527,12 @@ const routes = {
       path: "/api/v1/otp/login/",
       method: "POST",
       TBody: Type<{ phone_number: string; otp: string }>(),
-      TRes: Type<
-        { access: string } | { errors: Array<Record<string, string>> }
-      >(),
+      TRes: Type<{ access: string }>(),
     },
     getPatient: {
       path: "/api/v1/otp/patient/",
       method: "GET",
-      TRes: Type<PaginatedResponse<AppointmentPatient>>(),
+      TRes: Type<PaginatedResponse<Patient>>(),
       auth: {
         key: "Authorization",
         value: "Bearer {token}",
@@ -637,29 +543,12 @@ const routes = {
       path: "/api/v1/otp/patient/",
       method: "POST",
       TBody: Type<Partial<AppointmentPatientRegister>>(),
-      TRes: Type<AppointmentPatient>(),
+      TRes: Type<Patient>(),
       auth: {
         key: "Authorization",
         value: "Bearer {token}",
         type: "header",
       },
-    },
-  },
-
-  // Medication
-  medicationRequest: {
-    list: {
-      path: "/api/v1/patient/{patientId}/medication/request/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<MedicationRequestRead>>(),
-    },
-  },
-
-  medicationStatement: {
-    list: {
-      path: "/api/v1/patient/{patientId}/medication/statement/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<MedicationStatement>>(),
     },
   },
 } as const;

@@ -2,12 +2,14 @@ import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
+
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import {
-  Question,
-  StructuredQuestionType,
-} from "@/types/questionnaire/question";
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
+import { Question } from "@/types/questionnaire/question";
 
 import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
 
@@ -20,13 +22,13 @@ const FULL_WIDTH_QUESTION_TYPES: StructuredQuestionType[] = [
 interface QuestionRendererProps {
   questions: Question[];
   responses: QuestionnaireResponse[];
-  onResponseChange: (responses: QuestionnaireResponse[]) => void;
+  onResponseChange: (values: ResponseValue[], questionId: string) => void;
   errors: QuestionValidationError[];
   clearError: (questionId: string) => void;
   disabled?: boolean;
   activeGroupId?: string;
   encounterId?: string;
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
 }
 
@@ -43,6 +45,7 @@ export function QuestionRenderer({
   patientId,
 }: QuestionRendererProps) {
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const isPreview = encounterId === "preview";
 
   useEffect(() => {
     if (activeGroupId && questionRefs.current[activeGroupId]) {
@@ -53,26 +56,13 @@ export function QuestionRenderer({
     }
   }, [activeGroupId]);
 
-  const handleResponseChange = (updatedResponse: QuestionnaireResponse) => {
-    const newResponses = [...responses];
-    const index = newResponses.findIndex(
-      (r) => r.question_id === updatedResponse.question_id,
-    );
-    if (index !== -1) {
-      newResponses[index] = updatedResponse;
-    } else {
-      newResponses.push(updatedResponse);
-    }
-    onResponseChange(newResponses);
-  };
-
   const shouldBeFullWidth = (question: Question): boolean =>
     question.type === "structured" &&
     !!question.structured_type &&
     FULL_WIDTH_QUESTION_TYPES.includes(question.structured_type);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8 bg-white">
       {questions.map((question) => (
         <div
           key={question.id}
@@ -86,10 +76,10 @@ export function QuestionRenderer({
             question={question}
             encounterId={encounterId}
             questionnaireResponses={responses}
-            updateQuestionnaireResponseCB={handleResponseChange}
+            updateQuestionnaireResponseCB={onResponseChange}
             errors={errors}
             clearError={clearError}
-            disabled={disabled}
+            disabled={disabled || isPreview}
             activeGroupId={activeGroupId}
             patientId={patientId}
           />

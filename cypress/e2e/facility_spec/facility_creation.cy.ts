@@ -1,8 +1,11 @@
-import { FacilityCreation } from "pageObject/facility/FacilityCreation";
-import { generatePhoneNumber } from "utils/commonUtils";
-import { generateFacilityData } from "utils/facilityData";
+import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
+import { generatePhoneNumber } from "@/utils/commonUtils";
+import { generateFacilityData } from "@/utils/facilityData";
+import { viewPort } from "@/utils/viewPort";
 
 const LOCATION_HIERARCHY = {
+  state: "Kerala",
+  district: "Ernakulam",
   localBody: "Aluva",
   ward: "4",
 };
@@ -12,17 +15,16 @@ describe("Facility Management", () => {
   const facilityType = "Primary Health Centre";
 
   beforeEach(() => {
-    // Set larger viewport to ensure all elements are visible
-    cy.viewport(1920, 1080);
-    cy.visit("/login");
+    cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
     cy.loginByApi("nurse");
+    cy.visit("/");
   });
 
   it("Create a new facility using the admin role and verify validation errors", () => {
     const testFacility = generateFacilityData();
     const phoneNumber = generatePhoneNumber();
 
-    facilityPage.navigateToOrganization("Kerala");
+    facilityPage.navigateToGovernance("Kerala");
     facilityPage.navigateToFacilitiesList();
     facilityPage.clickAddFacility();
     facilityPage.submitFacilityCreationForm();
@@ -45,10 +47,7 @@ describe("Facility Management", () => {
 
     facilityPage.fillLocationHierarchy(LOCATION_HIERARCHY);
 
-    facilityPage.fillLocationDetails(
-      testFacility.coordinates.latitude,
-      testFacility.coordinates.longitude,
-    );
+    facilityPage.fillLocationDetails("Ernakulam");
 
     // Submit and verify
     facilityPage.makePublicFacility();

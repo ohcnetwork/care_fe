@@ -5,8 +5,11 @@ import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,20 +25,17 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 import CircularProgress from "@/components/Common/CircularProgress";
-import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import request from "@/Utils/request/request";
-import { HTTPError } from "@/Utils/request/types";
-import { parsePhoneNumber } from "@/Utils/utils";
-import { TokenData } from "@/types/auth/otpToken";
+import { TokenData } from "@/types/auth/otp";
 
 const FormSchema = z.object({
   pin: z.string().min(5, {
@@ -54,7 +54,7 @@ export default function PatientLogin({
 }) {
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
-  const [phoneNumber, setPhoneNumber] = useState("+91");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState("");
   const OTPForm = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -74,64 +74,27 @@ export default function PatientLogin({
       `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
     );
   }
-  const validate = (phoneNumber: string) => {
-    let errors = "";
-
-    const parsedPhoneNumber = parsePhoneNumber(phoneNumber);
-    if (
-      !parsedPhoneNumber ||
-      !(PhoneNumberValidator(["mobile"])(parsedPhoneNumber ?? "") === undefined)
-    ) {
-      errors = t("invalid_phone");
-    }
-    return errors;
-  };
-
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
-    mutationFn: (phoneNumber: string) =>
-      request(routes.otp.sendOtp, {
-        body: {
-          phone_number: phoneNumber,
-        },
-        silent: true,
-      }),
+    mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
+      toast.success(t("send_otp_success"));
       if (page === "send") {
         navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
       }
-    },
-    onError: () => {
-      toast.error(t("error_sending_otp"));
     },
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const errors = validate(phoneNumber);
-    if (errors !== "") {
-      setError(errors);
+    if (!isValidPhoneNumber(phoneNumber)) {
+      setError(t("phone_number_validation_error"));
       return;
     }
-    sendOTP(phoneNumber);
+    sendOTP({ phone_number: phoneNumber });
   };
 
   const { mutate: verifyOTP, isPending: isVerifyOTPLoading } = useMutation({
-    mutationFn: async ({
-      phone_number,
-      otp,
-    }: {
-      phone_number: string;
-      otp: string;
-    }) => {
-      const response = await mutate(routes.otp.loginByOtp, { silent: true })({
-        phone_number,
-        otp,
-      });
-      if ("errors" in response) {
-        throw response;
-      }
-      return response;
-    },
+    mutationFn: mutate(routes.otp.loginByOtp),
     onSuccess: (response: { access: string }) => {
       if (response.access) {
         const tokenData: TokenData = {
@@ -144,12 +107,6 @@ export default function PatientLogin({
           `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
         );
       }
-    },
-    onError: (error: HTTPError) => {
-      const errorData = error.cause as { errors: Array<{ otp: string }> };
-      const errorMessage =
-        errorData?.errors?.[0]?.otp || t("error_verifying_otp");
-      toast.error(errorMessage);
     },
   });
 
@@ -165,26 +122,27 @@ export default function PatientLogin({
         </span>
         <form
           onSubmit={handleSubmit}
-          className="flex mt-2 flex-col gap-4 shadow border p-8 rounded-lg"
+          className="flex mt-2 flex-col gap-4 shadow-sm border border-gray-200 p-8 rounded-lg"
         >
-          <div className="space-y-4">
-            <PhoneNumberFormField
-              name="phone_number"
-              label={t("phone_number")}
-              required
-              types={["mobile"]}
-              onChange={(e) => setPhoneNumber(e.value)}
+          <div className="space-y-2">
+            <Label>{t("phone_number")}</Label>
+            <PhoneInput
               value={phoneNumber}
-              error={error}
+              onChange={(value) => {
+                setPhoneNumber(value || "");
+                setError("");
+              }}
+              placeholder={t("enter_phone_number")}
+              disabled={isSendOTPLoading}
             />
+            {error && <p className="text-red-500 text-sm">{error}</p>}
           </div>
           <Button
-            variant="primary"
+            variant="primary_gradient"
             type="submit"
-            className="w-full h-12 text-lg"
             disabled={isSendOTPLoading}
           >
-            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+            <span className="bg-linear-to-b from-white/15 to-transparent"></span>
             {isSendOTPLoading ? (
               <CircularProgress className="text-white" />
             ) : (
@@ -209,7 +167,7 @@ export default function PatientLogin({
         <Form {...OTPForm}>
           <form
             onSubmit={OTPForm.handleSubmit(handleVerifySubmit)}
-            className="flex mt-2 flex-col gap-4 shadow border p-8 rounded-lg"
+            className="flex mt-2 flex-col gap-4 shadow-sm border border-gray-200 p-8 rounded-lg"
           >
             <FormField
               control={OTPForm.control}
@@ -220,7 +178,12 @@ export default function PatientLogin({
                     {t("enter_the_verification_code")}
                   </FormLabel>
                   <FormControl>
-                    <InputOTP maxLength={5} {...field} className="focus:ring-0">
+                    <InputOTP
+                      maxLength={5}
+                      {...field}
+                      className="focus:ring-0"
+                      autoFocus
+                    >
                       <InputOTPGroup>
                         <InputOTPSlot index={0} />
                       </InputOTPGroup>
@@ -255,12 +218,18 @@ export default function PatientLogin({
                 t("verify_otp")
               )}
             </Button>
-            <a
-              className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
-              onClick={() => sendOTP(phoneNumber)}
-            >
-              {t("didnt_receive_a_message")} {t("resend_otp")}
-            </a>
+            {isSendOTPLoading ? (
+              <div className="w-full flex justify-center">
+                <CircularProgress className="text-secondary-800" />
+              </div>
+            ) : (
+              <a
+                className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
+                onClick={() => sendOTP({ phone_number: phoneNumber })}
+              >
+                {t("didnt_receive_a_message")} {t("resend_otp")}
+              </a>
+            )}
           </form>
         </Form>
       </div>
@@ -274,12 +243,13 @@ export default function PatientLogin({
         className="border border-secondary-400"
         onClick={() =>
           page === "send"
-            ? goBack()
+            ? goBack(`/facility/${facilityId}`)
             : navigate(
                 `/facility/${facilityId}/appointments/${staffId}/otp/send`,
               )
         }
       >
+        <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
         <span className="text-sm underline">{t("back")}</span>
       </Button>
       {page === "send" ? renderPhoneNumberForm() : renderVerifyForm()}

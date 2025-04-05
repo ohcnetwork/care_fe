@@ -53,6 +53,7 @@ interface ObservationVisualizerProps {
   height?: number;
   gridCols?: number;
   encounterId: string;
+  canAccess: boolean;
 }
 
 interface ChartData {
@@ -103,6 +104,7 @@ export const ObservationVisualizer = ({
   encounterId,
   height = 300,
   gridCols = 2,
+  canAccess,
 }: ObservationVisualizerProps) => {
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
@@ -123,6 +125,7 @@ export const ObservationVisualizer = ({
         codes: allCodes,
       },
     }),
+    enabled: canAccess,
   });
 
   if (isLoading) {
@@ -152,7 +155,7 @@ export const ObservationVisualizer = ({
         {codeGroups.map((group, index) => (
           <Card key={index} className="p-4">
             <div
-              className="flex items-center justify-center text-muted-foreground"
+              className="flex items-center justify-center text-gray-500"
               style={{ height: `${height}px` }}
             >
               No data available
@@ -353,7 +356,7 @@ export const ObservationVisualizer = ({
                             <div className="flex items-center gap-2">
                               <Avatar
                                 name={observations[0].details.enteredBy}
-                                className="h-6 w-6"
+                                className="size-6"
                               />
                               <span>{observations[0].details.enteredBy}</span>
                             </div>
@@ -365,7 +368,7 @@ export const ObservationVisualizer = ({
                                   details.note && (
                                     <div
                                       key={code.code}
-                                      className="text-sm text-muted-foreground"
+                                      className="text-sm text-gray-500"
                                     >
                                       <span className="font-medium">
                                         {code.display}:

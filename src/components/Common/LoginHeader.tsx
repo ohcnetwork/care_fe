@@ -18,7 +18,7 @@ import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import { TokenData } from "@/types/auth/otpToken";
+import { TokenData } from "@/types/auth/otp";
 
 export const LoginHeader = () => {
   const { t } = useTranslation();
@@ -47,7 +47,7 @@ export const LoginHeader = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Avatar name={"User"} className="w-7 h-7 rounded-full" />
+                <Avatar name={"User"} className="size-7 rounded-full" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -58,7 +58,7 @@ export const LoginHeader = () => {
                 className="text-red-600 focus:text-red-600 cursor-pointer"
                 onClick={signOut}
               >
-                <CareIcon icon="l-signout" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-signout" className="mr-2 size-4" />
                 {t("sign_out")}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -74,7 +74,14 @@ export const LoginHeader = () => {
         <Button
           variant="ghost"
           className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
-          onClick={() => navigate("/login?mode=patient")}
+          onClick={() =>
+            navigate(
+              `/login?mode=${
+                localStorage.getItem(LocalStorageKeys.loginPreference) ??
+                "patient"
+              }`,
+            )
+          }
         >
           {t("sign_in")}
         </Button>

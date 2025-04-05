@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -37,10 +39,10 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { editUserPermissions } from "@/Utils/permissions";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
+import roleApi from "@/types/emr/role/roleApi";
 import { OrganizationUserRole } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -61,11 +63,12 @@ export default function EditUserRoleSheet({
   const [open, setOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>(userRole.role.id);
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
+  const authUser = useAuthUser();
   const { t } = useTranslation();
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
-    queryFn: query(routes.role.list),
+    queryFn: query(roleApi.listRoles),
     enabled: open,
   });
 
@@ -121,8 +124,8 @@ export default function EditUserRoleSheet({
       role: selectedRole,
     });
   };
-  const authUser = useAuthUser();
-  const editPermissions = editUserPermissions(authUser, userRole.user);
+  const canEditUser =
+    authUser.is_superuser || authUser.username === userRole.user.username;
 
   return (
     <>
@@ -143,16 +146,16 @@ export default function EditUserRoleSheet({
             </SheetDescription>
           </SheetHeader>
           <div className="space-y-6 py-4">
-            <div className="rounded-lg border p-4 space-y-4">
+            <div className="rounded-lg border border-gray-200 p-4 space-y-4">
               <div className="flex items-start gap-4">
                 <Avatar
                   name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                  className="h-12 w-12"
+                  className="size-12"
                   imageUrl={userRole.user.profile_picture_url}
                 />
                 <div className="flex flex-col flex-1">
                   <span className="font-medium text-lg">
-                    {userRole.user.first_name} {userRole.user.last_name}
+                    {formatName(userRole.user)}
                   </span>
                   <span className="text-sm text-gray-500">
                     {userRole.user.email}
@@ -160,7 +163,7 @@ export default function EditUserRoleSheet({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
                 <div>
                   <span className="text-sm text-gray-500">{t("username")}</span>
                   <p className="text-sm font-medium">
@@ -238,7 +241,7 @@ export default function EditUserRoleSheet({
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => removeRole()}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      className={cn(buttonVariants({ variant: "destructive" }))}
                     >
                       {t("remove")}
                     </AlertDialogAction>
@@ -246,7 +249,7 @@ export default function EditUserRoleSheet({
                 </AlertDialogContent>
               </AlertDialog>
 
-              {editPermissions && (
+              {canEditUser && (
                 <Button
                   variant="outline"
                   className="w-full"

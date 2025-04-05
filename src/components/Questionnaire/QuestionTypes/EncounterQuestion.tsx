@@ -29,6 +29,7 @@ import {
   type EncounterEditRequest,
   type EncounterPriority,
   type EncounterStatus,
+  Hospitalization,
 } from "@/types/emr/encounter";
 import type {
   QuestionnaireResponse,
@@ -40,7 +41,11 @@ interface EncounterQuestionProps {
   question: Question;
   encounterId: string;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
   clearError: () => void;
   organizations?: string[];
@@ -110,6 +115,9 @@ export function EncounterQuestion({
   ) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
+    if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
+      newEncounter.hospitalization = {} as Hospitalization;
+    }
 
     // Create the full encounter request object
     const encounterRequest: EncounterEditRequest = {
@@ -121,13 +129,13 @@ export function EncounterQuestion({
     // Create the response value with the encounter request
     const responseValue: ResponseValue = {
       type: "encounter",
-      value: [encounterRequest] as unknown as typeof responseValue.value,
+      value: [encounterRequest],
     };
 
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [responseValue],
-    });
+    updateQuestionnaireResponseCB(
+      [responseValue],
+      questionnaireResponse.question_id,
+    );
   };
 
   if (isLoading) {
@@ -223,10 +231,8 @@ export function EncounterQuestion({
         </div>
       </div>
       {/* Hospitalization Details - Only show for relevant encounter classes */}
-      {(encounter.encounter_class === "imp" ||
-        encounter.encounter_class === "obsenc" ||
-        encounter.encounter_class === "emer") && (
-        <div className="col-span-2 border rounded-lg p-4 space-y-4">
+      {["imp", "obsenc", "emer"].includes(encounter.encounter_class) && (
+        <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
           <h3 className="text-lg font-semibold break-words">
             {t("hospitalization_details")}
           </h3>

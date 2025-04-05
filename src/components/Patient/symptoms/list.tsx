@@ -1,5 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
+import { Link } from "raviger";
+import { ReactNode, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -11,9 +19,17 @@ import { SymptomTable } from "./SymptomTable";
 interface SymptomsListProps {
   patientId: string;
   encounterId?: string;
+  className?: string;
+  readOnly?: boolean;
 }
 
-export function SymptomsList({ patientId, encounterId }: SymptomsListProps) {
+export function SymptomsList({
+  patientId,
+  encounterId,
+  className,
+  readOnly = false,
+}: SymptomsListProps) {
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
@@ -24,38 +40,107 @@ export function SymptomsList({ patientId, encounterId }: SymptomsListProps) {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Symptoms</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <SymptomListLayout
+        patientId={patientId}
+        encounterId={encounterId}
+        readOnly={readOnly}
+      >
+        <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
-      </Card>
+      </SymptomListLayout>
     );
   }
 
-  if (!symptoms?.results?.length) {
+  const filteredSymptoms = symptoms?.results?.filter(
+    (symptom) =>
+      showEnteredInError || symptom.verification_status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorRecords = symptoms?.results?.some(
+    (symptom) => symptom.verification_status === "entered_in_error",
+  );
+
+  if (!filteredSymptoms?.length) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Symptoms</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">No symptoms recorded</p>
+      <SymptomListLayout
+        patientId={patientId}
+        encounterId={encounterId}
+        readOnly={readOnly}
+      >
+        <CardContent className="px-2 pb-3 pt-2">
+          <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
         </CardContent>
-      </Card>
+      </SymptomListLayout>
     );
   }
 
   return (
-    <Card className="p-0">
-      <CardHeader className="px-4 py-0 pt-4">
-        <CardTitle>Symptoms</CardTitle>
-      </CardHeader>
-      <CardContent className="p-2">
-        <SymptomTable symptoms={symptoms.results} />
-      </CardContent>
-    </Card>
+    <SymptomListLayout
+      patientId={patientId}
+      encounterId={encounterId}
+      className={className}
+      readOnly={readOnly}
+    >
+      <SymptomTable
+        symptoms={[
+          ...filteredSymptoms.filter(
+            (symptom) => symptom.verification_status !== "entered_in_error",
+          ),
+          ...(showEnteredInError
+            ? filteredSymptoms.filter(
+                (symptom) => symptom.verification_status === "entered_in_error",
+              )
+            : []),
+        ]}
+      />
+
+      {hasEnteredInErrorRecords && !showEnteredInError && (
+        <>
+          <div className="border-b border-dashed border-gray-200 my-2" />
+          <div className="flex justify-center ">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => setShowEnteredInError(true)}
+              className="text-xs underline text-gray-950"
+            >
+              {t("view_all")}
+            </Button>
+          </div>
+        </>
+      )}
+    </SymptomListLayout>
   );
 }
+
+const SymptomListLayout = ({
+  children,
+  className,
+  readOnly = false,
+}: {
+  facilityId?: string;
+  patientId: string;
+  encounterId?: string;
+  children: ReactNode;
+  className?: string;
+  readOnly?: boolean;
+}) => {
+  return (
+    <Card className={cn("border-none rounded-sm", className)}>
+      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
+        <CardTitle>{t("symptoms")}</CardTitle>
+        {!readOnly && (
+          <Link
+            href={`questionnaire/symptom`}
+            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
+          >
+            <CareIcon icon="l-pen" className="size-4" />
+            {t("edit")}
+          </Link>
+        )}
+      </CardHeader>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
+    </Card>
+  );
+};

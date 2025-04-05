@@ -36,7 +36,7 @@ export default function ScheduleTemplates({
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center text-center text-gray-500 py-64">
+      <div className="flex flex-col items-center text-center text-gray-500 py-16">
         <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
         <p>{t("no_schedule_templates_found")}</p>
       </div>
@@ -71,7 +71,7 @@ const ScheduleTemplateItem = ({
   const [qParams, setQParams] = useQueryParams<{ edit: string | null }>();
 
   return (
-    <div className="rounded-lg bg-white py-2 shadow">
+    <div className="rounded-lg bg-white py-2 shadow-sm">
       <div className="flex items-center justify-between py-2 pr-4">
         <div className="flex">
           <ColoredIndicator

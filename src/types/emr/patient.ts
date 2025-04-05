@@ -56,9 +56,6 @@ export interface PatientModel {
   transit_details?: string;
   present_health?: string;
   has_SARI?: boolean;
-  local_body?: number;
-  district?: number;
-  state?: number;
   nationality?: string;
   passport_no?: string;
   ration_card_category?: (typeof RATION_CARD_CATEGORY)[number] | null;
@@ -71,7 +68,7 @@ export interface PatientModel {
   last_vaccinated_date?: string;
   date_of_birth?: string;
   year_of_birth?: number;
-  readonly death_datetime?: string;
+  deceased_datetime?: string;
   blood_group?: string;
   review_interval?: number;
   review_time?: string;
@@ -87,7 +84,6 @@ export interface PatientModel {
   assigned_to?: number | null;
   assigned_to_object?: AssignedToObjectModel;
   meta_info?: PatientMeta;
-  age?: string;
 }
 
 export const validatePatient = (patient: PatientModel, useDob: boolean) => {

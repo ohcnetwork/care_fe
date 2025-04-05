@@ -6,13 +6,13 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { AppointmentPatient } from "@/pages/Patient/Utils";
-import { TokenData } from "@/types/auth/otpToken";
+import { TokenData } from "@/types/auth/otp";
+import { Patient } from "@/types/emr/newPatient";
 
 export type PatientUserContextType = {
-  patients?: AppointmentPatient[];
-  selectedPatient: AppointmentPatient | null;
-  setSelectedPatient: (patient: AppointmentPatient) => void;
+  patients?: Patient[];
+  selectedPatient: Patient | null;
+  setSelectedPatient: (patient: Patient) => void;
   tokenData: TokenData;
 };
 
@@ -25,9 +25,8 @@ interface Props {
 }
 
 export default function PatientUserProvider({ children }: Props) {
-  const [patients, setPatients] = useState<AppointmentPatient[]>([]);
-  const [selectedPatient, setSelectedPatient] =
-    useState<AppointmentPatient | null>(null);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
   const { patientToken: tokenData } = useAuthContext();
 
@@ -44,14 +43,7 @@ export default function PatientUserProvider({ children }: Props) {
   useEffect(() => {
     if (userData?.results && userData.results.length > 0) {
       setPatients(userData.results);
-      const localPatient: AppointmentPatient | undefined = JSON.parse(
-        localStorage.getItem("selectedPatient") || "{}",
-      );
-      const selectedPatient =
-        userData.results.find((patient) => patient.id === localPatient?.id) ||
-        userData.results[0];
-      setSelectedPatient(selectedPatient);
-      localStorage.setItem("selectedPatient", JSON.stringify(selectedPatient));
+      setSelectedPatient(userData.results[0]);
     }
   }, [userData]);
 

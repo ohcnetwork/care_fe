@@ -29,7 +29,7 @@ export function FacilitySwitcher({
   facilities: UserFacilityModel[];
   selectedFacility: UserFacilityModel | null;
 }) {
-  const { isMobile, setOpenMobile } = useSidebar();
+  const { isMobile } = useSidebar();
   const { t } = useTranslation();
 
   return (
@@ -40,6 +40,7 @@ export function FacilitySwitcher({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
+              tooltip={selectedFacility?.name}
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
                 <Hospital className="size-4" />
@@ -53,7 +54,7 @@ export function FacilitySwitcher({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg max-h-screen overflow-y-auto"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg max-h-screen overflow-y-auto"
             align="start"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
@@ -69,10 +70,7 @@ export function FacilitySwitcher({
               <DropdownMenuItem
                 key={index}
                 onClick={() => {
-                  navigate(`/facility/${facility.id}`);
-                  if (isMobile) {
-                    setOpenMobile(false);
-                  }
+                  navigate(`/facility/${facility.id}/overview`);
                 }}
                 className={cn(
                   "gap-2 p-2",
@@ -80,7 +78,7 @@ export function FacilitySwitcher({
                     "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
                 )}
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
+                <div className="flex size-6 items-center justify-center rounded-sm border border-gray-200">
                   <Hospital className="size-4 shrink-0" />
                 </div>
                 {facility.name}

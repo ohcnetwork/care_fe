@@ -1,10 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -14,161 +22,227 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
-import routes from "@/Utils/request/api";
+import { Avatar } from "@/components/Common/Avatar";
+
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
+import {
+  MEDICATION_STATEMENT_STATUS_STYLES,
+  MedicationStatementRead,
+} from "@/types/emr/medicationStatement";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 
 interface MedicationStatementListProps {
   patientId: string;
+  canAccess: boolean;
+  className?: string;
+}
+
+interface MedicationRowProps {
+  statement: MedicationStatementRead;
+  isEnteredInError?: boolean;
+}
+
+function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
+  const { t } = useTranslation();
+
+  return (
+    <TableRow
+      className={`rounded-md overflow-hidden bg-gray-50 ${
+        isEnteredInError ? "opacity-50" : ""
+      }`}
+    >
+      <TableCell className="font-medium first:rounded-l-md">
+        {statement.medication.display ?? statement.medication.code}
+      </TableCell>
+      <TableCell>{statement.dosage_text}</TableCell>
+      <TableCell>
+        <Badge
+          variant="outline"
+          className={`whitespace-nowrap capitalize ${
+            MEDICATION_STATEMENT_STATUS_STYLES[statement.status]
+          }`}
+        >
+          {statement.status}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        {[statement.effective_period?.start, statement.effective_period?.end]
+          .map((date, ind) =>
+            date ? formatDateTime(date) : ind === 1 ? t("ongoing") : "",
+          )
+          .join(" - ")}
+      </TableCell>
+      <TableCell>{statement.reason}</TableCell>
+      <TableCell className="max-w-[200px]">
+        {statement.note ? (
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs shrink-0"
+                >
+                  {t("see_note")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4">
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                  {statement.note}
+                </p>
+              </PopoverContent>
+            </Popover>
+          </div>
+        ) : (
+          "-"
+        )}
+      </TableCell>
+      <TableCell className="last:rounded-r-md">
+        <div className="flex items-center gap-2">
+          <Avatar
+            name={formatName(statement.created_by, true)}
+            className="w-4 h-4"
+            imageUrl={statement.created_by.read_profile_picture_url}
+          />
+          <span className="text-sm">{formatName(statement.created_by)}</span>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
 }
 
 export function MedicationStatementList({
   patientId,
+  canAccess,
+  className = "",
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: medications, isLoading } = useQuery({
-    queryKey: ["medication_statement", patientId],
-    queryFn: query(routes.medicationStatement.list, {
+    queryKey: ["medication_statements", patientId],
+    queryFn: query(medicationStatementApi.list, {
       pathParams: { patientId },
     }),
+    enabled: canAccess,
   });
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("ongoing_medications")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[100px] w-full" />
-        </CardContent>
-      </Card>
+      <MedicationStatementListLayout className={className}>
+        <Skeleton className="h-[100px] w-full" />
+      </MedicationStatementListLayout>
     );
   }
 
-  if (!medications?.results?.length) {
+  const filteredMedications = medications?.results?.filter(
+    (medication) =>
+      showEnteredInError || medication.status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorRecords = medications?.results?.some(
+    (medication) => medication.status === "entered_in_error",
+  );
+
+  if (!filteredMedications?.length) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("ongoing_medications")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">{t("no_ongoing_medications")}</p>
-        </CardContent>
-      </Card>
+      <MedicationStatementListLayout className={className}>
+        <p className="text-gray-500">{t("no_ongoing_medications")}</p>
+      </MedicationStatementListLayout>
     );
   }
-
-  const getStatusBadgeStyle = (status: string | undefined) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "on_hold":
-        return "bg-gray-100 text-gray-800 border-blue-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
 
   return (
-    <Card className="p-0">
-      <CardHeader className="px-4 py-0 pt-4">
-        <CardTitle>
-          {t("ongoing_medications")} ({medications.count})
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-2">
-        <Table>
+    <MedicationStatementListLayout
+      medicationsCount={filteredMedications.length}
+      className={className}
+    >
+      <>
+        <Table className="border-separate border-gray-200 border-spacing-y-0.5">
           <TableHeader>
-            <TableRow>
-              <TableHead>{t("medication")}</TableHead>
-              <TableHead>{t("dosage")}</TableHead>
-              <TableHead>{t("status")}</TableHead>
-              <TableHead>{t("medication_taken_between")}</TableHead>
-              <TableHead>{t("reason")}</TableHead>
-              <TableHead>{t("note")}</TableHead>
+            <TableRow className="rounded-md overflow-hidden bg-gray-100">
+              <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600">
+                {t("medication")}
+              </TableHead>
+              <TableHead className="h-auto py-1 px-2 text-gray-600">
+                {t("dosage")}
+              </TableHead>
+              <TableHead className="h-auto py-1 px-2 text-gray-600">
+                {t("status")}
+              </TableHead>
+              <TableHead className="h-auto py-1 px-2 text-gray-600">
+                {t("medication_taken_between")}
+              </TableHead>
+              <TableHead className="h-auto py-1 px-2 text-gray-600">
+                {t("reason")}
+              </TableHead>
+              <TableHead className="h-auto py-1 px-2 text-gray-600">
+                {t("notes")}
+              </TableHead>
+              <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
+                {t("logged_by")}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {medications.results.map((statement) => (
-              <TableRow>
-                <TableCell className="font-medium">
-                  <Tooltip>
-                    <TooltipTrigger asChild className="max-w-60 truncate">
-                      <p>
-                        {statement.medication.display ??
-                          statement.medication.code}
-                      </p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {statement.medication.display ??
-                          statement.medication.code}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TableCell>
-                <TableCell>
-                  <Tooltip>
-                    <TooltipTrigger asChild className="max-w-36 truncate">
-                      <p>{statement.dosage_text}</p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{statement.dosage_text}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "whitespace-nowrap capitalize",
-                      getStatusBadgeStyle(statement.status),
-                    )}
-                  >
-                    {statement.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {[
-                    statement.effective_period?.start,
-                    statement.effective_period?.end,
-                  ]
-                    .map((date) => formatDateTime(date))
-                    .join(" - ")}
-                </TableCell>
-                <TableCell>
-                  <Tooltip>
-                    <TooltipTrigger asChild className="max-w-60 truncate">
-                      <p>{statement.reason ?? "-"}</p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{statement.reason ?? "Not Specified"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TableCell>
-                <TableCell>
-                  <Tooltip>
-                    <TooltipTrigger asChild className="max-w-60 truncate">
-                      <p>{statement.note ?? "-"}</p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{statement.note ?? "Not Specified"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
+            {[
+              ...filteredMedications.filter(
+                (medication) => medication.status !== "entered_in_error",
+              ),
+              ...(showEnteredInError
+                ? filteredMedications.filter(
+                    (medication) => medication.status === "entered_in_error",
+                  )
+                : []),
+            ].map((statement) => (
+              <MedicationRow
+                key={statement.id}
+                statement={statement}
+                isEnteredInError={statement.status === "entered_in_error"}
+              />
             ))}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+        {hasEnteredInErrorRecords && !showEnteredInError && (
+          <>
+            <div className="border-b border-dashed border-gray-200 my-2" />
+            <div className="flex justify-center">
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={() => setShowEnteredInError(true)}
+                className="text-xs underline text-gray-500"
+              >
+                {t("view_all")}
+              </Button>
+            </div>
+          </>
+        )}
+      </>
+    </MedicationStatementListLayout>
   );
 }
+
+const MedicationStatementListLayout = ({
+  children,
+  className,
+  medicationsCount,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  medicationsCount?: number | undefined;
+}) => {
+  return (
+    <Card className={cn("rounded-sm ", className)}>
+      <CardHeader className="px-4 pt-4 pb-2">
+        <CardTitle>
+          {t("ongoing_medications")}{" "}
+          {medicationsCount ? `(${medicationsCount})` : ""}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
+    </Card>
+  );
+};

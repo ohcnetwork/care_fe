@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +10,8 @@ import { Button } from "@/components/ui/button";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns from "@/components/Common/UserColumns";
+import { userChildProps } from "@/components/Common/UserColumns";
+import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
 import UserResetPassword from "@/components/Users/UserResetPassword";
@@ -20,62 +23,57 @@ import {
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import {
-  editUserPermissions,
-  showAvatarEdit,
-  showUserDelete,
-  showUserPasswordReset,
-} from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
-import { UserBase } from "@/types/user/user";
 
 export default function UserSummaryTab({
   userData,
-  refetchUserData,
-}: {
-  userData?: UserBase;
-  refetchUserData?: () => void;
-}) {
+  permissions,
+}: userChildProps) {
   const { t } = useTranslation();
-  const [showDeleteDialog, setshowDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const authUser = useAuthUser();
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
+
+  const { mutate: deleteUser, isPending: isDeleting } = useMutation({
+    mutationFn: mutate(routes.deleteUser, {
+      pathParams: { username: userData?.username || "" },
+    }),
+    onSuccess: () => {
+      toast.success(t("user_deleted_successfully"));
+      setShowDeleteDialog(false);
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        navigate("/");
+      }
+    },
+    onError: () => {
+      setShowDeleteDialog(false);
+      toast.error(t("user_delete_error"));
+    },
+  });
   if (!userData) {
     return <></>;
   }
 
   const handleSubmit = async () => {
-    setIsDeleting(true);
-    const { res, error } = await request(routes.deleteUser, {
-      pathParams: { username: userData.username },
-    });
-    setIsDeleting(false);
-    if (res?.status === 204) {
-      toast.success(t("user_deleted_successfully"));
-      setshowDeleteDialog(!showDeleteDialog);
-      navigate("/users");
-    } else {
-      toast.error(t("user_delete_error") + ": " + (error || ""));
-      setshowDeleteDialog(!showDeleteDialog);
-    }
+    deleteUser();
   };
 
   const userColumnsData = {
     userData,
     username: userData.username,
-    refetchUserData,
+    permissions,
   };
-  const deletePermitted = showUserDelete(authUser, userData);
-  const passwordResetPermitted = showUserPasswordReset(authUser, userData);
-  const avatarPermitted = showAvatarEdit(authUser, userData);
-  const editPermissions = editUserPermissions(authUser, userData);
+  const loggedInUsersProfile = authUser.username === userData.username;
+  const canEditUser = authUser.is_superuser || loggedInUsersProfile;
+  const canResetPassword = loggedInUsersProfile;
 
   const renderBasicInformation = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
         <BasicInfoDetails user={userData} />
       </div>
     );
@@ -83,7 +81,7 @@ export default function UserSummaryTab({
 
   const renderContactInformation = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
         <ContactInfoDetails user={userData} />
       </div>
     );
@@ -93,31 +91,33 @@ export default function UserSummaryTab({
     <>
       {showDeleteDialog && (
         <UserDeleteDialog
+          show={showDeleteDialog}
           name={userData.username}
           handleOk={handleSubmit}
           handleCancel={() => {
-            setshowDeleteDialog(false);
+            setShowDeleteDialog(false);
           }}
         />
       )}
+
       <EditUserSheet
         existingUsername={userData.username}
         open={showEditUserSheet}
         setOpen={setShowEditUserSheet}
       />
       <div className="mt-10 flex flex-col gap-y-6">
-        {editPermissions && (
+        {canEditUser && (
           <Button
             variant="outline"
             className="w-fit self-end"
             data-cy="edit-user-button"
             onClick={() => setShowEditUserSheet(true)}
           >
-            <CareIcon icon="l-pen" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-pen" className="mr-2 size-4" />
             {t("edit_user")}
           </Button>
         )}
-        {avatarPermitted && (
+        {canEditUser && (
           <UserColumns
             heading={t("edit_avatar")}
             note={
@@ -134,7 +134,7 @@ export default function UserSummaryTab({
           note={
             authUser.username === userData.username
               ? t("personal_information_note_self")
-              : editPermissions
+              : canEditUser
                 ? t("personal_information_note")
                 : t("personal_information_note_view")
           }
@@ -146,14 +146,14 @@ export default function UserSummaryTab({
           note={
             authUser.username === userData.username
               ? t("contact_info_note_self")
-              : editPermissions
+              : canEditUser
                 ? t("contact_info_note")
                 : t("contact_info_note_view")
           }
           Child={renderContactInformation}
           childProps={userColumnsData}
         />
-        {passwordResetPermitted && (
+        {canResetPassword && (
           <UserColumns
             heading={t("reset_password")}
             note={t("reset_password_note_self")}
@@ -163,6 +163,12 @@ export default function UserSummaryTab({
         )}
         {authUser.username === userData.username && (
           <>
+            <UserColumns
+              heading={t("two_factor_authentication")}
+              note={t("two_factor_authentication_note")}
+              Child={TwoFactorAuth}
+              childProps={userColumnsData}
+            />
             <UserColumns
               heading={t("language_selection")}
               note={t("set_your_local_language")}
@@ -177,7 +183,7 @@ export default function UserSummaryTab({
             />
           </>
         )}
-        {deletePermitted && (
+        {canEditUser && (
           <div className="mt-3 flex flex-col items-center gap-5 border-t-2 pt-5 sm:flex-row">
             <div className="sm:w-1/4">
               <div className="my-1 text-sm leading-5">
@@ -187,7 +193,7 @@ export default function UserSummaryTab({
             </div>
             <div className="w-3/4">
               <Button
-                onClick={() => setshowDeleteDialog(true)}
+                onClick={() => setShowDeleteDialog(true)}
                 variant="destructive"
                 data-testid="user-delete-button"
                 className="my-1 inline-flex"

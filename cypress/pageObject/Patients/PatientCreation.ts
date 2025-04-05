@@ -1,13 +1,30 @@
-interface PatientFormData {
+export interface PatientFormData {
   name: string;
   phoneNumber: string;
-  dateOfBirth: string;
-  gender: string;
-  bloodGroup: string;
+  gender: "Male" | "Female" | "Transgender" | "Non_Binary";
+  bloodGroup:
+    | "Unknown"
+    | "A+"
+    | "A-"
+    | "B+"
+    | "B-"
+    | "AB+"
+    | "AB-"
+    | "O+"
+    | "O-"
+    | "Unknown";
+  dateOfBirth?: string;
+  age?: string;
   address: string;
+  sameAsPermanentAddress?: boolean; // true by default
+  permanentAddress?: string;
+  hasEmergencyContact?: boolean; // false by default
+  emergencyPhoneNumber?: string;
   pincode: string;
   localBody: string;
   ward: string;
+  state: string;
+  district: string;
 }
 
 export class PatientCreation {
@@ -16,9 +33,29 @@ export class PatientCreation {
     patientsButton: '[data-cy="patients-button"]',
     searchInput: "#patient-search",
     patientCard: "#patient-search-results",
-    patientName: '[data-cy="patient-name"]',
-    patientDetails: "#patient-search-results",
     createNewPatientButton: '[data-cy="create-new-patient-button"]',
+    nameInput: '[data-cy="patient-name-input"]',
+    phoneInput: '[data-cy="patient-phone-input"]',
+    dobDayInput: '[data-cy="dob-day-input"]',
+    dobMonthInput: '[data-cy="dob-month-input"]',
+    dobYearInput: '[data-cy="dob-year-input"]',
+    ageInput: '[data-cy="age-input"]',
+    genderRadio: '[data-cy="gender-radio-{value}"]',
+    bloodGroupSelect: '[data-cy="blood-group-select"]',
+    addressInput: '[data-cy="current-address-input"]',
+    sameAddressCheckbox: '[data-cy="same-address-checkbox"]',
+    permanentAddressInput: '[data-cy="permanent-address-input"]',
+    emergencyContactCheckbox: '[data-cy="same-phone-number-checkbox"]',
+    emergencyPhoneInput: '[data-cy="patient-emergency-phone-input"]',
+    pincodeInput: '[data-cy="pincode-input"]',
+    localBodySelect: '[data-cy="select-local_body"]',
+    wardSelect: '[data-cy="select-ward"]',
+    submitButton: '[data-cy="submit-button"]',
+    samePhoneNumberCheckbox: '[data-cy="same-phone-number-checkbox"]',
+    stateSelect: '[data-cy="select-state"]',
+    districtSelect: '[data-cy="select-district"]',
+    yearOfBirthInput: '[data-cy="year-of-birth-input"]',
+    verifyButton: '[data-cy="confirm-verification-button"]',
   };
 
   // Actions
@@ -36,14 +73,11 @@ export class PatientCreation {
     return this;
   }
 
-  verifySearchResults(patientDetails: {
-    name: string;
-    sex: string;
-    phone: string;
-  }) {
+  verifySearchResults(patientDetails: { name: string; phone: string }) {
     // Convert object values to an array of strings
     const detailsArray = Object.values(patientDetails);
-    cy.verifyContentPresence(this.selectors.patientDetails, detailsArray);
+    cy.verifyContentPresence(this.selectors.patientCard, detailsArray);
+    return this;
   }
 
   clickSearchPatients() {
@@ -51,15 +85,21 @@ export class PatientCreation {
     return this;
   }
 
-  enterName(name: string) {
-    cy.typeIntoField('[data-cy="patient-name-input"]', name);
+  enterName(name: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField(this.selectors.nameInput, name, { clearBeforeTyping });
     return this;
   }
 
-  enterPhoneNumber(phoneNumber: string) {
-    cy.typeIntoField('[data-cy="patient-phone-input"]', phoneNumber, {
+  enterPhoneNumber(phoneNumber: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField(this.selectors.phoneInput, phoneNumber, {
       skipVerification: true,
+      clearBeforeTyping,
     });
+    return this;
+  }
+
+  verifyUpdateSuccess() {
+    cy.verifyNotification("Patient Updated Successfully");
     return this;
   }
 
@@ -67,59 +107,97 @@ export class PatientCreation {
     // Split the date string (expected format: "DD-MM-YYYY")
     const [day, month, year] = dateString.split("-");
 
-    cy.get('[data-cy="dob-day-input"]').type(day);
-    cy.get('[data-cy="dob-month-input"]').type(month);
-    cy.get('[data-cy="dob-year-input"]').type(year);
+    cy.get(this.selectors.dobDayInput).type(day);
+    cy.get(this.selectors.dobMonthInput).type(month);
+    cy.get(this.selectors.dobYearInput).type(year);
 
     return this;
   }
 
   selectGender(gender: string) {
     const lowercaseGender = gender.toLowerCase();
-    cy.get(`[data-cy="gender-radio-${lowercaseGender}"]`).click();
+    cy.get(
+      this.selectors.genderRadio.replace("{value}", lowercaseGender),
+    ).click();
     return this;
   }
 
   selectBloodGroup(bloodGroup: string) {
-    cy.clickAndSelectOption('[data-cy="blood-group-select"]', bloodGroup);
+    cy.clickAndSelectOption(this.selectors.bloodGroupSelect, bloodGroup);
     return this;
   }
 
-  enterAddress(address: string) {
-    cy.typeIntoField('[data-cy="current-address-input"]', address);
+  enterAddress(address: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField(this.selectors.addressInput, address, {
+      clearBeforeTyping,
+    });
     return this;
   }
 
   enterPincode(pincode: string) {
-    cy.typeIntoField('[data-cy="pincode-input"]', pincode);
+    cy.typeIntoField(this.selectors.pincodeInput, pincode);
     return this;
   }
 
-  fillPatientDetails(patient: PatientFormData) {
-    return this.enterName(patient.name)
-      .enterPhoneNumber(patient.phoneNumber)
-      .clickSamePhoneNumberCheckbox()
-      .selectGender(patient.gender)
-      .selectBloodGroup(patient.bloodGroup)
-      .enterDateOfBirth(patient.dateOfBirth)
-      .enterAddress(patient.address)
-      .enterPincode(patient.pincode)
-      .selectLocalBody(patient.localBody)
-      .selectWard(patient.ward);
+  fillPatientDetails(data: PatientFormData) {
+    this.enterName(data.name)
+      .enterPhoneNumber(data.phoneNumber)
+      .selectGender(data.gender)
+      .selectBloodGroup(data.bloodGroup);
+
+    // Handle DOB or Age
+    if (data.dateOfBirth) {
+      this.enterDateOfBirth(data.dateOfBirth);
+    } else if (data.age) {
+      cy.get('[data-cy="age-tab"]').click();
+      cy.get(this.selectors.ageInput).type(data.age);
+    }
+
+    // Handle permanent address
+    if (data.sameAsPermanentAddress === false) {
+      cy.get(this.selectors.sameAddressCheckbox).click();
+      this.enterPermanentAddress(data.permanentAddress!);
+    }
+
+    this.enterAddress(data.address);
+
+    // Handle emergency contact - Fixed logic
+    if (data.hasEmergencyContact) {
+      // If hasEmergencyContact is true, just enter the emergency phone number
+      if (data.emergencyPhoneNumber) {
+        this.enterEmergencyPhone(data.emergencyPhoneNumber);
+      }
+    } else {
+      // If hasEmergencyContact is false, click the checkbox to disable emergency contact
+      cy.get(this.selectors.emergencyContactCheckbox).click();
+    }
+
+    this.enterPincode(data.pincode)
+      .selectState(data.state)
+      .selectDistrict(data.district)
+      .selectLocalBody(data.localBody)
+      .selectWard(data.ward);
+
+    return this;
   }
 
   selectLocalBody(localBody: string) {
-    cy.typeAndSelectOption('[data-cy="select-local_body"]', localBody, false);
+    cy.typeAndSelectOption(this.selectors.localBodySelect, localBody, false);
     return this;
   }
 
   selectWard(ward: string) {
-    cy.typeAndSelectOption('[data-cy="select-ward"]', ward);
+    cy.typeAndSelectOption(this.selectors.wardSelect, ward);
     return this;
   }
 
   submitPatientForm() {
     cy.clickSubmitButton("Save and Continue");
+    return this;
+  }
+
+  submitPatientUpdateForm() {
+    cy.clickSubmitButton("Save");
     return this;
   }
 
@@ -130,6 +208,51 @@ export class PatientCreation {
 
   assertPatientRegistrationSuccess() {
     cy.verifyNotification("Patient Registered Successfully");
+    return this;
+  }
+
+  enterPermanentAddress(address: string) {
+    cy.typeIntoField(this.selectors.permanentAddressInput, address);
+    return this;
+  }
+
+  enterEmergencyPhone(phoneNumber: string) {
+    cy.typeIntoField(this.selectors.emergencyPhoneInput, phoneNumber, {
+      skipVerification: true,
+    });
+    return this;
+  }
+
+  selectState(state: string) {
+    cy.get(this.selectors.stateSelect).then(($el) => {
+      if ($el.val() !== state) {
+        cy.typeAndSelectOption(this.selectors.stateSelect, state);
+      }
+    });
+    return this;
+  }
+
+  selectDistrict(district: string) {
+    cy.get(this.selectors.districtSelect).then(($el) => {
+      if ($el.val() !== district) {
+        cy.typeAndSelectOption(this.selectors.districtSelect, district);
+      }
+    });
+    return this;
+  }
+
+  selectPatientFromResults(patientName: string) {
+    cy.verifyAndClickElement(this.selectors.patientCard, patientName);
+    return this;
+  }
+
+  enterYearOfBirth(year: string) {
+    cy.typeIntoField(this.selectors.yearOfBirthInput, year);
+    return this;
+  }
+
+  clickVerifyButton() {
+    cy.verifyAndClickElement(this.selectors.verifyButton, "Verify");
     return this;
   }
 }

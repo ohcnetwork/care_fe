@@ -1,4 +1,4 @@
-import { LoginPage } from "../../pageObject/auth/LoginPage";
+import { LoginPage } from "@/pageObject/auth/LoginPage";
 
 describe("Login Page", () => {
   const loginPage = new LoginPage();

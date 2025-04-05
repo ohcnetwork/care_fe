@@ -1,16 +1,28 @@
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+
+import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { conditionalAttribute } from "@/Utils/utils";
@@ -18,6 +30,7 @@ import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface QuestionnaireSearchProps {
+  placeholder?: string;
   onSelect: (questionnaire: QuestionnaireDetail) => void;
   subjectType?: string;
   disabled?: boolean;
@@ -29,14 +42,15 @@ interface QuestionnaireListResponse {
 }
 
 export function QuestionnaireSearch({
+  placeholder,
   onSelect,
   subjectType,
   disabled,
 }: QuestionnaireSearchProps) {
   const { t } = useTranslation();
-
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const { data: questionnaires, isLoading } =
     useQuery<QuestionnaireListResponse>({
@@ -47,80 +61,116 @@ export function QuestionnaireSearch({
           ...conditionalAttribute(!!subjectType, {
             subject_type: subjectType,
           }),
+          status: "active",
         },
       }),
     });
 
-  const filteredQuestionnaires = (questionnaires?.results ?? []).filter(
-    (item: QuestionnaireDetail) =>
-      item.title.toLowerCase().includes(search.toLowerCase()),
-  );
+  useEffect(() => {
+    if (isOpen) {
+      setSearch("");
+    }
+  }, [isOpen]);
 
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full justify-between"
-          disabled={disabled || isLoading}
-        >
-          {isLoading ? (
-            <>
-              <CareIcon
-                icon="l-spinner"
-                className="mr-2 h-4 w-4 animate-spin"
-              />
-              Loading...
-            </>
-          ) : (
-            <span>{t("add_questionnaire")}</span>
-          )}
-          <CareIcon icon="l-arrow-down" className="ml-2 h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[600px] p-0" align="start">
-        <div className="flex items-center border-b px-3">
-          <CareIcon
-            icon="l-search"
-            className="mr-2 h-4 w-4 shrink-0 text-muted-foreground"
-          />
-          <input
-            className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-            placeholder="Search questionnaires..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="max-h-[400px] overflow-y-auto p-0">
+  const content = (
+    <Command filter={() => 1}>
+      <CommandInput
+        placeholder={t("search_questionnaires")}
+        className="outline-hidden border-none ring-0 shadow-none"
+        onValueChange={setSearch}
+        autoFocus
+      />
+      <CommandList className="overflow-y-auto">
+        <CommandEmpty>
           {isLoading ? (
             <div className="space-y-2 p-4">
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />
             </div>
-          ) : filteredQuestionnaires.length === 0 ? (
-            <div className="p-4 text-sm text-muted-foreground">
-              {t("no_questionnaires_found")}
-            </div>
           ) : (
-            <div className="grid gap-1 p-2">
-              {filteredQuestionnaires.map((item: QuestionnaireDetail) => (
-                <Button
-                  key={item.id}
-                  variant="ghost"
-                  className="w-full justify-start font-normal"
-                  onClick={() => {
-                    onSelect(item);
-                    setIsOpen(false);
-                  }}
-                >
-                  <CareIcon icon="l-file-export" className="mr-2 h-4 w-4" />
-                  {item.title}
-                </Button>
-              ))}
-            </div>
+            t("no_questionnaires_found")
           )}
-        </div>
+        </CommandEmpty>
+
+        <CommandGroup>
+          {(questionnaires?.results ?? []).map((item: QuestionnaireDetail) => (
+            <CommandItem
+              key={item.id}
+              value={item.title}
+              onSelect={() => {
+                onSelect(item);
+                setIsOpen(false);
+              }}
+            >
+              <CareIcon icon="l-file-export" className="mr-2 size-4" />
+              <span>{item.title}</span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </CommandList>
+    </Command>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>
+          <Button
+            data-cy="add-questionnaire-button"
+            variant="outline"
+            role="combobox"
+            className="w-full justify-between"
+            disabled={disabled || isLoading}
+          >
+            {isLoading ? (
+              <>
+                <CareIcon
+                  icon="l-spinner"
+                  className="mr-2 size-4 animate-spin"
+                />
+                {t("loading")}
+              </>
+            ) : (
+              <span>{placeholder || t("add_questionnaire")}</span>
+            )}
+            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent
+          side="bottom"
+          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
+        >
+          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+          <div className="mt-6 h-full">{content}</div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          data-cy="add-questionnaire-button"
+          variant="outline"
+          role="combobox"
+          className="w-full justify-between"
+          disabled={disabled || isLoading}
+        >
+          {isLoading ? (
+            <>
+              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
+              {t("loading")}
+            </>
+          ) : (
+            <span>{placeholder || t("add_questionnaire")}</span>
+          )}
+          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[300px] p-0" align="start">
+        {content}
       </PopoverContent>
     </Popover>
   );

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -17,13 +19,17 @@ import type { Question } from "@/types/questionnaire/question";
 import { AllergyQuestion } from "./AllergyQuestion";
 import { BooleanQuestion } from "./BooleanQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
+import { DateQuestion } from "./DateQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
+import { TimeOfDeathQuestion } from "./DeathQuestion";
 import { DiagnosisQuestion } from "./DiagnosisQuestion";
 import { EncounterQuestion } from "./EncounterQuestion";
+import { FilesQuestion } from "./FileQuestion";
 import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
 import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
 import { NumberQuestion } from "./NumberQuestion";
+import { QuantityQuestion } from "./QuantityQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
 import { TextQuestion } from "./TextQuestion";
 
@@ -32,13 +38,16 @@ interface QuestionInputProps {
   questionnaireResponses: QuestionnaireResponse[];
   encounterId?: string;
   updateQuestionnaireResponseCB: (
-    questionnaireResponse: QuestionnaireResponse,
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
   ) => void;
   errors: QuestionValidationError[];
   clearError: () => void;
   disabled?: boolean;
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
+  isSubQuestion?: boolean;
 }
 
 export function QuestionInput({
@@ -51,7 +60,9 @@ export function QuestionInput({
   disabled,
   facilityId,
   patientId,
+  isSubQuestion,
 }: QuestionInputProps) {
+  const { t } = useTranslation();
   const questionnaireResponse = questionnaireResponses.find(
     (v) => v.question_id === question.id,
   );
@@ -61,20 +72,21 @@ export function QuestionInput({
   }
 
   const handleAddValue = () => {
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [...questionnaireResponse.values, { type: "string", value: "" }],
-    });
+    updateQuestionnaireResponseCB(
+      [...questionnaireResponse.values, { type: "string", value: "" }],
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
   };
 
   const removeValue = (index: number) => {
     const updatedValues = questionnaireResponse.values.filter(
       (_, i) => i !== index,
     );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: updatedValues,
-    });
+    updateQuestionnaireResponseCB(
+      updatedValues,
+      questionnaireResponse.question_id,
+    );
   };
 
   const renderSingleInput = (index: number = 0) => {
@@ -89,15 +101,22 @@ export function QuestionInput({
       clearError,
       index,
       patientId,
+      errors,
     };
 
     switch (question.type) {
       case "dateTime":
         return <DateTimeQuestion {...commonProps} />;
 
+      case "date":
+        return <DateQuestion {...commonProps} />;
+
       case "decimal":
       case "integer":
         return <NumberQuestion {...commonProps} />;
+
+      case "quantity":
+        return <QuantityQuestion {...commonProps} />;
 
       case "choice":
         return <ChoiceQuestion {...commonProps} />;
@@ -112,28 +131,78 @@ export function QuestionInput({
       case "structured":
         switch (question.structured_type) {
           case "medication_request":
-            return <MedicationRequestQuestion {...commonProps} />;
-          case "medication_statement":
-            return <MedicationStatementQuestion {...commonProps} />;
-          case "allergy_intolerance":
-            return <AllergyQuestion {...commonProps} />;
-          case "symptom":
-            return <SymptomQuestion {...commonProps} />;
-          case "diagnosis":
-            return <DiagnosisQuestion {...commonProps} />;
-          case "appointment":
-            return <AppointmentQuestion {...commonProps} />;
-          case "encounter":
             if (encounterId) {
               return (
-                <EncounterQuestion
+                <MedicationRequestQuestion
                   {...commonProps}
                   encounterId={encounterId}
-                  facilityId={facilityId}
                 />
               );
             }
-            return null;
+            return (
+              <span>{t("questionnaire_medication_request_no_encounter")}</span>
+            );
+          case "medication_statement":
+            if (encounterId) {
+              return (
+                <MedicationStatementQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return (
+              <span>
+                {t("questionnaire_medication_statement_no_encounter")}
+              </span>
+            );
+          case "allergy_intolerance":
+            return <AllergyQuestion {...commonProps} />;
+          case "symptom":
+            if (encounterId) {
+              return (
+                <SymptomQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                  patientId={patientId}
+                />
+              );
+            }
+            return <span>{t("questionnaire_symptom_no_encounter")}</span>;
+          case "diagnosis":
+            if (encounterId) {
+              return (
+                <DiagnosisQuestion {...commonProps} encounterId={encounterId} />
+              );
+            }
+            return <span>{t("questionnaire_diagnosis_no_encounter")}</span>;
+          case "appointment":
+            if (facilityId) {
+              return (
+                <AppointmentQuestion {...commonProps} facilityId={facilityId} />
+              );
+            }
+            return <span>{t("questionnaire_appointment_no_encounter")}</span>;
+          case "encounter":
+            if (encounterId && facilityId) {
+              return (
+                <EncounterQuestion
+                  {...commonProps}
+                  facilityId={facilityId}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return <span>{t("questionnaire_no_encounter")}</span>;
+          case "time_of_death":
+            return <TimeOfDeathQuestion {...commonProps} />;
+          case "files":
+            if (encounterId && facilityId) {
+              return (
+                <FilesQuestion {...commonProps} encounterId={encounterId} />
+              );
+            }
+            return <span>{t("questionnaire_files_no_encounter")}</span>;
         }
         return null;
 
@@ -151,7 +220,7 @@ export function QuestionInput({
       : questionnaireResponse.values;
 
     return (
-      <div className="">
+      <div className="bg-gray-100 md:bg-transparent px-2 py-3">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 && (
@@ -159,43 +228,53 @@ export function QuestionInput({
                 variant="ghost"
                 size="icon"
                 onClick={() => removeValue(index)}
-                className="h-10 w-10"
+                className="size-10"
                 disabled={disabled}
               >
-                <CareIcon icon="l-trash" className="h-4 w-4" />
+                <CareIcon icon="l-trash" className="size-4" />
               </Button>
             );
 
           return (
             <div
               key={index}
-              className={cn("mt-2", removeButton && "gap-2 flex items-end")}
+              className={cn(removeButton && "gap-2 flex items-end")}
             >
               <div
                 className={cn("space-y-1", { "flex-1": removeButton })}
                 data-question-id={question.id}
               >
-                {index === 0 && <QuestionLabel question={question} />}
+                {index === 0 && (
+                  <QuestionLabel
+                    question={question}
+                    isSubQuestion={isSubQuestion}
+                  />
+                )}
                 <div
-                  className={cn({
-                    "flex w-full": !question.structured_type,
+                  className={cn("w-full", {
+                    "flex flex-col md:flex-row": !question.structured_type,
                     "flex-col": question.repeats || question.type === "text",
                   })}
                 >
-                  <div className="flex-1">{renderSingleInput(index)}</div>
+                  <div className="flex-1 min-w-0">
+                    {renderSingleInput(index)}
+                  </div>
                   {/* Notes are not available for structured questions */}
                   {!question.structured_type && !question.repeats && (
                     <NotesInput
-                      className={cn({
-                        "bg-white border rounded-l-none -ml-2": !(
-                          question.type === "text"
-                        ),
+                      className={cn("w-min", {
+                        "bg-white border md:rounded-l-none md:-ml-2 mt-2 md:mt-0":
+                          !(question.type === "text"),
                         "mt-2": question.type === "text",
                       })}
                       questionnaireResponse={questionnaireResponse}
-                      updateQuestionnaireResponseCB={
-                        updateQuestionnaireResponseCB
-                      }
+                      handleUpdateNote={(note) => {
+                        updateQuestionnaireResponseCB(
+                          [...questionnaireResponse.values],
+                          questionnaireResponse.question_id,
+                          note,
+                        );
+                      }}
                       disabled={disabled}
                     />
                   )}
@@ -214,12 +293,18 @@ export function QuestionInput({
               className=""
               disabled={disabled}
             >
-              <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-              Add Another
+              <CareIcon icon="l-plus" className="mr-2 size-4" />
+              {t("add_another")}
             </Button>
             <NotesInput
               questionnaireResponse={questionnaireResponse}
-              updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+              handleUpdateNote={(note) => {
+                updateQuestionnaireResponseCB(
+                  [...questionnaireResponse.values],
+                  questionnaireResponse.question_id,
+                  note,
+                );
+              }}
               disabled={disabled}
             />
           </div>
@@ -231,7 +316,10 @@ export function QuestionInput({
   const error = errors.find((e) => e.question_id === question.id)?.error;
 
   return (
-    <div className="space-y-2">
+    <div
+      className="space-y-2"
+      data-cy={`question-${question.text?.toLowerCase().replace(/\s+/g, "-")}`}
+    >
       {renderInput()}
       {error && <p className="text-sm font-medium text-red-500">{error}</p>}
     </div>

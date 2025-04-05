@@ -1,13 +1,20 @@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
 interface TextQuestionProps {
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
   clearError: () => void;
 }
@@ -21,15 +28,16 @@ export function TextQuestion({
 }: TextQuestionProps) {
   const handleChange = (value: string) => {
     clearError();
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
+    updateQuestionnaireResponseCB(
+      [
         {
           type: "string",
           value,
         },
       ],
-    });
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
   };
 
   return (

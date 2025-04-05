@@ -3,7 +3,7 @@
   "useTabs": false,
   "tabWidth": 2,
   "semi": true,
-  "endOfLine": "lf",
+  "endOfLine": "auto",
   "jsxSingleQuote": false,
   "arrowParens": "always",
   "tailwindFunctions": ["classNames"],

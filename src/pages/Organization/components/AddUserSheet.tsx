@@ -20,19 +20,21 @@ interface AddUserSheetProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   onUserCreated?: (user: UserBase) => void;
+  organizationId?: string;
 }
 
 export default function AddUserSheet({
   open,
   setOpen,
   onUserCreated,
+  organizationId,
 }: AddUserSheetProps) {
   const { t } = useTranslation();
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" data-cy="add-user-button">
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-plus" className="mr-2 size-4" />
           {t("add_user")}
         </Button>
       </SheetTrigger>
@@ -50,6 +52,7 @@ export default function AddUserSheet({
               setOpen(false);
               onUserCreated?.(user);
             }}
+            organizationId={organizationId}
           />
         </div>
       </SheetContent>

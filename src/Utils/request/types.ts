@@ -9,31 +9,12 @@ type QueryParamValue =
 export type QueryParams = Record<string, QueryParamValue>;
 
 export interface ApiRoute<TData, TBody = unknown> {
+  baseUrl?: string;
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   TBody?: TBody;
   path: string;
   TRes: TData;
   noAuth?: boolean;
-}
-
-/**
- * @deprecated in favor of useQuery/useMutation/callApi
- */
-export interface RequestResult<TData> {
-  res: Response | undefined;
-  data: TData | undefined;
-  error: undefined | Record<string, unknown>;
-}
-
-/**
- * @deprecated in favor of ApiCallOptions used by useQuery/useMutation/callApi
- */
-export interface RequestOptions<TData = unknown, TBody = unknown> {
-  query?: QueryParams;
-  body?: TBody;
-  pathParams?: Record<string, string>;
-  onResponse?: (res: RequestResult<TData>) => void;
-  silent?: boolean;
 }
 
 type ExtractRouteParams<T extends string> =
@@ -89,7 +70,9 @@ declare module "@tanstack/react-query" {
 
 export interface PaginatedResponse<TItem> {
   count: number;
-  next: string | null;
-  previous: string | null;
   results: TItem[];
+}
+
+export interface UpsertRequest<TCreate, TUpdate> {
+  datapoints: (TCreate | (TUpdate & { id: string }))[];
 }

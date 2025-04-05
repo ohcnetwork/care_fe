@@ -1,9 +1,10 @@
+import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
 import {
   DataTypeFor,
   RequestTypeFor,
 } from "@/components/Questionnaire/structured/types";
 
-import { StructuredQuestionType } from "@/types/questionnaire/question";
+import { readFileAsDataURL } from "@/Utils/utils";
 
 interface StructuredHandlerContext {
   patientId: string;
@@ -15,19 +16,21 @@ type StructuredHandler<T extends StructuredQuestionType> = {
   getRequests: (
     data: DataTypeFor<T>[],
     context: StructuredHandlerContext,
-  ) => Array<{
-    url: string;
-    method: string;
-    body: RequestTypeFor<T>;
-    reference_id: string;
-  }>;
+  ) => Promise<
+    Array<{
+      url: string;
+      method: string;
+      body: RequestTypeFor<T>;
+      reference_id: string;
+    }>
+  >;
 };
 
-const handlers: {
+export const structuredHandlers: {
   [K in StructuredQuestionType]: StructuredHandler<K>;
 } = {
   allergy_intolerance: {
-    getRequests: (allergies, { patientId, encounterId }) => {
+    getRequests: async (allergies, { patientId, encounterId }) => {
       return [
         {
           url: `/api/v1/patient/${patientId}/allergy_intolerance/upsert/`,
@@ -44,7 +47,7 @@ const handlers: {
     },
   },
   medication_request: {
-    getRequests: (medications, { patientId, encounterId }) => {
+    getRequests: async (medications, { patientId, encounterId }) => {
       return [
         {
           url: `/api/v1/patient/${patientId}/medication/request/upsert/`,
@@ -62,7 +65,7 @@ const handlers: {
     },
   },
   medication_statement: {
-    getRequests: (medications, { patientId, encounterId }) => {
+    getRequests: async (medications, { patientId, encounterId }) => {
       return [
         {
           url: `/api/v1/patient/${patientId}/medication/statement/upsert/`,
@@ -80,51 +83,47 @@ const handlers: {
     },
   },
   symptom: {
-    getRequests: (symptoms, { patientId, encounterId }) =>
-      symptoms.map((symptom) => {
-        const body: RequestTypeFor<"symptom"> = {
-          clinical_status: symptom.clinical_status,
-          verification_status: symptom.verification_status,
-          code: symptom.code,
-          severity: symptom.severity,
-          onset: symptom.onset,
-          recorded_date: symptom.recorded_date,
-          note: symptom.note,
-          encounter: encounterId,
-        };
-
-        return {
-          url: `/api/v1/patient/${patientId}/symptom/`,
+    getRequests: async (symptoms, { patientId, encounterId }) => {
+      return [
+        {
+          url: `/api/v1/patient/${patientId}/symptom/upsert/`,
           method: "POST",
-          body,
+          body: {
+            datapoints: symptoms.map((symptom) => ({
+              ...symptom,
+              encounter: encounterId,
+            })),
+          },
           reference_id: "symptom",
-        };
-      }),
+        },
+      ];
+    },
   },
   diagnosis: {
-    getRequests: (diagnoses, { patientId, encounterId }) =>
-      diagnoses.map((diagnosis) => {
-        const body: RequestTypeFor<"diagnosis"> = {
-          clinical_status: diagnosis.clinical_status,
-          verification_status: diagnosis.verification_status,
-          code: diagnosis.code,
-          onset: diagnosis.onset,
-          recorded_date: diagnosis.recorded_date,
-          note: diagnosis.note,
-          encounter: encounterId,
-        };
-
-        return {
-          url: `/api/v1/patient/${patientId}/diagnosis/`,
+    getRequests: async (diagnoses, { patientId, encounterId }) => {
+      return [
+        {
+          url: `/api/v1/patient/${patientId}/diagnosis/upsert/`,
           method: "POST",
-          body,
+          body: {
+            datapoints: diagnoses
+              .filter((diagnosis) => diagnosis.dirty)
+              .map((diagnosis) => ({
+                ...diagnosis,
+                encounter: encounterId,
+              })),
+          },
           reference_id: "diagnosis",
-        };
-      }),
+        },
+      ];
+    },
   },
   encounter: {
-    getRequests: (encounters, { patientId, encounterId }) => {
+    getRequests: async (encounters, { facilityId, patientId, encounterId }) => {
       if (!encounterId) return [];
+      if (!facilityId) {
+        throw new Error("Cannot create encounter without a facility");
+      }
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
           organizations: [],
@@ -135,7 +134,7 @@ const handlers: {
           hospitalization: encounter.hospitalization,
           priority: encounter.priority,
           external_identifier: encounter.external_identifier,
-          facility: encounter.facility.id,
+          facility: facilityId,
         };
 
         return {
@@ -148,7 +147,7 @@ const handlers: {
     },
   },
   appointment: {
-    getRequests: (appointment, { facilityId, patientId }) => {
+    getRequests: async (appointment, { facilityId, patientId }) => {
       const { reason_for_visit, slot_id } = appointment[0];
       return [
         {
@@ -163,10 +162,42 @@ const handlers: {
       ];
     },
   },
+  files: {
+    getRequests: async (files, { encounterId }) =>
+      await Promise.all(
+        files.map(async (file) => {
+          const base64 = (await readFileAsDataURL(file.file_data)).split(
+            ",",
+          )[1];
+          return {
+            url: `/api/v1/files/upload-file/`,
+            method: "POST",
+            body: {
+              ...file,
+              file_data: base64 as unknown as File,
+              encounter: encounterId,
+            },
+            reference_id: "files",
+          };
+        }),
+      ),
+  },
+  time_of_death: {
+    getRequests: async (timeOfDeaths, { patientId }) => {
+      return timeOfDeaths.map((timeOfDeath) => ({
+        url: `/api/v1/patient/${patientId}/`,
+        method: "PUT",
+        body: {
+          deceased_datetime: timeOfDeath,
+        },
+        reference_id: "time_of_death",
+      }));
+    },
+  },
 };
 
-export const getStructuredRequests = <T extends StructuredQuestionType>(
+export const getStructuredRequests = async <T extends StructuredQuestionType>(
   type: T,
   data: DataTypeFor<T>[],
   context: StructuredHandlerContext,
-) => handlers[type].getRequests(data, context);
+) => await structuredHandlers[type].getRequests(data, context);

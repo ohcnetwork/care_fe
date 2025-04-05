@@ -49,6 +49,11 @@ class PatientVerify {
     return this;
   }
 
+  selectOrganization(organization: string) {
+    cy.clickAndSelectOption('[data-cy="facility-organization"]', organization);
+    return this;
+  }
+
   clickSubmitEncounter() {
     cy.clickSubmitButton("Create Encounter");
     return this;
@@ -56,6 +61,13 @@ class PatientVerify {
 
   assertEncounterCreationSuccess() {
     cy.verifyNotification("Encounter created successfully");
+    return this;
+  }
+
+  assertEncounterMaxFailure() {
+    cy.verifyNotification(
+      "Patient already has maximum number of active encounters (5)",
+    );
     return this;
   }
 }

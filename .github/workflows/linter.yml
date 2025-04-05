@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - develop
-      - master
   merge_group:
 
 jobs:
@@ -22,10 +21,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run lint
         run: npm run lint -- --quiet
+
+      - name: Run unimported
+        run: npm run unimported

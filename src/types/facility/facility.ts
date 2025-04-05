@@ -5,11 +5,6 @@ export interface FacilityBareMinimum {
   name: string;
 }
 
-export interface FacilityBareMinimum {
-  id: string;
-  name: string;
-}
-
 export interface BaseFacility {
   id: string;
   name: string;
@@ -22,9 +17,10 @@ export interface BaseFacility {
   features: number[];
   geo_organization?: string;
   is_public: boolean;
+  permissions: string[];
 }
 
-export type CreateFacility = Omit<BaseFacility, "id">;
+export type CreateFacility = Omit<BaseFacility, "id" | "permissions">;
 
 export interface FacilityData {
   id: string;
@@ -40,4 +36,7 @@ export interface FacilityData {
   longitude: number;
   pincode: number;
   is_public: boolean;
+  permissions: string[];
+  root_org_permissions: string[];
+  child_org_permissions: string[];
 }

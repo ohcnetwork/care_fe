@@ -1,17 +1,26 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
+import { Trans } from "react-i18next";
 import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
-import DialogModal from "@/components/Common/Dialog";
 import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
-import { StateInterface } from "@/components/Files/FileUpload";
-import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { StateInterface } from "@/components/Common/FilePreviewDialog";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import {
@@ -131,7 +140,7 @@ export default function useFileManager(
 
   const validateArchiveReason = (name: any) => {
     if (name.trim() === "") {
-      setArchiveReasonError("Please enter a valid reason!");
+      setArchiveReasonError(t("please_enter_a_valid_reason"));
       return false;
     } else {
       setArchiveReasonError("");
@@ -167,7 +176,7 @@ export default function useFileManager(
     setArchiveDialogueOpen(null);
     setArchiving(false);
     setArchiveReason("");
-    onArchive && onArchive();
+    onArchive?.();
   };
 
   const archiveFile = (
@@ -200,7 +209,7 @@ export default function useFileManager(
 
   const validateEditFileName = (name: string) => {
     if (name.trim() === "") {
-      setEditError("Please enter a name!");
+      setEditError(t("please_enter_a_name"));
       return false;
     } else {
       setEditError("");
@@ -217,7 +226,7 @@ export default function useFileManager(
     onSuccess: (_, { associating_id }) => {
       toast.success(t("file_name_changed_successfully"));
       setEditDialogueOpen(null);
-      onEdit && onEdit();
+      onEdit?.();
       queryClient.invalidateQueries({
         queryKey: ["files", fileType, associating_id],
       });
@@ -253,61 +262,157 @@ export default function useFileManager(
         downloadURL={downloadURL}
         uploadedFiles={uploadedFiles}
         onClose={handleFilePreviewClose}
-        fixedWidth={false}
         className="h-[80vh] w-full md:h-screen"
         loadFile={viewFile}
         currentIndex={currentIndex}
       />
-      <DialogModal
-        show={
+      <Dialog
+        open={
           archiveDialogueOpen !== null &&
           archiveDialogueOpen.archived_datetime === null
         }
-        title={
-          <div className="flex flex-row">
-            <div className="my-1 mr-3 rounded-full bg-red-100 px-5 py-4 text-center">
-              <CareIcon
-                icon="l-exclamation-triangle"
-                className="text-lg text-danger-500"
-              />
-            </div>
-            <div className="text-sm">
-              <h1 className="text-xl text-black">Archive File</h1>
-              <span className="text-sm text-secondary-600">
-                This action is irreversible. Once a file is archived it cannot
-                be unarchived.
-              </span>
-            </div>
-          </div>
-        }
-        onClose={() => setArchiveDialogueOpen(null)}
+        onOpenChange={() => setArchiveDialogueOpen(null)}
       >
-        <form
-          onSubmit={(event: any) => {
-            event.preventDefault();
-            handleFileArchive(archiveDialogueOpen);
-          }}
-          className="mx-2 my-4 flex w-full flex-col"
-        >
-          <div>
-            <TextAreaFormField
-              name="editFileName"
-              id="archive-file-reason"
-              label={
-                <span>
-                  State the reason for archiving{" "}
-                  <b>{archiveDialogueOpen?.name}</b> file?
-                </span>
-              }
-              rows={6}
-              required
-              placeholder="Type the reason..."
-              value={archiveReason}
-              onChange={(e) => setArchiveReason(e.value)}
-              error={archiveReasonError}
-            />
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <div className="flex flex-row">
+                <div className="my-1 mr-3 rounded-full bg-red-100 px-5 py-4 text-center">
+                  <CareIcon
+                    icon="l-exclamation-triangle"
+                    className="text-lg text-danger-500"
+                  />
+                </div>
+                <div className="text-sm">
+                  <h1 className="text-xl text-black">{t("archive_file")}</h1>
+                  <span className="text-sm text-secondary-600">
+                    {t("this_action_is_irreversible")}
+                  </span>
+                </div>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+
+          <form
+            onSubmit={(event: any) => {
+              event.preventDefault();
+              handleFileArchive(archiveDialogueOpen);
+            }}
+            className="mx-2 my-4 flex w-full flex-col"
+          >
+            <div>
+              <Label className="text-gray-800 mb-2">
+                <Trans
+                  i18nKey="state_reason_for_archiving"
+                  values={{ name: archiveDialogueOpen?.name }}
+                  components={{ strong: <strong /> }}
+                />
+              </Label>
+              <Textarea
+                name="editFileName"
+                id="archive-file-reason"
+                rows={6}
+                required
+                placeholder="Type the reason..."
+                value={archiveReason}
+                onChange={(e) => setArchiveReason(e.target.value)}
+                className={cn(
+                  archiveReasonError &&
+                    "border-red-500 focus-visible:ring-red-500",
+                )}
+                data-cy="archive-reason-textarea"
+              />
+              {archiveReasonError && (
+                <p className="text-sm text-red-500">{archiveReasonError}</p>
+              )}
+            </div>
+            <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setArchiveDialogueOpen(null)}
+              >
+                {t("cancel")}
+              </Button>
+              <Button type="submit" variant="primary" disabled={archiving}>
+                {t("proceed")}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={
+          archiveDialogueOpen !== null &&
+          archiveDialogueOpen.archived_datetime !== null
+        }
+        onOpenChange={() => setArchiveDialogueOpen(null)}
+      >
+        <DialogContent className="md:w-[700px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-black">
+              {archiveDialogueOpen?.name} {t("archived")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mb-8 text-xs text-secondary-700">
+            <CareIcon icon="l-archive" className="mr-2" />
+            {t("this_file_has_been_archived")}
           </div>
-          <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
+          <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
+            {[
+              {
+                label: "File Name",
+                content: archiveDialogueOpen?.name,
+                icon: "l-file",
+              },
+              {
+                label: "Uploaded By",
+                content: archiveDialogueOpen?.uploaded_by?.username,
+                icon: "l-user",
+              },
+              {
+                label: "Uploaded On",
+                content: formatDateTime(archiveDialogueOpen?.created_date),
+                icon: "l-clock",
+              },
+              {
+                label: "Archive Reason",
+                content: archiveDialogueOpen?.archive_reason,
+                icon: "l-archive",
+              },
+              {
+                label: "Archived By",
+                content: archiveDialogueOpen?.archived_by?.username,
+                icon: "l-user",
+              },
+              {
+                label: "Archived On",
+                content: formatDateTime(archiveDialogueOpen?.archived_datetime),
+                icon: "l-clock",
+              },
+            ].map((item, index) => (
+              <div key={index} className="flex gap-2">
+                <div className="flex aspect-square h-10 items-center justify-center rounded-full bg-primary-100">
+                  <CareIcon
+                    icon={item.icon as any}
+                    className="text-lg text-primary-500"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs uppercase text-secondary-700">
+                    {item.label}
+                  </div>
+                  <div
+                    className="break-words text-base"
+                    data-archive-info={item.label}
+                  >
+                    {item.content}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 flex justify-end">
             <Button
               type="button"
               variant="outline"
@@ -315,153 +420,76 @@ export default function useFileManager(
             >
               {t("cancel")}
             </Button>
-            <Button type="submit" variant="primary" disabled={archiving}>
-              {t("proceed")}
-            </Button>
           </div>
-        </form>
-      </DialogModal>
-      <DialogModal
-        show={
-          archiveDialogueOpen !== null &&
-          archiveDialogueOpen.archived_datetime !== null
-        }
-        title={
-          <h1 className="text-xl text-black">
-            {archiveDialogueOpen?.name} (Archived)
-          </h1>
-        }
-        fixedWidth={false}
-        className="md:w-[700px]"
-        onClose={() => setArchiveDialogueOpen(null)}
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={editDialogueOpen !== null}
+        onOpenChange={() => setEditDialogueOpen(null)}
       >
-        <div className="mb-8 text-xs text-secondary-700">
-          <CareIcon icon="l-archive" className="mr-2" />
-          This file has been archived and cannot be unarchived.
-        </div>
-        <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
-          {[
-            {
-              label: "File Name",
-              content: archiveDialogueOpen?.name,
-              icon: "l-file",
-            },
-            {
-              label: "Uploaded By",
-              content: archiveDialogueOpen?.uploaded_by?.username,
-              icon: "l-user",
-            },
-            {
-              label: "Uploaded On",
-              content: formatDateTime(archiveDialogueOpen?.created_date),
-              icon: "l-clock",
-            },
-            {
-              label: "Archive Reason",
-              content: archiveDialogueOpen?.archive_reason,
-              icon: "l-archive",
-            },
-            {
-              label: "Archived By",
-              content: archiveDialogueOpen?.archived_by?.username,
-              icon: "l-user",
-            },
-            {
-              label: "Archived On",
-              content: formatDateTime(archiveDialogueOpen?.archived_datetime),
-              icon: "l-clock",
-            },
-          ].map((item, index) => (
-            <div key={index} className="flex gap-2">
-              <div className="flex aspect-square h-10 items-center justify-center rounded-full bg-primary-100">
-                <CareIcon
-                  icon={item.icon as any}
-                  className="text-lg text-primary-500"
-                />
-              </div>
-              <div>
-                <div className="text-xs uppercase text-secondary-700">
-                  {item.label}
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <div className="flex flex-row">
+                <div className="rounded-full bg-primary-100 px-5 py-4">
+                  <CareIcon
+                    icon="l-edit-alt"
+                    className="text-lg text-primary-500"
+                  />
                 </div>
-                <div
-                  className="break-words text-base"
-                  data-archive-info={item.label}
-                >
-                  {item.content}
+                <div className="m-4">
+                  <h1 className="text-xl text-black">{t("rename_file")}</h1>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-10 flex justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setArchiveDialogueOpen(null)}
+            </DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={(event: any) => {
+              event.preventDefault();
+              setEditing(true);
+              if (editDialogueOpen) partialupdateFileName(editDialogueOpen);
+            }}
+            className="flex w-full flex-col"
           >
-            {t("cancel")}
-          </Button>
-        </div>
-      </DialogModal>
-      <DialogModal
-        show={editDialogueOpen !== null}
-        title={
-          <div className="flex flex-row">
-            <div className="rounded-full bg-primary-100 px-5 py-4">
-              <CareIcon
-                icon="l-edit-alt"
-                className="text-lg text-primary-500"
+            <div>
+              <Label>{t("enter_the_file_name")}</Label>
+              <Input
+                name="editFileName"
+                id="edit-file-name"
+                value={editDialogueOpen?.name}
+                onChange={(e) => {
+                  setEditDialogueOpen({
+                    ...editDialogueOpen,
+                    name: e.target.value,
+                  });
+                }}
+                data-cy="edit-filename-input"
               />
+              {editError && <p className="text-sm text-red-500">{editError}</p>}
             </div>
-            <div className="m-4">
-              <h1 className="text-xl text-black">Rename File</h1>
+            <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditDialogueOpen(null)}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={
+                  editing === true ||
+                  editDialogueOpen?.name === "" ||
+                  editDialogueOpen?.name?.length === 0
+                }
+              >
+                {t("proceed")}
+              </Button>
             </div>
-          </div>
-        }
-        onClose={() => setEditDialogueOpen(null)}
-      >
-        <form
-          onSubmit={(event: any) => {
-            event.preventDefault();
-            setEditing(true);
-            if (editDialogueOpen) partialupdateFileName(editDialogueOpen);
-          }}
-          className="flex w-full flex-col"
-        >
-          <div>
-            <TextFormField
-              name="editFileName"
-              id="edit-file-name"
-              label="Enter the file name"
-              value={editDialogueOpen?.name}
-              onChange={(e) => {
-                setEditDialogueOpen({ ...editDialogueOpen, name: e.value });
-              }}
-              error={editError}
-            />
-          </div>
-          <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setEditDialogueOpen(null)}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={
-                editing === true ||
-                editDialogueOpen?.name === "" ||
-                editDialogueOpen?.name?.length === 0
-              }
-            >
-              {t("proceed")}
-            </Button>
-          </div>
-        </form>
-      </DialogModal>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 
@@ -507,7 +535,7 @@ export default function useFileManager(
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
       toast.success(t("file_download_completed"));
-    } catch (err) {
+    } catch {
       toast.error(t("file_download_failed"));
     }
   };

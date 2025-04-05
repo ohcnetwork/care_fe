@@ -19,14 +19,12 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-import { FieldError } from "@/components/Form/FieldValidators";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 
 import { isAppleDevice } from "@/Utils/utils";
 
@@ -49,9 +47,8 @@ interface SearchByMultipleFieldsProps {
   clearSearch?: { value: boolean; params?: string[] };
   enableOptionButtons?: boolean;
   onFieldChange?: (options: SearchOption) => void;
+  autoFocus?: boolean;
 }
-
-type EventType = React.ChangeEvent<HTMLInputElement> | { value: string };
 
 const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
   return (
@@ -94,6 +91,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   clearSearch,
   onFieldChange,
   enableOptionButtons = true,
+  autoFocus = false,
 }) => {
   const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] =
@@ -180,46 +178,24 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   }, [focusedIndex, open, handleOptionChange, options]);
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [selectedOptionIndex]);
-
-  useEffect(() => {
     if (selectedOption.value !== searchValue) {
       onSearch(selectedOption.key, searchValue);
     }
   }, [searchValue]);
 
-  const handleSearchChange = useCallback((event: EventType) => {
-    const value = "target" in event ? event.target.value : event.value;
-    setSearchValue(value);
-  }, []);
-
   const renderSearchInput = useMemo(() => {
-    const commonProps = {
-      ref: inputRef,
-      value: searchValue,
-      onChange: handleSearchChange,
-      className: cn(
-        "flex-grow border-none shadow-none focus-visible:ring-0",
-        inputClassName,
-      ),
-    } as const;
-
     switch (selectedOption.type) {
       case "phone":
         return (
           <div className="relative">
-            <PhoneNumberFormField
+            <PhoneInput
               id={id}
               name={selectedOption.key}
               placeholder={selectedOption.placeholder}
-              types={["mobile", "landline"]}
-              {...commonProps}
-              errorClassName="hidden"
-              hideHelp={true}
-              onError={(error: FieldError) => setError(error)}
+              value={searchValue}
+              onChange={(value) => setSearchValue(value)}
+              className={inputClassName}
+              autoFocus={autoFocus}
             />
             {!isSingleOption && <KeyboardShortcutHint open={open} />}
           </div>
@@ -231,25 +207,30 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               id={id}
               type="text"
               placeholder={selectedOption.placeholder}
-              {...commonProps}
+              ref={inputRef}
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              className={cn(
+                "grow border-none shadow-none focus-visible:ring-0",
+                inputClassName,
+              )}
             />
             {!isSingleOption && <KeyboardShortcutHint open={open} />}
           </div>
         );
     }
-  }, [
-    selectedOption,
-    searchValue,
-    handleSearchChange,
-    t,
-    inputClassName,
-    open,
-  ]);
+  }, [selectedOption, searchValue, t, inputClassName, open]);
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus();
+    }
+  }, [autoFocus, open, selectedOptionIndex]);
 
   return (
     <div
       className={cn(
-        "border rounded-lg border-gray-200 bg-white shadow",
+        "border rounded-lg border-gray-200 bg-white shadow-sm",
         className,
       )}
     >
@@ -359,7 +340,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       </div>
       {error && (
         <div className="px-2 mb-1 text-xs font-medium tracking-wide transition-opacity duration-300 error-text text-danger-500">
-          {t("invalid_phone_number")}
+          {t("phone_number_validation_error")}
         </div>
       )}
       {enableOptionButtons && (
@@ -387,13 +368,13 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full flex items-center justify-center text-muted-foreground"
+          className="w-full flex items-center justify-center text-gray-500"
           onClick={() => {
             setSearchValue("");
             inputRef.current?.focus();
           }}
         >
-          <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
+          <CareIcon icon="l-times" className="mr-2 size-4" />
           {t("clear_search")}
         </Button>
       )}

@@ -15,7 +15,7 @@ jobs:
       contents: write
     steps:
       - name: Add thankyou note
-        uses: actions/github-script@v6.3.3
+        uses: actions/github-script@v7
         with:
           script: |
             const thankyouNote = 'Your efforts have helped advance digital healthcare and TeleICU systems. :rocket: Thank you for taking the time out to make CARE better. We hope you continue to innovate and contribute; your impact is immense! :raised_hands:';

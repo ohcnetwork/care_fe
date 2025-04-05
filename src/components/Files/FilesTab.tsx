@@ -1,27 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { t } from "i18next";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -30,65 +26,101 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
-import AudioPlayer from "@/components/Common/AudioPlayer";
 import Loading from "@/components/Common/Loading";
+import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
+import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
+import FileUploadDialog from "@/components/Files/FileUploadDialog";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
-import useFileUpload, { FileUploadReturn } from "@/hooks/useFileUpload";
+import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
-import { FILE_EXTENSIONS } from "@/common/constants";
+import { getPermissions } from "@/common/Permissions";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FILE_EXTENSIONS,
+} from "@/common/constants";
 
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { classNames } from "@/Utils/utils";
+import { HTTPError } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
+import { Patient } from "@/types/emr/newPatient";
 
 export interface FilesTabProps {
   type: "encounter" | "patient";
-  facilityId: string;
-  encounterId?: string;
-  patientId?: string;
+  encounter?: Encounter;
+  patient?: Patient;
 }
 
 export const FilesTab = (props: FilesTabProps) => {
-  const { encounterId, patientId, type } = props;
+  const { patient, type, encounter } = props;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
   });
-  const { t } = useTranslation();
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
+  const [selectedArchivedFile, setSelectedArchivedFile] =
+    useState<FileUploadModel | null>(null);
   const [selectedAudioFile, setSelectedAudioFile] =
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
+  const {
+    canViewClinicalData,
+    canViewEncounter,
+    canWritePatient,
+    canWriteEncounter,
+  } = getPermissions(
+    hasPermission,
+    encounter?.permissions ?? patient?.permissions ?? [],
+  );
+  const canAccess =
+    type === "encounter"
+      ? canViewClinicalData || canViewEncounter
+      : canViewClinicalData;
+
+  const canWriteCurrentEncounter =
+    canWriteEncounter &&
+    encounter &&
+    !inactiveEncounterStatus.includes(encounter.status);
+
+  const canEdit =
+    type === "encounter" ? canWriteCurrentEncounter : canWritePatient;
+
+  const queryClient = useQueryClient();
 
   const associatingId =
     {
-      patient: patientId,
-      encounter: encounterId,
+      patient: patient?.id,
+      encounter: encounter?.id,
     }[type] || "";
 
   const fileCategories = [
     { value: "all", label: "All" },
-    { value: "imaging", label: "Imaging" },
-    { value: "lab_reports", label: "Lab Reports" },
-    { value: "documents", label: "Documents" },
     { value: "audio", label: "Audio" },
+    { value: "xray", label: "X-Ray" },
+    { value: "identity_proof", label: "Identity Proof" },
+    { value: "unspecified", label: "Unspecified" },
+    { value: "discharge_summary", label: "Discharge Summary" },
   ] as const;
 
-  const handleTabChange = (value: (typeof fileCategories)[number]["value"]) => {
-    updateQuery({ file_category: value === "all" ? undefined : value });
-  };
+  const { mutate: generateDischargeSummary, isPending: isGenerating } =
+    useMutation<{ detail: string }, HTTPError>({
+      mutationFn: mutate(routes.encounter.generateDischargeSummary, {
+        pathParams: { encounterId: encounter?.id || "" },
+      }),
+      onSuccess: (response) => {
+        toast.success(response.detail);
+        refetch();
+      },
+    });
 
   const {
     data: files,
@@ -105,9 +137,12 @@ export const FilesTab = (props: FilesTabProps) => {
         ...(qParams.is_archived !== undefined && {
           is_archived: qParams.is_archived,
         }),
-        //file_category: qParams.file_category,
+        ...(qParams.file !== "all" && {
+          file_category: qParams.file,
+        }),
       },
     }),
+    enabled: canAccess,
   });
 
   const fileManager = useFileManager({
@@ -116,6 +151,7 @@ export const FilesTab = (props: FilesTabProps) => {
     onEdit: refetch,
     uploadedFiles:
       files?.results
+        .filter((file) => !file.is_archived)
         .slice()
         .reverse()
         .map((file) => ({
@@ -127,42 +163,25 @@ export const FilesTab = (props: FilesTabProps) => {
   const fileUpload = useFileUpload({
     type: type,
     multiple: true,
-    allowedExtensions: [
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "bmp",
-      "tiff",
-      "mp4",
-      "mov",
-      "avi",
-      "wmv",
-      "mp3",
-      "wav",
-      "ogg",
-      "txt",
-      "csv",
-      "rtf",
-      "doc",
-      "odt",
-      "pdf",
-      "xls",
-      "xlsx",
-      "ods",
-      "pdf",
-    ],
+    allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
-    onUpload: () => refetch(),
+    onUpload: () => {
+      refetch();
+    },
+    compress: false,
   });
 
   useEffect(() => {
-    if (fileUpload.files.length > 0 && fileUpload.files[0] !== undefined) {
+    if (
+      fileUpload.files.length > 0 &&
+      fileUpload.files[0] !== undefined &&
+      !fileUpload.previewing
+    ) {
       setOpenUploadDialog(true);
     } else {
       setOpenUploadDialog(false);
     }
-  }, [fileUpload.files]);
+  }, [fileUpload.files, fileUpload.previewing]);
 
   useEffect(() => {
     if (!openUploadDialog) {
@@ -185,12 +204,24 @@ export const FilesTab = (props: FilesTabProps) => {
     DOCUMENT: "l-file-medical",
   };
 
-  const getArchivedMessage = () => {
+  const getArchivedMessage = (file: FileUploadModel) => {
     return (
       <div className="flex flex-row gap-2 justify-end">
-        <span className="text-gray-200/90 text-2xl uppercase font-bold">
+        <span className="text-gray-200/90 self-center uppercase font-bold">
           {t("archived")}
         </span>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setSelectedArchivedFile(file);
+            setOpenArchivedFileDialog(true);
+          }}
+        >
+          <span className="flex flex-row items-center gap-1">
+            <CareIcon icon="l-archive-alt" />
+            {t("view")}
+          </span>
+        </Button>
       </div>
     );
   };
@@ -198,74 +229,87 @@ export const FilesTab = (props: FilesTabProps) => {
   const DetailButtons = ({ file }: { file: FileUploadModel }) => {
     const filetype = getFileType(file);
     return (
-      <div className="flex flex-row gap-2 justify-end">
-        {filetype === "AUDIO" && !file.is_archived && (
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setSelectedAudioFile(file);
-              setOpenAudioPlayerDialog(true);
-            }}
-          >
-            <span className="flex flex-row items-center gap-1">
-              <CareIcon icon="l-play-circle" className="mr-1" />
-              {t("play")}
-            </span>
-          </Button>
-        )}
-        {fileManager.isPreviewable(file) && (
-          <Button
-            variant="secondary"
-            onClick={() => fileManager.viewFile(file, associatingId)}
-          >
-            <span className="flex flex-row items-center gap-1">
-              <CareIcon icon="l-eye" />
-              {t("view")}
-            </span>
-          </Button>
-        )}
-        {
+      <>
+        <div className="flex flex-row gap-2 justify-end">
+          {filetype === "AUDIO" && !file.is_archived && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSelectedAudioFile(file);
+                setOpenAudioPlayerDialog(true);
+              }}
+            >
+              <span className="flex flex-row items-center gap-1">
+                <CareIcon icon="l-play-circle" className="mr-1" />
+                {t("play")}
+              </span>
+            </Button>
+          )}
+          {fileManager.isPreviewable(file) && (
+            <Button
+              variant="secondary"
+              onClick={() => fileManager.viewFile(file, associatingId)}
+              data-cy="file-view-button"
+            >
+              <span className="flex flex-row items-center gap-1">
+                <CareIcon icon="l-eye" />
+                {t("view")}
+              </span>
+            </Button>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary">
+              <Button variant="secondary" data-cy="file-options-button">
                 <CareIcon icon="l-ellipsis-h" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem className="text-primary-900">
-                <button
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild className="text-primary-900">
+                <Button
+                  size="sm"
                   onClick={() => fileManager.downloadFile(file, associatingId)}
+                  variant="ghost"
+                  className="w-full flex flex-row justify-stretch items-center"
+                  data-cy="file-download-button"
                 >
                   <CareIcon icon="l-arrow-circle-down" className="mr-1" />
                   <span>{t("download")}</span>
-                </button>
+                </Button>
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-primary-900">
-                <button
-                  onClick={() => fileManager.archiveFile(file, associatingId)}
-                >
-                  <CareIcon icon="l-archive-alt" className="mr-1" />
-                  <span>{t("archive")}</span>
-                </button>
-              </DropdownMenuItem>
-              {hasPermission(
-                type === "encounter"
-                  ? "can_write_encounter"
-                  : "can_write_patient",
-              ) && (
-                <DropdownMenuItem className="text-primary-900">
-                  <button
-                    onClick={() => fileManager.editFile(file, associatingId)}
-                  >
-                    <CareIcon icon="l-pen" className="mr-1" />
-                    <span>{t("rename")}</span>
-                  </button>
-                </DropdownMenuItem>
+              {canEdit && (
+                <>
+                  <DropdownMenuItem asChild className="text-primary-900">
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        fileManager.archiveFile(file, associatingId)
+                      }
+                      variant="ghost"
+                      className="w-full flex flex-row justify-stretch items-center"
+                      data-cy="file-archive-option"
+                    >
+                      <CareIcon icon="l-archive-alt" className="mr-1" />
+                      <span>{t("archive")}</span>
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="text-primary-900">
+                    <Button
+                      size="sm"
+                      onClick={() => fileManager.editFile(file, associatingId)}
+                      variant="ghost"
+                      className="w-full flex flex-row justify-stretch items-center"
+                      data-cy="file-rename-button"
+                    >
+                      <CareIcon icon="l-pen" className="mr-1" />
+                      <span>{t("rename")}</span>
+                    </Button>
+                  </DropdownMenuItem>
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-        }
-      </div>
+        </div>
+      </>
     );
   };
 
@@ -273,7 +317,11 @@ export const FilesTab = (props: FilesTabProps) => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary" className="text-sm text-secondary-800">
+          <Button
+            variant="secondary"
+            className="text-sm text-secondary-800"
+            data-cy="files-filter-button"
+          >
             <span className="flex flex-row items-center gap-1">
               <CareIcon icon="l-filter" />
               <span>{t("filter")}</span>
@@ -289,6 +337,7 @@ export const FilesTab = (props: FilesTabProps) => {
             onClick={() => {
               updateQuery({ is_archived: "false" });
             }}
+            data-cy="active-files-button"
           >
             <span>{t("active_files")}</span>
           </DropdownMenuItem>
@@ -297,6 +346,7 @@ export const FilesTab = (props: FilesTabProps) => {
             onClick={() => {
               updateQuery({ is_archived: "true" });
             }}
+            data-cy="archived-files-button"
           >
             <span>{t("archived_files")}</span>
           </DropdownMenuItem>
@@ -313,6 +363,7 @@ export const FilesTab = (props: FilesTabProps) => {
           variant="secondary"
           className="cursor-pointer border border-gray-300 bg-white"
           onClick={() => updateQuery({ is_archived: undefined })}
+          data-cy="filter-badge"
         >
           {t(
             qParams.is_archived === "false" ? "active_files" : "archived_files",
@@ -324,18 +375,14 @@ export const FilesTab = (props: FilesTabProps) => {
   };
 
   const FileUploadButtons = (): JSX.Element => {
-    if (
-      !hasPermission(
-        type === "encounter" ? "can_write_encounter" : "can_write_patient",
-      )
-    )
-      return <></>;
+    if (!canEdit) return <></>;
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline_primary"
             className="flex flex-row items-center"
+            data-cy="add-files-button"
           >
             <CareIcon icon="l-file-upload" className="mr-1" />
             <span>{t("add_files")}</span>
@@ -345,60 +392,130 @@ export const FilesTab = (props: FilesTabProps) => {
         <DropdownMenuContent
           align="end"
           className="w-[calc(100vw-2.5rem)] sm:w-full"
+          data-cy="file-upload-dropdown"
         >
           <DropdownMenuItem
             className="flex flex-row items-center"
             onSelect={(e) => {
               e.preventDefault();
             }}
+            data-cy="choose-file-option"
           >
-            <label
-              htmlFor="file_upload_patient"
-              className="flex flex-row items-center cursor-pointer text-primary-900 font-normal w-full"
+            <Label
+              htmlFor={`file_upload_${type}`}
+              className="py-1 flex flex-row items-center cursor-pointer text-primary-900  w-full"
             >
               <CareIcon icon="l-file-upload-alt" className="mr-1" />
               <span>{t("choose_file")}</span>
-            </label>
+            </Label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
-          <DropdownMenuItem className="flex flex-row items-center text-primary-900">
-            <button
+          <DropdownMenuItem asChild>
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={() => fileUpload.handleCameraCapture()}
-              className="flex flex-row items-center "
+              className="flex flex-row justify-stretch items-center w-full text-primary-900"
+              data-cy="open-camera-button"
             >
-              <CareIcon icon="l-camera" className="mr-1" />
+              <CareIcon icon="l-camera" />
               <span>{t("open_camera")}</span>
-            </button>
+            </Button>
           </DropdownMenuItem>
-          <DropdownMenuItem className="flex flex-row items-center text-primary-900">
-            <button
+          <DropdownMenuItem asChild>
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={() => fileUpload.handleAudioCapture()}
-              className="flex flex-row items-center"
+              className="flex flex-row justify-stretch items-center w-full text-primary-900"
+              data-cy="record-audio-button"
             >
-              <CareIcon icon="l-microphone" className="mr-1" />
+              <CareIcon icon="l-microphone" />
               <span>{t("record")}</span>
-            </button>
+            </Button>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
   };
 
-  const RenderTable = () => {
-    return (
+  const RenderCard = () => (
+    <div className="xl:hidden space-y-4 px-2">
+      {files?.results && files?.results?.length > 0 ? (
+        files.results.map((file) => {
+          const filetype = getFileType(file);
+          const fileName = file.name ? file.name + file.extension : "";
+
+          return (
+            <Card
+              key={file.id}
+              className={cn(
+                "overflow-hidden",
+                file.is_archived ? "bg-white/50" : "bg-white",
+              )}
+            >
+              <CardContent className="p-4 space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="p-2 rounded-full bg-gray-100 shrink-0">
+                    <CareIcon icon={icons[filetype]} className="text-xl" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-gray-900 truncate">
+                      {fileName}
+                    </div>
+                    <div className="mt-1 text-sm text-gray-500">{filetype}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <div className="text-gray-500">{t("date")}</div>
+                    <div className="font-medium">
+                      {dayjs(file.created_date).format("DD MMM YYYY, hh:mm A")}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">{t("shared_by")}</div>
+                    <div className="font-medium">
+                      {file.uploaded_by?.username}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  {file.is_archived ? (
+                    getArchivedMessage(file)
+                  ) : (
+                    <DetailButtons file={file} />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })
+      ) : (
+        <div className="text-center py-4 text-gray-500">
+          {t("no_files_found")}
+        </div>
+      )}
+    </div>
+  );
+
+  const RenderTable = () => (
+    <div className="hidden xl:block">
       <Table className="border-separate border-spacing-y-3 mx-2 lg:max-w-[calc(100%-16px)]">
         <TableHeader>
-          <TableRow className="shadow rounded overflow-hidden">
-            <TableHead className="w-[30%] bg-white rounded-l">
+          <TableRow className="shadow-sm rounded overflow-hidden">
+            <TableHead className="w-[20%] bg-white rounded-l">
               {t("file_name")}
             </TableHead>
-            <TableHead className="w-[15%] rounded-y bg-white">
+            <TableHead className="w-[20%] rounded-y bg-white">
               {t("file_type")}
             </TableHead>
             <TableHead className="w-[25%] rounded-y bg-white">
               {t("date")}
             </TableHead>
-            <TableHead className="w-[15%] rounded-y bg-white">
+            <TableHead className="w-[20%] rounded-y bg-white">
               {t("shared_by")}
             </TableHead>
             <TableHead className="w-[15%] text-right rounded-r bg-white"></TableHead>
@@ -413,12 +530,11 @@ export const FilesTab = (props: FilesTabProps) => {
               return (
                 <TableRow
                   key={file.id}
-                  className={classNames(
-                    "shadow rounded-md overflow-hidden group",
-                  )}
+                  data-cy={fileName}
+                  className={cn("shadow-sm rounded-md overflow-hidden group")}
                 >
                   <TableCell
-                    className={classNames(
+                    className={cn(
                       "font-medium rounded-l-md rounded-y-md group-hover:bg-transparent",
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
@@ -428,18 +544,11 @@ export const FilesTab = (props: FilesTabProps) => {
                         <CareIcon icon={icons[filetype]} className="text-xl" />
                       </span>
                       {file.name && file.name.length > 20 ? (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="truncate">
-                              <span className="text-gray-900 truncate block">
-                                {fileName}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-black text-white z-40">
-                              <span>{fileName}</span>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <TooltipComponent content={fileName}>
+                          <span className="text-gray-900 truncate block">
+                            {fileName}
+                          </span>
+                        </TooltipComponent>
                       ) : (
                         <span className="text-gray-900 truncate block">
                           {fileName}
@@ -448,7 +557,7 @@ export const FilesTab = (props: FilesTabProps) => {
                     </div>
                   </TableCell>
                   <TableCell
-                    className={classNames(
+                    className={cn(
                       "rounded-y-md group-hover:bg-transparent",
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
@@ -456,15 +565,23 @@ export const FilesTab = (props: FilesTabProps) => {
                     {filetype}
                   </TableCell>
                   <TableCell
-                    className={classNames(
+                    className={cn(
                       "rounded-y-md group-hover:bg-transparent",
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
                   >
-                    {dayjs(file.created_date).format("DD MMM YYYY, hh:mm A")}
+                    <TooltipComponent
+                      content={dayjs(file.created_date).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    >
+                      <span>
+                        {dayjs(file.created_date).format("DD MMM YYYY ")}
+                      </span>
+                    </TooltipComponent>
                   </TableCell>
                   <TableCell
-                    className={classNames(
+                    className={cn(
                       "rounded-y-md group-hover:bg-transparent",
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
@@ -472,15 +589,18 @@ export const FilesTab = (props: FilesTabProps) => {
                     {file.uploaded_by?.username}
                   </TableCell>
                   <TableCell
-                    className={classNames(
+                    className={cn(
                       "text-right rounded-r-md rounded-y-md group-hover:bg-transparent",
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
                   >
                     {file.is_archived ? (
-                      getArchivedMessage()
+                      getArchivedMessage(file)
                     ) : (
-                      <DetailButtons file={file} />
+                      <DetailButtons
+                        file={file}
+                        data-cy={fileName + "-details-button"}
+                      />
                     )}
                   </TableCell>
                 </TableRow>
@@ -495,11 +615,11 @@ export const FilesTab = (props: FilesTabProps) => {
           )}
         </TableBody>
       </Table>
-    );
-  };
+    </div>
+  );
 
   return (
-    <div className="mt-5 space-y-4">
+    <div className="space-y-4">
       <div className="z-40">
         {fileUpload.Dialogues}
         {fileManager.Dialogues}
@@ -516,197 +636,87 @@ export const FilesTab = (props: FilesTabProps) => {
           associatingId={associatingId}
         />
       </div>
+      <ArchivedFileDialog
+        open={openArchivedFileDialog}
+        onOpenChange={setOpenArchivedFileDialog}
+        file={selectedArchivedFile}
+      />
       <FileUploadDialog
         open={openUploadDialog}
         onOpenChange={setOpenUploadDialog}
         fileUpload={fileUpload}
         associatingId={associatingId}
+        type={type}
       />
       <Tabs
-        defaultValue="all"
-        value={qParams.file_category || "all"}
+        value={qParams.file || "all"}
         onValueChange={(value) =>
-          handleTabChange(value as (typeof fileCategories)[number]["value"])
+          updateQuery({
+            file: value,
+            is_archived: undefined,
+            page: undefined,
+          })
         }
       >
-        <div className="mx-2 flex flex-col flex-wrap gap-3 sm:flex-row justify-between">
-          <div className="flex sm:flex-row flex-wrap flex-col gap-4 sm:items-center">
-            {/* <TabsList className="flex flex-row flex-wrap gap-2 h-auto">
-              {fileCategories.map((category) => (
-                <TabsTrigger
-                  key={category.value}
-                  value={category.value}
-                  className="hover:text-secondary-900 hover:bg-white/50 mr-4"
-                >
-                  {category.label}
-                </TabsTrigger>
-              ))}
-            </TabsList> */}
-            <FilterButton />
-          </div>
+        {type === "encounter" && (
+          <TabsList className="bg-gray-200 py-0 w-fit">
+            <TabsTrigger
+              value="all"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            >
+              {t("all")}
+            </TabsTrigger>
+            <TabsTrigger
+              value="discharge_summary"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            >
+              {t("discharge_summary")}
+            </TabsTrigger>
+          </TabsList>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
+          <FilterButton />
+          {type === "encounter" && qParams.file === "discharge_summary" && (
+            <>
+              <Button
+                variant="outline_primary"
+                className="flex flex-row items-center"
+                onClick={async () => {
+                  await queryClient.invalidateQueries({
+                    queryKey: ["files"],
+                  });
+                  toast.success(t("refreshed"));
+                }}
+              >
+                <CareIcon icon="l-sync" />
+                <span className="ml-2">{t("refresh")}</span>
+              </Button>
+              <Button
+                variant="primary"
+                className="flex flex-row items-center"
+                onClick={() => generateDischargeSummary()}
+                disabled={isGenerating}
+              >
+                <CareIcon icon="l-file-medical" className="hidden sm:block" />
+                <span>
+                  {isGenerating
+                    ? t("generating")
+                    : t("generate_discharge_summary")}
+                </span>
+              </Button>
+            </>
+          )}
           <FileUploadButtons />
         </div>
         <FilterBadges />
         {fileCategories.map((category) => (
           <TabsContent key={category.value} value={category.value}>
             <RenderTable />
+            <RenderCard />
           </TabsContent>
         ))}
       </Tabs>
       <Pagination totalCount={files?.count || 0} />
     </div>
-  );
-};
-
-const FileUploadDialog = ({
-  open,
-  onOpenChange,
-  fileUpload,
-  associatingId,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  fileUpload: FileUploadReturn;
-  associatingId: string;
-}) => {
-  const { t } = useTranslation();
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-      aria-labelledby="file-upload-dialog"
-    >
-      <DialogContent
-        className="mb-8 rounded-lg p-5 max-w-fit"
-        aria-describedby="file-upload"
-      >
-        <DialogHeader>
-          <DialogTitle>
-            {fileUpload.files.length > 1 ? t("upload_files") : t("upload_file")}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          {fileUpload.files.map((file, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
-                <span className="flex items-center truncate">
-                  <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
-                  <span className="truncate max-w-xs" title={file.name}>
-                    {file.name}
-                  </span>
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => fileUpload.removeFile(index)}
-                  disabled={fileUpload.uploading}
-                >
-                  <CareIcon icon="l-times" />
-                </Button>
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor={`upload-file-name-${index}`}
-                  className="text-sm font-medium text-gray-700"
-                >
-                  {t("enter_file_name")}
-                </Label>
-                <Input
-                  name={`file_name_${index}`}
-                  type="text"
-                  id={`upload-file-name-${index}`}
-                  required
-                  className={
-                    index === 0 && fileUpload.error
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-primary"
-                  }
-                  value={fileUpload.fileNames[index] || ""}
-                  disabled={fileUpload.uploading}
-                  onChange={(e) =>
-                    fileUpload.setFileName(e.target.value, index)
-                  }
-                />
-                {index === 0 && fileUpload.error && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {fileUpload.error}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center gap-2 mt-4">
-          <Button
-            variant="outline_primary"
-            onClick={() => fileUpload.handleFileUpload(associatingId)}
-            disabled={fileUpload.uploading}
-            className="w-full"
-            id="upload_file_button"
-          >
-            <CareIcon icon="l-check" className="mr-1" />
-            {t("upload")}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={fileUpload.clearFiles}
-            disabled={fileUpload.uploading}
-          >
-            <CareIcon icon="l-trash-alt" className="mr-1" />
-            {t("discard")}
-          </Button>
-        </div>
-        {!!fileUpload.progress && (
-          <Progress value={fileUpload.progress} className="mt-4" />
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const AudioPlayerDialog = ({
-  open,
-  onOpenChange,
-  file,
-  type,
-  associatingId,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  file: FileUploadModel | null;
-  type: "encounter" | "patient";
-  associatingId: string;
-}) => {
-  const { t } = useTranslation();
-  const { data: fileData } = useQuery({
-    queryKey: [routes.retrieveUpload, type, file?.id],
-    queryFn: query(routes.retrieveUpload, {
-      queryParams: { file_type: type, associating_id: associatingId },
-      pathParams: { id: file?.id || "" },
-    }),
-    enabled: !!file?.id,
-  });
-  const { Player, stopPlayback } = AudioPlayer({
-    src: fileData?.read_signed_url || "",
-  });
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={() => {
-        stopPlayback();
-        onOpenChange(false);
-      }}
-      aria-labelledby="audio-player-dialog"
-    >
-      <DialogContent
-        className="mb-2 rounded-lg p-4"
-        aria-describedby="audio-player"
-      >
-        <DialogHeader>
-          <DialogTitle>{t("play_audio")}</DialogTitle>
-        </DialogHeader>
-        <Player />
-      </DialogContent>
-    </Dialog>
   );
 };

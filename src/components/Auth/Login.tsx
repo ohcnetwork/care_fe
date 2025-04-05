@@ -1,9 +1,11 @@
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
-import { Link, useQueryParams } from "raviger";
-import { useState } from "react";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { useQueryParams } from "raviger";
+import { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -19,8 +21,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { PasswordInput } from "@/components/ui/input-password";
 import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import CircularProgress from "@/components/Common/CircularProgress";
@@ -29,17 +37,16 @@ import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
+import { LocalStorageKeys } from "@/common/constants";
+
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import request from "@/Utils/request/request";
-import { TokenData } from "@/types/auth/otpToken";
+import { HTTPError } from "@/Utils/request/types";
+import { TokenData } from "@/types/auth/otp";
 
-interface LoginFormData {
-  username: string;
-  password: string;
-}
+import { AuthHero } from "./AuthHero";
 
 interface OtpLoginData {
   phone_number: string;
@@ -69,10 +76,15 @@ interface LoginProps {
 }
 
 const Login = (props: LoginProps) => {
-  const { signIn, patientLogin } = useAuthContext();
-  const { reCaptchaSiteKey, urls, stateLogo, customLogo, customLogoAlt } =
-    careConfig;
-  const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
+  const { signIn, patientLogin, isAuthenticating } = useAuthContext();
+  const {
+    reCaptchaSiteKey,
+    urls,
+    stateLogo,
+    customLogo,
+    customLogoAlt,
+    resendOtpTimeout,
+  } = careConfig;
   const initForm: any = {
     username: "",
     password: "",
@@ -94,27 +106,30 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
+  const [resendOtpCountdown, setResendOtpCountdown] =
+    useState(resendOtpTimeout);
 
-  // Staff Login Mutation
-  const staffLoginMutation = useMutation({
-    mutationFn: async (data: LoginFormData) => {
-      FiltersCache.invaldiateAll();
-      return await signIn(data);
-    },
-    onSuccess: ({ res }) => {
-      setCaptcha(res?.status === 429);
-    },
-  });
+  // Timer Function for resend OTP
+  useEffect(() => {
+    if (resendOtpCountdown <= 0) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setResendOtpCountdown((prevTime) => prevTime - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Remember the last login mode
+  useEffect(() => {
+    localStorage.setItem(LocalStorageKeys.loginPreference, loginMode);
+  }, [loginMode]);
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
-    mutationFn: async (phone: string) => {
-      const response = await request(routes.otp.sendOtp, {
-        body: { phone_number: `+91${phone}` },
-        silent: true,
-      });
-      return response;
-    },
+    mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
       setIsOtpSent(true);
       setOtpError("");
@@ -148,7 +163,7 @@ const Login = (props: LoginProps) => {
         setOtpValidationError("");
         const tokenData: TokenData = {
           token: access,
-          phoneNumber: `+91${phone}`,
+          phoneNumber: phone,
           createdAt: new Date().toISOString(),
         };
         patientLogin(tokenData, `/patient/home`);
@@ -183,22 +198,6 @@ const Login = (props: LoginProps) => {
     },
   });
 
-  // Format phone number to include +91
-  const formatPhoneNumber = (value: string) => {
-    // Remove any non-digit characters
-    const digits = value.replace(/\D/g, "");
-    // Limit to 10 digits
-    const truncated = digits.slice(0, 10);
-    return truncated;
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedNumber = formatPhoneNumber(e.target.value);
-    setPhone(formattedNumber);
-    setOtpError(""); // Clear error when input changes
-    setOtpValidationError("");
-  };
-
   // Login form validation
   const handleChange = (e: any) => {
     const { value, name } = e.target;
@@ -226,12 +225,12 @@ const Login = (props: LoginProps) => {
       ) {
         if (!form[key].match(/\w/)) {
           hasError = true;
-          err[key] = t("field_required");
+          err[key] = "field_required";
         }
       }
       if (!form[key]) {
         hasError = true;
-        err[key] = t("field_required");
+        err[key] = "field_required";
       }
     });
     if (hasError) {
@@ -247,7 +246,14 @@ const Login = (props: LoginProps) => {
     const validated = validateData();
     if (!validated) return;
 
-    staffLoginMutation.mutate(validated);
+    FiltersCache.invalidateAll();
+    try {
+      await signIn(validated);
+    } catch (error) {
+      if (error instanceof HTTPError) {
+        setCaptcha(error.status == 429);
+      }
+    }
   };
 
   const validateForgetData = () => {
@@ -257,12 +263,12 @@ const Login = (props: LoginProps) => {
     if (typeof form.username === "string") {
       if (!form.username.match(/\w/)) {
         hasError = true;
-        err.username = t("field_required");
+        err.username = "field_required";
       }
     }
     if (!form.username) {
       hasError = true;
-      err.username = t("field_required");
+      err.username = "field_required";
     }
 
     if (hasError) {
@@ -271,7 +277,6 @@ const Login = (props: LoginProps) => {
     }
     return form;
   };
-
   const handleForgetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const valid = validateForgetData();
@@ -292,19 +297,11 @@ const Login = (props: LoginProps) => {
   const handlePatientLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      if (!isOtpSent) {
-        await sendOtp(phone);
-        setIsOtpSent(true);
-      } else {
-        await verifyOtp({ phone_number: `+91${phone}`, otp });
-      }
-    } catch (error: any) {
-      if (!isOtpSent) {
-        setOtpError(error.message);
-      } else {
-        setOtpValidationError(error.message);
-      }
+    if (!isOtpSent) {
+      sendOtp({ phone_number: phone });
+      setResendOtpCountdown(resendOtpTimeout);
+    } else {
+      verifyOtp({ phone_number: phone, otp });
     }
   };
 
@@ -317,121 +314,16 @@ const Login = (props: LoginProps) => {
   };
 
   // Loading state derived from mutations
-  const isLoading =
-    staffLoginMutation.isPending || sendOtpPending || verifyOtpPending;
+  const isLoading = isAuthenticating || sendOtpPending || verifyOtpPending;
 
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,
   );
 
   return (
-    <div className="relative flex md:h-screen flex-col-reverse md:flex-row">
+    <div className="relative flex min-h-screen flex-col md:h-screen md:flex-row">
+      <AuthHero />
       {!forgotPassword && <BrowserWarning />}
-
-      {/* Hero Section */}
-      <div className="login-hero relative flex flex-auto flex-col justify-between p-6 md:h-full md:w-[calc(50%+130px)] md:flex-none md:p-0 md:px-16 md:pr-[calc(4rem+130px)]">
-        <div></div>
-        <div className="mt-4 flex flex-col items-start rounded-lg py-4 md:mt-12">
-          <div className="mb-4 hidden items-center gap-6 md:flex">
-            {logos.map((logo, index) =>
-              logo && logo.light ? (
-                <div key={index} className="flex items-center">
-                  <img
-                    src={logo.light}
-                    className="h-16 rounded-lg py-3"
-                    alt="state logo"
-                  />
-                </div>
-              ) : null,
-            )}
-            {logos.length === 0 && (
-              <a
-                href={urls.ohcn}
-                className="inline-block"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src={customLogoAlt?.light ?? "/images/ohc_logo_light.svg"}
-                  className="h-8"
-                  alt="Open Healthcare Network logo"
-                />
-              </a>
-            )}
-          </div>
-          <div className="max-w-lg">
-            <h1 className="text-4xl font-black leading-tight tracking-wider text-white lg:text-5xl">
-              {t("care")}
-            </h1>
-            {customDescriptionHtml ? (
-              <div className="py-6">
-                <div
-                  className="max-w-xl text-secondary-400"
-                  dangerouslySetInnerHTML={{
-                    __html: __CUSTOM_DESCRIPTION_HTML__,
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="max-w-xl py-6 pl-1 text-base font-semibold text-secondary-400 md:text-lg lg:text-xl">
-                {t("goal")}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="mb-6 flex items-center">
-          <div className="max-w-lg text-xs md:text-sm">
-            <div className="mb-2 ml-1 flex items-center gap-4">
-              <a
-                href="https://www.digitalpublicgoods.net/r/care"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <img
-                  src="https://cdn.ohc.network/dpg-logo.svg"
-                  className="h-12"
-                  alt="Logo of Digital Public Goods Alliance"
-                />
-              </a>
-              <div className="ml-2 h-8 w-px rounded-full bg-white/50" />
-              <a href={urls.ohcn} rel="noopener noreferrer" target="_blank">
-                <img
-                  src="/images/ohc_logo_light.svg"
-                  className="inline-block h-10"
-                  alt="Open Healthcare Network logo"
-                />
-              </a>
-            </div>
-            <a
-              href={urls.ohcn}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-secondary-500"
-            >
-              {t("footer_body")}
-            </a>
-            <div className="mx-auto mt-2">
-              <a
-                href={urls.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary-400 hover:text-primary-500"
-              >
-                {t("contribute_github")}
-              </a>
-              <span className="mx-2 text-primary-400">|</span>
-              <Link
-                href="/licenses"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary-400 hover:text-primary-500"
-              >
-                {t("third_party_software_licenses")}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Login Forms Section */}
       <div className="login-hero-form my-4 w-full md:mt-0 md:h-full md:w-1/2">
@@ -512,7 +404,7 @@ const Login = (props: LoginProps) => {
                           />
                           {errors.username && (
                             <p className="text-sm text-red-500">
-                              {errors.username}
+                              {t(errors.username)}
                             </p>
                           )}
                         </div>
@@ -531,12 +423,12 @@ const Login = (props: LoginProps) => {
                           />
                           {errors.password && (
                             <p className="text-sm text-red-500">
-                              {errors.password}
+                              {t(errors.password)}
                             </p>
                           )}
                         </div>
 
-                        {isCaptchaEnabled && (
+                        {isCaptchaEnabled && reCaptchaSiteKey && (
                           <div className="py-4">
                             <ReCaptcha
                               sitekey={reCaptchaSiteKey}
@@ -606,7 +498,7 @@ const Login = (props: LoginProps) => {
                             />
                             {errors.username && (
                               <p className="text-sm text-red-500">
-                                {errors.username}
+                                {t(errors.username)}
                               </p>
                             )}
                           </div>
@@ -633,21 +525,18 @@ const Login = (props: LoginProps) => {
                     <form onSubmit={handlePatientLogin} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="phone">{t("phone_number")}</Label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                            +91
-                          </span>
-                          <Input
-                            id="phone"
-                            name="phone"
-                            type="tel"
-                            value={phone}
-                            onChange={handlePhoneChange}
-                            disabled={isOtpSent}
-                            className="pl-12"
-                            placeholder="Enter 10 digit number"
-                          />
-                        </div>
+                        <PhoneInput
+                          id="phone"
+                          name="phone"
+                          value={phone}
+                          onChange={(value) => {
+                            setPhone(value);
+                            setOtpError("");
+                            setOtpValidationError("");
+                          }}
+                          disabled={isOtpSent}
+                          placeholder={t("enter_phone_number")}
+                        />
                         {otpError && (
                           <p className="text-sm text-red-500">{otpError}</p>
                         )}
@@ -655,36 +544,37 @@ const Login = (props: LoginProps) => {
 
                       {isOtpSent && (
                         <div className="space-y-2">
-                          <Label htmlFor="otp">{t("enter_otp")}</Label>
-                          <Input
-                            id="otp"
-                            name="otp"
-                            type="text"
-                            value={otp}
-                            onChange={(e) => {
-                              setOtp(e.target.value);
-                              setOtpValidationError("");
-                            }}
-                            maxLength={5}
-                            placeholder="Enter 5-digit OTP"
-                          />
+                          <Label htmlFor="otp" className="mb-4">
+                            {t("enter_otp")}
+                          </Label>
+                          <div className="flex justify-center">
+                            <InputOTP
+                              value={otp}
+                              maxLength={5}
+                              pattern={REGEXP_ONLY_DIGITS}
+                              autoComplete="one-time-code"
+                              autoFocus
+                              onChange={(value) => {
+                                setOtp(value);
+                                setOtpValidationError("");
+                              }}
+                            >
+                              <InputOTPGroup>
+                                {[...Array(5)].map((_, index) => (
+                                  <InputOTPSlot
+                                    key={index}
+                                    index={index}
+                                    className="size-10"
+                                  />
+                                ))}
+                              </InputOTPGroup>
+                            </InputOTP>
+                          </div>
                           {otpValidationError && (
-                            <p className="text-sm text-red-500">
+                            <p className="text-sm text-red-500 text-center">
                               {otpValidationError}
                             </p>
                           )}
-                          <Button
-                            variant="link"
-                            type="button"
-                            onClick={() => {
-                              setIsOtpSent(false);
-                              setOtpError("");
-                              setOtpValidationError("");
-                            }}
-                            className="px-0"
-                          >
-                            {t("change_phone_number")}
-                          </Button>
                         </div>
                       )}
 
@@ -694,8 +584,7 @@ const Login = (props: LoginProps) => {
                         variant="primary"
                         disabled={
                           isLoading ||
-                          !phone ||
-                          phone.length !== 10 ||
+                          !isValidPhoneNumber(phone) ||
                           (isOtpSent && otp.length !== 5)
                         }
                       >
@@ -707,6 +596,43 @@ const Login = (props: LoginProps) => {
                           t("send_otp")
                         )}
                       </Button>
+                      {isOtpSent && (
+                        <div className="flex flex-col items-center gap-2 text-center">
+                          {resendOtpCountdown <= 0 ? (
+                            <Button
+                              variant="link"
+                              type="button"
+                              className="h-auto p-0"
+                              onClick={() => {
+                                sendOtp({ phone_number: phone });
+                                setResendOtpCountdown(resendOtpTimeout);
+                              }}
+                            >
+                              {t("resend_otp")}
+                            </Button>
+                          ) : (
+                            <p className="text-sm text-gray-500">
+                              {t("resend_otp_timer", {
+                                time: resendOtpCountdown,
+                              })}
+                            </p>
+                          )}
+                          <div className="flex items-center text-sm">
+                            <Button
+                              variant="link"
+                              type="button"
+                              className="h-auto p-0 text-primary-600"
+                              onClick={() => {
+                                setIsOtpSent(false);
+                                setOtpError("");
+                                setOtpValidationError("");
+                              }}
+                            >
+                              {t("change_phone_number")}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </form>
                   </TabsContent>
                 </Tabs>

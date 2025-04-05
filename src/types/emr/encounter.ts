@@ -1,5 +1,18 @@
+import {
+  Ambulance,
+  BedDouble,
+  Building2,
+  Home,
+  LucideIcon,
+  MonitorSmartphone,
+  Stethoscope,
+} from "lucide-react";
+
+import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { LocationAssociationStatus } from "@/types/location/association";
+import { LocationList } from "@/types/location/location";
 import { UserBase } from "@/types/user/user";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
@@ -26,7 +39,7 @@ export const ENCOUNTER_CLASS = [
 
 export const ENCOUNTER_DIET_PREFERENCE = [
   "vegetarian",
-  "diary_free",
+  "dairy_free",
   "nut_free",
   "gluten_free",
   "vegan",
@@ -77,6 +90,15 @@ export const ENCOUNTER_STATUS = [
   "unknown",
 ] as const;
 
+export const ENCOUNTER_CLASSES_ICONS = {
+  imp: BedDouble,
+  amb: Ambulance,
+  obsenc: Stethoscope,
+  emer: Building2,
+  vr: MonitorSmartphone,
+  hh: Home,
+} as const satisfies Record<EncounterClass, LucideIcon>;
+
 export type EncounterAdmitSources = (typeof ENCOUNTER_ADMIT_SOURCE)[number];
 
 export type EncounterClass = (typeof ENCOUNTER_CLASS)[number];
@@ -116,6 +138,14 @@ export type StatusHistory = {
   history: History[];
 };
 
+export type LocationHistory = {
+  id: string;
+  start_datetime: string;
+  location: LocationList;
+  status: LocationAssociationStatus;
+  end_datetime?: string;
+};
+
 export interface Encounter {
   id: string;
   patient: Patient;
@@ -136,6 +166,10 @@ export interface Encounter {
   encounter_class_history: EncounterClassHistory;
   status_history: StatusHistory;
   organizations: FacilityOrganization[];
+  current_location: LocationList;
+  location_history: LocationHistory[];
+  permissions: string[];
+  care_team: CareTeamResponse[];
 }
 
 export interface EncounterEditRequest {
@@ -163,3 +197,7 @@ export interface EncounterRequest {
 }
 
 export const completedEncounterStatus = ["completed", "discharged"];
+export const inactiveEncounterStatus = [
+  ...["cancelled", "entered_in_error", "discontinued"],
+  ...completedEncounterStatus,
+] as const;

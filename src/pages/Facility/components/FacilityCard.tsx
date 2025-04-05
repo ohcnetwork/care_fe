@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import { FacilityData } from "@/types/facility/facility";
@@ -21,7 +22,7 @@ export function FacilityCard({ facility, className }: Props) {
       <div className="flex flex-col h-full">
         <div className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="h-32 w-32 shrink-0 overflow-hidden rounded-lg">
+            <div className="size-32 shrink-0 overflow-hidden rounded-lg">
               <Avatar
                 imageUrl={facility.read_cover_image_url}
                 name={facility.name || ""}
@@ -34,8 +35,14 @@ export function FacilityCard({ facility, className }: Props) {
               </h3>
               {/* @ts-expect-error Type is not defined properly */}
               {facility.facility_type?.name}
-              <p className="text-sm text-muted-foreground truncate">
+              <p className="text-sm text-gray-500 truncate">
                 {[facility.address].filter(Boolean).join(", ")}
+                {facility.latitude && facility.longitude && (
+                  <FacilityMapsLink
+                    latitude={facility.latitude.toString()}
+                    longitude={facility.longitude.toString()}
+                  />
+                )}
               </p>
 
               <div className="mt-2 flex flex-wrap gap-2">

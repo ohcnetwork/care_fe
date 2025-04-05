@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils";
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
 import { QuestionInput } from "./QuestionInput";
@@ -14,13 +17,18 @@ interface QuestionGroupProps {
   question: Question;
   encounterId?: string;
   questionnaireResponses: QuestionnaireResponse[];
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   errors: QuestionValidationError[];
   clearError: (questionId: string) => void;
   disabled?: boolean;
   activeGroupId?: string;
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
+  isSubQuestion?: boolean;
 }
 
 function isQuestionEnabled(
@@ -85,6 +93,7 @@ export const QuestionGroup = memo(function QuestionGroup({
   activeGroupId,
   facilityId,
   patientId,
+  isSubQuestion = false,
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
@@ -104,6 +113,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         disabled={disabled}
         facilityId={facilityId}
         patientId={patientId}
+        isSubQuestion={isSubQuestion}
       />
     );
   }
@@ -112,25 +122,27 @@ export const QuestionGroup = memo(function QuestionGroup({
 
   return (
     <div
-      title="group_styling"
+      data-cy="group_styling"
       className={cn(
-        "space-y-4 rounded-lg",
+        "sm:space-y-4 sm:rounded-lg",
         isActive && "ring-2 ring-primary",
         question.styling_metadata?.classes && question.styling_metadata.classes,
       )}
     >
       {question.text && (
-        <div className="space-y-1">
-          <QuestionLabel question={question} groupLabel />
+        <div className="space-y-1 px-2 bg-gray-100 md:bg-transparent">
+          <QuestionLabel
+            question={question}
+            groupLabel
+            isSubQuestion={isSubQuestion}
+          />
           {question.description && (
-            <p className="text-sm text-muted-foreground">
-              {question.description}
-            </p>
+            <p className="text-sm text-gray-500">{question.description}</p>
           )}
         </div>
       )}
       <div
-        title="group_container_styling"
+        data-cy="group_container_styling"
         className={cn(
           "gap-2",
           question.styling_metadata?.containerClasses &&
@@ -139,6 +151,7 @@ export const QuestionGroup = memo(function QuestionGroup({
       >
         {question.questions?.map((subQuestion) => (
           <QuestionGroup
+            encounterId={encounterId}
             facilityId={facilityId}
             key={subQuestion.id}
             question={subQuestion}
@@ -149,6 +162,7 @@ export const QuestionGroup = memo(function QuestionGroup({
             disabled={disabled}
             activeGroupId={activeGroupId}
             patientId={patientId}
+            isSubQuestion={true}
           />
         ))}
       </div>

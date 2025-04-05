@@ -69,7 +69,7 @@ function OrganizationLevelSelect({
         {required && <span className="text-red-500">*</span>}
       </Label>
       <div className="flex items-center gap-2">
-        {isFetching && <Loader2 className="h-6 w-6 animate-spin" />}
+        {isFetching && <Loader2 className="size-6 animate-spin" />}
         <Autocomplete
           value={currentLevel?.id || ""}
           options={options}
@@ -91,6 +91,12 @@ export default function GovtOrganizationSelector(
 ) {
   const { onChange, required, selected, authToken } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+
+  useEffect(() => {
+    if (required && selectedLevels[selectedLevels.length - 1]?.has_children) {
+      onChange("");
+    }
+  }, [selectedLevels]);
 
   useEffect(() => {
     if (selected && selected.length > 0) {
@@ -119,9 +125,8 @@ export default function GovtOrganizationSelector(
         newLevels.push(organization);
         return newLevels;
       });
-      if (!organization.has_children) {
+      if (!required || (required && !organization.has_children)) {
         onChange(organization.id);
-        // Else condition is necessary to reset the form value for pre-filled forms
       } else {
         onChange("");
       }

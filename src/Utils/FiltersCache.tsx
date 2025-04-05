@@ -58,7 +58,7 @@ const invalidate = (key?: string) => {
 /**
  * Removes all filters cache in the platform.
  */
-const invaldiateAll = () => {
+const invalidateAll = () => {
   for (const key in localStorage) {
     if (key.startsWith("filters--")) {
       invalidate(key);
@@ -70,7 +70,7 @@ export default {
   get,
   set,
   invalidate,
-  invaldiateAll,
+  invalidateAll,
   utils: {
     clean,
   },

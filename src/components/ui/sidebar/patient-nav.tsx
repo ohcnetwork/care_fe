@@ -6,7 +6,7 @@ import { PatientSwitcher } from "@/components/ui/sidebar/patient-switcher";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import { AppointmentPatient } from "@/pages/Patient/Utils";
+import { Patient } from "@/types/emr/newPatient";
 
 interface NavigationLink {
   name: string;
@@ -15,7 +15,7 @@ interface NavigationLink {
 }
 
 function generatePatientLinks(
-  selectedUser: AppointmentPatient | null,
+  selectedUser: Patient | null,
   t: TFunction,
 ): NavigationLink[] {
   if (!selectedUser) return [];

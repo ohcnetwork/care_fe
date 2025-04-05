@@ -111,19 +111,19 @@ export function FacilitiesPage() {
           </div>
         ) : !qParams.organization ? (
           <Card className="p-6">
-            <div className="text-lg font-medium text-muted-foreground">
+            <div className="text-lg font-medium text-gray-500">
               {t("select_location_first")}
             </div>
           </Card>
         ) : !facilitiesResponse?.results.length ? (
           <Card className="p-6">
-            <div className="text-lg font-medium text-muted-foreground">
+            <div className="text-lg font-medium text-gray-500">
               {t("no_facilities_found")}
             </div>
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 3xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 3xl:grid-cols-3">
               {facilitiesResponse.results.map((facility) => (
                 <FacilityCard key={facility.id} facility={facility} />
               ))}

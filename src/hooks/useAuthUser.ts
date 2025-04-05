@@ -1,16 +1,16 @@
 import { createContext, useContext } from "react";
 
-import { UserModel } from "@/components/Users/models";
+import { AuthUserModel } from "@/components/Users/models";
 
-import { JwtTokenObtainPair, LoginCredentials } from "@/Utils/request/api";
-import { RequestResult } from "@/Utils/request/types";
-import { TokenData } from "@/types/auth/otpToken";
-
-type SignInReturnType = RequestResult<JwtTokenObtainPair>;
+import { LoginCredentials, LoginResponse } from "@/Utils/request/api";
+import { MFALoginRequest, TokenData } from "@/types/auth/otp";
 
 interface AuthContextType {
-  user: UserModel | undefined;
-  signIn: (creds: LoginCredentials) => Promise<SignInReturnType>;
+  user: AuthUserModel | undefined;
+  signIn: (creds: LoginCredentials) => Promise<LoginResponse>;
+  verifyMFA: (data: MFALoginRequest) => Promise<LoginResponse>;
+  isAuthenticating: boolean;
+  isVerifyingMFA: boolean;
   signOut: () => Promise<void>;
   patientLogin: (tokenData: TokenData, redirectUrl: string) => void;
   patientToken: TokenData | null;

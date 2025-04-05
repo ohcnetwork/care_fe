@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BedSingle,
   Building,
@@ -7,19 +6,21 @@ import {
   CircleDashed,
   Clock,
   Droplet,
+  SignatureIcon,
+  UserRound,
 } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -28,58 +29,36 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { Avatar } from "@/components/Common/Avatar";
-
-import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
+import { ConsentSheet } from "@/components/Consent/ConsentSheet";
+import EncounterActions from "@/components/Encounter/EncounterActions";
+import { LocationSheet } from "@/components/Location/LocationSheet";
+import { LocationTree } from "@/components/Location/LocationTree";
+import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
-import mutate from "@/Utils/request/mutate";
+import dayjs from "@/Utils/dayjs";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import {
+  Encounter,
+  completedEncounterStatus,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
-
-import ManageEncounterOrganizations from "./ManageEncounterOrganizations";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 export interface PatientInfoCardProps {
   patient: Patient;
   encounter: Encounter;
   fetchPatientData?: (state: { aborted: boolean }) => void;
+  canWrite: boolean;
+  disableButtons?: boolean;
 }
 
 export default function PatientInfoCard(props: PatientInfoCardProps) {
-  const { patient, encounter } = props;
+  const { patient, encounter, canWrite, disableButtons = false } = props;
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
-
-  const { mutate: updateEncounter } = useMutation({
-    mutationFn: mutate(routes.encounter.update, {
-      pathParams: { id: encounter.id },
-    }),
-    onSuccess: () => {
-      toast.success(t("encounter_marked_as_complete"));
-      queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
-    },
-    onError: () => {
-      toast.error(t("error_updating_encounter"));
-    },
-  });
-
-  const handleMarkAsComplete = () => {
-    updateEncounter({
-      ...encounter,
-      status: "completed",
-      organizations: encounter.organizations.map((org) => org.id),
-      patient: encounter.patient.id,
-      encounter_class: encounter.encounter_class,
-      period: encounter.period,
-      hospitalization: encounter.hospitalization,
-      priority: encounter.priority,
-      external_identifier: encounter.external_identifier,
-      facility: encounter.facility.id,
-    });
-  };
 
   return (
     <>
@@ -88,21 +67,47 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           className="flex w-full flex-col bg-white px-4 pt-4 lg:flex-row"
           id="patient-infobadges"
         >
-          <div className="flex justify-items-start gap-5 lg:justify-normal">
+          <div className="flex justify-items-start gap-2 lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
-              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:w-24 md:h-24 rounded">
+              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:size-24 rounded">
                 <Avatar name={patient.name} className="w-full h-full" />
               </div>
             </div>
             <div className="flex justify-center">
               <div
-                className="mb-2 flex flex-col text-xl font-semibold capitalize lg:hidden"
+                className="mb-2 flex flex-col text-base md:text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
-                {patient.name}
-                <div className="mt-[6px] text-sm font-semibold text-secondary-600">
-                  {formatPatientAge(patient, true)} • {patient.gender}
+                <Link
+                  href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
+                  className="text-gray-950 font-semibold flex items-start leading-tight"
+                  id="patient-details"
+                  data-cy="patient-details-button"
+                >
+                  {patient.name}
+                  <CareIcon
+                    icon="l-external-link-alt"
+                    className="size-3 opacity-50 mt-1"
+                  />
+                </Link>
+                <div className="my-[2px] text-sm font-semibold text-secondary-600">
+                  {formatPatientAge(patient, true)} •{" "}
+                  {t(`GENDER__${patient.gender}`)}
                 </div>
+                {patient.deceased_datetime && (
+                  <Badge
+                    variant="destructive"
+                    className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                  >
+                    <h3 className="text-xs font-normal sm:text-sm sm:font-medium">
+                      {t("time_of_death")}
+                      {": "}
+                      {dayjs(patient.deceased_datetime).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    </h3>
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -112,36 +117,62 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                 className="hidden flex-row text-xl font-semibold capitalize lg:flex"
                 id="patient-name-consultation"
               >
-                {patient.name}
+                <Link
+                  href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
+                  className="font-semibold flex items-center gap-1"
+                  id="patient-details"
+                  data-cy="patient-details-button"
+                >
+                  {patient.name}
+                  <CareIcon
+                    icon="l-external-link-alt"
+                    className="size-4 opacity-70"
+                  />
+                </Link>
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
-                  {formatPatientAge(patient, true)} • {patient.gender}
+                  {formatPatientAge(patient, true)} •{" "}
+                  {t(`GENDER__${patient.gender}`)}
                 </div>
+                {patient.deceased_datetime && (
+                  <Badge
+                    variant="destructive"
+                    className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                  >
+                    <h3 className="text-sm font-medium">
+                      {t("time_of_death")}
+                      {": "}
+                      {dayjs(patient.deceased_datetime).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    </h3>
+                  </Badge>
+                )}
               </div>
               <div className="grid gap-4 grid-cols-3 mt-2 md:mt-0">
                 <div className="flex flex-col space-y-1">
-                  <span className="text-xs text-muted-foreground font-medium">
-                    Start Date
+                  <span className="text-xs text-gray-500 font-medium">
+                    {t("start_date")}
                   </span>
                   <span className="text-xs">
                     {props.encounter.period.start
                       ? formatDateTime(props.encounter.period.start)
-                      : "Not started"}
+                      : t("not_started")}
                   </span>
                 </div>
                 <div className="flex flex-col space-y-1">
-                  <span className="text-xs text-muted-foreground font-medium">
-                    End Date
+                  <span className="text-xs text-gray-500 font-medium">
+                    {t("end_date")}
                   </span>
                   <span className="text-xs">
                     {props.encounter.period.end
                       ? formatDateTime(props.encounter.period.end)
-                      : "Ongoing"}
+                      : t("ongoing")}
                   </span>
                 </div>
                 {props.encounter.external_identifier && (
                   <div className="flex flex-col space-y-1 col-span-1">
-                    <span className="text-xs text-muted-foreground font-medium">
-                      Hospital Identifier
+                    <span className="text-xs text-gray-500 font-medium">
+                      {t("hospital_identifier")}
                     </span>
                     <span className="text-xs">
                       {props.encounter.external_identifier}
@@ -166,27 +197,29 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             props.encounter.status,
                           ) ? (
                             <CircleCheck
-                              className="w-4 h-4 text-green-300"
+                              className="size-4 text-green-300"
                               fill="green"
                             />
                           ) : (
-                            <CircleDashed className="w-4 h-4 text-yellow-500" />
+                            <CircleDashed className="size-4 text-yellow-500" />
                           )}
                           {t(`encounter_status__${props.encounter.status}`)}
-                          <ChevronDown className="h-3 w-3 opacity-50" />
+                          <ChevronDown className="size-3 opacity-50" />
                         </Badge>
                       </div>
                     </PopoverTrigger>
                     <PopoverContent align={"start"} className="w-auto p-2">
                       <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Status History</h4>
+                        <h4 className="font-medium text-sm">
+                          {t("status_history")}
+                        </h4>
                         {encounter.status_history.history.map(
                           (history, index) => (
                             <div
                               key={index}
                               className="flex items-center gap-2 text-sm"
                             >
-                              <span className="text-muted-foreground">
+                              <span className="text-gray-500">
                                 {formatDateTime(history.moved_at)}
                               </span>
                               <span className="font-medium">
@@ -208,26 +241,28 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           title={`Encounter Class: ${props.encounter.encounter_class}`}
                         >
                           <BedSingle
-                            className="w-4 h-4 text-blue-400"
+                            className="size-4 text-blue-400"
                             fill="#93C5FD"
                           />
                           {t(
                             `encounter_class__${props.encounter.encounter_class}`,
                           )}
-                          <ChevronDown className="h-3 w-3 opacity-50" />
+                          <ChevronDown className="size-3 opacity-50" />
                         </Badge>
                       </div>
                     </PopoverTrigger>
                     <PopoverContent align={"end"} className="w-auto p-2">
                       <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Class History</h4>
+                        <h4 className="font-medium text-sm">
+                          {t(`class_history`)}
+                        </h4>
                         {encounter.encounter_class_history.history.map(
                           (history, index) => (
                             <div
                               key={index}
                               className="flex items-center gap-2 text-sm"
                             >
-                              <span className="text-muted-foreground">
+                              <span className="text-gray-500">
                                 {formatDateTime(history.moved_at)}
                               </span>
                               <span className="font-medium">
@@ -246,7 +281,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       `encounter_priority__${props.encounter.priority.toLowerCase()}`,
                     )}`}
                   >
-                    <Clock className="w-4 h-4 text-yellow-500" />
+                    <Clock className="size-4 text-yellow-500" />
                     {t(
                       `encounter_priority__${props.encounter.priority.toLowerCase()}`,
                     )}
@@ -258,79 +293,209 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       variant="outline"
                       title={`Blood Group: ${patient.blood_group?.replace("_", " ")}`}
                     >
-                      <Droplet className="w-4 h-4 text-red-300" fill="red" />
+                      <Droplet className="size-4 text-red-300" fill="red" />
                       {patient.blood_group?.replace("_", " ")}
                     </Badge>
                   )}
 
-                  {encounter.hospitalization?.discharge_disposition && (
-                    <Badge title="Discharge Disposition" variant="outline">
-                      {encounter.hospitalization.discharge_disposition}
-                    </Badge>
-                  )}
+                  {
+                    // (encounter.status === "discharged" ||
+                    //   encounter.status === "completed") &&
+                    encounter.hospitalization?.discharge_disposition && (
+                      <Badge
+                        title={t("discharge_disposition")}
+                        variant="outline"
+                        className="gap-1"
+                      >
+                        <CareIcon
+                          icon="l-signout"
+                          className="size-4 text-blue-400"
+                        />
+                        {t(
+                          `encounter_discharge_disposition__${encounter.hospitalization.discharge_disposition}`,
+                        )}
+                      </Badge>
+                    )
+                  }
 
-                  <ManageEncounterOrganizations
-                    encounter={encounter}
-                    facilityId={encounter.facility.id}
-                    trigger={
+                  {canWrite ? (
+                    <LinkDepartmentsSheet
+                      entityType="encounter"
+                      entityId={encounter.id}
+                      currentOrganizations={encounter.organizations}
+                      facilityId={encounter.facility.id}
+                      trigger={
+                        <div className="flex flex-wrap gap-2">
+                          {encounter.organizations.map((org) =>
+                            organizationBadge(org),
+                          )}
+                          {encounter.organizations.length === 0 && (
+                            <Badge
+                              className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                              variant="outline"
+                            >
+                              <Building className="size-4 text-blue-400" />
+                              Add Organizations
+                            </Badge>
+                          )}
+                        </div>
+                      }
+                    />
+                  ) : (
+                    encounter.organizations.length > 0 && (
                       <div className="flex flex-wrap gap-2">
-                        {encounter.organizations.map((org) => (
-                          <Badge
-                            key={org.id}
-                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                            variant="outline"
-                            title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
-                          >
-                            <Building className="w-4 h-4 text-blue-400" />
-                            {org.name}
-                          </Badge>
-                        ))}
-                        {encounter.organizations.length === 0 && (
-                          <Badge
-                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                            variant="outline"
-                          >
-                            <Building className="w-4 h-4 text-blue-400" />
-                            Add Organizations
-                          </Badge>
+                        {encounter.organizations.map((org) =>
+                          organizationBadge(org),
                         )}
                       </div>
-                    }
-                  />
+                    )
+                  )}
+                  {props.encounter.current_location ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div>
+                          <Badge
+                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                            variant="outline"
+                            title={`Current Location: ${props.encounter.current_location.name}`}
+                            data-cy="current-location-badge"
+                          >
+                            <CareIcon
+                              icon="l-location-point"
+                              className="size-4 text-green-600"
+                            />
+                            {props.encounter.current_location.name}
+                            <ChevronDown className="size-3 opacity-50" />
+                          </Badge>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent align={"start"} className="w-auto p-2">
+                        <div className="space-y-2 p-2 items-center">
+                          <div className="flex items-center gap-8 justify-between">
+                            <h4 className="font-medium text-sm">
+                              {t("location")}
+                            </h4>
+
+                            <LocationSheet
+                              facilityId={props.encounter.facility.id}
+                              history={encounter.location_history}
+                              encounter={encounter}
+                              trigger={
+                                <div>
+                                  <CareIcon
+                                    icon="l-history"
+                                    className="size-4 text-gray-700"
+                                  />
+                                  <Button
+                                    variant="link"
+                                    className="text-gray-950 underline pl-1 pr-0  font-semibold"
+                                  >
+                                    {t("history")}
+                                  </Button>
+                                </div>
+                              }
+                            />
+                          </div>
+                          <div className="border-b border-gray-200 my-2" />
+                          <LocationTree
+                            location={props.encounter.current_location}
+                          />
+                          <div className="border-b border-dashed border-gray-200 my-2" />
+                          {canWrite && (
+                            <LocationSheet
+                              facilityId={props.encounter.facility.id}
+                              encounter={encounter}
+                              trigger={
+                                <Button
+                                  variant="outline"
+                                  className="border-gray-400 w-full"
+                                  data-cy="update-encounter-location-button"
+                                >
+                                  {t("update_location")}
+                                </Button>
+                              }
+                              history={encounter.location_history}
+                            />
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  ) : canWrite ? (
+                    <Badge variant="outline">
+                      <LocationSheet
+                        facilityId={props.encounter.facility.id}
+                        encounter={encounter}
+                        trigger={
+                          <div
+                            className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100"
+                            data-cy="add-encounter-location"
+                          >
+                            <CareIcon
+                              icon="l-location-point"
+                              className="size-4 text-green-600"
+                            />
+                            {t("add_location")}
+                          </div>
+                        }
+                        history={encounter.location_history}
+                      />
+                    </Badge>
+                  ) : (
+                    <></>
+                  )}
+                  <Badge variant="outline">
+                    <ConsentSheet
+                      patientId={props.encounter.patient.id}
+                      encounterId={props.encounter.id}
+                      trigger={
+                        <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                          <SignatureIcon className="size-4 text-green-600" />
+                          {t("manage_consents")}
+                        </div>
+                      }
+                    />
+                  </Badge>
+                  <Badge variant="outline">
+                    <CareTeamSheet
+                      encounter={encounter}
+                      trigger={
+                        <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                          <UserRound className="size-4 text-green-600" />
+                          {t("manage_care_team")}
+                        </div>
+                      }
+                    />
+                  </Badge>
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div
-          className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
+          className="flex flex-col mt-4 items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
-          {!completedEncounterStatus.includes(encounter.status) && (
-            <div className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row">
+          <PLUGIN_Component
+            __name="PatientInfoCardQuickActions"
+            encounter={encounter}
+            className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+          />
+          {!disableButtons && (
+            <div
+              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+              data-cy="update-encounter-button"
+            >
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="primary">
-                    {t("update")}
-                    <ChevronDown className="ml-2 h-4 w-4" />
+                    {inactiveEncounterStatus.includes(encounter.status)
+                      ? t("actions")
+                      : t("update")}
+                    <ChevronDown className="ml-2 size-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {questionnaireOptions.map((option) => (
-                    <DropdownMenuItem key={option.slug} asChild>
-                      <Link
-                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
-                        className="cursor-pointer text-gray-800"
-                      >
-                        {t(option.title)}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={handleMarkAsComplete}>
-                    {t("mark_as_complete")}
-                  </DropdownMenuItem>
+                  <EncounterActions encounter={encounter} layout="dropdown" />
                   <PLUGIN_Component
                     __name="PatientInfoCardActions"
                     encounter={encounter}
@@ -343,4 +508,20 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
       </section>
     </>
   );
+
+  function organizationBadge(org: FacilityOrganization) {
+    return (
+      <Badge
+        key={org.id}
+        className={cn(
+          "capitalize gap-1 py-1 px-2 hover:bg-secondary-100 cursor-pointer",
+        )}
+        variant="outline"
+        title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
+      >
+        <Building className="size-4 text-blue-400" />
+        {org.name}
+      </Badge>
+    );
+  }
 }

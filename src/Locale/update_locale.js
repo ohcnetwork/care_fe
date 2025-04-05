@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import {
   existsSync,
   mkdirSync,
@@ -61,7 +60,7 @@ function getAllJSONFiles(folderName) {
   dir.forEach((file) => {
     try {
       files[file] = JSON.parse(readFile(`./${folderName}/${file}`));
-    } catch (e) {
+    } catch {
       throw new Error(`Cannot parse ${file} file!`);
     }
   });

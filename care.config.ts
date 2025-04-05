@@ -1,3 +1,5 @@
+import { CountryCode } from "libphonenumber-js/types.cjs";
+
 import { EncounterClass } from "@/types/emr/encounter";
 
 const env = import.meta.env;
@@ -27,7 +29,7 @@ const logo = (value?: string, fallback?: ILogo) => {
 
 const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
-
+  sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
   urls: {
     dashboard: env.REACT_DASHBOARD_URL,
     github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
@@ -53,30 +55,14 @@ const careConfig = {
   defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
     "hh") as EncounterClass,
 
+  mapFallbackUrlTemplate:
+    env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
+    "https://www.openstreetmap.org/?mlat={lat}&mlon={long}&zoom=15",
+
   gmapsApiKey:
     env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
 
-  govDataApiKey:
-    env.REACT_GOV_DATA_API_KEY ||
-    "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b",
-  reCaptchaSiteKey:
-    env.REACT_RECAPTCHA_SITE_KEY || "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN",
-
-  sampleFormats: {
-    assetImport:
-      env.REACT_SAMPLE_FORMAT_ASSET_IMPORT || "/asset-import-template.xlsx",
-  },
-
-  wartimeShifting: boolean("REACT_WARTIME_SHIFTING"),
-
-  stillWatching: {
-    idleTimeout: env.REACT_STILL_WATCHING_IDLE_TIMEOUT
-      ? parseInt(env.REACT_STILL_WATCHING_IDLE_TIMEOUT)
-      : 3 * 60,
-    promptDuration: env.REACT_STILL_WATCHING_PROMPT_DURATION
-      ? parseInt(env.REACT_STILL_WATCHING_PROMPT_DURATION)
-      : 30,
-  },
+  reCaptchaSiteKey: env.REACT_RECAPTCHA_SITE_KEY,
 
   auth: {
     tokenRefreshInterval: env.REACT_JWT_TOKEN_REFRESH_INTERVAL
@@ -119,14 +105,41 @@ const careConfig = {
   },
 
   careApps: env.REACT_ENABLED_APPS
-    ? env.REACT_ENABLED_APPS.split(",").map((app) => ({
-        branch: app.split("@")[1],
-        package: app.split("@")[0],
-      }))
+    ? env.REACT_ENABLED_APPS.split(",").map((app) => {
+        const [module, cdn] = app.split("@");
+        const [org, repo] = module.split("/");
+
+        if (!org || !repo) {
+          throw new Error(
+            `Invalid plug configuration: ${module}. Expected 'org/repo@url'.`,
+          );
+        }
+
+        let url = "";
+        if (!cdn) {
+          url = `https://${org}.github.io/${repo}`;
+        }
+
+        if (!url.startsWith("http")) {
+          url = `${cdn.includes("localhost") ? "http" : "https"}://${cdn}`;
+        }
+
+        return {
+          url: new URL(url).toString(),
+          name: repo,
+          package: module,
+        };
+      })
     : [],
 
   plotsConfigUrl:
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
+
+  defaultCountry: (env.REACT_DEFAULT_COUNTRY || "IN") as CountryCode,
+
+  resendOtpTimeout: env.REACT_APP_RESEND_OTP_TIMEOUT
+    ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
+    : 30,
 } as const;
 
 export default careConfig;
