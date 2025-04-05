@@ -93,6 +93,12 @@ export default function GovtOrganizationSelector(
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
   useEffect(() => {
+    if (required && selectedLevels[selectedLevels.length - 1]?.has_children) {
+      onChange("");
+    }
+  }, [selectedLevels]);
+
+  useEffect(() => {
     if (selected && selected.length > 0) {
       let currentOrg = selected[0];
       if (currentOrg.level_cache === 0) {
@@ -119,7 +125,11 @@ export default function GovtOrganizationSelector(
         newLevels.push(organization);
         return newLevels;
       });
-      onChange(organization.id);
+      if (!required || (required && !organization.has_children)) {
+        onChange(organization.id);
+      } else {
+        onChange("");
+      }
     } else {
       onChange("");
       // Reset subsequent levels when clearing a selection
