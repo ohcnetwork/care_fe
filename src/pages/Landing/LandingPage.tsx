@@ -14,6 +14,8 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 
+import { useAuthContext } from "@/hooks/useAuthUser";
+
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Organization } from "@/types/organization/organization";
@@ -27,6 +29,9 @@ export function LandingPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOrganization, setSelectedOrganization] =
     useState<Organization | null>(null);
+
+  const { user, patientToken } = useAuthContext();
+  const isAuthenticated = !!user || !!patientToken?.token;
 
   const { data: organizationsResponse } = useQuery<
     PaginatedResponse<Organization>
@@ -133,7 +138,7 @@ export function LandingPage() {
           <div className="text-center mb-4 space-x-1">
             <span className="text-sm md:text-base block sm:inline">
               <Trans
-                i18nKey="search_facilities"
+                i18nKey="Search for available facilities to book an appointment"
                 components={{
                   strong: <strong />,
                 }}
@@ -221,51 +226,56 @@ export function LandingPage() {
           <img src="/images/dots.svg" alt="" />
         </div>
 
-        {/* Login Section */}
-        <div className="w-full max-w-[620px] flex flex-col items-center justify-center bg-gray-100 p-4 rounded-lg">
-          <div className="text-sm font-medium mb-4 md:mb-6 text-center">
-            {t("login_already_registered")}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-full justify-center">
-            <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/staff_background.png')] bg-auto bg-center bg-no-repeat">
-              <div className="rounded-full bg-green-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
-                <CareIcon
-                  icon="d-health-worker"
-                  className="size-8 text-green-700"
-                />
+        {/* Login Section - Only render if not authenticated */}
+        {!isAuthenticated && (
+          <div className="w-full max-w-[620px] flex flex-col items-center justify-center bg-gray-100 p-4 rounded-lg">
+            <div className="text-sm font-medium mb-4 md:mb-6 text-center">
+              {t("login_already_registered")}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-full justify-center">
+              <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/staff_background.png')] bg-auto bg-center bg-no-repeat">
+                <div className="rounded-full bg-green-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
+                  <CareIcon
+                    icon="d-health-worker"
+                    className="size-8 text-green-700"
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <Button
+                    variant="outline"
+                    className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
+                    onClick={() => navigate(`/login?mode=staff`)}
+                  >
+                    {t("staff_login")}
+                  </Button>
+                  <p className="text-xs mt-2 w-full text-center">
+                    {t("staff_login_description")}
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col items-center">
-                <Button
-                  variant="outline"
-                  className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                  onClick={() => navigate(`/login?mode=staff`)}
-                >
-                  {t("staff_login")}
-                </Button>
-                <p className="text-xs mt-2 w-full text-center">
-                  {t("staff_login_description")}
-                </p>
+              <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/patient_background.png')] bg-auto bg-center bg-no-repeat">
+                <div className="rounded-full bg-indigo-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
+                  <CareIcon
+                    icon="d-patient"
+                    className="size-8 text-indigo-700"
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <Button
+                    variant="outline"
+                    className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
+                    onClick={() => navigate(`/login?mode=patient`)}
+                  >
+                    {t("patient_login")}
+                  </Button>
+                  <p className="text-xs mt-2 w-full text-center">
+                    {t("patient_login_description")}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/patient_background.png')] bg-auto bg-center bg-no-repeat">
-              <div className="rounded-full bg-indigo-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
-                <CareIcon icon="d-patient" className="size-8 text-indigo-700" />
-              </div>
-              <div className="flex flex-col items-center">
-                <Button
-                  variant="outline"
-                  className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                  onClick={() => navigate(`/login?mode=patient`)}
-                >
-                  {t("patient_login")}
-                </Button>
-                <p className="text-xs mt-2 w-full text-center">
-                  {t("patient_login_description")}
-                </p>
-              </div>
-            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );

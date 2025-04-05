@@ -13,6 +13,7 @@ import useSidebarState from "@/hooks/useSidebarState";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
+import { LandingPage } from "@/pages/Landing/LandingPage";
 import PatientIndex from "@/pages/Patient/index";
 import { PatientRegistration } from "@/pages/PublicAppointments/PatientRegistration";
 import PatientSelect from "@/pages/PublicAppointments/PatientSelect";
@@ -22,6 +23,7 @@ import { AppointmentSuccess } from "@/pages/PublicAppointments/Success";
 import PublicRouter from "./PublicRouter";
 
 const DashboardRoutes = {
+  "/": () => <LandingPage />,
   "/nearby_facilities": () => <FacilitiesPage />,
   "/facility/:facilityId/appointments/:appointmentId/success": ({
     appointmentId,

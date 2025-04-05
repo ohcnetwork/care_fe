@@ -1,4 +1,4 @@
-import { DashboardIcon } from "@radix-ui/react-icons";
+import { DashboardIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Link, useLocationChange, usePathParams } from "raviger";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
@@ -53,10 +53,32 @@ export function AppSidebar({
   const orgSubpathMatch = usePathParams("/organization/:id/*");
   const organizationId = orgMatch?.id || orgSubpathMatch?.id;
 
+  // Get the current path to determine which link to display
+  const [currentPath, setCurrentPath] = React.useState("/");
+  useLocationChange((location) => {
+    setCurrentPath(location.pathname || "/");
+  });
+
+  // Initialize the currentPath on component mount
+  React.useEffect(() => {
+    setCurrentPath(window.location.pathname);
+  }, []);
+  const isHomePath = currentPath === "/";
+  const navigateTo = isHomePath ? "/patient/home" : "/";
+  const linkText = isHomePath ? t("View Home") : t("View Dashboard");
+
+  // State for hover effect on link
+  const [isLinkHovered, setIsLinkHovered] = React.useState(false);
+
+  // State for sidebar expansion
+  const [isHovered, setIsHovered] = React.useState(false);
+  const expandTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const collapseTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
   const facilitySidebar = sidebarFor === SidebarFor.FACILITY;
   const patientSidebar = sidebarFor === SidebarFor.PATIENT;
   const adminSidebar = sidebarFor === SidebarFor.ADMIN;
-  const { isMobile, setOpenMobile } = useSidebar();
+  const { isMobile, setOpenMobile, state, setOpen } = useSidebar();
   const [selectedFacility, setSelectedFacility] =
     React.useState<UserFacilityModel | null>(null);
 
@@ -84,12 +106,52 @@ export function AppSidebar({
     }
   });
 
+  // Handle mouse enter - expand the sidebar
+  const handleMouseEnter = () => {
+    if (collapseTimeoutRef.current) {
+      clearTimeout(collapseTimeoutRef.current);
+      collapseTimeoutRef.current = null;
+    }
+
+    // Add a slight delay before expanding to prevent accidental triggers
+    expandTimeoutRef.current = setTimeout(() => {
+      setIsHovered(true);
+      if (state === "collapsed") {
+        setOpen(true);
+      }
+    }, 150);
+  };
+
+  // Handle mouse leave - collapse the sidebar
+  const handleMouseLeave = () => {
+    if (expandTimeoutRef.current) {
+      clearTimeout(expandTimeoutRef.current);
+      expandTimeoutRef.current = null;
+    }
+
+    // Add a slight delay before collapsing to prevent flickering
+    collapseTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+      setOpen(false);
+    }, 300);
+  };
+
+  // Clean up timeouts on unmount
+  React.useEffect(() => {
+    return () => {
+      if (expandTimeoutRef.current) clearTimeout(expandTimeoutRef.current);
+      if (collapseTimeoutRef.current) clearTimeout(collapseTimeoutRef.current);
+    };
+  }, []);
+
   return (
     <Sidebar
       collapsible="icon"
       variant="sidebar"
       {...props}
-      className="group-data-[side=left]:border-r-0"
+      className={`group-data-[side=left]:border-r-0 transition-all duration-300 ${isHovered ? "hover:shadow-lg" : ""}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <SidebarHeader>
         {selectedOrganization && hasOrganizations && (
@@ -111,15 +173,23 @@ export function AppSidebar({
                 asChild
                 size="lg"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white mt-2"
+                onMouseEnter={() => setIsLinkHovered(true)}
+                onMouseLeave={() => setIsLinkHovered(false)}
               >
-                <Link href="/">
+                <Link href={navigateTo}>
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
-                    <DashboardIcon className="size-4" />
+                    {isHomePath ? (
+                      <DashboardIcon className="size-4" />
+                    ) : (
+                      <MagnifyingGlassIcon className="size-4" />
+                    )}
                   </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight text-gray-900">
-                    <span className="truncate font-semibold">
-                      {t("view_dashboard")}
-                    </span>
+                  <div
+                    className={`grid flex-1 text-left text-sm leading-tight text-gray-900 transition-all duration-200 ${
+                      isLinkHovered ? "scale-105 font-bold" : ""
+                    }`}
+                  >
+                    <span className="truncate font-semibold">{linkText}</span>
                   </div>
                 </Link>
               </SidebarMenuButton>
