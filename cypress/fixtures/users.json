@@ -43,12 +43,12 @@
     "username": "devnurse3",
     "password": "Test@123"
   },
-  "raj": {
-    "username": "rajkumar",
-    "password": "test@123"
-  },
   "devnurse4": {
     "username": "devnurse4",
+    "password": "Test@123"
+  },
+  "devdoctor3": {
+    "username": "devdoctor3",
     "password": "Test@123"
   },
   "test-human": {

@@ -9,9 +9,9 @@ const patientLocation = new PatientLocation();
 describe("Add a new Location and associate to an Encounter", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("raj");
+    cy.loginByApi("devdoctor3");
     cy.visit("/");
-    facilityCreation.selectFacility("MEDICAL FACILITY");
+    facilityCreation.selectFacility("GHC Payyanur");
   });
 
   it("Create a new Location", () => {
