@@ -193,6 +193,7 @@ export const DrawingPage = ({
                   <div className="relative">
                     <div className="h-60 md:h-40 w-full bg-gray-50">
                       <ExcalidrawPreview
+                        key={drawing.modified_date}
                         elements={drawing.object_value.elements}
                       />
                     </div>
