@@ -1,3 +1,4 @@
+import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { PatientLocation } from "@/pageObject/Patients/PatientLocation";
 import { LocationData } from "@/pageObject/Patients/PatientLocation";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
@@ -5,6 +6,7 @@ import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
 const patientLocation = new PatientLocation();
+const patientEncounter = new PatientEncounter();
 
 describe("Manage locations association to an encounter", () => {
   beforeEach(() => {
@@ -15,12 +17,13 @@ describe("Manage locations association to an encounter", () => {
   });
 
   it("Manage a bed association to an encounter", () => {
-    patientLocation
+    patientEncounter
       .navigateToEncounters()
-      .clickPlannedEncounterFilter()
-      .openFirstEncounterDetails()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails();
 
-      // Associate New Location to the first planned encounter
+    // Associate New Location to the first planned encounter
+    patientLocation
       .clickAddLocationBadge()
       .selectLocationBuilding("Block C")
       .clickShowAvailableBeds()

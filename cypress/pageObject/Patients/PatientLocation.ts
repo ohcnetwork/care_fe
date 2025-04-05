@@ -177,29 +177,6 @@ export class PatientLocation {
     return this;
   }
 
-  navigateToEncounters() {
-    cy.get('[data-sidebar="content"]').contains("Encounters").click();
-    return this;
-  }
-
-  clickPlannedEncounterFilter() {
-    cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
-    cy.verifyAndClickElement('[data-cy="planned-filter"]', "Planned");
-    cy.wait("@getEncounters", { timeout: 10000 }).then((interception) => {
-      expect(interception.request.url).to.include("status=planned");
-      expect(interception.response.statusCode).to.eq(200);
-    });
-    return this;
-  }
-
-  openFirstEncounterDetails() {
-    cy.get('[data-cy="encounter-list-cards"]')
-      .first()
-      .contains("View Details")
-      .click();
-    return this;
-  }
-
   clickAssociatedLocationBadge() {
     cy.get(this.selectors.currentLocationBadge).click();
     return this;
