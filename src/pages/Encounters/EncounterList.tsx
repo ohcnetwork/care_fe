@@ -457,6 +457,7 @@ export function EncounterList({
                         {t("all_status")}
                       </TabsTrigger>
                       <TabsTrigger
+                        data-cy="planned-filter"
                         value="planned"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                         onClick={() =>
