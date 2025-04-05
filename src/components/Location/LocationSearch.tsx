@@ -54,7 +54,11 @@ export function LocationSearch({
   });
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild disabled={disabled}>
+      <PopoverTrigger
+        asChild
+        disabled={disabled}
+        data-cy="location-search-trigger"
+      >
         <div
           className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer"
           role="combobox"
