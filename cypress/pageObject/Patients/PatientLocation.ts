@@ -31,7 +31,7 @@ export class PatientLocation {
 
   // Navigation
   navigateToSettings() {
-    cy.get('[data-sidebar="content"]').contains("Settings").click();
+    cy.verifyAndClickElement(this.selectors.sidebarContent, "Settings");
     return this;
   }
 
