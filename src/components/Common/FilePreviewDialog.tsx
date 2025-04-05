@@ -473,6 +473,17 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         className="mr-2 text-lg"
                       />
                     </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleRotate(90)}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                    >
+                      <CareIcon
+                        icon={"l-crop-alt-rotate-right" as IconName}
+                        className="mr-2 text-lg size-4"
+                      />
+                    </Button>
                   </>
                 )}
                 {file_state.extension === "pdf" && (
@@ -511,22 +522,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   </>
                 )}
               </div>
-              <div className="flex justify-center space-x-2">
-                {file_state.isImage && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleRotate(90)}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
-                    >
-                      <CareIcon
-                        icon={"l-corner-up-right" as IconName}
-                        className="text-lg size-4"
-                      />
-                      {t("rotate")}
-                    </Button>
-                  </>
-                )}
+              <div className="flex justify-center mr-9 space-x-2">
                 {file_state.extension === "pdf" && (
                   <>
                     <Button
@@ -535,9 +531,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       disabled={page === 1}
                       className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
+                      {t("previous_page")}
                       <CareIcon
-                        icon={"l-arrow-left" as IconName}
-                        className="mr-2 size-4"
+                        icon={"l-angle-left" as IconName}
+                        className="ml-2 size-4 text-lg"
                       />
                     </Button>
 
@@ -555,7 +552,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       disabled={page === numPages}
                       className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
-                      <CareIcon icon="l-arrow-right" className="mr-2 size-4" />
+                      <CareIcon
+                        icon={"l-angle-right" as IconName}
+                        className="mr-2 size-4"
+                      />
+                      {t("next_page")}
                     </Button>
                   </>
                 )}
