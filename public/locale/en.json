@@ -358,6 +358,7 @@
   "additional_instructions": "Additional Instructions",
   "address": "Address",
   "address_is_required": "Address is required",
+  "adjust_appointments_filters": "Try adjusting your filters or create a new appointment",
   "adjust_questionnaire_filters": "Try adjusting your filters or create a new questionnaire",
   "adjust_resource_filters": "Try adjusting your filters or create a new resource",
   "adjust_valueset_filters": "Try adjusting your filters or create a new valueset",
