@@ -19,29 +19,8 @@ const formatKey = (key: string) => {
     .join(" ");
 };
 
-const notifyError = (error: any, t: any) => {
+const notifyError = (error: any) => {
   let errorMsg = "";
-
-  if (
-    error?.type === "validation_error" &&
-    error?.msg &&
-    typeof error.msg === "object"
-  ) {
-    Object.values(error.msg).forEach((messages) => {
-      if (Array.isArray(messages)) {
-        errorMsg += messages.join(", ");
-      } else {
-        errorMsg += messages;
-      }
-    });
-
-    if (errorMsg.length > 0) {
-      toast.error(errorMsg);
-    } else {
-      toast.error(t("something_went_wrong"));
-    }
-    return;
-  }
 
   if (typeof error === "string" || !error) {
     errorMsg =
@@ -69,10 +48,10 @@ const notifyError = (error: any, t: any) => {
  * 400 Bad Request handler
  * @deprecated TODO: add a better error handler
  */
-export const BadRequest = ({ errs }: { errs: any }, t: any) => {
+export const BadRequest = ({ errs }: { errs: any }) => {
   if (Array.isArray(errs)) {
-    errs.forEach((error) => notifyError(error, t));
+    errs.forEach((error) => notifyError(error));
   } else {
-    notifyError(errs, t);
+    notifyError(errs);
   }
 };

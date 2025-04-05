@@ -2,8 +2,10 @@ import { t } from "i18next";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 
-import * as Notification from "@/Utils/Notifications";
 import { handleUploadPercentage } from "@/Utils/request/utils";
+
+import { handleHttpError } from "./errorHandler";
+import { HTTPError } from "./types";
 
 const uploadFile = async (
   url: string,
@@ -31,7 +33,14 @@ const uploadFile = async (
         } catch {
           error = xhr.responseText;
         }
-        Notification.BadRequest({ errs: error.errors }, t);
+        handleHttpError(
+          new HTTPError({
+            message: "Client error",
+            status: xhr.status,
+            silent: false,
+            cause: error,
+          }),
+        );
         reject(new Error("Client error"));
         reject(new Error("Client error"));
       } else {
