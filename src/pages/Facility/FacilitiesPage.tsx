@@ -64,7 +64,7 @@ export function FacilitiesPage() {
   return (
     <div className="container px-4 py-8 mx-auto">
       <div className="flex items-start justify-between w-full">
-        <Link href="/" className="">
+        <Link href="/facilities" className="">
           <img src={mainLogo?.dark} alt="Care Logo" className="w-auto h-12" />
         </Link>
         <LoginHeader />
