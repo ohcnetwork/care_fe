@@ -160,6 +160,26 @@ const time_of_death_questionnaire: QuestionnaireDetail = {
   tags: [],
 };
 
+const appointment_questionnaire: QuestionnaireDetail = {
+  id: "appointment",
+  slug: "appointment",
+  version: "0.0.1",
+  title: "Appointment",
+  status: "active",
+  subject_type: "patient",
+  questions: [
+    {
+      id: "appointment",
+      text: "Appointment",
+      type: "structured",
+      structured_type: "appointment",
+      link_id: "1.1",
+      required: false,
+    },
+  ],
+  tags: [],
+};
+
 export const STRUCTURED_QUESTIONS = [
   {
     value: "allergy_intolerance",
@@ -192,7 +212,11 @@ export const STRUCTURED_QUESTIONS = [
     label: "Time of Death",
     questionnaire: time_of_death_questionnaire,
   },
-  { value: "appointment", label: "Appointment" },
+  {
+    value: "appointment",
+    label: "Appointment",
+    questionnaire: appointment_questionnaire,
+  },
   { value: "files", label: "Files", questionnaire: files_questionnaire },
 ] as const;
 
