@@ -22,6 +22,7 @@ export class PatientLocation {
     currentLocationBadge: '[data-cy="current-location-badge"]',
     addLocationBadge: '[data-cy="add-encounter-location"]',
     updateLocationButton: '[data-cy="update-encounter-location-button"]',
+    endDateInput: '[data-cy="location-end-date-time"]',
     associatedLocationStatus: '[data-cy="associated-location-status"]',
     saveStatusButton: '[data-cy="update-associated-location-status-button"]',
     locationSearchTrigger: '[data-cy="location-search-trigger"]',
@@ -191,7 +192,9 @@ export class PatientLocation {
   }
 
   fillEndTime(dateTime: string) {
-    cy.get('[data-cy="location-end-date-time"]').clear().type(dateTime);
+    cy.typeIntoField(this.selectors.endDateInput, dateTime, {
+      clearBeforeTyping: true,
+    });
     return this;
   }
 
