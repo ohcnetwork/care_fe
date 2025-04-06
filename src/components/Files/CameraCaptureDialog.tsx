@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/dialog";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
-import useImageCapture from "@/hooks/useImageCapture";
 
+import { useImageCapture } from "@/Utils/imageUtils";
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
 export interface CameraCaptureDialogProps {

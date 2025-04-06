@@ -23,9 +23,9 @@ import {
 } from "@/components/ui/dialog";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
-import useImageCapture from "@/hooks/useImageCapture";
 
 import { getCroppedImg } from "@/Utils/getCroppedImg";
+import { useImageCapture } from "@/Utils/imageUtils";
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
 interface Props {
