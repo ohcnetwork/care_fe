@@ -27,7 +27,7 @@ export function BedStatusLegend({ className }: BedStatusLegendProps) {
   ];
 
   return (
-    <div className={`flex items-center gap-4 ${className}`}>
+    <div className={`flex flex-wrap items-center gap-4 ${className}`}>
       {statuses.map((status) => (
         <div key={status.label} className="flex items-center gap-2">
           <div className="relative size-6">

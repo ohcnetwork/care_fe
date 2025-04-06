@@ -24,14 +24,14 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
   return (
     <div
       className={cn(
-        "rounded-lg border p-2",
+        "rounded-lg border p-2 sm:p-4",
         status === "active"
           ? "border-green-200 bg-green-50"
           : "border-blue-200 bg-blue-50",
       )}
     >
-      <div className="flex justify-between items-start">
-        <div className="space-y-2">
+      <div className="flex flex-wrap justify-between items-start gap-4">
+        <div className="space-y-2 w-full sm:w-auto">
           {/* Parent locations */}
           {location.parent?.parent && (
             <div className="flex items-center text-sm font-medium text-gray-700">
@@ -78,7 +78,7 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
             </span>
           </div>
         </div>
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-end w-full sm:w-auto">
           <Badge
             variant="outline"
             className={cn(
@@ -91,7 +91,7 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
           <div className="mt-4 flex justify-end">
             <div className="flex flex-row text-xs text-gray-500 gap-4">
               <div className="flex flex-col">
-                <span className="text-xs font-medium ">{t("start_time")}</span>
+                <span className="text-xs font-medium">{t("start_time")}</span>
                 <div className="flex items-center gap-1">
                   <Clock className="size-3" />
                   <span className="font-semibold">

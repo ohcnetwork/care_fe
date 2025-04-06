@@ -77,21 +77,27 @@ export function LocationActionButtons({
   }
 
   return (
-    <div className="flex gap-2">
-      {buttons.map((button, index) => (
-        <Button
-          key={index}
-          variant={button.variant}
-          onClick={button.onClick}
-          className={button.className}
-        >
-          {button.label}
-        </Button>
-      ))}
+    <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap gap-2 flex-1">
+        {buttons.map((button, index) => (
+          <Button
+            key={index}
+            variant={button.variant}
+            onClick={button.onClick}
+            className={`sm:w-auto w-full ${button.className}`}
+          >
+            {button.label}
+          </Button>
+        ))}
+      </div>
       {onUpdateTime && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button
+              variant="outline"
+              size="icon"
+              className="ml-auto mt-2 sm:mt-0 sm:ml-0"
+            >
               <MoreVertical className="size-4" />
             </Button>
           </DropdownMenuTrigger>
