@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import useImageCapture from "@/hooks/useImageCapture";
 
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
@@ -29,6 +30,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const { open, onOpenChange, onCapture, onResetCapture, setPreview } = props;
   const isLaptopScreen = useBreakpoints({ lg: true, default: false });
   const { requestPermission } = useMediaDevicePermission();
+  const { processWebcamImage } = useImageCapture();
   const [stream, setStream] = useState<MediaStream | null>(null);
 
   const [cameraFacingMode, setCameraFacingMode] = useState(
@@ -89,16 +91,25 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     }
   }, []);
 
-  const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
-    const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
-      const extension = blob.type.split("/").pop();
-      const myFile = new File([blob], `capture.${extension}`, {
-        type: blob.type,
-      });
-      onCapture(myFile, `capture.${extension}`);
-    });
+  const captureImage = async () => {
+    const screenshot = webRef.current?.getScreenshot();
+    if (!screenshot) {
+      toast.error(t("failed_to_capture_image"));
+      return;
+    }
+
+    // Use the processWebcamImage function from our hook
+    const { file, error } = await processWebcamImage(screenshot);
+
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    if (file) {
+      setPreviewImage(screenshot);
+      onCapture(file, file.name);
+    }
   };
 
   return (

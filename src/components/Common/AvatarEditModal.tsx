@@ -23,12 +23,9 @@ import {
 } from "@/components/ui/dialog";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
+import useImageCapture from "@/hooks/useImageCapture";
 
 import { getCroppedImg } from "@/Utils/getCroppedImg";
-import {
-  captureWebcamImage,
-  processCroppedImage,
-} from "@/Utils/imageCaptureUtils";
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
 interface Props {
@@ -84,6 +81,7 @@ const AvatarEditModal = ({
     VideoConstraints.user,
   );
   const { t } = useTranslation();
+  const { captureWebcamImage, processCroppedImage } = useImageCapture();
   const [isDragging, setIsDragging] = useState(false);
   const { requestPermission } = useMediaDevicePermission();
   const [cropState, setCropState] = useState({
@@ -124,7 +122,7 @@ const AvatarEditModal = ({
   );
 
   const captureImage = async () => {
-    const { screenshot, file, error } = await captureWebcamImage(webRef, t);
+    const { screenshot, file, error } = await captureWebcamImage(webRef);
 
     if (error) {
       return;
@@ -192,7 +190,6 @@ const AvatarEditModal = ({
         try {
           const { file, error } = await processCroppedImage(
             cropState.croppedImage!,
-            t,
           );
 
           if (error) {
@@ -210,14 +207,14 @@ const AvatarEditModal = ({
             setErrorMessage(null);
           }
         } catch (error) {
-          console.error("Image processing error:", error);
-          toast.error(t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"));
+          console.error("Error processing cropped image:", error);
+          setErrorMessage(t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"));
         }
       };
 
       processCroppedImageData();
     }
-  }, [cropState.croppedImage, t]);
+  }, [cropState.croppedImage, processCroppedImage]);
 
   const closeModal = () => {
     setPreview(undefined);

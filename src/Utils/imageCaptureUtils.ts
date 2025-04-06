@@ -1,4 +1,7 @@
-import Webcam from "react-webcam";
+/**
+ * @deprecated Use the useImageCapture hook instead
+ * This file is maintained for backward compatibility
+ */
 import { toast } from "sonner";
 
 /**
@@ -122,15 +125,22 @@ export const canvasToFile = (
 };
 
 /**
- * Processes the captured image with appropriate size and quality constraints
- * @param imageDataUrl - The data URL of the captured image
- * @param t - Translation function for error messages
- * @returns Promise that resolves to a File object or null if processing failed
+ * @deprecated Use the useImageCapture hook instead
  */
 export const processWebcamImage = (
   imageDataUrl: string,
   t: (key: string) => string,
 ): Promise<{ file: File | null; error?: string }> => {
+  // Import the hook as a function for backward compatibility
+  // This is not a proper hook usage (hooks should be called at the top level of functional components)
+  // But it provides backward compatibility for existing code
+  console.warn(
+    "processWebcamImage is deprecated. Please use the useImageCapture hook instead.",
+  );
+
+  // Create a mock t function that just returns the key if not provided
+  const mockT = t || ((key: string) => key);
+
   return new Promise((resolve) => {
     const img = new Image();
 
@@ -141,7 +151,7 @@ export const processWebcamImage = (
       // Draw image to canvas
       const canvas = createImageCanvas(img, width, height);
       if (!canvas) {
-        resolve({ file: null, error: t("failed_to_process_image") });
+        resolve({ file: null, error: mockT("failed_to_process_image") });
         return;
       }
 
@@ -152,7 +162,7 @@ export const processWebcamImage = (
         });
 
         if (!pngBlob) {
-          resolve({ file: null, error: t("failed_to_process_image") });
+          resolve({ file: null, error: mockT("failed_to_process_image") });
           return;
         }
 
@@ -169,7 +179,7 @@ export const processWebcamImage = (
             });
             resolve({ file });
           } else {
-            resolve({ file: null, error: t("image_too_small_in_size") });
+            resolve({ file: null, error: mockT("image_too_small_in_size") });
           }
         } else if (pngBlob.size > 2 * 1024 * 1024) {
           // If image is too large, compress more with JPEG
@@ -195,7 +205,7 @@ export const processWebcamImage = (
               });
               resolve({ file });
             } else {
-              resolve({ file: null, error: t("failed_to_process_image") });
+              resolve({ file: null, error: mockT("failed_to_process_image") });
             }
           }
         } else {
@@ -206,12 +216,12 @@ export const processWebcamImage = (
           resolve({ file });
         }
       } catch (_error) {
-        resolve({ file: null, error: t("failed_to_process_image") });
+        resolve({ file: null, error: mockT("failed_to_process_image") });
       }
     };
 
     img.onerror = () => {
-      resolve({ file: null, error: t("failed_to_process_image") });
+      resolve({ file: null, error: mockT("failed_to_process_image") });
     };
 
     img.src = imageDataUrl;
@@ -219,20 +229,24 @@ export const processWebcamImage = (
 };
 
 /**
- * Captures an image from a webcam ref and processes it
- * @param webRef - Reference to the webcam component
- * @param t - Translation function for error messages
- * @returns Promise that resolves to the processed image data
+ * @deprecated Use the useImageCapture hook instead
  */
 export const captureWebcamImage = async (
-  webRef: React.RefObject<Webcam>,
+  webRef: React.RefObject<any>,
   t: (key: string) => string,
 ) => {
+  console.warn(
+    "captureWebcamImage is deprecated. Please use the useImageCapture hook instead.",
+  );
+
+  // Create a mock t function that just returns the key if not provided
+  const mockT = t || ((key: string) => key);
+
   if (!webRef.current) {
     return {
       screenshot: null,
       file: null,
-      error: t("camera_not_available"),
+      error: mockT("camera_not_available"),
     };
   }
 
@@ -241,11 +255,11 @@ export const captureWebcamImage = async (
     return {
       screenshot: null,
       file: null,
-      error: t("failed_to_capture_image"),
+      error: mockT("failed_to_capture_image"),
     };
   }
 
-  const { file, error } = await processWebcamImage(screenshot, t);
+  const { file, error } = await processWebcamImage(screenshot, mockT);
 
   if (error) {
     toast.error(error);
@@ -259,15 +273,19 @@ export const captureWebcamImage = async (
 };
 
 /**
- * Processes a cropped image with appropriate size and quality constraints
- * @param croppedImageSrc - The data URL of the cropped image
- * @param t - Translation function for error messages
- * @returns Promise resolving to file and metadata
+ * @deprecated Use the useImageCapture hook instead
  */
 export const processCroppedImage = (
   croppedImageSrc: string,
   t: (key: string) => string,
 ): Promise<{ file: File | null; error?: string }> => {
+  console.warn(
+    "processCroppedImage is deprecated. Please use the useImageCapture hook instead.",
+  );
+
+  // Create a mock t function that just returns the key if not provided
+  const mockT = t || ((key: string) => key);
+
   return new Promise((resolve) => {
     try {
       // Create an Image element to ensure consistent processing
@@ -282,7 +300,7 @@ export const processCroppedImage = (
           if (!canvas) {
             resolve({
               file: null,
-              error: t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
+              error: mockT("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
             });
             return;
           }
@@ -296,7 +314,7 @@ export const processCroppedImage = (
             if (!pngBlob) {
               resolve({
                 file: null,
-                error: t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
+                error: mockT("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
               });
               return;
             }
@@ -316,7 +334,10 @@ export const processCroppedImage = (
                 });
                 resolve({ file });
               } else {
-                resolve({ file: null, error: t("image_too_small_in_size") });
+                resolve({
+                  file: null,
+                  error: mockT("image_too_small_in_size"),
+                });
               }
             } else if (pngBlob.size > 2 * 1024 * 1024) {
               // If image is too large, compress more with JPEG
@@ -351,7 +372,7 @@ export const processCroppedImage = (
                 } else {
                   resolve({
                     file: null,
-                    error: t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
+                    error: mockT("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
                   });
                 }
               }
@@ -365,24 +386,30 @@ export const processCroppedImage = (
           } catch (_error) {
             resolve({
               file: null,
-              error: t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
+              error: mockT("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
             });
           }
         } catch (_error) {
           resolve({
             file: null,
-            error: t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
+            error: mockT("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
           });
         }
       };
 
       img.onerror = () => {
-        resolve({ file: null, error: t("AVATAR_EDIT__ERROR_LOADING_IMAGE") });
+        resolve({
+          file: null,
+          error: mockT("AVATAR_EDIT__ERROR_LOADING_IMAGE"),
+        });
       };
 
       img.src = croppedImageSrc;
     } catch (_error) {
-      resolve({ file: null, error: t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE") });
+      resolve({
+        file: null,
+        error: mockT("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
+      });
     }
   });
 };
