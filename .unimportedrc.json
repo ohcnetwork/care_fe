@@ -6,6 +6,7 @@
   "ignoreUnimported": [
     "src/Locale/update_locale.js",
     "src/PluginRegistry.ts",
+    "src/Utils/imageCaptureUtils.ts",
     "src/pluginTypes.ts",
     "src/service-worker.ts"
   ],
