@@ -1900,6 +1900,7 @@
   "number_of_beds_out_of_range_error": "Number of beds cannot be greater than 100",
   "number_of_chronic_diseased_dependents": "Number Of Chronic Diseased Dependents",
   "number_of_covid_vaccine_doses": "Number of Covid vaccine doses",
+  "number_of_slots": "Number of slots:",
   "nurse": "Nurse",
   "nurses_form": "Nurse's Form",
   "nursing_care": "Nursing Care",
