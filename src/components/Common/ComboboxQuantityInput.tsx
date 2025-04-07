@@ -129,6 +129,7 @@ export function ComboboxQuantityInput({
         <PopoverContent
           className="w-auto p-0"
           align="start"
+          side="top"
           onOpenAutoFocus={(e) => {
             e.preventDefault();
             inputRef.current?.focus();
