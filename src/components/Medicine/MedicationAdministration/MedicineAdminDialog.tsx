@@ -67,7 +67,7 @@ export const MedicineAdminDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-screen overflow-auto max-w-screen">
+      <DialogContent className="max-h-screen overflow-auto max-w-xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl">
