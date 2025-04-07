@@ -151,7 +151,7 @@ export function LocationSheet({
         queryParams: {
           limit: ITEMS_PER_PAGE,
           offset: (locationsPage - 1) * ITEMS_PER_PAGE,
-          search: searchTerm,
+          name: searchTerm,
           mode: "kind",
           parent: selectedLocation?.id,
           ...(!selectedLocation ? { mine: true } : {}),
@@ -169,6 +169,7 @@ export function LocationSheet({
       selectedLocation?.id,
       bedsPage,
       showAvailableOnly,
+      searchTerm,
     ],
     queryFn: async ({ signal }) => {
       const response = await query(locationApi.list, {
@@ -177,6 +178,7 @@ export function LocationSheet({
           limit: ITEMS_PER_PAGE,
           offset: (bedsPage - 1) * ITEMS_PER_PAGE,
           mode: "instance",
+          name: searchTerm,
           parent: selectedLocation?.id,
           available: showAvailableOnly ? "true" : undefined,
           ...(!selectedLocation ? { mine: true } : {}),
