@@ -889,7 +889,15 @@ function QuestionEditor({
     value: Question[K],
     additionalFields?: Partial<Question>,
   ) => {
-    onChange({ ...question, [field]: value, ...additionalFields });
+    const updateQuestion = { ...question, [field]: value, ...additionalFields };
+    if (
+      field === "type" &&
+      value === "structured" &&
+      !updateQuestion.structured_type
+    ) {
+      updateQuestion.structured_type = "allergy_intolerance";
+    }
+    onChange(updateQuestion);
   };
 
   const toggleSubQuestionExpanded = (questionId: string) => {
