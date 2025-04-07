@@ -117,7 +117,7 @@ export function LocationNavigation({
         />
 
         {beds.length > 0 && (
-          <div className="space-y-4 mt-4">
+          <div className="space-y-2 mt-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold mt-2">
                 {t("available_beds")}
