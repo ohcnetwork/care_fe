@@ -187,6 +187,7 @@ export function LocationSheet({
       })({ signal });
       return response;
     },
+    enabled: !!selectedLocation && !!facilityId,
   });
 
   useEffect(() => {

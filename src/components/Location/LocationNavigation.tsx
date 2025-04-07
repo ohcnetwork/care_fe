@@ -87,15 +87,9 @@ export function LocationNavigation({
           </div>
         </div>
 
-        {!isLoadingLocations && !selectedLocation && locations.length === 0 && (
+        {!isLoadingLocations && locations.length === 0 && (
           <div className="text-center text-gray-500 text-sm py-4">
             {t("no_locations_found")}
-          </div>
-        )}
-
-        {!isLoadingBeds && selectedLocation && beds.length === 0 && (
-          <div className="text-center text-gray-500 text-sm py-4">
-            {t("no_beds_found")}
           </div>
         )}
         {selectedBed && (
@@ -127,12 +121,10 @@ export function LocationNavigation({
           onLocationClick={onLocationClick}
         />
 
-        {beds.length > 0 && (
+        {selectedLocation && (
           <div className="space-y-2 mt-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold mt-2">
-                {t("available_beds")}
-              </h2>
+              <h2 className="text-sm font-semibold mt-2">{t("beds")}</h2>
               <div className="flex items-center gap-2">
                 <Switch
                   id="available-only"
@@ -146,7 +138,15 @@ export function LocationNavigation({
             </div>
 
             <BedStatusLegend />
-
+            {!isLoadingBeds && beds.length === 0 && (
+              <div className="text-center text-gray-500 text-sm py-4">
+                {t(
+                  !showAvailableOnly
+                    ? "no_beds_found"
+                    : "no_available_beds_found",
+                )}
+              </div>
+            )}
             <BedListing
               beds={beds}
               selectedBed={selectedBed}
