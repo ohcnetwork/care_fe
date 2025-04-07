@@ -645,6 +645,7 @@ export function LocationSheet({
               >
                 <Button
                   variant="outline"
+                  disabled={!selectedBed}
                   onClick={() => {
                     setSheetState((prev) => ({
                       ...prev,
