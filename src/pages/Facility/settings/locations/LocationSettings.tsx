@@ -381,6 +381,7 @@ export default function LocationSettings({
                     <div className="flex flex-col justify-between items-start gap-2 sm:gap-4 md:pt-4 md:px-4">
                       <div className="flex flex-col md:flex-row justify-between items-center w-full gap-4">
                         <Input
+                          data-cy="location-search-input"
                           placeholder={t("search_by_name")}
                           defaultValue={searchQuery}
                           onChange={(e) => handleSearchChange(e.target.value)}
@@ -388,6 +389,7 @@ export default function LocationSettings({
                         />
                         <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
                           <Button
+                            data-cy="add-main-location-button"
                             variant="primary"
                             onClick={handleAddLocation}
                             className="w-full sm:w-auto"
@@ -399,8 +401,11 @@ export default function LocationSettings({
                       </div>
                     </div>
 
-                    <div className="space-y-4 overflow-hidden md:px-4">
-                      <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
+                    <div className="space-y-4 overflow-hidden">
+                      <div
+                        className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4"
+                        data-cy="location-card-container"
+                      >
                         {isLoading ? (
                           <CardGridSkeleton count={2} />
                         ) : childLocations?.results?.length ? (

@@ -22,6 +22,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
@@ -33,6 +34,7 @@ interface Props {
   placeholder?: string;
   noOptionsMessage?: string;
   popoverClassName?: string;
+  facilityId?: string;
 }
 
 export default function UserSelector({
@@ -41,19 +43,26 @@ export default function UserSelector({
   placeholder,
   noOptionsMessage,
   popoverClassName,
+  facilityId,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const { data, isFetching } = useQuery({
-    queryKey: ["users", search],
-    queryFn: query.debounced(UserApi.list, {
-      queryParams: { search_text: search },
-    }),
+    queryKey: ["users", search, facilityId],
+    queryFn: query.debounced(
+      facilityId ? routes.facility.getUsers : UserApi.list,
+      {
+        pathParams: facilityId ? { facility_id: facilityId } : undefined,
+        queryParams: {
+          search_text: search,
+        },
+      },
+    ),
   });
 
-  const users = data?.results || [];
+  const usersList = data?.results || [];
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -100,7 +109,7 @@ export default function UserSelector({
                 : noOptionsMessage || t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {users.map((user: UserBase) => (
+              {usersList.map((user: UserBase) => (
                 <CommandItem
                   key={user.id}
                   value={user.id}

@@ -159,6 +159,7 @@ export function LocationCard({
                     <AlertDialogFooter>
                       <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                       <AlertDialogAction
+                        data-cy="remove-location-button"
                         onClick={() => removeLocation({})}
                         className={buttonVariants({ variant: "destructive" })}
                       >
@@ -219,6 +220,7 @@ export function LocationCard({
             </div>
             <div className="ml-auto">
               <Button
+                data-cy="view-details-location-button"
                 variant="outline"
                 className="flex items-center gap-2"
                 onClick={() => onView?.(location)}
