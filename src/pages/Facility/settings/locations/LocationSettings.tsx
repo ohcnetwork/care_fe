@@ -20,6 +20,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
+import { flattenParentChain } from "@/Utils/utils";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
@@ -32,18 +33,6 @@ import { LocationCard } from "./components/LocationCard";
 interface LocationSettingsProps {
   facilityId: string;
   locationId?: string;
-}
-
-function getParentChain(location: LocationListType): Set<string> {
-  const parentIds = new Set<string>();
-  let current = location.parent;
-
-  while (current) {
-    parentIds.add(current.id);
-    current = current.parent;
-  }
-
-  return parentIds;
 }
 
 export default function LocationSettings({
@@ -123,8 +112,8 @@ export default function LocationSettings({
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
       navigate(`/facility/${facilityId}/settings/location/${location.id}`);
-      const parentIds = getParentChain(location);
-      parentIds.add(location.id);
+      const parentIds = flattenParentChain(location).map((l) => l.id);
+      parentIds.push(location.id);
       setExpandedLocations(new Set([...expandedLocations, ...parentIds]));
     },
     [expandedLocations, facilityId],

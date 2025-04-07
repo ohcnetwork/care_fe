@@ -40,6 +40,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { flattenParentChain } from "@/Utils/utils";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
 import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
@@ -49,18 +50,6 @@ import locationApi from "@/types/location/locationApi";
 
 interface Props {
   facilityId: string;
-}
-
-function getParentChain(location: LocationList): Set<string> {
-  const parentIds = new Set<string>();
-  let current = location.parent;
-
-  while (current) {
-    parentIds.add(current.id);
-    current = current.parent;
-  }
-
-  return parentIds;
 }
 
 export default function DevicesList({ facilityId }: Props) {
@@ -129,8 +118,8 @@ export default function DevicesList({ facilityId }: Props) {
     (location: LocationList) => {
       setSelectedLocationId(location.id);
       updateQuery({ current_location: location.id });
-      const parentIds = getParentChain(location);
-      parentIds.add(location.id);
+      const parentIds = flattenParentChain(location).map((l) => l.id);
+      parentIds.push(location.id);
       setExpandedLocations(new Set([...expandedLocations, ...parentIds]));
     },
     [expandedLocations, facilityId],

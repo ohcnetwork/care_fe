@@ -14,7 +14,7 @@ import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import { formatPatientAge } from "@/Utils/utils";
+import { flattenParentChain, formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import {
   Organization,
@@ -108,26 +108,16 @@ export const Demography = (props: PatientProps) => {
   };
 
   const getGeoOrgDetails = (geoOrg: Organization) => {
-    const orgParents: OrganizationParent[] = [];
-    let currentParent = geoOrg.parent;
-    while (currentParent) {
-      if (currentParent.id) {
-        orgParents.push(currentParent);
-      }
-      currentParent = currentParent.parent;
-    }
-
-    const parentDetails = orgParents.map((org) => {
-      return {
+    return flattenParentChain(geoOrg as OrganizationParent)
+      .map((org) => ({
         label: getOrgLabel(org.org_type, org.metadata),
         value: org.name,
-      };
-    });
-
-    return parentDetails.reverse().concat({
-      label: getOrgLabel(geoOrg.org_type, geoOrg.metadata),
-      value: geoOrg.name,
-    });
+      }))
+      .reverse()
+      .concat({
+        label: getOrgLabel(geoOrg.org_type, geoOrg.metadata),
+        value: geoOrg.name,
+      });
   };
 
   const data: Data[] = [

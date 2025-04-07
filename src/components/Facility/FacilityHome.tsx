@@ -45,7 +45,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
-import { sleep } from "@/Utils/utils";
+import { flattenParentChain, sleep } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
@@ -74,30 +74,21 @@ export const getFacilityFeatureIcon = (featureId: number) => {
 };
 
 const renderGeoOrganizations = (geoOrg: Organization) => {
-  const orgParents: OrganizationParent[] = [];
-
-  let currentParent = geoOrg.parent;
-
-  while (currentParent) {
-    if (currentParent.id) {
-      orgParents.push(currentParent);
-    }
-    currentParent = currentParent.parent;
-  }
-
   const formatValue = (name: string, label: string) => {
     return name.endsWith(label)
       ? name.replace(new RegExp(`${label}$`), "").trim()
       : name;
   };
 
-  const parentDetails = orgParents.map((org) => {
-    const label = getOrgLabel(org.org_type, org.metadata);
-    return {
-      label,
-      value: formatValue(org.name, label),
-    };
-  });
+  const parentDetails = flattenParentChain(geoOrg as OrganizationParent).map(
+    (org) => {
+      const label = getOrgLabel(org.org_type, org.metadata);
+      return {
+        label,
+        value: formatValue(org.name, label),
+      };
+    },
+  );
 
   const geoOrgLabel = getOrgLabel(geoOrg.org_type, geoOrg.metadata);
 

@@ -45,7 +45,7 @@ function OrganizationTreeNode({
     }),
     enabled: isExpanded,
   });
-  console.log(children);
+
   return (
     <div className="space-y-1">
       <div

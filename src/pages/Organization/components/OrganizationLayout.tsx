@@ -27,6 +27,7 @@ import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
+import { flattenParentChain } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import OrganizationLayoutSkeleton from "@/pages/Organization/components/OrganizationLayoutSkeleton";
 import {
@@ -117,14 +118,7 @@ export default function OrganizationLayout({
   const visibleNavItems = navItems.filter((item) => item.visibility);
   const activeNavItem = visibleNavItems.find((item) => path === item.path);
 
-  const orgParents: OrganizationParent[] = [];
-  let currentParent = org.parent;
-  while (currentParent) {
-    if (currentParent.id) {
-      orgParents.push(currentParent);
-    }
-    currentParent = currentParent.parent;
-  }
+  const orgParents = flattenParentChain(org as OrganizationParent);
 
   return (
     <Page title={`${org.name}`}>

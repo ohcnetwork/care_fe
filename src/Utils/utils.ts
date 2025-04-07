@@ -328,3 +328,21 @@ export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
 
   return intervals;
 }
+
+export function flattenParentChain<T extends { id: string; parent?: T }>(
+  entity: T,
+): T[] {
+  const parents: T[] = [];
+
+  let current = entity.parent;
+
+  while (current) {
+    if (current.id) {
+      parents.push(current);
+    }
+
+    current = current.parent;
+  }
+
+  return parents;
+}

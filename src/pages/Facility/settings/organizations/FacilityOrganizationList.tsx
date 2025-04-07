@@ -17,6 +17,7 @@ import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { flattenParentChain } from "@/Utils/utils";
 import {
   FacilityOrganization,
   FacilityOrganizationParent,
@@ -135,14 +136,7 @@ export default function FacilityOrganizationList({
     [facilityId, currentTab],
   );
 
-  const orgParents: FacilityOrganizationParent[] = [];
-  let currentParent = org?.parent;
-  while (currentParent) {
-    if (currentParent.id) {
-      orgParents.push(currentParent);
-    }
-    currentParent = currentParent.parent;
-  }
+  const orgParents = flattenParentChain(org as FacilityOrganizationParent);
 
   return (
     <div className="flex gap-4">

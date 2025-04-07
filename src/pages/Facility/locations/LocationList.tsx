@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import React from "react";
 
 import query from "@/Utils/request/query";
+import { flattenParentChain } from "@/Utils/utils";
 import LocationContent from "@/pages/Facility/locations/LocationContent";
 import LocationNavbar from "@/pages/Facility/locations/LocationNavbar";
 import { LocationList as LocationListType } from "@/types/location/location";
@@ -16,18 +17,6 @@ interface LocationState {
   expandedLocations: Set<string>;
   searchQuery: string;
   currentPage: number;
-}
-
-function getParentChain(location: LocationListType): Set<string> {
-  const parentIds = new Set<string>();
-  let current = location.parent;
-
-  while (current) {
-    parentIds.add(current.id);
-    current = current.parent;
-  }
-
-  return parentIds;
 }
 
 // Hook for location data management
@@ -66,8 +55,8 @@ function useLocationState(
       navigate(`/facility/${facilityId}/encounters/locations/${location.id}`);
 
       // Get parent chain and include the current location ID
-      const parentIds = getParentChain(location);
-      parentIds.add(location.id);
+      const parentIds = flattenParentChain(location).map((l) => l.id);
+      parentIds.push(location.id);
 
       setState((prev) => ({
         ...prev,
