@@ -306,17 +306,11 @@ export default function UserForm({
 
   useEffect(() => {
     const levels: Organization[] = [];
-    if (
-      isEditMode &&
-      userData &&
-      "geo_organization" in userData &&
-      userData?.geo_organization &&
-      userData?.geo_organization
-    ) {
+    if (isEditMode && userData && "geo_organization" in userData) {
       levels.push(userData.geo_organization as Organization);
       setSelectedLevels(levels);
     }
-  }, [org, organizationId, userData, isEditMode]);
+  }, [org, userData, isEditMode]);
 
   return (
     <Form {...form}>
