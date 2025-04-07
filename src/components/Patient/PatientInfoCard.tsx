@@ -472,29 +472,35 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           </div>
         </div>
         <div
-          className="flex flex-col mt-4 items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
+          className="flex flex-col mt-4 items-center sm:justify-center lg:justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
           <PLUGIN_Component
             __name="PatientInfoCardQuickActions"
             encounter={encounter}
-            className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+            className="w-full md:w-auto bg-primary-700 text-white hover:bg-primary-600"
           />
           {!disableButtons && (
             <div
-              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+              className="flex w-full flex-col gap-3 md:w-auto md:flex-row md:justify-end md:pr-6"
               data-cy="update-encounter-button"
             >
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="primary">
+                  <Button
+                    variant="primary"
+                    className="w-full md:w-auto flex items-center justify-center md:justify-end px-4 py-2 text-sm whitespace-nowrap"
+                  >
                     {inactiveEncounterStatus.includes(encounter.status)
                       ? t("actions")
                       : t("update")}
                     <ChevronDown className="ml-2 size-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent
+                  className="w-[90vw] md:w-48"
+                  align="center"
+                >
                   <EncounterActions encounter={encounter} layout="dropdown" />
                   <PLUGIN_Component
                     __name="PatientInfoCardActions"
