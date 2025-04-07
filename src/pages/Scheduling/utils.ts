@@ -163,8 +163,13 @@ export const getFakeTokenNumber = (appointment: Appointment) => {
   return (hash % 90) + 10;
 };
 
-export const calculateSlotDuration = (startTime: string, endTime: string) => {
+export const calculateSlotDuration = (
+  startTime: string,
+  endTime: string,
+  numOfSlots: number = 1,
+) => {
   const start = parse(startTime, "HH:mm", new Date());
   const end = parse(endTime, "HH:mm", new Date());
-  return differenceInMinutes(end, start);
+  const result = differenceInMinutes(end, start) / numOfSlots;
+  return +result.toFixed(2);
 };

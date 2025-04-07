@@ -63,19 +63,19 @@ export const ENCOUNTER_DISCHARGE_DISPOSITION = [
 ] as const;
 
 export const ENCOUNTER_PRIORITY = [
+  "stat",
   "ASAP",
+  "emergency",
+  "urgent",
+  "routine",
+  "elective",
+  "rush_reporting",
+  "timing_critical",
   "callback_results",
   "callback_for_scheduling",
-  "elective",
-  "emergency",
   "preop",
   "as_needed",
-  "routine",
-  "rush_reporting",
-  "stat",
-  "timing_critical",
   "use_as_directed",
-  "urgent",
 ] as const;
 
 export const ENCOUNTER_STATUS = [
