@@ -1,6 +1,8 @@
 import { MoreVertical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -88,7 +90,7 @@ export function LocationActionButtons({
             key={index}
             variant={button.variant}
             onClick={button.onClick}
-            className={`sm:w-auto w-full ${button.className}`}
+            className={cn("sm:w-auto w-full", button.className)}
             data-cy={button["data-cy"]}
           >
             {button.label}
