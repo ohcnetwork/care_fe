@@ -96,13 +96,16 @@ export default function DevicesList({ facilityId }: Props) {
 
         {pluginDevices.length > 0 ? (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className="lg:w-1/5 w-full">
               <Button variant="white" className="flex items-center gap-2">
                 {t("add_device")}
                 <CareIcon icon="l-angle-down" className="size-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent
+              align="end"
+              className="w-[var(--radix-dropdown-menu-trigger-width)]"
+            >
               {pluginDevices.map((pluginDevice) => {
                 const DeviceIcon = pluginDevice.icon || CubeIcon;
                 return (
@@ -146,47 +149,52 @@ export default function DevicesList({ facilityId }: Props) {
             className="pl-9"
           />
         </div>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 w-full sm:w-auto"
-            >
-              {qParams.care_type ? (
-                <span className="capitalize">{qParams.care_type}</span>
-              ) : (
-                t("filter_by_type")
-              )}
-              <CaretSortIcon className="ml-2 size-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-2">
-            <div className="space-y-2">
+        {pluginDevices.length > 0 && (
+          <Popover>
+            <PopoverTrigger asChild>
               <Button
-                variant="ghost"
-                className="w-full justify-start font-normal"
-                onClick={() => handleCareTypeChange(null)}
+                variant="outline"
+                className="flex items-center gap-2 w-full sm:w-auto"
               >
-                {t("all_types")}
+                {qParams.care_type ? (
+                  <span className="capitalize">{qParams.care_type}</span>
+                ) : (
+                  t("filter_by_type")
+                )}
+                <CaretSortIcon className="ml-2 size-4" />
               </Button>
-              <Separator />
-              {pluginDevices.map((device) => {
-                const DeviceIcon = device.icon || CubeIcon;
-                return (
-                  <Button
-                    key={device.type}
-                    variant="ghost"
-                    className="w-full capitalize justify-start font-normal"
-                    onClick={() => handleCareTypeChange(device.type)}
-                  >
-                    <DeviceIcon className="mr-2 size-4" />
-                    {device.type}
-                  </Button>
-                );
-              })}
-            </div>
-          </PopoverContent>
-        </Popover>
+            </PopoverTrigger>
+            <PopoverContent
+              className="min-w-[var(--radix-popover-trigger-width)] max-w-[200px] p-2"
+              align="end"
+            >
+              <div className="space-y-2">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start font-normal"
+                  onClick={() => handleCareTypeChange(null)}
+                >
+                  {t("all_types")}
+                </Button>
+                <Separator />
+                {pluginDevices.map((device) => {
+                  const DeviceIcon = device.icon || CubeIcon;
+                  return (
+                    <Button
+                      key={device.type}
+                      variant="ghost"
+                      className="w-full capitalize justify-start font-normal"
+                      onClick={() => handleCareTypeChange(device.type)}
+                    >
+                      <DeviceIcon className="mr-2 size-4" />
+                      {device.type}
+                    </Button>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
 
       {isLoading ? (
