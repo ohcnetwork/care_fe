@@ -107,8 +107,8 @@ export default function LocationSettings({
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: locationId || "",
-        limit: ITEMS_PER_PAGE,
-        offset: (currentPage - 1) * ITEMS_PER_PAGE,
+        limit: ITEMS_PER_PAGE + 2,
+        offset: Math.max(0, (currentPage - 1) * ITEMS_PER_PAGE - 1),
         name: searchQuery || undefined,
         mode: locationId ? undefined : "kind",
         ordering: "sort_index",
@@ -116,6 +116,12 @@ export default function LocationSettings({
     }),
     enabled: true,
   });
+
+  // Filter the results to show only the current page items
+  const currentPageItems = childLocations?.results?.slice(
+    currentPage === 1 ? 0 : 1,
+    currentPage === 1 ? ITEMS_PER_PAGE : ITEMS_PER_PAGE + 1,
+  );
 
   const { data: mapLocations } = useQuery({
     queryKey: ["locations", facilityId, "map"],
@@ -145,6 +151,9 @@ export default function LocationSettings({
           body: {
             ...data,
             id: locationId,
+            location_type: {
+              code: data.location_type?.code || "OTHER",
+            },
           },
         }),
       );
@@ -238,6 +247,25 @@ export default function LocationSettings({
     (location: LocationListType, direction: "up" | "down") => {
       if (!childLocations?.results) return;
 
+      const currentIndex = childLocations.results.findIndex(
+        (loc) => loc.id === location.id,
+      );
+      const targetIndex =
+        direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+      // Check if we need to change pages
+      if (targetIndex < 0 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+        return;
+      }
+      if (
+        targetIndex >= childLocations.results.length &&
+        childLocations.count > currentPage * ITEMS_PER_PAGE
+      ) {
+        setCurrentPage(currentPage + 1);
+        return;
+      }
+
       handleLocationReorder({
         location,
         locations: childLocations.results,
@@ -253,11 +281,12 @@ export default function LocationSettings({
         previousData: childLocations,
         direction,
         updateMutation: updateLocationOrder,
-        currentPage,
-        setPage: setCurrentPage,
-        isFirstPage: currentPage === 1,
-        isLastPage: childLocations.count <= currentPage * ITEMS_PER_PAGE,
-        itemsPerPage: ITEMS_PER_PAGE,
+        onSuccess: () => {
+          // Invalidate the query to fetch fresh data
+          queryClient.invalidateQueries({
+            queryKey: ["locations", facilityId, "children", locationId],
+          });
+        },
       });
     },
     [
@@ -268,7 +297,6 @@ export default function LocationSettings({
       currentPage,
       searchQuery,
       queryClient,
-      ITEMS_PER_PAGE,
     ],
   );
 
@@ -403,36 +431,33 @@ export default function LocationSettings({
 
                     <div className="space-y-4 overflow-hidden">
                       <div
-                        className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4"
+                        className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4"
                         data-cy="location-card-container"
                       >
                         {isLoading ? (
                           <CardGridSkeleton count={2} />
-                        ) : childLocations?.results?.length ? (
+                        ) : currentPageItems?.length ? (
                           <AnimatePresence initial={false} mode="popLayout">
-                            {childLocations.results.map(
-                              (
-                                childLocation: LocationListType,
-                                index: number,
-                              ) => (
-                                <AnimatedLocationCard
-                                  key={childLocation.id}
-                                  location={childLocation}
-                                  onEdit={handleEditLocation}
-                                  onView={handleLocationSelect}
-                                  onMoveUp={handleMoveUp}
-                                  onMoveDown={handleMoveDown}
-                                  facilityId={facilityId}
-                                  index={index}
-                                  totalCount={childLocations.results.length}
-                                  isFirstPage={currentPage === 1}
-                                  isLastPage={
-                                    childLocations.count <=
-                                    currentPage * ITEMS_PER_PAGE
-                                  }
-                                />
-                              ),
-                            )}
+                            {currentPageItems.map((childLocation, index) => (
+                              <AnimatedLocationCard
+                                key={childLocation.id}
+                                location={childLocation}
+                                onEdit={handleEditLocation}
+                                onView={handleLocationSelect}
+                                onMoveUp={handleMoveUp}
+                                onMoveDown={handleMoveDown}
+                                facilityId={facilityId}
+                                index={index}
+                                totalCount={currentPageItems.length}
+                                isFirstPage={currentPage === 1}
+                                isLastPage={
+                                  childLocations?.count
+                                    ? childLocations.count <=
+                                      currentPage * ITEMS_PER_PAGE
+                                    : false
+                                }
+                              />
+                            ))}
                           </AnimatePresence>
                         ) : (
                           <Card className="col-span-full">

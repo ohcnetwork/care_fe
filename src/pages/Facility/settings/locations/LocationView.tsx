@@ -80,14 +80,14 @@ export default function LocationView({
       facilityId,
       id,
       "children",
-      { page, limit, searchQuery },
+      { page, limit: limit + 2, searchQuery },
     ],
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: id,
-        offset: (page - 1) * limit,
-        limit,
+        offset: Math.max(0, (page - 1) * limit - 1),
+        limit: limit + 2,
         name: searchQuery || undefined,
         ordering: "sort_index",
       },
@@ -110,6 +110,9 @@ export default function LocationView({
           body: {
             ...data,
             id: locationId,
+            location_type: {
+              code: data.location_type?.code || "OTHER",
+            },
           },
         }),
       );
@@ -140,7 +143,7 @@ export default function LocationView({
             facilityId,
             id,
             "children",
-            { page, limit, searchQuery },
+            { page, limit: limit + 2, searchQuery },
           ],
           variables.previousData,
         );
@@ -208,8 +211,32 @@ export default function LocationView({
 
   const breadcrumbs = location ? generateBreadcrumbs(location) : [];
 
+  const currentPageItems = children?.results?.slice(
+    page === 1 ? 0 : 1,
+    page === 1 ? limit : limit + 1,
+  );
+
   const handleMove = (location: LocationList, direction: "up" | "down") => {
     if (!children?.results) return;
+
+    const currentIndex = children.results.findIndex(
+      (loc) => loc.id === location.id,
+    );
+    const targetIndex =
+      direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+    // Check if we need to change pages
+    if (targetIndex < 0 && page > 1) {
+      setPage(page - 1);
+      return;
+    }
+    if (
+      targetIndex >= children.results.length &&
+      children.count > page * limit
+    ) {
+      setPage(page + 1);
+      return;
+    }
 
     handleLocationReorder({
       location,
@@ -220,16 +247,17 @@ export default function LocationView({
         facilityId,
         id,
         "children",
-        { page, limit, searchQuery },
+        { page, limit: limit + 2, searchQuery },
       ],
       previousData: children,
       direction,
       updateMutation: updateLocationOrder,
-      currentPage: page,
-      setPage,
-      isFirstPage: page === 1,
-      isLastPage: children.count <= page * limit,
-      itemsPerPage: limit,
+      onSuccess: () => {
+        // Invalidate the query to fetch fresh data
+        queryClient.invalidateQueries({
+          queryKey: ["locations", facilityId, id, "children"],
+        });
+      },
     });
   };
 
@@ -379,9 +407,9 @@ export default function LocationView({
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
-                  {children?.results?.length ? (
+                  {currentPageItems?.length ? (
                     <AnimatePresence initial={false} mode="popLayout">
-                      {children.results.map((child, index) => (
+                      {currentPageItems.map((child, index) => (
                         <AnimatedLocationCard
                           key={child.id}
                           location={child}
@@ -391,9 +419,13 @@ export default function LocationView({
                           onMoveDown={handleMoveDown}
                           facilityId={facilityId}
                           index={index}
-                          totalCount={children.results.length}
+                          totalCount={currentPageItems.length}
                           isFirstPage={page === 1}
-                          isLastPage={children.count <= page * limit}
+                          isLastPage={
+                            children?.count
+                              ? children.count <= page * limit
+                              : false
+                          }
                         />
                       ))}
                     </AnimatePresence>
