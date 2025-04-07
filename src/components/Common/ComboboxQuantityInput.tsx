@@ -127,9 +127,7 @@ export function ComboboxQuantityInput({
           </div>
         </PopoverTrigger>
         <PopoverContent
-          className="w-auto p-0"
-          align="start"
-          side="top"
+          className="w-auto p-0 h-auto overflow-y-auto"
           sideOffset={5}
           avoidCollisions={false}
           onOpenAutoFocus={(e) => {
