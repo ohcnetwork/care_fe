@@ -728,7 +728,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             </Popover>
           ) : (
             <Dialog open={showDosageDialog} onOpenChange={setShowDosageDialog}>
-              <DialogContent>
+              <DialogContent className="top-0 translate-y-0 sm:max-w-md">
                 <DosageDialog
                   dosageRange={dosageInstruction.dose_and_rate.dose_range}
                 />
