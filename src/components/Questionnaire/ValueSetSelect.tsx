@@ -10,7 +10,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandDrawer,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -22,6 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -81,13 +81,17 @@ export default function ValueSetSelect({
         onValueChange={setSearch}
         autoFocus
       />
-      <CommandList>
+      <CommandList className="overflow-y-auto">
         <CommandEmpty>
-          {search.length < 3
-            ? t("min_char_length_error", { min_length: 3 })
-            : searchQuery.isFetching
-              ? t("searching")
-              : t("no_results_found")}
+          {search.length < 3 ? (
+            <p className="p-4 text-sm text-gray-500">
+              {t("min_char_length_error", { min_length: 3 })}
+            </p>
+          ) : searchQuery.isFetching ? (
+            <p className="p-4 text-sm text-gray-500">{t("searching")}</p>
+          ) : (
+            <p className="p-4 text-sm text-gray-500">{t("no_results_found")}</p>
+          )}
         </CommandEmpty>
 
         <CommandGroup>
@@ -114,34 +118,39 @@ export default function ValueSetSelect({
 
   if (isMobile && !hideTrigger) {
     return (
-      <>
-        <Button
-          variant="outline"
-          role="combobox"
-          onClick={() => setInternalOpen(true)}
-          className={cn(
-            "w-full justify-between border border-primary rounded-md p-5",
-            wrapTextForSmallScreen
-              ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
-              : "truncate",
-            !value?.display && "text-gray-400",
-          )}
-          disabled={disabled}
+      <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            className={cn(
+              "w-full justify-between border border-primary rounded-md px-5",
+              wrapTextForSmallScreen
+                ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
+                : "truncate",
+              !value?.display && "text-gray-400",
+            )}
+            disabled={disabled}
+          >
+            <div className="flex items-center">
+              <CareIcon
+                icon="l-plus"
+                className="mr-2 text-5xl text-primary-700 font-normal"
+              />
+              <span className="text-primary-700 flex items-center font-semibold text-base text-wrap">
+                {value?.display || placeholder}
+              </span>
+            </div>
+          </Button>
+        </SheetTrigger>
+        <SheetContent
+          side="bottom"
+          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
         >
-          <div className="flex items-center">
-            <CareIcon
-              icon="l-plus"
-              className="mr-2 text-5xl text-primary-700 font-normal"
-            />
-            <span className="text-primary-700 flex items-center font-semibold text-base text-wrap">
-              {value?.display || placeholder}
-            </span>
-          </div>
-        </Button>
-        <CommandDrawer open={internalOpen} onOpenChange={setInternalOpen}>
-          {content}
-        </CommandDrawer>
-      </>
+          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+          <div className="mt-6 h-full">{content}</div>
+        </SheetContent>
+      </Sheet>
     );
   }
 
@@ -149,6 +158,7 @@ export default function ValueSetSelect({
     <Popover
       open={controlledOpen || internalOpen}
       onOpenChange={setInternalOpen}
+      modal={true}
     >
       {!hideTrigger && (
         <PopoverTrigger asChild disabled={disabled}>
