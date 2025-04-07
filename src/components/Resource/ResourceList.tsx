@@ -141,7 +141,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
                     <SearchInput
-                      id="resource-search"
+                      data-cy="resource-search"
                       options={[
                         {
                           key: "title",

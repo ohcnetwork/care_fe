@@ -135,7 +135,6 @@ const SearchInputFieldRenderer = ({
   }
 };
 const SearchInput: React.FC<SearchInputProps> = ({
-  id,
   options,
   onSearch,
   className,
@@ -383,7 +382,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
               onClick={() => handleOptionChange(i)}
               variant="outline"
               size="xs"
-              data-test-id={id + "__" + option.key}
               className={cn(
                 selectedOption.key === option.key
                   ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
