@@ -209,6 +209,7 @@ export function LocationSheet({
       }
       setHasMoreBeds(bedsData.count > bedsPage * ITEMS_PER_PAGE);
     }
+    setSelectedBed(null);
   }, [bedsData, bedsPage]);
 
   const handleLocationClick = (location: LocationList) => {
