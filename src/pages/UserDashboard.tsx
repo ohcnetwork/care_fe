@@ -18,6 +18,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import { UserFacilityModel } from "@/components/Users/models";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
+import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { formatName } from "@/Utils/utils";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
@@ -59,6 +60,8 @@ export default function UserDashboard() {
     availableTabs.length > 0 ? availableTabs[0] : null,
   );
 
+  const isMobile = useBreakpoints({ default: true, sm: false });
+
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
       {/* Welcome Section */}
@@ -97,37 +100,59 @@ export default function UserDashboard() {
               </Link>
             </Button>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                data-cy="user-dashboard-menu-trigger"
-                variant="outline"
-                size="sm"
-                className="px-2 w-full sm:w-auto"
-              >
-                <CareIcon icon="l-ellipsis-v" className="text-inherit" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 text-xs w-full sm:w-auto">
-                <Link
-                  href={`/users/${user.username}`}
-                  className="flex items-center gap-2 w-full text-inherit"
-                >
+
+          {isMobile ? (
+            <>
+              <Button variant="outline" size="sm" className="gap-2" asChild>
+                <Link href={`/users/${user.username}`}>
                   <SquarePen className="size-4" />
                   {t("edit_profile")}
                 </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                data-cy="sign-out-button"
-                className="cursor-pointer flex items-center gap-2 text-xs w-full sm:w-auto"
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
                 onClick={signOut}
+                data-cy="sign-out-button"
               >
                 <LogOut className="size-4" />
                 {t("sign_out")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </Button>
+            </>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  data-cy="user-dashboard-menu-trigger"
+                  variant="outline"
+                  size="sm"
+                  className="px-2 w-full sm:w-auto"
+                >
+                  <CareIcon icon="l-ellipsis-v" className="text-inherit" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem className="cursor-pointer flex items-center gap-2 text-xs w-full">
+                  <Link
+                    href={`/users/${user.username}`}
+                    className="flex items-center gap-2 w-full text-inherit"
+                  >
+                    <SquarePen className="size-4" />
+                    {t("edit_profile")}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  data-cy="sign-out-button"
+                  className="cursor-pointer flex items-center gap-2 text-xs w-full"
+                  onClick={signOut}
+                >
+                  <LogOut className="size-4" />
+                  {t("sign_out")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
 
