@@ -88,7 +88,15 @@ export function ConsentSheet({
   ); // TODO: move this to the backend in the next iteration
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          setSearchQuery("");
+        }
+      }}
+    >
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">

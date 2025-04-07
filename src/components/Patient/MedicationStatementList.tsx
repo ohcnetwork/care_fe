@@ -69,7 +69,9 @@ function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
       </TableCell>
       <TableCell>
         {[statement.effective_period?.start, statement.effective_period?.end]
-          .map((date) => formatDateTime(date))
+          .map((date, ind) =>
+            date ? formatDateTime(date) : ind === 1 ? t("ongoing") : "",
+          )
           .join(" - ")}
       </TableCell>
       <TableCell>{statement.reason}</TableCell>

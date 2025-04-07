@@ -93,7 +93,7 @@ export const Appointments = (props: PatientProps) => {
         <h2 className="text-2xl font-semibold leading-tight text-center sm:text-left">
           {t("appointments")}
         </h2>
-        {canCreateAppointment && (
+        {canCreateAppointment && facilityId && (
           <Button variant="outline_primary" asChild>
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/book-appointment`}
