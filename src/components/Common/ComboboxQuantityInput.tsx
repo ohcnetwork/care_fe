@@ -127,12 +127,14 @@ export function ComboboxQuantityInput({
           </div>
         </PopoverTrigger>
         <PopoverContent
-          className="w-auto p-0 h-auto overflow-y-auto"
-          sideOffset={5}
-          avoidCollisions={false}
+          className="w-auto p-0"
+          align="start"
           onOpenAutoFocus={(e) => {
-            e.preventDefault();
-            inputRef.current?.focus();
+            // Don't force focus on mobile to avoid keyboard issues
+            if (window.innerWidth >= 1024) {
+              e.preventDefault();
+              inputRef.current?.focus();
+            }
           }}
         >
           <Command>
