@@ -32,12 +32,12 @@ function OrganizationCard({
   org,
   facilityId,
   parentId,
-  editPermission,
+  canWrite,
 }: {
   org: FacilityOrganization;
   facilityId: string;
   parentId?: string;
-  editPermission: boolean;
+  canWrite: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -58,7 +58,7 @@ function OrganizationCard({
               </div>
             </div>
             <div className="flex flex-row gap-2">
-              {editPermission && org.org_type !== "root" && (
+              {canWrite && org.org_type !== "root" && (
                 <FacilityOrganizationFormSheet
                   facilityId={facilityId}
                   parentId={parentId}
@@ -163,7 +163,7 @@ export default function FacilityOrganizationView({
                 <OrganizationCard
                   key={org.id}
                   org={org}
-                  editPermission={canManageFacilityOrganization}
+                  canWrite={canManageFacilityOrganization}
                   facilityId={facilityId}
                   parentId={id}
                 />

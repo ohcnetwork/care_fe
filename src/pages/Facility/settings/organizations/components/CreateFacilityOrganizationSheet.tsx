@@ -50,8 +50,8 @@ interface Props {
 }
 
 const ORG_TYPES = [
-  { value: "dept", label: t("department") },
-  { value: "team", label: t("team") },
+  { value: "dept", label: "department" },
+  { value: "team", label: "team" },
 ] as const;
 
 type OrgType = (typeof ORG_TYPES)[number]["value"];
@@ -221,7 +221,7 @@ export default function FacilityOrganizationFormSheet({
                     <SelectContent>
                       {ORG_TYPES.map((type) => (
                         <SelectItem key={type.value} value={type.value}>
-                          {type.label}
+                          {t(type.label)}
                         </SelectItem>
                       ))}
                     </SelectContent>
