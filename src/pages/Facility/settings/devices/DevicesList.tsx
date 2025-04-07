@@ -96,13 +96,16 @@ export default function DevicesList({ facilityId }: Props) {
 
         {pluginDevices.length > 0 ? (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className="lg:w-1/5 w-full">
               <Button variant="white" className="flex items-center gap-2">
                 {t("add_device")}
                 <CareIcon icon="l-angle-down" className="size-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent
+              align="end"
+              className="w-[var(--radix-dropdown-menu-trigger-width)]"
+            >
               {pluginDevices.map((pluginDevice) => {
                 const DeviceIcon = pluginDevice.icon || CubeIcon;
                 return (
@@ -161,7 +164,10 @@ export default function DevicesList({ facilityId }: Props) {
                 <CaretSortIcon className="ml-2 size-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-2">
+            <PopoverContent
+              className="min-w-[var(--radix-popover-trigger-width)] max-w-[200px] p-2"
+              align="end"
+            >
               <div className="space-y-2">
                 <Button
                   variant="ghost"
