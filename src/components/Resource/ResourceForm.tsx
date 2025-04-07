@@ -69,12 +69,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const resourceFormSchema = z.object({
     status: z.string().min(1, { message: t("field_required") }),
     category: z.string().min(1, { message: t("field_required") }),
-    assigned_facility: z
-      .object({
-        id: z.string(),
-        name: z.string(),
-      })
-      .nullable(),
+    assigned_facility: z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
     reason: z.string().min(1, { message: t("field_required") }),
@@ -111,7 +109,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     defaultValues: {
       status: "pending",
       category: "",
-      assigned_facility: null,
+      assigned_facility: undefined,
       assigned_to: "",
       emergency: "false" as const,
       title: "",
@@ -169,7 +167,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       status: data.status,
       category: data.category,
       origin_facility: String(facilityId),
-      assigned_facility: data.assigned_facility?.id || null,
+      assigned_facility: data.assigned_facility?.id,
       assigned_to: assignedToUser?.id || null,
       approving_facility: null,
       emergency: data.emergency === "true",
@@ -286,12 +284,16 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         placeholder={t("start_typing_to_search")}
                         onSearch={setFacilitySearch}
                         onChange={(value) => {
-                          const facility =
-                            facilities?.results.find((f) => f.id === value) ??
-                            null;
-                          form.setValue("assigned_facility", facility, {
-                            shouldDirty: true,
-                          });
+                          const facility = facilities?.results.find(
+                            (f) => f.id === value,
+                          );
+                          if (facility) {
+                            form.setValue("assigned_facility", facility, {
+                              shouldDirty: true,
+                            });
+                          } else {
+                            form.resetField("assigned_facility");
+                          }
                         }}
                       />
                     </FormControl>
