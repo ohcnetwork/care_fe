@@ -125,14 +125,21 @@ export default function UserSelector({
                       name={formatName(user, true)}
                       className="size-6 rounded-full"
                     />
-                    <span>{formatName(user)}</span>
-                    <span className="text-xs text-gray-500 font-medium">
-                      {user.username}
+                    <span className="flex min-w-0 items-center">
+                      <span
+                        className="truncate text-sm font-medium"
+                        title={formatName(user)}
+                      >
+                        {formatName(user)}
+                      </span>
+                      <span className="ml-1 text-xs text-gray-500">
+                        {user.username}
+                      </span>
                     </span>
+                    {selected?.id === user.id && (
+                      <CheckIcon className="ml-auto" />
+                    )}
                   </div>
-                  {selected?.id === user.id && (
-                    <CheckIcon className="ml-auto" />
-                  )}
                 </CommandItem>
               ))}
             </CommandGroup>
