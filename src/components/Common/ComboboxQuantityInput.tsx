@@ -19,6 +19,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
+
 import {
   DOSAGE_UNITS_CODES,
   DosageQuantity,
@@ -46,6 +48,7 @@ export function ComboboxQuantityInput({
   const [selectedUnit, setSelectedUnit] = React.useState(quantity?.unit);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [activeIndex, setActiveIndex] = React.useState<number>(-1);
+  const isMobile = useBreakpoints({ md: false, default: true });
 
   const showDropdown = /^\d+$/.test(inputValue);
 
@@ -127,15 +130,18 @@ export function ComboboxQuantityInput({
           </div>
         </PopoverTrigger>
         <PopoverContent
-          className="w-auto p-0"
-          align="start"
-          side="top"
+          className={cn(
+            "w-auto p-0",
+            isMobile && "z-[9999] fixed top-1/4 left-1/2 -translate-x-1/2",
+          )}
+          align={isMobile ? "center" : "start"}
+          side={isMobile ? "bottom" : "top"}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
             inputRef.current?.focus();
           }}
         >
-          <Command>
+          <Command className={cn(isMobile && "max-h-[40vh] overflow-auto")}>
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
