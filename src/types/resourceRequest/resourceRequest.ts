@@ -6,7 +6,7 @@ import { UserBase } from "@/types/user/user";
 
 export interface ResourceRequest {
   approving_facility: FacilityModel | null;
-  assigned_facility: FacilityModel | null;
+  assigned_facility: FacilityModel | undefined;
   category: string;
   emergency: boolean;
   id: string;

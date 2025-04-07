@@ -11,6 +11,7 @@ import {
   isYesterday,
   subDays,
 } from "date-fns";
+import { t } from "i18next";
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect } from "react";
@@ -22,6 +23,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Command,
   CommandEmpty,
@@ -59,6 +61,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -93,6 +96,20 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 interface DateRangeDisplayProps {
   dateFrom: string | null;
   dateTo: string | null;
+}
+
+function AppointmentsEmptyState() {
+  return (
+    <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
+      <div className="rounded-full bg-primary/10 p-3 mb-4">
+        <CareIcon icon="l-calendar-slash" className="size-6 text-primary" />
+      </div>
+      <h3 className="text-lg font-semibold mb-1">{t("no_appointments")}</h3>
+      <p className="text-sm text-gray-500 mb-4">
+        {t("adjust_appointments_filters")}
+      </p>
+    </Card>
+  );
 }
 
 function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
@@ -740,7 +757,7 @@ function AppointmentRow(props: {
 }) {
   const { t } = useTranslation();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: [
       "appointments",
       props.facilityId,
@@ -823,10 +840,10 @@ function AppointmentRow(props: {
           </Select>
         </div>
 
-        {appointments.length === 0 ? (
-          <div className="flex mt-2 bg-white justify-center items-center h-[calc(100vh-22rem)]">
-            <p className="text-gray-500">{t("no_appointments")}</p>
-          </div>
+        {isLoading ? (
+          <TableSkeleton count={5} />
+        ) : appointments.length === 0 ? (
+          <AppointmentsEmptyState />
         ) : (
           <Table className="p-2 border-separate border-gray-200 border-spacing-y-3">
             <TableHeader>

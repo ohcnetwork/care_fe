@@ -113,14 +113,22 @@ export const PractitionerSelector = ({
                       name={formatName(user, true)}
                       className="size-6 rounded-full"
                     />
-                    <span>{formatName(user)}</span>
-                    <span className="text-xs text-gray-500 font-medium">
-                      {user.user_type}
+
+                    <span className="flex min-w-0 items-center">
+                      <span
+                        className="truncate text-sm font-medium"
+                        title={formatName(user)}
+                      >
+                        {formatName(user)}
+                      </span>
+                      <span className="ml-1 text-xs text-gray-500">
+                        {user.username}
+                      </span>
                     </span>
+                    {selected?.username === user.username && (
+                      <CheckIcon className="ml-auto" />
+                    )}
                   </PopoverClose>
-                  {selected?.username === user.username && (
-                    <CheckIcon className="ml-auto" />
-                  )}
                 </CommandItem>
               ))}
             </CommandGroup>

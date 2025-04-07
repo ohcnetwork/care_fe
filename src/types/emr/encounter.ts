@@ -8,6 +8,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 
+import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
@@ -62,19 +63,19 @@ export const ENCOUNTER_DISCHARGE_DISPOSITION = [
 ] as const;
 
 export const ENCOUNTER_PRIORITY = [
+  "stat",
   "ASAP",
+  "emergency",
+  "urgent",
+  "routine",
+  "elective",
+  "rush_reporting",
+  "timing_critical",
   "callback_results",
   "callback_for_scheduling",
-  "elective",
-  "emergency",
   "preop",
   "as_needed",
-  "routine",
-  "rush_reporting",
-  "stat",
-  "timing_critical",
   "use_as_directed",
-  "urgent",
 ] as const;
 
 export const ENCOUNTER_STATUS = [
@@ -168,6 +169,7 @@ export interface Encounter {
   current_location: LocationList;
   location_history: LocationHistory[];
   permissions: string[];
+  care_team: CareTeamResponse[];
 }
 
 export interface EncounterEditRequest {
