@@ -87,11 +87,8 @@ export default function CreateScheduleTemplateSheet({
         .min(dayjs().startOf("day").toDate(), {
           message: t("schedule_creation_for_past_validation_error"),
         }),
-      valid_to: z
-        .date({ required_error: t("field_required") })
-        .min(dayjs().startOf("day").toDate(), {
-          message: t("schedule_creation_for_past_validation_error"),
-        }),
+      valid_to: z.date({ required_error: t("field_required") }),
+
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
@@ -149,8 +146,11 @@ export default function CreateScheduleTemplateSheet({
         .min(1, t("schedule_sessions_min_error")),
     })
     .refine(
-      (data) => dayjs(data.valid_to).isAfter(dayjs(data.valid_from), "day"),
-      { message: t("to_date_equal_or_after_from_date"), path: ["valid_to"] },
+      (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
+      {
+        path: ["valid_to"],
+        message: t("to_date_equal_or_after_from_date"),
+      },
     );
 
   const form = useForm<z.infer<typeof formSchema>>({
