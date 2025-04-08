@@ -2,8 +2,19 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -12,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -230,6 +242,26 @@ export function EncounterQuestion({
           />
         </div>
       </div>
+
+      {/* Discharge Details - Show when status is discharged */}
+      {encounter.status === "discharged" && (
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label>{t("discharge_summary_advice")}</Label>
+            <Textarea
+              value={encounter.discharge_summary_advice || ""}
+              onChange={(e) =>
+                handleUpdateEncounter({
+                  discharge_summary_advice: e.target.value,
+                })
+              }
+              disabled={disabled}
+              placeholder={t("enter_discharge_summary_advice")}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Hospitalization Details - Only show for relevant encounter classes */}
       {["imp", "obsenc", "emer"].includes(encounter.encounter_class) && (
         <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
@@ -238,28 +270,69 @@ export function EncounterQuestion({
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-2 overflow-x-auto">
-              <Switch
-                checked={encounter.hospitalization?.re_admission || false}
-                onCheckedChange={(checked: boolean) =>
-                  handleUpdateEncounter({
-                    hospitalization: {
-                      ...encounter.hospitalization,
-                      re_admission: checked,
-                      admit_source:
-                        encounter.hospitalization?.admit_source || "other",
-                      discharge_disposition:
-                        encounter.hospitalization?.discharge_disposition ||
-                        "home",
-                      diet_preference:
-                        encounter.hospitalization?.diet_preference || "none",
-                    },
-                  })
-                }
-                disabled={disabled}
-              />
-              <Label>{t("readmission")}</Label>
-            </div>
+            {/* Only show readmission if not discharged */}
+            {encounter.status !== "discharged" && (
+              <div className="flex items-center space-x-2 overflow-x-auto">
+                <Switch
+                  checked={encounter.hospitalization?.re_admission || false}
+                  onCheckedChange={(checked: boolean) =>
+                    handleUpdateEncounter({
+                      hospitalization: {
+                        ...encounter.hospitalization,
+                        re_admission: checked,
+                        admit_source:
+                          encounter.hospitalization?.admit_source || "other",
+                        discharge_disposition:
+                          encounter.hospitalization?.discharge_disposition ||
+                          "home",
+                        diet_preference:
+                          encounter.hospitalization?.diet_preference || "none",
+                      },
+                    })
+                  }
+                  disabled={disabled}
+                />
+                <Label>{t("readmission")}</Label>
+              </div>
+            )}
+
+            {/* Mark for discharge checkbox - Only show if not readmission */}
+            {!encounter.hospitalization?.re_admission && (
+              <div className="flex items-center space-x-2 overflow-x-auto">
+                <Switch
+                  checked={encounter.status === "discharged"}
+                  onCheckedChange={(checked: boolean) => {
+                    handleUpdateEncounter({
+                      status: checked
+                        ? "discharged"
+                        : ("in_progress" as EncounterStatus),
+                      hospitalization: {
+                        ...encounter.hospitalization,
+                        re_admission: false,
+                        discharge_disposition: checked ? "home" : undefined,
+                        admit_source:
+                          encounter.hospitalization?.admit_source || "other",
+                        diet_preference:
+                          encounter.hospitalization?.diet_preference || "none",
+                      },
+                      // Clear discharge summary when unchecking
+                      ...(checked
+                        ? {}
+                        : { discharge_summary_advice: undefined }),
+                      // Clear discharge date when unchecking
+                      period: {
+                        ...encounter.period,
+                        end: checked
+                          ? encounter.period.end || new Date().toISOString()
+                          : undefined,
+                      },
+                    });
+                  }}
+                  disabled={disabled}
+                />
+                <Label>{t("mark_for_discharge")}</Label>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>{t("admit_source")}</Label>
@@ -295,50 +368,138 @@ export function EncounterQuestion({
               </Select>
             </div>
 
-            {/* Show discharge disposition only when status is completed */}
-            {encounter.status === "completed" && (
-              <div className="space-y-2">
-                <Label>{t("Discharge Disposition")}</Label>
-                <Select
-                  value={encounter.hospitalization?.discharge_disposition}
-                  onValueChange={(value) =>
-                    handleUpdateEncounter({
-                      hospitalization: {
-                        ...encounter.hospitalization,
-                        discharge_disposition:
-                          value as EncounterDischargeDisposition,
-                        re_admission:
-                          encounter.hospitalization?.re_admission || false,
-                        admit_source:
-                          encounter.hospitalization?.admit_source || "other",
-                        diet_preference:
-                          encounter.hospitalization?.diet_preference || "none",
-                      },
-                    })
-                  }
-                  disabled={disabled}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={t("select_discharge_disposition")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ENCOUNTER_DISCHARGE_DISPOSITION.map(
-                      (dischargeDisposition) => (
-                        <SelectItem
-                          key={dischargeDisposition}
-                          value={dischargeDisposition}
-                        >
-                          {t(
-                            `encounter_discharge_disposition__${dischargeDisposition}`,
-                          )}
+            {/* Show discharge disposition and date when status is discharged */}
+            {encounter.status === "discharged" && (
+              <>
+                <div className="space-y-2">
+                  <Label>{t("discharge_disposition")}</Label>
+                  <Select
+                    value={encounter.hospitalization?.discharge_disposition}
+                    onValueChange={(value) =>
+                      handleUpdateEncounter({
+                        hospitalization: {
+                          ...encounter.hospitalization,
+                          discharge_disposition:
+                            value as EncounterDischargeDisposition,
+                          re_admission:
+                            encounter.hospitalization?.re_admission || false,
+                          admit_source:
+                            encounter.hospitalization?.admit_source || "other",
+                          diet_preference:
+                            encounter.hospitalization?.diet_preference ||
+                            "none",
+                        },
+                      })
+                    }
+                    disabled={disabled}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t("select_discharge_disposition")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ENCOUNTER_DISCHARGE_DISPOSITION.map((disposition) => (
+                        <SelectItem key={disposition} value={disposition}>
+                          {t(`encounter_discharge_disposition__${disposition}`)}
                         </SelectItem>
-                      ),
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t("discharge_date_time")}</Label>
+                  <div className="flex sm:gap-2flex-wrap">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "flex-1 justify-start text-sm text-left font-normal h-8",
+                            !encounter.period.end && "text-gray-500",
+                          )}
+                        >
+                          <CareIcon icon="l-calender" className="mr-2 size-4" />
+                          {encounter.period.end
+                            ? new Date(
+                                encounter.period.end,
+                              ).toLocaleDateString()
+                            : t("select_date")}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            encounter.period.end
+                              ? new Date(encounter.period.end)
+                              : new Date()
+                          }
+                          onSelect={(newDate) => {
+                            if (!newDate) return;
+                            const currentDate = encounter.period.end
+                              ? new Date(encounter.period.end)
+                              : new Date();
+                            const updatedDate = new Date(newDate);
+                            updatedDate.setHours(currentDate.getHours());
+                            updatedDate.setMinutes(currentDate.getMinutes());
+                            handleUpdateEncounter({
+                              period: {
+                                ...encounter.period,
+                                end: updatedDate.toISOString(),
+                              },
+                            });
+                          }}
+                          disabled={(date) =>
+                            encounter.period.start
+                              ? date < new Date(encounter.period.start)
+                              : false
+                          }
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <Input
+                      type="time"
+                      className="sm:w-[150px] border-t-0 sm:border-t text-sm border-gray-200 h-8"
+                      value={
+                        encounter.period.end
+                          ? new Date(encounter.period.end).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              },
+                            )
+                          : new Date().toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })
+                      }
+                      onChange={(e) => {
+                        const [hours, minutes] = e.target.value
+                          .split(":")
+                          .map(Number);
+                        if (isNaN(hours) || isNaN(minutes)) return;
+                        const updatedDate = new Date(
+                          encounter.period.end || new Date(),
+                        );
+                        updatedDate.setHours(hours);
+                        updatedDate.setMinutes(minutes);
+                        handleUpdateEncounter({
+                          period: {
+                            ...encounter.period,
+                            end: updatedDate.toISOString(),
+                          },
+                        });
+                      }}
+                      disabled={disabled}
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             <div className="space-y-2">
