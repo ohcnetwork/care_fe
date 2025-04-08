@@ -239,11 +239,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     key="all"
                     value="all"
                     className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    onClick={() =>
-                      updateQuery({
-                        status: "all",
-                      })
-                    }
+                    onClick={() => updateQuery({ status: "all" })}
                   >
                     {t("all_status")}
                   </TabsTrigger>
