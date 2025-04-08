@@ -1,5 +1,5 @@
-import { t } from "i18next";
 import { Building, Tags, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -72,6 +72,8 @@ function StatusSelector({
   value: QuestionStatus;
   onChange: (value: QuestionStatus) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-2 w-fit">
       <Label htmlFor="status">{t("status")}</Label>
@@ -110,6 +112,8 @@ function SubjectTypeSelector({
   value: SubjectType;
   onChange: (value: SubjectType) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-2">
       <Label htmlFor="subject_type">{t("subject_type")}</Label>
@@ -156,6 +160,8 @@ function OrganizationSelector({
   organizations?: OrganizationResponse;
   selection: QuestionnairePropertiesProps["organizationSelection"];
 }) {
+  const { t } = useTranslation();
+
   if (id) {
     return (
       <>
@@ -246,6 +252,8 @@ function TagSelector({
   selection: QuestionnairePropertiesProps["tagSelection"];
   questionnaire: QuestionnaireDetail;
 }) {
+  const { t } = useTranslation();
+
   if (id) {
     return (
       <>
@@ -341,6 +349,8 @@ export function QuestionnaireProperties({
   organizationSelection,
   tagSelection,
 }: QuestionnairePropertiesProps) {
+  const { t } = useTranslation();
+
   return (
     <Card className="border-none bg-transparent shadow-none space-y-4 mt-2 ml-2">
       <CardHeader className="p-0">

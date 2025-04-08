@@ -1,5 +1,5 @@
-import { t } from "i18next";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -14,6 +14,8 @@ interface LocationCardProps {
 }
 
 export const DeviceLocationCard = ({ locationData }: LocationCardProps) => {
+  const { t } = useTranslation();
+
   const { start, end, location, created_by } = locationData;
 
   return (

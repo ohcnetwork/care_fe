@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -56,27 +56,27 @@ const ORG_TYPES = [
 
 type OrgType = (typeof ORG_TYPES)[number]["value"];
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, { message: t("field_required") }),
-  description: z.string().optional(),
-  org_type: z.enum(["dept", "team"]),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
 export default function FacilityOrganizationFormSheet({
   facilityId,
   parentId,
   org,
 }: Props) {
+  const { t } = useTranslation();
+
   const isEditMode = !!org;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
-  const form = useForm<FormValues>({
+  const formSchema = z.object({
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
+    description: z.string().optional(),
+    org_type: z.enum(["dept", "team"]),
+  });
+
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -138,7 +138,7 @@ export default function FacilityOrganizationFormSheet({
     },
   });
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     const data = {
       name: values.name.trim(),
       description: values.description?.trim() || undefined,

@@ -1,6 +1,6 @@
-import { t } from "i18next";
 import { X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -37,6 +37,8 @@ export function MultiValueSetSelect({
   count = 10,
   searchPostFix = "",
 }: MultiValueSetSelectProps) {
+  const { t } = useTranslation();
+
   const [activeTab, setActiveTab] = useState<number>(0);
   const [open, setOpen] = useState(false);
   const hasValues = options.some((opt) => opt.value !== null);

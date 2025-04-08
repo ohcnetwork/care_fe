@@ -1,5 +1,3 @@
-"use client";
-
 import {
   CheckCircledIcon,
   CircleBackslashIcon,
@@ -8,8 +6,8 @@ import {
   Pencil2Icon,
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
@@ -110,6 +108,8 @@ export function AllergyQuestion({
   disabled,
   patientId,
 }: AllergyQuestionProps) {
+  const { t } = useTranslation();
+
   const isPreview = patientId === "preview";
   const allergies =
     (questionnaireResponse.values?.[0]?.value as AllergyIntoleranceRequest[]) ||
@@ -470,6 +470,8 @@ const AllergyTableRow = ({
   onUpdate,
   onRemove,
 }: AllergyItemProps) => {
+  const { t } = useTranslation();
+
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
 
   const rowClassName = `group ${
