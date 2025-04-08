@@ -450,14 +450,14 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     >
                       <CareIcon
                         icon={"l-search-minus" as IconName}
-                        className="mr-2 text-lg"
+                        className="mr-2 text-lg text-gray-600"
                       />
                     </Button>
 
                     <Button
                       variant="ghost"
                       onClick={() => setFileState({ ...file_state, zoom: 4 })}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70 text-gray-600"
                     >
                       {`${25 * file_state.zoom}%`}
                     </Button>
@@ -470,7 +470,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     >
                       <CareIcon
                         icon={"l-search-plus" as IconName}
-                        className="mr-2 text-lg"
+                        className="mr-2 text-lg text-gray-600"
                       />
                     </Button>
 
@@ -481,7 +481,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     >
                       <CareIcon
                         icon={"l-crop-alt-rotate-right" as IconName}
-                        className="mr-2 text-lg size-4"
+                        className="mr-2 text-lg size-4 text-gray-600"
                       />
                     </Button>
                   </>
@@ -496,7 +496,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     >
                       <CareIcon
                         icon={"l-search-minus" as IconName}
-                        className="mr-2 text-lg"
+                        className="mr-2 text-lg text-gray-600"
                       />
                     </Button>
 
@@ -516,7 +516,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     >
                       <CareIcon
                         icon={"l-search-plus" as IconName}
-                        className="mr-2 text-lg"
+                        className="mr-2 text-lg text-gray-600"
                       />
                     </Button>
                   </>
