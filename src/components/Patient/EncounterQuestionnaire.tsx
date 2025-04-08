@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -33,6 +33,8 @@ export default function EncounterQuestionnaire({
   questionnaireSlug,
   subjectType,
 }: Props) {
+  const { t } = useTranslation();
+
   const { goBack } = useAppHistory();
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],

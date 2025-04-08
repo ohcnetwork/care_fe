@@ -129,26 +129,34 @@ export class FacilityCreation {
       .should("not.be.empty");
   }
 
-  fillLocationHierarchy(location: {
-    state: string;
-    district: string;
-    localBody: string;
-    ward: string;
-  }) {
-    cy.typeAndSelectOption('[data-cy="select-state"]', location.state, false);
-    cy.typeAndSelectOption(
-      '[data-cy="select-district"]',
-      location.district,
-      false,
-    );
-    // Don't verify selection for local body (false parameter)
-    cy.typeAndSelectOption(
-      '[data-cy="select-local_body"]',
-      location.localBody,
-      false,
-    );
-    // Verify selection for ward (default behavior)
-    cy.typeAndSelectOption('[data-cy="select-ward"]', location.ward);
+  fillLocationHierarchy(
+    location: Partial<{
+      state: string;
+      district: string;
+      localBody: string;
+      ward: string;
+    }>,
+  ) {
+    if (location.state) {
+      cy.typeAndSelectOption('[data-cy="select-state"]', location.state, false);
+    }
+    if (location.district) {
+      cy.typeAndSelectOption(
+        '[data-cy="select-district"]',
+        location.district,
+        false,
+      );
+    }
+    if (location.localBody) {
+      cy.typeAndSelectOption(
+        '[data-cy="select-local_body"]',
+        location.localBody,
+        false,
+      );
+    }
+    if (location.ward) {
+      cy.typeAndSelectOption('[data-cy="select-ward"]', location.ward, false);
+    }
     return this;
   }
 }
