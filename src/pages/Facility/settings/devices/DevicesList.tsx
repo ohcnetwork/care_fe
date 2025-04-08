@@ -255,7 +255,7 @@ export default function DevicesList({ facilityId }: Props) {
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex items-center gap-4">
-                <PageTitle title={t("devices")} className="mt-0" />
+                <PageTitle title={t("devices")} className="mt-2" />
                 <Badge
                   className="bg-purple-50 text-purple-700 text-sm font-medium rounded-xl px-3 w-max"
                   variant="outline"
@@ -268,15 +268,19 @@ export default function DevicesList({ facilityId }: Props) {
                       })}
                 </Badge>
               </div>
+
               {pluginDevices.length > 0 ? (
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger asChild className="lg:w-1/5 w-full">
                     <Button variant="white" className="flex items-center gap-2">
                       {t("add_device")}
-                      <CareIcon icon="l-angle-down" className="h-4 w-4" />
+                      <CareIcon icon="l-angle-down" className="size-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  >
                     {pluginDevices.map((pluginDevice) => {
                       const DeviceIcon = pluginDevice.icon || CubeIcon;
                       return (
@@ -288,7 +292,7 @@ export default function DevicesList({ facilityId }: Props) {
                           <Link
                             href={`/devices/create?type=${pluginDevice.type}`}
                           >
-                            <DeviceIcon className="h-4 w-4 mr-1" />
+                            <DeviceIcon className="size-4 mr-1" />
                             {pluginDevice.type}
                           </Link>
                         </DropdownMenuItem>
@@ -296,7 +300,7 @@ export default function DevicesList({ facilityId }: Props) {
                     })}
                     <DropdownMenuItem asChild>
                       <Link href="/devices/create">
-                        <CubeIcon className="h-4 w-4 mr-1" />
+                        <CubeIcon className="size-4 mr-1" />
                         {t("other")}
                       </Link>
                     </DropdownMenuItem>
@@ -305,7 +309,7 @@ export default function DevicesList({ facilityId }: Props) {
               ) : (
                 <Button variant="primary" asChild>
                   <Link href="/devices/create">
-                    <PlusIcon className="h-4 w-4" />
+                    <PlusIcon className="size-4" />
                     {t("add_device")}
                   </Link>
                 </Button>
@@ -337,7 +341,10 @@ export default function DevicesList({ facilityId }: Props) {
                       <CaretSortIcon className="ml-2 size-4" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[200px] p-2">
+                  <PopoverContent
+                    className="min-w-[var(--radix-popover-trigger-width)] max-w-[200px] p-2"
+                    align="end"
+                  >
                     <div className="space-y-2">
                       <Button
                         variant="ghost"
