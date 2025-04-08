@@ -179,9 +179,7 @@ export default function PatientRegistration(
       same_phone_number: false,
       same_address: true,
     },
-    mode: "all",
-    criteriaMode: "all",
-    reValidateMode: "onChange",
+    mode: "onChange",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
