@@ -295,7 +295,10 @@ export default function LocationForm({
                 disabled={!!locationId}
               >
                 <FormControl>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger
+                    className="w-full"
+                    data-cy="location-form-options"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                 </FormControl>
@@ -323,6 +326,7 @@ export default function LocationForm({
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    data-cy="enable-bulk-creation-checkbox"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -345,7 +349,7 @@ export default function LocationForm({
                 <FormLabel>{t("number_of_beds")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="bed-counts-select">
                       <SelectValue placeholder={t("select_number_of_beds")} />
                     </SelectTrigger>
                   </FormControl>
@@ -370,7 +374,7 @@ export default function LocationForm({
             <FormItem>
               <FormLabel>{t("name")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} data-cy="location-name-input" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -484,7 +488,11 @@ export default function LocationForm({
             <FormItem>
               <FormLabel>{t("description")}</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder="Description" />
+                <Textarea
+                  {...field}
+                  placeholder="Description"
+                  data-cy="location-description"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -500,7 +508,7 @@ export default function LocationForm({
                 <FormLabel>{t("status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="location-status">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
@@ -525,7 +533,7 @@ export default function LocationForm({
                 <FormLabel>{t("operational_status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="operational-status">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
