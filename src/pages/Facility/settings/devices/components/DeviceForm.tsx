@@ -60,7 +60,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const queryClient = useQueryClient();
   const pluginDevices = usePluginDevices();
 
-  const contactPointSchema = contactPoint(t).contactPoint;
+  const contactPointSchema = contactPoint();
 
   const formSchema = z
     .object({

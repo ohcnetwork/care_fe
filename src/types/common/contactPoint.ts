@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { z } from "zod";
 
 export const ContactPointSystems = [
@@ -22,8 +23,8 @@ export interface ContactPoint {
   use: ContactPointUse;
 }
 
-export const contactPoint = (t: (key: string) => string) => ({
-  contactPoint: z.discriminatedUnion("system", [
+export const contactPoint = () =>
+  z.discriminatedUnion("system", [
     // Phone numbers
     z.object({
       system: z.literal("phone"),
@@ -75,5 +76,4 @@ export const contactPoint = (t: (key: string) => string) => ({
       value: z.string().min(1, { message: t("field_required") }),
       use: z.enum(ContactPointUses),
     }),
-  ]),
-});
+  ]);
