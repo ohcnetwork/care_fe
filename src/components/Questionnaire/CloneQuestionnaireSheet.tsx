@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Building, Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +48,7 @@ export default function CloneQuestionnaireSheet({
   trigger,
 }: Props) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [newSlug, setNewSlug] = useState(questionnaire.slug + "-copy");
   const [error, setError] = useState<string | null>(null);
@@ -114,17 +115,16 @@ export default function CloneQuestionnaireSheet({
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Clone Questionnaire</SheetTitle>
+          <SheetTitle>{t("clone_questionnaire")}</SheetTitle>
           <SheetDescription>
-            Create a copy of this questionnaire with a new slug and select
-            organizations.
+            {t("clone_questionnaire_description")}
           </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-6 py-4">
           {/* Slug Input */}
           <div className="space-y-2">
-            <Label htmlFor="slug">Slug</Label>
+            <Label htmlFor="slug">{t("slug")}</Label>
             <Input
               id="slug"
               value={newSlug}
@@ -132,7 +132,7 @@ export default function CloneQuestionnaireSheet({
                 setNewSlug(e.target.value);
                 setError(null);
               }}
-              placeholder="Enter a unique slug"
+              placeholder={t("slug_input_placeholder")}
             />
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
@@ -244,7 +244,7 @@ export default function CloneQuestionnaireSheet({
                 setOpen(false);
               }}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleClone}
@@ -255,10 +255,10 @@ export default function CloneQuestionnaireSheet({
               {isCloning ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
-                  Cloning...
+                  {t("cloning")}...
                 </>
               ) : (
-                "Clone"
+                t("clone")
               )}
             </Button>
           </div>

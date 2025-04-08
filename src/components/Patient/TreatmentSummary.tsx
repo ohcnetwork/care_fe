@@ -1,9 +1,9 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { t } from "i18next";
 import { Loader } from "lucide-react";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
@@ -61,6 +61,8 @@ export default function TreatmentSummary({
   encounterId,
   patientId,
 }: TreatmentSummaryProps) {
+  const { t } = useTranslation();
+
   const { data: encounter, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(api.encounter.get, {
