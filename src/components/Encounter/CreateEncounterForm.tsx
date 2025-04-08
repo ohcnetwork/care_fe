@@ -166,7 +166,7 @@ export default function CreateEncounterForm({
                 const date = field.value ? new Date(field.value) : new Date();
                 return (
                   <FormItem>
-                    <FormLabel>{t("Date and Time")}</FormLabel>
+                    <FormLabel>{t("date_and_time")}</FormLabel>
                     <div className="flex sm:gap-2 flex-wrap">
                       <Popover>
                         <PopoverTrigger asChild>
