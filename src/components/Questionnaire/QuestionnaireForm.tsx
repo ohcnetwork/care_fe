@@ -643,11 +643,13 @@ export function QuestionnaireForm({
 
     // Then, add questionnaire submission requests
     formsWithValidation.forEach((form) => {
-      const nonStructuredResponses = form.responses.filter(
-        (response) => !response.structured_type,
+      const validResponses = form.responses.filter(
+        (response) =>
+          !response.structured_type &&
+          response.values.length > 0 &&
+          response.values?.[0]?.value !== "",
       );
-
-      if (nonStructuredResponses.length > 0) {
+      if (validResponses.length > 0) {
         requests.push({
           url: `/api/v1/questionnaire/${form.questionnaire.slug}/submit/`,
           method: "POST",
@@ -656,41 +658,35 @@ export function QuestionnaireForm({
             resource_id: encounterId ? encounterId : patientId,
             encounter: encounterId,
             patient: patientId,
-            results: nonStructuredResponses
-              .filter(
-                (response) =>
-                  response.values.length > 0 && !response.structured_type,
-              )
-              .map((response) => ({
-                question_id: response.question_id,
-                values: response.values.map((value) => {
-                  if (value.type === "dateTime" && value.value) {
-                    return {
-                      ...value,
-                      value: value.value.toISOString(),
-                    };
-                  }
-                  if (value.unit) {
-                    return {
-                      value: value.value?.toString(),
-                      unit: value.unit,
-                      coding: value.coding,
-                    };
-                  }
-                  if (value.coding) {
-                    return { coding: value.coding };
-                  }
-                  return { value: String(value.value) };
-                }),
-                note: response.note,
-                body_site: response.body_site,
-                method: response.method,
-              })),
+            results: validResponses.map((response) => ({
+              question_id: response.question_id,
+              values: response.values.map((value) => {
+                if (value.type === "dateTime" && value.value) {
+                  return {
+                    ...value,
+                    value: value.value.toISOString(),
+                  };
+                }
+                if (value.unit) {
+                  return {
+                    value: value.value?.toString(),
+                    unit: value.unit,
+                    coding: value.coding,
+                  };
+                }
+                if (value.coding) {
+                  return { coding: value.coding };
+                }
+                return { value: String(value.value) };
+              }),
+              note: response.note,
+              body_site: response.body_site,
+              method: response.method,
+            })),
           },
         });
       }
     });
-
     submitBatch({ requests });
   };
 
