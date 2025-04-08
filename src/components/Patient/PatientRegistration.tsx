@@ -179,7 +179,19 @@ export default function PatientRegistration(
       same_phone_number: false,
       same_address: true,
     },
+    mode: "all",
+    criteriaMode: "all",
+    reValidateMode: "onChange",
   });
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name && form.formState.errors[name]) {
+        form.clearErrors(name);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
