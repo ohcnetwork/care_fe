@@ -291,11 +291,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       silent: true,
     }),
     onSuccess: (data: QuestionnaireDetail) => {
-      toast.success("Questionnaire created successfully");
+      toast.success(t("questionnaire_created_successfully"));
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
       navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
-    onError: (error) => handleOnErrors(error, "Failed to Create Questionnaire"),
+    onError: (error) =>
+      handleOnErrors(error, t("failed_to_create_questionnaire")),
   });
 
   const { mutate: updateQuestionnaire, isPending: isUpdating } = useMutation({
@@ -304,11 +305,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       silent: true,
     }),
     onSuccess: (data: QuestionnaireDetail) => {
-      toast.success("Questionnaire updated successfully");
+      toast.success(t("questionnaire_updated_successfully"));
       navigate(`/admin/questionnaire/${data.slug}/edit`);
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
-    onError: (error) => handleOnErrors(error, "Failed to Update Questionnaire"),
+    onError: (error) =>
+      handleOnErrors(error, t("failed_to_update_questionnaire")),
   });
   const QuestionnaireFormPartialSchema = z.object({
     title: z.string().trim().min(1, t("field_required")),
