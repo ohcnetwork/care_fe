@@ -332,7 +332,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       return null;
     });
 
-  const form = useForm({
+  const form = useForm<any>({
     resolver: zodResolver(QuestionnaireFormPartialSchema),
     defaultValues: {
       title: questionnaire?.title ?? "",
@@ -395,7 +395,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
   const handleValidatedChange = (
     field: keyof typeof questionnaire,
-    value: string | undefined,
+    value: (typeof questionnaire)[keyof typeof questionnaire],
   ) => {
     updateQuestionnaireField(field, value);
     form.setValue(field as "title" | "description" | "slug", value, {
@@ -717,53 +717,39 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           </FormItem>
                         )}
                       />
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-
-              <Card className="border-none bg-transparent shadow-none">
-                <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
-                  <div>
-                    <CardTitle>
-                      <p className="text-sm text-gray-700 font-medium mt-1">
-                        {(questionnaire.questions?.length || 0) > 1
-                          ? t("questions")
-                          : t("question")}
-                      </p>
-                    </CardTitle>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newQuestion: Question = {
-                        id: crypto.randomUUID(),
-                        link_id: `${questionnaire.questions.length + 1}`,
-                        text: "New Question",
-                        type: "string",
-                        questions: [],
-                      };
-                      updateQuestionnaireField("questions", [
-                        ...questionnaire.questions,
-                        newQuestion,
-                      ]);
-                      setExpandedQuestions(
-                        (prev) => new Set([...prev, newQuestion.id]),
-                      );
-                    }}
-                  >
-                    <CareIcon icon="l-plus" className="mr-2 size-4" />
-                    {t("add_question")}
-                  </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="space-y-6">
-                    {questionnaire.questions.map((question, index) => (
-                      <div
-                        key={question.id}
-                        id={`question-${question.id}`}
-                        className="relative bg-white rounded-lg shadow-md"
+                    </CardContent>
+                  </Card>
+                  <Card className="border-none bg-transparent shadow-none">
+                    <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
+                      <div>
+                        <CardTitle>
+                          <p className="text-sm text-gray-700 font-medium mt-1">
+                            {(questionnaire.questions?.length || 0) > 1
+                              ? t("questions")
+                              : t("question")}
+                          </p>
+                        </CardTitle>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const newQuestion: Question = {
+                            id: crypto.randomUUID(),
+                            link_id: `${questionnaire.questions.length + 1}`,
+                            text: "New Question",
+                            type: "string",
+                            questions: [],
+                          };
+                          handleValidatedChange("questions", [
+                            ...questionnaire.questions,
+                            newQuestion,
+                          ]);
+                          setExpandedQuestions(
+                            (prev) => new Set([...prev, newQuestion.id]),
+                          );
+                        }}
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("add_question")}
@@ -820,7 +806,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                     newQuestions[index],
                                     newQuestions[index - 1],
                                   ];
-                                  handleValidatedChange(
+                                  updateQuestionnaireField(
                                     "questions",
                                     newQuestions,
                                   );
@@ -841,7 +827,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                     newQuestions[index + 1],
                                     newQuestions[index],
                                   ];
-                                  handleValidatedChange(
+                                  updateQuestionnaireField(
                                     "questions",
                                     newQuestions,
                                   );
