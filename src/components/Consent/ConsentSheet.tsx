@@ -3,6 +3,7 @@ import {
   Calendar,
   CalendarRange,
   CheckCircle,
+  Loader2,
   Plus,
   Search,
   XCircle,
@@ -157,7 +158,7 @@ function ConsentCard({ consent }: ConsentCardProps) {
 
   const attachment = consent.source_attachments[0];
   const attachmentId = attachment?.id;
-  const { data: consentFile } = useQuery({
+  const { data: consentFile, isPending } = useQuery({
     queryKey: ["file_upload", attachmentId],
     queryFn: query(routes.retrieveUpload, {
       pathParams: { id: attachmentId! },
@@ -175,6 +176,11 @@ function ConsentCard({ consent }: ConsentCardProps) {
       <Card className="overflow-hidden transition-all h-full flex flex-col">
         <CardContent className="p-0 group max-sm:hidden">
           <div className="relative aspect-video">
+            <div className="absolute top-1/2 left-1/2 -translate-x-3 -translate-y-3">
+              {isPending && (
+                <Loader2 className="text-secondary-800 cursor-pointer animate-spin" />
+              )}
+            </div>
             {consentFile ? (
               <div className="h-full w-full object-cover">
                 <div className="h-full w-full opacity-30 hover:opacity-100 transition-opacity">
