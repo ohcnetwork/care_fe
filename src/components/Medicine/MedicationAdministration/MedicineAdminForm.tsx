@@ -1,8 +1,6 @@
-"use client";
-
 import { format, formatDistanceToNow } from "date-fns";
-import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -56,6 +54,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   formId,
   isValid,
 }) => {
+  const { t } = useTranslation();
+
   const [isPastTime, setIsPastTime] = useState(
     administrationRequest.occurrence_period_start !==
       administrationRequest.occurrence_period_end || !!administrationRequest.id,

@@ -32,6 +32,7 @@ import { NumberQuestion } from "./NumberQuestion";
 import { QuantityQuestion } from "./QuantityQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
 import { TextQuestion } from "./TextQuestion";
+import { TimeQuestion } from "./TimeQuestion";
 
 interface QuestionInputProps {
   question: Question;
@@ -208,6 +209,9 @@ export function QuestionInput({
 
       case "display":
         return null;
+
+      case "time":
+        return <TimeQuestion {...commonProps} />;
 
       default:
         return <TextQuestion {...commonProps} />;
