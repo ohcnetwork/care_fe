@@ -153,6 +153,50 @@ export function LocationCard({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {onMoveUp && !hideUpButton && (
+                    <DropdownMenuItem onClick={() => onMoveUp(location)}>
+                      <span className="block xl:hidden">
+                        <CareIcon icon="l-arrow-up" className="mr-2" />
+                      </span>
+                      <span className="hidden xl:block">
+                        <CareIcon icon="l-arrow-left" className="mr-2" />
+                      </span>
+                      {isFirst && !isFirstPage ? (
+                        t("move_to_previous_page")
+                      ) : (
+                        <>
+                          <span className="block xl:hidden">
+                            {t("move_up")}
+                          </span>
+                          <span className="hidden xl:block">
+                            {t("move_left")}
+                          </span>
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+                  {onMoveDown && !hideDownButton && (
+                    <DropdownMenuItem onClick={() => onMoveDown(location)}>
+                      <span className="block xl:hidden">
+                        <CareIcon icon="l-arrow-down" className="mr-2" />
+                      </span>
+                      <span className="hidden xl:block">
+                        <CareIcon icon="l-arrow-right" className="mr-2" />
+                      </span>
+                      {isLast && !isLastPage ? (
+                        t("move_to_next_page")
+                      ) : (
+                        <>
+                          <span className="block xl:hidden">
+                            {t("move_down")}
+                          </span>
+                          <span className="hidden xl:block">
+                            {t("move_right")}
+                          </span>
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  )}
                   {onEdit && (
                     <DropdownMenuItem onClick={() => onEdit(location)}>
                       <PenLine className="size-4 mr-2" />
@@ -205,56 +249,6 @@ export function LocationCard({
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
           <div className="flex justify-between items-center">
-            <div className="flex gap-2">
-              {onMoveUp && !hideUpButton && (
-                <Button
-                  variant="white"
-                  onClick={() => onMoveUp(location)}
-                  title={
-                    isFirst && !isFirstPage
-                      ? t("move_to_previous_page")
-                      : t("move_up")
-                  }
-                  aria-label={
-                    isFirst && !isFirstPage
-                      ? t("move_to_previous_page")
-                      : t("move_up")
-                  }
-                  className="relative"
-                >
-                  <span className="block xl:hidden">
-                    <CareIcon icon="l-arrow-up" />
-                  </span>
-                  <span className="hidden xl:block">
-                    <CareIcon icon="l-arrow-left" />
-                  </span>
-                </Button>
-              )}
-              {onMoveDown && !hideDownButton && (
-                <Button
-                  variant="white"
-                  onClick={() => onMoveDown(location)}
-                  title={
-                    isLast && !isLastPage
-                      ? t("move_to_next_page")
-                      : t("move_down")
-                  }
-                  aria-label={
-                    isLast && !isLastPage
-                      ? t("move_to_next_page")
-                      : t("move_down")
-                  }
-                  className="relative"
-                >
-                  <span className="block xl:hidden">
-                    <CareIcon icon="l-arrow-down" />
-                  </span>
-                  <span className="hidden xl:block">
-                    <CareIcon icon="l-arrow-right" />
-                  </span>
-                </Button>
-              )}
-            </div>
             <div className="ml-auto">
               {location.form !== "bd" && onView && (
                 <Button

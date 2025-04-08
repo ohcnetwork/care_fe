@@ -1759,6 +1759,8 @@
   "more_info": "More Info",
   "morning_slots": "Morning Slots",
   "move_down": "Move Down",
+  "move_left": "Move Left",
+  "move_right": "Move Right",
   "move_to_another_bed": "Move to Another Bed",
   "move_to_next_page": "Move to next page",
   "move_to_onvif_preset": "Move to an ONVIF Preset",
