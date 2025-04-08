@@ -1,11 +1,22 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -25,32 +36,66 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
-import { FacilityOrganizationCreate } from "@/types/facilityOrganization/facilityOrganization";
+import {
+  FacilityOrganization,
+  FacilityOrganizationCreate,
+  FacilityOrganizationEdit,
+} from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   facilityId: string;
   parentId?: string;
+  org?: FacilityOrganization;
 }
 
 const ORG_TYPES = [
-  { value: "dept", label: "Department" },
-  { value: "team", label: "Team" },
+  { value: "dept", label: "department" },
+  { value: "team", label: "team" },
 ] as const;
 
 type OrgType = (typeof ORG_TYPES)[number]["value"];
 
-export default function FacilityOrganizationSheet({
+const formSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, { message: t("field_required") }),
+  description: z.string().optional(),
+  org_type: z.enum(["dept", "team"]),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+export default function FacilityOrganizationFormSheet({
   facilityId,
   parentId,
+  org,
 }: Props) {
+  const isEditMode = !!org;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [orgType, setOrgType] = useState<OrgType>("dept");
 
-  const { mutate: createOrganization, isPending } = useMutation({
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      org_type: "dept" as OrgType,
+    },
+  });
+
+  useEffect(() => {
+    if (isEditMode && org) {
+      form.reset({
+        name: org.name || "",
+        description: org.description || "",
+        org_type: org.org_type as OrgType,
+      });
+    }
+  }, [isEditMode, org, open]);
+
+  const { mutate: createOrganization, isPending: isCreating } = useMutation({
     mutationFn: (body: FacilityOrganizationCreate) =>
       mutate(facilityOrganizationApi.create, {
         pathParams: { facilityId },
@@ -65,9 +110,7 @@ export default function FacilityOrganizationSheet({
       });
       toast.success(t("organization_created_successfully"));
       setOpen(false);
-      setName("");
-      setDescription("");
-      setOrgType("dept");
+      form.reset();
     },
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string }[] };
@@ -77,81 +120,145 @@ export default function FacilityOrganizationSheet({
     },
   });
 
-  const handleSubmit = () => {
-    if (!name.trim()) {
-      toast.error(t("please_enter_organization_name"));
-      return;
-    }
+  const { mutate: updateOrganization, isPending: isUpdating } = useMutation({
+    mutationFn: (body: FacilityOrganizationEdit) =>
+      mutate(facilityOrganizationApi.update, {
+        pathParams: { facilityId, organizationId: org?.id },
+        body,
+      })(body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["facilityOrganization", "list", facilityId, parentId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["getCurrentUser"],
+      });
+      toast.success(t("organization_updated_successfully"));
+      setOpen(false);
+    },
+  });
 
-    createOrganization({
-      name: name.trim(),
-      description: description.trim() || undefined,
-      org_type: orgType,
+  const onSubmit = (values: FormValues) => {
+    const data = {
+      name: values.name.trim(),
+      description: values.description?.trim() || undefined,
+      org_type: values.org_type,
       parent: parentId,
-    });
+    };
+
+    if (isEditMode) {
+      updateOrganization({ ...data, facility: facilityId });
+    } else {
+      createOrganization(data);
+    }
   };
+
+  const isPending = isCreating || isUpdating;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button>
-          <CareIcon icon="l-plus" className="mr-2 size-4" />
-          {t("add_department_team")}
-        </Button>
+        {isEditMode ? (
+          <Button variant="white" size="sm" className="font-semibold">
+            {t("edit")}
+          </Button>
+        ) : (
+          <Button>
+            <CareIcon icon="l-plus" className="mr-2 size-4" />
+            {t("add_department_team")}
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{t("create_department_team")}</SheetTitle>
+          <SheetTitle>
+            {isEditMode
+              ? t("edit_department_team")
+              : t("create_department_team")}
+          </SheetTitle>
           <SheetDescription>
-            {t("create_department_team_description")}
+            {isEditMode
+              ? t("edit_department_team_description")
+              : t("create_department_team_description")}
           </SheetDescription>
         </SheetHeader>
-        <div className="space-y-6 py-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Name</label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t("enter_department_team_name")}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t(`type`)}</label>
-            <Select
-              value={orgType}
-              onValueChange={(value: OrgType) => setOrgType(value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("select_organization_type")} />
-              </SelectTrigger>
-              <SelectContent>
-                {ORG_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t("enter_department_team_description")}
-            />
-          </div>
-
-          <Button
-            className="w-full"
-            onClick={handleSubmit}
-            disabled={isPending || !name.trim()}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 py-4"
           >
-            {isPending ? t("creating") : t("create_organization")}
-          </Button>
-        </div>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>{t("name")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder={t("enter_department_team_name")}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="org_type"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>{t(`type`)}</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={t("select_organization_type")}
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {ORG_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {t(type.label)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>{t("description")}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder={t("enter_department_team_description")}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending
+                ? isEditMode
+                  ? t("updating")
+                  : t("creating")
+                : isEditMode
+                  ? t("update_organization")
+                  : t("create_organization")}
+            </Button>
+          </form>
+        </Form>
       </SheetContent>
     </Sheet>
   );
