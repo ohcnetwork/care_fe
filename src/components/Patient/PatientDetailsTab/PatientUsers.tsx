@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useState } from "react";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
@@ -58,6 +57,7 @@ interface AddUserSheetProps {
 }
 
 function AddUserSheet({ patientId }: AddUserSheetProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserBase>();
@@ -224,9 +224,10 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   );
 }
 
-export const PatientUsers = (props: PatientProps) => {
-  const { patientData } = props;
+export const PatientUsers = ({ patientData }: PatientProps) => {
   const patientId = patientData.id;
+
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(

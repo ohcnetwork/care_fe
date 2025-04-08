@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -82,6 +82,8 @@ function ValidationErrorDisplay({
   questionnaireForms,
   serverErrors,
 }: ValidationErrorDisplayProps) {
+  const { t } = useTranslation();
+
   const hasErrors =
     questionnaireForms.some((form) => form.errors.length > 0) ||
     (serverErrors?.length ?? 0) > 0;
@@ -317,6 +319,8 @@ export function QuestionnaireForm({
   onCancel,
   facilityId,
 }: QuestionnaireFormProps) {
+  const { t } = useTranslation();
+
   const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]

@@ -1,4 +1,3 @@
-import { t } from "i18next";
 import { Link, navigate, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -160,6 +159,8 @@ export const UserGrid = ({ users }: { users?: UserBase[] }) => {
 };
 
 const UserListHeader = () => {
+  const { t } = useTranslation();
+
   return (
     <thead>
       <tr className="bg-gray-50 text-sm font-medium text-gray-500">
@@ -174,6 +175,8 @@ const UserListHeader = () => {
 
 const UserListRow = ({ user }: { user: UserBase }) => {
   const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+  const { t } = useTranslation();
+
   return (
     <tr
       key={`usr_${user.id}`}

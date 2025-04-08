@@ -1,6 +1,6 @@
-import { t } from "i18next";
 import { BadgeCheck, CircleDashed, Clock, Eye } from "lucide-react";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,8 @@ interface EncounterCardProps {
 }
 
 export const EncounterCard = (props: EncounterCardProps) => {
+  const { t } = useTranslation();
+
   const { encounter, permissions, facilityId } = props;
   const { hasPermission } = usePermissions();
   const { canViewEncounter, canViewPatients } = getPermissions(

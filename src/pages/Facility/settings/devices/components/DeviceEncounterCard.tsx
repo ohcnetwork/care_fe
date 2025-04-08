@@ -1,6 +1,6 @@
 import { format } from "date-fns";
-import { t } from "i18next";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -27,6 +27,8 @@ function EncounterNode({
   end,
   children,
 }: EncounterNodeProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center text-sm">

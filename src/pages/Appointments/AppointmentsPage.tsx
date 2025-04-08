@@ -11,7 +11,6 @@ import {
   isYesterday,
   subDays,
 } from "date-fns";
-import { t } from "i18next";
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect } from "react";
@@ -99,6 +98,7 @@ interface DateRangeDisplayProps {
 }
 
 function AppointmentsEmptyState() {
+  const { t } = useTranslation();
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
