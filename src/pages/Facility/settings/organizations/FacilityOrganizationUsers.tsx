@@ -122,12 +122,12 @@ export default function FacilityOrganizationUsers({
       </div>
 
       {isLoadingUsers ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4">
-          <CardGridSkeleton count={4} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4 md:gap-6">
+          <CardGridSkeleton count={2} />
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4 md:gap-6">
             {!users?.results?.length ? (
               <Card className="col-span-full">
                 <CardContent className="p-6 text-center text-gray-500">

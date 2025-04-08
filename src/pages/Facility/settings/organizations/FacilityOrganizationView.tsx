@@ -156,7 +156,7 @@ export default function FacilityOrganizationView({
           <CardListSkeleton count={4} />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 md:pb-6">
           <div className="space-y-4">
             {children?.results?.length ? (
               children.results.map((org) => (
