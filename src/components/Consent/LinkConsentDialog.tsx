@@ -4,6 +4,7 @@ import { t } from "i18next";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -53,38 +54,39 @@ import {
 import consentApi from "@/types/consent/consentApi";
 import { UserBase } from "@/types/user/user";
 
-const consentFormSchema = z
-  .object({
-    decision: z.enum(CONSENT_DECISIONS).default("permit"),
-    category: z.enum(CONSENT_CATEGORIES).default("treatment"),
-    status: z.enum(CONSENT_STATUSES).default("active"),
-    date: z.date(),
-    period: z.object({
-      start: z.date().optional(),
-      end: z.date().optional(),
-    }),
-    verification_type: z.enum(VERIFICATION_TYPES).default("validation"),
-    source_attachments: z.array(z.instanceof(File)).default([]),
-  })
-  .superRefine((data, ctx) => {
-    if (data.source_attachments.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: t("please_upload_a_file"),
-        path: ["source_attachments"],
-      });
-    }
+const consentFormSchema = () =>
+  z
+    .object({
+      decision: z.enum(CONSENT_DECISIONS).default("permit"),
+      category: z.enum(CONSENT_CATEGORIES).default("treatment"),
+      status: z.enum(CONSENT_STATUSES).default("active"),
+      date: z.date(),
+      period: z.object({
+        start: z.date().optional(),
+        end: z.date().optional(),
+      }),
+      verification_type: z.enum(VERIFICATION_TYPES).default("validation"),
+      source_attachments: z.array(z.instanceof(File)).default([]),
+    })
+    .superRefine((data, ctx) => {
+      if (data.source_attachments.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("please_upload_a_file"),
+          path: ["source_attachments"],
+        });
+      }
 
-    if (data.period.end && data.date > data.period.end) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: t("consent_after_end"),
-        path: ["date"],
-      });
-    }
-  });
+      if (data.period.end && data.date > data.period.end) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("consent_after_end"),
+          path: ["date"],
+        });
+      }
+    });
 
-type ConsentFormValues = z.infer<typeof consentFormSchema>;
+type ConsentFormValues = z.infer<ReturnType<typeof consentFormSchema>>;
 
 interface LinkConsentDialogProps {
   patientId: string;
@@ -99,6 +101,8 @@ export default function LinkConsentDialog({
   trigger,
   onSuccess,
 }: LinkConsentDialogProps) {
+  const { t } = useTranslation();
+
   const [isOpen, setIsOpen] = useState(false);
   const [associatingId, setAssociatingId] = useState<string | null>(null);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
@@ -152,7 +156,7 @@ export default function LinkConsentDialog({
   });
 
   const form = useForm<ConsentFormValues>({
-    resolver: zodResolver(consentFormSchema),
+    resolver: zodResolver(consentFormSchema()),
     defaultValues: {
       decision: "permit",
       category: "treatment",

@@ -1,5 +1,3 @@
-"use client";
-
 import { ActiveLink } from "raviger";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";

@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import {
   ChevronDown,
   ChevronUp,
@@ -185,6 +184,7 @@ function LayoutOptionCard({
 
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set(),
