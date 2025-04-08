@@ -3,8 +3,6 @@ import {
   Calendar,
   CalendarRange,
   CheckCircle,
-  Download,
-  Loader2,
   Plus,
   Search,
   XCircle,
@@ -157,16 +155,14 @@ type ConsentCardProps = {
 function ConsentCard({ consent }: ConsentCardProps) {
   const { t } = useTranslation();
 
-  const [loadPreview, setLoadPreview] = useState(false);
-
   const attachment = consent.source_attachments[0];
   const attachmentId = attachment?.id;
-  const { data: consentFile, isPending } = useQuery({
+  const { data: consentFile } = useQuery({
     queryKey: ["file_upload", attachmentId],
     queryFn: query(routes.retrieveUpload, {
       pathParams: { id: attachmentId! },
     }),
-    enabled: loadPreview && !!attachmentId,
+    enabled: !!attachmentId,
   });
 
   const fileManager = useFileManager({
@@ -179,17 +175,6 @@ function ConsentCard({ consent }: ConsentCardProps) {
       <Card className="overflow-hidden transition-all h-full flex flex-col">
         <CardContent className="p-0 group max-sm:hidden">
           <div className="relative aspect-video">
-            <div className="absolute top-1/2 left-1/2 -translate-x-3 -translate-y-3">
-              {!consentFile && attachmentId && loadPreview === false && (
-                <Download
-                  onClick={() => setLoadPreview(true)}
-                  className="text-secondary-800 hidden group-hover:block cursor-pointer animate-bounce"
-                />
-              )}
-              {!consentFile && loadPreview === true && isPending && (
-                <Loader2 className="text-secondary-800 cursor-pointer animate-spin" />
-              )}
-            </div>
             {consentFile ? (
               <div className="h-full w-full object-cover">
                 <div className="h-full w-full opacity-30 hover:opacity-100 transition-opacity">
@@ -295,7 +280,6 @@ function ConsentCard({ consent }: ConsentCardProps) {
                 fileManager.viewFile(attachment, attachment.associating_id!);
               }}
             >
-              {loadPreview && <Loader2 className="mr-2 animate-spin" />}
               {t("view")}
             </Button>
           </div>
