@@ -304,47 +304,29 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 rounded-lg p-4 shadow-xl md:p-6 overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-sm text-gray-600">
-            {t("file_preview")}
+            <TooltipComponent content={fileName}>
+              <p className="text-2xl font-bold text-gray-800">
+                {fileNameTooltip}
+              </p>
+            </TooltipComponent>
           </DialogTitle>
+          {uploadedFiles &&
+            uploadedFiles[index] &&
+            uploadedFiles[index].created_date && (
+              <p className="mt-1 text-sm text-gray-600">
+                {t("created_on")}{" "}
+                {new Date(uploadedFiles[index].created_date!).toLocaleString(
+                  "en-US",
+                  {
+                    dateStyle: "long",
+                    timeStyle: "short",
+                  },
+                )}
+              </p>
+            )}
         </DialogHeader>
         {fileUrl ? (
           <>
-            <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
-              <div>
-                <TooltipComponent content={fileName}>
-                  <p className="text-2xl font-bold text-gray-800">
-                    {fileNameTooltip}
-                  </p>
-                </TooltipComponent>
-                {uploadedFiles &&
-                  uploadedFiles[index] &&
-                  uploadedFiles[index].created_date && (
-                    <p className="mt-1 text-sm text-gray-600">
-                      {t("created_on")}{" "}
-                      {new Date(
-                        uploadedFiles[index].created_date!,
-                      ).toLocaleString("en-US", {
-                        dateStyle: "long",
-                        timeStyle: "short",
-                      })}
-                    </p>
-                  )}
-              </div>
-              <div className="flex gap-4 mt-2 md:mt-0">
-                {downloadURL && downloadURL.length > 0 && (
-                  <Button variant="primary" data-cy="file-preview-download">
-                    <a
-                      href={downloadURL}
-                      className="text-white"
-                      download={`${file_state.name}.${file_state.extension}`}
-                    >
-                      <CareIcon icon="l-file-download" className="size-4" />
-                      <span>{t("download")}</span>
-                    </a>
-                  </Button>
-                )}
-              </div>
-            </div>
             <div className="flex flex-1 items-center justify-center">
               {uploadedFiles && uploadedFiles.length > 1 && (
                 <Button
@@ -446,18 +428,17 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       variant="ghost"
                       onClick={handleZoomOut}
                       disabled={file_state.zoom === 1}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
                       <CareIcon
-                        icon={"l-search-minus" as IconName}
-                        className="mr-2 text-lg text-gray-600"
+                        icon="l-search-minus"
+                        className="mr-2 text-lg text-gray-400"
                       />
                     </Button>
 
                     <Button
                       variant="ghost"
+                      disabled
                       onClick={() => setFileState({ ...file_state, zoom: 4 })}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70 text-gray-600"
                     >
                       {`${25 * file_state.zoom}%`}
                     </Button>
@@ -466,24 +447,40 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       variant="ghost"
                       onClick={handleZoomIn}
                       disabled={file_state.zoom === zoom_values.length}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
                       <CareIcon
                         icon={"l-search-plus" as IconName}
-                        className="mr-2 text-lg text-gray-600"
+                        className="mr-2 text-lg text-gray-400"
                       />
                     </Button>
 
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleRotate(90)}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
-                    >
+                    <Button variant="ghost" onClick={() => handleRotate(90)}>
                       <CareIcon
                         icon={"l-crop-alt-rotate-right" as IconName}
-                        className="mr-2 text-lg size-4 text-gray-600"
+                        className="mr-2 text-lg size-4 text-gray-400"
                       />
                     </Button>
+
+                    <div className="flex gap-4 mt-2 md:mt-0">
+                      {downloadURL && downloadURL.length > 0 && (
+                        <Button
+                          variant="primary"
+                          data-cy="file-preview-download"
+                        >
+                          <a
+                            href={downloadURL}
+                            className="text-white"
+                            download={`${file_state.name}.${file_state.extension}`}
+                          >
+                            <CareIcon
+                              icon="l-file-download"
+                              className="size-4"
+                            />
+                            <span>{t("download")}</span>
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   </>
                 )}
                 {file_state.extension === "pdf" && (
@@ -492,19 +489,14 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       variant="ghost"
                       onClick={handleZoomOut}
                       disabled={scale <= 0.5}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
                       <CareIcon
                         icon={"l-search-minus" as IconName}
-                        className="mr-2 text-lg text-gray-600"
+                        className="mr-2 text-lg text-gray-400"
                       />
                     </Button>
 
-                    <Button
-                      variant="ghost"
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
-                      disabled
-                    >
+                    <Button variant="ghost" disabled>
                       {`${Math.round(scale * 100)}%`}
                     </Button>
 
@@ -512,13 +504,33 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       variant="ghost"
                       onClick={handleZoomIn}
                       disabled={scale >= 2}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
                       <CareIcon
                         icon={"l-search-plus" as IconName}
-                        className="mr-2 text-lg text-gray-600"
+                        className="mr-2 text-lg text-gray-400"
                       />
                     </Button>
+
+                    <div className="flex gap-4 mt-2 md:mt-0">
+                      {downloadURL && downloadURL.length > 0 && (
+                        <Button
+                          variant="primary"
+                          data-cy="file-preview-download"
+                        >
+                          <a
+                            href={downloadURL}
+                            className="text-white"
+                            download={`${file_state.name}.${file_state.extension}`}
+                          >
+                            <CareIcon
+                              icon="l-file-download"
+                              className="size-4"
+                            />
+                            <span>{t("download")}</span>
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -529,7 +541,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       variant="ghost"
                       onClick={() => setPage((prev) => prev - 1)}
                       disabled={page === 1}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
                       {t("previous_page")}
                       <CareIcon
@@ -538,11 +549,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       />
                     </Button>
 
-                    <Button
-                      variant="ghost"
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
-                      disabled
-                    >
+                    <Button variant="ghost" disabled>
                       {`${page}/${numPages}`}
                     </Button>
 
@@ -550,7 +557,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       variant="ghost"
                       onClick={() => setPage((prev) => prev + 1)}
                       disabled={page === numPages}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
                     >
                       <CareIcon
                         icon={"l-angle-right" as IconName}
