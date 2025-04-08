@@ -1,5 +1,3 @@
-"use client";
-
 import { ActiveLink } from "raviger";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -36,6 +34,7 @@ export function NavMain({
                 className={
                   "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                 }
+                data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
               >
                 <ActiveLink
                   href={link.url}
