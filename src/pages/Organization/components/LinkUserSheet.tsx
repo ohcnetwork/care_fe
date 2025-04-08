@@ -201,7 +201,7 @@ export default function LinkUserSheet({
                         <div className="flex flex-col text-left">
                           <span>{role.name}</span>
                           {role.description && (
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 truncate">
                               {role.description}
                             </span>
                           )}
