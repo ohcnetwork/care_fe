@@ -410,7 +410,7 @@ export function EncounterQuestion({
 
                 <div className="space-y-2">
                   <Label>{t("discharge_date_time")}</Label>
-                  <div className="flex sm:gap-2flex-wrap">
+                  <div className="flex sm:gap-2 flex-wrap">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
