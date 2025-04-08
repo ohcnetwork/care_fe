@@ -585,20 +585,15 @@ export function QuestionnaireForm({
               q.structured_type as keyof typeof STRUCTURED_TYPE_VALIDATORS
             ];
 
-          // Skip appointment validator if question is not required
-          if (validator) {
-            // Only validate appointment fields if the question is required
-            if (
-              q.structured_type !== "appointment" ||
-              (q.structured_type === "appointment" && q.required)
-            ) {
-              // Skip validation for appointment type if not required
-            } else {
-              const validationErrors = validator(response?.values?.[0], q.id);
-              errors.push(...validationErrors);
-              if (validationErrors.length > 0) {
-                firstErrorId = firstErrorId ? firstErrorId : q.id;
-              }
+          // Skip validation for appointment type if not required
+          if (
+            validator &&
+            (q.structured_type !== "appointment" || q.required)
+          ) {
+            const validationErrors = validator(response?.values?.[0], q.id);
+            errors.push(...validationErrors);
+            if (validationErrors.length > 0) {
+              firstErrorId = firstErrorId ? firstErrorId : q.id;
             }
           }
         }
