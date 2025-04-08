@@ -185,7 +185,7 @@ export default function FacilityOrganizationList({
                           <BreadcrumbItem>
                             <BreadcrumbLink
                               asChild
-                              className="hover:text-primary cursor-pointer font-medium text-primary"
+                              className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
                               onClick={() => handleParentClick(parent.id)}
                             >
                               <button type="button">{parent.name}</button>
