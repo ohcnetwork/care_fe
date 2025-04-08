@@ -165,6 +165,7 @@ export function LocationCard({
                         <DropdownMenuItem
                           onSelect={(e) => e.preventDefault()}
                           className="text-destructive"
+                          data-cy="delete-location-button"
                         >
                           <Trash className="size-4 mr-2" />
                           {t("delete")}

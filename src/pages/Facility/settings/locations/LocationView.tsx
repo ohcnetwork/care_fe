@@ -135,7 +135,7 @@ export default function LocationView({
 
   return (
     <>
-      <Breadcrumb className="m-4">
+      <Breadcrumb className="md:m-5">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink
