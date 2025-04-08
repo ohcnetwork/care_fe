@@ -262,7 +262,7 @@ export default function LocationSettings({
 
                     <div className="space-y-4 overflow-hidden">
                       <div
-                        className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4"
+                        className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4 sm:px-4"
                         data-cy="location-card-container"
                       >
                         {isLoading ? (
