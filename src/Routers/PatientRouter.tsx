@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
@@ -102,6 +103,7 @@ export default function PatientRouter() {
           id="pages"
           className="flex-1 overflow-y-auto bg-gray-100 focus:outline-hidden md:pb-2 md:pr-2"
         >
+          <BrowserWarning />
           <div className="relative z-10 flex h-16 shrink-0 bg-white shadow-sm md:hidden">
             <div className="flex items-center">
               <SidebarTrigger className="px-2" />

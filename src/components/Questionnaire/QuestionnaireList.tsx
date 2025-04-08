@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import {
   ArchiveIcon,
   EyeIcon,
@@ -9,6 +8,7 @@ import {
   Search,
 } from "lucide-react";
 import { useNavigate } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -44,6 +44,8 @@ import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 function EmptyState() {
+  const { t } = useTranslation();
+
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
@@ -66,7 +68,9 @@ const RenderCard = ({
   questionnaireList: QuestionnaireDetail[];
   isLoading: boolean;
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
   return (
     <div className="xl:hidden space-y-4">
       {isLoading ? (
@@ -153,6 +157,8 @@ const RenderTable = ({
   isLoading: boolean;
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   return (
     <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow-sm overflow-x-auto">
       {isLoading ? (
@@ -222,7 +228,7 @@ const RenderTable = ({
 
 export function QuestionnaireList() {
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
