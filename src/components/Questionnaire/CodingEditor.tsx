@@ -68,6 +68,10 @@ export function CodingEditor({
       }
     },
     onError: (error) => {
+      form.setError(`questions.${questionIndex}.${type}.display`, {
+        type: "manual",
+        message: t("code_verification_required"),
+      });
       console.error(error);
       toast.error("Failed to verify code");
     },
@@ -84,12 +88,11 @@ export function CodingEditor({
             onChange({
               system: TERMINOLOGY_SYSTEMS[defaultSystem ?? "LOINC"],
               code: "",
-              display: "",
             });
           }}
         >
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          {t("add")} {label}
+          {t(`add_${label}`)}
         </Button>
       </div>
     );
@@ -100,7 +103,7 @@ export function CodingEditor({
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center w-full justify-between">
           <Label className="text-base font-medium">
-            {label} {t("details")}
+            {t(`${label}_details`)}
           </Label>
           <Button
             variant="ghost"
@@ -108,10 +111,11 @@ export function CodingEditor({
             onClick={(e) => {
               e.preventDefault();
               onChange(undefined);
+              form.clearErrors([`questions.${questionIndex}.${type}`]);
             }}
           >
             <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
-            {t("remove")} {label}
+            {t(`remove_${label}`)}
           </Button>
         </div>
       </CardHeader>
@@ -127,12 +131,11 @@ export function CodingEditor({
                 <FormControl>
                   <Select
                     {...field}
+                    value={code.system}
                     onValueChange={(value) => {
                       onChange({
                         ...code,
                         system: value,
-                        code: "",
-                        display: "",
                       });
                     }}
                     disabled={disableSystemSelect}
@@ -157,7 +160,7 @@ export function CodingEditor({
           />
         </div>
 
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-4 items-start">
+        <div className="flex flex-wrap sm:grid sm:grid-cols-[1fr_1fr_auto] gap-4 sm:items-start">
           <div>
             <FormField
               control={form.control}
@@ -168,12 +171,16 @@ export function CodingEditor({
                   <FormControl>
                     <Input
                       {...field}
+                      value={code.code}
                       onChange={(e) => {
                         onChange({
                           ...code,
                           code: e.target.value,
                           display: "",
                         });
+                        form.clearErrors([
+                          `questions.${questionIndex}.${type}.display`,
+                        ]);
                       }}
                       placeholder="Enter code"
                     />
@@ -193,6 +200,7 @@ export function CodingEditor({
                   <FormControl>
                     <Input
                       {...field}
+                      value={code.display}
                       placeholder="Unverified"
                       className={!code.display ? "text-gray-500" : undefined}
                       readOnly

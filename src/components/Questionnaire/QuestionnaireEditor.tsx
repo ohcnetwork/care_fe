@@ -297,26 +297,19 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         description: z.string().optional(),
         code: z
           .object({
-            system: z.string(),
-            code: z.string().trim(),
-            display: z.string().trim(),
+            system: z.string().optional(),
+            code: z.string().optional(),
+            display: z.string().optional(),
           })
-          .optional()
-          .refine((data) => !data || (data.code && data.display), {
-            message: t("code_verification_required"),
-            path: ["display"],
-          }),
+          .optional(),
+
         unit: z
           .object({
-            system: z.string(),
-            code: z.string().trim(),
-            display: z.string(),
+            system: z.string().optional(),
+            code: z.string().optional(),
+            display: z.string().optional(),
           })
-          .optional()
-          .refine((data) => !data || (data.code && data.display), {
-            message: t("code_verification_required"),
-            path: ["display"],
-          }),
+          .optional(),
       }),
     ),
   });
@@ -428,8 +421,26 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleSave = async () => {
-    const isValid = await form.trigger();
+    let isValid = await form.trigger();
     const hasOrganizations = validateOrganizations();
+
+    questionnaire.questions.forEach((question, idx) => {
+      if (question.code && !question.code?.display) {
+        form.setError(`questions.${idx}.code.display`, {
+          type: "manual",
+          message: t("code_verification_required"),
+        });
+        isValid = false;
+      }
+
+      if (question.unit && !question.unit.display) {
+        form.setError(`questions.${idx}.unit.display`, {
+          type: "manual",
+          message: t("code_verification_required"),
+        });
+        isValid = false;
+      }
+    });
 
     if (!isValid || !hasOrganizations) {
       return;
@@ -764,7 +775,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   ...questionnaire.questions,
                                 ];
                                 newQuestions[index] = updatedQuestion;
-                                handleValidatedChange(
+                                updateQuestionnaireField(
                                   "questions",
                                   newQuestions,
                                 );
@@ -774,7 +785,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   questionnaire.questions.filter(
                                     (_, i) => i !== index,
                                   );
-                                handleValidatedChange(
+                                updateQuestionnaireField(
                                   "questions",
                                   newQuestions,
                                 );
@@ -1061,7 +1072,14 @@ function QuestionEditor({
                     <FormControl>
                       <Input
                         {...field}
-                        onChange={(e) => updateField("text", e.target.value)}
+                        onChange={(e) => {
+                          updateField("text", e.target.value);
+                          form.setValue(
+                            `questions.${index}.text`,
+                            e.target.value,
+                            { shouldValidate: true },
+                          );
+                        }}
                         placeholder="Add a text"
                       />
                     </FormControl>
@@ -1080,7 +1098,14 @@ function QuestionEditor({
                     <FormControl>
                       <Input
                         {...field}
-                        onChange={(e) => updateField("link_id", e.target.value)}
+                        onChange={(e) => {
+                          updateField("link_id", e.target.value);
+                          form.setValue(
+                            `questions.${index}.link_id`,
+                            e.target.value,
+                            { shouldValidate: true },
+                          );
+                        }}
                         placeholder="Unique identifier for this question"
                       />
                     </FormControl>
@@ -1101,9 +1126,14 @@ function QuestionEditor({
                   <FormControl>
                     <Textarea
                       {...field}
-                      onChange={(e) =>
-                        updateField("description", e.target.value)
-                      }
+                      onChange={(e) => {
+                        updateField("description", e.target.value);
+                        form.setValue(
+                          `questions.${index}.description`,
+                          e.target.value,
+                          { shouldValidate: true },
+                        );
+                      }}
                       placeholder="Additional context or instructions for this question"
                       className="h-20"
                     />
@@ -1181,7 +1211,7 @@ function QuestionEditor({
                   questionIndex={index}
                   code={code}
                   onChange={(newCode) => updateField("code", newCode)}
-                  label={t("coding")}
+                  label="coding"
                   type="code"
                   form={form}
                 />
@@ -1190,7 +1220,7 @@ function QuestionEditor({
                   code={unit}
                   onChange={(newCode) => updateField("unit", newCode)}
                   defaultSystem="UCUM"
-                  label={t("unit")}
+                  label="unit"
                   type="unit"
                   disableSystemSelect
                   form={form}
