@@ -38,6 +38,7 @@ export function LocationActionButtons({
     onClick: () => void;
     variant: "outline" | "primary" | "link";
     className?: string;
+    "data-cy"?: string;
   };
 
   const buttons: ActionButton[] = [];
@@ -48,6 +49,7 @@ export function LocationActionButtons({
       onClick: onCancel,
       variant: "link",
       className: "underline underline-offset-2",
+      "data-cy": "cancel-bed-plan-button",
     });
   }
 
@@ -56,6 +58,7 @@ export function LocationActionButtons({
     onClick: onMove,
     variant: "outline",
     className: "border-gray-400 shadow-sm",
+    "data-cy": "move-to-another-bed-button",
   });
 
   if (status === "active" && onComplete) {
@@ -64,6 +67,7 @@ export function LocationActionButtons({
       onClick: () => onComplete(location),
       variant: "outline",
       className: "border-gray-400 shadow-sm",
+      "data-cy": "complete-bed-stay-button",
     });
   }
 
@@ -84,6 +88,7 @@ export function LocationActionButtons({
           variant={button.variant}
           onClick={button.onClick}
           className={button.className}
+          data-cy={button["data-cy"]}
         >
           {button.label}
         </Button>

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Building, Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -123,6 +123,8 @@ function DeleteOrganizationButton({
   facilityId: string;
   onSuccess?: () => void;
 }) {
+  const { t } = useTranslation();
+
   const queryClient = useQueryClient();
 
   const { mutate: removeOrganization, isPending } = useMutation({
@@ -182,6 +184,8 @@ export default function LinkDepartmentsSheet({
   onUpdate,
   orgType = "organization",
 }: Props) {
+  const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const queryClient = useQueryClient();
