@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Link } from "raviger";
 import { ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,8 @@ export function SymptomsList({
   className,
   readOnly = false,
 }: SymptomsListProps) {
+  const { t } = useTranslation();
+
   const [showEnteredInError, setShowEnteredInError] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
   const { data: symptoms, isLoading } = useQuery({
@@ -140,6 +142,8 @@ const SymptomListLayout = ({
   isExpanded: boolean;
   onToggle: () => void;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Card className={cn("border-none rounded-sm", className)}>
       <CardHeader
@@ -164,7 +168,7 @@ const SymptomListLayout = ({
             href={`questionnaire/symptom`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
-            <CareIcon icon="l-pen" className="w-4 h-4" />
+            <CareIcon icon="l-pen" className="size-4" />
             {t("edit")}
           </Link>
         )}

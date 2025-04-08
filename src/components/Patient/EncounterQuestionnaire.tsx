@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -33,6 +33,8 @@ export default function EncounterQuestionnaire({
   questionnaireSlug,
   subjectType,
 }: Props) {
+  const { t } = useTranslation();
+
   const { goBack } = useAppHistory();
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -58,7 +60,7 @@ export default function EncounterQuestionnaire({
     <Page title={t("questionnaire_one")}>
       <div className="flex flex-col space-y-4 mt-4 overflow-y-auto">
         {encounter && (
-          <div className="size-full rounded-lg border bg-white text-black shadow">
+          <div className="size-full rounded-lg border border-gray-200 bg-white text-black shadow-sm">
             <PatientInfoCard
               patient={encounter.patient}
               encounter={encounter}

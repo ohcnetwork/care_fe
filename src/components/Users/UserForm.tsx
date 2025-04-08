@@ -79,10 +79,10 @@ export default function UserForm({
             .string()
             .min(4, t("field_required"))
             .max(16, t("username_not_valid"))
-            .regex(/^[a-z0-9._-]*$/, t("username_not_valid"))
+            .regex(/^[a-z0-9_-]*$/, t("username_not_valid"))
             .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_not_valid"))
             .refine(
-              (val) => !val.match(/(?:[._-]{2,})/),
+              (val) => !val.match(/(?:[_-]{2,})/),
               t("username_not_valid"),
             ),
       password_setup_method: z.enum(["immediate", "email"]).optional(),
@@ -285,6 +285,7 @@ export default function UserForm({
             ? data.c_password
             : undefined,
         profile_picture_url: "",
+        geo_organization: data.geo_organization || null,
       } as CreateUserModel);
     }
   };
@@ -510,7 +511,7 @@ export default function UserForm({
               control={form.control}
               name="password_setup_method"
               render={({ field }) => (
-                <FormItem className="border rounded-lg p-4 bg-gray-50">
+                <FormItem className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                   <FormLabel className="text-base font-medium mb-3 block">
                     {t("password_setup_method")}
                   </FormLabel>
@@ -524,7 +525,7 @@ export default function UserForm({
                         className={`flex items-start space-x-3 rounded-md border p-3 ${
                           field.value === "immediate"
                             ? "bg-white border-primary"
-                            : "bg-transparent"
+                            : "bg-transparent  border-gray-200"
                         }`}
                       >
                         <RadioGroupItem
@@ -537,7 +538,7 @@ export default function UserForm({
                             htmlFor="immediate"
                             className="text-base font-medium cursor-pointer flex items-center"
                           >
-                            <Lock className="h-4 w-4 mr-2" />
+                            <Lock className="size-4 mr-2" />
                             {t("set_password_now")}
                           </Label>
                           <p className="text-sm text-muted-foreground">
@@ -550,7 +551,7 @@ export default function UserForm({
                         className={`flex items-start space-x-3 rounded-md border p-3 ${
                           field.value === "email"
                             ? "bg-white border-primary"
-                            : "bg-transparent"
+                            : "bg-transparent  border-gray-200"
                         }`}
                       >
                         <RadioGroupItem
@@ -563,7 +564,7 @@ export default function UserForm({
                             htmlFor="email"
                             className="text-base font-medium cursor-pointer flex items-center"
                           >
-                            <Mail className="h-4 w-4 mr-2" />
+                            <Mail className="size-4 mr-2" />
                             {t("send_email_invitation")}
                           </Label>
                           <p className="text-sm text-muted-foreground">

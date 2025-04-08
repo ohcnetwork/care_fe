@@ -1,7 +1,7 @@
 import { format } from "date-fns";
-import { t } from "i18next";
 import * as React from "react";
 import { DateRange } from "react-day-picker";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,8 @@ export function DateRangePicker({
   onChange,
   className,
 }: DateRangePickerProps) {
+  const { t } = useTranslation();
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -41,7 +43,7 @@ export function DateRangePicker({
               !date && "text-gray-500",
             )}
           >
-            <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-calender" className="mr-2 size-4" />
             {date?.from ? (
               date.to ? (
                 <>

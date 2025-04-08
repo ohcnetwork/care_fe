@@ -1,5 +1,3 @@
-"use client";
-
 import { Check } from "lucide-react";
 import * as React from "react";
 
@@ -159,7 +157,7 @@ export function ComboboxQuantityInput({
                     </div>
                     <Check
                       className={cn(
-                        "ml-auto h-4 w-4",
+                        "ml-auto size-4",
                         selectedUnit?.code === unit.code
                           ? "opacity-100"
                           : "opacity-0",

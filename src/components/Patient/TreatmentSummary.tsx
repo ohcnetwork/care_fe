@@ -1,9 +1,10 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { t } from "i18next";
 import { Loader } from "lucide-react";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
@@ -55,18 +56,13 @@ const SectionLayout = ({
   );
 };
 
-const EmptyState = ({ message }: { message: string }) => {
-  return (
-    <CardContent className="px-2 pb-3 pt-2">
-      <p className="text-gray-500">{message}</p>
-    </CardContent>
-  );
-};
 export default function TreatmentSummary({
   facilityId,
   encounterId,
   patientId,
 }: TreatmentSummaryProps) {
+  const { t } = useTranslation();
+
   const { data: encounter, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(api.encounter.get, {
@@ -86,12 +82,12 @@ export default function TreatmentSummary({
   const canAccess = canViewEncounter || canViewClinicalData;
 
   useEffect(() => {
-    if (!canAccess) {
+    if (!canAccess && !encounterLoading) {
       toast.error(t("no_permission_to_view_page"));
       goBack();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAccess]);
+  }, [canAccess, encounterLoading]);
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query.paginated(allergyIntoleranceApi.getAllergy, {
@@ -157,7 +153,7 @@ export default function TreatmentSummary({
 
   if (!encounter) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-gray-200 border-dashed p-4 text-gray-500">
         {t("no_patient_record_found")}
       </div>
     );
@@ -190,7 +186,7 @@ export default function TreatmentSummary({
       <div className="min-h-screen py-2 max-w-4xl mx-auto">
         <div className="space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-start pb-2 border-b">
+          <div className="flex justify-between items-start pb-2 border-b border-gray-200">
             <div className="space-y-4 flex-1">
               <div>
                 <h1 className="text-3xl font-semibold">
@@ -211,28 +207,28 @@ export default function TreatmentSummary({
           {/* Patient Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
             <div className="space-y-3">
-              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+              <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                 <span className="text-gray-600">{t("patient")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold break-words">
                   {encounter.patient.name}
                 </span>
               </div>
-              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+              <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                 <span className="text-gray-600">{`${t("age")} / ${t("sex")}`}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold break-words">
                   {`${formatPatientAge(encounter.patient, true)}, ${t(`GENDER__${encounter.patient.gender}`)}`}
                 </span>
               </div>
-              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+              <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                 <span className="text-gray-600">{t("encounter_class")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold">
                   {t(`encounter_class__${encounter.encounter_class}`)}
                 </span>
               </div>
-              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+              <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                 <span className="text-gray-600">{t("priority")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold">
@@ -241,7 +237,7 @@ export default function TreatmentSummary({
               </div>
 
               {encounter.hospitalization?.admit_source && (
-                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+                <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">{t("admission_source")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">
@@ -252,14 +248,14 @@ export default function TreatmentSummary({
                 </div>
               )}
               {encounter.hospitalization?.re_admission && (
-                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+                <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">{t("readmission")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">{t("yes")}</span>
                 </div>
               )}
               {encounter.hospitalization?.diet_preference && (
-                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+                <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">{t("diet_preference")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">
@@ -273,16 +269,17 @@ export default function TreatmentSummary({
 
             {/* Right Column */}
             <div className="space-y-3">
-              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+              <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                 <span className="text-gray-600">{t("mobile_number")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold break-words">
-                  {encounter.patient.phone_number}
+                  {encounter.patient.phone_number &&
+                    formatPhoneNumberIntl(encounter.patient.phone_number)}
                 </span>
               </div>
 
               {encounter.period?.start && (
-                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+                <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">{t("encounter_date")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">
@@ -294,7 +291,7 @@ export default function TreatmentSummary({
                 </div>
               )}
 
-              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+              <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                 <span className="text-gray-600">{t("status")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold">
@@ -302,16 +299,24 @@ export default function TreatmentSummary({
                 </span>
               </div>
 
-              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
-                <span className="text-gray-600">{t("consulting_doctor")}</span>
-                <span className="text-gray-600">:</span>
-                <span className="font-semibold">
-                  {formatName(encounter.created_by)}
-                </span>
-              </div>
+              {encounter.care_team[0] && (
+                <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
+                  <span className="text-gray-600">
+                    {encounter.care_team[0].role?.display}
+                  </span>
+                  <span className="text-gray-600">:</span>
+                  <span className="flex flex-row">
+                    <div className="flex flex-col">
+                      <div className="font-semibold">
+                        {formatName(encounter.care_team[0].member)}
+                      </div>
+                    </div>
+                  </span>
+                </div>
+              )}
 
               {encounter.external_identifier && (
-                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+                <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">{t("external_id")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">
@@ -321,7 +326,7 @@ export default function TreatmentSummary({
               )}
 
               {encounter.hospitalization?.discharge_disposition && (
-                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
+                <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">
                     {t("discharge_disposition")}
                   </span>
@@ -335,11 +340,44 @@ export default function TreatmentSummary({
               )}
             </div>
           </div>
+
+          {/* Care Team Section */}
+          <div className="mt-4 space-y-4">
+            {encounter.care_team.length > 0 && (
+              <div className="space-y-4">
+                {/* Other Consultants */}
+                {encounter.care_team.length > 1 && (
+                  <div className="border border-gray-100 p-3 rounded-sm">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">
+                      {t("care_team")}
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {encounter.care_team.map((member, index) => (
+                        <div key={index} className="flex items-start">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-semibold truncate">
+                              {formatName(member.member)}
+                            </div>
+                            {member.role?.display && (
+                              <div className="text-sm text-gray-500 truncate">
+                                {member.role.display}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Medical Information */}
           <div className="space-y-6">
             {/* Allergies */}
-            <SectionLayout title={t("allergies")}>
-              {allergies?.count ? (
+            {allergies?.count != 0 && (
+              <SectionLayout title={t("allergies")}>
                 <PrintTable
                   headers={[
                     { key: "allergen" },
@@ -358,15 +396,12 @@ export default function TreatmentSummary({
                     logged_by: formatName(allergy.created_by),
                   }))}
                 />
-              ) : (
-                <EmptyState message={t("no_allergies_recorded")} />
-              )}
-            </SectionLayout>
+              </SectionLayout>
+            )}
 
             {/* Symptoms */}
-
-            <SectionLayout title={t("symptoms")}>
-              {symptoms?.count ? (
+            {symptoms?.count != 0 && (
+              <SectionLayout title={t("symptoms")}>
                 <PrintTable
                   headers={[
                     { key: "symptom" },
@@ -391,14 +426,12 @@ export default function TreatmentSummary({
                     logged_by: formatName(symptom.created_by),
                   }))}
                 />
-              ) : (
-                <EmptyState message={t("no_symptoms_recorded")} />
-              )}
-            </SectionLayout>
+              </SectionLayout>
+            )}
 
             {/* Diagnoses */}
-            <SectionLayout title={t("diagnoses")}>
-              {diagnoses?.count ? (
+            {diagnoses?.count != 0 && (
+              <SectionLayout title={t("diagnoses")}>
                 <PrintTable
                   headers={[
                     { key: "diagnosis" },
@@ -421,14 +454,12 @@ export default function TreatmentSummary({
                     logged_by: formatName(diagnosis.created_by),
                   }))}
                 />
-              ) : (
-                <EmptyState message={t("no_diagnoses_recorded")} />
-              )}
-            </SectionLayout>
+              </SectionLayout>
+            )}
 
             {/* Medications */}
-            <SectionLayout title={t("medications")}>
-              {medications?.results.length ? (
+            {medications?.count != 0 && (
+              <SectionLayout title={t("medications")}>
                 <PrintTable
                   headers={[
                     { key: "medicine" },
@@ -463,14 +494,12 @@ export default function TreatmentSummary({
                     };
                   })}
                 />
-              ) : (
-                <EmptyState message={t("no_medication_recorded")} />
-              )}
-            </SectionLayout>
+              </SectionLayout>
+            )}
 
             {/* Medication Statements */}
-            <SectionLayout title={t("ongoing_medications")}>
-              {medicationStatement?.results.length ? (
+            {medicationStatement?.count != 0 && (
+              <SectionLayout title={t("ongoing_medications")}>
                 <PrintTable
                   headers={[
                     { key: "medication" },
@@ -493,17 +522,21 @@ export default function TreatmentSummary({
                       medication.effective_period?.start,
                       medication.effective_period?.end,
                     ]
-                      .map((date) => formatDateTime(date))
+                      .map((date, ind) =>
+                        date
+                          ? formatDateTime(date)
+                          : ind === 1
+                            ? t("ongoing")
+                            : "",
+                      )
                       .join(" - "),
                     reason: medication.reason,
                     notes: medication.note,
                     logged_by: formatName(medication.created_by),
                   }))}
                 />
-              ) : (
-                <EmptyState message={t("no_ongoing_medications")} />
-              )}
-            </SectionLayout>
+              </SectionLayout>
+            )}
           </div>
 
           {/* Questionnaire Responses Section */}

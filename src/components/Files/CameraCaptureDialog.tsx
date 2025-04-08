@@ -1,5 +1,5 @@
-import { t } from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
 import { toast } from "sonner";
 
@@ -26,6 +26,8 @@ export interface CameraCaptureDialogProps {
 }
 
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
+  const { t } = useTranslation();
+
   const { open, onOpenChange, onCapture, onResetCapture, setPreview } = props;
   const isLaptopScreen = useBreakpoints({ lg: true, default: false });
   const { requestPermission } = useMediaDevicePermission();
@@ -169,6 +171,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(true);
                     }}
                     className="m-2"
+                    data-cy="capture-button"
                   >
                     {t("capture")}
                   </Button>
@@ -185,6 +188,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(false);
                     }}
                     className="m-2"
+                    data-cy="retake-button"
                   >
                     {t("retake")}
                   </Button>
@@ -196,6 +200,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(false);
                     }}
                     className="m-2"
+                    data-cy="capture-submit-button"
                   >
                     {t("submit")}
                   </Button>

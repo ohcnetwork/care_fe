@@ -45,6 +45,7 @@ import deviceApi from "@/types/device/deviceApi";
 
 import DeviceEncounterHistory from "./DeviceEncounterHistory";
 import AssociateLocationSheet from "./components/AssociateLocationSheet";
+import DeviceServiceHistory from "./components/DeviceServiceHistory";
 
 interface Props {
   facilityId: string;
@@ -154,7 +155,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             <DeviceEncounterHistory
               trigger={
                 <Button variant="outline_primary">
-                  <CareIcon icon="l-medkit" className="h-4 w-4" />
+                  <CareIcon icon="l-medkit" className="size-4" />
                   {t("encounter_history")}
                 </Button>
               }
@@ -163,21 +164,21 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             />
             <Link href={`/devices/${deviceId}/locationHistory`}>
               <Button variant="outline_primary" className="sm:mr-3">
-                <CareIcon icon="l-location-point" className="h-4 w-4" />
+                <CareIcon icon="l-location-point" className="size-4" />
                 {t("location_history")}
               </Button>
             </Link>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Link href={`/devices/${deviceId}/edit`}>
-              <Button variant="outline">
-                <CareIcon icon="l-pen" className="w-4 h-4" />
+              <Button variant="outline" data-cy="edit-device-button">
+                <CareIcon icon="l-pen" className="size-4" />
                 {t("edit")}
               </Button>
             </Link>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">
+                <Button variant="destructive" data-cy="delete-device-button">
                   <CareIcon icon="l-trash" className="h-4" />
                   {t("delete")}
                 </Button>
@@ -190,11 +191,14 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogCancel data-cy="cancel-delete-device-button">
+                    {t("cancel")}
+                  </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => deleteDevice()}
                     className={cn(buttonVariants({ variant: "destructive" }))}
                     disabled={isDeleting}
+                    data-cy="confirm-delete-device-button"
                   >
                     {isDeleting ? t("deleting") : t("delete")}
                   </AlertDialogAction>
@@ -205,7 +209,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4" data-cy="device-details">
         <Card>
           <CardHeader>
             <CardTitle>{t("device_information")}</CardTitle>
@@ -238,7 +242,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                         className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
                       >
                         {device.current_location.name}
-                        <ExternalLink className="h-3 w-3" />
+                        <ExternalLink className="size-3" />
                       </Link>
                     </>
                   ) : (
@@ -267,7 +271,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                         className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
                       >
                         {device.current_encounter.patient.name}
-                        <ExternalLink className="h-3 w-3" />
+                        <ExternalLink className="size-3" />
                       </Link>
                     </>
                   ) : (
@@ -287,7 +291,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                         className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
                       >
                         {device.managing_organization.name}
-                        <ExternalLink className="h-3 w-3" />
+                        <ExternalLink className="size-3" />
                       </Link>
                     </>
                   ) : (
@@ -456,13 +460,14 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
           </Card>
         )}
 
+        <DeviceServiceHistory facilityId={facilityId} deviceId={deviceId} />
         {device.care_type && (
           <ErrorBoundary
             fallback={
               <Card className="md:col-span-2 border-red-200 bg-red-50">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-2 text-red-600">
-                    <AlertCircle className="h-5 w-5" />
+                    <AlertCircle className="size-5" />
                     <span>
                       Couldn't load device type specific information.{" "}
                       <strong className="font-semibold capitalize">

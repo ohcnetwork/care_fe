@@ -47,6 +47,25 @@ type ConsentSheetProps = {
   encounterId: string;
 };
 
+export const EmptyState = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex min-h-[200px] flex-col items-center justify-center gap-1 p-8 text-center">
+      <div className="rounded-full bg-secondary/10 p-3">
+        <CareIcon
+          icon="l-file-exclamation-alt"
+          className="text-3xl text-gray-500"
+        />
+      </div>
+      <div className="max-w-[300px] space-y-1">
+        <h3 className="font-medium">{t("no_consent_found")}</h3>
+        <p className="text-sm text-gray-500">{t("no_consent_description")}</p>
+      </div>
+    </div>
+  );
+};
+
 export function ConsentSheet({
   trigger,
   patientId,
@@ -56,7 +75,6 @@ export function ConsentSheet({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [open, setOpen] = useState(false);
-
   const { data: existingConsents } = useQuery({
     queryKey: ["consents", patientId, encounterId],
     queryFn: query(consentApi.list, {
@@ -66,8 +84,22 @@ export function ConsentSheet({
     enabled: open,
   });
 
+  const consents = existingConsents?.results?.filter((consent) =>
+    consent.source_attachments[0]?.name
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase()),
+  ); // TODO: move this to the backend in the next iteration
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          setSearchQuery("");
+        }
+      }}
+    >
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">
@@ -82,7 +114,7 @@ export function ConsentSheet({
           <div className="container">
             <div className="flex justify-between items-center gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
                 <Input
                   placeholder={t("search_existing_consent")}
                   className="pl-10"
@@ -95,24 +127,22 @@ export function ConsentSheet({
                 encounterId={encounterId}
                 trigger={
                   <Button className="flex items-center gap-1">
-                    <Plus className="w-4 h-4" />
+                    <Plus className="size-4" />
                     {t("link_consent")}
                   </Button>
                 }
               />
             </div>
 
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
-              {existingConsents?.results
-                ?.filter((consent) =>
-                  consent.source_attachments[0]?.name
-                    ?.toLowerCase()
-                    .includes(searchQuery.toLowerCase()),
-                ) // TODO: move this to the backend in the next iteration
-                .map((consent) => (
+            {consents && consents.length > 0 ? (
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
+                {consents.map((consent) => (
                   <ConsentCard key={consent.id} consent={consent} />
                 ))}
-            </div>
+              </div>
+            ) : (
+              <EmptyState />
+            )}
           </div>
         </ScrollArea>
       </SheetContent>
@@ -293,7 +323,7 @@ function PreviewFile({ file }: PreviewFileProps) {
         pageNumber={1}
         onDocumentLoadSuccess={() => {}}
         scale={1}
-        className="object-cover w-full h-full !overflow-hidden"
+        className="object-cover w-full h-full overflow-hidden!"
       />
     );
   }

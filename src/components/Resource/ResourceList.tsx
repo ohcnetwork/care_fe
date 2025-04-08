@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -46,10 +46,12 @@ const ACTIVE = RESOURCE_STATUS_CHOICES.map((o) => o.text).filter(
 );
 
 function EmptyState() {
+  const { t } = useTranslation();
+
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
-        <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
+        <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_resources_found")}</h3>
       <p className="text-sm text-gray-500 mb-4">
@@ -60,6 +62,8 @@ function EmptyState() {
 }
 
 export default function ResourceList({ facilityId }: { facilityId: string }) {
+  const { t } = useTranslation();
+
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["title"],
@@ -119,14 +123,15 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
         </Badge>
       }
     >
-      <div className="space-y-4 mt-2 px-6">
-        <div className="rounded-lg border bg-card shadow-sm">
+      <div className="space-y-4 mt-4">
+        <div className="border border-gray-200 rounded-lg">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
+                      data-cy="search-resource"
                       variant="outline"
                       size="sm"
                       className={cn(
@@ -135,7 +140,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                           "bg-primary/10 text-primary hover:bg-primary/20",
                       )}
                     >
-                      <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-search" className="mr-2 size-4" />
                       {title ? (
                         <span className="truncate">{title}</span>
                       ) : (
@@ -189,6 +194,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                             title,
                           })
                         }
+                        data-cy="tab-outgoing"
                       >
                         {t("outgoing")}
                       </TabsTrigger>
@@ -201,6 +207,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                             title,
                           })
                         }
+                        data-cy="tab-incoming"
                       >
                         {t("incoming")}
                       </TabsTrigger>
@@ -254,6 +261,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       key={statusOption}
                       value={statusOption}
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      data-cy={`tab-${statusOption}`}
                       onClick={() =>
                         updateQuery({
                           status: statusOption,
@@ -267,7 +275,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                             (o) => o.text === statusOption,
                           )?.icon || "l-folder-open"
                         }
-                        className="mr-2 h-4 w-4"
+                        className="mr-2 size-4"
                       />
                       {t(`resource_status__${statusOption}`)}
                     </TabsTrigger>
@@ -278,10 +286,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
           </div>
         </div>
 
-        <div
-          className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
-          data-cy="resource-list-cards"
-        >
+        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {isLoading ? (
             <CardGridSkeleton count={6} />
           ) : resources.length === 0 ? (
@@ -290,10 +295,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
             </div>
           ) : (
             <>
-              {resources.map((resource: ResourceRequest) => (
+              {resources.map((resource: ResourceRequest, index) => (
                 <Card
-                  key={resource.id}
+                  key={index}
                   className="hover:shadow-lg transition-shadow group flex flex-col justify-between"
+                  data-cy={`resource-card-${index}`}
                 >
                   <CardHeader className="space-y-1 pb-2">
                     <div className="flex items-center justify-between">
@@ -334,7 +340,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         {resource.origin_facility?.name}
                         <CareIcon
                           icon="l-arrow-right"
-                          className="mx-2 h-4 w-4"
+                          className="mx-2 size-4"
                         />
                         {resource.assigned_facility?.name}
                       </Badge>
@@ -345,9 +351,10 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <Link
                       href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
                       className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
+                      data-cy={`resource-view-details-${index}`}
                     >
                       View Details
-                      <CareIcon icon="l-arrow-right" className="ml-1 h-4 w-4" />
+                      <CareIcon icon="l-arrow-right" className="ml-1 size-4" />
                     </Link>
                   </CardFooter>
                 </Card>

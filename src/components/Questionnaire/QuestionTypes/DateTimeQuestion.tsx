@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -38,6 +38,8 @@ export function DateTimeQuestion({
   clearError,
   classes,
 }: DateTimeQuestionProps) {
+  const { t } = useTranslation();
+
   const currentValue = questionnaireResponse.values[0]?.value
     ? new Date(questionnaireResponse.values[0].value as string)
     : undefined;
@@ -104,7 +106,7 @@ export function DateTimeQuestion({
             )}
             disabled={disabled}
           >
-            <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-calender" className="mr-2 size-4" />
             {currentValue ? format(currentValue, "PPP") : t("pick_a_date")}
           </Button>
         </PopoverTrigger>
@@ -119,7 +121,7 @@ export function DateTimeQuestion({
       </Popover>
       <Input
         type="time"
-        className="sm:w-[150px] border-t-0 sm:border-t"
+        className="sm:w-[150px] border-t-0 sm:border-t border-gray-200"
         value={formatTime(currentValue)}
         onChange={handleTimeChange}
         disabled={disabled || !currentValue}

@@ -38,6 +38,7 @@ export function LocationActionButtons({
     onClick: () => void;
     variant: "outline" | "primary" | "link";
     className?: string;
+    "data-cy"?: string;
   };
 
   const buttons: ActionButton[] = [];
@@ -48,6 +49,7 @@ export function LocationActionButtons({
       onClick: onCancel,
       variant: "link",
       className: "underline underline-offset-2",
+      "data-cy": "cancel-bed-plan-button",
     });
   }
 
@@ -55,7 +57,8 @@ export function LocationActionButtons({
     label: t("move_to_another_bed"),
     onClick: onMove,
     variant: "outline",
-    className: "border-gray-400 shadow",
+    className: "border-gray-400 shadow-sm",
+    "data-cy": "move-to-another-bed-button",
   });
 
   if (status === "active" && onComplete) {
@@ -63,7 +66,8 @@ export function LocationActionButtons({
       label: t("complete_bed_stay"),
       onClick: () => onComplete(location),
       variant: "outline",
-      className: "border-gray-400 shadow",
+      className: "border-gray-400 shadow-sm",
+      "data-cy": "complete-bed-stay-button",
     });
   }
 
@@ -72,7 +76,7 @@ export function LocationActionButtons({
       label: t("assign_bed_now"),
       onClick: onAssignNow,
       variant: "primary",
-      className: "shadow",
+      className: "shadow-sm",
     });
   }
 
@@ -84,6 +88,7 @@ export function LocationActionButtons({
           variant={button.variant}
           onClick={button.onClick}
           className={button.className}
+          data-cy={button["data-cy"]}
         >
           {button.label}
         </Button>
@@ -92,7 +97,7 @@ export function LocationActionButtons({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">
-              <MoreVertical className="h-4 w-4" />
+              <MoreVertical className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

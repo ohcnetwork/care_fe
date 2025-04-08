@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { ArrowRight, Bed } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -36,7 +35,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
   return (
     <div
       className={cn(
-        "border rounded-lg overflow-hidden shadow-sm h-full",
+        "border rounded-lg overflow-hidden shadow-xs h-full",
         isOccupied
           ? "bg-white border-gray-200"
           : "bg-green-50 border-green-200",
@@ -53,7 +52,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
         <div className="flex items-center">
           <Bed
             className={cn(
-              "h-4 w-4 mr-2",
+              "size-4 mr-2",
               isOccupied ? "text-blue-600" : "text-green-600",
             )}
           />
@@ -102,15 +101,15 @@ function LocationCard({ location, onClick }: LocationCardProps) {
 
   return (
     <div
-      className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="border border-gray-200 rounded-lg overflow-hidden shadow-xs hover:shadow-md transition-shadow cursor-pointer"
       onClick={onClick}
     >
       <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
         <div className="flex items-center">
-          <Icon className="h-4 w-4 mr-2 text-gray-600" />
+          <Icon className="size-4 mr-2 text-gray-600" />
           <span className="font-medium">{location.name}</span>
         </div>
-        <ArrowRight className="h-4 w-4 text-gray-400" />
+        <ArrowRight className="size-4 text-gray-400" />
       </div>
 
       <div className="p-4">
@@ -164,6 +163,8 @@ interface BreadcrumbsProps {
 }
 
 function Breadcrumbs({ location, onSelect }: BreadcrumbsProps) {
+  const { t } = useTranslation();
+
   const items = [];
   let current: LocationList | undefined = location;
 

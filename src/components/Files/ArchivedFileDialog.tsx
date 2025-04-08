@@ -1,9 +1,12 @@
 import dayjs from "dayjs";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -20,6 +23,8 @@ export default function ArchivedFileDialog({
   onOpenChange: (open: boolean) => void;
   file: FileUploadModel | null;
 }) {
+  const { t } = useTranslation();
+
   if (!file) {
     return <></>;
   }
@@ -49,7 +54,7 @@ export default function ArchivedFileDialog({
             <span className="text-sm text-gray-500">
               {t("archived_reason")}:
             </span>
-            <span>{file?.archive_reason}</span>
+            <span data-cy="archived-reason">{file?.archive_reason}</span>
           </div>
           <div className="flex flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
             <span>
@@ -61,6 +66,17 @@ export default function ArchivedFileDialog({
             </span>
           </div>
         </div>
+        <DialogFooter className="sm:justify-start">
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="secondary"
+              data-cy="archive-dialog-close"
+            >
+              {t("close")}
+            </Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

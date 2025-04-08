@@ -55,7 +55,7 @@ Cypress.Commands.add(
           .type(value)
           .then(() => {
             // Select the filtered option from command menu
-            cy.get("[cmdk-list]")
+            cy.get("[cmdk-group]")
               .find("[cmdk-item]")
               .contains(value)
               .should("be.visible")
@@ -147,6 +147,18 @@ Cypress.Commands.add("verifyErrorMessages", (errors: ErrorMessageItem[]) => {
     cy.contains(label).scrollIntoView().should("be.visible");
     // Verify the error message is present
     cy.contains(message).scrollIntoView().should("be.visible");
+  });
+});
+
+Cypress.Commands.add("saveCurrentUrl", () => {
+  cy.url().then((url) => {
+    cy.wrap(url).as("savedCurrentUrl");
+  });
+});
+
+Cypress.Commands.add("navigateToSavedUrl", () => {
+  cy.get<string>("@savedCurrentUrl").then((url) => {
+    cy.visit(url);
   });
 });
 

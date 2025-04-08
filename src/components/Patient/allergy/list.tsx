@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import {
   BeakerIcon,
   CookingPotIcon,
@@ -8,6 +7,7 @@ import {
 } from "lucide-react";
 import { Link } from "raviger";
 import { ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -55,16 +55,12 @@ interface AllergyListProps {
 }
 
 export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
-  food: <CookingPotIcon className="h-4 w-4" aria-label="Food allergy" />,
-  medication: (
-    <BeakerIcon className="h-4 w-4" aria-label="Medication allergy" />
-  ),
+  food: <CookingPotIcon className="size-4" aria-label="Food allergy" />,
+  medication: <BeakerIcon className="size-4" aria-label="Medication allergy" />,
   environment: (
-    <LeafIcon className="h-4 w-4" aria-label="Environmental allergy" />
+    <LeafIcon className="size-4" aria-label="Environmental allergy" />
   ),
-  biologic: (
-    <HeartPulseIcon className="h-4 w-4" aria-label="Biologic allergy" />
-  ),
+  biologic: <HeartPulseIcon className="size-4" aria-label="Biologic allergy" />,
 };
 
 export function AllergyList({
@@ -74,6 +70,8 @@ export function AllergyList({
   readOnly = false,
   encounterStatus,
 }: AllergyListProps) {
+  const { t } = useTranslation();
+
   const [showEnteredInError, setShowEnteredInError] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -203,7 +201,7 @@ export function AllergyList({
           <div className="flex items-center gap-2">
             <Avatar
               name={allergy.created_by.username}
-              className="w-4 h-4"
+              className="size-4"
               imageUrl={allergy.created_by.profile_picture_url}
             />
             <span className="text-sm">{formatName(allergy.created_by)}</span>
@@ -300,6 +298,8 @@ const AllergyListLayout = ({
   isExpanded: boolean;
   onToggle: () => void;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Card className={cn("border-none rounded-sm", className)}>
       <CardHeader
@@ -324,7 +324,7 @@ const AllergyListLayout = ({
             href={`questionnaire/allergy_intolerance`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
-            <CareIcon icon="l-pen" className="w-4 h-4" />
+            <CareIcon icon="l-pen" className="size-4" />
             {t("edit")}
           </Link>
         )}

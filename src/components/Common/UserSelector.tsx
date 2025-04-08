@@ -22,6 +22,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
@@ -33,6 +34,7 @@ interface Props {
   placeholder?: string;
   noOptionsMessage?: string;
   popoverClassName?: string;
+  facilityId?: string;
 }
 
 export default function UserSelector({
@@ -41,19 +43,26 @@ export default function UserSelector({
   placeholder,
   noOptionsMessage,
   popoverClassName,
+  facilityId,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const { data, isFetching } = useQuery({
-    queryKey: ["users", search],
-    queryFn: query.debounced(UserApi.list, {
-      queryParams: { search_text: search },
-    }),
+    queryKey: ["users", search, facilityId],
+    queryFn: query.debounced(
+      facilityId ? routes.facility.getUsers : UserApi.list,
+      {
+        pathParams: facilityId ? { facility_id: facilityId } : undefined,
+        queryParams: {
+          search_text: search,
+        },
+      },
+    ),
   });
 
-  const users = data?.results || [];
+  const usersList = data?.results || [];
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -91,7 +100,7 @@ export default function UserSelector({
           <CommandInput
             placeholder={t("search")}
             onValueChange={setSearch}
-            className="outline-none border-none ring-0 shadow-none"
+            className="outline-hidden border-none ring-0 shadow-none"
           />
           <CommandList>
             <CommandEmpty>
@@ -100,7 +109,7 @@ export default function UserSelector({
                 : noOptionsMessage || t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {users.map((user: UserBase) => (
+              {usersList.map((user: UserBase) => (
                 <CommandItem
                   key={user.id}
                   value={user.id}
@@ -116,14 +125,21 @@ export default function UserSelector({
                       name={formatName(user, true)}
                       className="size-6 rounded-full"
                     />
-                    <span>{formatName(user)}</span>
-                    <span className="text-xs text-gray-500 font-medium">
-                      {user.username}
+                    <span className="flex min-w-0 items-center">
+                      <span
+                        className="truncate text-sm font-medium"
+                        title={formatName(user)}
+                      >
+                        {formatName(user)}
+                      </span>
+                      <span className="ml-1 text-xs text-gray-500">
+                        {user.username}
+                      </span>
                     </span>
+                    {selected?.id === user.id && (
+                      <CheckIcon className="ml-auto" />
+                    )}
                   </div>
-                  {selected?.id === user.id && (
-                    <CheckIcon className="ml-auto" />
-                  )}
                 </CommandItem>
               ))}
             </CommandGroup>

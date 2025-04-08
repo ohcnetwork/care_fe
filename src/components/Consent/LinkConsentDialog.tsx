@@ -4,6 +4,7 @@ import { t } from "i18next";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -53,30 +54,39 @@ import {
 import consentApi from "@/types/consent/consentApi";
 import { UserBase } from "@/types/user/user";
 
-const consentFormSchema = z
-  .object({
-    decision: z.enum(CONSENT_DECISIONS).default("permit"),
-    category: z.enum(CONSENT_CATEGORIES).default("treatment"),
-    status: z.enum(CONSENT_STATUSES).default("active"),
-    date: z.date(),
-    period: z.object({
-      start: z.date().optional(),
-      end: z.date().optional(),
-    }),
-    verification_type: z.enum(VERIFICATION_TYPES).default("validation"),
-    source_attachments: z.array(z.instanceof(File)).default([]),
-  })
-  .superRefine((data, ctx) => {
-    if (data.source_attachments.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: t("please_upload_a_file"),
-        path: ["source_attachments"],
-      });
-    }
-  });
+const consentFormSchema = () =>
+  z
+    .object({
+      decision: z.enum(CONSENT_DECISIONS).default("permit"),
+      category: z.enum(CONSENT_CATEGORIES).default("treatment"),
+      status: z.enum(CONSENT_STATUSES).default("active"),
+      date: z.date(),
+      period: z.object({
+        start: z.date().optional(),
+        end: z.date().optional(),
+      }),
+      verification_type: z.enum(VERIFICATION_TYPES).default("validation"),
+      source_attachments: z.array(z.instanceof(File)).default([]),
+    })
+    .superRefine((data, ctx) => {
+      if (data.source_attachments.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("please_upload_a_file"),
+          path: ["source_attachments"],
+        });
+      }
 
-type ConsentFormValues = z.infer<typeof consentFormSchema>;
+      if (data.period.end && data.date > data.period.end) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("consent_after_end"),
+          path: ["date"],
+        });
+      }
+    });
+
+type ConsentFormValues = z.infer<ReturnType<typeof consentFormSchema>>;
 
 interface LinkConsentDialogProps {
   patientId: string;
@@ -91,6 +101,8 @@ export default function LinkConsentDialog({
   trigger,
   onSuccess,
 }: LinkConsentDialogProps) {
+  const { t } = useTranslation();
+
   const [isOpen, setIsOpen] = useState(false);
   const [associatingId, setAssociatingId] = useState<string | null>(null);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
@@ -114,7 +126,6 @@ export default function LinkConsentDialog({
   });
 
   const handleSuccess = () => {
-    toast.success(t("consent_created_successfully"));
     queryClient.invalidateQueries({
       queryKey: ["consents", patientId, encounterId],
     });
@@ -132,6 +143,7 @@ export default function LinkConsentDialog({
     onSuccess: async (response) => {
       if (form.getValues("source_attachments")?.length === 0) {
         handleSuccess();
+        toast.success(t("consent_created_successfully"));
         return;
       }
 
@@ -144,7 +156,7 @@ export default function LinkConsentDialog({
   });
 
   const form = useForm<ConsentFormValues>({
-    resolver: zodResolver(consentFormSchema),
+    resolver: zodResolver(consentFormSchema()),
     defaultValues: {
       decision: "permit",
       category: "treatment",
@@ -178,6 +190,7 @@ export default function LinkConsentDialog({
       mfa_enabled: authUser.mfa_enabled || false,
       last_login: authUser.last_login || new Date().toISOString(),
       profile_picture_url: authUser.read_profile_picture_url || "",
+      deleted: authUser.deleted || false,
     };
 
     createConsent({
@@ -215,7 +228,7 @@ export default function LinkConsentDialog({
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" className="gap-2">
-            <Plus className="h-4 w-4" />
+            <Plus className="size-4" />
             {t("link_consent")}
           </Button>
         )}
@@ -402,7 +415,7 @@ export default function LinkConsentDialog({
                       <>
                         <Label
                           htmlFor={`file_upload_consent`}
-                          className="w-full inline-flex items-center justify-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground"
+                          className="w-full inline-flex items-center justify-center px-4 py-2 cursor-pointer border border-gray-200 rounded-md hover:bg-accent hover:text-accent-foreground"
                         >
                           <CareIcon icon="l-file-upload-alt" className="mr-1" />
                           <span

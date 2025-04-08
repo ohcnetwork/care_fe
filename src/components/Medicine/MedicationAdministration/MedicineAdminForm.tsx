@@ -1,8 +1,6 @@
-"use client";
-
 import { format, formatDistanceToNow } from "date-fns";
-import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -56,6 +54,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   formId,
   isValid,
 }) => {
+  const { t } = useTranslation();
+
   const [isPastTime, setIsPastTime] = useState(
     administrationRequest.occurrence_period_start !==
       administrationRequest.occurrence_period_end || !!administrationRequest.id,
@@ -341,7 +341,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 )}
                 disabled={!isPastTime || !!administrationRequest.id}
               >
-                <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-calender" className="mr-2 size-4" />
                 {administrationRequest.occurrence_period_start
                   ? format(
                       new Date(administrationRequest.occurrence_period_start),
@@ -403,7 +403,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   administrationRequest.status === "in_progress"
                 }
               >
-                <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-calender" className="mr-2 size-4" />
                 {administrationRequest.occurrence_period_end
                   ? format(
                       new Date(administrationRequest.occurrence_period_end),

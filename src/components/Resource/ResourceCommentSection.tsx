@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -23,8 +23,8 @@ import query from "@/Utils/request/query";
 import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 
-const CommentSection = (props: { id: string }) => {
-  const { id } = props;
+const CommentSection = ({ id }: { id: string }) => {
+  const { t } = useTranslation();
   const [commentBox, setCommentBox] = useState("");
   const queryClient = useQueryClient();
 
@@ -144,11 +144,11 @@ export const Comment = ({
         <div className="flex">
           <Avatar
             name={`${created_by.first_name} ${created_by.last_name}`}
-            className="w-8 h-8 rounded-full object-cover"
+            className="size-8 rounded-full object-cover"
           />
         </div>
       </TooltipComponent>
-      <div className="flex flex-col flex-grow mt-1">
+      <div className="flex flex-col grow mt-1">
         <div className="flex items-center justify-between w-full">
           <span className="text-gray-700 font-medium text-xs md:text-sm">
             {formatName(created_by)}

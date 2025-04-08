@@ -33,7 +33,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
-import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
@@ -225,12 +224,12 @@ const Login = (props: LoginProps) => {
       ) {
         if (!form[key].match(/\w/)) {
           hasError = true;
-          err[key] = t("field_required");
+          err[key] = "field_required";
         }
       }
       if (!form[key]) {
         hasError = true;
-        err[key] = t("field_required");
+        err[key] = "field_required";
       }
     });
     if (hasError) {
@@ -263,12 +262,12 @@ const Login = (props: LoginProps) => {
     if (typeof form.username === "string") {
       if (!form.username.match(/\w/)) {
         hasError = true;
-        err.username = t("field_required");
+        err.username = "field_required";
       }
     }
     if (!form.username) {
       hasError = true;
-      err.username = t("field_required");
+      err.username = "field_required";
     }
 
     if (hasError) {
@@ -277,7 +276,6 @@ const Login = (props: LoginProps) => {
     }
     return form;
   };
-
   const handleForgetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const valid = validateForgetData();
@@ -324,7 +322,6 @@ const Login = (props: LoginProps) => {
   return (
     <div className="relative flex min-h-screen flex-col md:h-screen md:flex-row">
       <AuthHero />
-      {!forgotPassword && <BrowserWarning />}
 
       {/* Login Forms Section */}
       <div className="login-hero-form my-4 w-full md:mt-0 md:h-full md:w-1/2">
@@ -405,7 +402,7 @@ const Login = (props: LoginProps) => {
                           />
                           {errors.username && (
                             <p className="text-sm text-red-500">
-                              {errors.username}
+                              {t(errors.username)}
                             </p>
                           )}
                         </div>
@@ -424,7 +421,7 @@ const Login = (props: LoginProps) => {
                           />
                           {errors.password && (
                             <p className="text-sm text-red-500">
-                              {errors.password}
+                              {t(errors.password)}
                             </p>
                           )}
                         </div>
@@ -499,7 +496,7 @@ const Login = (props: LoginProps) => {
                             />
                             {errors.username && (
                               <p className="text-sm text-red-500">
-                                {errors.username}
+                                {t(errors.username)}
                               </p>
                             )}
                           </div>
@@ -565,7 +562,7 @@ const Login = (props: LoginProps) => {
                                   <InputOTPSlot
                                     key={index}
                                     index={index}
-                                    className="w-10 h-10"
+                                    className="size-10"
                                   />
                                 ))}
                               </InputOTPGroup>

@@ -24,7 +24,7 @@ interface LocationTreeNodeProps {
   facilityId: string;
 }
 
-function LocationTreeNode({
+export function LocationTreeNode({
   location,
   selectedLocationId,
   onSelect,
@@ -33,7 +33,6 @@ function LocationTreeNode({
   level = 0,
   facilityId,
 }: LocationTreeNodeProps) {
-  const hasChildren = location.has_children;
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = location.id === selectedLocationId;
   const Icon =
@@ -42,16 +41,17 @@ function LocationTreeNode({
   // Query for this node's children
   const { data: children, isLoading } = useQuery({
     queryKey: ["locations", facilityId, "children", location.id, "kind"],
-    queryFn: query.paginated(locationApi.list, {
+    queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: location.id,
         mode: "kind",
       },
-      pageSize: 100,
     }),
-    enabled: isExpanded,
+    enabled: true,
   });
+
+  const hasChildren = children?.results && children.results.length > 0;
 
   return (
     <div className="space-y-1">
@@ -62,32 +62,34 @@ function LocationTreeNode({
         )}
         style={{ paddingLeft: `${level}rem` }}
       >
-        {hasChildren ? (
+        {isLoading ? (
+          <Button variant="ghost" size="icon" className="size-6">
+            <div className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+          </Button>
+        ) : hasChildren ? (
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="size-6"
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(location.id);
             }}
           >
-            {isLoading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
-            ) : isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
+            {isExpanded ? (
+              <ChevronDown className="size-4" />
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="size-4" />
             )}
           </Button>
         ) : (
           <span className="w-6" />
         )}
         <div
-          className="flex items-center flex-1 text-sm gap-2"
+          className="flex items-center flex-1 text-sm gap-2 w-0"
           onClick={() => onSelect(location)}
         >
-          <Icon className="h-4 w-4" />
+          <Icon className="size-4" />
           <span className="truncate">{location.name}</span>
         </div>
       </div>

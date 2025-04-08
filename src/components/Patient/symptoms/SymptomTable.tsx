@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,8 @@ interface SymptomTableProps {
 }
 
 export function SymptomTable({ symptoms }: SymptomTableProps) {
+  const { t } = useTranslation();
+
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>
@@ -139,7 +141,7 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
               <div className="flex items-center gap-2">
                 <Avatar
                   name={symptom.created_by.username}
-                  className="w-4 h-4"
+                  className="size-4"
                   imageUrl={symptom.created_by.profile_picture_url}
                 />
 

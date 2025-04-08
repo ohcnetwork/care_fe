@@ -37,7 +37,7 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
             <div className="flex items-center text-sm font-medium text-gray-700">
               {stringifyNestedObject(
                 location.parent.parent,
-                <MoveRight className="mx-2 h-5 w-5" />,
+                <MoveRight className="mx-2 size-5" />,
                 true,
               )}
             </div>
@@ -47,7 +47,7 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
           <div className="ml-4 flex items-center">
             <CareIcon
               icon="l-corner-down-right"
-              className="w-4 h-4 mr-2 mb-1 text-gray-400"
+              className="size-4 mr-2 mb-1 text-gray-400"
             />
             <span className="text-sm font-medium text-gray-800">
               {location.parent?.name}
@@ -58,7 +58,7 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
           <div className="ml-12 flex items-center">
             <CareIcon
               icon="l-corner-down-right"
-              className="w-4 h-4 mr-2 mb-1 text-gray-400"
+              className="size-4 mr-2 mb-1 text-gray-400"
             />
             <div
               className={cn(
@@ -68,7 +68,7 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
             >
               <BedSingle
                 className={cn(
-                  "h-5 w-5",
+                  "size-5",
                   status === "active" ? "text-teal-600" : "text-blue-600",
                 )}
               />
@@ -93,7 +93,7 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
               <div className="flex flex-col">
                 <span className="text-xs font-medium ">{t("start_time")}</span>
                 <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
+                  <Clock className="size-3" />
                   <span className="font-semibold">
                     {format(
                       new Date(locationHistory.start_datetime),
@@ -107,7 +107,7 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
                 <div className="flex items-center gap-1">
                   {locationHistory.end_datetime ? (
                     <>
-                      <Clock className="h-3 w-3" />
+                      <Clock className="size-3" />
                       <span className="font-semibold">
                         {format(
                           new Date(locationHistory.end_datetime),

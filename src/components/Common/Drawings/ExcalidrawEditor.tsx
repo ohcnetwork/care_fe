@@ -1,14 +1,14 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
-import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
+import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 import {
   hashKey,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { t } from "i18next";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { debounce } from "@/lib/utils";
@@ -45,6 +45,7 @@ export default function ExcalidrawEditor({
   associating_type,
   drawingId,
 }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [elements, setElements] = useState<readonly ExcalidrawElement[] | null>(
     drawingId ? null : [],
@@ -137,7 +138,7 @@ export default function ExcalidrawEditor({
           <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-500 text-gray-50 shadow-sm hover:bg-red-500/90"
+              className="bg-red-500 text-gray-50 shadow-xs hover:bg-red-500/90"
               onClick={() => {
                 setIsAlertOpen(false);
                 navigate("../drawings");

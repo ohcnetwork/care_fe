@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Building, Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -123,6 +123,8 @@ function DeleteOrganizationButton({
   facilityId: string;
   onSuccess?: () => void;
 }) {
+  const { t } = useTranslation();
+
   const queryClient = useQueryClient();
 
   const { mutate: removeOrganization, isPending } = useMutation({
@@ -165,9 +167,9 @@ function DeleteOrganizationButton({
       disabled={isPending}
     >
       {isPending ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <Loader2 className="size-4 animate-spin" />
       ) : (
-        <Trash2 className="h-4 w-4 text-destructive" />
+        <Trash2 className="size-4 text-destructive" />
       )}
     </Button>
   );
@@ -182,6 +184,8 @@ export default function LinkDepartmentsSheet({
   onUpdate,
   orgType = "organization",
 }: Props) {
+  const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -217,7 +221,7 @@ export default function LinkDepartmentsSheet({
       <SheetTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm">
-            <Building className="mr-2 h-4 w-4" />
+            <Building className="mr-2 size-4" />
             {t("manage_organization", {
               count: entityType === "device" ? 1 : 0,
             })}
@@ -259,7 +263,7 @@ export default function LinkDepartmentsSheet({
                 }
                 disabled={!selectedOrg || isAdding}
               >
-                {isAdding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isAdding && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {t("add_organization", {
                   count: entityType === "device" ? 1 : 0,
                 })}
@@ -276,10 +280,10 @@ export default function LinkDepartmentsSheet({
                 {currentOrganizations.map((org) => (
                   <div
                     key={org.id}
-                    className="flex items-center justify-between rounded-md border p-2"
+                    className="flex items-center justify-between rounded-md border border-gray-200 p-2"
                   >
                     <div className="flex items-center space-x-2">
-                      <Building className="h-4 w-4 text-blue-400" />
+                      <Building className="size-4 text-blue-400" />
                       <div className="flex flex-col">
                         <span className="font-medium">{org.name}</span>
                         {org.description && (

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -38,24 +38,29 @@ export const EmptyState = ({
   searchQuery,
   message,
   description,
-}: EmptyStateProps) => (
-  <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-8 text-center">
-    <div className="rounded-full bg-secondary/10 p-3">
-      <CareIcon icon="l-tablets" className="text-3xl text-gray-500" />
+}: EmptyStateProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-8 text-center">
+      <div className="rounded-full bg-secondary/10 p-3">
+        <CareIcon icon="l-tablets" className="text-3xl text-gray-500" />
+      </div>
+      <div className="max-w-[200px] space-y-1">
+        <h3 className="font-medium">
+          {message ||
+            (searching ? t("no_matches_found") : t("no_prescriptions"))}
+        </h3>
+        <p className="text-sm text-gray-500">
+          {description ||
+            (searching
+              ? t("no_medications_match_query", { searchQuery })
+              : t("no_medications_prescribed"))}
+        </p>
+      </div>
     </div>
-    <div className="max-w-[200px] space-y-1">
-      <h3 className="font-medium">
-        {message || (searching ? "No matches found" : "No Prescriptions")}
-      </h3>
-      <p className="text-sm text-gray-500">
-        {description ||
-          (searching
-            ? `No medications match "${searchQuery}"`
-            : "No medications have been prescribed yet")}
-      </p>
-    </div>
-  </div>
-);
+  );
+};
 
 interface Props {
   readonly?: boolean;
@@ -67,6 +72,8 @@ export default function MedicationRequestTable({
   patientId,
   encounter,
 }: Props) {
+  const { t } = useTranslation();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
   const { hasPermission } = usePermissions();
@@ -137,7 +144,7 @@ export default function MedicationRequestTable({
     <div className="space-y-2">
       <div className="rounded-lg">
         <Tabs defaultValue="prescriptions">
-          <TabsList className="bg-gray-200 py-0 w-fit">
+          <TabsList>
             <TabsTrigger
               value="prescriptions"
               className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
@@ -161,7 +168,7 @@ export default function MedicationRequestTable({
                     placeholder={t("search_medications")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-500"
+                    className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
                   />
                   {searchQuery && (
                     <Button
@@ -184,7 +191,7 @@ export default function MedicationRequestTable({
                       data-cy="edit-prescription"
                     >
                       <Link href={`questionnaire/medication_request`}>
-                        <PencilIcon className="mr-2 h-4 w-4" />
+                        <PencilIcon className="mr-2 size-4" />
                         {t("edit")}
                       </Link>
                     </Button>
@@ -227,7 +234,7 @@ export default function MedicationRequestTable({
                         >
                           <CareIcon
                             icon={showStopped ? "l-eye-slash" : "l-eye"}
-                            className="h-4 w-4"
+                            className="size-4"
                           />
                           <span className="text-sm underline">
                             {showStopped ? t("hide") : t("show")}{" "}
