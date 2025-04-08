@@ -24,7 +24,7 @@ import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
 import { OrgSelectorPopover } from "./ManageQuestionnaireOrganizationsSheet";
 import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
-import { TagSelector as TagSelectorPopover } from "./ManageQuestionnaireTagsSheet";
+import { TagSelectorPopover } from "./ManageQuestionnaireTagsSheet";
 
 interface Organization {
   id: string;

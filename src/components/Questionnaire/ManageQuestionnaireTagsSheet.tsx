@@ -63,7 +63,7 @@ interface TagSelectorProps {
   triggerClassName?: string;
 }
 
-export function TagSelector({
+export function TagSelectorPopover({
   title,
   selected,
   onToggle,
@@ -295,7 +295,7 @@ export default function ManageQuestionnaireTagsSheet({
           {/* Tag Selector */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium">{t("add_tags")}</h3>
-            <TagSelector
+            <TagSelectorPopover
               selected={selectedTags}
               onToggle={handleToggleTag}
               searchQuery={searchQuery}
