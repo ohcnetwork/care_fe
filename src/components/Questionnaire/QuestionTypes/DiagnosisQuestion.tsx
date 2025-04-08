@@ -46,6 +46,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -543,14 +551,47 @@ export function DiagnosisQuestion({
     <div className="space-y-4">
       {sortedDiagnoses.length > 0 && (
         <div className="md:rounded-lg md:border">
-          <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
-            <div className="col-span-5">{t("diagnosis")}</div>
-            <div className="col-span-2 text-center">{t("date")}</div>
-            <div className="col-span-2 text-center">{t("status")}</div>
-            <div className="col-span-2 text-center">{t("verification")}</div>
-            <div className="col-span-1 text-center">{t("action")}</div>
-          </div>
-          <div className="md:divide-y md:divide-gray-200">
+          {/* Desktop View - Table */}
+          {!isMobile && (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50">
+                  <TableHead className="w-[30%]">{t("diagnosis")}</TableHead>
+                  <TableHead className="w-[15%] text-center">
+                    {t("date")}
+                  </TableHead>
+                  <TableHead className="w-[15%] text-center">
+                    {t("status")}
+                  </TableHead>
+                  <TableHead className="w-[15%] text-center">
+                    {t("verification")}
+                  </TableHead>
+                  <TableHead className="w-[5%] text-center">
+                    {t("action")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedDiagnoses.map((diagnosis, index) => (
+                  <DiagnosisTableRow
+                    key={
+                      diagnosis.id ||
+                      `diagnosis-${diagnosis.code.code}-${index}`
+                    }
+                    diagnosis={diagnosis}
+                    disabled={disabled}
+                    onUpdate={(updates) =>
+                      handleUpdateDiagnosis(index, updates)
+                    }
+                    onRemove={() => handleRemoveDiagnosis(index)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          )}
+
+          {/* Mobile View */}
+          <div className="md:hidden">
             {sortedDiagnoses.map((diagnosis, index) => (
               <DiagnosisItem
                 key={
@@ -665,33 +706,27 @@ interface DiagnosisItemProps {
   onRemove?: () => void;
 }
 
-const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
+const DiagnosisTableRow = ({
   diagnosis,
   disabled,
   onUpdate,
   onRemove,
-}) => {
-  const { t } = useTranslation();
-
+}: DiagnosisItemProps) => {
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
-  const [isOpen, setIsOpen] = useState(
-    Boolean(diagnosis.dirty) || !diagnosis.id,
-  );
-
+  const { t } = useTranslation();
   return (
-    <div
-      className={cn("group hover:bg-gray-50", {
-        "opacity-40 pointer-events-none":
-          diagnosis.verification_status === "entered_in_error",
-        "bg-yellow-50/50": diagnosis.category === "chronic_condition",
-      })}
-    >
-      {/* Desktop View */}
-      <div className="hidden md:grid md:grid-cols-12 md:items-center md:gap-4 py-1 px-2 hover:bg-gray-50">
-        <div className="flex items-center justify-between md:col-span-5">
+    <>
+      <TableRow
+        className={cn(
+          diagnosis.verification_status === "entered_in_error" &&
+            "opacity-40 pointer-events-none",
+          diagnosis.category === "chronic_condition" && "bg-yellow-50/50",
+        )}
+      >
+        <TableCell className="py-1">
           <div className="flex items-center space-x-2 min-w-0">
             <div
-              className="font-medium text-sm truncate flex-1"
+              className="font-medium text-sm truncate max-w-[12rem]"
               title={diagnosis.code.display}
             >
               {diagnosis.code.display}
@@ -707,127 +742,80 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
               {t(`Diagnosis_${diagnosis.category}__title`)}
             </div>
           </div>
-          <div className="md:hidden shrink-0">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={disabled}
-                  className="size-8"
-                >
-                  <DotsVerticalIcon className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
-                  <Pencil2Icon className="size-4 mr-2" />
-                  {showNotes ? t("hide_notes") : t("add_notes")}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={onRemove}
-                >
-                  <MinusCircledIcon className="size-4 mr-2" />
-                  {t("remove_diagnosis")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-2 md:col-span-6 md:grid-cols-3 md:gap-4">
-          <div className="col-span-2 md:col-span-1">
-            <Label className="text-xs text-gray-500 md:hidden">
-              {t("date")}
-            </Label>
-            <CombinedDatePicker
-              value={
-                diagnosis.onset?.onset_datetime
-                  ? new Date(diagnosis.onset.onset_datetime)
-                  : undefined
-              }
-              onChange={(date) =>
-                onUpdate?.({ onset: { onset_datetime: dateQueryString(date) } })
-              }
-              dateFormat="P"
-              disabled={disabled || !!diagnosis.id}
-              buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
-            />
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500 md:hidden">
-              {t("status")}
-            </Label>
-            <Select
-              value={diagnosis.clinical_status}
-              onValueChange={(value) =>
-                onUpdate?.({
-                  clinical_status: value as DiagnosisRequest["clinical_status"],
-                })
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger className="h-8 md:h-9">
-                <SelectValue
-                  placeholder={
-                    <span className="text-gray-500">
-                      {t("diagnosis_status_placeholder")}
-                    </span>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
-                  <SelectItem
-                    key={status}
-                    value={status}
-                    className="capitalize"
-                  >
-                    {t(status)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500 md:hidden">
-              {t("verification")}
-            </Label>
-            <Select
-              value={diagnosis.verification_status}
-              onValueChange={(value) =>
-                onUpdate?.({
-                  verification_status:
-                    value as DiagnosisRequest["verification_status"],
-                })
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger className="h-8 md:h-9">
-                <SelectValue
-                  placeholder={
-                    <span className="text-gray-500">
-                      {t("diagnosis_verification_placeholder")}
-                    </span>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
-                  <SelectItem
-                    key={status}
-                    value={status}
-                    className="capitalize"
-                  >
-                    {t(status)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="hidden md:block md:col-span-1">
+        </TableCell>
+        <TableCell className="py-1">
+          <CombinedDatePicker
+            value={
+              diagnosis.onset?.onset_datetime
+                ? new Date(diagnosis.onset.onset_datetime)
+                : undefined
+            }
+            onChange={(date) =>
+              onUpdate?.({ onset: { onset_datetime: dateQueryString(date) } })
+            }
+            dateFormat="P"
+            disabled={disabled || !!diagnosis.id}
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+          />
+        </TableCell>
+        <TableCell className="py-1">
+          <Select
+            value={diagnosis.clinical_status}
+            onValueChange={(value) =>
+              onUpdate?.({
+                clinical_status: value as DiagnosisRequest["clinical_status"],
+              })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-8 md:h-9">
+              <SelectValue
+                placeholder={
+                  <span className="text-gray-500">
+                    {t("diagnosis_status_placeholder")}
+                  </span>
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
+                <SelectItem key={status} value={status} className="capitalize">
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </TableCell>
+        <TableCell className="py-1">
+          <Select
+            value={diagnosis.verification_status}
+            onValueChange={(value) =>
+              onUpdate?.({
+                verification_status:
+                  value as DiagnosisRequest["verification_status"],
+              })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-8 md:h-9">
+              <SelectValue
+                placeholder={
+                  <span className="text-gray-500">
+                    {t("diagnosis_verification_placeholder")}
+                  </span>
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
+                <SelectItem key={status} value={status} className="capitalize">
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </TableCell>
+        <TableCell className="py-1 text-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -842,7 +830,11 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
                 <Pencil2Icon className="size-4 mr-2" />
-                {showNotes ? t("hide_notes") : t("add_notes")}
+                {showNotes
+                  ? t("hide_notes")
+                  : diagnosis.note
+                    ? t("show_notes")
+                    : t("add_notes")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -854,214 +846,234 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-      </div>
+        </TableCell>
+      </TableRow>
+      {showNotes && (
+        <TableRow>
+          <TableCell colSpan={5} className="px-4 py-2">
+            <Input
+              type="text"
+              placeholder={t("add_notes_about_diagnosis")}
+              value={diagnosis.note || ""}
+              onChange={(e) => onUpdate?.({ note: e.target.value })}
+              disabled={disabled}
+            />
+          </TableCell>
+        </TableRow>
+      )}
+    </>
+  );
+};
 
+// Keep the original DiagnosisItem component for mobile view
+const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
+  diagnosis,
+  disabled,
+  onUpdate,
+  onRemove,
+}) => {
+  const [isOpen, setIsOpen] = useState(
+    Boolean(diagnosis.dirty) || !diagnosis.id,
+  );
+  const { t } = useTranslation();
+  return (
+    <div
+      className={cn("group hover:bg-gray-50", {
+        "opacity-40 pointer-events-none":
+          diagnosis.verification_status === "entered_in_error",
+        "bg-yellow-50/50": diagnosis.category === "chronic_condition",
+      })}
+    >
       {/* Mobile View - Card Layout */}
-      <div className="md:hidden rounded-lg">
-        <Card
-          className={cn("mb-2 rounded-lg", {
-            "border border-primary-500": isOpen,
-            "border-0 shadow-none": !isOpen,
-          })}
+      <Card
+        className={cn("mb-2 rounded-lg", {
+          "border border-primary-500": isOpen,
+          "border-0 shadow-none": !isOpen,
+        })}
+      >
+        <Collapsible
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          key={diagnosis.id || `diagnosis-${diagnosis.code.code}`}
         >
-          <Collapsible
-            open={isOpen}
-            onOpenChange={setIsOpen}
-            key={diagnosis.id || `diagnosis-${diagnosis.code.code}`}
-          >
-            <CollapsibleTrigger asChild>
-              <CardHeader
-                className={cn(
-                  "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
-                  {
-                    "bg-gray-200 border border-gray-300": !isOpen,
-                  },
-                )}
-              >
-                <div className="flex flex-col space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-start gap-1">
-                        <CardTitle
-                          className="text-base text-gray-950 break-words"
-                          title={diagnosis.code.display}
+          <CollapsibleTrigger asChild>
+            <CardHeader
+              className={cn(
+                "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
+                {
+                  "bg-gray-200 border border-gray-300": !isOpen,
+                },
+              )}
+            >
+              <div className="flex flex-col space-y-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-start gap-1">
+                      <CardTitle
+                        className="text-base text-gray-950 break-words"
+                        title={diagnosis.code.display}
+                      >
+                        <span className="mr-2">{diagnosis.code.display}</span>
+                        <div
+                          className={cn(
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
+                            diagnosis.category === "chronic_condition"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-gray-100 text-gray-700",
+                          )}
                         >
-                          <span className="mr-2">{diagnosis.code.display}</span>
-                          <div
-                            className={cn(
-                              "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
-                              diagnosis.category === "chronic_condition"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-gray-100 text-gray-700",
-                            )}
-                          >
-                            {t(`Diagnosis_${diagnosis.category}__title`)}
-                          </div>
-                        </CardTitle>
-                      </div>
+                          {t(`Diagnosis_${diagnosis.category}__title`)}
+                        </div>
+                      </CardTitle>
                     </div>
-                    <div className="flex items-center gap-2 ml-2 shrink-0">
-                      {isOpen && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={
-                            disabled ||
-                            diagnosis.verification_status === "entered_in_error"
-                          }
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onRemove?.();
-                          }}
-                          className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
-                        >
-                          <MinusCircledIcon className="h-5 w-5" />
-                        </Button>
-                      )}
+                  </div>
+                  <div className="flex items-center gap-2 ml-2 shrink-0">
+                    {isOpen && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-10 w-10 border border-gray-400 bg-white shadow p-4"
+                        disabled={
+                          disabled ||
+                          diagnosis.verification_status === "entered_in_error"
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemove?.();
+                        }}
+                        className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
                       >
-                        {isOpen ? (
-                          <ChevronsDownUp className="h-5 w-5" />
-                        ) : (
-                          <ChevronsUpDown className="h-5 w-5" />
-                        )}
+                        <MinusCircledIcon className="h-5 w-5" />
                       </Button>
-                    </div>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10 border border-gray-400 bg-white shadow p-4"
+                    >
+                      {isOpen ? (
+                        <ChevronsDownUp className="h-5 w-5" />
+                      ) : (
+                        <ChevronsUpDown className="h-5 w-5" />
+                      )}
+                    </Button>
                   </div>
-                  {!isOpen && (
-                    <div className="text-sm text-gray-500">
-                      {t("diagnosed_on")}{" "}
-                      {diagnosis.onset?.onset_datetime
-                        ? format(
-                            new Date(diagnosis.onset.onset_datetime),
-                            "MMMM d, yyyy",
-                          )
-                        : ""}
-                      {" · "}
-                      {t(diagnosis.clinical_status)}
-                      {" · "}
-                      {t(diagnosis.verification_status)}
-                    </div>
-                  )}
                 </div>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
-                <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
-                    {t("diagnosis")} {t("date")}
+                {!isOpen && (
+                  <div className="text-sm text-gray-500">
+                    {t("diagnosed_on")}{" "}
+                    {diagnosis.onset?.onset_datetime
+                      ? format(
+                          new Date(diagnosis.onset.onset_datetime),
+                          "MMMM d, yyyy",
+                        )
+                      : ""}
+                    {" · "}
+                    {t(diagnosis.clinical_status)}
+                    {" · "}
+                    {t(diagnosis.verification_status)}
                   </div>
-                  <CombinedDatePicker
-                    value={
-                      diagnosis.onset?.onset_datetime
-                        ? new Date(diagnosis.onset.onset_datetime)
-                        : undefined
-                    }
-                    onChange={(date) =>
-                      onUpdate?.({
-                        onset: { onset_datetime: dateQueryString(date) },
-                      })
-                    }
-                    dateFormat="P"
-                    disabled={disabled || !!diagnosis.id}
-                    buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
-                  />
+                )}
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
+              <div>
+                <div className="block text-sm font-medium text-gray-500 mb-1">
+                  {t("diagnosis")} {t("date")}
                 </div>
-                <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
-                    {t("status")}
-                  </div>
-                  <Select
-                    value={diagnosis.clinical_status}
-                    onValueChange={(value) =>
-                      onUpdate?.({
-                        clinical_status:
-                          value as DiagnosisRequest["clinical_status"],
-                      })
-                    }
-                    disabled={disabled}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
-                        <SelectItem
-                          key={status}
-                          value={status}
-                          className="capitalize"
-                        >
-                          {t(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <CombinedDatePicker
+                  value={
+                    diagnosis.onset?.onset_datetime
+                      ? new Date(diagnosis.onset.onset_datetime)
+                      : undefined
+                  }
+                  onChange={(date) =>
+                    onUpdate?.({
+                      onset: { onset_datetime: dateQueryString(date) },
+                    })
+                  }
+                  dateFormat="P"
+                  disabled={disabled || !!diagnosis.id}
+                  buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+                />
+              </div>
+              <div>
+                <div className="block text-sm font-medium text-gray-500 mb-1">
+                  {t("status")}
                 </div>
-                <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
-                    {t("verification")}
-                  </div>
-                  <Select
-                    value={diagnosis.verification_status}
-                    onValueChange={(value) =>
-                      onUpdate?.({
-                        verification_status:
-                          value as DiagnosisRequest["verification_status"],
-                      })
-                    }
-                    disabled={disabled}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
-                        <SelectItem
-                          key={status}
-                          value={status}
-                          className="capitalize"
-                        >
-                          {t(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <Select
+                  value={diagnosis.clinical_status}
+                  onValueChange={(value) =>
+                    onUpdate?.({
+                      clinical_status:
+                        value as DiagnosisRequest["clinical_status"],
+                    })
+                  }
+                  disabled={disabled}
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
+                      <SelectItem
+                        key={status}
+                        value={status}
+                        className="capitalize"
+                      >
+                        {t(status)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <div className="block text-sm font-medium text-gray-500 mb-1">
+                  {t("verification")}
                 </div>
-                <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
-                    {t("notes")}
-                  </div>
-                  <Input
-                    type="text"
-                    placeholder={t("add_notes_about_diagnosis")}
-                    value={diagnosis.note || ""}
-                    onChange={(e) => onUpdate?.({ note: e.target.value })}
-                    disabled={disabled}
-                  />
+                <Select
+                  value={diagnosis.verification_status}
+                  onValueChange={(value) =>
+                    onUpdate?.({
+                      verification_status:
+                        value as DiagnosisRequest["verification_status"],
+                    })
+                  }
+                  disabled={disabled}
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
+                      <SelectItem
+                        key={status}
+                        value={status}
+                        className="capitalize"
+                      >
+                        {t(status)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <div className="block text-sm font-medium text-gray-500 mb-1">
+                  {t("notes")}
                 </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
-      </div>
-
-      {/* Notes for Desktop */}
-      {showNotes && (
-        <div className="hidden md:block px-3 pb-3">
-          <Input
-            type="text"
-            placeholder={t("add_notes_about_diagnosis")}
-            value={diagnosis.note || ""}
-            onChange={(e) => onUpdate?.({ note: e.target.value })}
-            disabled={disabled}
-          />
-        </div>
-      )}
+                <Input
+                  type="text"
+                  placeholder={t("add_notes_about_diagnosis")}
+                  value={diagnosis.note || ""}
+                  onChange={(e) => onUpdate?.({ note: e.target.value })}
+                  disabled={disabled}
+                />
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
     </div>
   );
 };
@@ -1080,7 +1092,7 @@ function CategorySelector({
   const { t } = useTranslation();
 
   return (
-    <div className={`grid ${gridCols} gap-4`}>
+    <div className={cn("grid gap-4", gridCols)}>
       {categories.map((category) => (
         <div
           key={category}
