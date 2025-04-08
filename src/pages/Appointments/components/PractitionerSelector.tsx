@@ -1,6 +1,5 @@
 import { CaretDownIcon } from "@radix-ui/react-icons";
 import { CheckIcon } from "@radix-ui/react-icons";
-import { PopoverClose } from "@radix-ui/react-popover";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -93,13 +92,16 @@ export const PractitionerSelector = ({
               {clearSelection && (
                 <CommandItem
                   value="all"
-                  onSelect={() => onSelect(null)}
+                  onSelect={() => {
+                    onSelect(null);
+                    setOpen(false);
+                  }}
                   className="cursor-pointer w-full"
                 >
-                  <PopoverClose className="w-full flex items-start">
+                  <div className="w-full flex items-start">
                     <span>{clearSelection}</span>
                     {!selected && <CheckIcon className="ml-auto" />}
-                  </PopoverClose>
+                  </div>
                 </CommandItem>
               )}
               {practitioners?.users.map((user) => (
