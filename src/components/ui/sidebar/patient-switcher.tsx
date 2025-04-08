@@ -96,7 +96,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
               </SelectValue>
             </SelectTrigger>
           </TooltipTrigger>
-          {!open && (
+          {!open && !isMobile && (
             <TooltipContent side="right" align="center">
               <p>{patientUserContext.selectedPatient?.name}</p>
             </TooltipContent>
