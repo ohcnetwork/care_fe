@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 type Props = {
@@ -21,16 +22,23 @@ type Props = {
 
 export default function PrintPreview(props: Props) {
   const initialScale = useBreakpoints({ default: 0.44, md: 1 });
+  const { goBack } = useAppHistory();
   const { t } = useTranslation();
 
   return (
     <Page
       title={props.title}
       options={
-        <Button variant="primary" disabled={props.disabled} onClick={print}>
-          <CareIcon icon="l-print" className="text-lg" />
-          {t("print")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => goBack()}>
+            <CareIcon icon="l-arrow-left" className="text-lg" />
+            {t("back")}
+          </Button>
+          <Button variant="primary" disabled={props.disabled} onClick={print}>
+            <CareIcon icon="l-print" className="text-lg" />
+            {t("print")}
+          </Button>
+        </div>
       }
     >
       <div className="mx-auto my-4 max-w-[95vw] print:max-w-none sm:my-8">
