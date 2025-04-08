@@ -89,53 +89,60 @@ export function RolesIndex() {
           ...tableDimensions,
         }}
       >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="md:sticky bg-gray-50 left-0 z-20 whitespace-nowrap">
-                {t("permission")}
-              </TableHead>
-              {roles.map((role) => (
-                <TableHead
-                  key={role.id}
-                  className="whitespace-nowrap h-[120px] max-w-[30px] min-w-[30px] sticky top-0 z-10 "
-                >
-                  <div className="text-sm transform -rotate-90 w-[100px] px-2 origin-center -translate-x-1/3">
-                    {role.name}
-                  </div>
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {allPermissions.map((permission) => (
-              <TableRow key={permission.slug}>
-                <TableCell className="md:sticky left-0 z-10 max-w-[200px] bg-gray-50 font-medium">
-                  {permission.name}
-                </TableCell>
-                {roles.map((role) => {
-                  const hasPermission = role.permissions.some(
-                    (p) => p.slug === permission.slug,
-                  );
-
-                  return (
-                    <TableCell key={role.id} className="bg-white">
-                      <div className=" max-w-[30px]  min-w-[30px] flex items-center justify-center">
-                        {hasPermission ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-500" />
-                        )}
+        <div className="relative">
+          <div className="sticky top-0 z-40 bg-gray-50">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="md:sticky bg-gray-50 left-0 z-20 whitespace-nowrap">
+                    {t("permission")}
+                  </TableHead>
+                  {roles.map((role) => (
+                    <TableHead
+                      key={role.id}
+                      className="whitespace-nowrap h-[120px] max-w-[20px] min-w-[20px] sticky top-0 z-10"
+                    >
+                      <div className="text-sm transform -rotate-90 w-[100px] px-2 origin-center -translate-x-1/3">
+                        {role.name}
                       </div>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+            </Table>
+          </div>
+          <div className="overflow-auto">
+            <Table>
+              <TableBody>
+                {allPermissions.map((permission) => (
+                  <TableRow key={permission.slug}>
+                    <TableCell className="md:sticky left-0 z-10 max-w-[200px] bg-gray-50 font-medium">
+                      {permission.name}
                     </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                    {roles.map((role) => {
+                      const hasPermission = role.permissions.some(
+                        (p) => p.slug === permission.slug,
+                      );
 
+                      return (
+                        <TableCell key={role.id} className="bg-white">
+                          <div className=" max-w-[30px]  min-w-[30px] flex items-center justify-center">
+                            {hasPermission ? (
+                              <CheckCircle2 className="h-5 w-5 text-green-500" />
+                            ) : (
+                              <XCircle className="h-5 w-5 text-red-500" />
+                            )}
+                          </div>
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </div>
       <Pagination totalCount={response?.count ?? 0} />
     </Page>
   );
