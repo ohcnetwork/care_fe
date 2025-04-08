@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import {
   Calendar,
   CalendarRange,
@@ -48,20 +47,24 @@ type ConsentSheetProps = {
   encounterId: string;
 };
 
-export const EmptyState = () => (
-  <div className="flex min-h-[200px] flex-col items-center justify-center gap-1 p-8 text-center">
-    <div className="rounded-full bg-secondary/10 p-3">
-      <CareIcon
-        icon="l-file-exclamation-alt"
-        className="text-3xl text-gray-500"
-      />
+export const EmptyState = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex min-h-[200px] flex-col items-center justify-center gap-1 p-8 text-center">
+      <div className="rounded-full bg-secondary/10 p-3">
+        <CareIcon
+          icon="l-file-exclamation-alt"
+          className="text-3xl text-gray-500"
+        />
+      </div>
+      <div className="max-w-[300px] space-y-1">
+        <h3 className="font-medium">{t("no_consent_found")}</h3>
+        <p className="text-sm text-gray-500">{t("no_consent_description")}</p>
+      </div>
     </div>
-    <div className="max-w-[300px] space-y-1">
-      <h3 className="font-medium">{t("no_consent_found")}</h3>
-      <p className="text-sm text-gray-500">{t("no_consent_description")}</p>
-    </div>
-  </div>
-);
+  );
+};
 
 export function ConsentSheet({
   trigger,
@@ -88,7 +91,15 @@ export function ConsentSheet({
   ); // TODO: move this to the backend in the next iteration
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          setSearchQuery("");
+        }
+      }}
+    >
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">

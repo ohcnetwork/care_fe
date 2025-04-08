@@ -5,9 +5,9 @@ import {
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -133,6 +133,8 @@ function SymptomActionsMenu({
   onRemove: () => void;
   symptom: SymptomRequest;
 }) {
+  const { t } = useTranslation();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -177,6 +179,8 @@ const SymptomRow = React.memo(function SymptomRow({
   onUpdate,
   onRemove,
 }: SymptomRowProps) {
+  const { t } = useTranslation();
+
   const [showNotes, setShowNotes] = useState(Boolean(symptom.note));
   const [isOpen, setIsOpen] = useState(!symptom.id);
   const isMobile = useBreakpoints({ default: true, md: false });
@@ -479,6 +483,8 @@ export function SymptomQuestion({
   disabled,
   encounterId,
 }: SymptomQuestionProps) {
+  const { t } = useTranslation();
+
   const isPreview = patientId === "preview";
   const symptoms =
     (questionnaireResponse.values?.[0]?.value as SymptomRequest[]) || [];

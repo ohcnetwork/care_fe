@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Command,
@@ -41,6 +41,8 @@ export function LocationSearch({
   disabled,
   value,
 }: LocationSearchProps) {
+  const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -54,7 +56,11 @@ export function LocationSearch({
   });
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild disabled={disabled}>
+      <PopoverTrigger
+        asChild
+        disabled={disabled}
+        data-cy="location-search-trigger"
+      >
         <div
           className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer"
           role="combobox"
