@@ -38,7 +38,7 @@ export default function PrintPreview(props: Props) {
           <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out print:transform-none w-[50rem]">
             <div
               id="section-to-print"
-              className={cn("w-full", props.className)}
+              className={cn("w-full print:py-10", props.className)}
             >
               {props.children}
             </div>
