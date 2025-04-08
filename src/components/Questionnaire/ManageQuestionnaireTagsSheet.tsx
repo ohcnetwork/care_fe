@@ -52,7 +52,8 @@ interface Props {
 }
 
 interface TagSelectorProps {
-  selectedTags: QuestionnaireTagModel[];
+  title?: string;
+  selected: QuestionnaireTagModel[];
   onToggle: (tagId: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
@@ -63,7 +64,8 @@ interface TagSelectorProps {
 }
 
 export function TagSelector({
-  selectedTags,
+  title,
+  selected,
   onToggle,
   searchQuery,
   onSearchChange,
@@ -95,7 +97,7 @@ export function TagSelector({
           )}
         >
           <Hash className="mr-2 size-4" />
-          <span>{t("search_tags")}</span>
+          <span>{title || t("search_tags")}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -127,7 +129,7 @@ export function TagSelector({
                       <Hash className="size-4" />
                       <span>{tag.name}</span>
                     </div>
-                    {selectedTags.some((t) => t.id === tag.id) && (
+                    {selected.some((t) => t.id === tag.id) && (
                       <Check className="size-4" />
                     )}
                   </CommandItem>
@@ -294,7 +296,7 @@ export default function ManageQuestionnaireTagsSheet({
           <div className="space-y-4">
             <h3 className="text-sm font-medium">{t("add_tags")}</h3>
             <TagSelector
-              selectedTags={selectedTags}
+              selected={selectedTags}
               onToggle={handleToggleTag}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}

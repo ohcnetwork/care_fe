@@ -42,7 +42,8 @@ interface Props {
 }
 
 interface OrgSelectorPopoverProps {
-  selectedIds: string[];
+  title?: string;
+  selected: string[];
   onToggle: (orgId: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
@@ -59,7 +60,8 @@ interface OrgSelectorPopoverProps {
 }
 
 export function OrgSelectorPopover({
-  selectedIds,
+  title,
+  selected,
   onToggle,
   searchQuery,
   onSearchChange,
@@ -91,7 +93,7 @@ export function OrgSelectorPopover({
           )}
         >
           <Building className="mr-2 size-4" />
-          <span>{t("search_organizations")}</span>
+          <span>{title || t("search_organizations")}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -128,9 +130,7 @@ export function OrgSelectorPopover({
                         </span>
                       )}
                     </div>
-                    {selectedIds.includes(org.id) && (
-                      <Check className="size-4" />
-                    )}
+                    {selected.includes(org.id) && <Check className="size-4" />}
                   </CommandItem>
                 ))
               )}
@@ -273,7 +273,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
               {t("add_organization", { count: 0 })}
             </h3>
             <OrgSelectorPopover
-              selectedIds={selectedIds}
+              selected={selectedIds}
               onToggle={handleToggleOrganization}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
