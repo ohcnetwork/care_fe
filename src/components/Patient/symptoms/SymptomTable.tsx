@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,8 @@ interface SymptomTableProps {
 }
 
 export function SymptomTable({ symptoms }: SymptomTableProps) {
+  const { t } = useTranslation();
+
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>

@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
-import { t } from "i18next";
 import { navigate } from "raviger";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,7 @@ interface Props {
 }
 
 export function UserCard({ user, className, facilityId }: Props) {
+  const { t } = useTranslation();
   const { patientToken: tokenData } = useAuthContext();
 
   const returnLink = useMemo(() => {
