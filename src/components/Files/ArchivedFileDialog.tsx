@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +23,8 @@ export default function ArchivedFileDialog({
   onOpenChange: (open: boolean) => void;
   file: FileUploadModel | null;
 }) {
+  const { t } = useTranslation();
+
   if (!file) {
     return <></>;
   }

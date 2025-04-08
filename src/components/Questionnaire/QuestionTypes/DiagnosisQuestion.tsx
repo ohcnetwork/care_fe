@@ -5,7 +5,6 @@ import {
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, {
   Dispatch,
@@ -14,6 +13,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -118,6 +118,8 @@ export function DiagnosisQuestion({
   updateQuestionnaireResponseCB,
   disabled,
 }: DiagnosisQuestionProps) {
+  const { t } = useTranslation();
+
   const isPreview = patientId === "preview";
   const [selectedCategory, setSelectedCategory] = useState<
     DiagnosisRequest["category"]
@@ -669,6 +671,8 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
   onUpdate,
   onRemove,
 }) => {
+  const { t } = useTranslation();
+
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
   const [isOpen, setIsOpen] = useState(
     Boolean(diagnosis.dirty) || !diagnosis.id,
@@ -1073,6 +1077,8 @@ function CategorySelector({
   onCategorySelect: Dispatch<SetStateAction<DiagnosisRequest["category"]>>;
   gridCols?: string;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className={`grid ${gridCols} gap-4`}>
       {categories.map((category) => (
