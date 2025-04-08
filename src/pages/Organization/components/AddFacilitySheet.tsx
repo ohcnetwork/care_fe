@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -21,6 +21,8 @@ interface Props {
 }
 
 export default function AddFacilitySheet({ organizationId }: Props) {
+  const { t } = useTranslation();
+
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 

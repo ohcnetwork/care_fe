@@ -1,5 +1,3 @@
-"use client";
-
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { BadgeCheck, LogOut } from "lucide-react";
 import { navigate } from "raviger";

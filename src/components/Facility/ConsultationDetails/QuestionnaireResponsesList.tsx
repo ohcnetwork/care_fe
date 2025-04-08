@@ -206,6 +206,8 @@ function StructuredResponseBadge({
   type: string;
   submitType: string;
 }) {
+  const { t } = useTranslation();
+
   const colors = {
     symptom: "bg-yellow-100 text-yellow-800",
     diagnosis: "bg-blue-100 text-blue-800",
@@ -234,6 +236,8 @@ function ResponseCard({
   item: QuestionnaireResponse;
   isPrintPreview?: boolean;
 }) {
+  const { t } = useTranslation();
+
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
 
