@@ -13,8 +13,7 @@ import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 
 import { GeneralSettings } from "./general/general";
-import LocationList from "./locations/LocationList";
-import LocationView from "./locations/LocationView";
+import LocationSettings from "./locations/LocationSettings";
 import FacilityOrganizationList from "./organizations/FacilityOrganizationList";
 
 interface SettingsLayoutProps {
@@ -31,9 +30,9 @@ const getRoutes = (facilityId: string) => ({
       currentTab={tab}
     />
   ),
-  "/locations": () => <LocationList facilityId={facilityId} />,
+  "/locations": () => <LocationSettings facilityId={facilityId} />,
   "/location/:id": ({ id }: { id: string }) => (
-    <LocationView facilityId={facilityId} id={id} />
+    <LocationSettings facilityId={facilityId} locationId={id} />
   ),
   "/devices": () => <DevicesList facilityId={facilityId} />,
   "/devices/create": () => <CreateDevice facilityId={facilityId} />,
@@ -97,6 +96,7 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
               <TabsTrigger
                 value={tab.value}
                 className="border-b-2 border-transparent px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-primary-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                data-cy={"settings-" + tab.value + "-tab"}
               >
                 {tab.label}
               </TabsTrigger>

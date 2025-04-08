@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,8 @@ interface GenericTableProps {
 }
 
 export default function PrintTable({ headers, rows }: GenericTableProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200">
       <Table className="w-full">

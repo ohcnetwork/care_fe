@@ -1,12 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { ArrowLeft } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
 
@@ -22,6 +25,85 @@ import {
   AppointmentCreateRequest,
   TokenSlot,
 } from "@/types/scheduling/schedule";
+
+interface PatientCardProps {
+  patient: Patient;
+  selectedPatient: string | null;
+  setSelectedPatient: (patientId: string) => void;
+  getPatienDobOrAge: (patient: Patient) => string;
+}
+
+function PatientCard({
+  patient,
+  selectedPatient,
+  setSelectedPatient,
+  getPatienDobOrAge,
+}: PatientCardProps) {
+  const { t } = useTranslation();
+
+  return (
+    <Card
+      key={patient.id}
+      onClick={() => setSelectedPatient(patient.id)}
+      className={cn(
+        "cursor-pointer transition-all duration-200 rounded-xl shadow-md border",
+        selectedPatient === patient.id
+          ? "border-primary shadow-lg"
+          : "hover:border-gray-300",
+      )}
+    >
+      <CardHeader>
+        <CardTitle className="capitalize text-lg font-semibold">
+          {patient.name}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground font-medium">
+            {t("date_of_birth_age")}:
+          </span>
+          <span className="text-sm font-semibold">
+            {getPatienDobOrAge(patient)}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground font-medium">
+            {t("sex")}:
+          </span>
+          <span className="text-sm font-semibold">
+            {t(`GENDER__${patient.gender}`)}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PatientList({
+  patients,
+  selectedPatient,
+  setSelectedPatient,
+  getPatienDobOrAge,
+}: {
+  patients: Patient[];
+  selectedPatient: string | null;
+  setSelectedPatient: (patientId: string | null) => void;
+  getPatienDobOrAge: (patient: Patient) => string;
+}) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-0 sm:p-4">
+      {patients?.map((patient) => (
+        <PatientCard
+          key={patient.id}
+          patient={patient}
+          selectedPatient={selectedPatient}
+          setSelectedPatient={setSelectedPatient}
+          getPatienDobOrAge={getPatienDobOrAge}
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function PatientSelect({
   facilityId,
@@ -104,7 +186,7 @@ export default function PatientSelect({
     );
   };
 
-  const getPatienDoBorAge = (patient: Patient) => {
+  const getPatienDobOrAge = (patient: Patient) => {
     if (patient.date_of_birth) {
       return dayjs(patient.date_of_birth).format("DD MMM YYYY");
     }
@@ -113,111 +195,37 @@ export default function PatientSelect({
     return `${age} years`;
   };
 
-  const renderPatientList = () => {
-    return (
-      <div className="overflow-auto max-h-[400px]">
-        <table className="w-full">
-          <thead className="text-sm bg-secondary-200 font-medium">
-            <tr>
-              <th className="w-2/6 px-4 py-2 text-left">
-                {t("patient_name_uhid")}
-              </th>
-              <th className="w-1/6 px-4 py-2 text-left">
-                {t("primary_ph_no")}
-              </th>
-              <th className="w-1/6 px-4 py-2 text-left">
-                {t("date_of_birth_age")}
-              </th>
-              <th className="w-1/6 px-4 py-2 text-left">{t("sex")}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y rounded-lg border border-gray-200 bg-card">
-            {patients?.map((patient) => (
-              <tr
-                key={patient.id}
-                onClick={() => setSelectedPatient(patient.id ?? null)}
-                className="hover:bg-secondary-100 cursor-pointer"
-              >
-                {selectedPatient === patient.id ? (
-                  <td colSpan={4} className="w-full p-4">
-                    <div className="flex items-center justify-center gap-4">
-                      <Button
-                        variant="destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedPatient(null);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          createAppointment({
-                            patient: patient.id ?? "",
-                            reason_for_visit: reason ?? "",
-                          });
-                        }}
-                      >
-                        Confirm
-                      </Button>
-                    </div>
-                  </td>
-                ) : (
-                  <>
-                    <td className="p-4 align-middle text-left">
-                      <div className="font-medium">{patient.name}</div>
-                      <div className="text-xs text-gray-500">{patient.id}</div>
-                    </td>
-                    <td className="p-4 align-middle text-left">
-                      {formatPhoneNumberIntl(patient.phone_number)}
-                    </td>
-                    <td className="p-4 align-middle text-left">
-                      {getPatienDoBorAge(patient)}
-                    </td>
-                    <td className="p-4 align-middle text-left">
-                      {t(`GENDER__${patient.gender}`)}
-                    </td>
-                  </>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
+  const handleConfirm = () => {
+    if (!selectedPatient) return;
+    const selectedPatientData = patients?.find((p) => p.id === selectedPatient);
+    if (!selectedPatientData) return;
+
+    createAppointment({
+      patient: selectedPatientData.id ?? "",
+      reason_for_visit: reason ?? "",
+    });
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <div className="flex px-2 pb-4 justify-start">
+    <div className="container mx-auto p-4 max-w-4xl pb-32">
+      <div className="flex pb-4 justify-start">
         <Button
           variant="outline"
-          className="border border-secondary-400"
           onClick={() =>
             navigate(
               `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
             )
           }
         >
+          <ArrowLeft className="size-4" />
           <span className="text-sm underline">{t("back")}</span>
         </Button>
       </div>
-      <div className="flex flex-col justify-center space-y-4 bg-white rounded-lg shadow-md p-8">
-        <h3 className="text-lg font-medium">{t("select_register_patient")}</h3>
-        {isLoading ? (
-          <div className="flex justify-center items-center">
-            <Loading />
-          </div>
-        ) : (patients?.length ?? 0) > 0 ? (
-          renderPatientList()
-        ) : (
-          renderNoPatientFound()
-        )}
+      <div className="flex flex-col sm:flex-row gap-2 justify-between items-center my-6">
+        <h3>{t("select_register_patient")}</h3>
         <Button
           variant="primary_gradient"
-          className="w-1/2 self-center"
+          className="w-full sm:w-auto"
           onClick={() =>
             navigate(
               `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
@@ -228,6 +236,36 @@ export default function PatientSelect({
           {t("add_new_patient")}
         </Button>
       </div>
+      <div className="flex flex-col justify-center space-y-4">
+        {isLoading ? (
+          <div className="flex justify-center items-center">
+            <Loading />
+          </div>
+        ) : (patients?.length ?? 0) > 0 ? (
+          <PatientList
+            patients={patients ?? []}
+            selectedPatient={selectedPatient}
+            setSelectedPatient={setSelectedPatient}
+            getPatienDobOrAge={getPatienDobOrAge}
+          />
+        ) : (
+          renderNoPatientFound()
+        )}
+      </div>
+
+      {/* Sticky bottom bar */}
+      {selectedPatient && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg">
+          <div className="container mx-auto max-w-4xl flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setSelectedPatient(null)}>
+              {t("cancel")}
+            </Button>
+            <Button variant="primary" onClick={handleConfirm}>
+              {t("confirm")}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
