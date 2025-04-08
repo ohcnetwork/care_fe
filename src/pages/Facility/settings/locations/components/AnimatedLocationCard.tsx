@@ -17,6 +17,8 @@ interface AnimatedLocationCardProps {
   totalCount?: number;
   isFirstPage?: boolean;
   isLastPage?: boolean;
+  currentPage?: number;
+  setPage?: (page: number) => void;
 }
 
 export function AnimatedLocationCard({
@@ -31,6 +33,8 @@ export function AnimatedLocationCard({
   totalCount,
   isFirstPage,
   isLastPage,
+  currentPage,
+  setPage,
 }: AnimatedLocationCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -48,17 +52,11 @@ export function AnimatedLocationCard({
   return (
     <motion.div
       layout="position"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
       transition={{
-        layout: {
-          type: "spring",
-          damping: 25,
-          stiffness: 300,
-          mass: 0.8,
-        },
-        opacity: { duration: 0.15 },
+        type: "spring",
+        damping: 25,
+        stiffness: 300,
+        mass: 0.8,
       }}
       ref={cardRef}
       className="w-full"
@@ -76,6 +74,8 @@ export function AnimatedLocationCard({
         totalCount={totalCount}
         isFirstPage={isFirstPage}
         isLastPage={isLastPage}
+        currentPage={currentPage}
+        setPage={setPage}
       />
     </motion.div>
   );
