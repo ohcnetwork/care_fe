@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -46,6 +46,8 @@ const ACTIVE = RESOURCE_STATUS_CHOICES.map((o) => o.text).filter(
 );
 
 function EmptyState() {
+  const { t } = useTranslation();
+
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
@@ -60,6 +62,8 @@ function EmptyState() {
 }
 
 export default function ResourceList({ facilityId }: { facilityId: string }) {
+  const { t } = useTranslation();
+
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["title"],

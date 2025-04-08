@@ -211,7 +211,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel required>{t("registered_name")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_registered_name")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_registered_name")}
+                    data-cy="registered-name-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -228,6 +232,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                   <Input
                     {...field}
                     placeholder={t("enter_user_friendly_name")}
+                    data-cy="user-friendly-name-input"
                   />
                 </FormControl>
                 <FormMessage />
@@ -243,7 +248,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <FormLabel required>{t("status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="device-status-select">
                       <SelectValue placeholder={t("select_status")} />
                     </SelectTrigger>
                   </FormControl>
@@ -268,7 +273,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <FormLabel required>{t("availability_status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="device-availability-status-select">
                       <SelectValue
                         placeholder={t("select_availability_status")}
                       />
@@ -294,7 +299,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("identifier")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_identifier")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_identifier")}
+                    data-cy="identifier-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -308,7 +317,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("manufacturer")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_manufacturer")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_manufacturer")}
+                    data-cy="manufacturer-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -322,7 +335,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("manufacture_date")}</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    type="date"
+                    {...field}
+                    data-cy="manufacture-date-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -336,7 +353,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("expiration_date")}</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    type="date"
+                    {...field}
+                    data-cy="expiration-date-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -350,7 +371,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("lot_number")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_lot_number")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_lot_number")}
+                    data-cy="lot-number-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -364,7 +389,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("serial_number")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_serial_number")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_serial_number")}
+                    data-cy="serial-number-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -378,7 +407,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("model_number")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_model_number")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_model_number")}
+                    data-cy="model-number-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -392,7 +425,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("part_number")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_part_number")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_part_number")}
+                    data-cy="part-number-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -560,10 +597,15 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 goBack(`/facility/${facilityId}/settings/devices`);
               }
             }}
+            data-cy="cancel-button"
           >
             {t("cancel")}
           </Button>
-          <Button type="submit" disabled={isPending || !form.formState.isDirty}>
+          <Button
+            type="submit"
+            disabled={isPending || !form.formState.isDirty}
+            data-cy="save-device-button"
+          >
             {isPending ? t("saving") : t("save")}
           </Button>
         </div>
