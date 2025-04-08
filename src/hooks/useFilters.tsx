@@ -52,7 +52,7 @@ export default function useFilters({
     options?: setQueryParamsOptions,
   ) => {
     query = FiltersCache.utils.clean(query);
-    _setQueryParams(query, options);
+    _setQueryParams(query, { ...options, historyReplace: true });
     updateCache(query);
   };
 
