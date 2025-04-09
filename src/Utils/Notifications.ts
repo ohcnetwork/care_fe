@@ -21,7 +21,6 @@ const formatKey = (key: string) => {
 
 const notifyError = (error: any) => {
   let errorMsg = "";
-
   if (typeof error === "string" || !error) {
     errorMsg =
       !error || error.length > 100 ? "Something went wrong...!" : error;

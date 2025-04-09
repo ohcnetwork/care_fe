@@ -35,7 +35,7 @@ const uploadFile = async (
         }
         handleHttpError(
           new HTTPError({
-            message: "Client error",
+            message: t("client_error"),
             status: xhr.status,
             silent: false,
             cause: error,
