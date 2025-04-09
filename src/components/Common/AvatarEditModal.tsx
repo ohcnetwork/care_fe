@@ -454,25 +454,27 @@ const AvatarEditModal = ({
                     <div className="flex flex-1 items-center justify-center rounded-lg relative">
                       <div className="w-full overflow-hidden max-w-full max-h-[calc(100vh-200px)]">
                         {cropState.isCropping ? (
-                          <Cropper
-                            image={preview || imageUrl || ""}
-                            crop={cropState.crop}
-                            zoom={cropState.zoom}
-                            aspect={1}
-                            onCropChange={(crop) =>
-                              setCropState((prev) => ({
-                                ...prev,
-                                crop,
-                              }))
-                            }
-                            onZoomChange={(zoom) =>
-                              setCropState((prev) => ({
-                                ...prev,
-                                zoom,
-                              }))
-                            }
-                            onCropComplete={onCropComplete}
-                          />
+                          <div className="w-full overflow-hidden relative h-[48vh] max-h-[300px] mx-auto">
+                            <Cropper
+                              image={preview || imageUrl || ""}
+                              crop={cropState.crop}
+                              zoom={cropState.zoom}
+                              aspect={1}
+                              onCropChange={(crop) =>
+                                setCropState((prev) => ({
+                                  ...prev,
+                                  crop,
+                                }))
+                              }
+                              onZoomChange={(zoom) =>
+                                setCropState((prev) => ({
+                                  ...prev,
+                                  zoom,
+                                }))
+                              }
+                              onCropComplete={onCropComplete}
+                            />
+                          </div>
                         ) : (
                           <img
                             src={DOMPurify.sanitize(preview || imageUrl || "")}
@@ -688,7 +690,7 @@ const AvatarEditModal = ({
                   ) : (
                     <>
                       {cropState.isCropping ? (
-                        <div className="aspect-square max-w-[720px] w-full overflow-hidden relative">
+                        <div className="aspect-square max-w-[720px] w-full h-[48vh] max-h-[300px] overflow-hidden relative">
                           <Cropper
                             image={previewImage || ""}
                             crop={cropState.crop}

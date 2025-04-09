@@ -12,17 +12,26 @@ export default function useImageCapture() {
   const { t } = useTranslation();
 
   /**
-   * Processes the captured image with appropriate size and quality constraints
+   * Processes the captured image with cropping
    * @param imageDataUrl - The data URL of the captured image
    * @returns Promise that resolves to a File object or null if processing failed
    */
   const processWebcamImage = (
     imageDataUrl: string,
   ): Promise<{ file: File | null; error?: string }> => {
-    return processImageCore(imageDataUrl, "camera_image", {
-      processingError: t("failed_to_process_image"),
-      tooSmall: t("image_too_small_in_size"),
-    });
+    return processImageCore(
+      imageDataUrl,
+      "camera_image",
+      {
+        x: 0,
+        y: 0,
+        width: 400, // Default width if no cropping specified
+        height: 400, // Default height if no cropping specified
+      },
+      {
+        processingError: t("failed_to_process_image"),
+      },
+    );
   };
 
   /**
@@ -62,16 +71,17 @@ export default function useImageCapture() {
   };
 
   /**
-   * Processes a cropped image with appropriate size and quality constraints
+   * Processes a cropped image
    * @param croppedImageSrc - The data URL of the cropped image
+   * @param cropOptions - Cropping coordinates and dimensions
    * @returns Promise resolving to file and metadata
    */
   const processCroppedImage = (
     croppedImageSrc: string,
+    cropOptions = { x: 0, y: 0, width: 400, height: 400 },
   ): Promise<{ file: File | null; error?: string }> => {
-    return processImageCore(croppedImageSrc, "cropped_image", {
+    return processImageCore(croppedImageSrc, "cropped_image", cropOptions, {
       processingError: t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"),
-      tooSmall: t("image_too_small_in_size"),
     });
   };
 

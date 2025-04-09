@@ -10,12 +10,7 @@ export { default as useImageCapture } from "@/hooks/useImageCapture";
 
 // Re-export legacy utilities (deprecated, but maintained for backward compatibility)
 export {
-  // Core functions
-  calculateImageDimensions,
-  createImageCanvas,
-  createScaledCanvas,
   canvasToFile,
-
   // Legacy API (deprecated)
   processWebcamImage,
   captureWebcamImage,
