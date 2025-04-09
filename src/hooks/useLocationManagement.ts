@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -79,7 +80,7 @@ export function useLocationManagement({
         }),
       );
 
-      return mutate(routes.batchRequest)({
+      return mutate(routes.batchRequest, { silent: true })({
         requests: batchRequests,
       });
     },
@@ -112,8 +113,57 @@ export function useLocationManagement({
           variables.previousData,
         );
       }
-      toast.error("Failed to update order");
-      console.error("Failed to update location order:", error);
+      let errorMessage = t("failed_to_update_order");
+
+      // Try to extract more specific error messages
+
+      if (error && typeof error === "object" && "cause" in error) {
+        const errorObj = error as { cause: unknown };
+        const errorData = errorObj.cause as {
+          results?: Array<{
+            reference_id: string;
+            status_code: number;
+            data: {
+              detail?: string;
+              errors?: Array<{
+                msg?: string;
+                error?: string;
+                detail?: string;
+                type?: string;
+                loc?: string[];
+              }>;
+            };
+          }>;
+        };
+
+        if (errorData?.results) {
+          const failedResults = errorData.results.filter(
+            (result) => result.status_code >= 400,
+          );
+
+          if (failedResults.length > 0) {
+            for (const result of failedResults) {
+              if (result.data?.detail) {
+                errorMessage = result.data.detail;
+                break;
+              }
+
+              const errors = result.data?.errors || [];
+              if (errors.length > 0) {
+                const firstError = errors[0];
+                errorMessage =
+                  firstError.msg ||
+                  firstError.error ||
+                  firstError.detail ||
+                  errorMessage;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      toast.error(errorMessage);
     },
   });
 
