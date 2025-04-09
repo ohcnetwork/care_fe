@@ -121,7 +121,7 @@ export default function LinkUserSheet({
           {t("link_user")}
         </Button>
       </SheetTrigger>
-      <SheetContent className="min-w-[8rem] sm:min-w-[10rem] md:min-w-[12rem] lg:min-w-[14rem] max-w-[90vw]">
+      <SheetContent className="min-w-[var(--radix-select-trigger-width)] max-w-[90vw]">
         <SheetHeader>
           <SheetTitle>{t("link_user_to_organization")}</SheetTitle>
           <SheetDescription>
@@ -196,7 +196,7 @@ export default function LinkUserSheet({
                   >
                     <SelectValue placeholder={t("select_role")} />
                   </SelectTrigger>
-                  <SelectContent className="min-w-[8rem] sm:min-w-[10rem] md:min-w-[12rem] lg:min-w-[14rem] max-w-[90vw]">
+                  <SelectContent className="min-w-[var(--radix-select-trigger-width)] max-w-[90vw]">
                     {roles?.results?.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
                         <div className="flex flex-col text-left">

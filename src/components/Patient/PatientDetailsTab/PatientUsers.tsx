@@ -191,7 +191,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                   <SelectTrigger data-cy="patient-user-role-select">
                     <SelectValue placeholder={t("select_role")} />
                   </SelectTrigger>
-                  <SelectContent className="min-w-[8rem] sm:min-w-[10rem] md:min-w-[12rem] lg:min-w-[14rem] max-w-[90vw]">
+                  <SelectContent className="min-w-[var(--radix-select-trigger-width)] max-w-[90vw]">
                     {roles?.results?.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
                         <div className="flex flex-col">
