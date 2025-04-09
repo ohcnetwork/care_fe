@@ -1314,7 +1314,7 @@ function QuestionEditor({
                         >
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label>Value</Label>
+                              <Label>{t("value")}</Label>
                               <Input
                                 value={opt.value}
                                 onChange={(e) => {
@@ -1325,12 +1325,12 @@ function QuestionEditor({
                                   };
                                   updateField("answer_option", newOptions);
                                 }}
-                                placeholder="Option value"
+                                placeholder={t("option_value")}
                               />
                             </div>
                             <div className="flex gap-2">
                               <div className="flex-1">
-                                <Label>Display Text</Label>
+                                <Label>{t("display_text")}</Label>
                                 <Input
                                   value={opt.display || ""}
                                   onChange={(e) => {
@@ -1341,7 +1341,7 @@ function QuestionEditor({
                                     };
                                     updateField("answer_option", newOptions);
                                   }}
-                                  placeholder="Display text (optional)"
+                                  placeholder={t("display_text_placeholder")}
                                 />
                               </div>
                               <DropdownMenu>
