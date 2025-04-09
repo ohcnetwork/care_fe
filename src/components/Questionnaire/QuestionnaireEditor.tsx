@@ -1349,11 +1349,11 @@ function QuestionEditor({
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="size-15"
+                                    className="size-8"
                                   >
                                     <CareIcon
                                       icon="l-ellipsis-v"
-                                      className="size-15 "
+                                      className="size-4"
                                     />
                                   </Button>
                                 </DropdownMenuTrigger>
