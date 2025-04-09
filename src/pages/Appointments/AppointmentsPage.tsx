@@ -817,7 +817,7 @@ function AppointmentRow(props: {
             value={props.status || "booked"}
             onValueChange={(value) => props.updateQuery({ status: value })}
           >
-            <SelectTrigger className="h-8 w-[160px]">
+            <SelectTrigger className="h-8 w-40">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
