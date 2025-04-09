@@ -112,10 +112,10 @@ export default function CreateScheduleExceptionSheet({
       },
     )
     .refine(
-      (data) => dayjs(data.valid_to).isAfter(dayjs(data.valid_from), "day"),
+      (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
       {
-        message: t("to_date_equal_or_after_from_date"),
         path: ["valid_to"],
+        message: t("to_date_equal_or_after_from_date"),
       },
     );
   const form = useForm<z.infer<typeof formSchema>>({
