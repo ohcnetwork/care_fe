@@ -128,12 +128,8 @@ export function EncounterQuestion({
 
   // Update local state when encounter data changes
   useEffect(() => {
-    if (encounter.status === "discharged") {
-      setDischargeAdvice(encounter.discharge_summary_advice || "");
-    } else {
-      setDischargeAdvice("");
-    }
-  }, [encounter.discharge_summary_advice, encounter.status]);
+    setDischargeAdvice(encounter.discharge_summary_advice || "");
+  }, [encounter.discharge_summary_advice]);
 
   const handleUpdateEncounter = (
     updates: Partial<Omit<EncounterEditRequest, "organizations" | "patient">>,
@@ -275,7 +271,7 @@ export function EncounterQuestion({
               onChange={(e) => {
                 setDischargeAdvice(e.target.value);
                 handleUpdateEncounter({
-                  discharge_summary_advice: e.target.value,
+                  discharge_summary_advice: e.target.value || null,
                 });
               }}
               disabled={disabled}
@@ -329,8 +325,6 @@ export function EncounterQuestion({
                           ...encounter.period,
                           end: new Date().toISOString(),
                         },
-                        discharge_summary_advice:
-                          encounter.discharge_summary_advice || "",
                         hospitalization: {
                           ...encounter.hospitalization,
                           discharge_disposition: "home",

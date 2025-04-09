@@ -170,7 +170,7 @@ export interface Encounter {
   location_history: LocationHistory[];
   permissions: string[];
   care_team: CareTeamResponse[];
-  discharge_summary_advice?: string | null;
+  discharge_summary_advice?: string;
 }
 
 export interface EncounterEditRequest {
@@ -196,7 +196,7 @@ export interface EncounterRequest {
   priority: EncounterPriority;
   external_identifier?: string;
   facility: string;
-  discharge_summary_advice?: string | null;
+  discharge_summary_advice?: string;
 }
 
 export const completedEncounterStatus = ["completed", "discharged"];
