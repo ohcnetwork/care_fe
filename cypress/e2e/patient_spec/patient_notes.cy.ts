@@ -54,7 +54,7 @@ describe("Encounter Notes", () => {
     // Login as a new user and verify the thread
     userProfile.openUserMenu().clickUserLogout();
     // Login as a new user and verify the thread
-    cy.loginByApi("devnurse2");
+    cy.loginByApi("devdoctor4");
     patientNotes
       .navigateToSavedUrl()
       .verifyMessagesInChat(testData.secondThreadMessages)
