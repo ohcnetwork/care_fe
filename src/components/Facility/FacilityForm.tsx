@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -60,6 +60,7 @@ export default function FacilityForm({
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const geoOrganizationRef = useRef<HTMLDivElement>(null);
 
   const facilityFormSchema = z.object({
     facility_type: z.string().min(1, t("facility_type_required")),
@@ -159,6 +160,19 @@ export default function FacilityForm({
     }
   };
 
+  const handleSubmit = form.handleSubmit(onSubmit, (errors) => {
+    // Show generic error toast for any validation error
+    toast.error(t("please_fill_all_required_fields"));
+
+    // Scroll to geo-organization field if it has an error
+    if (errors.geo_organization) {
+      geoOrganizationRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  });
+
   const handleFeatureChange = (value: string[]) => {
     const features = value.map((val) => Number(val));
     form.setValue("features", features, { shouldDirty: true });
@@ -219,7 +233,7 @@ export default function FacilityForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Information */}
         <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("basic_info")}</h3>
@@ -358,20 +372,23 @@ export default function FacilityForm({
 
             <FormField
               name="geo_organization"
+              control={form.control}
               render={({ field }) => (
-                <FormItem className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
+                <FormItem className="md:col-span-2" ref={geoOrganizationRef}>
                   <FormControl>
-                    <GovtOrganizationSelector
-                      {...field}
-                      value={form.watch("geo_organization")}
-                      selected={selectedLevels}
-                      onChange={(value) =>
-                        form.setValue("geo_organization", value, {
-                          shouldDirty: true,
-                        })
-                      }
-                      required
-                    />
+                    <div className="grid-cols-1 grid md:grid-cols-2 gap-5">
+                      <GovtOrganizationSelector
+                        {...field}
+                        value={form.watch("geo_organization")}
+                        selected={selectedLevels}
+                        onChange={(value) =>
+                          form.setValue("geo_organization", value, {
+                            shouldDirty: true,
+                          })
+                        }
+                        required
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

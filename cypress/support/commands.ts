@@ -55,7 +55,7 @@ Cypress.Commands.add(
           .type(value)
           .then(() => {
             // Select the filtered option from command menu
-            cy.get("[cmdk-list]")
+            cy.get("[cmdk-group]")
               .find("[cmdk-item]")
               .contains(value)
               .should("be.visible")

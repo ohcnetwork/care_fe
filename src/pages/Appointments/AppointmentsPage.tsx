@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Command,
   CommandEmpty,
@@ -59,6 +60,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -93,6 +95,21 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 interface DateRangeDisplayProps {
   dateFrom: string | null;
   dateTo: string | null;
+}
+
+function AppointmentsEmptyState() {
+  const { t } = useTranslation();
+  return (
+    <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
+      <div className="rounded-full bg-primary/10 p-3 mb-4">
+        <CareIcon icon="l-calendar-slash" className="size-6 text-primary" />
+      </div>
+      <h3 className="text-lg font-semibold mb-1">{t("no_appointments")}</h3>
+      <p className="text-sm text-gray-500 mb-4">
+        {t("adjust_appointments_filters")}
+      </p>
+    </Card>
+  );
 }
 
 function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
@@ -237,21 +254,23 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   );
 }
 
-export default function AppointmentsPage(props: { facilityId?: string }) {
+export default function AppointmentsPage({
+  facilityId,
+}: {
+  facilityId: string;
+}) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
     limit: 15,
   });
 
-  const facilityId = props.facilityId ?? authUser.home_facility!;
-
   const [activeTab, setActiveTab] = useView("appointments", "board");
 
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
-  const { data: facilityData } = useQuery({
+  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId },
@@ -342,11 +361,12 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const slot = slots?.find((s) => s.id === qParams.slot);
 
   useEffect(() => {
-    if (!canViewAppointments) {
+    if (!canViewAppointments && !isFacilityLoading) {
       toast.error(t("no_permission_to_view_page"));
       goBack("/");
     }
-  }, [canViewAppointments]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canViewAppointments, isFacilityLoading]);
 
   if (schedulableUsersQuery.isLoading) {
     return <Loading />;
@@ -374,8 +394,8 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       }
     >
       <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
-        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start">
-          <div className="mt-1">
+        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start md:w-xs">
+          <div className="mt-1 w-full">
             <Label className="mb-2 text-black">
               {t("select_practitioner")}
             </Label>
@@ -527,7 +547,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
         <div className="flex gap-4 items-center">
           <Input
-            className="w-[300px]"
+            className="md:w-xs w-full"
             placeholder={t("search")}
             value={qParams.search ?? ""}
             onChange={(e) => updateQuery({ search: e.target.value })}
@@ -737,7 +757,7 @@ function AppointmentRow(props: {
 }) {
   const { t } = useTranslation();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: [
       "appointments",
       props.facilityId,
@@ -820,10 +840,10 @@ function AppointmentRow(props: {
           </Select>
         </div>
 
-        {appointments.length === 0 ? (
-          <div className="flex mt-2 bg-white justify-center items-center h-[calc(100vh-22rem)]">
-            <p className="text-gray-500">{t("no_appointments")}</p>
-          </div>
+        {isLoading ? (
+          <TableSkeleton count={5} />
+        ) : appointments.length === 0 ? (
+          <AppointmentsEmptyState />
         ) : (
           <Table className="p-2 border-separate border-gray-200 border-spacing-y-3">
             <TableHeader>

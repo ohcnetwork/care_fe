@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 function Command({
   className,
@@ -50,21 +49,6 @@ function CommandDialog({
         </Command>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function CommandDrawer({
-  children,
-  ...props
-}: React.ComponentProps<typeof Drawer>) {
-  return (
-    <Drawer {...props}>
-      <DrawerContent className="max-h-[85vh] mx-2 rounded-t-md">
-        <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-gray-500 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 dark:[&_[cmdk-group-heading]]:text-gray-400">
-          {children}
-        </Command>
-      </DrawerContent>
-    </Drawer>
   );
 }
 
@@ -182,7 +166,6 @@ function CommandShortcut({
 export {
   Command,
   CommandDialog,
-  CommandDrawer,
   CommandInput,
   CommandList,
   CommandEmpty,

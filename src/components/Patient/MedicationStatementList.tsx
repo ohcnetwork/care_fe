@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -69,7 +68,9 @@ function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
       </TableCell>
       <TableCell>
         {[statement.effective_period?.start, statement.effective_period?.end]
-          .map((date) => formatDateTime(date))
+          .map((date, ind) =>
+            date ? formatDateTime(date) : ind === 1 ? t("ongoing") : "",
+          )
           .join(" - ")}
       </TableCell>
       <TableCell>{statement.reason}</TableCell>
@@ -232,6 +233,8 @@ const MedicationStatementListLayout = ({
   className?: string;
   medicationsCount?: number | undefined;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Card className={cn("rounded-sm ", className)}>
       <CardHeader className="px-4 pt-4 pb-2">

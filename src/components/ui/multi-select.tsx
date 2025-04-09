@@ -117,7 +117,8 @@ export function MultiSelect({
                     return (
                       <Badge
                         key={value}
-                        className="m-1 bg-secondary text-black"
+                        className="m-1 cursor-pointer"
+                        variant="secondary"
                       >
                         {option?.icon && (
                           <CareIcon
@@ -127,11 +128,12 @@ export function MultiSelect({
                         )}
                         {option?.label}
                         <XCircle
-                          className="ml-2 size-4 cursor-pointer"
+                          className="ml-2 size-4 cursor-pointer opacity-50 hover:opacity-100 hover:text-black"
                           onClick={(event) => {
                             event.stopPropagation();
                             toggleOption(value);
                           }}
+                          aria-label={`Remove ${option?.label}`}
                         />
                       </Badge>
                     );
@@ -184,6 +186,7 @@ export function MultiSelect({
                 >
                   <Checkbox
                     checked={selectedValues.length === options.length}
+                    aria-label="Select all options"
                   />
                   <span>{t("select_all")}</span>
                 </CommandItem>
@@ -195,7 +198,10 @@ export function MultiSelect({
                       onSelect={() => toggleOption(option.value)}
                       className="cursor-pointer"
                     >
-                      <Checkbox checked={isSelected} />
+                      <Checkbox
+                        checked={isSelected}
+                        aria-label={`Select ${option.label}`}
+                      />
                       {option?.icon && (
                         <CareIcon icon={option.icon} className="mr-2 size-4" />
                       )}
