@@ -190,7 +190,7 @@ export default function EditUserRoleSheet({
               <SelectTrigger className="h-12">
                 <SelectValue placeholder={t("select_role")} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="min-w-[8rem] sm:min-w-[10rem] md:min-w-[12rem] lg:min-w-[14rem] max-w-[90vw]">
                 {roles?.results?.map((role) => (
                   <SelectItem key={role.id} value={role.id}>
                     <div className="flex flex-col text-left">

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -120,7 +121,7 @@ export default function LinkUserSheet({
           {t("link_user")}
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="min-w-[8rem] sm:min-w-[10rem] md:min-w-[12rem] lg:min-w-[14rem] max-w-[90vw]">
         <SheetHeader>
           <SheetTitle>{t("link_user_to_organization")}</SheetTitle>
           <SheetDescription>
@@ -185,9 +186,9 @@ export default function LinkUserSheet({
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">
+                <Label className="text-sm font-medium">
                   {t("select_role")}
-                </label>
+                </Label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger
                     className="h-12"
@@ -195,13 +196,13 @@ export default function LinkUserSheet({
                   >
                     <SelectValue placeholder={t("select_role")} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="min-w-[8rem] sm:min-w-[10rem] md:min-w-[12rem] lg:min-w-[14rem] max-w-[90vw]">
                     {roles?.results?.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
                         <div className="flex flex-col text-left">
                           <span>{role.name}</span>
                           {role.description && (
-                            <span className="text-xs text-gray-500 truncate">
+                            <span className="text-xs text-gray-500">
                               {role.description}
                             </span>
                           )}
