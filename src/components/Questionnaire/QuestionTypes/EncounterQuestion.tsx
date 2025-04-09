@@ -106,6 +106,10 @@ export function EncounterQuestion({
     organizations: [],
   });
 
+  const [dischargeAdvice, setDischargeAdvice] = useState(
+    encounter.discharge_summary_advice || "",
+  );
+
   // Update encounter state when data is loaded
   useEffect(() => {
     if (encounterData) {
@@ -121,6 +125,15 @@ export function EncounterQuestion({
       }));
     }
   }, [questionnaireResponse]);
+
+  // Update local state when encounter data changes
+  useEffect(() => {
+    if (encounter.status === "discharged") {
+      setDischargeAdvice(encounter.discharge_summary_advice || "");
+    } else {
+      setDischargeAdvice("");
+    }
+  }, [encounter.discharge_summary_advice, encounter.status]);
 
   const handleUpdateEncounter = (
     updates: Partial<Omit<EncounterEditRequest, "organizations" | "patient">>,
@@ -165,6 +178,15 @@ export function EncounterQuestion({
             onValueChange={(value) =>
               handleUpdateEncounter({
                 status: value as EncounterStatus,
+                ...(value === "discharged" && {
+                  period: {
+                    ...encounter.period,
+                    end: new Date().toISOString(),
+                  },
+                }),
+                ...(value !== "discharged" && {
+                  discharge_summary_advice: null,
+                }),
               })
             }
             disabled={disabled}
@@ -249,12 +271,13 @@ export function EncounterQuestion({
           <div className="space-y-2">
             <Label>{t("discharge_summary_advice")}</Label>
             <Textarea
-              value={encounter.discharge_summary_advice || ""}
-              onChange={(e) =>
+              value={dischargeAdvice}
+              onChange={(e) => {
+                setDischargeAdvice(e.target.value);
                 handleUpdateEncounter({
                   discharge_summary_advice: e.target.value,
-                })
-              }
+                });
+              }}
               disabled={disabled}
               placeholder={t("enter_discharge_summary_advice")}
             />
@@ -270,63 +293,57 @@ export function EncounterQuestion({
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Only show readmission if not discharged */}
+            <div className="flex items-center space-x-2 overflow-x-auto">
+              <Switch
+                checked={encounter.hospitalization?.re_admission || false}
+                onCheckedChange={(checked: boolean) =>
+                  handleUpdateEncounter({
+                    hospitalization: {
+                      ...encounter.hospitalization,
+                      re_admission: checked,
+                      admit_source:
+                        encounter.hospitalization?.admit_source || "other",
+                      discharge_disposition:
+                        encounter.hospitalization?.discharge_disposition ||
+                        "home",
+                      diet_preference:
+                        encounter.hospitalization?.diet_preference || "none",
+                    },
+                  })
+                }
+                disabled={disabled}
+              />
+              <Label>{t("readmission")}</Label>
+            </div>
+
+            {/* Mark for discharge checkbox - Only show if not already discharged */}
             {encounter.status !== "discharged" && (
               <div className="flex items-center space-x-2 overflow-x-auto">
                 <Switch
-                  checked={encounter.hospitalization?.re_admission || false}
-                  onCheckedChange={(checked: boolean) =>
-                    handleUpdateEncounter({
-                      hospitalization: {
-                        ...encounter.hospitalization,
-                        re_admission: checked,
-                        admit_source:
-                          encounter.hospitalization?.admit_source || "other",
-                        discharge_disposition:
-                          encounter.hospitalization?.discharge_disposition ||
-                          "home",
-                        diet_preference:
-                          encounter.hospitalization?.diet_preference || "none",
-                      },
-                    })
-                  }
-                  disabled={disabled}
-                />
-                <Label>{t("readmission")}</Label>
-              </div>
-            )}
-
-            {/* Mark for discharge checkbox - Only show if not readmission */}
-            {!encounter.hospitalization?.re_admission && (
-              <div className="flex items-center space-x-2 overflow-x-auto">
-                <Switch
-                  checked={encounter.status === "discharged"}
+                  checked={false}
                   onCheckedChange={(checked: boolean) => {
-                    handleUpdateEncounter({
-                      status: checked
-                        ? "discharged"
-                        : ("in_progress" as EncounterStatus),
-                      hospitalization: {
-                        ...encounter.hospitalization,
-                        re_admission: false,
-                        discharge_disposition: checked ? "home" : undefined,
-                        admit_source:
-                          encounter.hospitalization?.admit_source || "other",
-                        diet_preference:
-                          encounter.hospitalization?.diet_preference || "none",
-                      },
-                      // Clear discharge summary when unchecking
-                      ...(checked
-                        ? {}
-                        : { discharge_summary_advice: undefined }),
-                      // Clear discharge date when unchecking
-                      period: {
-                        ...encounter.period,
-                        end: checked
-                          ? encounter.period.end || new Date().toISOString()
-                          : undefined,
-                      },
-                    });
+                    if (checked) {
+                      handleUpdateEncounter({
+                        status: "discharged" as EncounterStatus,
+                        period: {
+                          ...encounter.period,
+                          end: new Date().toISOString(),
+                        },
+                        discharge_summary_advice:
+                          encounter.discharge_summary_advice || "",
+                        hospitalization: {
+                          ...encounter.hospitalization,
+                          discharge_disposition: "home",
+                          re_admission:
+                            encounter.hospitalization?.re_admission || false,
+                          admit_source:
+                            encounter.hospitalization?.admit_source || "other",
+                          diet_preference:
+                            encounter.hospitalization?.diet_preference ||
+                            "none",
+                        },
+                      });
+                    }
                   }}
                   disabled={disabled}
                 />
@@ -416,7 +433,7 @@ export function EncounterQuestion({
                         <Button
                           variant="outline"
                           className={cn(
-                            "flex-1 justify-start text-sm text-left font-normal h-8",
+                            "flex-1 justify-start text-sm text-left font-normal h-9",
                             !encounter.period.end && "text-gray-500",
                           )}
                         >
@@ -461,7 +478,7 @@ export function EncounterQuestion({
                     </Popover>
                     <Input
                       type="time"
-                      className="sm:w-[150px] border-t-0 sm:border-t text-sm border-gray-200 h-8"
+                      className="sm:w-[150px] border-t-0 sm:border-t text-sm border-gray-200 h-9"
                       value={
                         encounter.period.end
                           ? new Date(encounter.period.end).toLocaleTimeString(
