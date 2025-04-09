@@ -403,10 +403,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       }
     });
 
-    setStructuredTypeErrors((prev) => ({
-      ...prev,
-      ...updatedErrors,
-    }));
+    setStructuredTypeErrors(updatedErrors);
 
     return !hasError;
   };
