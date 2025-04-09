@@ -358,6 +358,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
                             variant="outline"
                             title={`Current Location: ${props.encounter.current_location.name}`}
+                            data-cy="current-location-badge"
                           >
                             <CareIcon
                               icon="l-location-point"
@@ -408,6 +409,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                                 <Button
                                   variant="outline"
                                   className="border-gray-400 w-full"
+                                  data-cy="update-encounter-location-button"
                                 >
                                   {t("update_location")}
                                 </Button>
@@ -424,7 +426,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         facilityId={props.encounter.facility.id}
                         encounter={encounter}
                         trigger={
-                          <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                          <div
+                            className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100"
+                            data-cy="add-encounter-location"
+                          >
                             <CareIcon
                               icon="l-location-point"
                               className="size-4 text-green-600"

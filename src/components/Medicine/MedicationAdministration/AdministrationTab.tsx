@@ -1,10 +1,8 @@
-"use client";
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
-import { t } from "i18next";
 import { Link } from "raviger";
 import React, { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -129,31 +127,39 @@ interface MedicationRowProps {
 // Utility Components
 const MedicationStatusBadge: React.FC<MedicationStatusBadgeProps> = ({
   status,
-}) => (
-  <span
-    className={`text-xs px-2 py-0.5 rounded-md font-medium ${
-      status === "active"
-        ? "text-emerald-900 bg-emerald-100"
-        : "text-gray-900 bg-gray-100"
-    }`}
-  >
-    {t(status)}
-  </span>
-);
+}) => {
+  const { t } = useTranslation();
 
-const MedicationBadges: React.FC<MedicationBadgesProps> = ({ medication }) => (
-  <div className="flex flex-wrap gap-2 mt-1">
-    <span className="text-xs text-blue-900 bg-blue-100 px-2 py-0.5 rounded-md font-medium">
-      {medication.dosage_instruction[0]?.route?.display || "Oral"}
+  return (
+    <span
+      className={`text-xs px-2 py-0.5 rounded-md font-medium ${
+        status === "active"
+          ? "text-emerald-900 bg-emerald-100"
+          : "text-gray-900 bg-gray-100"
+      }`}
+    >
+      {t(status)}
     </span>
-    {medication.dosage_instruction[0]?.as_needed_boolean && (
-      <span className="text-xs text-pink-900 bg-pink-100 px-2 py-0.5 rounded-md font-medium">
-        {t("as_needed_prn")}
+  );
+};
+
+const MedicationBadges: React.FC<MedicationBadgesProps> = ({ medication }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex flex-wrap gap-2 mt-1">
+      <span className="text-xs text-blue-900 bg-blue-100 px-2 py-0.5 rounded-md font-medium">
+        {medication.dosage_instruction[0]?.route?.display || "Oral"}
       </span>
-    )}
-    <MedicationStatusBadge status={medication.status} />
-  </div>
-);
+      {medication.dosage_instruction[0]?.as_needed_boolean && (
+        <span className="text-xs text-pink-900 bg-pink-100 px-2 py-0.5 rounded-md font-medium">
+          {t("as_needed_prn")}
+        </span>
+      )}
+      <MedicationStatusBadge status={medication.status} />
+    </div>
+  );
+};
 
 const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
   slot,
@@ -215,6 +221,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
   onDiscontinue,
   canWrite,
 }) => {
+  const { t } = useTranslation();
   const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
     medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
   );
@@ -386,6 +393,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   canAccess,
   canWrite,
 }) => {
+  const { t } = useTranslation();
+
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [showStopped, setShowStopped] = useState(false);

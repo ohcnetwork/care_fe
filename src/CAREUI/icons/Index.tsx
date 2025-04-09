@@ -1,6 +1,5 @@
-/* eslint-disable i18next/no-literal-string */
-import { t } from "i18next";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -9,6 +8,7 @@ import iconPaths from "@/CAREUI/icons/UniconPaths.json";
 import PageTitle from "@/components/Common/PageTitle";
 
 const IconIndex: React.FC = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredIcons = Object.keys(iconPaths).filter((iconName) =>
@@ -17,12 +17,12 @@ const IconIndex: React.FC = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success(t("icon_copy_successfully"));
+    toast.success(t("copied_to_clipboard"));
   };
 
   return (
     <div className="mx-auto max-w-7xl p-4">
-      <PageTitle title="Care Icons" />
+      <PageTitle title={t("care_icons")} />
       <input
         type="text"
         placeholder={t("search")}
