@@ -6,9 +6,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { t } from "i18next";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { debounce } from "@/lib/utils";
@@ -45,6 +45,7 @@ export default function ExcalidrawEditor({
   associating_type,
   drawingId,
 }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [elements, setElements] = useState<readonly ExcalidrawElement[] | null>(
     drawingId ? null : [],

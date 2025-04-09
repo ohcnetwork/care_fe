@@ -1,5 +1,5 @@
-import { t } from "i18next";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -30,13 +30,16 @@ export default function FileUploadDialog({
   associatingId: string;
   type: "patient" | "consent" | "encounter";
 }) {
+  const { t } = useTranslation();
+  const [isPdf, setIsPdf] = useState(false);
+
   const handleDialogClose = (open: boolean) => {
     if (!open) {
       setIsPdf(false);
     }
     onOpenChange(open);
   };
-  const [isPdf, setIsPdf] = useState(false);
+
   return (
     <Dialog
       open={open}
