@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useSidebar } from "@/components/ui/sidebar";
 import {
   TableBody,
   TableCell,
@@ -14,7 +12,6 @@ import {
 
 import Page from "@/components/Common/Page";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
@@ -37,13 +34,6 @@ export function RolesIndex() {
     }),
   });
 
-  const sidebar = useSidebar();
-
-  const [tableDimensions, setTableDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
-
   const roles = response?.results || [];
   const allPermissions = roles.reduce(
     (acc, role) => {
@@ -56,38 +46,12 @@ export function RolesIndex() {
     },
     [] as (typeof roles)[0]["permissions"],
   );
-  const isMobile = useBreakpoints({ default: true, md: false });
-
-  useEffect(() => {
-    // calculate table dimensions on resize
-    const handleResize = () => {
-      setTableDimensions({
-        width:
-          window.innerWidth -
-          (!isMobile ? (sidebar.state === "expanded" ? 340 : 130) : 40),
-        height: window.innerHeight - (isMobile ? 200 : 150),
-      });
-    };
-
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [isMobile, sidebar.state]);
 
   return (
-    <Page title="Roles">
+    <Page title={t("roles")}>
       <p className="text-gray-600">{t("manage_and_view_roles")}</p>
 
-      <div
-        className={`overflow-auto mt-4`}
-        style={{
-          ...tableDimensions,
-        }}
-      >
+      <div className="overflow-auto pr-1 h-[calc(100vh-12rem)] sm:h-[calc(100vh-9rem)]">
         <div className="relative w-full">
           <table className="w-full caption-bottom text-sm">
             <TableHeader>
