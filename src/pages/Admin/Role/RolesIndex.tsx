@@ -51,20 +51,20 @@ export function RolesIndex() {
     <Page title={t("roles")}>
       <p className="text-gray-600">{t("manage_and_view_roles")}</p>
 
-      <div className="overflow-auto pr-1 h-[calc(100vh-12rem)] sm:h-[calc(100vh-9rem)]">
-        <div className="relative w-full">
-          <table className="w-full caption-bottom text-sm">
+      <div className="overflow-auto h-[calc(100vh-12rem)] md:h-[calc(100vh-9rem)]">
+        <div className="relative w-full p-1">
+          <table className="w-full caption-bottom text-sm rounded-lg shadow-md z-20">
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky top-0 left-0 z-20 bg-gray-50 whitespace-nowrap">
+                <TableHead className="sticky top-0 left-0 z-20 whitespace-nowrap bg-white font-semibold">
                   {t("permission")}
                 </TableHead>
                 {roles.map((role) => (
                   <TableHead
                     key={role.id}
-                    className="whitespace-nowrap h-[120px] max-w-[30px] min-w-[30px] sticky top-0 z-10 bg-gray-50"
+                    className="whitespace-nowrap h-32 max-w-8 min-w-8 sticky top-0 z-10 bg-white font-semibold"
                   >
-                    <div className="text-sm transform -rotate-90 w-[100px] px-2 origin-center -translate-x-1/3">
+                    <div className="text-sm transform -rotate-90 w-24 px-2 -translate-x-1/3">
                       {role.name}
                     </div>
                   </TableHead>
@@ -73,8 +73,11 @@ export function RolesIndex() {
             </TableHeader>
             <TableBody>
               {allPermissions.map((permission) => (
-                <TableRow key={permission.slug}>
-                  <TableCell className="sticky left-0 z-10 max-w-[200px] bg-gray-50 font-medium">
+                <TableRow
+                  key={permission.slug}
+                  className="even:bg-gray-100 odd:bg-gray-50"
+                >
+                  <TableCell className="sticky left-0 z-10 max-w-48 font-semibold bg-inherit">
                     {permission.name}
                   </TableCell>
                   {roles.map((role) => {
@@ -83,12 +86,12 @@ export function RolesIndex() {
                     );
 
                     return (
-                      <TableCell key={role.id} className="bg-white">
-                        <div className=" max-w-[30px]  min-w-[30px] flex items-center justify-center">
+                      <TableCell key={role.id}>
+                        <div className="w-8 flex items-center justify-center">
                           {hasPermission ? (
-                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                            <CheckCircle2 className="size-5 text-green-500" />
                           ) : (
-                            <XCircle className="h-5 w-5 text-red-500" />
+                            <XCircle className="size-5 text-red-500" />
                           )}
                         </div>
                       </TableCell>
