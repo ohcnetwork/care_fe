@@ -135,7 +135,6 @@ export function RolesIndex() {
           </TableBody>
         </Table>
       </div>
-
       <Pagination totalCount={response?.count ?? 0} />
     </Page>
   );
