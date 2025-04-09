@@ -134,8 +134,9 @@ export function CodingEditor({
                     value={code.system}
                     onValueChange={(value) => {
                       onChange({
-                        ...code,
                         system: value,
+                        code: "",
+                        display: "",
                       });
                     }}
                     disabled={disableSystemSelect}
