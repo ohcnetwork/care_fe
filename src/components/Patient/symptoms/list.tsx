@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Link } from "raviger";
 import { ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,8 @@ export function SymptomsList({
   className,
   readOnly = false,
 }: SymptomsListProps) {
+  const { t } = useTranslation();
+
   const [showEnteredInError, setShowEnteredInError] = useState(false);
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
@@ -126,6 +128,8 @@ const SymptomListLayout = ({
   className?: string;
   readOnly?: boolean;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Card className={cn("border-none rounded-sm", className)}>
       <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
