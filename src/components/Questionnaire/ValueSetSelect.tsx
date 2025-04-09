@@ -396,6 +396,7 @@ export default function ValueSetSelect({
           <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
           <div className="mt-6 h-full">{content}</div>
         </SheetContent>
+        {alert}
       </Sheet>
     );
   }
