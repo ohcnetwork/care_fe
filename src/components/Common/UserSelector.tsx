@@ -51,13 +51,11 @@ export default function UserSelector({
 
   const { data, isFetching } = useQuery({
     queryKey: ["users", search, facilityId],
-    queryFn: query.debounced(
+    queryFn: query.paginated(
       facilityId ? routes.facility.getUsers : UserApi.list,
       {
         pathParams: facilityId ? { facility_id: facilityId } : undefined,
-        queryParams: {
-          search_text: search,
-        },
+        pageSize: 100,
       },
     ),
   });
@@ -96,7 +94,18 @@ export default function UserSelector({
         align="start"
         sideOffset={4}
       >
-        <Command filter={() => 1}>
+        <Command
+          filter={(value, search) => {
+            const user = usersList.find((u) => u.id === value);
+            if (!user) return 0;
+
+            const name = formatName(user).toLowerCase();
+            const username = user.username?.toLowerCase() ?? "";
+            const input = search.toLowerCase();
+
+            return name.includes(input) || username.includes(input) ? 1 : 0;
+          }}
+        >
           <CommandInput
             placeholder={t("search")}
             onValueChange={setSearch}
