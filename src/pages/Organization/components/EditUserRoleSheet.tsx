@@ -138,7 +138,7 @@ export default function EditUserRoleSheet({
         <SheetTrigger asChild>
           {trigger || <Button variant="outline">{t("edit_role")}</Button>}
         </SheetTrigger>
-        <SheetContent>
+        <SheetContent className="w-[var(--radix-select-trigger-width)]">
           <SheetHeader>
             <SheetTitle>{t("edit_user_role")}</SheetTitle>
             <SheetDescription>
@@ -193,7 +193,7 @@ export default function EditUserRoleSheet({
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder={t("select_role")} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-[var(--radix-select-trigger-width)]">
                   {roles?.results?.map((role) => (
                     <SelectItem key={role.id} value={role.id}>
                       <div className="flex flex-col text-left">

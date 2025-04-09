@@ -3,6 +3,10 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import {
+  Organization,
+  renderGeoOrganizations,
+} from "@/types/organization/organization";
 import { UserBase } from "@/types/user/user";
 
 interface UserViewDetailsProps {
@@ -102,6 +106,35 @@ export const ContactInfoDetails = ({ user }: UserViewDetailsProps) => {
           label={t("phone_number")}
           value={user.phone_number && formatPhoneNumberIntl(user.phone_number)}
         />
+      </div>
+    </div>
+  );
+};
+
+export const GeoOrgDetails = ({ user }: UserViewDetailsProps) => {
+  const { t } = useTranslation();
+  const geoOrganization =
+    "geo_organization" in user
+      ? (user.geo_organization as Organization)
+      : undefined;
+
+  if (!geoOrganization) {
+    return <></>;
+  }
+
+  const geoOrganizationDetails = renderGeoOrganizations(geoOrganization);
+
+  return (
+    <div className="pt-2 pb-5">
+      <Badge text={t("location")} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {geoOrganizationDetails.map((detail) => (
+          <LabelValue
+            key={detail.label}
+            label={detail.label}
+            value={detail.value}
+          />
+        ))}
       </div>
     </div>
   );

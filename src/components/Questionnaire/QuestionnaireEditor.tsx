@@ -560,7 +560,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <p className="text-sm text-gray-500">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleCancel}>
+          <Button type="button" variant="outline" onClick={handleCancel}>
             {t("cancel")}
           </Button>
           {id && (
@@ -1190,7 +1190,7 @@ function QuestionEditor({
                       }
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex flex-col items-start">

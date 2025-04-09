@@ -50,7 +50,7 @@ export default {
     path: "/api/v1/facility/{facility_id}/device/{id}/associate_location/",
     method: HttpMethod.POST,
     TRes: Type<DeviceDetail>(),
-    TBody: Type<{ location: string }>(),
+    TBody: Type<{ location: string | null }>(),
   },
   serviceHistory: {
     list: {
