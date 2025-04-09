@@ -330,57 +330,48 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             <Separator />
 
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">
                     {t("identifier")}
                   </h4>
-                  <p className="mt-1">{device.identifier || "-"}</p>
+                  <p className="text-sm mt-1">{device.identifier || "-"}</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">
                     {t("lot_number")}
                   </h4>
-                  <p className="mt-1">{device.lot_number || "-"}</p>
+                  <p className="text-sm mt-1">{device.lot_number || "-"}</p>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">
                     {t("manufacturer")}
                   </h4>
-                  <p className="mt-1">{device.manufacturer || "-"}</p>
+                  <p className="text-sm mt-1">{device.manufacturer || "-"}</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">
                     {t("model_number")}
                   </h4>
-                  <p className="mt-1">{device.model_number || "-"}</p>
+                  <p className="text-sm mt-1">{device.model_number || "-"}</p>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">
                     {t("serial_number")}
                   </h4>
-                  <p className="mt-1">{device.serial_number || "-"}</p>
+                  <p className="text-sm mt-1">{device.serial_number || "-"}</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">
                     {t("part_number")}
                   </h4>
-                  <p className="mt-1">{device.part_number || "-"}</p>
+                  <p className="text-sm mt-1">{device.part_number || "-"}</p>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">
                     {t("manufacture_date")}
                   </h4>
-                  <p className="mt-1">
+                  <p className="text-sm mt-1">
                     {device.manufacture_date
                       ? formatDate(device.manufacture_date, "dd/MM/yyyy")
                       : "-"}
@@ -390,7 +381,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                   <h4 className="text-sm font-medium text-gray-500">
                     {t("expiration_date")}
                   </h4>
-                  <p className="mt-1">
+                  <p className="text-sm mt-1">
                     {device.expiration_date
                       ? formatDate(device.expiration_date, "dd/MM/yyyy")
                       : "-"}
