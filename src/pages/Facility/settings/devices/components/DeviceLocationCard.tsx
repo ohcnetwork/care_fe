@@ -6,7 +6,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { DeviceLocationHistory } from "@/types/device/device";
 
 interface LocationCardProps {
@@ -51,7 +51,9 @@ export const DeviceLocationCard = ({ locationData }: LocationCardProps) => {
 
         <div className="grid sm:flex sm:flex-wrap gap-7">
           <div className="w-full mx-2 sm:w-auto">
-            <div className="text-gray-600 text-sm">{t("associated_by")}</div>
+            <div className="text-gray-600 text-sm">
+              {t("associated_by", { name: formatName(created_by) })}
+            </div>
             <div className="font-semibold text-base flex items-center gap-2">
               {`${created_by.first_name} ${created_by.last_name}`}
             </div>
