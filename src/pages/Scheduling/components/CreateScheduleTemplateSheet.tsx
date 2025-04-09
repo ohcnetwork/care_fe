@@ -72,7 +72,7 @@ export default function CreateScheduleTemplateSheet({
 
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
   const [qParams, _setQParams] = useQueryParams<QueryParams>();
-  const setQParams = (p: QueryParams) => _setQParams(p, { replace: false });
+  const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
 
   const weekdayFormat = useBreakpoints({
     default: "alphabet",
