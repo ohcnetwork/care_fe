@@ -461,15 +461,12 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       />
                     </Button>
 
-                    <div className="flex gap-4 mt-2 md:mt-0">
+                    <div className="flex gap-4">
                       {downloadURL && downloadURL.length > 0 && (
-                        <Button
-                          variant="primary"
-                          data-cy="file-preview-download"
-                        >
+                        <Button variant="ghost" data-cy="file-preview-download">
                           <a
                             href={downloadURL}
-                            className="text-white"
+                            className="text-gray-400"
                             download={`${file_state.name}.${file_state.extension}`}
                           >
                             <CareIcon
@@ -511,15 +508,12 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       />
                     </Button>
 
-                    <div className="flex gap-4 mt-2 md:mt-0">
+                    <div className="flex gap-4">
                       {downloadURL && downloadURL.length > 0 && (
-                        <Button
-                          variant="primary"
-                          data-cy="file-preview-download"
-                        >
+                        <Button variant="ghost" data-cy="file-preview-download">
                           <a
                             href={downloadURL}
-                            className="text-white"
+                            className="text-gray-400"
                             download={`${file_state.name}.${file_state.extension}`}
                           >
                             <CareIcon
