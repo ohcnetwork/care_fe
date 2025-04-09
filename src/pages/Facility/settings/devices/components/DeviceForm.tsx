@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isBefore, startOfTomorrow } from "date-fns";
-import { t } from "i18next";
 import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -50,76 +49,11 @@ import {
 } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
-const formSchema = z
-  .object({
-    identifier: z.string().optional(),
-    status: z.enum(DeviceStatuses),
-    availability_status: z.enum(DeviceAvailabilityStatuses),
-    manufacturer: z.string().optional(),
-    manufacture_date: z
-      .string()
-      .optional()
-      .refine(
-        (date) => !date || isBefore(new Date(date), startOfTomorrow()),
-        t("manufacture_date_cannot_be_in_future"),
-      ),
-    expiration_date: z.string().optional(),
-    lot_number: z.string().optional(),
-    serial_number: z.string().optional(),
-    registered_name: z
-      .string()
-      .trim()
-      .min(1, { message: t("field_required") }),
-    user_friendly_name: z.string().optional(),
-    model_number: z.string().optional(),
-    part_number: z.string().optional(),
-    contact: z.array(contactPointSchema).superRefine((contacts, ctx) => {
-      const valueMap = new Map();
-      contacts.forEach((contact, index) => {
-        //To take care of case sensitivity in URL
-        const normalizedValue = contact.value.trim().toLowerCase();
-        if (normalizedValue) {
-          if (valueMap.has(normalizedValue)) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: t("duplicate_contact_values_not_allowed"),
-              path: [index, "value"],
-            });
-          } else {
-            valueMap.set(normalizedValue, true);
-          }
-        }
-      });
-    }),
-    metadata: z.record(z.string(), z.unknown()).optional(),
-  })
-  .refine(
-    (data) => {
-      if (!data.expiration_date || !data.manufacture_date) return true;
-      return new Date(data.expiration_date) > new Date(data.manufacture_date);
-    },
-    {
-      message: t("expiration_date_must_be_after_manufacture_date"),
-      path: ["expiration_date"],
-    },
-  );
-
 interface Props {
   facilityId: string;
   device?: DeviceList;
   onSuccess?: () => void;
 }
-
-const defaultValues: z.infer<typeof formSchema> = {
-  identifier: undefined,
-  status: "active",
-  availability_status: "available",
-  manufacturer: undefined,
-  manufacture_date: undefined,
-  registered_name: "",
-  contact: [],
-  metadata: {},
-};
 
 export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const { t } = useTranslation();
@@ -128,6 +62,70 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
 
   const queryClient = useQueryClient();
   const pluginDevices = usePluginDevices();
+
+  const formSchema = z
+    .object({
+      identifier: z.string().optional(),
+      status: z.enum(DeviceStatuses),
+      availability_status: z.enum(DeviceAvailabilityStatuses),
+      manufacturer: z.string().optional(),
+      manufacture_date: z
+        .string()
+        .optional()
+        .refine(
+          (date) => !date || isBefore(new Date(date), startOfTomorrow()),
+          t("manufacture_date_cannot_be_in_future"),
+        ),
+      expiration_date: z.string().optional(),
+      lot_number: z.string().optional(),
+      serial_number: z.string().optional(),
+      registered_name: z
+        .string()
+        .trim()
+        .min(1, { message: t("field_required") }),
+      user_friendly_name: z.string().optional(),
+      model_number: z.string().optional(),
+      part_number: z.string().optional(),
+      contact: z.array(contactPointSchema()).superRefine((contacts, ctx) => {
+        const valueMap = new Map();
+        contacts.forEach((contact, index) => {
+          //To take care of case sensitivity in URL
+          const normalizedValue = contact.value.trim().toLowerCase();
+          if (normalizedValue) {
+            if (valueMap.has(normalizedValue)) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("duplicate_contact_values_not_allowed"),
+                path: [index, "value"],
+              });
+            } else {
+              valueMap.set(normalizedValue, true);
+            }
+          }
+        });
+      }),
+      metadata: z.record(z.string(), z.unknown()).optional(),
+    })
+    .refine(
+      (data) => {
+        if (!data.expiration_date || !data.manufacture_date) return true;
+        return new Date(data.expiration_date) > new Date(data.manufacture_date);
+      },
+      {
+        message: t("expiration_date_must_be_after_manufacture_date"),
+        path: ["expiration_date"],
+      },
+    );
+
+  const defaultValues: z.infer<typeof formSchema> = {
+    identifier: undefined,
+    status: "active",
+    availability_status: "available",
+    manufacturer: undefined,
+    manufacture_date: undefined,
+    registered_name: "",
+    contact: [],
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -214,7 +212,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel required>{t("registered_name")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_registered_name")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_registered_name")}
+                    data-cy="registered-name-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -231,6 +233,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                   <Input
                     {...field}
                     placeholder={t("enter_user_friendly_name")}
+                    data-cy="user-friendly-name-input"
                   />
                 </FormControl>
                 <FormMessage />
@@ -246,7 +249,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <FormLabel required>{t("status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="device-status-select">
                       <SelectValue placeholder={t("select_status")} />
                     </SelectTrigger>
                   </FormControl>
@@ -271,7 +274,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <FormLabel required>{t("availability_status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="device-availability-status-select">
                       <SelectValue
                         placeholder={t("select_availability_status")}
                       />
@@ -297,7 +300,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("identifier")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_identifier")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_identifier")}
+                    data-cy="identifier-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -311,7 +318,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("manufacturer")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_manufacturer")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_manufacturer")}
+                    data-cy="manufacturer-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -325,7 +336,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("manufacture_date")}</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    type="date"
+                    {...field}
+                    data-cy="manufacture-date-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -339,7 +354,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("expiration_date")}</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    type="date"
+                    {...field}
+                    data-cy="expiration-date-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -353,7 +372,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("lot_number")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_lot_number")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_lot_number")}
+                    data-cy="lot-number-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -367,7 +390,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("serial_number")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_serial_number")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_serial_number")}
+                    data-cy="serial-number-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -381,7 +408,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("model_number")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_model_number")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_model_number")}
+                    data-cy="model-number-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -395,7 +426,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("part_number")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_part_number")} />
+                  <Input
+                    {...field}
+                    placeholder={t("enter_part_number")}
+                    data-cy="part-number-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -563,10 +598,15 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 goBack(`/facility/${facilityId}/settings/devices`);
               }
             }}
+            data-cy="cancel-button"
           >
             {t("cancel")}
           </Button>
-          <Button type="submit" disabled={isPending || !form.formState.isDirty}>
+          <Button
+            type="submit"
+            disabled={isPending || !form.formState.isDirty}
+            data-cy="save-device-button"
+          >
             {isPending ? t("saving") : t("save")}
           </Button>
         </div>

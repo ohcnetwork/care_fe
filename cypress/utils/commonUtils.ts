@@ -122,3 +122,11 @@ export function getRandomMedicineName(): string {
   const randomIndex = getRandomIndex(medicineNames.length);
   return medicineNames[randomIndex];
 }
+
+export function generateDeviceName(): string {
+  const deviceTypes = ["Camera", "Vital", "ABG", "Combined"];
+  const randomDeviceType = deviceTypes[getRandomIndex(deviceTypes.length)];
+  const randomNumber = (getRandomIndex(900) + 100).toString(); // Ensures 3 digits (100-999)
+
+  return `${randomDeviceType}-${randomNumber}`;
+}
