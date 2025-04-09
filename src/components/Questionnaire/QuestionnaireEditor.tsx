@@ -1306,64 +1306,121 @@ function QuestionEditor({
 
                 {question.type === "choice" && !question.answer_value_set ? (
                   <CardContent className="space-y-4">
-                    {(answer_option || []).map((opt, idx) => (
-                      <div
-                        key={idx}
-                        className="space-y-4 pb-4 border-b border-gray-200 last:border-0 last:pb-0"
-                      >
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Value</Label>
-                            <Input
-                              value={opt.value}
-                              onChange={(e) => {
-                                const newOptions = answer_option
-                                  ? [...answer_option]
-                                  : [];
-                                newOptions[idx] = {
-                                  ...opt,
-                                  value: e.target.value,
-                                };
-                                updateField("answer_option", newOptions);
-                              }}
-                              placeholder="Option value"
-                            />
-                          </div>
-                          <div className="flex gap-2">
-                            <div className="flex-1">
-                              <Label>Display Text</Label>
+                    {answer_option &&
+                      answer_option.map((opt, idx) => (
+                        <div
+                          key={idx}
+                          className="space-y-4 pb-4 border-b border-gray-200 last:border-0 last:pb-0"
+                        >
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label>Value</Label>
                               <Input
-                                value={opt.display || ""}
+                                value={opt.value}
                                 onChange={(e) => {
-                                  const newOptions = answer_option
-                                    ? [...answer_option]
-                                    : [];
+                                  const newOptions = [...answer_option];
                                   newOptions[idx] = {
                                     ...opt,
-                                    display: e.target.value,
+                                    value: e.target.value,
                                   };
                                   updateField("answer_option", newOptions);
                                 }}
-                                placeholder="Display text (optional)"
+                                placeholder="Option value"
                               />
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="mt-8"
-                              onClick={() => {
-                                const newOptions = answer_option?.filter(
-                                  (_, i) => i !== idx,
-                                );
-                                updateField("answer_option", newOptions);
-                              }}
-                            >
-                              <CareIcon icon="l-times" className="size-4" />
-                            </Button>
+                            <div className="flex gap-2">
+                              <div className="flex-1">
+                                <Label>Display Text</Label>
+                                <Input
+                                  value={opt.display || ""}
+                                  onChange={(e) => {
+                                    const newOptions = [...answer_option];
+                                    newOptions[idx] = {
+                                      ...opt,
+                                      display: e.target.value,
+                                    };
+                                    updateField("answer_option", newOptions);
+                                  }}
+                                  placeholder="Display text (optional)"
+                                />
+                              </div>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-15"
+                                  >
+                                    <CareIcon
+                                      icon="l-ellipsis-v"
+                                      className="size-15 "
+                                    />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {idx !== 0 && (
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const newOptions = [...answer_option];
+                                        [newOptions[idx - 1], newOptions[idx]] =
+                                          [
+                                            newOptions[idx],
+                                            newOptions[idx - 1],
+                                          ];
+                                        updateField(
+                                          "answer_option",
+                                          newOptions,
+                                        );
+                                      }}
+                                    >
+                                      <ChevronUp className="mr-2 size-4" />
+                                      {t("move_up")}
+                                    </DropdownMenuItem>
+                                  )}
+                                  {idx !== answer_option.length - 1 && (
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const newOptions = [...answer_option];
+                                        [newOptions[idx + 1], newOptions[idx]] =
+                                          [
+                                            newOptions[idx],
+                                            newOptions[idx + 1],
+                                          ];
+                                        updateField(
+                                          "answer_option",
+                                          newOptions,
+                                        );
+                                      }}
+                                    >
+                                      <ChevronDown className="mr-2 size-4" />
+                                      {t("move_down")}
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const newOptions = answer_option.filter(
+                                        (_, i) => i !== idx,
+                                      );
+                                      updateField("answer_option", newOptions);
+                                    }}
+                                    className="text-destructive"
+                                  >
+                                    <CareIcon
+                                      icon="l-trash-alt"
+                                      className="mr-2 size-4"
+                                    />
+                                    {t("delete")}
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
 
                     <Button
                       variant="outline"
