@@ -56,22 +56,34 @@ npm run dev
 
 Once the development server has started, open [localhost:4000](http://localhost:4000) in your browser. The page will be automatically reloaded when you make edits and save. You will also see any lint errors in the console.
 
-#### 🔑 Staging API Credentials
+#### 🔑 API Credentials for care.ohc.network
 
-Authenticate to staging API with any of the following credentials
+Authenticate to care.ohc.network with any of the following credentials
 
 ```yaml
-- username: devdistrictadmin
-  password: Coronasafe@123
-  role: Administrator
+# Doctor at Aluva PHC
+- username: care-doctor
+  password: Ohcn@123
 
-- username: staffdev
-  password: Coronasafe@123
-  role: Nurse
+# Staff at Aluva PHC
+- username: care-staff
+  password: Ohcn@123
 
-- username: doctordev
-  password: Coronasafe@123
-  role: Doctor
+# Admin at Aluva PHC
+- username: care-nurse
+  password: Ohcn@123
+
+# Facility Admin at Aluva PHC
+- username: care-fac-admin
+  password: Ohcn@123
+
+# Volunteer at Aluva PHC
+- username: care-volunteer
+  password: Ohcn@123
+
+# Administrator
+- username: care-admin
+  password: Ohcn@123
 ```
 
 #### 📱 Patient Login in Staging

@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -234,6 +233,8 @@ const MedicationStatementListLayout = ({
   className?: string;
   medicationsCount?: number | undefined;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Card className={cn("rounded-sm ", className)}>
       <CardHeader className="px-4 pt-4 pb-2">
