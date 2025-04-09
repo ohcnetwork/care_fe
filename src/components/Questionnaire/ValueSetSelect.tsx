@@ -429,10 +429,7 @@ export default function ValueSetSelect({
         {hideTrigger ? (
           content
         ) : (
-          <PopoverContent
-            className="transition-all w-[600px] p-0"
-            align="start"
-          >
+          <PopoverContent className="transition-all w-150 p-0" align="start">
             {content}
           </PopoverContent>
         )}
