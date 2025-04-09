@@ -1,14 +1,6 @@
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import usePreferredMediaDevice from "@/hooks/usePreferredMediaDevice";
 
@@ -70,25 +62,7 @@ const useCameraSelect = ({ onChange }: UseCameraSelectOptions = {}) => {
     }
   };
 
-  const CameraSelect = () => (
-    <Select value={selectedDeviceId} onValueChange={handleValueChange}>
-      <SelectTrigger>
-        <SelectValue placeholder="Select a camera" />
-      </SelectTrigger>
-      <SelectContent>
-        {devices.map((device: MediaDeviceInfo) => (
-          <SelectItem
-            key={device.deviceId}
-            value={device.deviceId || "Unknown Device"}
-          >
-            {device.label || `Camera ${device.deviceId}`}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-
-  return { CameraSelect, selectedDeviceId };
+  return { devices, selectedDeviceId, handleValueChange };
 };
 
 export default useCameraSelect;

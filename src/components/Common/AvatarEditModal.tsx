@@ -21,7 +21,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import useCameraSelect from "@/hooks/useCameraSelect";
+import CameraSelect from "@/components/Common/CameraSelect";
+
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
@@ -72,6 +73,7 @@ const AvatarEditModal = ({
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const webRef = useRef<Webcam>(null);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
@@ -80,7 +82,6 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
-  const { CameraSelect, selectedDeviceId } = useCameraSelect();
   const { requestPermission } = useMediaDevicePermission();
 
   const handleSwitchCamera = useCallback(() => {
@@ -392,7 +393,9 @@ const AvatarEditModal = ({
                   {!previewImage ? (
                     <>
                       <div className="mb-2 w-full">
-                        <CameraSelect />
+                        <CameraSelect
+                          onChange={(deviceId) => setSelectedDeviceId(deviceId)}
+                        />
                       </div>
                       <Webcam
                         audio={false}
