@@ -123,18 +123,18 @@ export const MultiSelect = React.forwardRef<
                       return (
                         <Badge
                           key={value}
-                          className="m-1 cursor-pointer bg-gray-100 text-gray-900 hover:bg-gray-700 hover:text-white transition-colors group"
+                          className="m-1 cursor-pointer"
                           variant="secondary"
                         >
                           {option?.icon && (
                             <CareIcon
                               icon={option.icon}
-                              className="size-4 mr-2 group-hover:text-white"
+                              className="size-4 mr-2"
                             />
                           )}
                           {option?.label}
                           <XCircle
-                            className="ml-2 size-4 cursor-pointer opacity-70 hover:opacity-100 hover:text-white"
+                            className="ml-2 size-4 cursor-pointer opacity-50 hover:opacity-100 hover:text-black"
                             onClick={(event) => {
                               event.stopPropagation();
                               toggleOption(value);
