@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +51,98 @@ interface Props {
   trigger?: React.ReactNode;
 }
 
+interface TagSelectorProps {
+  title?: string;
+  selected: QuestionnaireTagModel[];
+  onToggle: (tagId: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  isLoading?: boolean;
+  tagOptions?: QuestionnaireTagModel[];
+  className?: string;
+  triggerClassName?: string;
+}
+
+export function TagSelectorPopover({
+  title,
+  selected,
+  onToggle,
+  searchQuery,
+  onSearchChange,
+  isLoading,
+  tagOptions,
+  className,
+  triggerClassName,
+}: TagSelectorProps) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover
+      modal={true}
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onSearchChange("");
+        }
+        setOpen(isOpen);
+      }}
+    >
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className={cn(
+            "w-full justify-start text-left font-normal",
+            triggerClassName,
+          )}
+        >
+          <Hash className="mr-2 size-4" />
+          <span>{title || t("search_tags")}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className={cn("p-0 w-[var(--radix-popover-trigger-width)]", className)}
+        align="start"
+      >
+        <Command className="rounded-lg" filter={() => 1}>
+          <CommandInput
+            placeholder={t("search_tags")}
+            value={searchQuery}
+            onValueChange={onSearchChange}
+            className="outline-hidden border-none ring-0 shadow-none"
+          />
+          <CommandList>
+            <CommandEmpty>{t("no_tags_found")}</CommandEmpty>
+            <CommandGroup>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="size-6 animate-spin" />
+                </div>
+              ) : (
+                tagOptions?.map((tag) => (
+                  <CommandItem
+                    key={tag.id}
+                    value={tag.id}
+                    onSelect={() => onToggle(tag.id)}
+                  >
+                    <div className="flex flex-1 items-center gap-2">
+                      <Hash className="size-4" />
+                      <span>{tag.name}</span>
+                    </div>
+                    {selected.some((t) => t.id === tag.id) && (
+                      <Check className="size-4" />
+                    )}
+                  </CommandItem>
+                ))
+              )}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export default function ManageQuestionnaireTagsSheet({
   questionnaire,
   trigger,
@@ -56,7 +150,6 @@ export default function ManageQuestionnaireTagsSheet({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [popOverOpen, setPopOverOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newTagName, setNewTagName] = useState("");
@@ -68,7 +161,6 @@ export default function ManageQuestionnaireTagsSheet({
     queryFn: query.debounced(questionnaireApi.tags.list, {
       queryParams: searchQuery !== "" ? { name: searchQuery } : undefined,
     }),
-    enabled: popOverOpen,
   });
 
   const { mutate: setTags, isPending: isUpdating } = useMutation({
@@ -111,23 +203,21 @@ export default function ManageQuestionnaireTagsSheet({
     if (!availableTags?.results) return selectedTags;
     if (searchQuery) return availableTags.results;
 
-    const availableSlugs = new Set(
-      availableTags.results.map((tag) => tag.slug),
-    );
+    const availableIds = new Set(availableTags.results.map((tag) => tag.id));
 
     // Add selected tags that aren't in availableTags
     const selectedNotInAvailable = selectedTags.filter(
-      (selectedTag) => !availableSlugs.has(selectedTag.slug),
+      (selectedTag) => !availableIds.has(selectedTag.id),
     );
 
     return [...availableTags.results, ...selectedNotInAvailable];
   }, [availableTags, selectedTags, searchQuery]);
 
-  const handleToggleTag = (tagSlug: string) => {
+  const handleToggleTag = (tagId: string) => {
     setSelectedTags((current) => {
-      const newTag = tagOptions?.find((tag) => tag.slug === tagSlug);
-      return current.some((tag) => tag.slug === tagSlug)
-        ? current.filter((tag) => tag.slug !== tagSlug)
+      const newTag = tagOptions?.find((tag) => tag.id === tagId);
+      return current.some((tag) => tag.id === tagId)
+        ? current.filter((tag) => tag.id !== tagId)
         : newTag
           ? [...current, newTag]
           : current;
@@ -151,10 +241,10 @@ export default function ManageQuestionnaireTagsSheet({
   };
 
   const hasChanges =
-    new Set(questionnaire.tags.map((tag) => tag.slug)).size !==
+    new Set(questionnaire.tags.map((tag) => tag.id)).size !==
       new Set(selectedTags).size ||
     !questionnaire.tags.every((tag) =>
-      selectedTags.some((st) => st.slug === tag.slug),
+      selectedTags.some((st) => st.id === tag.id),
     );
 
   return (
@@ -180,7 +270,7 @@ export default function ManageQuestionnaireTagsSheet({
             <div className="flex flex-wrap gap-2">
               {selectedTags?.map((tag) => (
                 <Badge
-                  key={tag.slug}
+                  key={tag.id}
                   variant="secondary"
                   className="flex items-center gap-1"
                 >
@@ -189,7 +279,7 @@ export default function ManageQuestionnaireTagsSheet({
                     variant="ghost"
                     size="icon"
                     className="size-4 p-0 hover:bg-transparent"
-                    onClick={() => handleToggleTag(tag.slug)}
+                    onClick={() => handleToggleTag(tag.id)}
                     disabled={isUpdating}
                   >
                     <X className="size-3" />
@@ -205,64 +295,15 @@ export default function ManageQuestionnaireTagsSheet({
           {/* Tag Selector */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium">{t("add_tags")}</h3>
-            <Popover
-              modal={true}
-              open={popOverOpen}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setSearchQuery("");
-                }
-                setPopOverOpen(open);
-              }}
-            >
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                >
-                  <Hash className="mr-2 size-4" />
-                  <span>{t("search_tags")}</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="p-0 w-[var(--radix-popover-trigger-width)]"
-                align="start"
-              >
-                <Command className="rounded-lg" filter={() => 1}>
-                  <CommandInput
-                    placeholder={t("search_tags")}
-                    onValueChange={setSearchQuery}
-                    className="outline-hidden border-none ring-0 shadow-none"
-                  />
-                  <CommandList>
-                    <CommandEmpty>{t("no_tags_found")}</CommandEmpty>
-                    <CommandGroup>
-                      {isLoading ? (
-                        <div className="flex items-center justify-center py-6">
-                          <Loader2 className="size-6 animate-spin" />
-                        </div>
-                      ) : (
-                        tagOptions?.map((tag) => (
-                          <CommandItem
-                            key={tag.slug}
-                            value={tag.slug}
-                            onSelect={() => handleToggleTag(tag.slug)}
-                          >
-                            <div className="flex flex-1 items-center gap-2">
-                              <Hash className="size-4" />
-                              <span>{tag.name}</span>
-                            </div>
-                            {selectedTags.some((t) => t.slug === tag.slug) && (
-                              <Check className="size-4" />
-                            )}
-                          </CommandItem>
-                        ))
-                      )}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <TagSelectorPopover
+              selected={selectedTags}
+              onToggle={handleToggleTag}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              isLoading={isLoading}
+              tagOptions={tagOptions}
+              className="w-full justify-start text-left font-normal"
+            />
           </div>
 
           {/* Create New Tag */}
