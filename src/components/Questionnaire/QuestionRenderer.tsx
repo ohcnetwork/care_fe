@@ -49,10 +49,7 @@ export function QuestionRenderer({
 
   useEffect(() => {
     if (activeGroupId && questionRefs.current[activeGroupId]) {
-      questionRefs.current[activeGroupId]?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      questionRefs.current[activeGroupId]?.scrollIntoView({ block: "start" });
     }
   }, [activeGroupId]);
 
@@ -66,7 +63,9 @@ export function QuestionRenderer({
       {questions.map((question) => (
         <div
           key={question.id}
-          ref={(el) => (questionRefs.current[question.id] = el)}
+          ref={(el) => {
+            questionRefs.current[question.id] = el;
+          }}
           className={cn(
             shouldBeFullWidth(question) ? "md:w-auto" : "max-w-4xl",
           )}

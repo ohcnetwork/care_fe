@@ -30,7 +30,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
 
   const { facilityId } = props;
 
-  let usersList: JSX.Element = <></>;
+  let usersList: React.ReactNode = <></>;
 
   const { data: userListData, isFetching: userListFetching } = useQuery({
     queryKey: ["facilityUsers", facilityId, qParams, resultsPerPage],

@@ -376,7 +376,7 @@ export const FilesTab = (props: FilesTabProps) => {
     );
   };
 
-  const FileUploadButtons = (): JSX.Element => {
+  const FileUploadButtons = (): React.ReactNode => {
     if (!canEdit) return <></>;
     return (
       <DropdownMenu>

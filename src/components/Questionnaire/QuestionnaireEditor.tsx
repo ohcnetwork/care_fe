@@ -511,7 +511,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 `question-${question.id}`,
                               );
                               if (element) {
-                                element.scrollIntoView({ behavior: "smooth" });
+                                element.scrollIntoView();
                                 toggleQuestionExpanded(question.id);
                               }
                             }}
@@ -539,9 +539,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                         `question-${subQuestion.id}`,
                                       );
                                       if (element) {
-                                        element.scrollIntoView({
-                                          behavior: "smooth",
-                                        });
+                                        element.scrollIntoView();
                                         toggleQuestionExpanded(question.id);
                                       }
                                     }}

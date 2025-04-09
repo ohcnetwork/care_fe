@@ -745,7 +745,7 @@ function AppointmentRow(props: {
   }: {
     totalCount: number;
     noMargin?: boolean;
-  }) => JSX.Element;
+  }) => React.ReactNode;
   updateQuery: (filter: FilterState) => void;
   resultsPerPage: number;
   slot: string | null;

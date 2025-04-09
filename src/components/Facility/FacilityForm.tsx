@@ -166,10 +166,7 @@ export default function FacilityForm({
 
     // Scroll to geo-organization field if it has an error
     if (errors.geo_organization) {
-      geoOrganizationRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      geoOrganizationRef.current?.scrollIntoView({ block: "center" });
     }
   });
 

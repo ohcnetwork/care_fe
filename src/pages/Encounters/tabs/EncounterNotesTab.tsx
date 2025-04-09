@@ -436,10 +436,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   }, [inView, hasNextPage, fetchNextPage]);
 
   useEffect(() => {
-    recentMessageRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    recentMessageRef.current?.scrollIntoView({ block: "start" });
   }, [messagesData]);
 
   const handleCreateThread = (title: string) => {
