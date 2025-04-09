@@ -304,6 +304,14 @@ export default function UserForm({
     setSelectedLevels(levels);
   }, [org, organizationId]);
 
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (isEditMode && userData && "geo_organization" in userData) {
+      levels.push(userData.geo_organization as Organization);
+      setSelectedLevels(levels);
+    }
+  }, [org, userData, isEditMode]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -772,28 +780,28 @@ export default function UserForm({
             </div>
           </>
         )} */}
-        {!isEditMode && (
-          <FormField
-            control={form.control}
-            name="geo_organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <GovtOrganizationSelector
-                    {...field}
-                    value={form.watch("geo_organization")}
-                    selected={selectedLevels}
-                    onChange={(value) =>
-                      form.setValue("geo_organization", value)
-                    }
-                    required={false}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="geo_organization"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <GovtOrganizationSelector
+                  {...field}
+                  value={form.watch("geo_organization")}
+                  selected={selectedLevels}
+                  onChange={(value) =>
+                    form.setValue("geo_organization", value, {
+                      shouldDirty: true,
+                    })
+                  }
+                  required={false}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button
           type="submit"
