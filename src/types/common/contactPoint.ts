@@ -1,6 +1,8 @@
 import { t } from "i18next";
 import { z } from "zod";
 
+import validators from "@/Utils/validators";
+
 export const ContactPointSystems = [
   "phone",
   "fax",
@@ -23,12 +25,12 @@ export interface ContactPoint {
   use: ContactPointUse;
 }
 
-export const contactPointSchema = () =>
+export const contactPoint = () =>
   z.discriminatedUnion("system", [
     // Phone numbers
     z.object({
       system: z.literal("phone"),
-      value: z.string().min(1, { message: t("field_required") }),
+      value: validators().phoneNumber.required,
       use: z.enum(ContactPointUses),
     }),
     // Fax numbers (also using phone validation since they follow same format)
@@ -58,7 +60,7 @@ export const contactPointSchema = () =>
     // SMS (also using phone validation)
     z.object({
       system: z.literal("sms"),
-      value: z.string().min(1, { message: t("field_required") }),
+      value: validators().phoneNumber.required,
       use: z.enum(ContactPointUses),
     }),
     // Pager (typically numeric, but can vary)

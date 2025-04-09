@@ -38,10 +38,7 @@ import {
   usePluginDevice,
   usePluginDevices,
 } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
-import {
-  ContactPointSystems,
-  contactPointSchema,
-} from "@/types/common/contactPoint";
+import { ContactPointSystems, contactPoint } from "@/types/common/contactPoint";
 import {
   DeviceAvailabilityStatuses,
   DeviceList,
@@ -86,7 +83,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
       user_friendly_name: z.string().optional(),
       model_number: z.string().optional(),
       part_number: z.string().optional(),
-      contact: z.array(contactPointSchema()).superRefine((contacts, ctx) => {
+      contact: z.array(contactPoint()).superRefine((contacts, ctx) => {
         const valueMap = new Map();
         contacts.forEach((contact, index) => {
           // Normalize value to prevent case-sensitive duplicates
