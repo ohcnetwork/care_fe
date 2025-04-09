@@ -1079,7 +1079,7 @@ function QuestionEditor({
                             { shouldValidate: true },
                           );
                         }}
-                        placeholder="Add a text"
+                        placeholder={t("question_text_placeholder")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -1105,7 +1105,7 @@ function QuestionEditor({
                             { shouldValidate: true },
                           );
                         }}
-                        placeholder="Unique identifier for this question"
+                        placeholder={t("link_id_placeholder")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -1133,7 +1133,7 @@ function QuestionEditor({
                           { shouldValidate: true },
                         );
                       }}
-                      placeholder="Additional context or instructions for this question"
+                      placeholder={t("question_description_placeholder")}
                       className="h-20"
                     />
                   </FormControl>
