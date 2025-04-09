@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +22,9 @@ import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
+import { OrgSelectorPopover } from "./ManageQuestionnaireOrganizationsSheet";
 import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
+import { TagSelectorPopover } from "./ManageQuestionnaireTagsSheet";
 
 interface Organization {
   id: string;
@@ -223,21 +224,17 @@ function OrganizationSelector({
       {selection.error && (
         <p className="text-sm text-red-500">{selection.error}</p>
       )}
-      <Autocomplete
-        options={(selection.available?.results ?? []).map((org) => ({
-          label: org.name,
-          value: org.id,
-          description: org.description,
-        }))}
-        value=""
-        onChange={(value) => {
+      <OrgSelectorPopover
+        title={t("select_organizations")}
+        selected={selection.selectedOrgs.map((org) => org.id)}
+        onToggle={(value) => {
           selection.onToggle(value);
           if (selection.error) selection.setError(undefined);
         }}
-        onSearch={selection.setSearchQuery}
-        placeholder={t("select_organizations")}
+        searchQuery={selection.searchQuery}
+        onSearchChange={selection.setSearchQuery}
         isLoading={selection.isLoading}
-        noOptionsMessage={t("no_organizations_found")}
+        organizations={selection.available}
       />
     </div>
   );
@@ -311,17 +308,14 @@ function TagSelector({
         )}
       </div>
 
-      <Autocomplete
-        options={(selection.available ?? []).map((tag) => ({
-          label: tag.name,
-          value: tag.id,
-        }))}
-        value=""
-        onChange={selection.onToggle}
-        onSearch={selection.setSearchQuery}
-        placeholder={t("select_tags")}
+      <TagSelectorPopover
+        title={t("select_tags")}
+        selected={selection.selectedTags}
+        onToggle={selection.onToggle}
+        searchQuery={selection.searchQuery}
+        onSearchChange={selection.setSearchQuery}
         isLoading={selection.isLoading}
-        noOptionsMessage={t("no_tags_found")}
+        tagOptions={selection.available}
       />
 
       {!id && (
