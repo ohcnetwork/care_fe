@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import {
   ChevronDown,
   ChevronUp,
@@ -185,6 +184,7 @@ function LayoutOptionCard({
 
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set(),
@@ -332,14 +332,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   }, [initialQuestionnaire]);
 
   if (id && isLoading) return <Loading />;
+
   if (error) {
     return (
       <Alert variant="destructive">
         <CareIcon icon="l-exclamation-circle" className="size-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Failed to load questionnaire. Please try again later.
-        </AlertDescription>
+        <AlertTitle>{t("error")}</AlertTitle>
+        <AlertDescription>{t("questionniare_load_error")}</AlertDescription>
       </Alert>
     );
   }
@@ -347,7 +346,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     return (
       <Alert>
         <CareIcon icon="l-info-circle" className="size-4" />
-        <AlertTitle>Not Found</AlertTitle>
+        <AlertTitle>{t("not_found")}</AlertTitle>
         <AlertDescription>
           {t("no_requested_questionnaires_found")}
         </AlertDescription>
@@ -357,13 +356,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const updateQuestionnaireField = (
     field: keyof QuestionnaireDetail,
-    value: any,
+    value: unknown,
   ) => {
     setQuestionnaire((prev) => (prev ? { ...prev, [field]: value } : null));
   };
   const handleValidatedChange = (
     field: keyof typeof questionnaire,
-    value: any,
+    value: string | undefined,
   ) => {
     updateQuestionnaireField(field, value);
     form.setValue(field as "title" | "description" | "slug", value, {
@@ -526,7 +525,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               {index + 1}.
                             </span>
                             <span className="flex-1 truncate">
-                              {question.text || "Untitled Question"}
+                              {question.text || t("untitled_question")}
                             </span>
                           </button>
                           {hasSubQuestions && question.questions && (
@@ -677,8 +676,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   <div>
                     <CardTitle>
                       <p className="text-sm text-gray-700 font-medium mt-1">
-                        {questionnaire.questions?.length || 0} {t("question")}
-                        {questionnaire.questions?.length !== 1 ? "s" : ""}
+                        {(questionnaire.questions?.length || 0) > 1
+                          ? t("questions")
+                          : t("question")}
                       </p>
                     </CardTitle>
                   </div>
@@ -801,7 +801,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </div>
           <DebugPreview
             data={questionnaire}
-            title="Questionnaire"
+            title={t("questionnaire")}
             className="mt-4"
           />
         </TabsContent>
@@ -918,7 +918,7 @@ function QuestionEditor({
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
             <div className="font-semibold text-left">
-              {index + 1}. {text || "Untitled Question"}
+              {index + 1}. {text || t("untitled_question")}
             </div>
             <div className="flex gap-2 mt-1">
               <Badge variant="secondary">{type}</Badge>
@@ -985,18 +985,18 @@ function QuestionEditor({
         <div className="p-2 pt-0 space-y-4 mt-2">
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label>Question Text</Label>
+              <Label>{t("question_text")}</Label>
               <Input
                 value={text}
                 onChange={(e) => updateField("text", e.target.value)}
               />
             </div>
             <div className="flex-1">
-              <Label>Link ID</Label>
+              <Label>{t("link_id")}</Label>
               <Input
                 value={question.link_id}
                 onChange={(e) => updateField("link_id", e.target.value)}
-                placeholder="Unique identifier for this question"
+                placeholder={t("link_id_placeholder")}
               />
             </div>
           </div>
@@ -1006,7 +1006,7 @@ function QuestionEditor({
             <Textarea
               value={question.description || ""}
               onChange={(e) => updateField("description", e.target.value)}
-              placeholder="Additional context or instructions for this question"
+              placeholder={t("question_description_placeholder")}
               className="h-20"
             />
           </div>
@@ -1026,7 +1026,7 @@ function QuestionEditor({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select question type">
+                    <SelectValue placeholder={t("question_type_placeholder")}>
                       {
                         SUPPORTED_QUESTION_TYPES.find((t) => t.value === type)
                           ?.name
@@ -1058,7 +1058,9 @@ function QuestionEditor({
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select structured type" />
+                      <SelectValue
+                        placeholder={t("question_structured_type_placeholder")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {STRUCTURED_QUESTIONS.map((type) => (
@@ -1082,10 +1084,11 @@ function QuestionEditor({
 
           <div className="space-y-6">
             <div className="border rounded-lg border-gray-200 bg-gray-100 p-4">
-              <h3 className="text-sm font-medium mb-2">Question Settings</h3>
+              <h3 className="text-sm font-medium mb-2">
+                {t("question_settings")}
+              </h3>
               <p className="text-sm text-gray-500 mb-4">
-                Configure the basic behavior: mark as required, allow multiple
-                entries, or set as read only.
+                {t("question_settings_description")}
               </p>
               <div className="">
                 <div className="flex flex-wrap gap-4">
@@ -1118,7 +1121,7 @@ function QuestionEditor({
                       id={`read_only-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`read_only-${getQuestionPath()}`}>
-                      Read Only
+                      {t("read_only")}
                     </Label>
                   </div>
                 </div>
@@ -1127,11 +1130,10 @@ function QuestionEditor({
 
             <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">
-                Data Collection Details
+                {t("data_collection_details")}
               </h3>
               <p className="text-sm text-gray-500 mb-4">
-                Specify key collection info: time, performer, body site, and
-                method.
+                {t("data_collection_details_description")}
               </p>
               <div className="">
                 <div className="flex flex-wrap gap-4">
@@ -1210,7 +1212,7 @@ function QuestionEditor({
             <div className="space-y-4">
               <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
                 <h3 className="text-sm font-medium mb-2">
-                  Group Layout Options
+                  {t("group_layout_options")}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   {t("choose_layout_style")}
@@ -1253,10 +1255,10 @@ function QuestionEditor({
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <div>
                         <CardTitle className="text-base font-medium">
-                          Answer Options
+                          {t("answer_options")}
                         </CardTitle>
                         <p className="text-sm text-gray-500">
-                          Define possible answers for this question
+                          {t("answer_options_description")}
                         </p>
                       </div>
                       <Select
@@ -1293,11 +1295,10 @@ function QuestionEditor({
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div>
                       <CardTitle className="text-base font-medium">
-                        Quantity
+                        {t("quantity")}
                       </CardTitle>
                       <p className="text-sm text-gray-500">
-                        Select the valueset of options for this quantity
-                        question
+                        {t("quantity_question_description")}
                       </p>
                     </div>
                   </CardHeader>
@@ -1409,9 +1410,7 @@ function QuestionEditor({
             <div className="bg-gray-100 rounded-lg p-1">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-gray-950 font-semibold">
-                  {question.questions?.length || 0} Sub-Question
-                  {question.questions?.length !== 1 ? "s " : " "}
-                  (for the "{text}" Group)
+                  {t("sub_questions_for_group", { group: text })}
                 </Label>
                 <Button
                   variant="ghost"
@@ -1496,11 +1495,11 @@ function QuestionEditor({
           )}
 
           <div className="space-y-4">
-            <Label>Enable When Conditions</Label>
+            <Label>{t("enable_when_conditions")}</Label>
             <div className="space-y-2">
               {(question.enable_when || []).length > 0 && (
                 <div>
-                  <Label className="text-xs">Enable Behavior</Label>
+                  <Label className="text-xs">{t("enable_behavior")}</Label>
                   <Select
                     value={question.enable_behavior ?? "all"}
                     onValueChange={(val: "all" | "any") =>
@@ -1512,10 +1511,10 @@ function QuestionEditor({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">
-                        All conditions must be met
+                        {t("enable_when__all")}
                       </SelectItem>
                       <SelectItem value="any">
-                        Any condition must be met
+                        {t("enable_when__any")}
                       </SelectItem>
                     </SelectContent>
                   </Select>

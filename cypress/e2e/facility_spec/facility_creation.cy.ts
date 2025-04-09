@@ -45,8 +45,25 @@ describe("Facility Management", () => {
       testFacility.address,
     );
 
-    facilityPage.fillLocationHierarchy(LOCATION_HIERARCHY);
+    // Test incomplete location hierarchy combinations
+    // 1. Only state
+    facilityPage.submitFacilityCreationForm();
 
+    // 2. State and district only
+    facilityPage.fillLocationHierarchy({
+      district: LOCATION_HIERARCHY.district,
+    });
+    facilityPage.submitFacilityCreationForm();
+    // 3. State, district and local body only
+    facilityPage.fillLocationHierarchy({
+      localBody: LOCATION_HIERARCHY.localBody,
+    });
+    facilityPage.submitFacilityCreationForm();
+
+    // Fill complete location hierarchy
+    facilityPage.fillLocationHierarchy({
+      ward: LOCATION_HIERARCHY.ward,
+    });
     facilityPage.fillLocationDetails("Ernakulam");
 
     // Submit and verify

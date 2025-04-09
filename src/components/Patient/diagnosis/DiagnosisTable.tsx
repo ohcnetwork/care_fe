@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -31,10 +31,11 @@ interface DiagnosisTableProps {
   title?: string;
 }
 
-export function DiagnosisTable({
-  diagnoses,
-  title = t("diagnosis"),
-}: DiagnosisTableProps) {
+export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
+  const { t } = useTranslation();
+
+  title = title ?? t("diagnosis");
+
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>

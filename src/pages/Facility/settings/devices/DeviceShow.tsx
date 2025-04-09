@@ -171,14 +171,14 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
           </div>
           <div className="flex gap-2 flex-wrap">
             <Link href={`/devices/${deviceId}/edit`}>
-              <Button variant="outline">
+              <Button variant="outline" data-cy="edit-device-button">
                 <CareIcon icon="l-pen" className="size-4" />
                 {t("edit")}
               </Button>
             </Link>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">
+                <Button variant="destructive" data-cy="delete-device-button">
                   <CareIcon icon="l-trash" className="h-4" />
                   {t("delete")}
                 </Button>
@@ -191,11 +191,14 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogCancel data-cy="cancel-delete-device-button">
+                    {t("cancel")}
+                  </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => deleteDevice()}
                     className={cn(buttonVariants({ variant: "destructive" }))}
                     disabled={isDeleting}
+                    data-cy="confirm-delete-device-button"
                   >
                     {isDeleting ? t("deleting") : t("delete")}
                   </AlertDialogAction>
@@ -206,7 +209,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4" data-cy="device-details">
         <Card>
           <CardHeader>
             <CardTitle>{t("device_information")}</CardTitle>

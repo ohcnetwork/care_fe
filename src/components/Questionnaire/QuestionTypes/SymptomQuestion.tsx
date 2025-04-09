@@ -1,5 +1,3 @@
-"use client";
-
 import {
   DotsVerticalIcon,
   MinusCircledIcon,
@@ -7,9 +5,9 @@ import {
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -24,7 +22,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
-import { Command, CommandDrawer, CommandList } from "@/components/ui/command";
+import { Command, CommandList } from "@/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -124,6 +123,8 @@ function SymptomActionsMenu({
   onToggleNotes: () => void;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -164,6 +165,8 @@ const SymptomRow = React.memo(function SymptomRow({
   onUpdate,
   onRemove,
 }: SymptomRowProps) {
+  const { t } = useTranslation();
+
   const [showNotes, setShowNotes] = useState(Boolean(symptom.note));
   const [isOpen, setIsOpen] = useState(!symptom.id);
 
@@ -462,6 +465,8 @@ export function SymptomQuestion({
   disabled,
   encounterId,
 }: SymptomQuestionProps) {
+  const { t } = useTranslation();
+
   const isPreview = patientId === "preview";
   const symptoms =
     (questionnaireResponse.values?.[0]?.value as SymptomRequest[]) || [];
@@ -725,7 +730,7 @@ export function SymptomQuestion({
             onSelect={handleCodeSelect}
             disabled={disabled}
           />
-          <CommandDrawer
+          <Sheet
             open={showSymptomSelection}
             onOpenChange={setShowSymptomSelection}
           >
@@ -745,9 +750,17 @@ export function SymptomQuestion({
                       <CareIcon icon="l-times" className="h-5 w-5" />
                     </Button>
                   </div>
-                  <CommandList className="max-h-[100vh] overflow-y-auto pb-1">
-                    {symptomDetailsContent}
-                  </CommandList>
+                  <SheetContent
+                    side="bottom"
+                    className="px-0 pt-2 pb-0 rounded-t-lg"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+                    <div className="mt-6 h-full">
+                      <CommandList className="max-h-[calc(80vh-2rem)] overflow-y-auto">
+                        {symptomDetailsContent}
+                      </CommandList>
+                    </div>
+                  </SheetContent>
                 </>
               ) : (
                 <>
@@ -764,20 +777,28 @@ export function SymptomQuestion({
                       <CareIcon icon="l-times" className="h-5 w-5" />
                     </Button>
                   </div>
-                  <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
-                    <ValueSetSelect
-                      system="system-condition-code"
-                      placeholder={t("search_symptom")}
-                      onSelect={handleCodeSelect}
-                      disabled={disabled}
-                      hideTrigger={true}
-                      controlledOpen={true}
-                    />
-                  </CommandList>
+                  <SheetContent
+                    side="bottom"
+                    className=" px-0 pt-2 pb-0 rounded-t-lg"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+                    <div className="mt-6 h-full">
+                      <CommandList className="overflow-y-auto">
+                        <ValueSetSelect
+                          system="system-condition-code"
+                          placeholder={t("search_symptom")}
+                          onSelect={handleCodeSelect}
+                          disabled={disabled}
+                          hideTrigger={true}
+                          controlledOpen={true}
+                        />
+                      </CommandList>
+                    </div>
+                  </SheetContent>
                 </>
               )}
             </Command>
-          </CommandDrawer>
+          </Sheet>
         </>
       ) : (
         <ValueSetSelect
