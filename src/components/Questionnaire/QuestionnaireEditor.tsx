@@ -1033,7 +1033,7 @@ function QuestionEditor({
                       }
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="min-w-[var(--radix-select-trigger-width)] max-w-[90vw]">
+                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex flex-col items-start">
