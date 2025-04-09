@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +16,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Sheet,
   SheetContent,
@@ -32,6 +39,107 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 interface Props {
   questionnaireId: string;
   trigger?: React.ReactNode;
+}
+
+interface OrgSelectorPopoverProps {
+  title?: string;
+  selected: string[];
+  onToggle: (orgId: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  isLoading?: boolean;
+  organizations?: {
+    results: Array<{
+      id: string;
+      name: string;
+      description?: string;
+    }>;
+  };
+  className?: string;
+  triggerClassName?: string;
+}
+
+export function OrgSelectorPopover({
+  title,
+  selected,
+  onToggle,
+  searchQuery,
+  onSearchChange,
+  isLoading,
+  organizations,
+  className,
+  triggerClassName,
+}: OrgSelectorPopoverProps) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover
+      modal={true}
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onSearchChange("");
+        }
+        setOpen(isOpen);
+      }}
+    >
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className={cn(
+            "w-full justify-start text-left font-normal",
+            triggerClassName,
+          )}
+        >
+          <Building className="mr-2 size-4" />
+          <span>{title || t("search_organizations")}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className={cn("p-0 w-[var(--radix-popover-trigger-width)]", className)}
+        align="start"
+      >
+        <Command className="rounded-lg" filter={() => 1}>
+          <CommandInput
+            placeholder={t("search_organizations")}
+            value={searchQuery}
+            onValueChange={onSearchChange}
+            className="outline-hidden border-none ring-0 shadow-none"
+          />
+          <CommandList>
+            <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
+            <CommandGroup>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="size-6 animate-spin" />
+                </div>
+              ) : (
+                organizations?.results.map((org) => (
+                  <CommandItem
+                    key={org.id}
+                    value={org.id}
+                    onSelect={() => onToggle(org.id)}
+                  >
+                    <div className="flex flex-1 items-center gap-2">
+                      <Building className="size-4" />
+                      <span>{org.name}</span>
+                      {org.description && (
+                        <span className="text-xs text-gray-500">
+                          - {org.description}
+                        </span>
+                      )}
+                    </div>
+                    {selected.includes(org.id) && <Check className="size-4" />}
+                  </CommandItem>
+                ))
+              )}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 export default function ManageQuestionnaireOrganizationsSheet({
@@ -164,43 +272,14 @@ export default function ManageQuestionnaireOrganizationsSheet({
             <h3 className="text-sm font-medium">
               {t("add_organization", { count: 0 })}
             </h3>
-            <Command className="rounded-lg border border-gray-200 shadow-md">
-              <CommandInput
-                placeholder="Search organizations..."
-                onValueChange={setSearchQuery}
-              />
-              <CommandList>
-                <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
-                <CommandGroup>
-                  {isLoadingOrganizations ? (
-                    <div className="flex items-center justify-center py-6">
-                      <Loader2 className="size-6 animate-spin" />
-                    </div>
-                  ) : (
-                    availableOrganizations?.results.map((org) => (
-                      <CommandItem
-                        key={org.id}
-                        value={org.id}
-                        onSelect={() => handleToggleOrganization(org.id)}
-                      >
-                        <div className="flex flex-1 items-center gap-2">
-                          <Building className="size-4" />
-                          <span>{org.name}</span>
-                          {org.description && (
-                            <span className="text-xs text-gray-500">
-                              - {org.description}
-                            </span>
-                          )}
-                        </div>
-                        {selectedIds.includes(org.id) && (
-                          <Check className="size-4" />
-                        )}
-                      </CommandItem>
-                    ))
-                  )}
-                </CommandGroup>
-              </CommandList>
-            </Command>
+            <OrgSelectorPopover
+              selected={selectedIds}
+              onToggle={handleToggleOrganization}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              isLoading={isLoadingOrganizations}
+              organizations={availableOrganizations}
+            />
           </div>
         </div>
 
