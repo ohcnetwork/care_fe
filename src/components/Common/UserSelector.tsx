@@ -47,10 +47,9 @@ export default function UserSelector({
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
 
   const { data, isFetching } = useQuery({
-    queryKey: ["users", search, facilityId],
+    queryKey: ["users", facilityId],
     queryFn: query.paginated(
       facilityId ? routes.facility.getUsers : UserApi.list,
       {
@@ -108,7 +107,6 @@ export default function UserSelector({
         >
           <CommandInput
             placeholder={t("search")}
-            onValueChange={setSearch}
             className="outline-hidden border-none ring-0 shadow-none"
           />
           <CommandList>
