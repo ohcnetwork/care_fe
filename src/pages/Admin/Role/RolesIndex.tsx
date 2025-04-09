@@ -92,13 +92,13 @@ export function RolesIndex() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="md:sticky bg-gray-50 left-0 z-20 whitespace-nowrap">
+              <TableHead className="sticky top-0 left-0 z-20 bg-gray-50 whitespace-nowrap">
                 {t("permission")}
               </TableHead>
               {roles.map((role) => (
                 <TableHead
                   key={role.id}
-                  className="whitespace-nowrap h-[120px] max-w-[30px] min-w-[30px] sticky top-0 z-10 "
+                  className="whitespace-nowrap h-[120px] max-w-[30px] min-w-[30px] sticky top-0 z-10 bg-gray-50"
                 >
                   <div className="text-sm transform -rotate-90 w-[100px] px-2 origin-center -translate-x-1/3">
                     {role.name}
@@ -110,7 +110,7 @@ export function RolesIndex() {
           <TableBody>
             {allPermissions.map((permission) => (
               <TableRow key={permission.slug}>
-                <TableCell className="md:sticky left-0 z-10 max-w-[200px] bg-gray-50 font-medium">
+                <TableCell className="sticky left-0 z-10 max-w-[200px] bg-gray-50 font-medium">
                   {permission.name}
                 </TableCell>
                 {roles.map((role) => {
