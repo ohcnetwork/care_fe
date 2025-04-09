@@ -421,7 +421,7 @@ export function EncounterQuestion({
 
                 <div className="space-y-2">
                   <Label>{t("discharge_date_time")}</Label>
-                  <div className="flex sm:gap-2 flex-wrap">
+                  <div className="flex gap-1 flex-wrap">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -472,7 +472,7 @@ export function EncounterQuestion({
                     </Popover>
                     <Input
                       type="time"
-                      className="sm:w-[150px] border-t-0 sm:border-t text-sm border-gray-200 h-9"
+                      className="flex-1 border-t-0 sm:border-t text-sm border-gray-200 h-9"
                       value={
                         encounter.period.end
                           ? new Date(encounter.period.end).toLocaleTimeString(
