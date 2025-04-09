@@ -206,7 +206,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [importedData, setImportedData] = useState<QuestionnaireDetail | null>(
     null,
   );
-  const [isLoadingImport, setIsLoadingImport] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -292,6 +291,24 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       toast.error("Failed to update questionnaire");
     },
   });
+
+  const { mutate: importQuestionnaire, isPending: isImporting } = useMutation({
+    mutationFn: async (url: string) => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch questionnaire");
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setImportedData(data);
+      toast.success(t("questionnaire_imported_successfully"));
+    },
+    onError: () => {
+      toast.error(t("failed_to_import_questionnaire"));
+    },
+  });
+
+  const urlSchema = z.string().url(t("please enter a valid url"));
+
   const QuestionnaireFormPartialSchema = z.object({
     title: z.string().trim().min(1, t("field_required")),
     slug: z
@@ -434,20 +451,18 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleImport = async () => {
-    if (!importUrl) return;
+    if (!importUrl) {
+      toast.error(t("url_required"));
+      return;
+    }
 
-    setIsLoadingImport(true);
     try {
-      const response = await fetch(importUrl);
-      if (!response.ok) throw new Error("Failed to fetch questionnaire");
-
-      const data = await response.json();
-      setImportedData(data);
-      toast.success(t("questionnaire_imported_successfully"));
-    } catch (_error) {
-      toast.error(t("failed_to_import_questionnaire"));
-    } finally {
-      setIsLoadingImport(false);
+      urlSchema.parse(importUrl);
+      importQuestionnaire(importUrl);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      }
     }
   };
 
@@ -473,7 +488,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       slug: importedData.slug,
     };
 
-    setQuestionnaire(mappedData as QuestionnaireDetail);
+    setQuestionnaire({
+      ...questionnaire,
+      ...mappedData,
+    } as QuestionnaireDetail);
     form.reset({
       title: mappedData.title || "",
       slug: mappedData.slug || "",
@@ -952,9 +970,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             {!importedData ? (
               <Button
                 onClick={handleImport}
-                disabled={!importUrl || isLoadingImport}
+                disabled={!importUrl || isImporting}
               >
-                {isLoadingImport ? t("importing") : t("import")}
+                {isImporting ? t("importing") : t("import")}
               </Button>
             ) : (
               <Button onClick={handleImportConfirm}>{t("import_form")}</Button>
