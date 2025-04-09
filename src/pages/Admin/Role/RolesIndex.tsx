@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 
 import { useSidebar } from "@/components/ui/sidebar";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -89,51 +88,53 @@ export function RolesIndex() {
           ...tableDimensions,
         }}
       >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="sticky top-0 left-0 z-20 bg-gray-50 whitespace-nowrap">
-                {t("permission")}
-              </TableHead>
-              {roles.map((role) => (
-                <TableHead
-                  key={role.id}
-                  className="whitespace-nowrap h-[120px] max-w-[30px] min-w-[30px] sticky top-0 z-10 bg-gray-50"
-                >
-                  <div className="text-sm transform -rotate-90 w-[100px] px-2 origin-center -translate-x-1/3">
-                    {role.name}
-                  </div>
+        <div className="relative w-full">
+          <table className="w-full caption-bottom text-sm">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="sticky top-0 left-0 z-20 bg-gray-50 whitespace-nowrap">
+                  {t("permission")}
                 </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {allPermissions.map((permission) => (
-              <TableRow key={permission.slug}>
-                <TableCell className="sticky left-0 z-10 max-w-[200px] bg-gray-50 font-medium">
-                  {permission.name}
-                </TableCell>
-                {roles.map((role) => {
-                  const hasPermission = role.permissions.some(
-                    (p) => p.slug === permission.slug,
-                  );
-
-                  return (
-                    <TableCell key={role.id} className="bg-white">
-                      <div className=" max-w-[30px]  min-w-[30px] flex items-center justify-center">
-                        {hasPermission ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-500" />
-                        )}
-                      </div>
-                    </TableCell>
-                  );
-                })}
+                {roles.map((role) => (
+                  <TableHead
+                    key={role.id}
+                    className="whitespace-nowrap h-[120px] max-w-[30px] min-w-[30px] sticky top-0 z-10 bg-gray-50"
+                  >
+                    <div className="text-sm transform -rotate-90 w-[100px] px-2 origin-center -translate-x-1/3">
+                      {role.name}
+                    </div>
+                  </TableHead>
+                ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {allPermissions.map((permission) => (
+                <TableRow key={permission.slug}>
+                  <TableCell className="sticky left-0 z-10 max-w-[200px] bg-gray-50 font-medium">
+                    {permission.name}
+                  </TableCell>
+                  {roles.map((role) => {
+                    const hasPermission = role.permissions.some(
+                      (p) => p.slug === permission.slug,
+                    );
+
+                    return (
+                      <TableCell key={role.id} className="bg-white">
+                        <div className=" max-w-[30px]  min-w-[30px] flex items-center justify-center">
+                          {hasPermission ? (
+                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          )}
+                        </div>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </table>
+        </div>
       </div>
       <Pagination totalCount={response?.count ?? 0} />
     </Page>
