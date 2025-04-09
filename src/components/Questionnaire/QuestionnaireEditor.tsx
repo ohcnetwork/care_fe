@@ -396,7 +396,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
     questionnaire.questions.forEach((q) => {
       if (q.type === "structured" && !q.structured_type) {
-        updatedErrors[q.id] = t("select_structure_type");
+        updatedErrors[q.id] = t("field_required");
         hasError = true;
       } else {
         updatedErrors[q.id] = undefined;
@@ -927,8 +927,7 @@ function QuestionEditor({
     value: Question[K],
     additionalFields?: Partial<Question>,
   ) => {
-    const updateQuestion = { ...question, [field]: value, ...additionalFields };
-    onChange(updateQuestion);
+    onChange({ ...question, [field]: value, ...additionalFields });
   };
 
   const toggleSubQuestionExpanded = (questionId: string) => {
