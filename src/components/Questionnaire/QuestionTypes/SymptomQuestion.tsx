@@ -706,7 +706,7 @@ export function SymptomQuestion({
       </div>
 
       <div className="flex justify-between space-x-2">
-        <Button variant="outline" onClick={handleBackToValueSet}>
+        <Button type="button" variant="outline" onClick={handleBackToValueSet}>
           {t("cancel")}
         </Button>
         <Button onClick={handleConfirmSymptom}>{t("add_symptom")}</Button>

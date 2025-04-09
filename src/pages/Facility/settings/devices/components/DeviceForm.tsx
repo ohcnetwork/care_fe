@@ -590,6 +590,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         <div className="flex items-center justify-end">
           <Button
             variant="outline"
+            type="button"
             className="m-4"
             onClick={() => {
               if (device) {
