@@ -55,6 +55,41 @@ interface Props {
   controlledOpen?: boolean;
 }
 
+const Item = ({
+  option,
+  onFavourite,
+  onSelect,
+  isFavourite,
+}: {
+  option: Code;
+  isFavourite: boolean;
+  onFavourite: () => void;
+  onSelect: () => void;
+}) => (
+  <CommandItem
+    key={option.code}
+    value={option.code}
+    onSelect={onSelect}
+    className="cursor-pointer"
+  >
+    <div className="flex items-center justify-between w-full gap-4">
+      <span>{option.display}</span>
+
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onFavourite();
+        }}
+        className="hover:text-primary-500 transition-all text-secondary-900 cursor-pointer"
+      >
+        {isFavourite ? <StarFilledIcon /> : <StarIcon className="" />}
+      </button>
+    </div>
+  </CommandItem>
+);
+
 export default function ValueSetSelect({
   system,
   value,
@@ -161,49 +196,6 @@ export default function ValueSetSelect({
     }
   }, [controlledOpen, internalOpen]);
 
-  const Item = ({ option }: { option: Code }) => (
-    <CommandItem
-      key={option.code}
-      value={option.code}
-      onSelect={() => {
-        onSelect({
-          code: option.code,
-          display: option.display || "",
-          system: option.system || "",
-        });
-        setInternalOpen(false);
-        addRecentMutation.mutate(option);
-      }}
-      className="cursor-pointer"
-    >
-      <div className="flex items-center justify-between w-full gap-4">
-        <span>{option.display}</span>
-
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            favouritesQuery.data?.find(
-              (favourite) => favourite.code === option.code,
-            )
-              ? removeFavouriteMutation.mutate(option)
-              : addFavouriteMutation.mutate(option);
-          }}
-          className="hover:text-primary-500 transition-all text-secondary-900"
-        >
-          {favouritesQuery.data?.find(
-            (favourite) => favourite.code === option.code,
-          ) ? (
-            <StarFilledIcon />
-          ) : (
-            <StarIcon className="" />
-          )}
-        </button>
-      </div>
-    </CommandItem>
-  );
-
   const content = (
     <Command filter={() => 1}>
       <CommandInput
@@ -212,7 +204,7 @@ export default function ValueSetSelect({
         onValueChange={setSearch}
         autoFocus
       />
-      <CommandList className="h-[300px] overflow-hidden">
+      <CommandList className="h-75 overflow-hidden">
         <Tabs
           value={activeTab.toString()}
           onValueChange={(value) => {
@@ -242,13 +234,45 @@ export default function ValueSetSelect({
           >
             <CommandGroup>
               {resultsWithRecents.map((option) => (
-                <Item key={option.code} option={option} />
+                <Item
+                  key={option.code}
+                  option={option}
+                  onSelect={() => {
+                    onSelect({
+                      code: option.code,
+                      display: option.display || "",
+                      system: option.system || "",
+                    });
+                    setInternalOpen(false);
+                    addRecentMutation.mutate(option);
+                  }}
+                  onFavourite={() => {
+                    favouritesQuery.data?.find(
+                      (favourite) => favourite.code === option.code,
+                    )
+                      ? removeFavouriteMutation.mutate(option)
+                      : addFavouriteMutation.mutate(option);
+                  }}
+                  isFavourite={
+                    !!favouritesQuery.data?.find(
+                      (favourite) => favourite.code === option.code,
+                    )
+                  }
+                />
               ))}
             </CommandGroup>
           </div>
 
           <div
-            className={`${activeTab === 1 ? "block" : "hidden"} md:block flex-1 ${(search.length < 3 && !searchQuery.isFetching) || (!favourites?.length && !resultsWithRecents.length) ? "" : "md:border-l"} border-gray-200`}
+            className={cn(
+              activeTab === 1 ? "block" : "hidden",
+              "md:block flex-1",
+              (search.length < 3 && !searchQuery.isFetching) ||
+                (!favourites?.length && !resultsWithRecents.length)
+                ? ""
+                : "md:border-l",
+              "border-gray-200",
+            )}
           >
             <CommandGroup>
               <div className="flex items-center justify-between">
@@ -275,7 +299,31 @@ export default function ValueSetSelect({
                   </div>
                 )}
               {favourites?.map((option) => (
-                <Item key={option.code} option={option} />
+                <Item
+                  key={option.code}
+                  option={option}
+                  onSelect={() => {
+                    onSelect({
+                      code: option.code,
+                      display: option.display || "",
+                      system: option.system || "",
+                    });
+                    setInternalOpen(false);
+                    addRecentMutation.mutate(option);
+                  }}
+                  onFavourite={() => {
+                    favouritesQuery.data?.find(
+                      (favourite) => favourite.code === option.code,
+                    )
+                      ? removeFavouriteMutation.mutate(option)
+                      : addFavouriteMutation.mutate(option);
+                  }}
+                  isFavourite={
+                    !!favouritesQuery.data?.find(
+                      (favourite) => favourite.code === option.code,
+                    )
+                  }
+                />
               ))}
             </CommandGroup>
           </div>
@@ -382,7 +430,7 @@ export default function ValueSetSelect({
           content
         ) : (
           <PopoverContent
-            className={`transition-all w-[600px] p-0`}
+            className="transition-all w-[600px] p-0"
             align="start"
           >
             {content}
