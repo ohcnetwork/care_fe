@@ -396,8 +396,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
     questionnaire.questions.forEach((q) => {
       if (q.type === "structured" && !q.structured_type) {
-        updatedErrors[q.id] =
-          "Please select a structured type for this question.";
+        updatedErrors[q.id] = t("select_structure_type");
         hasError = true;
       } else {
         updatedErrors[q.id] = undefined;
