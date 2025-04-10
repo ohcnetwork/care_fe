@@ -149,7 +149,7 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
                 <span className="text-gray-500">
                   {t("discharge_summary_advice")}
                 </span>
-                <div className="font-medium text-gray-950">
+                <div className="font-sm text-gray-950">
                   <p
                     className={cn(
                       "whitespace-pre-wrap",
@@ -161,7 +161,7 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
                   {encounter.discharge_summary_advice.length > 100 && (
                     <Button
                       variant="link"
-                      className="p-0 h-auto font-medium text-blue-600 hover:text-blue-800"
+                      className="p-0 h-auto font-sm text-gray-500 hover:text-gray-800"
                       onClick={() => toggleShowMore(encounter.id)}
                     >
                       {showFullText[encounter.id]

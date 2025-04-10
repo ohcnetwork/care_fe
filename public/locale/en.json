@@ -969,7 +969,7 @@
   "discard": "Discard",
   "discard_changes": "Discard Changes",
   "discharge": "Discharge",
-  "discharge_confirmation_date": "Discharge date and time will be automatically set to today's date and time",
+  "discharge_confirmation_date": "Discharge date and time will be automatically set to current date and time",
   "discharge_confirmation_message": "You are about to mark this patient as discharged.",
   "discharge_confirmation_status_change": "The encounter status will be changed to 'Discharged'",
   "discharge_confirmation_summary_required": "You will have an option to provide discharge summary advice details",

@@ -280,12 +280,10 @@ export function EncounterQuestion({
 
       {/* Mark for discharge button - Show if not already discharged */}
       {encounter.status !== "discharged" && (
-        <div className="col-span-2 border border-gray-200 rounded-lg p-4 bg-gray-50">
+        <div className="col-span-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
             <div className="space-y-1">
-              <h3 className="text-base font-medium">
-                {t("discharge_patient")}
-              </h3>
+              <h3 className="text-sm font-medium">{t("discharge_patient")}</h3>
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
