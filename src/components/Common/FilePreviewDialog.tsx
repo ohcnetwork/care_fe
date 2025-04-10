@@ -473,7 +473,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                               icon="l-file-download"
                               className="size-4"
                             />
-                            <span>{t("download")}</span>
                           </a>
                         </Button>
                       )}
@@ -520,7 +519,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                               icon="l-file-download"
                               className="size-4"
                             />
-                            <span>{t("download")}</span>
                           </a>
                         </Button>
                       )}
