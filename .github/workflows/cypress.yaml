@@ -33,9 +33,13 @@ jobs:
           node-version: "22.14.0"
 
       - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: "latest"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=arm64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: Install dependencies 📦
         run: npm ci
