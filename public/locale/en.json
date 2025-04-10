@@ -920,6 +920,7 @@
   "delete_device_description": "Once you delete a device, there is no going back. Please be certain.",
   "delete_facility": "Delete Facility",
   "delete_facility_confirmation": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+  "delete_facility_description": "Once you delete a facility, there is no going back. Please be certain.",
   "delete_item": "Delete {{name}}",
   "delete_record": "Delete Record",
   "delete_this_device": "Delete this device",
