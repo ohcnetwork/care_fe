@@ -14,7 +14,6 @@ import React, {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -127,8 +126,6 @@ export function DiagnosisQuestion({
   updateQuestionnaireResponseCB,
   disabled,
 }: DiagnosisQuestionProps) {
-  const { t } = useTranslation();
-
   const { t } = useTranslation();
 
   const isPreview = patientId === "preview";
@@ -714,9 +711,7 @@ const DiagnosisTableRow = ({
   disabled,
   onUpdate,
   onRemove,
-}) => {
-  const { t } = useTranslation();
-
+}: DiagnosisItemProps) => {
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
   const { t } = useTranslation();
   return (
@@ -1094,8 +1089,6 @@ function CategorySelector({
   onCategorySelect: Dispatch<SetStateAction<DiagnosisRequest["category"]>>;
   gridCols?: string;
 }) {
-  const { t } = useTranslation();
-
   const { t } = useTranslation();
 
   return (
