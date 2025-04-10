@@ -585,11 +585,7 @@ export function QuestionnaireForm({
               q.structured_type as keyof typeof STRUCTURED_TYPE_VALIDATORS
             ];
 
-          // Skip validation for appointment type if not required
-          if (
-            validator &&
-            (q.structured_type !== "appointment" || q.required)
-          ) {
+          if (validator) {
             const validationErrors = validator(response?.values?.[0], q.id);
             errors.push(...validationErrors);
             if (validationErrors.length > 0) {
