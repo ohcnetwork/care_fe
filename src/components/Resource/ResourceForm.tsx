@@ -317,7 +317,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         value={field.value}
                         className="flex gap-4"
                       >
-                        <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormItem className="flex">
                           <FormControl>
                             <RadioGroupItem value="true" />
                           </FormControl>
@@ -325,7 +325,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                             {t("yes")}
                           </FormLabel>
                         </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormItem className="flex">
                           <FormControl>
                             <RadioGroupItem value="false" />
                           </FormControl>

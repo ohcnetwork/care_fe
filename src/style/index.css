@@ -294,6 +294,11 @@
   [data-slot="input-otp-slot"] {
     @apply data-[active=true]:ring-primary-500 data-[active=true]:border-primary-500 data-[active=true]:ring-1 not-first:data-[active=true]:border-x;
   }
+
+  /* Styling for radio group */
+  button[role="radio"] {
+    @apply data-[state=checked]:border-primary-500 data-[state=checked]:text-primary-500 border-gray-300 shadow-sm;
+  }
 }
 
 @layer base {

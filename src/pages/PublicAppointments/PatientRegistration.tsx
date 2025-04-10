@@ -255,10 +255,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         className="flex gap-5 flex-wrap"
                       >
                         {GENDER_TYPES.map((g) => (
-                          <FormItem
-                            key={g.id}
-                            className="flex items-center space-x-2 space-y-0"
-                          >
+                          <FormItem key={g.id} className="flex">
                             <FormControl>
                               <RadioGroupItem
                                 value={g.id}

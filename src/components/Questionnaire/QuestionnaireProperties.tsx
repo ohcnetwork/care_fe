@@ -87,7 +87,7 @@ function StatusSelector({
           <div
             key={status}
             className={cn(
-              "flex items-center px-2 py-1 space-x-2",
+              "flex items-center px-2 py-1",
               status === "active" && "rounded-l-md",
               status === "retired" && "rounded-r-md",
             )}
@@ -130,7 +130,7 @@ function SubjectTypeSelector({
           <div
             key={type.value}
             className={cn(
-              "flex items-center px-2 py-1 space-x-2",
+              "flex items-center px-2 py-1",
               type.value === "patient" && "rounded-l-md",
               type.value === "encounter" && "rounded-r-md",
             )}
