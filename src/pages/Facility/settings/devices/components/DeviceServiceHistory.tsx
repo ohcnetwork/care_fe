@@ -71,9 +71,7 @@ export default function DeviceServiceHistory({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>{t("service_history")}</CardTitle>
-        </div>
+        <CardTitle>{t("service_history")}</CardTitle>
         <AddServiceHistorySheet
           facilityId={facilityId}
           deviceId={deviceId}

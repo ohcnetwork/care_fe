@@ -52,18 +52,18 @@ export default function useFilters({
     options?: setQueryParamsOptions,
   ) => {
     query = FiltersCache.utils.clean(query);
-    _setQueryParams(query, { ...options, historyReplace: true });
+    _setQueryParams(query, { ...options, replace: true });
     updateCache(query);
   };
 
   const updateQuery = (filter: FilterState) => {
     filter = hasPagination ? { page: 1, limit, ...filter } : filter;
-    setQueryParams(Object.assign({}, qParams, filter), { replace: true });
+    setQueryParams(Object.assign({}, qParams, filter), { overwrite: true });
     setClearSearch({ value: false });
   };
   const updatePage = (page: number) => {
     if (!hasPagination) return;
-    setQueryParams(Object.assign({}, qParams, { page }), { replace: true });
+    setQueryParams(Object.assign({}, qParams, { page }), { overwrite: true });
   };
   const removeFilters = (params?: string[]) => {
     params ??= Object.keys(qParams);

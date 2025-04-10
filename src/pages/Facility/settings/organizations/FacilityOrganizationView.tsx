@@ -121,7 +121,7 @@ export default function FacilityOrganizationView({
     getPermissions(hasPermission, permissions);
 
   return (
-    <div className="space-y-6 mx-auto max-w-4xl">
+    <div className="space-y-6 mx-auto max-w-4xl md:pt-3">
       <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
         <div className="flex flex-col items-start md:flex-row sm:items-center gap-4 w-full lg:justify-between">
           <div className="w-full lg:w-1/3 relative">
@@ -156,7 +156,7 @@ export default function FacilityOrganizationView({
           <CardListSkeleton count={4} />
         </div>
       ) : (
-        <div className="space-y-6 mb-4">
+        <div className="space-y-6 md:pb-6">
           <div className="space-y-4">
             {children?.results?.length ? (
               children.results.map((org) => (
