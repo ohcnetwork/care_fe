@@ -74,7 +74,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const user = useAuthUser();
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
-  const { hasPermission, isSuperAdmin } = usePermissions();
+  const { hasPermission } = usePermissions();
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -420,7 +420,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   </CardContent>
                 </Card>
               )}
-              {isSuperAdmin && (
+              {user.is_superuser && (
                 <Card className="border-red-500 mt-3">
                   <CardHeader>
                     <CardTitle className="text-destructive">
@@ -455,6 +455,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             </AlertDialogTitle>
                             <AlertDialogDescription>
                               {t("delete_facility_confirmation")}
+                              {t("delete_facility_confirmation", {
+                                name: facilityData?.name,
+                              })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
