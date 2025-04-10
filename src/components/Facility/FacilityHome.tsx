@@ -51,11 +51,7 @@ import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
-import type {
-  Organization,
-  OrganizationParent,
-} from "@/types/organization/organization";
-import { getOrgLabel } from "@/types/organization/organization";
+import { renderGeoOrganizations } from "@/types/organization/organization";
 
 import { FacilityMapsLink } from "./FacilityMapLink";
 
@@ -71,42 +67,6 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   ) : (
     feature.icon
   );
-};
-
-const renderGeoOrganizations = (geoOrg: Organization) => {
-  const orgParents: OrganizationParent[] = [];
-
-  let currentParent = geoOrg.parent;
-
-  while (currentParent) {
-    if (currentParent.id) {
-      orgParents.push(currentParent);
-    }
-    currentParent = currentParent.parent;
-  }
-
-  const formatValue = (name: string, label: string) => {
-    return name.endsWith(label)
-      ? name.replace(new RegExp(`${label}$`), "").trim()
-      : name;
-  };
-
-  const parentDetails = orgParents.map((org) => {
-    const label = getOrgLabel(org.org_type, org.metadata);
-    return {
-      label,
-      value: formatValue(org.name, label),
-    };
-  });
-
-  const geoOrgLabel = getOrgLabel(geoOrg.org_type, geoOrg.metadata);
-
-  return [
-    {
-      label: geoOrgLabel,
-      value: formatValue(geoOrg.name, geoOrgLabel),
-    },
-  ].concat(parentDetails);
 };
 
 export const FacilityHome = ({ facilityId }: Props) => {
