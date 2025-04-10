@@ -134,7 +134,7 @@ const SearchInputFieldRenderer = ({
       );
   }
 };
-const SearchInput: React.FC<SearchInputProps> = ({
+export default function SearchInput({
   options,
   onSearch,
   className,
@@ -144,7 +144,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   enableOptionButtons = true,
   autoFocus = false,
   ...props
-}) => {
+}: SearchInputProps) {
   const initialOptionIndex = useMemo(
     () =>
       Math.max(
@@ -410,6 +410,4 @@ const SearchInput: React.FC<SearchInputProps> = ({
       )}
     </div>
   );
-};
-
-export default SearchInput;
+}
