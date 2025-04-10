@@ -2473,6 +2473,8 @@
   "secret_key_copied": "Secret key copied to clipboard",
   "see_attachments": "See Attachments",
   "see_details": "See Details",
+  "see_less": "See less...",
+  "see_more": "See more...",
   "see_note": "See Note",
   "select": "Select",
   "select_a_status": "Select a status",

@@ -1,5 +1,8 @@
 import { Link, navigate, usePathParams } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -22,12 +25,22 @@ interface QuickAccessProps {
 
 export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
   const { t } = useTranslation();
+  const [showFullText, setShowFullText] = useState<{ [key: string]: boolean }>(
+    {},
+  );
   const questionnaireOptions = useQuestionnaireOptions(
     "encounter_actions",
     canEdit,
   );
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityId = subpathMatch?.facilityId;
+
+  const toggleShowMore = (id: string) => {
+    setShowFullText((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -129,40 +142,36 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
       {/* Discharge Information - Show when status is discharged */}
       {encounter.status === "discharged" && (
         <section>
-          <h3 className="text-lg font-medium mb-3">{t("discharge_details")}</h3>
+          <h3 className="text-lg font-medium mb-2">{t("discharge_details")}</h3>
           <div className="space-y-2 text-sm mt-4 bg-gray-50 p-2 rounded-md">
-            <div className="flex justify-between">
-              <span className="text-gray-500">{t("discharge_date_time")}</span>
-              <span className="font-semibold text-gray-950">
-                {encounter.period.end
-                  ? new Date(encounter.period.end).toLocaleString([], {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })
-                  : "-"}
-              </span>
-            </div>
             {encounter.discharge_summary_advice && (
               <div className="flex flex-col gap-1">
                 <span className="text-gray-500">
                   {t("discharge_summary_advice")}
                 </span>
-                <span className="font-medium text-gray-950 whitespace-pre-wrap">
-                  {encounter.discharge_summary_advice}
-                </span>
+                <div className="font-medium text-gray-950">
+                  <p
+                    className={cn(
+                      "whitespace-pre-wrap",
+                      !showFullText[encounter.id] && "line-clamp-2",
+                    )}
+                  >
+                    {encounter.discharge_summary_advice}
+                  </p>
+                  {encounter.discharge_summary_advice.length > 100 && (
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto font-medium text-blue-600 hover:text-blue-800"
+                      onClick={() => toggleShowMore(encounter.id)}
+                    >
+                      {showFullText[encounter.id]
+                        ? t("see_less")
+                        : t("see_more")}
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
-            <Button
-              asChild
-              variant="outline"
-              className="font-semibold rounded-md border-gray-400 text-gray-950"
-            >
-              <Link
-                href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
-              >
-                {t("update_discharge_details")}
-              </Link>
-            </Button>
           </div>
         </section>
       )}
@@ -174,7 +183,7 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
 
           {/* Hospitalisation Details */}
           <section>
-            <h3 className="text-lg font-medium mb-3">
+            <h3 className="text-lg font-medium mb-2">
               {t("hospitalisation_details")}
             </h3>
             <div className="space-y-2 text-sm mt-4 bg-gray-50 p-2 rounded-md">
