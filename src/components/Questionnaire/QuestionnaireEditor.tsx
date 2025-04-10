@@ -1231,7 +1231,7 @@ function QuestionEditor({
               )}
             </div>
 
-            {type !== "structured" && type !== "group" && (
+            {type !== "structured" && (
               <CodingEditor
                 code={code}
                 onChange={(newCode) => updateField("code", newCode)}
