@@ -495,11 +495,12 @@ export function EncounterQuestion({
                               },
                             });
                           }}
-                          disabled={(date) =>
-                            encounter.period.start
-                              ? date < new Date(encounter.period.start)
-                              : false
-                          }
+                          disabled={(date) => {
+                            if (!encounter.period.start) return false;
+                            const startDate = new Date(encounter.period.start);
+                            startDate.setHours(0, 0, 0, 0);
+                            return date < startDate;
+                          }}
                         />
                       </PopoverContent>
                     </Popover>
