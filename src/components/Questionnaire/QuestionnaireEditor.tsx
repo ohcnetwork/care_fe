@@ -30,6 +30,13 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -194,6 +201,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const [orgError, setOrgError] = useState<string | undefined>();
+  const [importUrl, setImportUrl] = useState("");
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importedData, setImportedData] = useState<QuestionnaireDetail | null>(
+    null,
+  );
   const queryClient = useQueryClient();
 
   const {
@@ -279,6 +291,24 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       toast.error("Failed to update questionnaire");
     },
   });
+
+  const { mutate: importQuestionnaire, isPending: isImporting } = useMutation({
+    mutationFn: async (url: string) => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch questionnaire");
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setImportedData(data);
+      toast.success(t("questionnaire_imported_successfully"));
+    },
+    onError: () => {
+      toast.error(t("failed_to_import_questionnaire"));
+    },
+  });
+
+  const urlSchema = z.string().url(t("please enter a valid url"));
+
   const QuestionnaireFormPartialSchema = z.object({
     title: z.string().trim().min(1, t("field_required")),
     slug: z
@@ -409,6 +439,71 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     navigate("/admin/questionnaire");
   };
 
+  const handleDownload = () => {
+    const dataStr = JSON.stringify(questionnaire, null, 2);
+    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
+    const exportFileDefaultName = `${questionnaire.slug || "questionnaire"}.json`;
+
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const handleImport = async () => {
+    if (!importUrl) {
+      toast.error(t("url_required"));
+      return;
+    }
+
+    try {
+      urlSchema.parse(importUrl);
+      importQuestionnaire(importUrl);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      }
+    }
+  };
+
+  const handleImportConfirm = () => {
+    if (!importedData) return;
+
+    // Map only the necessary fields, ignoring id, created_by, tags etc.
+    const mappedData: Partial<QuestionnaireDetail> = {
+      title: importedData.title,
+      description: importedData.description,
+      status: "draft",
+      version: "1.0",
+      subject_type: importedData.subject_type || "patient",
+      questions:
+        importedData.questions?.map((q: Question) => ({
+          ...q,
+          id: crypto.randomUUID(), // Generate new IDs for questions
+          questions: q.questions?.map((sq: Question) => ({
+            ...sq,
+            id: crypto.randomUUID(), // Generate new IDs for sub-questions
+          })),
+        })) || [],
+      slug: importedData.slug,
+    };
+
+    setQuestionnaire({
+      ...questionnaire,
+      ...mappedData,
+    } as QuestionnaireDetail);
+    form.reset({
+      title: mappedData.title || "",
+      slug: mappedData.slug || "",
+      description: mappedData.description || "",
+    });
+
+    setShowImportDialog(false);
+    setImportUrl("");
+    setImportedData(null);
+    toast.success(t("questionnaire_imported_successfully"));
+  };
+
   const toggleQuestionExpanded = (questionId: string) => {
     setExpandedQuestions((prev) => {
       const next = new Set(prev);
@@ -455,7 +550,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">
             {id
@@ -465,9 +560,21 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <p className="text-sm text-gray-500">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleCancel}>
+          <Button type="button" variant="outline" onClick={handleCancel}>
             {t("cancel")}
           </Button>
+          {id && (
+            <Button variant="outline" onClick={handleDownload}>
+              <CareIcon icon="l-import" className="mr-1 size-4" />
+              {t("download")}
+            </Button>
+          )}
+          {!id && (
+            <Button variant="outline" onClick={() => setShowImportDialog(true)}>
+              <CareIcon icon="l-import" className="mr-1 size-4" />
+              {t("import_from_url")}
+            </Button>
+          )}
           <Button onClick={handleSave} disabled={isCreating || isUpdating}>
             <CareIcon icon="l-save" className="mr-2 size-4" />
             {id ? t("save") : t("create")}
@@ -823,6 +930,56 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </Card>
         </TabsContent>
       </Tabs>
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("import_questionnaire")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t("questionnaire_json_url")}</Label>
+              <Input
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                placeholder={t("questionnaire_json_url_placeholder")}
+              />
+            </div>
+            {importedData && (
+              <div className="space-y-2">
+                <Label>{t("preview")}</Label>
+                <div className="p-4 border rounded-lg">
+                  <p className="font-medium">{importedData.title}</p>
+                  <p className="text-sm text-gray-500">
+                    {importedData.description}
+                  </p>
+                  <p className="text-sm mt-2">
+                    {t("questions_count")} :{" "}
+                    {importedData.questions?.length || 0}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowImportDialog(false)}
+            >
+              {t("cancel")}
+            </Button>
+            {!importedData ? (
+              <Button
+                onClick={handleImport}
+                disabled={!importUrl || isImporting}
+              >
+                {isImporting ? t("importing") : t("import")}
+              </Button>
+            ) : (
+              <Button onClick={handleImportConfirm}>{t("import_form")}</Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -1033,7 +1190,7 @@ function QuestionEditor({
                       }
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex flex-col items-start">
