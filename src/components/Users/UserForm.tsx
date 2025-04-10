@@ -431,6 +431,13 @@ export default function UserForm({
                         {...field}
                         onFocus={() => setIsUsernameFieldFocused(true)}
                         onBlur={() => setIsUsernameFieldFocused(false)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Tab") {
+                            e.preventDefault(); // Prevent default tab behavior
+                            document.getElementById("email")?.focus();
+                            // Move focus to email input
+                          }
+                        }}
                       />
                     </div>
                   </FormControl>
@@ -494,12 +501,15 @@ export default function UserForm({
                   <FormItem>
                     <FormLabel required>{t("email")}</FormLabel>
                     <FormControl>
-                      <Input
-                        data-cy="email-input"
-                        type="email"
-                        placeholder={t("email")}
-                        {...field}
-                      />
+                      <div>
+                        <Input
+                          data-cy="email-input"
+                          type="email"
+                          id="email"
+                          placeholder={t("email")}
+                          {...field}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -585,7 +595,7 @@ export default function UserForm({
                   control={form.control}
                   name="password"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem id="password">
                       <FormLabel required>{t("password")}</FormLabel>
                       <FormControl>
                         <div className="relative">
@@ -595,6 +605,12 @@ export default function UserForm({
                             {...field}
                             onFocus={() => setIsPasswordFieldFocused(true)}
                             onBlur={() => setIsPasswordFieldFocused(false)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Tab") {
+                                e.preventDefault(); // Prevent default tab behavior
+                                document.getElementById("c_password")?.focus(); // Move focus to confirm password input
+                              }
+                            }}
                           />
                         </div>
                       </FormControl>
@@ -644,6 +660,13 @@ export default function UserForm({
                           data-cy="confirm-password-input"
                           placeholder={t("confirm_password")}
                           {...field}
+                          id="c_password"
+                          onKeyDown={(e) => {
+                            if (e.key === "Tab") {
+                              e.preventDefault();
+                              document.getElementById("phone_number")?.focus();
+                            }
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -667,6 +690,7 @@ export default function UserForm({
                     data-cy="phone-number-input"
                     placeholder={t("enter_phone_number")}
                     {...field}
+                    id="phone_number"
                   />
                 </FormControl>
                 <FormMessage />
@@ -678,7 +702,7 @@ export default function UserForm({
             control={form.control}
             name="gender"
             render={({ field }) => (
-              <FormItem>
+              <FormItem id="gender">
                 <FormLabel required>{t("gender")}</FormLabel>
                 <Select
                   {...field}
@@ -777,7 +801,7 @@ export default function UserForm({
             control={form.control}
             name="geo_organization"
             render={({ field }) => (
-              <FormItem>
+              <FormItem id="geo_organization">
                 <FormControl>
                   <GovtOrganizationSelector
                     {...field}
