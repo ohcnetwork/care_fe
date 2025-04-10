@@ -1,8 +1,9 @@
 import { CaretDownIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +38,8 @@ interface Props {
   facilityId?: string;
 }
 
+const PAGE_LIMIT = 50;
+
 export default function UserSelector({
   selected,
   onChange,
@@ -47,19 +50,37 @@ export default function UserSelector({
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const { ref, inView } = useInView();
 
-  const { data, isFetching } = useQuery({
-    queryKey: ["users", facilityId],
-    queryFn: query.paginated(
-      facilityId ? routes.facility.getUsers : UserApi.list,
-      {
-        pathParams: facilityId ? { facility_id: facilityId } : undefined,
-        pageSize: 100,
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
+    useInfiniteQuery({
+      queryKey: ["users", facilityId],
+      queryFn: async ({ pageParam = 0 }) => {
+        const response = await query(
+          facilityId ? routes.facility.getUsers : UserApi.list,
+          {
+            pathParams: facilityId ? { facility_id: facilityId } : undefined,
+            queryParams: {
+              limit: String(PAGE_LIMIT),
+              offset: String(pageParam),
+            },
+          },
+        )({ signal: new AbortController().signal });
+
+        return response;
       },
-    ),
-  });
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * PAGE_LIMIT;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
 
-  const usersList = data?.results || [];
+  const usersList = data?.pages.flatMap((p) => p.results) || [];
+
+  useEffect(() => {
+    if (inView && hasNextPage) fetchNextPage();
+  }, [inView, hasNextPage, fetchNextPage]);
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -116,7 +137,7 @@ export default function UserSelector({
                 : noOptionsMessage || t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {usersList.map((user: UserBase) => (
+              {usersList.map((user: UserBase, i) => (
                 <CommandItem
                   key={user.id}
                   value={user.id}
@@ -125,6 +146,7 @@ export default function UserSelector({
                     setOpen(false);
                   }}
                   className="cursor-pointer w-full"
+                  ref={i === usersList.length - 1 ? ref : undefined}
                 >
                   <div className="flex items-center gap-2 w-full">
                     <Avatar
@@ -149,6 +171,11 @@ export default function UserSelector({
                   </div>
                 </CommandItem>
               ))}
+              {isFetchingNextPage && (
+                <div className="text-center text-sm text-muted py-2">
+                  {t("loading")}
+                </div>
+              )}
             </CommandGroup>
           </CommandList>
         </Command>
