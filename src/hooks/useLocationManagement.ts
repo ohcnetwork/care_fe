@@ -193,28 +193,6 @@ export function useLocationManagement({
 
     const targetLocation = children.results[targetIndex];
 
-    // Swap positions in local state for animation
-    const updatedLocations = [...children.results];
-    [updatedLocations[targetIndex], updatedLocations[currentIndex]] = [
-      updatedLocations[currentIndex],
-      updatedLocations[targetIndex],
-    ];
-
-    // Optimistically update the UI
-    queryClient.setQueryData(
-      [
-        "locations",
-        facilityId,
-        parentId ? "children" : "all",
-        parentId,
-        { page, limit: itemsPerPage + 2, searchQuery },
-      ],
-      {
-        ...children,
-        results: updatedLocations,
-      },
-    );
-
     // Swap sort_index values between the two locations
     updateLocationOrder({
       locations: [
@@ -235,6 +213,29 @@ export function useLocationManagement({
       ],
       previousData: children,
       onSuccess: () => {
+        // Update the UI only after successful API call
+        const updatedLocations = [...children.results];
+        [updatedLocations[targetIndex], updatedLocations[currentIndex]] = [
+          updatedLocations[currentIndex],
+          updatedLocations[targetIndex],
+        ];
+
+        // Update the local state
+        queryClient.setQueryData(
+          [
+            "locations",
+            facilityId,
+            parentId ? "children" : "all",
+            parentId,
+            { page, limit: itemsPerPage + 2, searchQuery },
+          ],
+          {
+            ...children,
+            results: updatedLocations,
+          },
+        );
+
+        // Then invalidate to ensure data is fresh
         queryClient.invalidateQueries({
           queryKey: [
             "locations",
