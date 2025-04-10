@@ -1,4 +1,3 @@
-import { CubeIcon } from "@radix-ui/react-icons";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -11,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
+import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { DeviceList } from "@/types/device/device";
 import { Encounter } from "@/types/emr/encounter";
 
@@ -22,15 +21,6 @@ interface Props {
 
 export default function DeviceCard({ device, encounter }: Props) {
   const { t } = useTranslation();
-  const deviceTypes = usePluginDevices();
-
-  // Find the matching device type for the current device
-  const deviceType = device.care_type
-    ? deviceTypes.find((type) => type.type === device.care_type)
-    : undefined;
-
-  // Use the device type icon or fallback to CubeIcon
-  const DeviceIcon = deviceType?.icon || CubeIcon;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -70,7 +60,7 @@ export default function DeviceCard({ device, encounter }: Props) {
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-2">
               <div className="mt-1">
-                <DeviceIcon className="size-5 text-gray-500" />
+                <DeviceTypeIcon className="size-5 text-gray-500" />
               </div>
               <div>
                 <CardTitle className="text-lg font-semibold line-clamp-1">
