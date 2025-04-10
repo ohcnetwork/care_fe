@@ -588,11 +588,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       >
         <TabsList className="mb-4">
           <TabsTrigger value="edit">
-            <ViewIcon className="size-4 mr-2" />
+            <ViewIcon className="size-4" />
             {t("edit_form")}
           </TabsTrigger>
           <TabsTrigger value="preview">
-            <SquarePenIcon className="size-4 mr-2" />
+            <SquarePenIcon className="size-4" />
             {t("form_preview")}
           </TabsTrigger>
         </TabsList>

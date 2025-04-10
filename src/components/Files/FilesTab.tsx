@@ -661,17 +661,9 @@ export const FilesTab = (props: FilesTabProps) => {
         }
       >
         {type === "encounter" && (
-          <TabsList className="bg-gray-200 py-0 w-fit">
-            <TabsTrigger
-              value="all"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("all")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="discharge_summary"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
+          <TabsList>
+            <TabsTrigger value="all">{t("all")}</TabsTrigger>
+            <TabsTrigger value="discharge_summary">
               {t("discharge_summary")}
             </TabsTrigger>
           </TabsList>

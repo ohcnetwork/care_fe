@@ -382,11 +382,11 @@ export default function AppointmentsPage({
         >
           <TabsList>
             <TabsTrigger value="board">
-              <CareIcon icon="l-kanban" className="mr-2" />
+              <CareIcon icon="l-kanban" />
               <span>{t("board")}</span>
             </TabsTrigger>
             <TabsTrigger value="list">
-              <CareIcon icon="l-list-ul" className="mr-2" />
+              <CareIcon icon="l-list-ul" />
               <span>{t("list")}</span>
             </TabsTrigger>
           </TabsList>

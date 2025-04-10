@@ -377,9 +377,13 @@ const Login = (props: LoginProps) => {
                     }
                   }}
                 >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="staff">Staff Login</TabsTrigger>
-                    <TabsTrigger value="patient">Patient Login</TabsTrigger>
+                  <TabsList className="flex w-full">
+                    <TabsTrigger className="flex-1" value="staff">
+                      {t("staff_login")}
+                    </TabsTrigger>
+                    <TabsTrigger className="flex-1" value="patient">
+                      {t("patient_login")}
+                    </TabsTrigger>
                   </TabsList>
 
                   {/* Staff Login */}
