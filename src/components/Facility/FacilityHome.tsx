@@ -286,7 +286,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
               )}
             </div>
 
-            <div className="mt-2 space-y-2">
+            <div className="mt-4 space-y-4">
               <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
                 <Card className="basis-1/2">
                   <CardContent className="p-6 flex flex-col h-full">
