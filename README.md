@@ -94,6 +94,45 @@ For patient login via phone number:
 
 All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
 
+#### Rules for Writing Translation Keys
+
+- If creating dynamic translation or keys which are resolved during runtime, use the following format: `static_part__dynamic_part`.
+- Always use a double underscore `__` to separate the static part and dynamic part.
+- Use descriptive and meaningful keys that reflect the purpose of the string.
+- Use snake_case for naming keys (e.g., `user_login_success`).
+- Avoid using special characters or spaces in keys.
+- Do not hardcode dynamic values; use placeholders (e.g., `welcome_message: "Welcome, {username}!"`).
+- Ensure keys are unique across the project to avoid conflicts.
+- Keep keys consistent and aligned with existing naming conventions.
+- Update the translation file in alphabetical order for easier maintenance (use sort-locale js script).
+- Always test translations to ensure they render correctly in the UI.
+
+### Rules for Using Translation Keys
+
+1. **Avoid Passing Translation Keys as Props:**  
+   Always use the `t` function or the `Trans` component to handle translations. Do not pass translation keys directly as props to components, and then use these props in `t` function or `Trans` component
+
+2. **Dynamic Keys:**
+
+- Ensure dynamic keys follow the translation key naming conventions outlined above.
+- Use the `Trans` component to translate strings with dynamic keys instead of the `t` function.
+
+3. **Plural Keys:**
+
+- When using plural keys, ensure the entire translation key is passed to the `Trans` component. Avoid relying on i18n to determine the correct key dynamically.
+- Example:
+
+```javascript
+const key =
+  count === 1 ? (
+    <Trans i18nKey="item_singular" values={{ count }} />
+  ) : (
+    <Trans i18nKey="item_plural" values={{ count }} />
+  );
+```
+
+- This approach ensures clarity and avoids potential issues with incorrect key resolution.
+
 ### Testing
 
 To ensure the quality of our pull requests, we use a variety of tools:
