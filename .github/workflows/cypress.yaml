@@ -35,11 +35,6 @@ jobs:
       - name: Install dependencies 📦
         run: npm ci
 
-      - name: Install Chromium
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
-
       - name: Build ⚙️
         run: npm run build
 
@@ -54,7 +49,6 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chromium
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,7 +67,6 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chromium
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
