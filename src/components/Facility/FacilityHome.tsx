@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
-import { Hospital, Trash2 } from "lucide-react";
+import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -262,69 +262,27 @@ export const FacilityHome = ({ facilityId }: Props) => {
               </div>
             </div>
 
-            <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
-              {user.is_superuser && (
-                <div className="flex max-sm:flex-col mt-2 sm:mt-4">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        className="cursor-pointer font-semibold"
-                        variant="destructive"
-                        size="sm"
-                      >
-                        <Trash2 className="mr-2 size-4" />
-                        {t("delete_facility")}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("delete_facility")}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {t("delete_facility_confirmation", {
-                            name: facilityData?.name,
-                          })}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => deleteFacility()}
-                          className={cn(
-                            buttonVariants({ variant: "destructive" }),
-                          )}
-                          disabled={isDeleting}
-                        >
-                          {isDeleting ? t("deleting") : t("delete")}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              )}
-              {canUpdateFacility && (
-                <div className="flex max-sm:flex-col mt-10 sm:mt-4">
-                  <PLUGIN_Component
-                    __name="FacilityHomeActions"
-                    facility={facilityData}
-                  />
-                  <EditFacilitySheet
-                    facilityId={facilityId}
-                    trigger={
-                      <Button
-                        className="cursor-pointer font-semibold"
-                        variant="outline"
-                        size="sm"
-                      >
-                        <CareIcon icon="l-pen" />
-                        {t("edit_facility_details")}
-                      </Button>
-                    }
-                  />
-                </div>
-              )}
-            </div>
+            {canUpdateFacility && (
+              <div className="flex max-sm:flex-col mt-10 sm:mt-4">
+                <PLUGIN_Component
+                  __name="FacilityHomeActions"
+                  facility={facilityData}
+                />
+                <EditFacilitySheet
+                  facilityId={facilityId}
+                  trigger={
+                    <Button
+                      className="cursor-pointer font-semibold"
+                      variant="outline"
+                      size="sm"
+                    >
+                      <CareIcon icon="l-pen" />
+                      {t("edit_facility_details")}
+                    </Button>
+                  }
+                />
+              </div>
+            )}
 
             <div className="mt-2 space-y-2">
               <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
@@ -420,7 +378,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   </CardContent>
                 </Card>
               )}
-              {user.is_superuser && (
+              {!user.is_superuser && (
                 <Card className="border-red-500 mt-3">
                   <CardHeader>
                     <CardTitle className="text-destructive">
@@ -431,19 +389,18 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     <div className="flex items-center justify-between gap-4 rounded-md border p-4">
                       <div className="space-y-1">
                         <h3 className="text-sm font-medium">
-                          {t("Delete this Facility")}
+                          Delete this Facility
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          {t(
-                            "Once you delete a facility there is no going back. Please be certain.",
-                          )}
+                          Once you delete a facility there is no going back.
+                          Please be certain.
                         </p>
                       </div>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
                             variant="destructive"
-                            data-cy="delete-device-button"
+                            data-cy="delete-facility-button"
                           >
                             {t("delete")}
                           </Button>
@@ -454,7 +411,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
                               {t("delete_facility")}
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                              {t("delete_facility_confirmation")}
                               {t("delete_facility_confirmation", {
                                 name: facilityData?.name,
                               })}
