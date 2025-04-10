@@ -48,6 +48,7 @@
   "DOMESTIC_HEALTHCARE_SUPPORT__FAMILY_MEMBER": "Family member",
   "DOMESTIC_HEALTHCARE_SUPPORT__NO_SUPPORT": "No support",
   "DOMESTIC_HEALTHCARE_SUPPORT__PAID_CAREGIVER": "Paid caregiver",
+  "date_and_time": "Date and Time",
   "Diagnosis_chronic_condition__description": "Long-term diagnosis (e.g., Hypertension)",
   "Diagnosis_chronic_condition__title": "Chronic Condition",
   "Diagnosis_encounter_diagnosis__description": "Specific to this visit only",
