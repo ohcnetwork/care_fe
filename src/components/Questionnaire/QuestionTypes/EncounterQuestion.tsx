@@ -110,6 +110,21 @@ export function EncounterQuestion({
     encounter.discharge_summary_advice || "",
   );
 
+  useEffect(() => {
+    if (encounter.status === "discharged") {
+      handleUpdateEncounter({
+        period: {
+          ...encounter.period,
+          end: new Date().toISOString(),
+        },
+      });
+    } else {
+      handleUpdateEncounter({
+        discharge_summary_advice: null,
+      });
+    }
+  }, [encounter.status]);
+
   // Update encounter state when data is loaded
   useEffect(() => {
     if (encounterData) {
@@ -174,15 +189,6 @@ export function EncounterQuestion({
             onValueChange={(value) =>
               handleUpdateEncounter({
                 status: value as EncounterStatus,
-                ...(value === "discharged" && {
-                  period: {
-                    ...encounter.period,
-                    end: new Date().toISOString(),
-                  },
-                }),
-                ...(value !== "discharged" && {
-                  discharge_summary_advice: null,
-                }),
               })
             }
             disabled={disabled}
