@@ -851,7 +851,7 @@ export function QuestionnaireForm({
           <>
             <div
               key={`${questionnaireForms.length}`}
-              className="flex gap-4 items-center m-4 max-w-4xl"
+              className="flex gap-4 items-center max-w-4xl px-2"
             >
               <QuestionnaireSearch
                 subjectType={subjectType}
