@@ -179,11 +179,7 @@ export function MultiSelect({
               onTouchMove={handleTouchMove}
             >
               <CommandGroup>
-                <CommandItem
-                  key="all"
-                  onSelect={toggleAll}
-                  className="cursor-pointer"
-                >
+                <CommandItem key="all" onSelect={toggleAll}>
                   <Checkbox
                     checked={selectedValues.length === options.length}
                     aria-label="Select all options"
@@ -199,11 +195,12 @@ export function MultiSelect({
                       className="cursor-pointer"
                     >
                       <Checkbox
+                        className="data-[state=checked]:bg-white"
                         checked={isSelected}
                         aria-label={`Select ${option.label}`}
                       />
                       {option?.icon && (
-                        <CareIcon icon={option.icon} className="mr-2 size-4" />
+                        <CareIcon icon={option.icon} className="size-4" />
                       )}
                       <span>{option.label}</span>
                     </CommandItem>
