@@ -1,7 +1,7 @@
-import { CaretSortIcon, CubeIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,7 @@ import {
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
-import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
+import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { DeviceList } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
@@ -37,6 +37,8 @@ export function DeviceSearch({
   disabled,
   value,
 }: DeviceSearchProps) {
+  const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -103,13 +105,9 @@ export function DeviceSearch({
 }
 
 const DeviceItem = ({ device }: { device: DeviceList }) => {
-  const deviceManifests = usePluginDevices();
-  const deviceConfig = deviceManifests.find((c) => c.type === device.care_type);
-  const DeviceIcon = deviceConfig?.icon || CubeIcon;
-
   return (
     <div className="flex items-center gap-2">
-      {DeviceIcon && <DeviceIcon className="size-4" />}
+      <DeviceTypeIcon type={device.care_type} className="size-4" />
       {device.registered_name}
     </div>
   );

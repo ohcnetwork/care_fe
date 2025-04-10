@@ -32,6 +32,7 @@ import { NumberQuestion } from "./NumberQuestion";
 import { QuantityQuestion } from "./QuantityQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
 import { TextQuestion } from "./TextQuestion";
+import { TimeQuestion } from "./TimeQuestion";
 
 interface QuestionInputProps {
   question: Question;
@@ -209,6 +210,9 @@ export function QuestionInput({
       case "display":
         return null;
 
+      case "time":
+        return <TimeQuestion {...commonProps} />;
+
       default:
         return <TextQuestion {...commonProps} />;
     }
@@ -220,7 +224,7 @@ export function QuestionInput({
       : questionnaireResponse.values;
 
     return (
-      <div className="bg-gray-100 md:bg-transparent px-2 py-3">
+      <div className="bg-gray-100 md:bg-transparent px-2 py-1.5">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 && (

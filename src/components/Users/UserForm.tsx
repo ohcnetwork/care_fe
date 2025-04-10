@@ -79,10 +79,10 @@ export default function UserForm({
             .string()
             .min(4, t("field_required"))
             .max(16, t("username_not_valid"))
-            .regex(/^[a-z0-9._-]*$/, t("username_not_valid"))
+            .regex(/^[a-z0-9_-]*$/, t("username_not_valid"))
             .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_not_valid"))
             .refine(
-              (val) => !val.match(/(?:[._-]{2,})/),
+              (val) => !val.match(/(?:[_-]{2,})/),
               t("username_not_valid"),
             ),
       password_setup_method: z.enum(["immediate", "email"]).optional(),
@@ -303,6 +303,14 @@ export default function UserForm({
     if (org && org.org_type === "govt") levels.push(org);
     setSelectedLevels(levels);
   }, [org, organizationId]);
+
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (isEditMode && userData && "geo_organization" in userData) {
+      levels.push(userData.geo_organization as Organization);
+      setSelectedLevels(levels);
+    }
+  }, [org, userData, isEditMode]);
 
   return (
     <Form {...form}>
@@ -772,28 +780,28 @@ export default function UserForm({
             </div>
           </>
         )} */}
-        {!isEditMode && (
-          <FormField
-            control={form.control}
-            name="geo_organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <GovtOrganizationSelector
-                    {...field}
-                    value={form.watch("geo_organization")}
-                    selected={selectedLevels}
-                    onChange={(value) =>
-                      form.setValue("geo_organization", value)
-                    }
-                    required={false}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="geo_organization"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <GovtOrganizationSelector
+                  {...field}
+                  value={form.watch("geo_organization")}
+                  selected={selectedLevels}
+                  onChange={(value) =>
+                    form.setValue("geo_organization", value, {
+                      shouldDirty: true,
+                    })
+                  }
+                  required={false}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button
           type="submit"

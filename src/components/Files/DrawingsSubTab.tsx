@@ -1,9 +1,9 @@
 import { exportToSvg } from "@excalidraw/excalidraw";
-import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { navigate } from "raviger";
 import { memo, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -33,6 +33,7 @@ interface ExcalidrawPreviewProps {
 }
 
 const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
+  const { t } = useTranslation();
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [svgKey, setSvgKey] = useState(0);
@@ -131,6 +132,7 @@ export const DrawingPage = ({
     limit: 15,
     cacheBlacklist: ["name"],
   });
+  const { t } = useTranslation();
 
   const associatingId = type === "encounter" ? encounter?.id : patientId;
 

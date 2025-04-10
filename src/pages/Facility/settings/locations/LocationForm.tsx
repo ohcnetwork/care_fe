@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Info, RotateCcw } from "lucide-react";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -44,53 +43,12 @@ import type {
   BatchSubmissionResult,
 } from "@/types/questionnaire/batch";
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, { message: t("field_required") }),
-  description: z.string().optional(),
-  status: z.enum(["active", "inactive", "unknown"] as const),
-  operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
-  form: z.enum(LocationFormOptions),
-  parent: z.string().optional().nullable(),
-  enableBulkCreation: z.boolean().default(false),
-  numberOfBeds: z.string().optional(),
-  customizeNames: z.boolean().default(false),
-  organizations: z.array(z.string()).default([]),
-  availability_status: z.enum(["available", "unavailable"] as const),
-  bedNames: z
-    .array(
-      z.object({
-        name: z.string().min(1, { message: t("field_required") }),
-      }),
-    )
-    .default([]),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
 interface Props {
   facilityId: string;
   onSuccess?: () => void;
   locationId?: string;
   parentId?: string;
 }
-
-const defaultValues: FormValues = {
-  name: "",
-  description: "",
-  status: "active",
-  operational_status: "O",
-  form: "ro",
-  parent: null,
-  enableBulkCreation: false,
-  numberOfBeds: "2",
-  customizeNames: false,
-  organizations: [],
-  availability_status: "available",
-  bedNames: [],
-};
 
 export default function LocationForm({
   facilityId,
@@ -100,6 +58,47 @@ export default function LocationForm({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  const formSchema = z.object({
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
+    description: z.string().optional(),
+    status: z.enum(["active", "inactive", "unknown"] as const),
+    operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
+    form: z.enum(LocationFormOptions),
+    parent: z.string().optional().nullable(),
+    enableBulkCreation: z.boolean().default(false),
+    numberOfBeds: z.string().optional(),
+    customizeNames: z.boolean().default(false),
+    organizations: z.array(z.string()).default([]),
+    availability_status: z.enum(["available", "unavailable"] as const),
+    bedNames: z
+      .array(
+        z.object({
+          name: z.string().min(1, { message: t("field_required") }),
+        }),
+      )
+      .default([]),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
+
+  const defaultValues: FormValues = {
+    name: "",
+    description: "",
+    status: "active",
+    operational_status: "O",
+    form: "ro",
+    parent: null,
+    enableBulkCreation: false,
+    numberOfBeds: "2",
+    customizeNames: false,
+    organizations: [],
+    availability_status: "available",
+    bedNames: [],
+  };
 
   const { data: location, isLoading } = useQuery({
     queryKey: ["location", locationId],
@@ -296,7 +295,10 @@ export default function LocationForm({
                 disabled={!!locationId}
               >
                 <FormControl>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger
+                    className="w-full"
+                    data-cy="location-form-options"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                 </FormControl>
@@ -324,6 +326,7 @@ export default function LocationForm({
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    data-cy="enable-bulk-creation-checkbox"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -346,7 +349,7 @@ export default function LocationForm({
                 <FormLabel>{t("number_of_beds")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="bed-counts-select">
                       <SelectValue placeholder={t("select_number_of_beds")} />
                     </SelectTrigger>
                   </FormControl>
@@ -371,7 +374,7 @@ export default function LocationForm({
             <FormItem>
               <FormLabel>{t("name")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} data-cy="location-name-input" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -485,7 +488,11 @@ export default function LocationForm({
             <FormItem>
               <FormLabel>{t("description")}</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder="Description" />
+                <Textarea
+                  {...field}
+                  placeholder="Description"
+                  data-cy="location-description"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -501,7 +508,7 @@ export default function LocationForm({
                 <FormLabel>{t("status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="location-status">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
@@ -526,7 +533,7 @@ export default function LocationForm({
                 <FormLabel>{t("operational_status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="operational-status">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
