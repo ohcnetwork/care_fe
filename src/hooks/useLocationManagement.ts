@@ -3,7 +3,6 @@ import { t } from "i18next";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { handleLocationReorder } from "@/Utils/locationOrder";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -115,8 +114,6 @@ export function useLocationManagement({
       }
       let errorMessage = t("failed_to_update_order");
 
-      // Try to extract more specific error messages
-
       if (error && typeof error === "object" && "cause" in error) {
         const errorObj = error as { cause: unknown };
         const errorData = errorObj.cause as {
@@ -189,20 +186,54 @@ export function useLocationManagement({
       return;
     }
 
-    const params = {
-      location,
-      locations: children.results,
-      queryClient,
-      queryKey: [
+    // Check if movement is possible
+    if (targetIndex < 0 || targetIndex >= children.results.length) {
+      return;
+    }
+
+    const targetLocation = children.results[targetIndex];
+
+    // Swap positions in local state for animation
+    const updatedLocations = [...children.results];
+    [updatedLocations[targetIndex], updatedLocations[currentIndex]] = [
+      updatedLocations[currentIndex],
+      updatedLocations[targetIndex],
+    ];
+
+    // Optimistically update the UI
+    queryClient.setQueryData(
+      [
         "locations",
         facilityId,
         parentId ? "children" : "all",
         parentId,
         { page, limit: itemsPerPage + 2, searchQuery },
       ],
+      {
+        ...children,
+        results: updatedLocations,
+      },
+    );
+
+    // Swap sort_index values between the two locations
+    updateLocationOrder({
+      locations: [
+        {
+          locationId: location.id,
+          data: {
+            ...location,
+            sort_index: targetLocation.sort_index,
+          },
+        },
+        {
+          locationId: targetLocation.id,
+          data: {
+            ...targetLocation,
+            sort_index: location.sort_index,
+          },
+        },
+      ],
       previousData: children,
-      direction,
-      updateMutation: updateLocationOrder,
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: [
@@ -213,9 +244,7 @@ export function useLocationManagement({
           ],
         });
       },
-    };
-
-    handleLocationReorder(params);
+    });
   };
 
   const handleAddLocation = () => {
