@@ -99,6 +99,7 @@ function AppointmentDialog({
             <span className="flex flex-row gap-2">
               <Button
                 variant="destructive"
+                type="button"
                 disabled={isPending}
                 onClick={() => {
                   cancelAppointment({

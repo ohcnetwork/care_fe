@@ -26,7 +26,7 @@ interface PatientSwitcherProps {
 
 export function PatientSwitcher({ className }: PatientSwitcherProps) {
   const { t } = useTranslation();
-  const { open } = useSidebar();
+  const { open, isMobile } = useSidebar();
 
   const patientUserContext = usePatientContext();
 
@@ -64,7 +64,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
                 }
               >
                 <>
-                  {open && (
+                  {(open || isMobile) && (
                     <div className="flex flex-row justify-between items-center gap-2 w-full text-primary-800">
                       <Avatar
                         name={
@@ -82,7 +82,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
                       </div>
                     </div>
                   )}
-                  {!open && (
+                  {!open && !isMobile && (
                     <div className="flex flex-row items-center -ml-1.5">
                       <Avatar
                         name={
@@ -96,7 +96,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
               </SelectValue>
             </SelectTrigger>
           </TooltipTrigger>
-          {!open && (
+          {!open && !isMobile && (
             <TooltipContent side="right" align="center">
               <p>{patientUserContext.selectedPatient?.name}</p>
             </TooltipContent>

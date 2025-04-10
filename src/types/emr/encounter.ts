@@ -1,3 +1,14 @@
+import {
+  Ambulance,
+  BedDouble,
+  Building2,
+  Home,
+  LucideIcon,
+  MonitorSmartphone,
+  Stethoscope,
+} from "lucide-react";
+
+import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
@@ -52,19 +63,19 @@ export const ENCOUNTER_DISCHARGE_DISPOSITION = [
 ] as const;
 
 export const ENCOUNTER_PRIORITY = [
+  "stat",
   "ASAP",
+  "emergency",
+  "urgent",
+  "routine",
+  "elective",
+  "rush_reporting",
+  "timing_critical",
   "callback_results",
   "callback_for_scheduling",
-  "elective",
-  "emergency",
   "preop",
   "as_needed",
-  "routine",
-  "rush_reporting",
-  "stat",
-  "timing_critical",
   "use_as_directed",
-  "urgent",
 ] as const;
 
 export const ENCOUNTER_STATUS = [
@@ -78,6 +89,15 @@ export const ENCOUNTER_STATUS = [
   "entered_in_error",
   "unknown",
 ] as const;
+
+export const ENCOUNTER_CLASSES_ICONS = {
+  imp: BedDouble,
+  amb: Ambulance,
+  obsenc: Stethoscope,
+  emer: Building2,
+  vr: MonitorSmartphone,
+  hh: Home,
+} as const satisfies Record<EncounterClass, LucideIcon>;
 
 export type EncounterAdmitSources = (typeof ENCOUNTER_ADMIT_SOURCE)[number];
 
@@ -149,6 +169,7 @@ export interface Encounter {
   current_location: LocationList;
   location_history: LocationHistory[];
   permissions: string[];
+  care_team: CareTeamResponse[];
 }
 
 export interface EncounterEditRequest {
