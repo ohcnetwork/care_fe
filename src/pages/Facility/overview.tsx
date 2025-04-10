@@ -48,6 +48,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       icon: Calendar,
       href: `/facility/${facilityId}/users/${user?.username}/availability`,
       visible: canViewSchedule,
+      "data-cy": "my-schedules",
     },
     {
       title: t("encounters"),
@@ -55,6 +56,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       icon: Users,
       href: `/facility/${facilityId}/encounters`,
       visible: canListEncounters,
+      "data-cy": "my-encounters",
     },
   ];
 
@@ -92,6 +94,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   key={shortcut.href}
                   href={shortcut.href}
                   className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"
+                  data-cy={shortcut["data-cy"]}
                 >
                   <Card className="h-full border-0 shadow rounded-xl p-4">
                     <CardContent className="p-0 flex flex-row items-center h-full gap-4">

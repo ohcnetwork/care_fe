@@ -268,7 +268,11 @@ export default function CreateScheduleTemplateSheet({
     >
       <SheetTrigger asChild>
         {trigger ?? (
-          <Button variant="primary" disabled={isPending}>
+          <Button
+            variant="primary"
+            disabled={isPending}
+            data-cy="create-template-button"
+          >
             {t("create_template")}
           </Button>
         )}
@@ -296,6 +300,7 @@ export default function CreateScheduleTemplateSheet({
                       <Input
                         placeholder={t("schedule_template_name_placeholder")}
                         {...field}
+                        dats-cy="schedule-template-name"
                       />
                     </FormControl>
                     <FormMessage />
@@ -313,6 +318,7 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        data-cy="template-valid-from"
                       />
                       <FormMessage />
                     </FormItem>
@@ -328,6 +334,7 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        data-cy="template-valid-till"
                       />
                       <FormMessage />
                     </FormItem>
@@ -353,6 +360,7 @@ export default function CreateScheduleTemplateSheet({
                             value={field.value}
                             onChange={field.onChange}
                             format={weekdayFormat}
+                            data-cy="schedule-weekdays"
                           />
                         </FormControl>
                         <FormMessage />
@@ -408,6 +416,7 @@ export default function CreateScheduleTemplateSheet({
                               <FormControl>
                                 <Input
                                   placeholder={t("session_title_placeholder")}
+                                  data-cy="template-session-title"
                                   {...field}
                                 />
                               </FormControl>
@@ -476,6 +485,7 @@ export default function CreateScheduleTemplateSheet({
                                     field.onChange(e);
                                     updateSlotDuration(index);
                                   }}
+                                  data-cy="session-start-time"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -497,6 +507,7 @@ export default function CreateScheduleTemplateSheet({
                                     field.onChange(e);
                                     updateSlotDuration(index);
                                   }}
+                                  data-cy="session-end-time"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -535,6 +546,7 @@ export default function CreateScheduleTemplateSheet({
                                     updateSlotDuration(index);
                                   }
                                 }}
+                                data-cy="auto-fill-slot-duration"
                               />
                               {form.watch(
                                 `availabilities.${index}.is_auto_fill`,
@@ -561,6 +573,7 @@ export default function CreateScheduleTemplateSheet({
                                               );
                                               updateSlotDuration(index);
                                             }}
+                                            data-cy="number-of-slots"
                                           />
                                         </FormControl>
                                         <FormMessage />
@@ -595,6 +608,7 @@ export default function CreateScheduleTemplateSheet({
                                       disabled={form.watch(
                                         `availabilities.${index}.is_auto_fill`,
                                       )}
+                                      data-cy="slot-size-in-minutes"
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -623,6 +637,7 @@ export default function CreateScheduleTemplateSheet({
                                       onChange={(e) =>
                                         field.onChange(e.target.valueAsNumber)
                                       }
+                                      data-cy="patients-per-slot"
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -649,6 +664,7 @@ export default function CreateScheduleTemplateSheet({
                                 placeholder={t("remarks_placeholder")}
                                 className="resize-none"
                                 {...field}
+                                data-cy="template-remarks"
                               />
                             </FormControl>
                             <FormMessage />
@@ -697,7 +713,12 @@ export default function CreateScheduleTemplateSheet({
                   </Button>
                 </SheetClose>
 
-                <Button variant="primary" type="submit" disabled={isPending}>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  disabled={isPending}
+                  data-cy="submit-template"
+                >
                   {isPending ? t("saving") : t("save")}
                 </Button>
               </SheetFooter>
