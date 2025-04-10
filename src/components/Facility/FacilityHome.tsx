@@ -378,7 +378,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   </CardContent>
                 </Card>
               )}
-              {!user.is_superuser && (
+              {user.is_superuser && (
                 <Card className="border-red-500 mt-3">
                   <CardHeader>
                     <CardTitle className="text-destructive">
