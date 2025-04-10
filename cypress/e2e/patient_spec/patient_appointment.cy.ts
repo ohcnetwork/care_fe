@@ -39,8 +39,8 @@ describe("User Schedule and Patient Appointment", () => {
       .clickMySchedules()
       .clickCreateTemplateButton()
       .fillTemplateForm(formData)
-      .clickUpdateTemplateIcon();
-    // .updateTemplate(updateData);
+      .clickUpdateTemplateIcon()
+      .fillEditForm(updateData);
   });
 });
 

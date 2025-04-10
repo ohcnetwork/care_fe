@@ -30,6 +30,10 @@ export class PatientAppointment {
     patientsPerSlot: "[data-cy=patients-per-slot]",
     templateRemarks: "[data-cy=template-remarks]",
     submitTemplate: "[data-cy=submit-template]",
+    editTemplateName: "[data-cy=edit-template-name]",
+    editTemplateValidFrom: "[data-cy=edit-template-valid-from]",
+    editTemplateValidTill: "[data-cy=edit-template-valid-till]",
+    editTemplateSubmit: "[data-cy=edit-template-submit]",
   };
 
   clickMySchedules() {
@@ -146,6 +150,18 @@ export class PatientAppointment {
     return this;
   }
 
+  interceptTemplateUpdation() {
+    cy.intercept("POST", "/api/v1/facility/*/schedule/").as("updateTemplate");
+    return this;
+  }
+
+  verifyTemplateUpdationAPICall() {
+    cy.wait("@createTemplate").then((interception) => {
+      expect(interception.response.statusCode).to.equal(201);
+    });
+    return this;
+  }
+
   clickUpdateTemplateIcon() {
     cy.get("[data-cy=update-template-icon]").click();
     return this;
@@ -167,6 +183,40 @@ export class PatientAppointment {
     if (data.remarks) this.fillTemplateRemarks(data.remarks);
     this.submitTemplate();
     this.verifyTemplateCreationAPICall();
+    return this;
+  }
+
+  fillEditTemplateName(name: string) {
+    cy.typeIntoField(this.selectors.editTemplateName, name, {
+      clearBeforeTyping: true,
+    });
+    return this;
+  }
+
+  fillEditTemplateValidFrom(date: string) {
+    cy.get(this.selectors.editTemplateValidFrom).click();
+    cy.get(`[aria-label="${date}"]`).click();
+    return this;
+  }
+
+  fillEditTemplateValidTill(date: string) {
+    cy.get(this.selectors.editTemplateValidTill).click();
+    cy.get(`[aria-label="${date}"]`).click(); // Assumes date picker uses aria-label for dates
+    return this;
+  }
+
+  submitEditTemplate() {
+    cy.get(this.selectors.editTemplateSubmit).click();
+    return this;
+  }
+
+  fillEditForm(data: TemplateData) {
+    this.interceptTemplateUpdation();
+    this.fillEditTemplateName(data.templateName);
+    this.fillEditTemplateValidFrom(data.validFrom);
+    this.fillEditTemplateValidTill(data.validTill);
+    this.submitEditTemplate();
+    this.verifyTemplateUpdationAPICall();
     return this;
   }
 }

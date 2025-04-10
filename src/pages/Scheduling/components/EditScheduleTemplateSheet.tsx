@@ -235,6 +235,7 @@ const ScheduleTemplateEditor = ({
                   <Input
                     placeholder={t("schedule_template_name_placeholder")}
                     {...field}
+                    data-cy="edit-template-name"
                   />
                 </FormControl>
                 <FormMessage />
@@ -252,6 +253,7 @@ const ScheduleTemplateEditor = ({
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
+                    data-cy="edit-template-valid-from"
                   />
                   <FormMessage />
                 </FormItem>
@@ -267,6 +269,7 @@ const ScheduleTemplateEditor = ({
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
+                    data-cy="edit-template-valid-till"
                   />
                   <FormMessage />
                 </FormItem>
@@ -331,6 +334,7 @@ const ScheduleTemplateEditor = ({
               type="submit"
               disabled={isUpdating || !form.formState.isDirty}
               size="sm"
+              data-cy="edit-template-submit"
             >
               <SaveIcon />
               {isUpdating ? t("saving") : t("save")}
