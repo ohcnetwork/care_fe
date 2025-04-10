@@ -74,7 +74,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const user = useAuthUser();
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
-  const { hasPermission } = usePermissions();
+  const { hasPermission, isSuperAdmin } = usePermissions();
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -417,6 +417,66 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       content={facilityData.description}
                       className="text-sm"
                     />
+                  </CardContent>
+                </Card>
+              )}
+              {isSuperAdmin && (
+                <Card className="border-red-500 mt-3">
+                  <CardHeader>
+                    <CardTitle className="text-destructive">
+                      {t("danger_zone")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between gap-4 rounded-md border p-4">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium">
+                          {t("Delete this Facility")}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {t(
+                            "Once you delete a facility there is no going back. Please be certain.",
+                          )}
+                        </p>
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            data-cy="delete-device-button"
+                          >
+                            {t("delete")}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("delete_facility")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("delete_facility_confirmation")}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel data-cy="cancel-delete-facility-button">
+                              {t("cancel")}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteFacility()}
+                              className={cn(
+                                buttonVariants({
+                                  variant: "destructive",
+                                }),
+                              )}
+                              disabled={isDeleting}
+                              data-cy="confirm-delete-facility-button"
+                            >
+                              {isDeleting ? t("deleting") : t("delete")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </CardContent>
                 </Card>
               )}
