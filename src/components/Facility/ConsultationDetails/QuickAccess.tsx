@@ -124,6 +124,50 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
         </div>
       </section>
 
+      <div className="w-full border-t border-dashed border-gray-300" />
+
+      {/* Discharge Information - Show when status is discharged */}
+      {encounter.status === "discharged" && (
+        <section>
+          <h3 className="text-lg font-medium mb-3">{t("discharge_details")}</h3>
+          <div className="space-y-2 text-sm mt-4 bg-gray-50 p-2 rounded-md">
+            <div className="flex justify-between">
+              <span className="text-gray-500">{t("discharge_date_time")}</span>
+              <span className="font-semibold text-gray-950">
+                {encounter.period.end
+                  ? new Date(encounter.period.end).toLocaleString([], {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })
+                  : "-"}
+              </span>
+            </div>
+            {encounter.discharge_summary_advice && (
+              <div className="flex flex-col gap-1">
+                <span className="text-gray-500">
+                  {t("discharge_summary_advice")}
+                </span>
+                <span className="font-medium text-gray-950 whitespace-pre-wrap">
+                  {encounter.discharge_summary_advice}
+                </span>
+              </div>
+            )}
+            <Button
+              asChild
+              variant="outline"
+              className="font-semibold rounded-md border-gray-400 text-gray-950"
+            >
+              <Link
+                href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
+              >
+                {t("update_discharge_details")}
+              </Link>
+            </Button>
+          </div>
+        </section>
+      )}
+
+      {/* Hospitalisation Details */}
       {encounter.hospitalization?.admit_source && (
         <>
           <div className="w-full border-t border-dashed border-gray-300" />
@@ -155,6 +199,16 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
                 <span className="font-semibold text-gray-950">
                   {t(
                     `encounter_re_admission__${encounter.hospitalization?.re_admission}`,
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">
+                  {t("discharge_disposition")}
+                </span>
+                <span className="font-semibold text-gray-950">
+                  {t(
+                    `encounter_discharge_disposition__${encounter.hospitalization?.discharge_disposition}`,
                   )}
                 </span>
               </div>

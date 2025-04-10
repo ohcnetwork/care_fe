@@ -6,6 +6,17 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -267,6 +278,57 @@ export function EncounterQuestion({
         </div>
       </div>
 
+      {/* Mark for discharge button - Show if not already discharged */}
+      {encounter.status !== "discharged" && (
+        <div className="col-span-2 border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+            <div className="space-y-1">
+              <h3 className="text-base font-medium">
+                {t("discharge_patient")}
+              </h3>
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="default" size="sm" disabled={disabled}>
+                  {t("mark_for_discharge")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("confirm_discharge")}</AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-2">
+                    <p>{t("discharge_confirmation_message")}</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>{t("discharge_confirmation_status_change")}</li>
+                      <li>{t("discharge_confirmation_summary_required")}</li>
+                      <li>{t("discharge_confirmation_date")}</li>
+                    </ul>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                  <AlertDialogCancel className="mt-0">
+                    {t("cancel")}
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      handleUpdateEncounter({
+                        status: "discharged" as EncounterStatus,
+                        period: {
+                          ...encounter.period,
+                          end: new Date().toISOString(),
+                        },
+                      });
+                    }}
+                  >
+                    {t("proceed")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+      )}
+
       {/* Discharge Details - Show when status is discharged */}
       {encounter.status === "discharged" && (
         <div className="space-y-6">
@@ -317,39 +379,6 @@ export function EncounterQuestion({
               />
               <Label>{t("readmission")}</Label>
             </div>
-
-            {/* Mark for discharge checkbox - Only show if not already discharged */}
-            {encounter.status !== "discharged" && (
-              <div className="flex items-center space-x-2 overflow-x-auto">
-                <Switch
-                  checked={false}
-                  onCheckedChange={(checked: boolean) => {
-                    if (checked) {
-                      handleUpdateEncounter({
-                        status: "discharged" as EncounterStatus,
-                        period: {
-                          ...encounter.period,
-                          end: new Date().toISOString(),
-                        },
-                        hospitalization: {
-                          ...encounter.hospitalization,
-                          discharge_disposition: "home",
-                          re_admission:
-                            encounter.hospitalization?.re_admission || false,
-                          admit_source:
-                            encounter.hospitalization?.admit_source || "other",
-                          diet_preference:
-                            encounter.hospitalization?.diet_preference ||
-                            "none",
-                        },
-                      });
-                    }
-                  }}
-                  disabled={disabled}
-                />
-                <Label>{t("mark_for_discharge")}</Label>
-              </div>
-            )}
 
             <div className="space-y-2">
               <Label>{t("admit_source")}</Label>
