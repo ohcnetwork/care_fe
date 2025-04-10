@@ -32,14 +32,10 @@ jobs:
         with:
           node-version: "22.14.0"
 
-      - name: Install Chrome
+      - name: Install Chromium
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=arm64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          sudo apt-get install -y chromium-browser
 
       - name: Install dependencies 📦
         run: npm ci
@@ -58,7 +54,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chrome
+          browser: chromium
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -77,7 +73,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chrome
+          browser: chromium
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
