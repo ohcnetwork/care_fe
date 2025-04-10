@@ -160,6 +160,7 @@
     "glob": "^11.0.0",
     "globals": "^16.0.0",
     "husky": "^9.1.7",
+    "i18next-scanner": "^4.6.0",
     "jsdom": "^26.0.0",
     "lint-staged": "^15.2.10",
     "local-cypress": "^1.2.6",
