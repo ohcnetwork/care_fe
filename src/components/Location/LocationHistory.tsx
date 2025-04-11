@@ -7,7 +7,6 @@ interface LocationHistoryProps {
 }
 
 export function LocationHistory({ history }: LocationHistoryProps) {
-  console.log("heyyyy:::", history);
   return (
     <div className="space-y-4">
       {history.map((item, index) => (

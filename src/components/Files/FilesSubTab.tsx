@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
+import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
+import { FilterState } from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 import {
@@ -55,7 +57,7 @@ interface FilesTabProps {
   encounter?: Encounter;
   patient?: Patient;
   qParams: any;
-  updateQuery: (params: any) => void;
+  updateQuery: (params: FilterState) => void;
   associatingId: string;
   canEdit: boolean | undefined;
 }
@@ -594,18 +596,15 @@ export const FilesPage = ({
         type={type}
       />
       <div className="flex flex-wrap items-center gap-3 mt-2 ml-2">
-        <div className="relative flex-1 min-w-[300px] max-w-[400px]">
-          <CareIcon
-            icon="l-search"
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-          />
+        <div className="relative flex-1 min-w-72 max-w-96">
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
             id="search-by-filename"
             name="name"
             placeholder={t("search_files")}
             value={qParams.name || ""}
             onChange={(e) => updateQuery({ name: e.target.value })}
-            className="w-full pl-8"
+            className="pl-10"
           />
         </div>
 

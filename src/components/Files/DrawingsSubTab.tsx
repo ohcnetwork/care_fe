@@ -1,6 +1,7 @@
 import { exportToSvg } from "@excalidraw/excalidraw";
 import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
 import { useQuery } from "@tanstack/react-query";
+import { SearchIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { memo, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,7 +15,7 @@ import { Input } from "@/components/ui/input";
 
 import Loading from "@/components/Common/Loading";
 
-import useFilters from "@/hooks/useFilters";
+import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { Encounter } from "@/types/emr/encounter";
@@ -25,7 +26,7 @@ export interface DrawingsTabProps {
   patientId?: string;
   encounter?: Encounter;
   qParams: any;
-  updateQuery: (params: any) => void;
+  updateQuery: (params: FilterState) => void;
 }
 
 interface ExcalidrawPreviewProps {
@@ -153,11 +154,8 @@ export const DrawingPage = ({
   return (
     <div className="p-4 -ml-2 -mt-2">
       <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
-        <div className="relative flex-1 min-w-[300px] max-w-[400px]">
-          <CareIcon
-            icon="l-search"
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-          />
+        <div className="relative flex-1 min-w-72 max-w-96">
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
             id="search-by-name"
             name="name"

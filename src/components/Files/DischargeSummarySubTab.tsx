@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
+import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -38,6 +39,7 @@ import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
+import { FilterState } from "@/hooks/useFilters";
 
 import {
   BACKEND_ALLOWED_EXTENSIONS,
@@ -53,7 +55,7 @@ interface DischargeTabProps {
   type: "encounter" | "patient";
   encounterId: string;
   qParams: any;
-  updateQuery: (params: any) => void;
+  updateQuery: (params: FilterState) => void;
   canEdit: boolean | undefined;
 }
 
@@ -586,18 +588,15 @@ export const DischargeTab = ({
         type={type}
       />
       <div className="flex flex-wrap items-center gap-3 mt-2 ml-2">
-        <div className="relative flex-1 min-w-[250px] sm:min-w-[300px] max-w-[400px]">
-          <CareIcon
-            icon="l-search"
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-          />
+        <div className="relative flex-1 min-w-72 max-w-96">
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
             id="search-by-filename"
             name="name"
             placeholder={t("search_files")}
             value={qParams.name || ""}
             onChange={(e) => updateQuery({ name: e.target.value })}
-            className="w-full pl-8"
+            className="pl-10"
           />
         </div>
 
