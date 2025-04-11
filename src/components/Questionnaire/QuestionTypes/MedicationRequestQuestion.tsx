@@ -41,7 +41,9 @@ import {
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { MultiValueSetSelect } from "@/components/Medicine/MultiValueSetSelect";
+import { formatDosage } from "@/components/Medicine/utils";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -231,6 +233,23 @@ export function MedicationRequestQuestion({
     setExpandedMedicationIndex(newMedications.length - 1);
   };
 
+  const handleAddHistoricalMedications = (
+    selectedMedications: MedicationRequest[],
+  ) => {
+    const newMedications = [
+      ...medications,
+      ...selectedMedications.map((med) => ({
+        ...med,
+        id: undefined,
+        authored_on: new Date().toISOString(),
+      })),
+    ];
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_request", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
+  };
+
   const handleRemoveMedication = (index: number) => {
     setMedicationToDelete(index);
   };
@@ -305,7 +324,49 @@ export function MedicationRequestQuestion({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
+      <HistoricalRecordSelector<MedicationRequest>
+        patientId={patientId}
+        currentEncounterId={encounterId}
+        structuredType="medication"
+        displayFields={[
+          {
+            key: "medication",
+            label: t("medicine"),
+            render: (med) => med?.display,
+          },
+          {
+            key: "dosage_instruction",
+            label: t("dosage"),
+            render: (instructions) => formatDosage(instructions?.[0]),
+          },
+          {
+            key: "dosage_instruction",
+            label: t("frequency"),
+            render: (instructions) => {
+              const timing = instructions?.[0]?.timing;
+              const option = reverseFrequencyOption(timing);
+              return option
+                ? MEDICATION_REQUEST_TIMING_OPTIONS[option].display
+                : "";
+            },
+          },
+          {
+            key: "dosage_instruction",
+            label: t("instructions"),
+            render: (instructions) =>
+              instructions?.[0]?.additional_instruction?.[0]?.display,
+          },
+        ]}
+        buttonLabel={t("medication_history")}
+        onAddSelected={handleAddHistoricalMedications}
+        fetchRecords={async (encounterId) => {
+          const response = await query(medicationRequestApi.list, {
+            pathParams: { patientId },
+            queryParams: { encounter: encounterId },
+          })({ signal: new AbortController().signal });
+          return response.results;
+        }}
+      />
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto pb-2">
           <div className="min-w-fit">
