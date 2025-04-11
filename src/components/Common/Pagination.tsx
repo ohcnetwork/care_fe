@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -21,6 +21,7 @@ const Pagination = ({
 }: PaginationProps) => {
   const [rowsPerPage, setRowsPerPage] = useState(3);
   const [currentPage, setCurrentPage] = useState(1);
+  const isInitialRender = useRef(true);
 
   useEffect(() => {
     if (defaultPerPage) {
@@ -30,6 +31,19 @@ const Pagination = ({
       setCurrentPage(parseInt(`${cPage}`));
     }
   }, [defaultPerPage, cPage]);
+
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      return;
+    }
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+  }, [currentPage]);
 
   const getPageNumbers = () => {
     const totalPage = Math.ceil(data.totalCount / rowsPerPage);
@@ -74,12 +88,6 @@ const Pagination = ({
   const goToPage = (page: number) => {
     setCurrentPage(page);
     onChange(page, rowsPerPage);
-    const pageContainer = window.document.getElementById("pages");
-    pageContainer?.scroll({
-      top: 0,
-      left: 0,
-      behavior: "smooth",
-    });
   };
 
   return (
