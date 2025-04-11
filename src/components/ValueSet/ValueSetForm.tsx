@@ -98,13 +98,14 @@ function ConceptFields({
 function FilterFields({
   nestIndex,
   type,
+  parentForm,
 }: {
   nestIndex: number;
   type: "include" | "exclude";
+  parentForm: ReturnType<typeof useForm<ValuesetFormType>>;
 }) {
-  const form = useForm();
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
+    control: parentForm.control,
     name: `compose.${type}.${nestIndex}.filter`,
   });
 
@@ -125,7 +126,7 @@ function FilterFields({
       {fields.map((field, index) => (
         <div key={field.id} className="flex gap-4 items-start">
           <FormField
-            control={form.control}
+            control={parentForm.control}
             name={`compose.${type}.${nestIndex}.filter.${index}.property`}
             render={({ field }) => (
               <FormItem className="flex-1">
@@ -136,7 +137,7 @@ function FilterFields({
             )}
           />
           <FormField
-            control={form.control}
+            control={parentForm.control}
             name={`compose.${type}.${nestIndex}.filter.${index}.op`}
             render={({ field }) => (
               <FormItem className="flex-1">
@@ -147,7 +148,7 @@ function FilterFields({
             )}
           />
           <FormField
-            control={form.control}
+            control={parentForm.control}
             name={`compose.${type}.${nestIndex}.filter.${index}.value`}
             render={({ field }) => (
               <FormItem className="flex-1">
@@ -248,7 +249,7 @@ function RuleFields({
               </Button>
             </div>
             <ConceptFields nestIndex={index} type={type} parentForm={form} />
-            <FilterFields nestIndex={index} type={type} />
+            <FilterFields nestIndex={index} type={type} parentForm={form} />
           </div>
         ))}
       </CardContent>
