@@ -265,7 +265,7 @@ export default function LocationView({
                     trigger={
                       <Button variant="outline" className="w-full md:w-auto">
                         <CareIcon icon="l-building" className="size-4 mr-2" />
-                        {t("manage_organization_other")}
+                        {t("manage_organization", { count: 0 })}
                       </Button>
                     }
                     onUpdate={() => {
