@@ -117,6 +117,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
         } else {
           goBack("/");
         }
+      } else {
+        goBack("/");
       }
     },
   });
