@@ -207,6 +207,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     null,
   );
   const queryClient = useQueryClient();
+  const [structuredTypeErrors, setStructuredTypeErrors] = useState<
+    Record<string, string | undefined>
+  >({});
 
   const {
     data: initialQuestionnaire,
@@ -416,11 +419,30 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     return true;
   };
 
+  const validateStructuredType = (): boolean => {
+    let hasError = false;
+    const updatedErrors: Record<string, string | undefined> = {};
+
+    questionnaire.questions.forEach((q) => {
+      if (q.type === "structured" && !q.structured_type) {
+        updatedErrors[q.id] = t("field_required");
+        hasError = true;
+      } else {
+        updatedErrors[q.id] = undefined;
+      }
+    });
+
+    setStructuredTypeErrors(updatedErrors);
+
+    return !hasError;
+  };
+
   const handleSave = async () => {
     const isValid = await form.trigger();
     const hasOrganizations = validateOrganizations();
+    const hasValidStructuredType = validateStructuredType();
 
-    if (!isValid || !hasOrganizations) {
+    if (!isValid || !hasOrganizations || !hasValidStructuredType) {
       return;
     }
 
@@ -870,6 +892,15 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           }}
                           isFirst={index === 0}
                           isLast={index === questionnaire.questions.length - 1}
+                          structuredTypeError={
+                            structuredTypeErrors[question.id]
+                          }
+                          setStructuredTypeError={(error) => {
+                            setStructuredTypeErrors((prev) => ({
+                              ...prev,
+                              [question.id]: error,
+                            }));
+                          }}
                         />
                       </div>
                     ))}
@@ -997,6 +1028,8 @@ interface QuestionEditorProps {
   onMoveDown?: () => void;
   isFirst?: boolean;
   isLast?: boolean;
+  structuredTypeError?: string;
+  setStructuredTypeError?: (error: string | undefined) => void;
 }
 
 function QuestionEditor({
@@ -1012,6 +1045,8 @@ function QuestionEditor({
   isFirst,
   isLast,
   index,
+  structuredTypeError,
+  setStructuredTypeError,
 }: QuestionEditorProps) {
   const { t } = useTranslation();
   const {
@@ -1209,10 +1244,13 @@ function QuestionEditor({
                 <div>
                   <Label>{t("structured_type")}</Label>
                   <Select
-                    value={structured_type ?? "allergy_intolerance"}
-                    onValueChange={(val: StructuredQuestionType) =>
-                      updateField("structured_type", val)
-                    }
+                    value={structured_type || ""}
+                    onValueChange={(val: StructuredQuestionType) => {
+                      updateField("structured_type", val);
+                      if (setStructuredTypeError) {
+                        setStructuredTypeError(undefined);
+                      }
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue
@@ -1227,6 +1265,11 @@ function QuestionEditor({
                       ))}
                     </SelectContent>
                   </Select>
+                  {structuredTypeError && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {structuredTypeError}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

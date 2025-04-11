@@ -47,6 +47,12 @@ export default {
       search: string;
     }>(),
   },
+  preview_search: {
+    path: "/api/v1/valueset/preview_search/",
+    method: HttpMethod.POST,
+    TRes: Type<{ results: Code[] }>(),
+    TBody: Type<CreateValuesetModel>(),
+  },
   favourites: {
     path: "/api/v1/valueset/{slug}/favourites/",
     method: HttpMethod.GET,
