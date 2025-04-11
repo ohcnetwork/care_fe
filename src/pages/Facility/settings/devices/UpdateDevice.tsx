@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
-import PageTitle from "@/components/Common/PageTitle";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
@@ -15,6 +14,7 @@ import query from "@/Utils/request/query";
 import deviceApi from "@/types/device/deviceApi";
 
 import DeviceForm from "./components/DeviceForm";
+import DeviceTypeIcon from "./components/DeviceTypeIcon";
 
 interface Props {
   facilityId: string;
@@ -34,7 +34,19 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto space-y-3">
-      <PageTitle title={t("update_device")} />
+      <div className="inline-flex items-center">
+        <DeviceTypeIcon type={device?.care_type} className="size-5 mr-2" />
+        <span className="text-2xl font-bold">
+          {t("update")}{" "}
+          {device?.care_type && (
+            <>
+              {device.care_type.charAt(0).toUpperCase() +
+                device.care_type.slice(1)}{" "}
+            </>
+          )}
+          {t("device")}
+        </span>
+      </div>
       <Separator />
       {isLoading ? (
         <Loading />
