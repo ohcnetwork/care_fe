@@ -90,6 +90,7 @@ export function LocationSheet({
   const [bedsPage, setBedsPage] = useState(1);
   const [hasMoreLocations, setHasMoreLocations] = useState(true);
   const [hasMoreBeds, setHasMoreBeds] = useState(true);
+  const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const initialState = {
@@ -191,7 +192,7 @@ export function LocationSheet({
   });
 
   useEffect(() => {
-    if (locationsData) {
+    if (locationsData && open) {
       if (locationsPage === 1) {
         setAllLocations(locationsData.results);
       } else {
@@ -199,7 +200,7 @@ export function LocationSheet({
       }
       setHasMoreLocations(locationsData.count > locationsPage * ITEMS_PER_PAGE);
     }
-  }, [locationsData, locationsPage]);
+  }, [locationsData, locationsPage, open]);
 
   useEffect(() => {
     if (bedsData) {
@@ -775,6 +776,7 @@ export function LocationSheet({
     <>
       <Sheet
         onOpenChange={(open) => {
+          setOpen(open);
           // Reset states when closing the sheet
           if (!open) {
             resetStates();
