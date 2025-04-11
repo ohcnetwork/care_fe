@@ -20,12 +20,10 @@ export default function CreateDevice({ facilityId }: Props) {
     <div className="space-y-3 max-w-3xl mx-auto">
       <div className="inline-flex items-center">
         <DeviceTypeIcon type={qParams.type} className="size-5 mr-2" />
-        <span className="text-2xl font-bold">
-          {t("add")}{" "}
-          {qParams.type && (
-            <>{qParams.type.charAt(0).toUpperCase() + qParams.type.slice(1)} </>
-          )}
-          {t("device")}
+        <span className="text-2xl font-bold capitalize">
+          {t("add_device_with_type", {
+            type: qParams.type,
+          })}
         </span>
       </div>
       <Separator />
