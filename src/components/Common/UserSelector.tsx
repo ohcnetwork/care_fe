@@ -70,7 +70,7 @@ export default function UserSelector({
         <Button
           variant="outline"
           role="combobox"
-          className="min-w-60 justify-start"
+          className="min-w-60 w-full justify-start"
         >
           {selected ? (
             <div className="flex items-center gap-2">
@@ -117,25 +117,25 @@ export default function UserSelector({
                     onChange(user);
                     setOpen(false);
                   }}
-                  className="cursor-pointer"
+                  className="cursor-pointer w-full"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full">
                     <Avatar
                       imageUrl={user.profile_picture_url}
                       name={formatName(user, true)}
                       className="size-6 rounded-full"
                     />
-                    <span className="flex min-w-0 items-center">
+                    <div className="flex flex-col min-w-0">
                       <span
                         className="truncate text-sm font-medium"
                         title={formatName(user)}
                       >
                         {formatName(user)}
                       </span>
-                      <span className="ml-1 text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 truncate">
                         {user.username}
                       </span>
-                    </span>
+                    </div>
                     {selected?.id === user.id && (
                       <CheckIcon className="ml-auto" />
                     )}

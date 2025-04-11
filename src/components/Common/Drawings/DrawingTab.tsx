@@ -1,5 +1,5 @@
 import { exportToSvg } from "@excalidraw/excalidraw";
-import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { memo, useEffect, useRef, useState } from "react";
