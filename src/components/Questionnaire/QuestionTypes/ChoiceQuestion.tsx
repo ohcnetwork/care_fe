@@ -117,7 +117,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           <RadioGroup
             onValueChange={handleValueChange}
             disabled={disabled}
-            className="flex flex-col"
+            className="flex flex-col gap-3"
           >
             {options.map((option: AnswerOption) => (
               <Label
@@ -125,7 +125,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                 className="cursor-pointer"
                 key={option.value.toString()}
               >
-                <Card className="shadow-sm border-1 p-6 transition-all hover:bg-muted/50 [&:has([data-state=checked])]:border-primary">
+                <Card className="shadow-sm border-1 p-6 transition-all hover:bg-gray-50/90 [&:has([data-state=checked])]:border-primary">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem
                       value={option.value.toString()}
