@@ -11,7 +11,6 @@ import {
   isYesterday,
   subDays,
 } from "date-fns";
-import { t } from "i18next";
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect } from "react";
@@ -99,6 +98,7 @@ interface DateRangeDisplayProps {
 }
 
 function AppointmentsEmptyState() {
+  const { t } = useTranslation();
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
@@ -394,8 +394,8 @@ export default function AppointmentsPage({
       }
     >
       <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
-        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start">
-          <div className="mt-1">
+        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start md:w-xs">
+          <div className="mt-1 w-full">
             <Label className="mb-2 text-black">
               {t("select_practitioner")}
             </Label>
@@ -547,7 +547,7 @@ export default function AppointmentsPage({
 
         <div className="flex gap-4 items-center">
           <Input
-            className="w-[300px]"
+            className="md:w-xs w-full"
             placeholder={t("search")}
             value={qParams.search ?? ""}
             onChange={(e) => updateQuery({ search: e.target.value })}

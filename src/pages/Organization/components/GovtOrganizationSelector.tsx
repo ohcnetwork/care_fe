@@ -1,6 +1,6 @@
-import { t } from "i18next";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,8 @@ function OrganizationLevelSelect({
   required,
   authToken,
 }: OrganizationLevelProps) {
+  const { t } = useTranslation();
+
   const parentId = index === 0 ? "" : previousLevel?.id || "";
 
   const { options, handleChange, handleSearch, organizations, isFetching } =

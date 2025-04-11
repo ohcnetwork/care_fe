@@ -1,6 +1,6 @@
 import { format } from "date-fns";
-import { t } from "i18next";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,8 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
+  const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
 
   return (

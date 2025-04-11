@@ -1,7 +1,7 @@
 import { CaretDownIcon } from "@radix-ui/react-icons";
 import { CheckIcon } from "@radix-ui/react-icons";
-import { PopoverClose } from "@radix-ui/react-popover";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ export const PractitionerSelector = ({
   clearSelection,
 }: PractitionerSelectorProps) => {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
   const {
     data: practitioners,
     isLoading,
@@ -52,7 +53,7 @@ export const PractitionerSelector = ({
   });
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild disabled={isLoading}>
         <Button
           variant="outline"
@@ -91,44 +92,49 @@ export const PractitionerSelector = ({
               {clearSelection && (
                 <CommandItem
                   value="all"
-                  onSelect={() => onSelect(null)}
+                  onSelect={() => {
+                    onSelect(null);
+                    setOpen(false);
+                  }}
                   className="cursor-pointer w-full"
                 >
-                  <PopoverClose className="w-full flex items-start">
+                  <div className="w-full flex items-start">
                     <span>{clearSelection}</span>
                     {!selected && <CheckIcon className="ml-auto" />}
-                  </PopoverClose>
+                  </div>
                 </CommandItem>
               )}
               {practitioners?.users.map((user) => (
                 <CommandItem
                   key={user.id}
                   value={formatName(user)}
-                  onSelect={() => onSelect(user)}
+                  onSelect={() => {
+                    onSelect(user);
+                    setOpen(false);
+                  }}
                   className="cursor-pointer w-full"
                 >
-                  <PopoverClose className="flex items-center gap-2 w-full">
+                  <div className="flex items-center gap-2 w-full">
                     <Avatar
                       imageUrl={user.profile_picture_url}
                       name={formatName(user, true)}
                       className="size-6 rounded-full"
                     />
-
-                    <span className="flex min-w-0 items-center">
+                    <div className="flex flex-col min-w-0">
                       <span
                         className="truncate text-sm font-medium"
                         title={formatName(user)}
                       >
                         {formatName(user)}
                       </span>
-                      <span className="ml-1 text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 truncate">
                         {user.username}
                       </span>
-                    </span>
-                    {selected?.username === user.username && (
+                    </div>
+                    {selected?.id === user.id && (
                       <CheckIcon className="ml-auto" />
                     )}
-                  </PopoverClose>
+                  </div>
                 </CommandItem>
               ))}
             </CommandGroup>

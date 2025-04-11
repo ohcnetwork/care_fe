@@ -1,5 +1,3 @@
-"use client";
-
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { BadgeCheck, LogOut } from "lucide-react";
 import { navigate } from "raviger";
@@ -134,7 +132,7 @@ export function PatientNavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               data-cy="user-menu-dropdown"
             >
-              {open && (
+              {(open || isMobile) && (
                 <>
                   <Avatar
                     className="size-8 rounded-lg"
@@ -151,7 +149,7 @@ export function PatientNavUser() {
                   <CaretSortIcon className="ml-auto size-4" />
                 </>
               )}
-              {!open && (
+              {!open && !isMobile && (
                 <div className="flex flex-row items-center">
                   <Avatar
                     name={patient?.name || phoneNumber}
