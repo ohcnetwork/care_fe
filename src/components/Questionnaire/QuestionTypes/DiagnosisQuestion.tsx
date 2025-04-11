@@ -432,7 +432,7 @@ export function DiagnosisQuestion({
       </div>
 
       <div className="flex justify-between space-x-2">
-        <Button variant="outline" onClick={handleBackToValueSet}>
+        <Button type="button" variant="outline" onClick={handleBackToValueSet}>
           {t("cancel")}
         </Button>
         <Button onClick={handleCategoryConfirm}>{t("add_diagnosis")}</Button>
