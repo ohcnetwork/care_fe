@@ -107,7 +107,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       });
 
       const prevPath = document.referrer;
-      const orgMatch = prevPath.match(/\/org\/([^/]+)\/facilities/);
+      const orgMatch = prevPath?.match(/\/org\/([^/]+)\/facilities/);
 
       if (orgMatch && orgMatch[1]) {
         navigate(`/org/${orgMatch[1]}/facilities`);
