@@ -34,6 +34,7 @@ import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
@@ -75,6 +76,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
+  const { history, goBack } = useAppHistory();
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -106,13 +108,15 @@ export const FacilityHome = ({ facilityId }: Props) => {
         queryKey: ["facility", facilityId],
       });
 
-      const prevPath = document.referrer;
-      const orgMatch = prevPath?.match(/\/org\/([^/]+)\/facilities/);
+      if (history.length > 1) {
+        const prevPath = history[1];
+        const orgMatch = prevPath.match(/\/org\/([^/]+)\/facilities/);
 
-      if (orgMatch && orgMatch[1]) {
-        navigate(`/org/${orgMatch[1]}/facilities`);
-      } else {
-        navigate("/");
+        if (orgMatch && orgMatch[1]) {
+          navigate(`/org/${orgMatch[1]}/facilities`);
+        } else {
+          goBack("/");
+        }
       }
     },
   });
