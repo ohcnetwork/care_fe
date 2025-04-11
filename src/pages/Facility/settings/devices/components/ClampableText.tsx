@@ -7,20 +7,20 @@ interface ClampableTextProps {
   text: string;
   linesToClamp?: number;
   className?: string;
-  toggleMessageBtnVariant?: ButtonVariant;
-  toggleMessageBtnClassName?: string;
+  toggleTextBtnVariant?: ButtonVariant;
+  toggleTextBtnClassName?: string;
 }
 
 const ClampableText: React.FC<ClampableTextProps> = ({
   text,
   linesToClamp = 1,
   className = "",
-  toggleMessageBtnVariant = "link",
-  toggleMessageBtnClassName = "px-0 hover:cursor-pointer text-primary-700",
+  toggleTextBtnVariant = "link",
+  toggleTextBtnClassName = "px-0 hover:cursor-pointer text-primary-600",
 }) => {
   const [isClamped, setIsClamped] = useState(true);
   const [showToggleButton, setShowToggleButton] = useState(true);
-  const [messageExpanded, setMessageExpanded] = useState(false);
+  const [textExpanded, setTextExpanded] = useState(false);
 
   const textContainerRef = useRef<HTMLDivElement>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
@@ -49,12 +49,12 @@ const ClampableText: React.FC<ClampableTextProps> = ({
       >
         {text}
       </div>
-      {(showToggleButton || (!showToggleButton && messageExpanded)) && (
+      {(showToggleButton || (!showToggleButton && textExpanded)) && (
         <Button
-          variant={toggleMessageBtnVariant}
-          className={toggleMessageBtnClassName}
+          variant={toggleTextBtnVariant}
+          className={toggleTextBtnClassName}
           onClick={() => {
-            setMessageExpanded((prev) => !prev);
+            setTextExpanded((prev) => !prev);
             setIsClamped((prev) => !prev);
           }}
         >
