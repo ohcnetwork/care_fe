@@ -27,6 +27,7 @@ import { ServiceHistory } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
 import AddServiceHistorySheet from "./AddServiceHistorySheet";
+import ClampableText from "./ClampableText";
 import EditServiceHistorySheet from "./EditServiceHistorySheet";
 
 interface DeviceServiceHistoryProps {
@@ -104,10 +105,10 @@ export default function DeviceServiceHistory({
                       <TableCell className="font-medium">
                         {format(new Date(service.serviced_on), "PPP")}
                       </TableCell>
-                      <TableCell className="max-w-md truncate">
-                        {service.note}
+                      <TableCell className="max-w-md">
+                        <ClampableText text={service.note} />
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right ">
                         <EditServiceHistorySheet
                           facilityId={facilityId}
                           deviceId={deviceId}
