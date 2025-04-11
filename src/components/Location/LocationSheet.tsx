@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -94,6 +96,7 @@ export function LocationSheet({
     id: string;
   } | null>(null);
   const [hasMoreLocations, setHasMoreLocations] = useState(true);
+  const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [hasMoreBeds, setHasMoreBeds] = useState(true);
   const queryClient = useQueryClient();
 
@@ -366,43 +369,29 @@ export function LocationSheet({
       toast.success(t("location_deleted_successfully"));
       queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
     },
-    onError: (error: {
-      cause?: {
-        results?: Array<{
-          reference_id: string;
-          status_code: number;
-          data: {
-            errors?: Array<{
-              msg?: string;
-              error?: string;
-              type?: string;
-              loc?: string[];
-            }>;
-          };
-        }>;
-      };
-    }) => {
-      const errorMessage =
-        error?.cause?.results?.[0]?.data?.errors?.[0]?.msg ||
-        t("error_deleting_location");
-      toast.error(errorMessage);
+    onError: () => {
+      toast.error(t("error_deleting_location"));
     },
   });
-  const handleCancelPlan = () => {
-    const currentLocation = getCurrentLocations().plannedLocations[0];
-    if (!currentLocation) return;
+  const handleCancelPlan = (status: "active" | "planned") => {
+    const { activeLocation, plannedLocations } = getCurrentLocations();
+    const locationToCancel =
+      status === "active" ? activeLocation : plannedLocations[0];
+
+    if (!locationToCancel) return;
 
     setLocationToDelete({
-      location: currentLocation.location.id,
-      id: currentLocation.id,
+      location: locationToCancel.location.id,
+      id: locationToCancel.id,
     });
+    setLocationStatus(status);
     setShowDeleteDialog(true);
     setSheetState((prev) => ({
       ...prev,
       screen: "modify",
       action: "cancel",
       timeConfig: {
-        start: new Date(currentLocation.start_datetime),
+        start: new Date(locationToCancel.start_datetime),
         end: new Date(),
         status: "completed",
       },
@@ -597,7 +586,11 @@ export function LocationSheet({
                 status === "active" ? handleCompleteBedStay : undefined
               }
               onUpdateTime={handleUpdateTime}
-              onCancel={status === "planned" ? handleCancelPlan : undefined}
+              onCancel={() =>
+                status === "active" || status === "planned"
+                  ? handleCancelPlan(status)
+                  : undefined
+              }
               onAssignNow={status === "planned" ? handleAssignNow : undefined}
             />
           </div>
@@ -900,7 +893,7 @@ export function LocationSheet({
           <AlertDialogHeader>
             <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("are_you_sure_cancel_plan")}
+              {t("are_you_sure_cancel_plan", { status: locationStatus })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -912,7 +905,10 @@ export function LocationSheet({
             >
               {t("cancel")}
             </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeletePlan}>
+            <AlertDialogAction
+              className={cn(buttonVariants({ variant: "destructive" }))}
+              onClick={confirmDeletePlan}
+            >
               {t("confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>

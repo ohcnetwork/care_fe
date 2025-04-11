@@ -17,7 +17,7 @@ interface LocationActionButtonsProps {
   location: LocationHistory;
   onMove: () => void;
   onComplete?: (location: LocationHistory) => void;
-  onCancel?: () => void;
+  onCancel: () => void;
   onAssignNow?: () => void;
   onUpdateTime?: (location: LocationHistory) => void;
 }
@@ -43,15 +43,13 @@ export function LocationActionButtons({
 
   const buttons: ActionButton[] = [];
 
-  if (status === "planned" && onCancel) {
-    buttons.push({
-      label: t("cancel_plan"),
-      onClick: onCancel,
-      variant: "link",
-      className: "underline underline-offset-2",
-      "data-cy": "cancel-bed-plan-button",
-    });
-  }
+  buttons.push({
+    label: t("cancel_plan"),
+    onClick: onCancel,
+    variant: "link",
+    className: "underline underline-offset-2",
+    "data-cy": "cancel-bed-plan-button",
+  });
 
   buttons.push({
     label: t("move_to_another_bed"),
