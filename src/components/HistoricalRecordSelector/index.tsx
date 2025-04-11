@@ -19,6 +19,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody } from "@/components/ui/table";
 
 import query from "@/Utils/request/query";
 import { Encounter } from "@/types/emr/encounter";
@@ -134,7 +135,7 @@ export function HistoricalRecordSelector<T>({
         </div>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-3xl p-0">
-        <div className="flex justify-between items-center p-4">
+        <div className="flex justify-between items-center p-2">
           <SheetHeader className="p-0">
             <SheetTitle className="text-lg font-medium">{title}</SheetTitle>
           </SheetHeader>
@@ -156,7 +157,7 @@ export function HistoricalRecordSelector<T>({
               >
                 <div className="border rounded-md m-2 bg-gray-50 border-gray-200">
                   <CollapsibleTrigger className="w-full">
-                    <div className="flex justify-between items-center p-4 cursor-pointer">
+                    <div className="flex justify-between items-center p-1 cursor-pointer">
                       <div>
                         <div className="flex items-center gap-2">
                           <div className="w-1 h-5 bg-emerald-600 rounded-full" />
@@ -183,14 +184,14 @@ export function HistoricalRecordSelector<T>({
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto p-2">
                       {encounter.isLoading ? (
-                        <div className="space-y-2 p-4">
-                          <Skeleton className="h-16 w-full" />
+                        <div className="space-y-2 p-2">
+                          <Skeleton className="h-8 w-full" />
                         </div>
                       ) : encounter.records?.length ? (
-                        <table className="w-full">
-                          <tbody>
+                        <Table className="w-full p-2">
+                          <TableBody className="[&_tr:last-child]:border-1">
                             {encounter.records.map(
                               (record: T, index: number) => (
                                 <RecordItem
@@ -202,8 +203,8 @@ export function HistoricalRecordSelector<T>({
                                 />
                               ),
                             )}
-                          </tbody>
-                        </table>
+                          </TableBody>
+                        </Table>
                       ) : (
                         <div className="pb-4 text-center text-sm text-gray-500">
                           No records found

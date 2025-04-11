@@ -6,7 +6,7 @@ export function formatDosage(instruction: MedicationRequestDosageInstruction) {
 
   const { dose_range, dose_quantity } = instruction.dose_and_rate;
   if (dose_range) {
-    return `${dose_range.low.value}${dose_range.low.unit.display} - ${dose_range.high.value}${dose_range.high.unit.display}`;
+    return `${dose_range.low.value} ${dose_range.low.unit.display} -> ${dose_range.high.value} ${dose_range.high.unit.display}`;
   } else if (dose_quantity) {
     return `${dose_quantity.value} ${dose_quantity.unit.display}`;
   }
