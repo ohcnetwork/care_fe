@@ -63,6 +63,8 @@ import {
   parseMedicationStringToRequest,
 } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { MedicationStatementRead } from "@/types/emr/medicationStatement";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
 import {
@@ -324,47 +326,105 @@ export function MedicationRequestQuestion({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <HistoricalRecordSelector<MedicationRequest>
+      <HistoricalRecordSelector<MedicationRequest | MedicationStatementRead>
         patientId={patientId}
         currentEncounterId={encounterId}
-        structuredType="medication"
-        displayFields={[
+        structuredTypes={[
           {
-            key: "medication",
-            label: t("medicine"),
-            render: (med) => med?.display,
-          },
-          {
-            key: "dosage_instruction",
-            label: t("dosage"),
-            render: (instructions) => formatDosage(instructions?.[0]),
-          },
-          {
-            key: "dosage_instruction",
-            label: t("frequency"),
-            render: (instructions) => {
-              const timing = instructions?.[0]?.timing;
-              const option = reverseFrequencyOption(timing);
-              return option
-                ? MEDICATION_REQUEST_TIMING_OPTIONS[option].display
-                : "";
+            type: t("past_prescriptions"),
+            displayFields: [
+              {
+                key: "medication",
+                label: t("medicine"),
+                render: (med) => med?.display,
+              },
+              {
+                key: "dosage_instruction",
+                label: t("dosage"),
+                render: (instructions) => formatDosage(instructions?.[0]),
+              },
+              {
+                key: "dosage_instruction",
+                label: t("frequency"),
+                render: (instructions) => {
+                  const timing = instructions?.[0]?.timing;
+                  const option = reverseFrequencyOption(timing);
+                  return option
+                    ? MEDICATION_REQUEST_TIMING_OPTIONS[option].display
+                    : "";
+                },
+              },
+              {
+                key: "dosage_instruction",
+                label: t("instructions"),
+                render: (instructions) =>
+                  instructions?.[0]?.additional_instruction?.[0]?.display,
+              },
+            ],
+            fetchRecords: async (encounterId) => {
+              const response = await query(medicationRequestApi.list, {
+                pathParams: { patientId },
+                queryParams: { encounter: encounterId },
+              })({ signal: new AbortController().signal });
+              return response.results;
             },
           },
           {
-            key: "dosage_instruction",
-            label: t("instructions"),
-            render: (instructions) =>
-              instructions?.[0]?.additional_instruction?.[0]?.display,
+            type: t("ongoing_medications"),
+            displayFields: [
+              {
+                key: "medication",
+                label: t("medicine"),
+                render: (med) => med?.display,
+              },
+              {
+                key: "dosage_text",
+                label: t("dosage"),
+                render: (dosage) => dosage,
+              },
+              {
+                key: "status",
+                label: t("status"),
+                render: (status) => t(status),
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note || "-",
+              },
+            ],
+            fetchRecords: async (encounterId) => {
+              const response = await query(medicationStatementApi.list, {
+                pathParams: { patientId },
+                queryParams: { encounter: encounterId },
+              })({ signal: new AbortController().signal });
+              return response.results;
+            },
           },
         ]}
         buttonLabel={t("medication_history")}
-        onAddSelected={handleAddHistoricalMedications}
-        fetchRecords={async (encounterId) => {
-          const response = await query(medicationRequestApi.list, {
-            pathParams: { patientId },
-            queryParams: { encounter: encounterId },
-          })({ signal: new AbortController().signal });
-          return response.results;
+        onAddSelected={(selected) => {
+          // Filter and convert MedicationStatement to MedicationRequest if needed
+          const medicationRequests = selected.map((record) => {
+            if ("dosage_instruction" in record) {
+              return record as MedicationRequest;
+            } else {
+              const statement = record as MedicationStatementRead;
+              return {
+                ...parseMedicationStringToRequest(statement.medication),
+                authored_on: new Date().toISOString(),
+                dosage_instruction: [
+                  {
+                    text: statement.dosage_text,
+                    additional_instruction: statement.note
+                      ? [{ text: statement.note }]
+                      : undefined,
+                  },
+                ],
+              } as MedicationRequest;
+            }
+          });
+          handleAddHistoricalMedications(medicationRequests);
         }}
       />
       {medications.length > 0 && (
