@@ -117,10 +117,6 @@ export function EncounterQuestion({
     organizations: [],
   });
 
-  const [dischargeAdvice, setDischargeAdvice] = useState(
-    encounter.discharge_summary_advice || "",
-  );
-
   useEffect(() => {
     if (encounter.status === "discharged") {
       handleUpdateEncounter({
@@ -151,11 +147,6 @@ export function EncounterQuestion({
       }));
     }
   }, [questionnaireResponse]);
-
-  // Update local state when encounter data changes
-  useEffect(() => {
-    setDischargeAdvice(encounter.discharge_summary_advice || "");
-  }, [encounter.discharge_summary_advice]);
 
   const handleUpdateEncounter = (
     updates: Partial<Omit<EncounterEditRequest, "organizations" | "patient">>,
@@ -333,9 +324,8 @@ export function EncounterQuestion({
           <div className="space-y-2">
             <Label>{t("discharge_summary_advice")}</Label>
             <Textarea
-              value={dischargeAdvice}
+              defaultValue={encounter.discharge_summary_advice || ""}
               onChange={(e) => {
-                setDischargeAdvice(e.target.value);
                 handleUpdateEncounter({
                   discharge_summary_advice: e.target.value || null,
                 });
@@ -358,21 +348,15 @@ export function EncounterQuestion({
             <div className="flex items-center space-x-2 overflow-x-auto">
               <Switch
                 checked={encounter.hospitalization?.re_admission || false}
-                onCheckedChange={(checked: boolean) =>
+                onCheckedChange={(checked: boolean) => {
+                  if (!encounter.hospitalization) return;
                   handleUpdateEncounter({
                     hospitalization: {
                       ...encounter.hospitalization,
                       re_admission: checked,
-                      admit_source:
-                        encounter.hospitalization?.admit_source || "other",
-                      discharge_disposition:
-                        encounter.hospitalization?.discharge_disposition ||
-                        "home",
-                      diet_preference:
-                        encounter.hospitalization?.diet_preference || "none",
                     },
-                  })
-                }
+                  });
+                }}
                 disabled={disabled}
               />
               <Label>{t("readmission")}</Label>
@@ -382,21 +366,15 @@ export function EncounterQuestion({
               <Label>{t("admit_source")}</Label>
               <Select
                 value={encounter.hospitalization?.admit_source}
-                onValueChange={(value) =>
+                onValueChange={(value) => {
+                  if (!encounter.hospitalization) return;
                   handleUpdateEncounter({
                     hospitalization: {
                       ...encounter.hospitalization,
                       admit_source: value as EncounterAdmitSources,
-                      re_admission:
-                        encounter.hospitalization?.re_admission || false,
-                      discharge_disposition:
-                        encounter.hospitalization?.discharge_disposition ||
-                        "home",
-                      diet_preference:
-                        encounter.hospitalization?.diet_preference || "none",
                     },
-                  })
-                }
+                  });
+                }}
                 disabled={disabled}
               >
                 <SelectTrigger>
@@ -419,22 +397,16 @@ export function EncounterQuestion({
                   <Label>{t("discharge_disposition")}</Label>
                   <Select
                     value={encounter.hospitalization?.discharge_disposition}
-                    onValueChange={(value) =>
+                    onValueChange={(value) => {
+                      if (!encounter.hospitalization) return;
                       handleUpdateEncounter({
                         hospitalization: {
                           ...encounter.hospitalization,
                           discharge_disposition:
                             value as EncounterDischargeDisposition,
-                          re_admission:
-                            encounter.hospitalization?.re_admission || false,
-                          admit_source:
-                            encounter.hospitalization?.admit_source || "other",
-                          diet_preference:
-                            encounter.hospitalization?.diet_preference ||
-                            "none",
                         },
-                      })
-                    }
+                      });
+                    }}
                     disabled={disabled}
                   >
                     <SelectTrigger>
@@ -551,21 +523,15 @@ export function EncounterQuestion({
               <Label>{t("diet_preference")}</Label>
               <Select
                 value={encounter.hospitalization?.diet_preference}
-                onValueChange={(value) =>
+                onValueChange={(value) => {
+                  if (!encounter.hospitalization) return;
                   handleUpdateEncounter({
                     hospitalization: {
                       ...encounter.hospitalization,
                       diet_preference: value as EncounterDietPreference,
-                      re_admission:
-                        encounter.hospitalization?.re_admission || false,
-                      admit_source:
-                        encounter.hospitalization?.admit_source || "other",
-                      discharge_disposition:
-                        encounter.hospitalization?.discharge_disposition ||
-                        "home",
                     },
-                  })
-                }
+                  });
+                }}
                 disabled={disabled}
               >
                 <SelectTrigger>
