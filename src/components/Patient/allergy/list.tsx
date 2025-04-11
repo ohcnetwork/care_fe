@@ -13,9 +13,15 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -73,7 +79,6 @@ export function AllergyList({
   const { t } = useTranslation();
 
   const [showEnteredInError, setShowEnteredInError] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
 
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId, encounterStatus],
@@ -89,13 +94,7 @@ export function AllergyList({
 
   if (isLoading) {
     return (
-      <AllergyListLayout
-        readOnly={readOnly}
-        className={className}
-        count={0}
-        isExpanded={isExpanded}
-        onToggle={() => setIsExpanded(!isExpanded)}
-      >
+      <AllergyListLayout readOnly={readOnly} className={className} count={0}>
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -114,13 +113,7 @@ export function AllergyList({
 
   if (!filteredAllergies?.length) {
     return (
-      <AllergyListLayout
-        readOnly={readOnly}
-        className={className}
-        count={0}
-        isExpanded={false}
-        onToggle={() => setIsExpanded(!isExpanded)}
-      >
+      <AllergyListLayout readOnly={readOnly} className={className} count={0}>
         <></>
       </AllergyListLayout>
     );
@@ -216,8 +209,6 @@ export function AllergyList({
       readOnly={readOnly}
       className={className}
       count={filteredAllergies.length}
-      isExpanded={isExpanded}
-      onToggle={() => setIsExpanded(!isExpanded)}
     >
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
@@ -288,50 +279,53 @@ const AllergyListLayout = ({
   className,
   readOnly = false,
   count,
-  isExpanded,
-  onToggle,
 }: {
   children: ReactNode;
   className?: string;
   readOnly?: boolean;
   count: number;
-  isExpanded: boolean;
-  onToggle: () => void;
 }) => {
   const { t } = useTranslation();
 
   return (
-    <Card className={cn("border-none rounded-sm", className)}>
-      <CardHeader
-        className={cn(
-          "flex justify-between flex-row px-4 pt-2 pb-2 space-y-0",
-          count !== 0 && "cursor-pointer",
-        )}
-        onClick={onToggle}
-      >
-        <div className="flex items-center">
-          <Button size="icon" variant="link" disabled={count == 0}>
-            {count > 0 && isExpanded ? (
-              <CareIcon icon="l-angle-down" className="h-6 w-6" />
-            ) : (
-              <CareIcon icon="l-angle-right" className="h-6 w-6" />
-            )}
-          </Button>
-          <CardTitle>{t("allergies_count", { count })}</CardTitle>
-        </div>
-        {!readOnly && (
-          <Link
-            href={`questionnaire/allergy_intolerance`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
-          >
-            <CareIcon icon="l-pen" className="size-4" />
-            {t("edit")}
-          </Link>
-        )}
-      </CardHeader>
-      {isExpanded && (
-        <CardContent className="px-2 pb-2">{children}</CardContent>
+    <Accordion
+      type="single"
+      collapsible
+      defaultValue={count > 0 ? "allergies" : undefined}
+      className={cn(
+        "w-full bg-white rounded-md shadow-sm border border-gray-100",
+        className,
       )}
-    </Card>
+    >
+      <AccordionItem value="allergies" className="border-none">
+        <AccordionTrigger
+          className={cn(
+            "px-4 py-2 flex items-center justify-between rounded-sm",
+            "data-[state=open]:bg-gray-50 hover:bg-gray-50 hover:no-underline",
+            count === 0 && "pointer-events-none opacity-50",
+          )}
+          disabled={count === 0}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-medium">
+              {t("allergies_count", { count })}
+            </span>
+          </div>
+
+          {!readOnly && (
+            <Link
+              href="questionnaire/allergy_intolerance"
+              className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 no-underline justify-end"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CareIcon icon="l-pen" className="size-4" />
+              {t("edit")}
+            </Link>
+          )}
+        </AccordionTrigger>
+
+        <AccordionContent className="px-2 pb-2">{children}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };

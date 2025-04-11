@@ -7,8 +7,14 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
@@ -32,7 +38,6 @@ export function SymptomsList({
   const { t } = useTranslation();
 
   const [showEnteredInError, setShowEnteredInError] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
@@ -48,8 +53,6 @@ export function SymptomsList({
         encounterId={encounterId}
         readOnly={readOnly}
         count={0}
-        isExpanded={isExpanded}
-        onToggle={() => setIsExpanded(!isExpanded)}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -74,8 +77,6 @@ export function SymptomsList({
         encounterId={encounterId}
         readOnly={readOnly}
         count={0}
-        isExpanded={false}
-        onToggle={() => setIsExpanded(!isExpanded)}
       >
         <></>
       </SymptomListLayout>
@@ -89,8 +90,6 @@ export function SymptomsList({
       className={className}
       readOnly={readOnly}
       count={filteredSymptoms.length}
-      isExpanded={isExpanded}
-      onToggle={() => setIsExpanded(!isExpanded)}
     >
       <SymptomTable
         symptoms={[
@@ -129,8 +128,6 @@ const SymptomListLayout = ({
   className,
   readOnly = false,
   count,
-  isExpanded,
-  onToggle,
 }: {
   facilityId?: string;
   patientId: string;
@@ -139,43 +136,48 @@ const SymptomListLayout = ({
   className?: string;
   readOnly?: boolean;
   count: number;
-  isExpanded: boolean;
-  onToggle: () => void;
 }) => {
   const { t } = useTranslation();
 
   return (
-    <Card className={cn("border-none rounded-sm", className)}>
-      <CardHeader
-        className={cn(
-          "flex justify-between flex-row px-4 pt-2 pb-2 space-y-0",
-          count !== 0 && "cursor-pointer",
-        )}
-        onClick={onToggle}
-      >
-        <div className="flex items-center">
-          <Button size="icon" variant="link" disabled={count == 0}>
-            {count > 0 && isExpanded ? (
-              <CareIcon icon="l-angle-down" className="h-6 w-6" />
-            ) : (
-              <CareIcon icon="l-angle-right" className="h-6 w-6" />
-            )}
-          </Button>
-          <CardTitle>{t("symptoms_count", { count })}</CardTitle>
-        </div>
-        {!readOnly && (
-          <Link
-            href={`questionnaire/symptom`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
-          >
-            <CareIcon icon="l-pen" className="size-4" />
-            {t("edit")}
-          </Link>
-        )}
-      </CardHeader>
-      {isExpanded && (
-        <CardContent className="px-2 pb-2">{children}</CardContent>
+    <Accordion
+      type="single"
+      collapsible
+      defaultValue={count > 0 ? "symptoms" : undefined}
+      className={cn(
+        "w-full bg-white rounded-md shadow-sm border border-gray-100",
+        className,
       )}
-    </Card>
+    >
+      <AccordionItem value="symptoms" className="border-none">
+        <AccordionTrigger
+          className={cn(
+            "px-4 py-2 flex items-center justify-between rounded-sm",
+            "data-[state=open]:bg-gray-50 hover:bg-gray-50 hover:no-underline",
+            count === 0 && "pointer-events-none opacity-50",
+          )}
+          disabled={count === 0}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-medium">
+              {t("symptoms_count", { count })}
+            </span>
+          </div>
+
+          {!readOnly && (
+            <Link
+              href={`questionnaire/symptom`}
+              className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 no-underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CareIcon icon="l-pen" className="size-4" />
+              {t("edit")}
+            </Link>
+          )}
+        </AccordionTrigger>
+
+        <AccordionContent className="px-2 pb-2">{children}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };
