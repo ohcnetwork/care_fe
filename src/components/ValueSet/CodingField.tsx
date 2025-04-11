@@ -36,11 +36,11 @@ export const CodingField = ({
           shouldValidate: true,
         });
 
-        toast.success("Code verified successfully");
+        toast.success(t("code_verified_successfully"));
       }
     },
     onError: () => {
-      toast.error("Failed to verify code");
+      toast.error(t("failed_to_verify_code"));
     },
   });
 
@@ -48,7 +48,7 @@ export const CodingField = ({
     const code = form.getValues(`${name}.code`);
 
     if (!system || !code) {
-      toast.error("Please select a system and enter a code first");
+      toast.error(t("select_system_first"));
       return;
     }
 
