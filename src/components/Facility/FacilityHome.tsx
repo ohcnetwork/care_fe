@@ -145,7 +145,15 @@ export const FacilityHome = ({ facilityId }: Props) => {
       queryClient.invalidateQueries({
         queryKey: ["facility", facilityId],
       });
-      navigate("/");
+
+      const prevPath = document.referrer;
+      const orgMatch = prevPath.match(/\/org\/([^/]+)\/facilities/);
+
+      if (orgMatch && orgMatch[1]) {
+        navigate(`/org/${orgMatch[1]}/facilities`);
+      } else {
+        navigate("/");
+      }
     },
   });
 
