@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { ChevronDown } from "lucide-react";
-import { Link, useQueryParams } from "raviger";
+import { Link, usePath, useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -237,7 +237,8 @@ function ResponseCard({
   isPrintPreview?: boolean;
 }) {
   const { t } = useTranslation();
-
+  const path = usePath() || "";
+  const isTreatmentSummaryRoute = path?.includes("/treatment_summary");
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
 
@@ -290,28 +291,30 @@ function ResponseCard({
             </span>
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              {t("print")}
-              <ChevronDown className="ml-2 size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <Link href={`questionnaire_response/${item.id}/print`}>
-              <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
-            </Link>
-            <Link
-              href={`questionnaire/${item.questionnaire?.id}/responses/print`}
-            >
-              <DropdownMenuItem>
-                {t("print_all_responses", {
-                  title: item.questionnaire?.title,
-                })}
-              </DropdownMenuItem>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {!isTreatmentSummaryRoute && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                {t("print")}
+                <ChevronDown className="ml-2 size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <Link href={`questionnaire_response/${item.id}/print`}>
+                <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
+              </Link>
+              <Link
+                href={`questionnaire/${item.questionnaire?.id}/responses/print`}
+              >
+                <DropdownMenuItem>
+                  {t("print_all_responses", {
+                    title: item.questionnaire?.title,
+                  })}
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {item.questionnaire && (
