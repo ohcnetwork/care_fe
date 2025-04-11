@@ -17,9 +17,12 @@ import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
+import { usePermissions } from "@/context/PermissionContext";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
@@ -70,6 +73,10 @@ export default function LocationSettings({
       pathParams: { id: facilityId },
     }),
   });
+
+  const { hasPermission } = usePermissions();
+  const { canWriteFacilityLocation, canManageFacilityOrganization } =
+    getPermissions(hasPermission, facilityData?.permissions ?? []);
 
   const { data: allLocations } = useQuery({
     queryKey: ["locations", facilityId, "all"],
@@ -249,6 +256,7 @@ export default function LocationSettings({
                 facilityName={facilityData?.name || t("facility")}
                 searchQuery={searchQuery}
                 isEditing={isSheetOpen}
+                canWrite={canWriteFacilityLocation}
               />
             ) : (
               <>
@@ -261,6 +269,8 @@ export default function LocationSettings({
                       navigate(`/facility/${facilityId}/settings/locations`)
                     }
                     onSelectLocation={handleLocationSelect}
+                    canWrite={canWriteFacilityLocation}
+                    canWriteOrganization={canManageFacilityOrganization}
                   />
                 ) : (
                   <>
@@ -273,17 +283,22 @@ export default function LocationSettings({
                           onChange={(e) => handleSearchChange(e.target.value)}
                           className="w-full lg:w-72"
                         />
-                        <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
-                          <Button
-                            data-cy="add-main-location-button"
-                            variant="primary"
-                            onClick={handleAddLocation}
-                            className="w-full sm:w-auto"
-                          >
-                            <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
-                            {t("add_location")}
-                          </Button>
-                        </div>
+                        {canManageFacilityOrganization && (
+                          <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                            <Button
+                              data-cy="add-main-location-button"
+                              variant="primary"
+                              onClick={handleAddLocation}
+                              className="w-full sm:w-auto"
+                            >
+                              <CareIcon
+                                icon="l-plus"
+                                className="h-4 w-4 mr-2"
+                              />
+                              {t("add_location")}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -303,6 +318,7 @@ export default function LocationSettings({
                                 onEdit={handleEditLocation}
                                 onView={handleLocationSelect}
                                 facilityId={facilityId}
+                                canWrite={canWriteFacilityLocation}
                               />
                             ),
                           )

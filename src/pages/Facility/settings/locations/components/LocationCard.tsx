@@ -32,6 +32,7 @@ interface Props {
   onView?: (location: LocationList) => void;
   className?: string;
   facilityId: string;
+  canWrite: boolean;
 }
 
 export function LocationCard({
@@ -40,6 +41,7 @@ export function LocationCard({
   onView,
   className,
   facilityId,
+  canWrite,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -103,7 +105,7 @@ export function LocationCard({
               </div>
             </div>
 
-            {onEdit && (
+            {canWrite && onEdit && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -118,37 +120,39 @@ export function LocationCard({
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
           <div className="flex justify-between">
-            {!location.has_children && !location.current_encounter && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="white" data-cy="delete-location-button">
-                    <CareIcon icon="l-trash" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t("remove_location", { name: location.name })}
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("are_you_sure_want_to_delete", {
-                        name: location.name,
-                      })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      data-cy="remove-location-button"
-                      onClick={() => removeLocation({})}
-                      className={buttonVariants({ variant: "destructive" })}
-                    >
-                      {t("remove")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
+            {canWrite &&
+              !location.has_children &&
+              !location.current_encounter && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="white" data-cy="delete-location-button">
+                      <CareIcon icon="l-trash" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t("remove_location", { name: location.name })}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("are_you_sure_want_to_delete", {
+                          name: location.name,
+                        })}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        data-cy="remove-location-button"
+                        onClick={() => removeLocation({})}
+                        className={buttonVariants({ variant: "destructive" })}
+                      >
+                        {t("remove")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             <div className="ml-auto">
               <Button
                 data-cy="view-details-location-button"

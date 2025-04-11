@@ -47,6 +47,8 @@ export interface DeviceDetail extends DeviceBase {
   updated_by: UserBase;
   care_metadata: Record<string, unknown>;
   managing_organization: FacilityOrganization | null;
+  permissions: string[];
+  location_permissions: string[];
 }
 
 export interface DeviceList extends DeviceBase {

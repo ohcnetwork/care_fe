@@ -36,6 +36,8 @@ interface Props {
   isNested?: boolean;
   onBackToParent?: () => void;
   onSelectLocation?: (location: LocationList) => void;
+  canWrite: boolean;
+  canWriteOrganization: boolean;
 }
 
 export default function LocationView({
@@ -44,6 +46,8 @@ export default function LocationView({
   isNested,
   onBackToParent,
   onSelectLocation,
+  canWrite,
+  canWriteOrganization,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -245,7 +249,8 @@ export default function LocationView({
                 {!isLocationLoading &&
                   location &&
                   "mode" in location &&
-                  location.mode === "kind" && (
+                  location.mode === "kind" &&
+                  canWrite && (
                     <Button
                       data-cy="add-child-location-button"
                       variant="primary"
@@ -256,25 +261,27 @@ export default function LocationView({
                       {t("add_location")}
                     </Button>
                   )}
-                {!isLocationLoading && locationOrganizations && (
-                  <LinkDepartmentsSheet
-                    entityType="location"
-                    entityId={id}
-                    currentOrganizations={locationOrganizations.results}
-                    facilityId={facilityId}
-                    trigger={
-                      <Button variant="outline" className="w-full md:w-auto">
-                        <CareIcon icon="l-building" className="size-4 mr-2" />
-                        {t("manage_organization", { count: 0 })}
-                      </Button>
-                    }
-                    onUpdate={() => {
-                      queryClient.invalidateQueries({
-                        queryKey: ["location", facilityId, id],
-                      });
-                    }}
-                  />
-                )}
+                {!isLocationLoading &&
+                  locationOrganizations &&
+                  canWriteOrganization && (
+                    <LinkDepartmentsSheet
+                      entityType="location"
+                      entityId={id}
+                      currentOrganizations={locationOrganizations.results}
+                      facilityId={facilityId}
+                      trigger={
+                        <Button variant="outline" className="w-full md:w-auto">
+                          <CareIcon icon="l-building" className="size-4 mr-2" />
+                          {t("manage_organization_other")}
+                        </Button>
+                      }
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["location", facilityId, id],
+                        });
+                      }}
+                    />
+                  )}
               </div>
             </div>
           </div>
@@ -295,6 +302,7 @@ export default function LocationView({
                         onEdit={handleEditLocation}
                         onView={handleViewLocation}
                         facilityId={facilityId}
+                        canWrite={canWrite}
                       />
                     ))
                   ) : (

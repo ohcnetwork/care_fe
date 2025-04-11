@@ -36,13 +36,18 @@ import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
+import { getPermissions } from "@/common/Permissions";
+
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { usePluginDevice } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import { ContactPoint } from "@/types/common/contactPoint";
 import { type DeviceDetail } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
+import { LocationList } from "@/types/location/location";
 
 import DeviceEncounterHistory from "./DeviceEncounterHistory";
 import DeviceServiceHistory from "./components/DeviceServiceHistory";
@@ -63,6 +68,33 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
       pathParams: { facility_id: facilityId, id: deviceId },
     }),
   });
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
+
+  const { hasPermission } = usePermissions();
+  const { canManageDevice, canListDevice } = getPermissions(
+    hasPermission,
+    device?.permissions ?? [],
+  );
+  const {
+    canWriteFacilityLocation,
+    canListDevice: canListDeviceonLocation,
+    canListFacilityLocations,
+  } = getPermissions(hasPermission, device?.location_permissions ?? []);
+  const { canManageFacilityOrganization } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
+  const canViewLocationHistory = canListDevice || canListDeviceonLocation;
+
+  const canWriteLocation = device?.current_location
+    ? canManageDevice && canWriteFacilityLocation
+    : canManageDevice;
 
   const { mutate: deleteDevice, isPending: isDeleting } = useMutation({
     mutationFn: mutate(deviceApi.delete, {
@@ -147,6 +179,20 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
     );
   };
 
+  const renderLocationLink = (location: LocationList) => {
+    return canListFacilityLocations ? (
+      <Link
+        href={`/location/${location.id}`}
+        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1 truncate"
+      >
+        {location.name}
+        <ExternalLink className="size-3 flex-shrink-0" />
+      </Link>
+    ) : (
+      <>{location.name}</>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-2 max-w-4xl mx-auto">
       <div className="ml-2 flex gap-3 items-center">
@@ -161,16 +207,18 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
         <Card>
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>{t("device_information")}</CardTitle>
-            <Link href={`/devices/${deviceId}/edit`}>
-              <Button
-                variant="outline_primary"
-                size="sm"
-                data-cy="edit-device-button"
-              >
-                <CareIcon icon="l-pen" className="size-4" />
-                {t("edit")}
-              </Button>
-            </Link>
+            {canManageDevice && (
+              <Link href={`/devices/${deviceId}/edit`}>
+                <Button
+                  variant="outline_primary"
+                  size="sm"
+                  data-cy="edit-device-button"
+                >
+                  <CareIcon icon="l-pen" className="size-4" />
+                  {t("edit")}
+                </Button>
+              </Link>
+            )}
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
@@ -196,30 +244,30 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                   </h4>
                   <div className="mt-1 flex items-center gap-2">
                     {device.current_location ? (
-                      <Link
-                        href={`/location/${device.current_location.id}`}
-                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1 truncate"
-                      >
-                        {device.current_location.name}
-                        <ExternalLink className="size-3 flex-shrink-0" />
-                      </Link>
+                      renderLocationLink(device.current_location)
                     ) : (
                       <span className="text-gray-500 text-sm">
                         {t("no_location_associated")}
                       </span>
                     )}
-                    <ManageLocationSheet
-                      facilityId={facilityId}
-                      device={device}
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-shrink-0"
+                    {(canViewLocationHistory || canWriteLocation) && (
+                      <ManageLocationSheet
+                        facilityId={facilityId}
+                        device={device}
                       >
-                        {device.current_location ? t("change") : t("associate")}
-                      </Button>
-                    </ManageLocationSheet>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-shrink-0"
+                        >
+                          {device.current_location && canWriteLocation
+                            ? t("change")
+                            : canWriteLocation
+                              ? t("associate")
+                              : t("view_location_history")}
+                        </Button>
+                      </ManageLocationSheet>
+                    )}
                   </div>
                 </div>
 
@@ -265,7 +313,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                   <div className="mt-1 flex items-center gap-2">
                     {device.managing_organization ? (
                       <Link
-                        href={`/departments/${device.managing_organization.id}`}
+                        href={`/departments/${device.managing_organization.id}/departments/`}
                         className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1 truncate"
                       >
                         {device.managing_organization.name}
@@ -276,33 +324,35 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                         {t("no_organization_associated")}
                       </span>
                     )}
-                    <LinkDepartmentsSheet
-                      entityType="device"
-                      entityId={deviceId}
-                      facilityId={facilityId}
-                      currentOrganizations={
-                        device.managing_organization
-                          ? [device.managing_organization]
-                          : []
-                      }
-                      onUpdate={() => {
-                        queryClient.invalidateQueries({
-                          queryKey: ["device", facilityId, deviceId],
-                        });
-                      }}
-                      trigger={
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-shrink-0"
-                        >
-                          {device.managing_organization
-                            ? t("change")
-                            : t("associate")}
-                        </Button>
-                      }
-                      orgType="managing_organization"
-                    />
+                    {canManageDevice && canManageFacilityOrganization && (
+                      <LinkDepartmentsSheet
+                        entityType="device"
+                        entityId={deviceId}
+                        facilityId={facilityId}
+                        currentOrganizations={
+                          device.managing_organization
+                            ? [device.managing_organization]
+                            : []
+                        }
+                        onUpdate={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: ["device", facilityId, deviceId],
+                          });
+                        }}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-shrink-0"
+                          >
+                            {device.managing_organization
+                              ? t("change")
+                              : t("associate")}
+                          </Button>
+                        }
+                        orgType="managing_organization"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -436,53 +486,60 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
           </ErrorBoundary>
         )}
 
-        <Card className="border-red-500">
-          <CardHeader>
-            <CardTitle className="text-destructive">
-              {t("danger_zone")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between gap-4 rounded-md border p-4">
-              <div className="space-y-1">
-                <h3 className="text-sm font-medium">
-                  {t("delete_this_device")}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {t("delete_device_description")}
-                </p>
-              </div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" data-cy="delete-device-button">
-                    {t("delete")}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("delete_device")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("delete_device_confirmation")}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel data-cy="cancel-delete-device-button">
-                      {t("cancel")}
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteDevice()}
-                      className={cn(buttonVariants({ variant: "destructive" }))}
-                      disabled={isDeleting}
-                      data-cy="confirm-delete-device-button"
+        {canManageDevice && (
+          <Card className="border-red-500">
+            <CardHeader>
+              <CardTitle className="text-destructive">
+                {t("danger_zone")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between gap-4 rounded-md border p-4">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium">
+                    {t("delete_this_device")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("delete_device_description")}
+                  </p>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      data-cy="delete-device-button"
                     >
-                      {isDeleting ? t("deleting") : t("delete")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </CardContent>
-        </Card>
+                      {t("delete")}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t("delete_device")}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("delete_device_confirmation")}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel data-cy="cancel-delete-device-button">
+                        {t("cancel")}
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteDevice()}
+                        className={cn(
+                          buttonVariants({ variant: "destructive" }),
+                        )}
+                        disabled={isDeleting}
+                        data-cy="confirm-delete-device-button"
+                      >
+                        {isDeleting ? t("deleting") : t("delete")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

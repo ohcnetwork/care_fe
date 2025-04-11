@@ -75,6 +75,9 @@ export const PERMISSION_LIST_USER_SCHEDULE = "can_list_user_schedule";
 export const PERMISSION_CREATE_USER = "can_create_user";
 export const PERMISSION_LIST_USER = "can_list_user";
 
+export const PERMISSION_LIST_DEVICES = "can_list_devices";
+export const PERMISSION_MANAGE_DEVICES = "can_manage_devices";
+
 export interface Permissions {
   // Patient Permissions
   /** Permission slug: "can_create_patient" */
@@ -181,6 +184,12 @@ export interface Permissions {
   canCreateUser: boolean;
   /** Permission slug: "can_list_user" */
   canListUsers: boolean;
+
+  // Device Permissions
+  /** Permission slug: "can_list_devices" */
+  canListDevice: boolean;
+  /** Permission slug: "can_manage_devices" */
+  canManageDevice: boolean;
 }
 
 export type HasPermissionFn = (
@@ -346,5 +355,9 @@ export function getPermissions(
     canCreateUser: hasPermission(PERMISSION_CREATE_USER, permissions),
     // Currently listed, but not used in BE
     canListUsers: hasPermission(PERMISSION_LIST_USER, permissions),
+
+    // Devices
+    canListDevice: hasPermission(PERMISSION_LIST_DEVICES, permissions),
+    canManageDevice: hasPermission(PERMISSION_MANAGE_DEVICES, permissions),
   };
 }

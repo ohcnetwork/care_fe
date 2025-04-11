@@ -20,10 +20,12 @@ import {
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { LocationSearch } from "@/components/Location/LocationSearch";
 
+import { getPermissions } from "@/common/Permissions";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import { DeviceLocationTimelineCard } from "@/pages/Facility/settings/devices/components/DeviceLocationTimelineCard";
 import { DeviceDetail } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
@@ -45,6 +47,19 @@ export default function ManageLocationSheet({
   const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
     null,
   );
+
+  const { hasPermission } = usePermissions();
+  const { canManageDevice, canListDevice } = getPermissions(
+    hasPermission,
+    device?.permissions ?? [],
+  );
+  const { canWriteFacilityLocation, canListDevice: canListDeviceonLocation } =
+    getPermissions(hasPermission, device?.location_permissions ?? []);
+  const canViewLocationHistory = canListDevice || canListDeviceonLocation;
+  const canWriteLocation = device?.current_location
+    ? canManageDevice && canWriteFacilityLocation
+    : canManageDevice;
+
   const [open, setOpen] = useState(false);
 
   const { data: locationsData, isLoading } = useQuery({
@@ -55,7 +70,7 @@ export default function ManageLocationSheet({
         id: device.id,
       },
     }),
-    enabled: open,
+    enabled: open && canViewLocationHistory,
   });
 
   const { mutate: associateLocation, isPending } = useMutation({
@@ -91,56 +106,63 @@ export default function ManageLocationSheet({
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-md overflow-auto">
         <SheetHeader>
-          <SheetTitle>{t("associate_location")}</SheetTitle>
+          <SheetTitle>
+            {canWriteLocation
+              ? t("associate_location")
+              : t("view_location_history")}
+          </SheetTitle>
           <SheetDescription>
-            {t("associate_location_description")}
+            {canWriteLocation
+              ? t("associate_location_description")
+              : t("view_location_history_description")}
           </SheetDescription>
         </SheetHeader>
 
-        {device?.current_location ? (
-          <div className="mt-6 space-y-4">
-            <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
-              <div className="space-y-1">
-                <div className="text-sm font-medium">
-                  {t("current_location")}
+        {canWriteLocation &&
+          (device?.current_location ? (
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
+                <div className="space-y-1">
+                  <div className="text-sm font-medium">
+                    {t("current_location")}
+                  </div>
+                  <Link
+                    href={`/location/${device.current_location.id}`}
+                    className="text-sm text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                  >
+                    {device.current_location.name}
+                    <CareIcon
+                      icon="l-external-link-alt"
+                      className="size-3 opacity-50"
+                    />
+                  </Link>
                 </div>
-                <Link
-                  href={`/location/${device.current_location.id}`}
-                  className="text-sm text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDisassociate}
+                  disabled={isPending}
                 >
-                  {device.current_location.name}
-                  <CareIcon
-                    icon="l-external-link-alt"
-                    className="size-3 opacity-50"
-                  />
-                </Link>
+                  {isPending ? t("disassociating") : t("disassociate")}
+                </Button>
               </div>
+            </div>
+          ) : (
+            <div className="mt-6 space-y-4">
+              <LocationSearch
+                facilityId={facilityId}
+                onSelect={setSelectedLocation}
+                value={selectedLocation}
+              />
               <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDisassociate}
-                disabled={isPending}
+                onClick={handleSubmit}
+                disabled={!selectedLocation || isPending}
+                className="w-full mt-4"
               >
-                {isPending ? t("disassociating") : t("disassociate")}
+                {isPending ? t("associating") : t("associate")}
               </Button>
             </div>
-          </div>
-        ) : (
-          <div className="mt-6 space-y-4">
-            <LocationSearch
-              facilityId={facilityId}
-              onSelect={setSelectedLocation}
-              value={selectedLocation}
-            />
-            <Button
-              onClick={handleSubmit}
-              disabled={!selectedLocation || isPending}
-              className="w-full mt-4"
-            >
-              {isPending ? t("associating") : t("associate")}
-            </Button>
-          </div>
-        )}
+          ))}
 
         <Separator className="my-6" />
 

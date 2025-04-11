@@ -41,6 +41,7 @@ interface LocationMapProps {
   facilityName: string;
   searchQuery?: string;
   isEditing?: boolean;
+  canWrite: boolean;
 }
 
 const CustomNode = ({ data }: NodeProps) => {
@@ -106,7 +107,9 @@ const CustomNode = ({ data }: NodeProps) => {
               </TooltipProvider>
               <p className="text-sm text-gray-500 truncate">{data.type}</p>
             </div>
-            {data.form !== "facility" && <Pencil className="size-4" />}
+            {data.form !== "facility" && data.canWrite && (
+              <Pencil className="size-4" />
+            )}
           </div>
         </div>
         {hasChildren && (
@@ -196,6 +199,7 @@ function createLocationNode(
   toggleNode: (id: string) => void,
   onLocationClick: (location: LocationListType) => void,
   t: (key: string) => string,
+  canWrite: boolean,
   onLocationEdit?: (location: LocationListType) => void,
 ): Node {
   return {
@@ -212,6 +216,7 @@ function createLocationNode(
       onToggle: toggleNode,
       onClick: (_loc: LocationListType) => onLocationClick(location),
       onEdit: onLocationEdit ? () => onLocationEdit(location) : undefined,
+      canWrite,
     },
   };
 }
@@ -248,6 +253,7 @@ function processLocationHierarchy(
   toggleNode: (id: string) => void,
   onLocationClick: (location: LocationListType) => void,
   t: (key: string) => string,
+  canWrite: boolean,
   onLocationEdit?: (location: LocationListType) => void,
 ): { nodes: Node[]; edges: Edge[] } {
   const isExpanded = expandedNodes.includes(location.id);
@@ -266,6 +272,7 @@ function processLocationHierarchy(
     toggleNode,
     onLocationClick,
     t,
+    canWrite,
     onLocationEdit,
   );
   result.nodes.push(node);
@@ -299,6 +306,7 @@ function processLocationHierarchy(
         toggleNode,
         onLocationClick,
         t,
+        canWrite,
         onLocationEdit,
       );
       result.nodes.push(...childResult.nodes);
@@ -316,6 +324,7 @@ function LocationMapContent({
   onLocationEdit,
   facilityName,
   searchQuery,
+  canWrite,
 }: LocationMapProps) {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -485,6 +494,7 @@ function LocationMapContent({
             toggleNode,
             onLocationClick,
             t,
+            canWrite,
             onLocationEdit,
           );
 

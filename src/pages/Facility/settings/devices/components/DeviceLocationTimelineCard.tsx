@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { ArrowRight } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -28,13 +27,7 @@ function LocationNode({ locationData, children }: LocationNodeProps) {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center text-sm font-semibold">
-        <Link
-          href={`/location/${location.id}`}
-          className="flex items-center gap-1"
-        >
-          {location.name}
-          <CareIcon icon="l-external-link-alt" className="size-3 opacity-50" />
-        </Link>
+        <p>{location.name}</p>
 
         <div className="ml-2">
           <Badge variant="outline" className="text-xs">

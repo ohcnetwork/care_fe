@@ -25,10 +25,17 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { Encounter, LocationHistory } from "@/types/emr/encounter";
+import { usePermissions } from "@/context/PermissionContext";
+import {
+  Encounter,
+  LocationHistory,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter";
 import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
@@ -74,6 +81,14 @@ export function LocationSheet({
   encounter,
 }: LocationSheetProps) {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+  const { canWriteEncounter } = getPermissions(
+    hasPermission,
+    encounter.patient.permissions,
+  );
+  const canWrite =
+    canWriteEncounter &&
+    !inactiveEncounterStatus.includes(encounter?.status ?? "");
   const [showDischargeDialog, setShowDischargeDialog] = useState(false);
   const [showOccupiedDialog, setShowOccupiedDialog] = useState(false);
   const [selectedDischargedBed, setSelectedDischargedBed] =
@@ -780,18 +795,20 @@ export function LocationSheet({
         <SheetContent className="w-full sm:max-w-3xl pr-2 pl-3">
           <SheetHeader className="space-y-1 px-1">
             <SheetTitle className="text-sm font-semibold">
-              {t("update_location")}
+              {canWrite ? t("update_location") : t("view_location_history")}
             </SheetTitle>
           </SheetHeader>
 
-          <Tabs defaultValue="assign" className="mt-2">
+          <Tabs defaultValue={canWrite ? "assign" : "history"} className="mt-2">
             <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
-              <TabsTrigger
-                value="assign"
-                className="data-[state=active]:border-b-4 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t("assign_location")}
-              </TabsTrigger>
+              {canWrite && (
+                <TabsTrigger
+                  value="assign"
+                  className="data-[state=active]:border-b-4 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                >
+                  {t("assign_location")}
+                </TabsTrigger>
+              )}
               <TabsTrigger
                 value="history"
                 className="data-[state=active]:border-b-4 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
@@ -800,11 +817,13 @@ export function LocationSheet({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="assign" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-8rem)]">
-                {renderScreen()}
-              </ScrollArea>
-            </TabsContent>
+            {canWrite && (
+              <TabsContent value="assign" className="mt-2">
+                <ScrollArea className="h-[calc(100vh-8rem)]">
+                  {renderScreen()}
+                </ScrollArea>
+              </TabsContent>
+            )}
 
             <TabsContent value="history" className="mt-2">
               <ScrollArea className="h-[calc(100vh-8rem)]">
