@@ -1,5 +1,8 @@
 import { memo } from "react";
 
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -41,6 +44,10 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   index = 0,
 }: ChoiceQuestionProps) {
   const options = question.answer_option || [];
+  const selectType =
+    question.answer_option?.length && question.answer_option?.length > 5
+      ? "dropdown"
+      : "radio";
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
   const currentCoding = questionnaireResponse.values[index]?.coding;
   const handleValueChange = (newValue: string) => {
@@ -84,7 +91,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           value={currentCoding}
           onSelect={handleCodingChange}
         ></ValueSetSelect>
-      ) : (
+      ) : selectType === "dropdown" ? (
         <Select
           value={currentValue}
           onValueChange={handleValueChange}
@@ -105,6 +112,34 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
             ))}
           </SelectContent>
         </Select>
+      ) : (
+        <div className="mt-2 mx-1 mr-4">
+          <RadioGroup
+            onValueChange={handleValueChange}
+            disabled={disabled}
+            className="flex flex-col"
+          >
+            {options.map((option: AnswerOption) => (
+              <Label
+                htmlFor={option.value.toString()}
+                className="cursor-pointer"
+                key={option.value.toString()}
+              >
+                <Card className="shadow-sm border-1 p-6 transition-all hover:bg-muted/50 [&:has([data-state=checked])]:border-primary">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value={option.value.toString()}
+                      id={option.value.toString()}
+                    />
+                    <div className="font-medium">
+                      {properCase(option.display || option.value)}
+                    </div>
+                  </div>
+                </Card>
+              </Label>
+            ))}
+          </RadioGroup>
+        </div>
       )}
     </>
   );
