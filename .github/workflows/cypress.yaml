@@ -22,25 +22,17 @@ jobs:
           node-version: "22.14.0"
           cache: "npm"
 
-      - name: Install Firefox
+      - name: Install Chrome
         run: |
-          # Use faster mirror
-          sudo sed -i 's/archive.ubuntu.com/mirrors.ubuntu.com/g' /etc/apt/sources.list
-          sudo sed -i 's/security.ubuntu.com/mirrors.ubuntu.com/g' /etc/apt/sources.list
+          # Download Chrome .deb package
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 
-          # Update package lists
-          sudo apt-get update -y
+          # Install dependencies
+          sudo apt-get update
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 
-          # Install minimal Firefox package
-          sudo apt-get install -y --no-install-recommends firefox
-
-      - name: Cache apt packages
-        uses: actions/cache@v3
-        with:
-          path: /var/cache/apt
-          key: ${{ runner.os }}-apt-${{ github.ref }}
-          restore-keys: |
-            ${{ runner.os }}-apt-
+          # Cleanup
+          rm google-chrome-stable_current_amd64.deb
 
       - name: Install dependencies 📦
         run: npm ci
@@ -94,7 +86,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: firefox
+          browser: chrome
           retries: 2
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -115,7 +107,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: firefox
+          browser: chrome
           retries: 2
         env:
           CYPRESS_SPLIT_TESTS: "true"
