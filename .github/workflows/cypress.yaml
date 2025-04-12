@@ -24,22 +24,26 @@ jobs:
 
       - name: Install Firefox
         run: |
-          sudo apt-get update
-          sudo apt-get install -y firefox
+          # Use faster mirror
+          sudo sed -i 's/archive.ubuntu.com/mirrors.ubuntu.com/g' /etc/apt/sources.list
+          sudo sed -i 's/security.ubuntu.com/mirrors.ubuntu.com/g' /etc/apt/sources.list
+
+          # Update package lists
+          sudo apt-get update -y
+
+          # Install minimal Firefox package
+          sudo apt-get install -y --no-install-recommends firefox
+
+      - name: Cache apt packages
+        uses: actions/cache@v3
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-${{ github.ref }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
 
       - name: Install dependencies 📦
         run: npm ci
-
-      - name: Cache Vite build
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules/.vite
-            dist
-          key: ${{ runner.os }}-vite-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**') }}
-          restore-keys: |
-            ${{ runner.os }}-vite-${{ hashFiles('**/package-lock.json') }}-
-            ${{ runner.os }}-vite-
 
       - name: Build ⚙️
         run: npm run build
