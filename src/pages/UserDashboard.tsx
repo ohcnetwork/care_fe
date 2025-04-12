@@ -33,7 +33,7 @@ type TabContentProps = {
   tabId: string;
   tabItems: UserFacilityModel[] | Organization[];
   description: string;
-  renderChild: (item: UserFacilityModel | Organization) => JSX.Element;
+  renderChild: (item: UserFacilityModel | Organization) => React.ReactNode;
 };
 
 export default function UserDashboard() {
