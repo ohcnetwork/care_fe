@@ -177,7 +177,7 @@ export default function PatientRegistration(
       emergency_phone_number: "",
       age_or_dob: "dob",
       same_phone_number: false,
-      same_address: true,
+      same_address: false,
     },
     mode: "onChange",
   });
@@ -397,7 +397,7 @@ export default function PatientRegistration(
                       <PhoneInput
                         {...field}
                         onChange={(value) => {
-                          form.setValue("phone_number", value);
+                          field.onChange(value);
                           if (form.getValues("same_phone_number")) {
                             form.setValue("emergency_phone_number", value);
                           }
@@ -420,6 +420,13 @@ export default function PatientRegistration(
                                     form.setValue(
                                       "emergency_phone_number",
                                       form.watch("phone_number"),
+                                      { shouldValidate: true },
+                                    );
+                                  } else {
+                                    form.setValue(
+                                      "emergency_phone_number",
+                                      "",
+                                      { shouldValidate: true },
                                     );
                                   }
                                 }}
@@ -704,7 +711,7 @@ export default function PatientRegistration(
                       <Textarea
                         {...field}
                         onChange={(e) => {
-                          form.setValue("address", e.target.value);
+                          field.onChange(e);
                           if (form.getValues("same_address")) {
                             form.setValue("permanent_address", e.target.value);
                           }
@@ -727,7 +734,12 @@ export default function PatientRegistration(
                                     form.setValue(
                                       "permanent_address",
                                       form.getValues("address"),
+                                      { shouldValidate: true },
                                     );
+                                  } else {
+                                    form.setValue("permanent_address", "", {
+                                      shouldValidate: true,
+                                    });
                                   }
                                 }}
                                 data-cy="same-address-checkbox"
@@ -770,14 +782,13 @@ export default function PatientRegistration(
                       <Input
                         type="number"
                         {...field}
-                        onChange={(e) =>
-                          form.setValue(
-                            "pincode",
-                            e.target.value
-                              ? Number(e.target.value)
-                              : (undefined as unknown as number), // intentionally setting to undefined, when the value is empty to avoid 0 in the input field
-                          )
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value
+                            ? Number(e.target.value)
+                            : undefined;
+                          field.onChange(value);
+                          form.trigger("pincode");
+                        }}
                         data-cy="pincode-input"
                       />
                     </FormControl>
