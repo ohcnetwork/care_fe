@@ -705,9 +705,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                               `question-${subQuestion.id}`,
                                             );
                                           if (element) {
-                                            element.scrollIntoView({
-                                              behavior: "smooth",
-                                            });
+                                            element.scrollIntoView();
                                           }
                                         }, 100);
                                       } else {
@@ -715,9 +713,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                           `question-${subQuestion.id}`,
                                         );
                                         if (element) {
-                                          element.scrollIntoView({
-                                            behavior: "smooth",
-                                          });
+                                          element.scrollIntoView();
                                         }
                                       }
                                     }}
