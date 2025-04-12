@@ -25,21 +25,6 @@ jobs:
       - name: Install dependencies 📦
         run: npm ci
 
-      - name: Install Chrome
-        run: |
-          # Install required dependencies
-          sudo apt-get update
-          sudo apt-get install -y wget
-
-          # Download Chrome for ARM64
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_arm64.deb
-
-          # Install Chrome
-          sudo apt-get install -y ./google-chrome-stable_current_arm64.deb
-
-          # Cleanup
-          rm google-chrome-stable_current_arm64.deb
-
       - name: Build ⚙️
         run: npm run build
 
@@ -89,7 +74,6 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chrome
           retries: 2
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -110,7 +94,6 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chrome
           retries: 2
         env:
           CYPRESS_SPLIT_TESTS: "true"
