@@ -91,7 +91,7 @@ const SearchInputFieldRenderer = ({
   selectedOption: SearchOption;
   searchValue: string;
   setSearchValue: (value: string) => void;
-  inputRef: React.RefObject<HTMLInputElement>;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
   inputClassName?: string;
   autoFocus?: boolean;
   isSingleOption: boolean;
@@ -105,10 +105,10 @@ const SearchInputFieldRenderer = ({
             name={selectedOption.key}
             placeholder={selectedOption.placeholder}
             value={searchValue}
-            ref={inputRef}
             onChange={(value) => setSearchValue(value || "")}
             className={inputClassName}
             autoFocus={autoFocus}
+            ref={inputRef}
             {...prop}
           />
           {!isSingleOption && <KeyboardShortcutHint open={open} />}
@@ -120,7 +120,7 @@ const SearchInputFieldRenderer = ({
           <Input
             type="text"
             placeholder={selectedOption.placeholder}
-            ref={inputRef}
+            ref={inputRef as React.RefObject<HTMLInputElement>}
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
             className={cn(
