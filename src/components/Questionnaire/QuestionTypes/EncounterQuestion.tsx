@@ -135,16 +135,7 @@ export function EncounterQuestion({
   // Update encounter state when data is loaded
   useEffect(() => {
     if (encounterData) {
-      const updatedEncounterData = {
-        ...encounterData,
-        hospitalization: {
-          ...encounterData.hospitalization,
-          re_admission: encounterData.hospitalization?.re_admission ?? false,
-        },
-      };
-      handleUpdateEncounter(
-        updatedEncounterData as unknown as EncounterEditRequest,
-      );
+      handleUpdateEncounter(encounterData as unknown as EncounterEditRequest);
     }
   }, [encounterData]);
 

@@ -25,22 +25,13 @@ interface QuickAccessProps {
 
 export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
   const { t } = useTranslation();
-  const [showFullText, setShowFullText] = useState<{ [key: string]: boolean }>(
-    {},
-  );
+  const [isExpanded, setIsExpanded] = useState(false);
   const questionnaireOptions = useQuestionnaireOptions(
     "encounter_actions",
     canEdit,
   );
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityId = subpathMatch?.facilityId;
-
-  const toggleShowMore = (id: string) => {
-    setShowFullText((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -156,7 +147,7 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
                       <p
                         className={cn(
                           "whitespace-pre-wrap",
-                          !showFullText[encounter.id] && "line-clamp-2",
+                          !isExpanded && "line-clamp-2",
                         )}
                       >
                         {encounter.discharge_summary_advice}
@@ -165,11 +156,9 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
                         <Button
                           variant="link"
                           className="p-0 h-auto font-sm text-gray-500 hover:text-gray-800"
-                          onClick={() => toggleShowMore(encounter.id)}
+                          onClick={() => setIsExpanded(!isExpanded)}
                         >
-                          {showFullText[encounter.id]
-                            ? t("see_less")
-                            : t("see_more")}
+                          {isExpanded ? t("see_less") : t("see_more")}
                         </Button>
                       )}
                     </div>
