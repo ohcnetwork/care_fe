@@ -22,14 +22,10 @@ jobs:
           node-version: "22.14.0"
           cache: "npm"
 
-      - name: Install Chrome for ARM
+      - name: Install Firefox
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
-          echo "deb [arch=arm64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-          sudo apt-get install -y google-chrome
+          sudo apt-get install -y firefox
 
       - name: Install dependencies 📦
         run: npm ci
@@ -94,7 +90,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chrome
+          browser: firefox
           retries: 2
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -115,7 +111,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chrome
+          browser: firefox
           retries: 2
         env:
           CYPRESS_SPLIT_TESTS: "true"
