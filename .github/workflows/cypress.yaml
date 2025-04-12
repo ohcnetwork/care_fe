@@ -22,20 +22,23 @@ jobs:
           node-version: "22.14.0"
           cache: "npm"
 
-      - name: Install Chrome
-        run: |
-          # Download Chrome .deb package
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-
-          # Install dependencies
-          sudo apt-get update
-          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-
-          # Cleanup
-          rm google-chrome-stable_current_amd64.deb
-
       - name: Install dependencies 📦
         run: npm ci
+
+      - name: Install Chrome
+        run: |
+          # Install required dependencies
+          sudo apt-get update
+          sudo apt-get install -y wget
+
+          # Download Chrome for ARM64
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_arm64.deb
+
+          # Install Chrome
+          sudo apt-get install -y ./google-chrome-stable_current_arm64.deb
+
+          # Cleanup
+          rm google-chrome-stable_current_arm64.deb
 
       - name: Build ⚙️
         run: npm run build
