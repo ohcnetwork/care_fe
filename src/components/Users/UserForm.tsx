@@ -439,20 +439,13 @@ export default function UserForm({
                         {...field}
                         onFocus={() => setIsUsernameFieldFocused(true)}
                         onBlur={() => setIsUsernameFieldFocused(false)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Tab") {
-                            e.preventDefault(); // Prevent default tab behavior
-                            document.getElementById("email")?.focus();
-                            // Move focus to email input
-                          }
-                        }}
                       />
                     </div>
                   </FormControl>
                   {isUsernameFieldFocused ? (
                     <>
                       <div
-                        className="text-small mt-2 pl-2 text-secondary-500"
+                        className={`text-small mt-2 pl-2 text-secondary-500`}
                         aria-live="polite"
                       >
                         {(isUsernameChecking || !isUsernameTaken) && (
