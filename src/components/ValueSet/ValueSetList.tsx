@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import {
   ArchiveIcon,
   FileCheckIcon,
@@ -46,6 +45,7 @@ import { ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 function EmptyState() {
+  const { t } = useTranslation();
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
@@ -329,19 +329,19 @@ export function ValueSetList() {
               <div className="min-w-[480px]">
                 <TabsList className="flex w-full">
                   <TabsTrigger value="active" className="flex-1">
-                    <FileCheckIcon className="size-4 mr-2" />
+                    <FileCheckIcon className="size-4" />
                     {t("active")}
                   </TabsTrigger>
                   <TabsTrigger value="draft" className="flex-1">
-                    <NotepadTextDashedIcon className="size-4 mr-2" />
+                    <NotepadTextDashedIcon className="size-4" />
                     {t("draft")}
                   </TabsTrigger>
                   <TabsTrigger value="retired" className="flex-1">
-                    <ArchiveIcon className="size-4 mr-2" />
+                    <ArchiveIcon className="size-4" />
                     {t("retired")}
                   </TabsTrigger>
                   <TabsTrigger value="unknown" className="flex-1">
-                    <HelpCircle className="size-4 mr-2" />
+                    <HelpCircle className="size-4" />
                     {t("unknown")}
                   </TabsTrigger>
                 </TabsList>

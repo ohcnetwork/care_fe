@@ -1,14 +1,15 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
-import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
+import "@excalidraw/excalidraw/index.css";
 import {
   hashKey,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { t } from "i18next";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { debounce } from "@/lib/utils";
@@ -45,6 +46,7 @@ export default function ExcalidrawEditor({
   associating_type,
   drawingId,
 }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [elements, setElements] = useState<readonly ExcalidrawElement[] | null>(
     drawingId ? null : [],

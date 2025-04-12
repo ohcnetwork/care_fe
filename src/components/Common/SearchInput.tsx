@@ -105,7 +105,7 @@ const SearchInputFieldRenderer = ({
             name={selectedOption.key}
             placeholder={selectedOption.placeholder}
             value={searchValue}
-            onChange={setSearchValue}
+            onChange={(value) => setSearchValue(value || "")}
             className={inputClassName}
             autoFocus={autoFocus}
             {...prop}
