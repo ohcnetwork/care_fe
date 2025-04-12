@@ -130,3 +130,159 @@ export function generateDeviceName(): string {
 
   return `${randomDeviceType}-${randomNumber}`;
 }
+
+export function generateRandomCharacter(
+  options: {
+    charLimit?: number;
+    paragraphCount?: number;
+  } = {},
+): string {
+  const { charLimit = 500, paragraphCount = 1 } = options;
+
+  const patientSymptoms = [
+    "fever",
+    "headache",
+    "cough",
+    "sore throat",
+    "fatigue",
+    "nausea",
+    "vomiting",
+    "diarrhea",
+    "chest pain",
+    "shortness of breath",
+    "dizziness",
+    "joint pain",
+    "muscle weakness",
+    "rash",
+    "abdominal pain",
+    "back pain",
+    "insomnia",
+    "anxiety",
+    "depression",
+    "weight loss",
+    "weight gain",
+    "loss of appetite",
+    "excessive thirst",
+    "frequent urination",
+    "blurred vision",
+    "hearing loss",
+    "memory problems",
+    "confusion",
+    "seizures",
+    "tremors",
+    "numbness",
+    "tingling",
+    "swelling",
+    "bruising",
+    "bleeding",
+    "palpitations",
+    "irregular heartbeat",
+    "high blood pressure",
+    "low blood pressure",
+    "allergic reaction",
+    "wheezing",
+    "congestion",
+    "runny nose",
+    "sneezing",
+    "itchy eyes",
+    "red eyes",
+    "dry mouth",
+    "mouth sores",
+    "tooth pain",
+    "ear pain",
+    "neck stiffness",
+    "shoulder pain",
+    "knee pain",
+    "hip pain",
+    "foot pain",
+    "hand pain",
+    "wrist pain",
+    "elbow pain",
+  ];
+
+  const medicalTerms = [
+    "hypertension",
+    "diabetes",
+    "asthma",
+    "arthritis",
+    "migraine",
+    "anemia",
+    "infection",
+    "inflammation",
+    "allergy",
+    "fracture",
+    "sprain",
+    "strain",
+    "contusion",
+    "laceration",
+    "abrasion",
+    "burn",
+    "wound",
+    "ulcer",
+    "tumor",
+    "cancer",
+    "benign",
+    "malignant",
+    "chronic",
+    "acute",
+    "severe",
+    "mild",
+    "moderate",
+    "progressive",
+    "recurrent",
+    "remission",
+    "relapse",
+    "complication",
+    "side effect",
+    "medication",
+    "treatment",
+    "therapy",
+    "surgery",
+    "procedure",
+    "diagnosis",
+    "prognosis",
+    "recovery",
+    "rehabilitation",
+    "physical therapy",
+    "occupational therapy",
+    "prescription",
+    "dosage",
+    "frequency",
+    "duration",
+    "contraindication",
+    "allergy",
+    "interaction",
+    "monitoring",
+  ];
+
+  const generateParagraph = (): string => {
+    let paragraph = "";
+    const targetLength = charLimit / paragraphCount;
+    const sentences = [];
+
+    while (paragraph.length < targetLength) {
+      const symptom = patientSymptoms[getRandomIndex(patientSymptoms.length)];
+      const term = medicalTerms[getRandomIndex(medicalTerms.length)];
+      const severity = ["mild", "moderate", "severe"][getRandomIndex(3)];
+      const duration = [
+        "for a few days",
+        "for a week",
+        "for several weeks",
+        "for months",
+      ][getRandomIndex(4)];
+
+      const sentence = `Patient reports ${severity} ${symptom} ${duration}. ${term} noted during examination.`;
+      sentences.push(sentence);
+      paragraph = sentences.join(" ");
+    }
+
+    return paragraph.trim();
+  };
+
+  const paragraphs: string[] = [];
+  for (let i = 0; i < paragraphCount; i++) {
+    paragraphs.push(generateParagraph());
+  }
+
+  return paragraphs.join("\n\n");
+}
