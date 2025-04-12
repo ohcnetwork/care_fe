@@ -315,11 +315,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             }}
             className="flex gap-4"
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex">
               <RadioGroupItem value="yes" id={`yes-${formId}`} />
               <Label htmlFor={`yes-${formId}`}>{t("yes")}</Label>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex">
               <RadioGroupItem value="no" id={`no-${formId}`} />
               <Label htmlFor={`no-${formId}`}>{t("no")}</Label>
             </div>
@@ -373,7 +373,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           </Popover>
           <Input
             type="time"
-            className="w-[150px]"
+            className="w-full max-w-[7rem] sm:max-w-[9.5rem] text-sm sm:text-base py-0"
             value={formatTime(administrationRequest.occurrence_period_start)}
             onChange={(e) => handleTimeChange(e, true)}
             disabled={!isPastTime || !!administrationRequest.id}
@@ -435,7 +435,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           </Popover>
           <Input
             type="time"
-            className="w-[150px]"
+            className="w-full max-w-[7rem] sm:max-w-[9.5rem] text-sm sm:text-base py-0"
             value={formatTime(administrationRequest.occurrence_period_end)}
             onChange={(e) => handleTimeChange(e, false)}
             disabled={

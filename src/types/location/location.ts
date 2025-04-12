@@ -38,6 +38,7 @@ export interface LocationBase {
 export interface LocationDetail extends LocationBase {
   id: string;
   organizations: FacilityOrganization[];
+  sort_index: number;
 }
 
 export interface LocationList extends LocationBase {
@@ -45,7 +46,7 @@ export interface LocationList extends LocationBase {
   has_children: boolean;
   parent?: LocationList;
   current_encounter?: Encounter;
-  sort_index?: number;
+  sort_index: number;
 }
 
 export interface LocationWrite extends LocationBase {

@@ -21,7 +21,7 @@ export interface PatientProps {
 
 export interface Tab {
   route: string;
-  component: (props: PatientProps) => JSX.Element;
+  component: (props: PatientProps) => React.ReactNode;
   visible?: boolean;
 }
 

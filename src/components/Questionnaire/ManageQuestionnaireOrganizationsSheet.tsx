@@ -220,13 +220,13 @@ export default function ManageQuestionnaireOrganizationsSheet({
         {trigger || (
           <Button variant="outline" size="sm">
             <Building className="mr-2 size-4" />
-            {t("manage_organization_one")}
+            {t("manage_organization", { count: 0 })}
           </Button>
         )}
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{t("manage_organization_other")}</SheetTitle>
+          <SheetTitle>{t("manage_organization", { count: 0 })}</SheetTitle>
           <SheetDescription>
             {t("manage_organizations_description")}
           </SheetDescription>
@@ -286,6 +286,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
         <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
           <div className="flex w-full justify-end gap-4">
             <Button
+              type="button"
               variant="outline"
               onClick={() => {
                 if (organizations?.results) {

@@ -432,7 +432,7 @@ export function DiagnosisQuestion({
       </div>
 
       <div className="flex justify-between space-x-2">
-        <Button variant="outline" onClick={handleBackToValueSet}>
+        <Button type="button" variant="outline" onClick={handleBackToValueSet}>
           {t("cancel")}
         </Button>
         <Button onClick={handleCategoryConfirm}>{t("add_diagnosis")}</Button>
@@ -632,7 +632,7 @@ export function DiagnosisQuestion({
                       className="h-8 w-8"
                       onClick={handleBackToValueSet}
                     >
-                      <CareIcon icon="l-times" className="h-5 w-5" />
+                      <CareIcon icon="l-times" className="size-5" />
                     </Button>
                   </div>
                   <SheetContent
@@ -659,7 +659,7 @@ export function DiagnosisQuestion({
                       className="h-8 w-8"
                       onClick={handleCloseDrawer}
                     >
-                      <CareIcon icon="l-times" className="h-5 w-5" />
+                      <CareIcon icon="l-times" className="size-5" />
                     </Button>
                   </div>
                   <SheetContent
@@ -1116,7 +1116,7 @@ function CategorySelector({
               </div>
             </div>
             {selectedCategory === category && (
-              <div className="h-4 w-4 rounded-full bg-primary" />
+              <div className="size-4 rounded-full bg-primary" />
             )}
           </div>
         </div>

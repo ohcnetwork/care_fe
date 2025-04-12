@@ -1,4 +1,6 @@
-import { forwardRef, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+
+import { cn } from "@/lib/utils";
 
 interface AutoExpandingTextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -8,10 +10,14 @@ interface AutoExpandingTextareaProps
   placeholder?: string;
 }
 
-const AutoExpandingTextarea = forwardRef<
-  HTMLTextAreaElement,
-  AutoExpandingTextareaProps
->(({ value, onChange, onKeyDown, placeholder, className, ...rest }) => {
+function AutoExpandingTextarea({
+  value,
+  onChange,
+  onKeyDown,
+  placeholder,
+  className,
+  ...props
+}: React.ComponentProps<"textarea"> & AutoExpandingTextareaProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -40,11 +46,14 @@ const AutoExpandingTextarea = forwardRef<
       placeholder={placeholder}
       rows={1}
       style={{ overflow: "hidden", resize: "none" }}
-      className={`flex-1 p-2 rounded-md border border-green-700 focus:outline-hidden focus:ring-1 focus:ring-green-700 placeholder:text-gray-500 ${className || ""}`}
-      {...rest}
+      className={cn(
+        "flex-1 p-2 rounded-md border border-green-700 focus:outline-hidden focus:ring-1 focus:ring-green-700 placeholder:text-gray-500",
+        className,
+      )}
+      {...props}
     />
   );
-});
+}
 
 AutoExpandingTextarea.displayName = "AutoExpandingTextarea";
 
