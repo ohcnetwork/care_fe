@@ -91,7 +91,7 @@ const SearchInputFieldRenderer = ({
   selectedOption: SearchOption;
   searchValue: string;
   setSearchValue: (value: string) => void;
-  inputRef?: React.RefObject<HTMLInputElement>;
+  inputRef: React.RefObject<HTMLInputElement>;
   inputClassName?: string;
   autoFocus?: boolean;
   isSingleOption: boolean;
@@ -105,6 +105,7 @@ const SearchInputFieldRenderer = ({
             name={selectedOption.key}
             placeholder={selectedOption.placeholder}
             value={searchValue}
+            ref={inputRef}
             onChange={(value) => setSearchValue(value || "")}
             className={inputClassName}
             autoFocus={autoFocus}
