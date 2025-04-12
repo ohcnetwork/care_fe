@@ -138,46 +138,47 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
       </section>
 
       {/* Discharge Information - Show when status is discharged */}
-      {encounter.status === "discharged" && (
-        <>
-          <div className="w-full border-t border-dashed border-gray-300" />
-          <section>
-            <h3 className="text-lg font-medium mb-2">
-              {t("discharge_details")}
-            </h3>
-            <div className="space-y-2 text-sm mt-4 bg-gray-50 p-2 rounded-md">
-              {encounter.discharge_summary_advice && (
-                <div className="flex flex-col gap-1">
-                  <span className="text-gray-500">
-                    {t("discharge_summary_advice")}
-                  </span>
-                  <div className="font-sm text-gray-950">
-                    <p
-                      className={cn(
-                        "whitespace-pre-wrap",
-                        !showFullText[encounter.id] && "line-clamp-2",
-                      )}
-                    >
-                      {encounter.discharge_summary_advice}
-                    </p>
-                    {encounter.discharge_summary_advice.length > 100 && (
-                      <Button
-                        variant="link"
-                        className="p-0 h-auto font-sm text-gray-500 hover:text-gray-800"
-                        onClick={() => toggleShowMore(encounter.id)}
+      {encounter.status === "discharged" &&
+        encounter.discharge_summary_advice && (
+          <>
+            <div className="w-full border-t border-dashed border-gray-300" />
+            <section>
+              <h3 className="text-lg font-medium mb-2">
+                {t("discharge_details")}
+              </h3>
+              <div className="space-y-2 text-sm mt-4 bg-gray-50 p-2 rounded-md">
+                {encounter.discharge_summary_advice && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-gray-500">
+                      {t("discharge_summary_advice")}
+                    </span>
+                    <div className="font-sm text-gray-950">
+                      <p
+                        className={cn(
+                          "whitespace-pre-wrap",
+                          !showFullText[encounter.id] && "line-clamp-2",
+                        )}
                       >
-                        {showFullText[encounter.id]
-                          ? t("see_less")
-                          : t("see_more")}
-                      </Button>
-                    )}
+                        {encounter.discharge_summary_advice}
+                      </p>
+                      {encounter.discharge_summary_advice.length > 100 && (
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto font-sm text-gray-500 hover:text-gray-800"
+                          onClick={() => toggleShowMore(encounter.id)}
+                        >
+                          {showFullText[encounter.id]
+                            ? t("see_less")
+                            : t("see_more")}
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          </section>
-        </>
-      )}
+                )}
+              </div>
+            </section>
+          </>
+        )}
 
       {/* Hospitalisation Details */}
       {encounter.hospitalization &&
