@@ -263,46 +263,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
             </div>
 
             <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
-              {user.is_superuser && (
-                <div className="flex max-sm:flex-col mt-2 sm:mt-4">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        className="cursor-pointer font-semibold"
-                        variant="destructive"
-                        size="sm"
-                      >
-                        <Trash2 className="mr-2 size-4" />
-                        {t("delete_facility")}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("delete_facility")}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {t("delete_facility_confirmation", {
-                            name: facilityData?.name,
-                          })}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => deleteFacility()}
-                          className={cn(
-                            buttonVariants({ variant: "destructive" }),
-                          )}
-                          disabled={isDeleting}
-                        >
-                          {isDeleting ? t("deleting") : t("delete")}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              )}
               {canUpdateFacility && (
                 <div className="flex max-sm:flex-col mt-10 sm:mt-4">
                   <PLUGIN_Component
@@ -326,7 +286,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
               )}
             </div>
 
-            <div className="mt-2 space-y-2">
+            <div className="mt-4 space-y-4">
               <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
                 <Card className="basis-1/2">
                   <CardContent className="p-6 flex flex-col h-full">
@@ -417,6 +377,63 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       content={facilityData.description}
                       className="text-sm"
                     />
+                  </CardContent>
+                </Card>
+              )}
+              {user.is_superuser && (
+                <Card className="border-2 border-red-400">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="font-semibold text-lg">
+                      {t("danger_zone")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-3 border rounded-md border-gray-300">
+                      <div>
+                        <p className="text-sm font-medium">
+                          {t("delete_facility")}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {t("delete_facility_description")}
+                        </p>
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            className="cursor-pointer font-semibold"
+                            variant="destructive"
+                            size="sm"
+                          >
+                            <Trash2 className="mr-2 size-4" />
+                            {t("delete_facility")}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("delete_facility")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("delete_facility_confirmation", {
+                                name: facilityData?.name,
+                              })}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteFacility()}
+                              className={cn(
+                                buttonVariants({ variant: "destructive" }),
+                              )}
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? t("deleting") : t("delete")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </CardContent>
                 </Card>
               )}
