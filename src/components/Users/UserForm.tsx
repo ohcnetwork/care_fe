@@ -321,7 +321,7 @@ export default function UserForm({
             name="user_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("user_type")}</FormLabel>
+                <FormLabel aria-required>{t("user_type")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -376,7 +376,7 @@ export default function UserForm({
             name="first_name"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel required>{t("first_name")}</FormLabel>
+                <FormLabel aria-required>{t("first_name")}</FormLabel>
                 <FormControl>
                   <Input
                     data-cy="first-name-input"
@@ -393,7 +393,7 @@ export default function UserForm({
             name="last_name"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel required>{t("last_name")}</FormLabel>
+                <FormLabel aria-required>{t("last_name")}</FormLabel>
                 <FormControl>
                   <Input
                     data-cy="last-name-input"
@@ -430,7 +430,7 @@ export default function UserForm({
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("username")}</FormLabel>
+                  <FormLabel aria-required>{t("username")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
@@ -500,7 +500,7 @@ export default function UserForm({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("email")}</FormLabel>
+                    <FormLabel aria-required>{t("email")}</FormLabel>
                     <FormControl>
                       <Input
                         data-cy="email-input"
@@ -546,7 +546,7 @@ export default function UserForm({
                             htmlFor="immediate"
                             className="text-base font-medium cursor-pointer flex items-center"
                           >
-                            <Lock className="size-4 mr-2" />
+                            <Lock className="size-4" />
                             {t("set_password_now")}
                           </Label>
                           <p className="text-sm text-muted-foreground">
@@ -572,7 +572,7 @@ export default function UserForm({
                             htmlFor="email"
                             className="text-base font-medium cursor-pointer flex items-center"
                           >
-                            <Mail className="size-4 mr-2" />
+                            <Mail className="size-4" />
                             {t("send_email_invitation")}
                           </Label>
                           <p className="text-sm text-muted-foreground">
@@ -594,7 +594,7 @@ export default function UserForm({
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>{t("password")}</FormLabel>
+                      <FormLabel aria-required>{t("password")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <PasswordInput
@@ -646,7 +646,9 @@ export default function UserForm({
                   name="c_password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>{t("confirm_password")}</FormLabel>
+                      <FormLabel aria-required>
+                        {t("confirm_password")}
+                      </FormLabel>
                       <FormControl>
                         <PasswordInput
                           data-cy="confirm-password-input"
@@ -669,7 +671,7 @@ export default function UserForm({
             name="phone_number"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("phone_number")}</FormLabel>
+                <FormLabel aria-required>{t("phone_number")}</FormLabel>
                 <FormControl>
                   <PhoneInput
                     data-cy="phone-number-input"
@@ -687,7 +689,7 @@ export default function UserForm({
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("gender")}</FormLabel>
+                <FormLabel aria-required>{t("gender")}</FormLabel>
                 <Select
                   {...field}
                   onValueChange={field.onChange}

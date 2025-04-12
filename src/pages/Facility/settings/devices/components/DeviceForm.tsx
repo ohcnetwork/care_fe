@@ -210,7 +210,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             name="registered_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("registered_name")}</FormLabel>
+                <FormLabel aria-required>{t("registered_name")}</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -246,7 +246,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("status")}</FormLabel>
+                <FormLabel aria-required>{t("status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger data-cy="device-status-select">
@@ -271,7 +271,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             name="availability_status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("availability_status")}</FormLabel>
+                <FormLabel aria-required>{t("availability_status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger data-cy="device-availability-status-select">

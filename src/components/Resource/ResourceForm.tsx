@@ -317,7 +317,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         value={field.value}
                         className="flex gap-4"
                       >
-                        <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormItem className="flex">
                           <FormControl>
                             <RadioGroupItem value="true" />
                           </FormControl>
@@ -325,7 +325,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                             {t("yes")}
                           </FormLabel>
                         </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormItem className="flex">
                           <FormControl>
                             <RadioGroupItem value="false" />
                           </FormControl>
@@ -348,7 +348,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("status")}</FormLabel>
+                    <FormLabel aria-required>{t("status")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-cy="select-status-dropdown">
@@ -373,7 +373,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("category")}</FormLabel>
+                    <FormLabel aria-required>{t("category")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-cy="select-category-dropdown">
@@ -400,7 +400,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   name="assigned_to"
                   render={() => (
                     <FormItem>
-                      <FormLabel required>{t("assigned_to")}</FormLabel>
+                      <FormLabel aria-required>{t("assigned_to")}</FormLabel>
                       <FormControl>
                         <div data-cy="select-assigned-user">
                           <UserSelector
@@ -434,7 +434,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("request_title")}</FormLabel>
+                  <FormLabel aria-required>{t("request_title")}</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="title-input"
@@ -456,7 +456,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
               name="reason"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("request_reason")}</FormLabel>
+                  <FormLabel aria-required>{t("request_reason")}</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
@@ -504,7 +504,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                 name="referring_facility_contact_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("contact_person")}</FormLabel>
+                    <FormLabel aria-required>{t("contact_person")}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -525,7 +525,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                 name="referring_facility_contact_number"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("contact_phone")}</FormLabel>
+                    <FormLabel aria-required>{t("contact_phone")}</FormLabel>
                     <FormControl>
                       <PhoneInput
                         {...field}
