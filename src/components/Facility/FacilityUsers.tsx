@@ -30,7 +30,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
 
   const { facilityId } = props;
 
-  let usersList: JSX.Element = <></>;
+  let usersList: React.ReactNode = <></>;
 
   const { data: userListData, isFetching: userListFetching } = useQuery({
     queryKey: ["facilityUsers", facilityId, qParams, resultsPerPage],
@@ -96,20 +96,15 @@ export default function FacilityUsers(props: { facilityId: string }) {
         <Tabs
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as "card" | "list")}
-          className="mr-auto sm:mr-0 sm:ml-auto"
         >
           <TabsList className="flex">
             <TabsTrigger value="card" id="user-card-view">
-              <div className="flex items-center gap-2">
-                <CareIcon icon="l-credit-card" className="text-lg" />
-                <span>{t("card")}</span>
-              </div>
+              <CareIcon icon="l-credit-card" className="text-lg" />
+              <span>{t("card")}</span>
             </TabsTrigger>
             <TabsTrigger value="list" id="user-list-view">
-              <div className="flex items-center gap-2">
-                <CareIcon icon="l-list-ul" className="text-lg" />
-                <span>{t("list")}</span>
-              </div>
+              <CareIcon icon="l-list-ul" className="text-lg" />
+              <span>{t("list")}</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>

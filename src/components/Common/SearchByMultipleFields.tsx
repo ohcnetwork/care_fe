@@ -193,7 +193,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               name={selectedOption.key}
               placeholder={selectedOption.placeholder}
               value={searchValue}
-              onChange={(value) => setSearchValue(value)}
+              onChange={(value) => setSearchValue(value ?? "")}
               className={inputClassName}
               autoFocus={autoFocus}
             />

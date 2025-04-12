@@ -240,7 +240,7 @@ export default function FacilityOrganizationList({
                             <TabsTrigger
                               key={item.value}
                               value={item.value}
-                              className="border-b-2 border-transparent px-2 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                              className="border-0 border-b-2 border-transparent px-2 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
                             >
                               {item.title}
                             </TabsTrigger>
