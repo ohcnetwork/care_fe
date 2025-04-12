@@ -52,7 +52,7 @@
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.0",
     "@fontsource/figtree": "^5.1.1",
-    "@hookform/resolvers": "^4.1.3",
+    "@hookform/resolvers": "^5.0.0",
     "@originjs/vite-plugin-federation": "^1.3.7",
     "@radix-ui/react-alert-dialog": "^1.1.7",
     "@radix-ui/react-avatar": "^1.1.4",
