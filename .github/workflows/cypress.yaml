@@ -8,38 +8,83 @@ on:
   workflow_dispatch:
 
 jobs:
-  cypress-run:
+  build:
     permissions: write-all
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-24.04-arm
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2, 3]
-    env:
-      REACT_CARE_API_URL: https://careapi.ohc.network
-
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
-
-      - name: Determine PR Origin
-        id: pr_origin
-        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22.14.0"
+          cache: "npm"
+
+      - name: Install Chrome for ARM
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=arm64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: Install dependencies 📦
         run: npm ci
 
+      - name: Cache Vite build
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules/.vite
+            dist
+          key: ${{ runner.os }}-vite-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**') }}
+          restore-keys: |
+            ${{ runner.os }}-vite-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-vite-
+
       - name: Build ⚙️
         run: npm run build
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            dist
+            node_modules
+            node_modules/.vite
+
+  test:
+    needs: build
+    permissions: write-all
+    if: github.repository == 'ohcnetwork/care_fe'
+    runs-on: ubuntu-24.04-arm
+    env:
+      REACT_CARE_API_URL: https://careapi.ohc.network
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3]
+    steps:
+      - name: Checkout 📥
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - name: Determine PR Origin
+        id: pr_origin
+        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
+
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
+        timeout-minutes: 30
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
@@ -49,6 +94,8 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
+          browser: chrome
+          retries: 2
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -58,6 +105,7 @@ jobs:
 
       - name: Cypress run for Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'true'
+        timeout-minutes: 30
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
@@ -67,6 +115,8 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
+          browser: chrome
+          retries: 2
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
