@@ -119,15 +119,21 @@ export function EncounterQuestion({
 
   useEffect(() => {
     if (encounter.status === "discharged") {
-      handleUpdateEncounter({
-        period: {
-          ...encounter.period,
-          end: new Date().toISOString(),
-        },
-      });
+      if (!encounter.period.end) {
+        handleUpdateEncounter({
+          period: {
+            ...encounter.period,
+            end: new Date().toISOString(),
+          },
+        });
+      }
     } else {
       handleUpdateEncounter({
         discharge_summary_advice: null,
+        period: {
+          ...encounter.period,
+          end: undefined,
+        },
       });
     }
   }, [encounter.status]);
