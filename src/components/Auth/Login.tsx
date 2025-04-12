@@ -562,7 +562,11 @@ const Login = (props: LoginProps) => {
                                   <InputOTPSlot
                                     key={index}
                                     index={index}
-                                    className="size-10"
+                                    className={cn(
+                                      "size-10",
+                                      otpValidationError &&
+                                        "border-red-500 focus-visible:ring-red-500",
+                                    )}
                                   />
                                 ))}
                               </InputOTPGroup>
