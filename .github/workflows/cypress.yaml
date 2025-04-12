@@ -8,19 +8,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  cypress-run:
     permissions: write-all
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-24.04-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3]
+    env:
+      REACT_CARE_API_URL: https://careapi.ohc.network
+
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
+
+      - name: Determine PR Origin
+        id: pr_origin
+        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22.14.0"
-          cache: "npm"
 
       - name: Install dependencies 📦
         run: npm ci
@@ -28,43 +38,8 @@ jobs:
       - name: Build ⚙️
         run: npm run build
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            dist
-            node_modules
-            node_modules/.vite
-
-  test:
-    needs: build
-    permissions: write-all
-    if: github.repository == 'ohcnetwork/care_fe'
-    runs-on: ubuntu-24.04-arm
-    env:
-      REACT_CARE_API_URL: https://careapi.ohc.network
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2, 3]
-    steps:
-      - name: Checkout 📥
-        uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: .
-
-      - name: Determine PR Origin
-        id: pr_origin
-        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
-
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
-        timeout-minutes: 30
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
@@ -83,7 +58,6 @@ jobs:
 
       - name: Cypress run for Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'true'
-        timeout-minutes: 30
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
