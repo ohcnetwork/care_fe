@@ -505,15 +505,13 @@ export default function UserForm({
                   <FormItem>
                     <FormLabel aria-required>{t("email")}</FormLabel>
                     <FormControl>
-                      <div>
-                        <Input
-                          data-cy="email-input"
-                          type="email"
-                          id="email"
-                          placeholder={t("email")}
-                          {...field}
-                        />
-                      </div>
+                      <Input
+                        data-cy="email-input"
+                        type="email"
+                        id="email"
+                        placeholder={t("email")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -609,7 +607,7 @@ export default function UserForm({
 >>>>>>> 404a394eb (Upgrade to React 19 (#11592))
 =======
                     <FormItem id="password">
-                      <FormLabel>{t("password")} *</FormLabel>
+                      <FormLabel aria-required>{t("password")} *</FormLabel>
 
 >>>>>>> d2658ca64 (sovled errors of cypress test)
                       <FormControl>
@@ -727,8 +725,12 @@ export default function UserForm({
 >>>>>>> 404a394eb (Upgrade to React 19 (#11592))
 =======
               <FormItem id="gender">
+<<<<<<< HEAD
                 <FormLabel>{t("gender")} *</FormLabel>
 >>>>>>> d2658ca64 (sovled errors of cypress test)
+=======
+                <FormLabel aria-required>{t("gender")} *</FormLabel>
+>>>>>>> 9bf973327 (added aria-required)
                 <Select
                   {...field}
                   onValueChange={field.onChange}
