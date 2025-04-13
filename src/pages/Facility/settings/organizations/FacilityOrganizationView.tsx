@@ -20,7 +20,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
-import FacilityOrganizationFormSheet from "./components/CreateFacilityOrganizationSheet";
+import FacilityOrganizationFormSheet from "./components/FacilityOrganizationFormSheet";
 
 interface Props {
   id?: string;
