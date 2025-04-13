@@ -50,6 +50,7 @@ export default function UserSelector({
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
@@ -63,6 +64,7 @@ export default function UserSelector({
             queryParams: {
               limit: String(PAGE_LIMIT),
               offset: String(pageParam),
+              search_text: search,
             },
           },
         )({ signal: new AbortController().signal });
@@ -128,6 +130,7 @@ export default function UserSelector({
         >
           <CommandInput
             placeholder={t("search")}
+            onValueChange={setSearch}
             className="outline-hidden border-none ring-0 shadow-none"
           />
           <CommandList>
