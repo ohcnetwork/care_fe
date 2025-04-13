@@ -599,9 +599,8 @@ export default function UserForm({
                   control={form.control}
                   name="password"
                   render={({ field }) => (
-
                     <FormItem id="password">
-                      <FormLabel required>{t("password")}</FormLabel>
+                      <FormLabel>{t("password")} *</FormLabel>
 
                       <FormControl>
                         <div className="relative">
@@ -707,10 +706,9 @@ export default function UserForm({
           <FormField
             control={form.control}
             name="gender"
-
+            render={({ field }) => (
               <FormItem id="gender">
-                <FormLabel required>{t("gender")}</FormLabel>
-
+                <FormLabel>{t("gender")} *</FormLabel>
                 <Select
                   {...field}
                   onValueChange={field.onChange}
