@@ -58,8 +58,8 @@ export type FileUploadReturn = {
     associating_id: string,
     combineToPDF?: boolean,
   ) => Promise<void>;
-  Dialogues: JSX.Element;
-  Input: (_: FileInputProps) => JSX.Element;
+  Dialogues: React.ReactNode;
+  Input: (_: FileInputProps) => React.ReactNode;
   fileNames: string[];
   files: File[];
   setFileName: (names: string, index?: number) => void;

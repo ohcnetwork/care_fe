@@ -329,19 +329,19 @@ export function ValueSetList() {
               <div className="min-w-[480px]">
                 <TabsList className="flex w-full">
                   <TabsTrigger value="active" className="flex-1">
-                    <FileCheckIcon className="size-4 mr-2" />
+                    <FileCheckIcon className="size-4" />
                     {t("active")}
                   </TabsTrigger>
                   <TabsTrigger value="draft" className="flex-1">
-                    <NotepadTextDashedIcon className="size-4 mr-2" />
+                    <NotepadTextDashedIcon className="size-4" />
                     {t("draft")}
                   </TabsTrigger>
                   <TabsTrigger value="retired" className="flex-1">
-                    <ArchiveIcon className="size-4 mr-2" />
+                    <ArchiveIcon className="size-4" />
                     {t("retired")}
                   </TabsTrigger>
                   <TabsTrigger value="unknown" className="flex-1">
-                    <HelpCircle className="size-4 mr-2" />
+                    <HelpCircle className="size-4" />
                     {t("unknown")}
                   </TabsTrigger>
                 </TabsList>

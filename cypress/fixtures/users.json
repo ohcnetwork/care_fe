@@ -31,6 +31,10 @@
     "username": "devdoctor3",
     "password": "Test@123"
   },
+  "devdoctor4": {
+    "username": "dev-doctor4",
+    "password": "Test@123"
+  },
   "devnurse3": {
     "username": "devnurse3",
     "password": "Test@123"
