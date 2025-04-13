@@ -1,6 +1,6 @@
 import { CaretSortIcon, CubeIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { PlusIcon, SearchIcon, XIcon } from "lucide-react";
+import { Funnel, PlusIcon, SearchIcon, XIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -174,6 +174,7 @@ export default function DevicesList({ facilityId }: Props) {
                   )}
                   onClick={() => setShowLocationFilter(!showLocationFilter)}
                 >
+                  <Funnel />
                   {t("filter_by_location")}
                 </Button>
 
