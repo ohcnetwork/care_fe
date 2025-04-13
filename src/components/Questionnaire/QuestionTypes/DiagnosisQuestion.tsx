@@ -55,6 +55,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -169,7 +170,7 @@ export function DiagnosisQuestion({
   }, [questionnaireResponse.values]);
 
   const { data: patientDiagnoses } = useQuery({
-    queryKey: ["diagnoses", patientId],
+    queryKey: ["diagnoses", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
@@ -183,7 +184,7 @@ export function DiagnosisQuestion({
   });
 
   const { data: patientChronicConditions } = useQuery({
-    queryKey: ["chronic_condition", patientId],
+    queryKey: ["chronic_condition", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
@@ -326,6 +327,19 @@ export function DiagnosisQuestion({
         onset_datetime: new Date().toISOString().split("T")[0],
       },
     });
+  };
+
+  const handleAddHistoricalDiagnoses = async (
+    selectedDiagnoses: DiagnosisRequest[],
+  ) => {
+    const newDiagnoses = [
+      ...sortedDiagnoses,
+      ...selectedDiagnoses.map(({ id: _id, ...diagnosis }) => diagnosis),
+    ];
+    updateQuestionnaireResponseCB(
+      [{ type: "diagnosis", value: newDiagnoses }],
+      questionnaireResponse.question_id,
+    );
   };
 
   const diagnosisDetailsContent = (
@@ -549,6 +563,51 @@ export function DiagnosisQuestion({
 
   return (
     <div className="space-y-4">
+      <HistoricalRecordSelector<DiagnosisRequest>
+        patientId={patientId}
+        currentEncounterId={encounterId}
+        structuredTypes={[
+          {
+            type: t("diagnoses"),
+            displayFields: [
+              {
+                key: "code",
+                label: t("diagnosis"),
+                render: (code: Code) => code?.display,
+              },
+              {
+                key: "clinical_status",
+                label: t("status"),
+                render: (status: string) => t(status),
+              },
+              {
+                key: "verification_status",
+                label: t("verification_status"),
+                render: (status: string) => t(status),
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note: string | undefined) => note || "-",
+              },
+            ],
+            queryKey: [
+              "diagnoses_and_chronic_conditions",
+              patientId,
+              encounterId,
+            ],
+            queryFn: async (encounterId: string) => {
+              const response = await query(diagnosisApi.listDiagnosis, {
+                pathParams: { patientId },
+                queryParams: { encounter: encounterId },
+              })({ signal: new AbortController().signal });
+              return response.results.map(convertToDiagnosisRequest);
+            },
+          },
+        ]}
+        buttonLabel={t("diagnosis_history")}
+        onAddSelected={handleAddHistoricalDiagnoses}
+      />
       {sortedDiagnoses.length > 0 && (
         <div className="md:rounded-lg md:border">
           {/* Desktop View - Table */}

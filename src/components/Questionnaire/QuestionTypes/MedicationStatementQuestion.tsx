@@ -149,7 +149,7 @@ export function MedicationStatementQuestion({
       ?.value as MedicationStatementRequest[]) || [];
 
   const { data: patientMedications } = useQuery({
-    queryKey: ["medication_statements", patientId],
+    queryKey: ["medication_statements", patientId, encounterId],
     queryFn: query(medicationStatementApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -320,7 +320,8 @@ export function MedicationStatementQuestion({
                   instructions?.[0]?.additional_instruction?.[0]?.display,
               },
             ],
-            fetchRecords: async (encounterId) => {
+            queryKey: ["medication_requests", patientId, encounterId],
+            queryFn: async (encounterId) => {
               const response = await query(medicationRequestApi.list, {
                 pathParams: { patientId },
                 queryParams: { encounter: encounterId },
@@ -352,7 +353,8 @@ export function MedicationStatementQuestion({
                 render: (note) => note || "-",
               },
             ],
-            fetchRecords: async (encounterId) => {
+            queryKey: ["medication_statements", patientId, encounterId],
+            queryFn: async (encounterId) => {
               const response = await query(medicationStatementApi.list, {
                 pathParams: { patientId },
                 queryParams: { encounter: encounterId },

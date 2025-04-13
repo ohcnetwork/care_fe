@@ -30,7 +30,8 @@ import { DisplayField, RecordItem } from "./RecordItem";
 interface StructuredTypeConfig<T> {
   type: string;
   displayFields: DisplayField<T>[];
-  fetchRecords: (encounterId: string) => Promise<T[]>;
+  queryKey: string[];
+  queryFn: (encounterId: string) => Promise<T[]>;
 }
 
 interface HistoricalRecordSelectorProps<T> {
@@ -94,6 +95,7 @@ export function HistoricalRecordSelector<T>({
       "historical-records",
       expandedEncounterId[activeType],
       activeType,
+      ...(structuredTypes.find((st) => st.type === activeType)?.queryKey || []),
     ],
     queryFn: async () => {
       if (!expandedEncounterId[activeType]) return [];
@@ -103,10 +105,7 @@ export function HistoricalRecordSelector<T>({
       );
       if (!activeTypeConfig) return [];
 
-      const records = await activeTypeConfig.fetchRecords(
-        expandedEncounterId[activeType]!,
-      );
-      return records;
+      return activeTypeConfig.queryFn(expandedEncounterId[activeType]!);
     },
     enabled: !!expandedEncounterId[activeType] && isOpen,
   });

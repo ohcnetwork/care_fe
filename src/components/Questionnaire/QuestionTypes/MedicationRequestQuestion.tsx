@@ -43,7 +43,6 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { MultiValueSetSelect } from "@/components/Medicine/MultiValueSetSelect";
-import { formatDosage } from "@/components/Medicine/utils";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -191,7 +190,7 @@ export function MedicationRequestQuestion({
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
 
   const { data: patientMedications } = useQuery({
-    queryKey: ["medication_requests", patientId],
+    queryKey: ["medication_requests", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -236,18 +235,29 @@ export function MedicationRequestQuestion({
   };
 
   const handleAddHistoricalMedications = (
-    selectedMedications: MedicationRequest[],
+    selected: (MedicationRequest | MedicationStatementRead)[],
   ) => {
-    const newMedications = [
-      ...medications,
-      ...selectedMedications.map((med) => ({
-        ...med,
-        id: undefined,
-        authored_on: new Date().toISOString(),
-      })),
-    ];
+    // Filter and convert MedicationStatement to MedicationRequest if needed
+    const medicationRequests = selected.map((record) => {
+      if ("dosage_instruction" in record) {
+        const { id: _id, ...request } = record as MedicationRequest;
+        return request;
+      } else {
+        const statement = record as MedicationStatementRead;
+        return {
+          ...parseMedicationStringToRequest(statement.medication),
+          authored_on: new Date().toISOString(),
+          note: statement.note,
+        } as MedicationRequest;
+      }
+    });
     updateQuestionnaireResponseCB(
-      [{ type: "medication_request", value: newMedications }],
+      [
+        {
+          type: "medication_request",
+          value: [...medications, ...medicationRequests],
+        },
+      ],
       questionnaireResponse.question_id,
     );
   };
@@ -341,7 +351,7 @@ export function MedicationRequestQuestion({
               {
                 key: "dosage_instruction",
                 label: t("dosage"),
-                render: (instructions) => formatDosage(instructions?.[0]),
+                render: (instructions) => instructions?.[0]?.text || "-",
               },
               {
                 key: "dosage_instruction",
@@ -361,7 +371,8 @@ export function MedicationRequestQuestion({
                   instructions?.[0]?.additional_instruction?.[0]?.display,
               },
             ],
-            fetchRecords: async (encounterId) => {
+            queryKey: ["medication_requests", patientId, encounterId],
+            queryFn: async (encounterId) => {
               const response = await query(medicationRequestApi.list, {
                 pathParams: { patientId },
                 queryParams: { encounter: encounterId },
@@ -393,7 +404,8 @@ export function MedicationRequestQuestion({
                 render: (note) => note || "-",
               },
             ],
-            fetchRecords: async (encounterId) => {
+            queryKey: ["medication_statements", patientId, encounterId],
+            queryFn: async (encounterId) => {
               const response = await query(medicationStatementApi.list, {
                 pathParams: { patientId },
                 queryParams: { encounter: encounterId },
@@ -403,29 +415,7 @@ export function MedicationRequestQuestion({
           },
         ]}
         buttonLabel={t("medication_history")}
-        onAddSelected={(selected) => {
-          // Filter and convert MedicationStatement to MedicationRequest if needed
-          const medicationRequests = selected.map((record) => {
-            if ("dosage_instruction" in record) {
-              return record as MedicationRequest;
-            } else {
-              const statement = record as MedicationStatementRead;
-              return {
-                ...parseMedicationStringToRequest(statement.medication),
-                authored_on: new Date().toISOString(),
-                dosage_instruction: [
-                  {
-                    text: statement.dosage_text,
-                    additional_instruction: statement.note
-                      ? [{ text: statement.note }]
-                      : undefined,
-                  },
-                ],
-              } as MedicationRequest;
-            }
-          });
-          handleAddHistoricalMedications(medicationRequests);
-        }}
+        onAddSelected={handleAddHistoricalMedications}
       />
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto pb-2">

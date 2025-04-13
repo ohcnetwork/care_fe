@@ -48,6 +48,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -497,7 +498,7 @@ export function SymptomQuestion({
   const isMobile = useBreakpoints({ default: true, md: false });
 
   const { data: patientSymptoms } = useQuery({
-    queryKey: ["symptoms", patientId],
+    queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
       queryParams: {
@@ -714,8 +715,62 @@ export function SymptomQuestion({
     </div>
   );
 
+  const handleAddHistoricalSymptoms = async (
+    selectedSymptoms: SymptomRequest[],
+  ) => {
+    const newSymptoms = [
+      ...symptoms,
+      ...selectedSymptoms.map(({ id: _id, ...symptom }) => symptom),
+    ];
+    updateQuestionnaireResponseCB(
+      [{ type: "symptom", value: newSymptoms }],
+      questionnaireResponse.question_id,
+    );
+  };
+
   return (
     <div className="space-y-2">
+      <HistoricalRecordSelector<SymptomRequest>
+        patientId={patientId}
+        currentEncounterId={encounterId}
+        structuredTypes={[
+          {
+            type: t("symptoms"),
+            displayFields: [
+              {
+                key: "code",
+                label: t("symptom"),
+                render: (code: Code) => code?.display,
+              },
+              {
+                key: "clinical_status",
+                label: t("status"),
+                render: (status: string) => t(status),
+              },
+              {
+                key: "severity",
+                label: t("severity"),
+                render: (severity: string) => t(severity),
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note: string | undefined) => note || "-",
+              },
+            ],
+            queryKey: ["symptoms", patientId, encounterId],
+            queryFn: async (encounterId) => {
+              const response = await query(symptomApi.listSymptoms, {
+                pathParams: { patientId },
+                queryParams: { encounter: encounterId },
+              })({ signal: new AbortController().signal });
+              return response.results.map(convertToSymptomRequest);
+            },
+          },
+        ]}
+        buttonLabel={t("symptom_history")}
+        onAddSelected={handleAddHistoricalSymptoms}
+      />
       {symptoms.length > 0 && (
         <>
           {/* Desktop View - Table */}
