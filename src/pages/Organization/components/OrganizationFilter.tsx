@@ -130,7 +130,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
         <SelectTrigger className="sm:max-w-56 h-[38px]">
           <SelectValue
             placeholder={
-              !selected ? t("select_location_first") : t("select_facility_type")
+              !selected ? t("select_district_first") : t("select_facility_type")
             }
           />
         </SelectTrigger>
@@ -142,7 +142,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           ))}
         </SelectContent>
       </Select>
-      <div className="flex flex-col gap-2 lg:gap-0 sm:flex-row lg:rounded-md lg:border lg:border-1 lg:border-secondary-500 overflow-clip sm:w-fit w-[calc(100vw-2rem)]">
+      <div className="flex flex-col gap-2 lg:gap-0 sm:flex-row lg:rounded-md lg:border-1 lg:border-secondary-500 overflow-clip sm:w-fit w-[calc(100vw-2rem)]">
         {[...Array(Math.min(orgTypes.length + 1, DEFAULT_ORG_LEVELS))].map(
           (_, index) => (
             <OrganizationLevel

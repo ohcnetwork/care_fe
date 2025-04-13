@@ -112,7 +112,7 @@ export function FacilitiesPage() {
         ) : !qParams.organization ? (
           <Card className="p-6">
             <div className="text-lg font-medium text-gray-500">
-              {t("select_location_first")}
+              {t("select_district_first")}
             </div>
           </Card>
         ) : !facilitiesResponse?.results.length ? (
