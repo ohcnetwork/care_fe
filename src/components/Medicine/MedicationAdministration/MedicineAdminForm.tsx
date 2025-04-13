@@ -315,11 +315,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             }}
             className="flex gap-4"
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex">
               <RadioGroupItem value="yes" id={`yes-${formId}`} />
               <Label htmlFor={`yes-${formId}`}>{t("yes")}</Label>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex">
               <RadioGroupItem value="no" id={`no-${formId}`} />
               <Label htmlFor={`no-${formId}`}>{t("no")}</Label>
             </div>
