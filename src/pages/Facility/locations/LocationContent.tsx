@@ -35,7 +35,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
   return (
     <div
       className={cn(
-        "border rounded-lg overflow-hidden shadow-xs h-full flex flex-col ",
+        "border rounded-lg overflow-hidden shadow-xs h-full flex flex-col",
         isOccupied
           ? "bg-white border-gray-200"
           : "bg-green-50 border-green-200",
