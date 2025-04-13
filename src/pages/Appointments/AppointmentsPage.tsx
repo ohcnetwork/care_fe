@@ -382,11 +382,11 @@ export default function AppointmentsPage({
         >
           <TabsList>
             <TabsTrigger value="board">
-              <CareIcon icon="l-kanban" className="mr-2" />
+              <CareIcon icon="l-kanban" />
               <span>{t("board")}</span>
             </TabsTrigger>
             <TabsTrigger value="list">
-              <CareIcon icon="l-list-ul" className="mr-2" />
+              <CareIcon icon="l-list-ul" />
               <span>{t("list")}</span>
             </TabsTrigger>
           </TabsList>
@@ -745,7 +745,7 @@ function AppointmentRow(props: {
   }: {
     totalCount: number;
     noMargin?: boolean;
-  }) => JSX.Element;
+  }) => React.ReactNode;
   updateQuery: (filter: FilterState) => void;
   resultsPerPage: number;
   slot: string | null;
@@ -817,7 +817,7 @@ function AppointmentRow(props: {
             value={props.status || "booked"}
             onValueChange={(value) => props.updateQuery({ status: value })}
           >
-            <SelectTrigger className="h-8 w-[160px]">
+            <SelectTrigger className="h-8 w-40">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>

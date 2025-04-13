@@ -108,7 +108,8 @@ export class PatientEncounter {
         if ($el.is("select")) {
           cy.wrap($el).select(value);
         } else {
-          cy.wrap($el).type(value);
+          // Find the actual input element within the container
+          cy.wrap($el).find("input, textarea").click().type(value);
         }
       });
     });

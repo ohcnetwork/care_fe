@@ -271,7 +271,7 @@ const SymptomRow = React.memo(function SymptomRow({
                           }}
                           className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
                         >
-                          <MinusCircledIcon className="h-5 w-5" />
+                          <MinusCircledIcon className="size-5" />
                         </Button>
                       )}
                       <Button
@@ -280,9 +280,9 @@ const SymptomRow = React.memo(function SymptomRow({
                         className="h-10 w-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
                       >
                         {isOpen ? (
-                          <ChevronsDownUp className="h-5 w-5" />
+                          <ChevronsDownUp className="size-5" />
                         ) : (
-                          <ChevronsUpDown className="h-5 w-5" />
+                          <ChevronsUpDown className="size-5" />
                         )}
                       </Button>
                     </div>
@@ -794,7 +794,7 @@ export function SymptomQuestion({
                       className="h-8 w-8"
                       onClick={handleBackToValueSet}
                     >
-                      <CareIcon icon="l-times" className="h-5 w-5" />
+                      <CareIcon icon="l-times" className="size-5" />
                     </Button>
                   </div>
                   <SheetContent
@@ -821,7 +821,7 @@ export function SymptomQuestion({
                       className="h-8 w-8"
                       onClick={handleCloseDrawer}
                     >
-                      <CareIcon icon="l-times" className="h-5 w-5" />
+                      <CareIcon icon="l-times" className="size-5" />
                     </Button>
                   </div>
                   <SheetContent
