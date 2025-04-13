@@ -40,7 +40,7 @@ export type RouteParams<T extends string> =
 
 export type RouteFunction<T extends string> = (
   params: RouteParams<T>,
-) => JSX.Element;
+) => React.ReactNode;
 
 export type AppRoutes = {
   [K in string]: RouteFunction<K>;
