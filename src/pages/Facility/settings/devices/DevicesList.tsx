@@ -176,7 +176,7 @@ export default function DevicesList({ facilityId }: Props) {
                   onClick={() => setShowLocationFilter(!showLocationFilter)}
                 >
                   <Funnel />
-                  {t("filter_by_location")}
+                  {t("filter_by_locations")}
                 </Button>
 
                 {qParams.locationId && (
