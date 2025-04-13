@@ -125,7 +125,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                 className="cursor-pointer"
                 key={option.value.toString()}
               >
-                <Card className="shadow-sm border-1 p-6 transition-all hover:bg-gray-50/90 [&:has([data-state=checked])]:border-primary">
+                <Card className="shadow-sm rounded-sm border-1 p-3 sm:p-6 transition-all hover:bg-gray-50/90 [&:has([data-state=checked])]:border-primary w-full">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem
                       value={option.value.toString()}
