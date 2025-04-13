@@ -600,12 +600,18 @@ export default function UserForm({
                   name="password"
                   render={({ field }) => (
 <<<<<<< HEAD
+<<<<<<< HEAD
                     <FormItem id="password">
                       <FormLabel required>{t("password")}</FormLabel>
 =======
                     <FormItem>
                       <FormLabel aria-required>{t("password")}</FormLabel>
 >>>>>>> 404a394eb (Upgrade to React 19 (#11592))
+=======
+                    <FormItem id="password">
+                      <FormLabel>{t("password")} *</FormLabel>
+
+>>>>>>> d2658ca64 (sovled errors of cypress test)
                       <FormControl>
                         <div className="relative">
                           <PasswordInput
@@ -712,12 +718,17 @@ export default function UserForm({
             name="gender"
             render={({ field }) => (
 <<<<<<< HEAD
+<<<<<<< HEAD
               <FormItem id="gender">
                 <FormLabel required>{t("gender")}</FormLabel>
 =======
               <FormItem>
                 <FormLabel aria-required>{t("gender")}</FormLabel>
 >>>>>>> 404a394eb (Upgrade to React 19 (#11592))
+=======
+              <FormItem id="gender">
+                <FormLabel>{t("gender")} *</FormLabel>
+>>>>>>> d2658ca64 (sovled errors of cypress test)
                 <Select
                   {...field}
                   onValueChange={field.onChange}
