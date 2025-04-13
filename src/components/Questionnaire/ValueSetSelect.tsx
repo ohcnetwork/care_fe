@@ -212,9 +212,13 @@ export default function ValueSetSelect({
           }}
           className="md:hidden"
         >
-          <TabsList className="flex">
-            <TabsTrigger value={"0"}>{t("search")}</TabsTrigger>
-            <TabsTrigger value={"1"}>{t("starred")}</TabsTrigger>
+          <TabsList className="flex w-full">
+            <TabsTrigger value={"0"} className="flex-1">
+              {t("search")}
+            </TabsTrigger>
+            <TabsTrigger value={"1"} className="flex-1">
+              {t("starred")}
+            </TabsTrigger>
           </TabsList>
         </Tabs>
         <CommandEmpty>

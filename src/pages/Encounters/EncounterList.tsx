@@ -467,7 +467,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-calender" className="mr-2 size-4" />
+                        <CareIcon icon="l-calender" className="size-4" />
                         {t("encounter_status__planned")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -481,7 +481,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-spinner" className="mr-2 size-4" />
+                        <CareIcon icon="l-spinner" className="size-4" />
                         {t("encounter_class__in_progress")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -494,7 +494,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-home" className="mr-2 size-4" />
+                        <CareIcon icon="l-home" className="size-4" />
                         {t("discharge")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -507,7 +507,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-check" className="mr-2 size-4" />
+                        <CareIcon icon="l-check" className="size-4" />
                         {t("completed")}
                       </TabsTrigger>
                       <TabsTrigger
@@ -520,7 +520,7 @@ export function EncounterList({
                           })
                         }
                       >
-                        <CareIcon icon="l-x" className="mr-2 size-4" />
+                        <CareIcon icon="l-x" className="size-4" />
                         {t("cancelled")}
                       </TabsTrigger>
                     </div>
@@ -560,7 +560,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-hospital" className="mr-2 size-4" />
+                      <CareIcon icon="l-hospital" className="size-4" />
                       {t("encounter_class__imp")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -574,7 +574,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-user" className="mr-2 size-4" />
+                      <CareIcon icon="l-user" className="size-4" />
                       {t("encounter_class__amb")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -588,7 +588,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-eye" className="mr-2 size-4" />
+                      <CareIcon icon="l-eye" className="size-4" />
                       {t("encounter_class__obsenc")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -602,7 +602,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-ambulance" className="mr-2 size-4" />
+                      <CareIcon icon="l-ambulance" className="size-4" />
                       {t("emergency")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -616,7 +616,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-video" className="mr-2 size-4" />
+                      <CareIcon icon="l-video" className="size-4" />
                       {t("encounter_class__vr")}
                     </TabsTrigger>
                     <TabsTrigger
@@ -630,7 +630,7 @@ export function EncounterList({
                         })
                       }
                     >
-                      <CareIcon icon="l-home" className="mr-2 size-4" />
+                      <CareIcon icon="l-home" className="size-4" />
                       {t("encounter_class__hh")}
                     </TabsTrigger>
                   </div>
