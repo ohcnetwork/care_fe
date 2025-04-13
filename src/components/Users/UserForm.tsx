@@ -505,15 +505,13 @@ export default function UserForm({
                   <FormItem>
                     <FormLabel aria-required>{t("email")}</FormLabel>
                     <FormControl>
-                      <div>
-                        <Input
-                          data-cy="email-input"
-                          type="email"
-                          id="email"
-                          placeholder={t("email")}
-                          {...field}
-                        />
-                      </div>
+                      <Input
+                        data-cy="email-input"
+                        type="email"
+                        id="email"
+                        placeholder={t("email")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -600,7 +598,7 @@ export default function UserForm({
                   name="password"
                   render={({ field }) => (
                     <FormItem id="password">
-                      <FormLabel>{t("password")} *</FormLabel>
+                      <FormLabel aria-required>{t("password")} *</FormLabel>
 
                       <FormControl>
                         <div className="relative">
@@ -708,7 +706,7 @@ export default function UserForm({
             name="gender"
             render={({ field }) => (
               <FormItem id="gender">
-                <FormLabel>{t("gender")} *</FormLabel>
+                <FormLabel aria-required>{t("gender")} *</FormLabel>
                 <Select
                   {...field}
                   onValueChange={field.onChange}
