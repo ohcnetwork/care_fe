@@ -36,12 +36,18 @@ import {
 } from "@/components/ui/select";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
+import {
+  MEDICATION_REQUEST_TIMING_OPTIONS,
+  MedicationRequest,
+} from "@/types/emr/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import {
   MEDICATION_STATEMENT_STATUS,
   MedicationStatementInformationSourceType,
@@ -175,6 +181,36 @@ export function MedicationStatementQuestion({
     setExpandedMedicationIndex(newMedications.length - 1);
   };
 
+  const handleAddHistoricalMedications = (
+    selected: (MedicationRequest | MedicationStatementRequest)[],
+  ) => {
+    const newMedications = selected.map((record) => {
+      if ("dosage_instruction" in record) {
+        // Convert MedicationRequest to MedicationStatementRequest
+        const request = record as MedicationRequest;
+        return {
+          ...MEDICATION_STATEMENT_INITIAL_VALUE,
+          medication: request.medication,
+          note: request.note,
+        } as MedicationStatementRequest;
+      } else {
+        // For MedicationStatementRequest, exclude the id
+        const { id: _id, ...statement } = record as MedicationStatementRequest;
+        return statement;
+      }
+    });
+
+    updateQuestionnaireResponseCB(
+      [
+        {
+          type: "medication_statement",
+          value: [...medications, ...newMedications],
+        },
+      ],
+      questionnaireResponse.question_id,
+    );
+  };
+
   const handleRemoveMedication = (index: number) => {
     setMedicationToDelete(index);
   };
@@ -248,6 +284,86 @@ export function MedicationStatementQuestion({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <HistoricalRecordSelector<MedicationRequest | MedicationStatementRequest>
+        patientId={patientId}
+        currentEncounterId={encounterId}
+        structuredTypes={[
+          {
+            type: t("past_prescriptions"),
+            displayFields: [
+              {
+                key: "medication",
+                label: t("medicine"),
+                render: (med) => med?.display,
+              },
+              {
+                key: "dosage_instruction",
+                label: t("dosage"),
+                render: (instructions) => instructions?.[0]?.text || "-",
+              },
+              {
+                key: "dosage_instruction",
+                label: t("frequency"),
+                render: (instructions) => {
+                  const timing = instructions?.[0]?.timing;
+                  const option = reverseFrequencyOption(timing);
+                  return option
+                    ? MEDICATION_REQUEST_TIMING_OPTIONS[option].display
+                    : "";
+                },
+              },
+              {
+                key: "dosage_instruction",
+                label: t("instructions"),
+                render: (instructions) =>
+                  instructions?.[0]?.additional_instruction?.[0]?.display,
+              },
+            ],
+            fetchRecords: async (encounterId) => {
+              const response = await query(medicationRequestApi.list, {
+                pathParams: { patientId },
+                queryParams: { encounter: encounterId },
+              })({ signal: new AbortController().signal });
+              return response.results;
+            },
+          },
+          {
+            type: t("ongoing_medications"),
+            displayFields: [
+              {
+                key: "medication",
+                label: t("medicine"),
+                render: (med) => med?.display,
+              },
+              {
+                key: "dosage_text",
+                label: t("dosage"),
+                render: (dosage) => dosage,
+              },
+              {
+                key: "status",
+                label: t("status"),
+                render: (status) => t(status),
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note || "-",
+              },
+            ],
+            fetchRecords: async (encounterId) => {
+              const response = await query(medicationStatementApi.list, {
+                pathParams: { patientId },
+                queryParams: { encounter: encounterId },
+              })({ signal: new AbortController().signal });
+              return response.results;
+            },
+          },
+        ]}
+        buttonLabel={t("medication_history")}
+        onAddSelected={handleAddHistoricalMedications}
+      />
 
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto pb-2">
@@ -661,4 +777,14 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
     </div>
   );
+};
+
+// Helper function to find the frequency option from timing
+const reverseFrequencyOption = (
+  timing?: MedicationRequest["dosage_instruction"][0]["timing"],
+) => {
+  if (!timing?.code?.code) return undefined;
+  return Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
+    ([_, option]) => option.timing.code?.code === timing.code?.code,
+  )?.[0];
 };

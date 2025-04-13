@@ -308,13 +308,13 @@ export function HistoricalRecordSelector<T>({
         <div className="flex justify-between items-center p-4 border-t">
           <div className="text-sm">
             <span className="font-medium">
-              {(selectedRecords[activeType] || []).length} {activeType}(s)
+              {(selectedRecords[activeType] || []).length} {activeType}
             </span>{" "}
-            selected
+            {t("selected")}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleClose}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleAddSelected}
@@ -322,7 +322,7 @@ export function HistoricalRecordSelector<T>({
               className="bg-emerald-600 hover:bg-emerald-700"
               data-cy="add-selected-records"
             >
-              Add to Prescription
+              {t("add_selected")}
             </Button>
           </div>
         </div>

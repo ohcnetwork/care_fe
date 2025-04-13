@@ -37,7 +37,10 @@ export function RecordItem<T>({
       {displayFields.map((field, index) => (
         <TableCell
           key={index}
-          className={cn("p-2 text-sm", index % 2 == 1 && "bg-white")}
+          className={cn(
+            "p-2 text-sm whitespace-pre-wrap",
+            index % 2 == 1 && "bg-white",
+          )}
         >
           {field.render(record[field.key as keyof T])}
         </TableCell>
