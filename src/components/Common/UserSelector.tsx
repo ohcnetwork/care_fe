@@ -55,7 +55,7 @@ export default function UserSelector({
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
     useInfiniteQuery({
-      queryKey: ["users", facilityId],
+      queryKey: ["users", facilityId, search],
       queryFn: async ({ pageParam = 0 }) => {
         const response = await query(
           facilityId ? routes.facility.getUsers : UserApi.list,
