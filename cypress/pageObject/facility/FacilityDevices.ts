@@ -107,8 +107,8 @@ export class FacilityDevices {
     });
     return this;
   }
-  clickDevice(deviceName: string) {
-    cy.verifyAndClickElement(`[data-cy="devices-list"]`, deviceName);
+  clickDeviceViewDetailButton() {
+    cy.verifyAndClickElement(`[data-cy="devices-list"]`, "View Details");
     return this;
   }
   clickDeviceEditButton() {

@@ -27,7 +27,7 @@ describe("Facility Devices Management", () => {
       .submitDeviceForm()
       .assertDeviceCreationSuccess()
       .searchDeviceList(deviceName)
-      .clickDevice(deviceName)
+      .clickDeviceViewDetailButton()
       .assertDeviceDetails(deviceName)
       .clickDeviceEditButton()
       .fillDeviceForm({
