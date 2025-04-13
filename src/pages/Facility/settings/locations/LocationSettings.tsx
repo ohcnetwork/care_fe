@@ -34,7 +34,7 @@ interface LocationSettingsProps {
   locationId?: string;
 }
 
-function getParentChain(location: LocationListType): Set<string> {
+export function getParentChain(location: LocationListType): Set<string> {
   const parentIds = new Set<string>();
   let current = location.parent;
 
