@@ -541,7 +541,7 @@ export function DiagnosisQuestion({
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2">
+      <div className="flex justify-end space-x-2" data-cy="add">
         <Button onClick={handleCategoryConfirm}>{t("add_diagnosis")}</Button>
       </div>
     </div>
@@ -688,12 +688,14 @@ export function DiagnosisQuestion({
       ) : showCategorySelection ? (
         desktopDiagnosisContent
       ) : (
-        <ValueSetSelect
-          system="system-condition-code"
-          placeholder={t("add_another_diagnosis")}
-          onSelect={handleCodeSelect}
-          disabled={disabled}
-        />
+        <div data-cy="add-diagnoses">
+          <ValueSetSelect
+            system="system-condition-code"
+            placeholder={t("add_another_diagnosis")}
+            onSelect={handleCodeSelect}
+            disabled={disabled}
+          />
+        </div>
       )}
     </div>
   );
@@ -758,7 +760,7 @@ const DiagnosisTableRow = ({
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
-        <TableCell className="py-1">
+        <TableCell className="py-1" data-cy="status">
           <Select
             value={diagnosis.clinical_status}
             onValueChange={(value) =>
@@ -786,7 +788,7 @@ const DiagnosisTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="py-1">
+        <TableCell className="py-1" data-cy="verification">
           <Select
             value={diagnosis.verification_status}
             onValueChange={(value) =>

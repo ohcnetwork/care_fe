@@ -118,9 +118,31 @@ export const medicineNames = [
   "Venlafaxine",
 ];
 
+export const allergyNames = [
+  "Vomitus",
+  "Gold",
+  "Methylbenzethonium chloride",
+  "Iron",
+  "Soya bean protein",
+  "Carbaryl",
+  "Aspartame",
+  "Clostridium botulinum toxin",
+  "Aluminium",
+  "Eucalyptus oil",
+  "Nut",
+  "Silicone",
+  "Wood",
+  "Cereal",
+];
+
 export function getRandomMedicineName(): string {
   const randomIndex = getRandomIndex(medicineNames.length);
   return medicineNames[randomIndex];
+}
+
+export function getRandomAllergyName(): string {
+  const randomIndex = getRandomIndex(allergyNames.length);
+  return allergyNames[randomIndex];
 }
 
 export function generateDeviceName(): string {

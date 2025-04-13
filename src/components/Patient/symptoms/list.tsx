@@ -138,6 +138,7 @@ const SymptomListLayout = ({
           <Link
             href={`questionnaire/symptom`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
+            data-cy="edit-symptoms"
           >
             <CareIcon icon="l-pen" className="size-4" />
             {t("edit")}

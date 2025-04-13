@@ -119,6 +119,7 @@ const DiagnosisListLayout = ({
           <Link
             href={`questionnaire/diagnosis`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
+            data-cy="edit-diagnoses"
           >
             <CareIcon icon="l-pen" className="size-4" />
             {t("edit")}

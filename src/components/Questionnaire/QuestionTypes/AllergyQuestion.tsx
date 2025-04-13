@@ -166,7 +166,14 @@ const AllergyTableRow = ({
         <TableCell className="font-medium py-1 pl-1">
           {allergy.code.display}
         </TableCell>
-        <TableCell className="py-1">
+        <TableCell
+          className="py-1"
+          data-cy={
+            allergy.verification_status !== "entered_in_error"
+              ? `criticality-${allergy.id}`
+              : undefined
+          }
+        >
           <Select
             value={allergy.criticality}
             onValueChange={(value) => onUpdate?.({ criticality: value })}
@@ -184,7 +191,14 @@ const AllergyTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="py-1">
+        <TableCell
+          className="py-1"
+          data-cy={
+            allergy.verification_status !== "entered_in_error"
+              ? `status-${allergy.id}`
+              : undefined
+          }
+        >
           <Select
             value={allergy.verification_status}
             onValueChange={(value) => {
@@ -230,12 +244,20 @@ const AllergyTableRow = ({
                 size="icon"
                 disabled={disabled}
                 className="size-9"
+                data-cy={
+                  allergy.verification_status !== "entered_in_error"
+                    ? `options-${allergy.id}`
+                    : undefined
+                }
               >
                 <DotsVerticalIcon className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowNotes((n) => !n)}>
+              <DropdownMenuItem
+                onClick={() => setShowNotes((n) => !n)}
+                data-cy={!showNotes ? `add-notes-${allergy.id}` : undefined}
+              >
                 <Pencil2Icon className="size-4 mr-2" />
                 {showNotes
                   ? t("hide_notes")
@@ -271,6 +293,7 @@ const AllergyTableRow = ({
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onClick={onRemove}
+                data-cy={`remove-allergy-${allergy.id}`}
               >
                 <MinusCircledIcon className="size-4 mr-2" />
                 {t("remove_allergy")}
@@ -281,7 +304,15 @@ const AllergyTableRow = ({
       </TableRow>
       {showNotes && (
         <TableRow>
-          <TableCell colSpan={6} className="px-4 py-2">
+          <TableCell
+            colSpan={6}
+            className="px-4 py-2"
+            data-cy={
+              allergy.verification_status !== "entered_in_error"
+                ? `notes-${allergy.id}`
+                : undefined
+            }
+          >
             <Input
               type="text"
               placeholder={t("add_notes_about_the_allergy")}
@@ -646,12 +677,14 @@ export function AllergyQuestion({
           </div>
         </div>
       )}
-      <ValueSetSelect
-        system="system-allergy-code"
-        placeholder={t("search_for_allergies_to_add")}
-        onSelect={handleAddAllergy}
-        disabled={disabled}
-      />
+      <div data-cy="add-allergy">
+        <ValueSetSelect
+          system="system-allergy-code"
+          placeholder={t("search_for_allergies_to_add")}
+          onSelect={handleAddAllergy}
+          disabled={disabled}
+        />
+      </div>
     </div>
   );
 }

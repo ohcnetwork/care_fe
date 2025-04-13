@@ -11,6 +11,10 @@
     "username": "arjun-doctor",
     "password": "Test@123"
   },
+  "devnurse5":{
+    "username": "devnurse5",
+    "password": "Test@123"
+  },
   "staff": {
     "username": "nihalstaff",
     "password": "Test@123"

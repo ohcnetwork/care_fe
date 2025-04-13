@@ -1,3 +1,10 @@
+interface AllergyDetails {
+  id?: string;
+  allergyName?: string;
+  criticality?: string;
+  status?: string;
+  notes?: string;
+}
 export class PatientEncounter {
   // Navigation
   navigateToEncounters() {
@@ -18,6 +25,57 @@ export class PatientEncounter {
     cy.typeIntoField("#encounter-search", patientName);
     cy.get('[data-cy="search-encounter"]').click();
     return this;
+  }
+
+  clickEditAllergy() {
+    cy.verifyAndClickElement('[data-cy="edit-allergies"]', "Edit");
+    return this;
+  }
+
+  addAllergy(details: AllergyDetails) {
+    const { allergyName } = details;
+    cy.get('[data-cy="add-allergy"]').scrollIntoView();
+    cy.typeAndSelectOption('[data-cy="add-allergy"]', allergyName, false);
+    return this;
+  }
+
+  updateAllergy(details: AllergyDetails) {
+    const { criticality, status, notes, id } = details;
+    cy.clickAndSelectOption(`[data-cy="criticality-${id}"]`, criticality);
+    cy.clickAndSelectOption(`[data-cy="status-${id}"]`, status);
+    cy.typeIntoField(`[data-cy="notes-${id}"]`, notes, {
+      skipVerification: true,
+    });
+  }
+
+  deleteAllergy(id: string) {
+    cy.get(`[data-cy="options-${id}"]`).scrollIntoView();
+    cy.get(`[data-cy="options-${id}"]`).click();
+    cy.verifyAndClickElement(
+      `[data-cy="remove-allergy-${id}"]`,
+      "Remove Allergy",
+    );
+  }
+
+  verifyAllergyDelete(id: string) {
+    cy.contains('[data-cy="allergies-table"]', id).should("not.be.visible");
+  }
+
+  verifyAllergy(details: AllergyDetails) {
+    const { allergyName, criticality, status } = details;
+    cy.verifyContentPresence('[data-cy="allergies-table"]', [
+      allergyName,
+      criticality,
+      status,
+    ]);
+    return this;
+  }
+  verifyUpdateAllergy(details: AllergyDetails) {
+    const { criticality, status, id } = details;
+    cy.get('[data-cy="allergies-table"]').within(() => {
+      cy.get(`[data-cy="criticality-${id}"]`).should("contain", criticality);
+      cy.get(`[data-cy="status-${id}"]`).should("contain", status);
+    });
   }
 
   clickUpdateEncounter() {

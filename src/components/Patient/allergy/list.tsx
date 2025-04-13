@@ -126,6 +126,9 @@ export function AllergyList({
           allergy.verification_status === "entered_in_error" ? "opacity-50" : ""
         }`}
       >
+        <TableCell className="hidden" data-cy="allergy-id">
+          {allergy.id}
+        </TableCell>
         <TableCell className="first:rounded-l-md">
           <div className="flex items-center">
             {CATEGORY_ICONS[allergy.category ?? ""]}
@@ -150,6 +153,7 @@ export function AllergyList({
             className={`whitespace-nowrap ${
               ALLERGY_CRITICALITY_STYLES[allergy.criticality]
             }`}
+            data-cy={`criticality-${allergy.id}`}
           >
             {t(allergy.criticality)}
           </Badge>
@@ -157,9 +161,10 @@ export function AllergyList({
         <TableCell>
           <Badge
             variant="outline"
-            className={`whitespace-nowrap capitalize ${
+            className={`whitespace-nowrap ${
               ALLERGY_VERIFICATION_STATUS_STYLES[allergy.verification_status]
             }`}
+            data-cy={`status-${allergy.id}`}
           >
             {t(allergy.verification_status)}
           </Badge>
@@ -285,13 +290,16 @@ const AllergyListLayout = ({
           <Link
             href={`questionnaire/allergy_intolerance`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
+            data-cy="edit-allergies"
           >
             <CareIcon icon="l-pen" className="size-4" />
             {t("edit")}
           </Link>
         )}
       </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
+      <CardContent className="px-2 pb-2" data-cy="allergies-table">
+        {children}
+      </CardContent>
     </Card>
   );
 };

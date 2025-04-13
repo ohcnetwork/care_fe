@@ -412,7 +412,7 @@ const SymptomRow = React.memo(function SymptomRow({
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
-        <TableCell>
+        <TableCell data-cy="status">
           <Select
             value={symptom.clinical_status}
             onValueChange={handleStatusChange}
@@ -430,7 +430,7 @@ const SymptomRow = React.memo(function SymptomRow({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell>
+        <TableCell data-cy="severity">
           <Select
             value={symptom.severity}
             onValueChange={handleSeverityChange}
@@ -848,12 +848,14 @@ export function SymptomQuestion({
           </Sheet>
         </>
       ) : (
-        <ValueSetSelect
-          system="system-condition-code"
-          placeholder={t("add_another_symptom")}
-          onSelect={handleCodeSelect}
-          disabled={disabled}
-        />
+        <div data-cy="add-symptom">
+          <ValueSetSelect
+            system="system-condition-code"
+            placeholder={t("add_another_symptom")}
+            onSelect={handleCodeSelect}
+            disabled={disabled}
+          />
+        </div>
       )}
     </div>
   );
