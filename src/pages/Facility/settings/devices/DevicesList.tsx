@@ -116,9 +116,9 @@ export default function DevicesList({ facilityId }: Props) {
   });
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 h-full">
+    <div className="flex flex-col md:flex-row gap-6 h-full min-h-[calc(100vh-10rem)]">
       {showLocationFilter && (
-        <div className="md:w-1/4">
+        <div className="md:w-1/4 min-h-full">
           <Card className="h-full">
             <CardContent className="p-4 space-y-4">
               <div className="flex items-center justify-between py-2">
@@ -146,8 +146,8 @@ export default function DevicesList({ facilityId }: Props) {
         </div>
       )}
 
-      <div className="flex-1">
-        <Card>
+      <div className="flex-1 min-h-full">
+        <Card className="h-full">
           <CardContent className="space-y-6 p-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex items-center gap-4">

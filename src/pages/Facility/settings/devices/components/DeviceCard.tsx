@@ -64,11 +64,10 @@ export default function DeviceCard({ device, encounter }: Props) {
               <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-1">
                 {device.registered_name}
               </CardTitle>
-              {device.user_friendly_name && (
-                <CardDescription className="text-gray-600 line-clamp-1">
-                  {device.user_friendly_name}
-                </CardDescription>
-              )}
+
+              <CardDescription className="text-gray-600 line-clamp-1">
+                {device.user_friendly_name ? device.user_friendly_name : "--"}
+              </CardDescription>
             </div>
           </div>
         </div>
