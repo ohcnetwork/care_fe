@@ -1,7 +1,9 @@
+import { ArrowRightIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { DeviceList } from "@/types/device/device";
@@ -50,56 +53,64 @@ export default function DeviceCard({ device, encounter }: Props) {
   };
 
   return (
-    <Link
-      href={`/devices/${device.id}`}
-      basePath={encounter ? `/facility/${encounter.facility.id}/settings` : ""}
-      className="block h-[160px]"
-    >
-      <Card className="hover:shadow-md transition-shadow h-full">
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-2">
-              <div className="mt-1">
-                <DeviceTypeIcon className="size-5 text-gray-500" />
-              </div>
-              <div>
-                <CardTitle className="text-lg font-semibold line-clamp-1">
-                  {device.registered_name}
-                </CardTitle>
-                {device.user_friendly_name && (
-                  <CardDescription className="line-clamp-1">
-                    {device.user_friendly_name}
-                  </CardDescription>
-                )}
-              </div>
+    <Card className="hover:shadow-md transition-shadow h-full">
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-2">
+            <div className="mt-1">
+              <DeviceTypeIcon className="size-5 text-gray-500" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-1">
+                {device.registered_name}
+              </CardTitle>
+              {device.user_friendly_name && (
+                <CardDescription className="text-gray-600 line-clamp-1">
+                  {device.user_friendly_name}
+                </CardDescription>
+              )}
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
+        </div>
+      </CardHeader>
+
+      <CardContent className="flex flex-col flex-1 justify-between space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="secondary" className={getStatusColor(device.status)}>
+            {t(`device_status_${device.status}`)}
+          </Badge>
+          <Badge
+            variant="secondary"
+            className={getAvailabilityStatusColor(device.availability_status)}
+          >
+            {t(`device_availability_status_${device.availability_status}`)}
+          </Badge>
+          {device.care_type && (
             <Badge
               variant="secondary"
-              className={getStatusColor(device.status)}
+              className="rounded-md bg-blue-100 text-blue-800 font-medium capitalize"
             >
-              {t(`device_status_${device.status}`)}
+              {device.care_type}
             </Badge>
-            <Badge
-              variant="secondary"
-              className={getAvailabilityStatusColor(device.availability_status)}
+          )}
+        </div>
+
+        <Separator className="my-2" />
+
+        <div className="flex justify-end mt-auto">
+          <Button variant="link" asChild className="p-0">
+            <Link
+              href={`/devices/${device.id}`}
+              basePath={
+                encounter ? `/facility/${encounter.facility.id}/settings` : ""
+              }
+              className="text-sm font-semibold text-black hover:underline flex items-center gap-1"
             >
-              {t(`device_availability_status_${device.availability_status}`)}
-            </Badge>
-            {device.care_type && (
-              <Badge
-                variant="secondary"
-                className="bg-blue-100 text-blue-800 hover:bg-blue-100/80"
-              >
-                {device.care_type}
-              </Badge>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+              {t("view_details")} <ArrowRightIcon className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

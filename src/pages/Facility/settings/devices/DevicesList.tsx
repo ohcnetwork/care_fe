@@ -52,6 +52,7 @@ export default function DevicesList({ facilityId }: Props) {
   const [showLocationFilter, setShowLocationFilter] = useState(false);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
+    disableCache: true,
   });
 
   const handleToggleExpand = useCallback((locationId: string) => {
