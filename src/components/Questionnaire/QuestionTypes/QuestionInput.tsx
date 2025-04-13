@@ -256,7 +256,8 @@ export function QuestionInput({
                 )}
                 <div
                   className={cn("w-full", {
-                    "flex flex-col md:flex-row": !question.structured_type,
+                    "flex flex-col gap-4 md:flex-row":
+                      !question.structured_type,
                     "flex-col": question.repeats || question.type === "text",
                   })}
                 >

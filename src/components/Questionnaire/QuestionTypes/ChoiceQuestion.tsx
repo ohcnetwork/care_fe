@@ -10,7 +10,6 @@ import {
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { properCase } from "@/Utils/utils";
 import { Code } from "@/types/questionnaire/code";
 import type {
   QuestionnaireResponse,
@@ -50,7 +49,6 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       type: "string",
       value: newValue,
     };
-
     updateQuestionnaireResponseCB(
       newValues,
       questionnaireResponse.question_id,
@@ -100,7 +98,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                 value={option.value.toString()}
                 className="whitespace-normal break-words py-3"
               >
-                {properCase(option.display || option.value)}
+                {option.display || option.value}
               </SelectItem>
             ))}
           </SelectContent>
