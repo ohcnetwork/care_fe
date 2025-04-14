@@ -301,7 +301,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 rounded-lg p-4 shadow-xl md:p-6 overflow-y-auto">
+      <DialogContent className="w-full h-full max-w-5xl flex flex-col gap-4 rounded-lg p-4 shadow-xl md:p-6 overflow-y-visible md:overflow-y-hidden overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="text-sm text-gray-600">
             <TooltipComponent content={fileName}>
@@ -420,8 +420,8 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </Button>
               )}
             </div>
-            <div className="mt-4 flex flex-col items-center space-y-2">
-              <div className="flex justify-center space-x-2">
+            <div className="mt-4 flex flex-col items-center space-y-2 w-full">
+              <div className="flex justify-center flex-wrap gap-2 w-full">
                 {file_state.isImage && (
                   <>
                     <Button
@@ -526,7 +526,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   </>
                 )}
               </div>
-              <div className="flex justify-center mr-9 space-x-2">
+              <div className="flex justify-center flex-wrap gap-2 w-full">
                 {file_state.extension === "pdf" && (
                   <>
                     <Button
