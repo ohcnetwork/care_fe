@@ -47,6 +47,7 @@ interface ValueSetFormProps {
   initialData?: UpdateValuesetModel;
   onSubmit: (data: ValuesetFormType) => void;
   isSubmitting?: boolean;
+  isSystemDefined?: boolean;
 }
 
 function ConceptFields({
@@ -349,6 +350,7 @@ export function ValueSetForm({
   initialData,
   onSubmit,
   isSubmitting,
+  isSystemDefined,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
   const valuesetFormSchema = z.object({
@@ -525,13 +527,15 @@ export function ValueSetForm({
           >
             {t("cancel")}
           </Button>
-          <Button
-            variant="primary"
-            type="submit"
-            disabled={isSubmitting || !form.formState.isDirty}
-          >
-            {isSubmitting ? t("saving") : t("save_valueset")}
-          </Button>
+          {!isSystemDefined && (
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={isSubmitting || !form.formState.isDirty}
+            >
+              {isSubmitting ? t("saving") : t("save_valueset")}
+            </Button>
+          )}
         </div>
       </form>
     </Form>

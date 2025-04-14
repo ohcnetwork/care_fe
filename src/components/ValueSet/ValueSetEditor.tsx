@@ -78,6 +78,7 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
           initialData={existingValueset}
           onSubmit={handleSubmit}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
+          isSystemDefined={existingValueset?.is_system_defined}
         />
       )}
     </div>
