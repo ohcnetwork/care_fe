@@ -54,7 +54,7 @@ export function OrganizationLevel({
           ? t("select") +
             " " +
             t(`SYSTEM__govt_org_type__${orgType?.toLowerCase()}`)
-          : t("select") + " " + t("SYSTEM__govt_org_type__district")
+          : t("select_location")
       }
       disabled={index > selectedLevels.length}
       align="start"

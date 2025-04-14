@@ -130,7 +130,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
         <SelectTrigger className="sm:max-w-56 h-[38px]">
           <SelectValue
             placeholder={
-              !selected ? t("select_district_first") : t("select_facility_type")
+              !selected ? t("select_location_first") : t("select_facility_type")
             }
           />
         </SelectTrigger>
