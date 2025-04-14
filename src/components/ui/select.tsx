@@ -8,6 +8,7 @@ function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   // This is a workaround to prevent the select from being empty when the value is null when used along with react hook form
+  // TODO: revert this once @radix-ui/react-select solves this
   return (
     <SelectPrimitive.Root
       data-slot="select"
