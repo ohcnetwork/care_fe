@@ -126,9 +126,6 @@ export function AllergyList({
           allergy.verification_status === "entered_in_error" ? "opacity-50" : ""
         }`}
       >
-        <TableCell className="hidden" data-cy="allergy-id">
-          {allergy.id}
-        </TableCell>
         <TableCell className="first:rounded-l-md">
           <div className="flex items-center">
             {CATEGORY_ICONS[allergy.category ?? ""]}
@@ -153,7 +150,6 @@ export function AllergyList({
             className={`whitespace-nowrap ${
               ALLERGY_CRITICALITY_STYLES[allergy.criticality]
             }`}
-            data-cy={`criticality-${allergy.id}`}
           >
             {t(allergy.criticality)}
           </Badge>
@@ -164,7 +160,6 @@ export function AllergyList({
             className={`whitespace-nowrap ${
               ALLERGY_VERIFICATION_STATUS_STYLES[allergy.verification_status]
             }`}
-            data-cy={`status-${allergy.id}`}
           >
             {t(allergy.verification_status)}
           </Badge>
@@ -178,12 +173,16 @@ export function AllergyList({
                     variant="outline"
                     size="sm"
                     className="h-7 text-xs shrink-0"
+                    data-cy="allergy-see-note"
                   >
                     {t("see_note")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-4">
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                  <p
+                    className="text-sm text-gray-700 whitespace-pre-wrap"
+                    data-cy="allergy-note"
+                  >
                     {allergy.note}
                   </p>
                 </PopoverContent>

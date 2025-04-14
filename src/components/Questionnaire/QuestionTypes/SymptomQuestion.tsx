@@ -143,12 +143,13 @@ function SymptomActionsMenu({
           size="icon"
           disabled={disabled}
           className="size-9"
+          data-cy="options"
         >
           <DotsVerticalIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onToggleNotes}>
+        <DropdownMenuItem onClick={onToggleNotes} data-cy="add-notes">
           <Pencil2Icon className="size-4 mr-2" />
           {showNotes
             ? t("hide_notes")
@@ -161,6 +162,7 @@ function SymptomActionsMenu({
           className="text-destructive focus:text-destructive"
           onClick={onRemove}
           disabled={verificationStatus === "entered_in_error"}
+          data-cy="remove-symptom"
         >
           <MinusCircledIcon className="size-4 mr-2" />
           {verificationStatus === "entered_in_error"
@@ -369,13 +371,15 @@ const SymptomRow = React.memo(function SymptomRow({
                   <div className="block text-sm font-medium text-gray-500 mb-1">
                     {t("notes")}
                   </div>
-                  <Input
-                    type="text"
-                    placeholder={t("add_notes_about_symptom")}
-                    value={symptom.note || ""}
-                    onChange={handleNotesChange}
-                    disabled={disabled}
-                  />
+                  <div data-cy="notes">
+                    <Input
+                      type="text"
+                      placeholder={t("add_notes_about_symptom")}
+                      value={symptom.note || ""}
+                      onChange={handleNotesChange}
+                      disabled={disabled}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </CollapsibleContent>

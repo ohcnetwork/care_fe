@@ -135,6 +135,17 @@ export const allergyNames = [
   "Cereal",
 ];
 
+export const allergyStatus = [
+  "Unconfirmed",
+  "Confirmed",
+  "Refuted",
+  "Presumed",
+];
+
+export const allergyCriticality = ["Low", "High", "Unable to Assess"];
+
+export const symptomStatus = [];
+
 export function getRandomMedicineName(): string {
   const randomIndex = getRandomIndex(medicineNames.length);
   return medicineNames[randomIndex];
@@ -143,6 +154,16 @@ export function getRandomMedicineName(): string {
 export function getRandomAllergyName(): string {
   const randomIndex = getRandomIndex(allergyNames.length);
   return allergyNames[randomIndex];
+}
+
+export function getRandomAllergyStatus(): string {
+  const randomIndex = getRandomIndex(allergyStatus.length);
+  return allergyStatus[randomIndex];
+}
+
+export function getRandomAllergyCriticality(): string {
+  const randomIndex = getRandomIndex(allergyCriticality.length);
+  return allergyCriticality[randomIndex];
 }
 
 export function generateDeviceName(): string {

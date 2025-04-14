@@ -1,7 +1,11 @@
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { PatientPrescription } from "@/pageObject/Patients/PatientPrescription";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
-import { generateRandomCharacter } from "@/utils/commonUtils";
+import {
+  generateRandomCharacter,
+  getRandomAllergyCriticality,
+  getRandomAllergyStatus,
+} from "@/utils/commonUtils";
 import { getRandomAllergyName } from "@/utils/commonUtils";
 import { viewPort } from "@/utils/viewPort";
 
@@ -57,7 +61,7 @@ describe("Patient Encounter Questionnaire", () => {
   });
 });
 
-describe("Patient Encounter Allergies", () => {
+describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
     cy.loginByApi("devnurse5");
@@ -79,27 +83,54 @@ describe("Patient Encounter Allergies", () => {
       .addAllergy(createAllergyDetails);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyAllergy(createAllergyDetails);
-    cy.get('[data-cy="allergy-id"]')
-      .first()
-      .invoke("text")
-      .then((text) => {
-        const updateAllergyDetails = {
-          id: text.trim(),
-          allergyName: createAllergyDetails.allergyName,
-          criticality: "High",
-          status: "Presumed",
-          notes: "Edit allergy notes",
-        };
 
-        patientEncounter.clickEditAllergy().updateAllergy(updateAllergyDetails);
+    const updateAllergyDetails = {
+      allergyName: createAllergyDetails.allergyName,
+      criticality: getRandomAllergyCriticality(),
+      status: getRandomAllergyStatus(),
+      notes: "Edit allergy notes",
+    };
 
-        patientPrescription.submitQuestionnaire();
-        patientEncounter.verifyUpdateAllergy(updateAllergyDetails);
+    patientEncounter.clickEditAllergy().updateAllergy(updateAllergyDetails);
 
-        patientEncounter.clickEditAllergy().deleteAllergy(text.trim());
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifyAllergy(updateAllergyDetails);
 
-        patientPrescription.submitQuestionnaire();
-        patientEncounter.verifyAllergyDelete(text.trim());
-      });
+    patientEncounter.clickEditAllergy().deleteAllergy();
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifyAllergyDelete(createAllergyDetails.allergyName);
+  });
+
+  it("Create and edit a symptom and verify the changes", () => {
+    facilityCreation.selectFacility("GHC Payyanur");
+    const createSymptomsDetails = {
+      symptomName: "Adenosine deaminase 2 deficiency",
+      severity: "Moderate",
+      status: "Active",
+    };
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails()
+      .clickEditSymptoms()
+      .addSymptoms(createSymptomsDetails);
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifySymptom(createSymptomsDetails);
+
+    const updateSymptomsDetails = {
+      allergyName: createSymptomsDetails.symptomName,
+      severity: "Mild",
+      status: "Recurrence",
+      notes: "Edit symptom notes",
+    };
+
+    patientEncounter.clickEditSymptoms().updateSymptom(updateSymptomsDetails);
+
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifySymptom(updateSymptomsDetails);
+
+    patientEncounter.clickEditSymptoms().deleteSymptom();
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifySymptomDelete(createSymptomsDetails.symptomName);
   });
 });

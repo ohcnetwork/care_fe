@@ -122,12 +122,16 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
                         variant="outline"
                         size="sm"
                         className="h-7 text-xs shrink-0"
+                        data-cy="symptom-see-note"
                       >
                         {t("see_note")}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-4">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                      <p
+                        className="text-sm text-gray-700 whitespace-pre-wrap"
+                        data-cy="symptom-note"
+                      >
                         {symptom.note}
                       </p>
                     </PopoverContent>

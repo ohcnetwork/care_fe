@@ -1,7 +1,13 @@
 interface AllergyDetails {
-  id?: string;
   allergyName?: string;
   criticality?: string;
+  status?: string;
+  notes?: string;
+}
+
+interface SymptomDetails {
+  symptomName?: string;
+  severity?: string;
   status?: string;
   notes?: string;
 }
@@ -40,42 +46,118 @@ export class PatientEncounter {
   }
 
   updateAllergy(details: AllergyDetails) {
-    const { criticality, status, notes, id } = details;
-    cy.clickAndSelectOption(`[data-cy="criticality-${id}"]`, criticality);
-    cy.clickAndSelectOption(`[data-cy="status-${id}"]`, status);
-    cy.typeIntoField(`[data-cy="notes-${id}"]`, notes, {
-      skipVerification: true,
+    const { criticality, status, notes } = details;
+    if (criticality) {
+      cy.clickAndSelectOption('[data-cy="criticality"]', criticality, {
+        position: "first",
+      });
+    }
+    if (status) {
+      cy.clickAndSelectOption('[data-cy="status"]', status, {
+        position: "first",
+      });
+    }
+    if (notes) {
+      cy.typeIntoField('[data-cy="notes"]', notes, {
+        position: "first",
+        skipVerification: true,
+      });
+    }
+  }
+
+  deleteAllergy() {
+    cy.clickAndSelectOption('[data-cy="status"]', "Entered in Error", {
+      position: "first",
     });
   }
 
-  deleteAllergy(id: string) {
-    cy.get(`[data-cy="options-${id}"]`).scrollIntoView();
-    cy.get(`[data-cy="options-${id}"]`).click();
-    cy.verifyAndClickElement(
-      `[data-cy="remove-allergy-${id}"]`,
-      "Remove Allergy",
-    );
-  }
-
-  verifyAllergyDelete(id: string) {
-    cy.contains('[data-cy="allergies-table"]', id).should("not.be.visible");
+  verifyAllergyDelete(name: string) {
+    cy.get('[data-cy="allergies-table"]').then(($el) => {
+      cy.wrap($el).should("not.contain", name);
+    });
   }
 
   verifyAllergy(details: AllergyDetails) {
-    const { allergyName, criticality, status } = details;
+    const { allergyName, criticality, status, notes } = details;
     cy.verifyContentPresence('[data-cy="allergies-table"]', [
       allergyName,
       criticality,
       status,
     ]);
+
+    if (notes) {
+      cy.get('[data-cy="allergy-see-note"]').first().click();
+      cy.get('[data-cy="allergy-note"]').first().should("contain", notes);
+    }
+
     return this;
   }
-  verifyUpdateAllergy(details: AllergyDetails) {
-    const { criticality, status, id } = details;
-    cy.get('[data-cy="allergies-table"]').within(() => {
-      cy.get(`[data-cy="criticality-${id}"]`).should("contain", criticality);
-      cy.get(`[data-cy="status-${id}"]`).should("contain", status);
+
+  clickEditSymptoms() {
+    cy.verifyAndClickElement('[data-cy="edit-symptoms"]', "Edit");
+    return this;
+  }
+
+  addSymptoms(details: SymptomDetails) {
+    const { symptomName } = details;
+    cy.get('[data-cy="add-symptom"]').scrollIntoView();
+    cy.typeAndSelectOption('[data-cy="add-symptom"]', symptomName, false);
+    return this;
+  }
+
+  updateSymptom(details: SymptomDetails) {
+    const { severity, status, notes } = details;
+    if (severity) {
+      cy.get('[data-cy="severity"]').scrollIntoView();
+      cy.clickAndSelectOption('[data-cy="severity"]', severity, {
+        position: "last",
+      });
+    }
+    if (status) {
+      cy.get('[data-cy="status"]').scrollIntoView();
+      cy.clickAndSelectOption('[data-cy="status"]', status, {
+        position: "last",
+      });
+    }
+    if (notes) {
+      cy.get('[data-cy="options"]').last().click();
+      cy.get('[data-cy="add-notes"]').last().click();
+      cy.typeIntoField('[data-cy="notes"]', notes, {
+        position: "last",
+        skipVerification: true,
+      });
+    }
+  }
+
+  deleteSymptom() {
+    cy.get('[data-cy="options"]').last().scrollIntoView();
+    cy.get('[data-cy="options"]').last().click();
+    cy.get('[data-cy="remove-symptom"]').last().scrollIntoView();
+    cy.get('[data-cy="remove-symptom"]').last().click();
+  }
+
+  verifySymptomDelete(name: string) {
+    cy.get('[data-cy="symptoms-table"]').scrollIntoView();
+    cy.get('[data-cy="symptoms-table"]').then(($el) => {
+      cy.wrap($el).should("not.contain", name);
     });
+  }
+
+  verifySymptom(details: SymptomDetails) {
+    const { symptomName, severity, status, notes } = details;
+    cy.verifyContentPresence('[data-cy="symptoms-table"]', [
+      symptomName,
+      severity,
+      status,
+    ]);
+
+    if (notes) {
+      cy.get('[data-cy="symptom-see-note"]').first().scrollIntoView();
+      cy.get('[data-cy="symptom-see-note"]').first().click();
+      cy.get('[data-cy="symptom-note"]').first().should("contain", notes);
+    }
+
+    return this;
   }
 
   clickUpdateEncounter() {

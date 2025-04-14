@@ -145,7 +145,9 @@ const SymptomListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
+      <CardContent className="px-2 pb-2" data-cy="symptoms-table">
+        {children}
+      </CardContent>
     </Card>
   );
 };
