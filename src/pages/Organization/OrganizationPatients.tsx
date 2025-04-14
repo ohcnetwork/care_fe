@@ -214,7 +214,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                 ))
               )}
             </div>
-            <Pagination totalCount={patients?.count ?? 0} />
+            {!isFetching && <Pagination totalCount={patients?.count ?? 0} />}
           </div>
         );
       }}

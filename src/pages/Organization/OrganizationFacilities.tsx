@@ -165,7 +165,7 @@ export default function OrganizationFacilities({
                 ))
               )}
             </div>
-            <Pagination totalCount={facilities?.count ?? 0} />
+            {!isFetching && <Pagination totalCount={facilities?.count ?? 0} />}
           </div>
         );
       }}

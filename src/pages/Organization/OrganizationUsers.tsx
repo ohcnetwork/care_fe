@@ -193,7 +193,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                 )}
               </div>
             )}
-            <Pagination totalCount={users?.count || 0} />
+            {!isFetchingUsers && <Pagination totalCount={users?.count || 0} />}
           </div>
         );
       }}

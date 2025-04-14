@@ -138,7 +138,9 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                 </div>
                 {children && children.count > resultsPerPage && (
                   <div className="flex justify-center">
-                    <Pagination totalCount={children?.count || 0} />
+                    {!isFetching && (
+                      <Pagination totalCount={children?.count || 0} />
+                    )}
                   </div>
                 )}
               </div>
