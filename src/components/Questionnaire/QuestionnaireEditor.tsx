@@ -226,13 +226,17 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     errorData.errors.forEach((er) => {
       let fieldPath = er.loc?.join(" > ");
       if (er.loc?.includes("questions")) {
-        let questionPath = [];
+        const questionIndices: number[] = [];
+
         for (let i = 0; i < er.loc.length; i++) {
           if (er.loc[i] === "questions" && typeof er.loc[i + 1] === "number") {
-            questionPath.push(`Question ${Number(er.loc[i + 1]) + 1}`);
+            questionIndices.push(Number(er.loc[i + 1]) + 1);
           }
         }
-        fieldPath = questionPath.join(" > ");
+
+        if (questionIndices.length > 0) {
+          fieldPath = `Question ${questionIndices.join(".")}`;
+        }
       }
 
       const message = fieldPath ? `Error in ${fieldPath}: ${er.msg}` : er.msg;
