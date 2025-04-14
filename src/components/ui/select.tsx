@@ -7,7 +7,19 @@ import { cn } from "@/lib/utils";
 function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />;
+  // This is a workaround to prevent the select from being empty when the value is null when used along with react hook form
+  return (
+    <SelectPrimitive.Root
+      data-slot="select"
+      {...props}
+      onValueChange={(value) => {
+        if (value) {
+          props.onValueChange?.(value);
+        }
+      }}
+    />
+  );
+  // return <SelectPrimitive.Root data-slot="select" {...props} />;
 }
 
 function SelectGroup({
