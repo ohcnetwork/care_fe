@@ -15,7 +15,6 @@
     {
       "groupName": "all dependencies (minor, patch)",
       "matchUpdateTypes": [
-        "minor",
         "patch"
       ],
       "matchCurrentVersion": "!/^0/",
