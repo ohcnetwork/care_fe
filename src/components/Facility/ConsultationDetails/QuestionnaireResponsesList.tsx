@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { ChevronDown } from "lucide-react";
-import { Link, usePath, useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -237,8 +237,7 @@ function ResponseCard({
   isPrintPreview?: boolean;
 }) {
   const { t } = useTranslation();
-  const path = usePath() || "";
-  const isTreatmentSummaryRoute = path?.includes("/treatment_summary");
+
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
 
@@ -291,7 +290,7 @@ function ResponseCard({
             </span>
           </div>
         </div>
-        {!isTreatmentSummaryRoute && (
+        {!isPrintPreview && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
