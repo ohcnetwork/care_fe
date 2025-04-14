@@ -172,7 +172,7 @@ const ScheduleTemplateEditor = ({
       },
     );
 
-  const form = useForm<z.infer<typeof templateFormSchema>>({
+  const form = useForm({
     resolver: zodResolver(templateFormSchema),
     defaultValues: {
       name: template.name,
@@ -600,7 +600,7 @@ const NewAvailabilityCard = ({
       },
     );
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",

@@ -95,7 +95,7 @@ export default function CreateScheduleExceptionSheet({
       path: ["valid_from"], // This will show the error on the valid_from field
     });
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       valid_from: undefined,

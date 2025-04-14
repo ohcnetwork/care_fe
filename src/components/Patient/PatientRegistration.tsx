@@ -169,7 +169,7 @@ export default function PatientRegistration(
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       nationality: "India",

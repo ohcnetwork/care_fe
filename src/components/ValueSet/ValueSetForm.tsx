@@ -414,7 +414,7 @@ export function ValueSetForm({
 
   const { goBack } = useAppHistory();
 
-  const form = useForm<ValuesetFormType>({
+  const form = useForm({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
       name: initialData?.name || "",

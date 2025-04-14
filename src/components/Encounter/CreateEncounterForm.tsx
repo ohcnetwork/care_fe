@@ -88,7 +88,7 @@ export default function CreateEncounterForm({
     start_date: z.string(),
   });
 
-  const form = useForm<z.infer<typeof encounterFormSchema>>({
+  const form = useForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: "planned",

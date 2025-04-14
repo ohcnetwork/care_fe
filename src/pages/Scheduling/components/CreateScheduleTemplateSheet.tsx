@@ -152,7 +152,7 @@ export default function CreateScheduleTemplateSheet({
       path: ["valid_from"],
     });
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
