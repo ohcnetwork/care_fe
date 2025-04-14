@@ -38,14 +38,15 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { usePluginDevice } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import { ContactPoint } from "@/types/common/contactPoint";
 import { type DeviceDetail } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
 import DeviceEncounterHistory from "./DeviceEncounterHistory";
-import AssociateLocationSheet from "./components/AssociateLocationSheet";
 import DeviceServiceHistory from "./components/DeviceServiceHistory";
+import ManageLocationSheet from "./components/ManageLocationSheet";
 
 interface Props {
   facilityId: string;
@@ -147,181 +148,165 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex flex-wrap gap-3 justify-center lg:justify-between w-full">
+    <div className="flex flex-col gap-2 max-w-4xl mx-auto">
+      <div className="ml-2 flex gap-3 items-center">
+        <DeviceTypeIcon
+          type={device.care_type}
+          className="size-5 mb-1 md:mb-3"
+        />
         <PageTitle title={device.registered_name} />
-        <div className="flex flex-wrap justify-center gap-3">
-          <div className="flex  gap-2 flex-wrap flex-col sm:flex-row">
-            <DeviceEncounterHistory
-              trigger={
-                <Button variant="outline_primary">
-                  <CareIcon icon="l-medkit" className="size-4" />
-                  {t("encounter_history")}
-                </Button>
-              }
-              facilityId={facilityId}
-              deviceId={deviceId}
-            />
-            <Link href={`/devices/${deviceId}/locationHistory`}>
-              <Button variant="outline_primary" className="sm:mr-3">
-                <CareIcon icon="l-location-point" className="size-4" />
-                {t("location_history")}
-              </Button>
-            </Link>
-          </div>
-          <div className="flex gap-2 flex-wrap">
+      </div>
+
+      <div className="flex flex-col gap-4 xl:gap-6" data-cy="device-details">
+        <Card>
+          <CardHeader className="flex flex-row justify-between items-center">
+            <CardTitle>{t("device_information")}</CardTitle>
             <Link href={`/devices/${deviceId}/edit`}>
-              <Button variant="outline" data-cy="edit-device-button">
+              <Button
+                variant="outline_primary"
+                size="sm"
+                data-cy="edit-device-button"
+              >
                 <CareIcon icon="l-pen" className="size-4" />
                 {t("edit")}
               </Button>
             </Link>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" data-cy="delete-device-button">
-                  <CareIcon icon="l-trash" className="h-4" />
-                  {t("delete")}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("delete_device")}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t("delete_device_confirmation")}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel data-cy="cancel-delete-device-button">
-                    {t("cancel")}
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deleteDevice()}
-                    className={cn(buttonVariants({ variant: "destructive" }))}
-                    disabled={isDeleting}
-                    data-cy="confirm-delete-device-button"
-                  >
-                    {isDeleting ? t("deleting") : t("delete")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-4" data-cy="device-details">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("device_information")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">
-                  {t("registered_name")}
-                </h4>
-                <p className="mt-1">{device.registered_name}</p>
-              </div>
-              {device.user_friendly_name && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("registered_name")}
+                  </h4>
+                  <p className="mt-1">{device.registered_name}</p>
+                </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">
                     {t("user_friendly_name")}
                   </h4>
-                  <p className="mt-1">{device.user_friendly_name}</p>
-                </div>
-              )}
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">
-                  {t("location")}
-                </h4>
-                <div className="mt-1 flex items-center gap-6">
-                  {device.current_location ? (
-                    <>
-                      <Link
-                        href={`/location/${device.current_location.id}`}
-                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
-                      >
-                        {device.current_location.name}
-                        <ExternalLink className="size-3" />
-                      </Link>
-                    </>
-                  ) : (
-                    <span className="text-gray-500">{t("no_location")}</span>
-                  )}
-                  <AssociateLocationSheet
-                    facilityId={facilityId}
-                    deviceId={deviceId}
-                  >
-                    <Button variant="outline" size="sm">
-                      {device.current_location ? t("change") : t("add")}
-                    </Button>
-                  </AssociateLocationSheet>
+                  <p className="mt-1">{device.user_friendly_name || "-"}</p>
                 </div>
               </div>
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">
-                  {t("encounter")}
-                </h4>
-                <div className="mt-1 flex items-center gap-6">
-                  {device.current_encounter ? (
-                    <>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("location")}
+                  </h4>
+                  <div className="mt-1 flex items-center gap-2">
+                    {device.current_location ? (
+                      <Link
+                        href={`/location/${device.current_location.id}`}
+                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1 truncate"
+                      >
+                        {device.current_location.name}
+                        <ExternalLink className="size-3 flex-shrink-0" />
+                      </Link>
+                    ) : (
+                      <span className="text-gray-500 text-sm">
+                        {t("no_location_associated")}
+                      </span>
+                    )}
+                    <ManageLocationSheet
+                      facilityId={facilityId}
+                      device={device}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-shrink-0"
+                      >
+                        {device.current_location ? t("change") : t("associate")}
+                      </Button>
+                    </ManageLocationSheet>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("encounter")}
+                  </h4>
+                  <div className="mt-1 flex items-center gap-2">
+                    {device.current_encounter ? (
                       <Link
                         href={`/encounter/${device.current_encounter.id}/updates`}
                         basePath={`/facility/${device.current_encounter.facility.id}/patient/${device.current_encounter.patient.id}`}
-                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1 truncate"
                       >
                         {device.current_encounter.patient.name}
-                        <ExternalLink className="size-3" />
+                        <ExternalLink className="size-3 flex-shrink-0" />
                       </Link>
-                    </>
-                  ) : (
-                    <span className="text-gray-500">{t("no_encounter")}</span>
-                  )}
+                    ) : (
+                      <span className="text-gray-500 text-sm">
+                        {t("no_encounter_associated")}
+                      </span>
+                    )}
+                    <DeviceEncounterHistory
+                      trigger={
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-shrink-0"
+                        >
+                          {t("view_history")}
+                        </Button>
+                      }
+                      facilityId={facilityId}
+                      deviceId={deviceId}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">
-                  {t("managing_organization")}
-                </h4>
-                <div className="mt-1 flex items-center gap-6">
-                  {device.managing_organization ? (
-                    <>
+
+                <div className="md:col-span-2">
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("managing_organization")}
+                  </h4>
+                  <div className="mt-1 flex items-center gap-2">
+                    {device.managing_organization ? (
                       <Link
                         href={`/departments/${device.managing_organization.id}`}
-                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1 truncate"
                       >
                         {device.managing_organization.name}
-                        <ExternalLink className="size-3" />
+                        <ExternalLink className="size-3 flex-shrink-0" />
                       </Link>
-                    </>
-                  ) : (
-                    <span className="text-gray-500">
-                      {t("no_organization")}
-                    </span>
-                  )}
-                  <LinkDepartmentsSheet
-                    entityType="device"
-                    entityId={deviceId}
-                    facilityId={facilityId}
-                    currentOrganizations={
-                      device.managing_organization
-                        ? [device.managing_organization]
-                        : []
-                    }
-                    onUpdate={() => {
-                      queryClient.invalidateQueries({
-                        queryKey: ["device", facilityId, deviceId],
-                      });
-                    }}
-                    trigger={
-                      <Button variant="outline" size="sm">
-                        {device.managing_organization ? t("change") : t("add")}
-                      </Button>
-                    }
-                    orgType="managing_organization"
-                  />
+                    ) : (
+                      <span className="text-gray-500 text-sm">
+                        {t("no_organization_associated")}
+                      </span>
+                    )}
+                    <LinkDepartmentsSheet
+                      entityType="device"
+                      entityId={deviceId}
+                      facilityId={facilityId}
+                      currentOrganizations={
+                        device.managing_organization
+                          ? [device.managing_organization]
+                          : []
+                      }
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["device", facilityId, deviceId],
+                        });
+                      }}
+                      trigger={
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-shrink-0"
+                        >
+                          {device.managing_organization
+                            ? t("change")
+                            : t("associate")}
+                        </Button>
+                      }
+                      orgType="managing_organization"
+                    />
+                  </div>
                 </div>
               </div>
+
               <div className="flex flex-wrap gap-2">
                 <Badge
                   variant="secondary"
@@ -345,100 +330,63 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             <Separator />
 
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(device.identifier || device.lot_number) && (
-                  <>
-                    {device.identifier && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          {t("identifier")}
-                        </h4>
-                        <p className="mt-1">{device.identifier}</p>
-                      </div>
-                    )}
-                    {device.lot_number && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          {t("lot_number")}
-                        </h4>
-                        <p className="mt-1">{device.lot_number}</p>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(device.manufacturer || device.model_number) && (
-                  <>
-                    {device.manufacturer && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          {t("manufacturer")}
-                        </h4>
-                        <p className="mt-1">{device.manufacturer}</p>
-                      </div>
-                    )}
-                    {device.model_number && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          {t("model_number")}
-                        </h4>
-                        <p className="mt-1">{device.model_number}</p>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(device.serial_number || device.part_number) && (
-                  <>
-                    {device.serial_number && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          {t("serial_number")}
-                        </h4>
-                        <p className="mt-1">{device.serial_number}</p>
-                      </div>
-                    )}
-                    {device.part_number && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          {t("part_number")}
-                        </h4>
-                        <p className="mt-1">{device.part_number}</p>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(device.manufacture_date || device.expiration_date) && (
-                  <>
-                    {device.manufacture_date && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          {t("manufacture_date")}
-                        </h4>
-                        <p className="mt-1">
-                          {formatDate(device.manufacture_date, "dd/MM/yyyy")}
-                        </p>
-                      </div>
-                    )}
-                    {device.expiration_date && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          {t("expiration_date")}
-                        </h4>
-                        <p className="mt-1">
-                          {formatDate(device.expiration_date, "dd/MM/yyyy")}
-                        </p>
-                      </div>
-                    )}
-                  </>
-                )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("identifier")}
+                  </h4>
+                  <p className="text-sm mt-1">{device.identifier || "-"}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("lot_number")}
+                  </h4>
+                  <p className="text-sm mt-1">{device.lot_number || "-"}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("manufacturer")}
+                  </h4>
+                  <p className="text-sm mt-1">{device.manufacturer || "-"}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("model_number")}
+                  </h4>
+                  <p className="text-sm mt-1">{device.model_number || "-"}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("serial_number")}
+                  </h4>
+                  <p className="text-sm mt-1">{device.serial_number || "-"}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("part_number")}
+                  </h4>
+                  <p className="text-sm mt-1">{device.part_number || "-"}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("manufacture_date")}
+                  </h4>
+                  <p className="text-sm mt-1">
+                    {device.manufacture_date
+                      ? formatDate(device.manufacture_date, "dd/MM/yyyy")
+                      : "-"}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    {t("expiration_date")}
+                  </h4>
+                  <p className="text-sm mt-1">
+                    {device.expiration_date
+                      ? formatDate(device.expiration_date, "dd/MM/yyyy")
+                      : "-"}
+                  </p>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -461,6 +409,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
         )}
 
         <DeviceServiceHistory facilityId={facilityId} deviceId={deviceId} />
+
         {device.care_type && (
           <ErrorBoundary
             fallback={
@@ -486,6 +435,54 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             />
           </ErrorBoundary>
         )}
+
+        <Card className="border-red-500">
+          <CardHeader>
+            <CardTitle className="text-destructive">
+              {t("danger_zone")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between gap-4 rounded-md border p-4">
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium">
+                  {t("delete_this_device")}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t("delete_device_description")}
+                </p>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" data-cy="delete-device-button">
+                    {t("delete")}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("delete_device")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("delete_device_confirmation")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel data-cy="cancel-delete-device-button">
+                      {t("cancel")}
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteDevice()}
+                      className={cn(buttonVariants({ variant: "destructive" }))}
+                      disabled={isDeleting}
+                      data-cy="confirm-delete-device-button"
+                    >
+                      {isDeleting ? t("deleting") : t("delete")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

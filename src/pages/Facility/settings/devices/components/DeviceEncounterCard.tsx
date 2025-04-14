@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { formatName } from "@/Utils/utils";
 import { DeviceEncounterHistory } from "@/types/device/device";
 import { Encounter } from "@/types/emr/encounter";
 import { UserBase } from "@/types/user/user";
@@ -50,10 +51,7 @@ function EncounterNode({
       {created_by && (
         <div className="flex items-center text-sm pl-6">
           <span className="text-gray-700 font-normal">
-            {t("associated_by", {
-              first_name: created_by.first_name,
-              last_name: created_by.last_name,
-            })}
+            {t("associated_by", { name: formatName(created_by) })}
           </span>
         </div>
       )}

@@ -75,11 +75,7 @@ const Pagination = ({
     setCurrentPage(page);
     onChange(page, rowsPerPage);
     const pageContainer = window.document.getElementById("pages");
-    pageContainer?.scroll({
-      top: 0,
-      left: 0,
-      behavior: "smooth",
-    });
+    pageContainer?.scroll({ top: 0, left: 0 });
   };
 
   return (

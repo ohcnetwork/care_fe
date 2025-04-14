@@ -28,7 +28,7 @@ export interface UserHomeProps {
   facilityId?: string;
 }
 export interface TabChildProp {
-  body: (childProps: userChildProps) => JSX.Element | undefined;
+  body: (childProps: userChildProps) => React.ReactNode | undefined;
   hidden?: boolean;
 }
 
