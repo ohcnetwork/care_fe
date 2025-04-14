@@ -14,7 +14,7 @@ export default function UserColumns({
 }: {
   heading: string;
   note: string;
-  Child: (childProps: userChildProps) => JSX.Element | undefined;
+  Child: (childProps: userChildProps) => React.ReactNode | undefined;
   childProps: userChildProps;
 }) {
   return (

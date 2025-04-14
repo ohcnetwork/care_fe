@@ -230,7 +230,9 @@ const ScheduleTemplateEditor = ({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("schedule_template_name")}</FormLabel>
+                <FormLabel aria-required>
+                  {t("schedule_template_name")}
+                </FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t("schedule_template_name_placeholder")}
@@ -249,7 +251,7 @@ const ScheduleTemplateEditor = ({
               name="valid_from"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel required>{t("valid_from")}</FormLabel>
+                  <FormLabel aria-required>{t("valid_from")}</FormLabel>
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
@@ -265,7 +267,7 @@ const ScheduleTemplateEditor = ({
               name="valid_to"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel required>{t("valid_to")}</FormLabel>
+                  <FormLabel aria-required>{t("valid_to")}</FormLabel>
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
@@ -733,7 +735,7 @@ const NewAvailabilityCard = ({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("session_title")}</FormLabel>
+                <FormLabel aria-required>{t("session_title")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t("session_title_placeholder")}
@@ -750,7 +752,7 @@ const NewAvailabilityCard = ({
             name="slot_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("session_type")}</FormLabel>
+                <FormLabel aria-required>{t("session_type")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -784,7 +786,7 @@ const NewAvailabilityCard = ({
               name="start_time"
               render={({ field }) => (
                 <FormItem className="flex flex-col w-full">
-                  <FormLabel required>{t("start_time")}</FormLabel>
+                  <FormLabel aria-required>{t("start_time")}</FormLabel>
                   <FormControl>
                     <Input
                       type="time"
@@ -805,7 +807,7 @@ const NewAvailabilityCard = ({
               name="end_time"
               render={({ field }) => (
                 <FormItem className="flex flex-col w-full mt-2">
-                  <FormLabel required>{t("end_time")}</FormLabel>
+                  <FormLabel aria-required>{t("end_time")}</FormLabel>
                   <FormControl>
                     <Input
                       type="time"
@@ -881,7 +883,7 @@ const NewAvailabilityCard = ({
                   name="slot_size_in_minutes"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel required>
+                      <FormLabel aria-required>
                         {t("schedule_slot_size_label")}
                       </FormLabel>
                       <FormControl>
@@ -907,7 +909,9 @@ const NewAvailabilityCard = ({
                   name="tokens_per_slot"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel required>{t("patients_per_slot")}</FormLabel>
+                      <FormLabel aria-required>
+                        {t("patients_per_slot")}
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -934,7 +938,7 @@ const NewAvailabilityCard = ({
             name="weekdays"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("schedule_weekdays")}</FormLabel>
+                <FormLabel aria-required>{t("schedule_weekdays")}</FormLabel>
                 <FormControl>
                   <WeekdayCheckbox
                     value={field.value}

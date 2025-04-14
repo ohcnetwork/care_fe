@@ -293,7 +293,7 @@ export default function CreateScheduleTemplateSheet({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>
+                    <FormLabel aria-required>
                       {t("schedule_template_name")}
                     </FormLabel>
                     <FormControl>
@@ -314,7 +314,7 @@ export default function CreateScheduleTemplateSheet({
                   name="valid_from"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>{t("valid_from")}</FormLabel>
+                      <FormLabel aria-required>{t("valid_from")}</FormLabel>
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
@@ -330,7 +330,7 @@ export default function CreateScheduleTemplateSheet({
                   name="valid_to"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>{t("valid_to")}</FormLabel>
+                      <FormLabel aria-required>{t("valid_to")}</FormLabel>
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
@@ -410,7 +410,7 @@ export default function CreateScheduleTemplateSheet({
                           name={`availabilities.${index}.name`}
                           render={({ field }) => (
                             <FormItem className="col-span-2">
-                              <FormLabel required>
+                              <FormLabel aria-required>
                                 {t("session_title")}
                               </FormLabel>
                               <FormControl>
@@ -431,7 +431,7 @@ export default function CreateScheduleTemplateSheet({
                         name={`availabilities.${index}.slot_type`}
                         render={({ field }) => (
                           <FormItem className="col-span-2 md:col-span-1">
-                            <FormLabel required>{t("session_type")}</FormLabel>
+                            <FormLabel aria-required>{t("session_type")}</FormLabel>
                             <Select
                               onValueChange={field.onChange}
                               defaultValue={field.value}
@@ -476,7 +476,9 @@ export default function CreateScheduleTemplateSheet({
                           name={`availabilities.${index}.start_time`}
                           render={({ field }) => (
                             <FormItem className="flex flex-col w-full">
-                              <FormLabel required>{t("start_time")}</FormLabel>
+                              <FormLabel aria-required>
+                                {t("start_time")}
+                              </FormLabel>
                               <FormControl>
                                 <Input
                                   type="time"
@@ -498,7 +500,9 @@ export default function CreateScheduleTemplateSheet({
                           name={`availabilities.${index}.end_time`}
                           render={({ field }) => (
                             <FormItem className="flex flex-col w-full mt-2">
-                              <FormLabel required>{t("end_time")}</FormLabel>
+                              <FormLabel aria-required>
+                                {t("end_time")}
+                              </FormLabel>
                               <FormControl>
                                 <Input
                                   type="time"
@@ -590,7 +594,7 @@ export default function CreateScheduleTemplateSheet({
                               render={({ field }) => (
                                 <FormItem className="flex grow flex-col">
                                   <FormLabel
-                                    required
+                                    aria-required
                                     className="whitespace-nowrap "
                                   >
                                     {t("schedule_slot_size_label")}
@@ -622,7 +626,7 @@ export default function CreateScheduleTemplateSheet({
                               render={({ field }) => (
                                 <FormItem className="flex flex-col grow">
                                   <FormLabel
-                                    required
+                                    aria-required
                                     className="whitespace-nowrap"
                                   >
                                     {t("patients_per_slot")}

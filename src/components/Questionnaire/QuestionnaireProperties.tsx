@@ -87,7 +87,7 @@ function StatusSelector({
           <div
             key={status}
             className={cn(
-              "flex items-center px-2 py-1 space-x-2",
+              "flex items-center px-2 py-1",
               status === "active" && "rounded-l-md",
               status === "retired" && "rounded-r-md",
             )}
@@ -130,7 +130,7 @@ function SubjectTypeSelector({
           <div
             key={type.value}
             className={cn(
-              "flex items-center px-2 py-1 space-x-2",
+              "flex items-center px-2 py-1",
               type.value === "patient" && "rounded-l-md",
               type.value === "encounter" && "rounded-r-md",
             )}
@@ -185,7 +185,7 @@ function OrganizationSelector({
           questionnaireId={id}
           trigger={
             <Button variant="outline" className="w-full justify-start">
-              <Building className="mr-2 h-4 w-4" />
+              <Building className="mr-2 size-4" />
               {t("manage_organization_one")}
             </Button>
           }
@@ -208,7 +208,7 @@ function OrganizationSelector({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-4 w-4 p-0 hover:bg-transparent"
+                className="size-4 p-0 hover:bg-transparent"
                 onClick={() => selection.onToggle(org.id)}
               >
                 <X className="h-3 w-3" />
@@ -273,7 +273,7 @@ function TagSelector({
           questionnaire={questionnaire}
           trigger={
             <Button variant="outline" className="w-full justify-start">
-              <Tags className="mr-2 h-4 w-4" />
+              <Tags className="mr-2 size-4" />
               {t("manage_tags")}
             </Button>
           }
@@ -296,7 +296,7 @@ function TagSelector({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-4 w-4 p-0 hover:bg-transparent"
+                className="size-4 p-0 hover:bg-transparent"
                 onClick={() => selection.onToggle(tag.id)}
               >
                 <X className="h-3 w-3" />
@@ -325,7 +325,7 @@ function TagSelector({
           }}
           trigger={
             <Button variant="outline" className="w-full justify-start">
-              <Tags className="mr-2 h-4 w-4" />
+              <Tags className="mr-2 size-4" />
               {t("create_tag")}
             </Button>
           }
@@ -384,7 +384,7 @@ export function QuestionnaireProperties({
             questionnaire={questionnaire}
             trigger={
               <Button variant="outline" className="w-full justify-start">
-                <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-copy" className="mr-2 size-4" />
                 {t("clone_questionnaire")}
               </Button>
             }

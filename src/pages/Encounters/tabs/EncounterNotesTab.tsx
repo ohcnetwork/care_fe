@@ -16,7 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { Link, usePathParams } from "raviger";
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -119,83 +119,82 @@ const ThreadItem = ({
 
 // Message item component
 
-const MessageItem = forwardRef<HTMLDivElement, { message: Message }>(
-  ({ message }, ref) => {
-    const authUser = useAuthUser();
-    const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
-    const isCurrentUser = authUser?.external_id === message.created_by.id;
+function MessageItem({
+  message,
+  ...props
+}: React.ComponentProps<"div"> & { message: Message }) {
+  const authUser = useAuthUser();
+  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+  const isCurrentUser = authUser?.external_id === message.created_by.id;
 
-    return (
+  return (
+    <div
+      className={cn(
+        "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
+        isCurrentUser ? "justify-end" : "justify-start",
+      )}
+      {...props}
+    >
       <div
         className={cn(
-          "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
-          isCurrentUser ? "justify-end" : "justify-start",
+          "flex max-w-[80%] items-start gap-3",
+          isCurrentUser ? "flex-row-reverse" : "flex-row",
         )}
-        ref={ref}
       >
+        <TooltipComponent content={message.created_by?.username}>
+          <Link
+            href={
+              facilityId
+                ? `/facility/${facilityId}/users/${message.created_by?.username}`
+                : `/users/${message.created_by?.username}`
+            }
+          >
+            <span className="flex pr-2">
+              <Avatar
+                name={message.created_by?.username}
+                imageUrl={message.created_by?.profile_picture_url}
+                className="size-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
+              />
+            </span>
+          </Link>
+        </TooltipComponent>
         <div
           className={cn(
-            "flex max-w-[80%] items-start gap-3",
-            isCurrentUser ? "flex-row-reverse" : "flex-row",
+            "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
+            isCurrentUser
+              ? "bg-white text-black rounded-tr-none border border-gray-200"
+              : "bg-gray-100 rounded-tl-none border border-gray-200",
           )}
         >
-          <TooltipComponent content={message.created_by?.username}>
-            <Link
-              href={
-                facilityId
-                  ? `/facility/${facilityId}/users/${message.created_by?.username}`
-                  : `/users/${message.created_by?.username}`
-              }
+          <p className="text-xs space-x-2 mb-1">
+            <span className="text-gray-700 font-medium">
+              {message.created_by.username}
+            </span>
+            <time
+              className="text-gray-500"
+              dateTime={message.created_date}
+              title={formatDateTime(message.created_date)}
             >
-              <span className="flex pr-2">
-                <Avatar
-                  name={message.created_by?.username}
-                  imageUrl={message.created_by?.profile_picture_url}
-                  className="size-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
-                />
-              </span>
-            </Link>
-          </TooltipComponent>
+              {formatRelative(message.created_date, new Date())}
+            </time>
+          </p>
           <div
             className={cn(
-              "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
+              "p-3 rounded-lg break-words",
               isCurrentUser
                 ? "bg-white text-black rounded-tr-none border border-gray-200"
                 : "bg-gray-100 rounded-tl-none border border-gray-200",
             )}
           >
-            <p className="text-xs space-x-2 mb-1">
-              <span className="text-gray-700 font-medium">
-                {message.created_by.username}
-              </span>
-              <time
-                className="text-gray-500"
-                dateTime={message.created_date}
-                title={formatDateTime(message.created_date)}
-              >
-                {formatRelative(message.created_date, new Date())}
-              </time>
-            </p>
-            <div
-              className={cn(
-                "p-3 rounded-lg break-words",
-                isCurrentUser
-                  ? "bg-white text-black rounded-tr-none border border-gray-200"
-                  : "bg-gray-100 rounded-tl-none border border-gray-200",
-              )}
-            >
-              {message.message && (
-                <Markdown content={message.message} className="text-sm" />
-              )}
-            </div>
+            {message.message && (
+              <Markdown content={message.message} className="text-sm" />
+            )}
           </div>
         </div>
       </div>
-    );
-  },
-);
-
-MessageItem.displayName = "MessageItem";
+    </div>
+  );
+}
 
 // New thread dialog component
 const NewThreadDialog = ({
@@ -437,10 +436,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   }, [inView, hasNextPage, fetchNextPage]);
 
   useEffect(() => {
-    recentMessageRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    recentMessageRef.current?.scrollIntoView({ block: "start" });
   }, [messagesData]);
 
   const handleCreateThread = (title: string) => {
