@@ -401,7 +401,7 @@ export function DiagnosisQuestion({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {selectedCode && (
-            <Label className="text-sm font-medium">
+            <Label className="text-md font-medium">
               {selectedCode.display}
             </Label>
           )}
