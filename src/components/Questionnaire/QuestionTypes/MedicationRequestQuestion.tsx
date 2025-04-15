@@ -526,7 +526,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
 
   const formatDoseRange = (range?: DoseRange) => {
     if (!range?.high?.value) return "";
-    return `${range.low?.value} ${range.low?.unit?.display} → ${range.high?.value} ${range.high?.unit?.display}`;
+    const formatValue = (value: number) =>
+      value.toString().includes(".") ? value.toFixed(2) : value.toString();
+    return `${formatValue(range.low?.value)} ${range.low?.unit?.display} → ${formatValue(range.high?.value)} ${range.high?.unit?.display}`;
   };
   interface DosageDialogProps {
     dosageRange: DoseRange;

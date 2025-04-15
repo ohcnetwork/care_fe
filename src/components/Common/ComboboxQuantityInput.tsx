@@ -45,18 +45,18 @@ export function ComboboxQuantityInput({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [activeIndex, setActiveIndex] = React.useState<number>(-1);
 
-  const showDropdown = /^\d+$/.test(inputValue);
+  const showDropdown = /^-?\d*\.?\d*$/.test(inputValue) && inputValue !== ".";
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (disabled) return;
     const value = e.target.value;
-    if (value === "" || /^\d+$/.test(value)) {
+    if (value === "" || /^-?\d*\.?\d*$/.test(value)) {
       setInputValue(value);
       setOpen(true);
       setActiveIndex(0);
-      if (value && selectedUnit) {
+      if (value && selectedUnit && value !== ".") {
         onChange({
-          value: parseInt(value, 10),
+          value: parseFloat(value),
           unit: selectedUnit,
         });
       }
@@ -86,7 +86,7 @@ export function ComboboxQuantityInput({
         setSelectedUnit(unit);
         setOpen(false);
         setActiveIndex(-1);
-        onChange({ value: parseInt(inputValue, 10), unit });
+        onChange({ value: parseFloat(inputValue), unit });
       }
     }
   };
@@ -145,7 +145,7 @@ export function ComboboxQuantityInput({
                       setOpen(false);
                       setActiveIndex(-1);
                       inputRef.current?.focus();
-                      onChange({ value: parseInt(inputValue, 10), unit });
+                      onChange({ value: parseFloat(inputValue), unit });
                     }}
                     className={cn(
                       "flex items-center gap-2",
