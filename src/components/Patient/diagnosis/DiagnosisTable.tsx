@@ -68,22 +68,12 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
               "rounded-md overflow-hidden",
               diagnosis.verification_status === "entered_in_error"
                 ? "opacity-50"
-                : diagnosis.category === "chronic_condition"
-                  ? "bg-yellow-50/50"
-                  : "bg-gray-50",
+                : "bg-gray-50",
             )}
           >
             <TableCell className="font-medium first:rounded-l-md">
               <div className="flex items-center gap-2">
                 {diagnosis.code.display}
-                {diagnosis.category === "chronic_condition" && (
-                  <Badge
-                    variant="outline"
-                    className="bg-yellow-100 text-yellow-700 text-xs"
-                  >
-                    {t("chronic_condition", { count: 1 })}
-                  </Badge>
-                )}
               </div>
             </TableCell>
             <TableCell>
