@@ -13,6 +13,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -29,6 +35,7 @@ import { Separator } from "@/components/ui/separator";
 import PageTitle from "@/components/Common/PageTitle";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
@@ -54,6 +61,7 @@ export default function DevicesList({ facilityId }: Props) {
     limit: 12,
     disableCache: true,
   });
+  const isMobile = useBreakpoints({ default: true, md: false });
 
   const handleToggleExpand = useCallback((locationId: string) => {
     setExpandedLocations((prev) => {
@@ -117,7 +125,7 @@ export default function DevicesList({ facilityId }: Props) {
 
   return (
     <div className="flex flex-col md:flex-row gap-6 h-full min-h-[calc(100vh-10rem)]">
-      {showLocationFilter && (
+      {showLocationFilter && !isMobile && (
         <div className="md:w-1/4 min-h-full">
           <Card className="h-full">
             <CardContent className="p-4 space-y-4">
@@ -145,6 +153,34 @@ export default function DevicesList({ facilityId }: Props) {
           </Card>
         </div>
       )}
+      {isMobile && (
+        <Dialog open={showLocationFilter} onOpenChange={setShowLocationFilter}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>{t("locations")}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              {allLocations?.results?.length &&
+                allLocations.results
+                  .filter(
+                    (loc) =>
+                      !loc.parent || Object.keys(loc.parent).length === 0,
+                  )
+                  .map((location) => (
+                    <LocationTreeNode
+                      key={location.id}
+                      location={location}
+                      facilityId={facilityId}
+                      selectedLocationId={qParams.locationId || null}
+                      expandedLocations={expandedLocations}
+                      onToggleExpand={handleToggleExpand}
+                      onSelect={handleLocationSelect}
+                    />
+                  ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <div className="flex-1 min-h-full">
         <Card className="h-full">
@@ -164,38 +200,40 @@ export default function DevicesList({ facilityId }: Props) {
                       })}
                 </Badge>
               </div>
-
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "flex items-center gap-2 flex-1 sm:flex-auto",
-                    showLocationFilter &&
-                      "bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-700 border-blue-700",
-                  )}
-                  onClick={() => setShowLocationFilter(!showLocationFilter)}
-                >
-                  <Funnel />
-                  {t("filter_by_locations")}
-                </Button>
-
-                {qParams.locationId && (
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <div className="flex gap-2 w-full sm:w-auto">
                   <Button
                     variant="outline"
-                    size="icon"
-                    onClick={() => updateQuery({ locationId: undefined })}
-                    title={t("clear_location_filter")}
+                    className={cn(
+                      "flex items-center gap-2 w-full sm:w-auto",
+                      showLocationFilter &&
+                        "bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-700 border-blue-700",
+                    )}
+                    onClick={() => setShowLocationFilter(!showLocationFilter)}
                   >
-                    <XIcon className="size-4" />
+                    <Funnel />
+                    {t("filter_by_locations")}
                   </Button>
-                )}
+
+                  {qParams.locationId && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => updateQuery({ locationId: undefined })}
+                      title={t("clear_location_filter")}
+                      className="w-full sm:w-auto"
+                    >
+                      <XIcon className="size-4" />
+                    </Button>
+                  )}
+                </div>
 
                 {pluginDevices.length > 0 ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild className="w-full sm:w-auto">
                       <Button
                         variant="white"
-                        className="flex items-center gap-2"
+                        className="flex items-center justify-between gap-2 w-full sm:w-auto"
                       >
                         {t("add_device")}
                         <CareIcon icon="l-angle-down" className="size-4" />
@@ -231,7 +269,12 @@ export default function DevicesList({ facilityId }: Props) {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <Button variant="white" asChild data-cy="add-device-button">
+                  <Button
+                    variant="white"
+                    asChild
+                    data-cy="add-device-button"
+                    className="w-full sm:w-auto"
+                  >
                     <Link href="/devices/create">
                       <PlusIcon className="size-4" />
                       {t("add_device")}
