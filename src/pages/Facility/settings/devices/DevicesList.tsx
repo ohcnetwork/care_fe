@@ -1,6 +1,11 @@
 import { CaretSortIcon, CubeIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { Funnel, PlusIcon, SearchIcon, XIcon } from "lucide-react";
+import {
+  FilterIcon as Funnel,
+  PlusIcon,
+  SearchIcon,
+  XIcon,
+} from "lucide-react";
 import { Link } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -50,6 +55,7 @@ import locationApi from "@/types/location/locationApi";
 interface Props {
   facilityId: string;
 }
+
 export default function DevicesList({ facilityId }: Props) {
   const { t } = useTranslation();
   const pluginDevices = usePluginDevices();
@@ -127,8 +133,8 @@ export default function DevicesList({ facilityId }: Props) {
     <div className="flex flex-col md:flex-row gap-6 h-full min-h-[calc(100vh-10rem)]">
       {showLocationFilter && !isMobile && (
         <div className="md:w-1/4 min-h-full">
-          <Card className="h-full">
-            <CardContent className="p-4 space-y-4">
+          <Card className="w-full h-full flex flex-col">
+            <CardContent className="p-4 space-y-4 flex-grow overflow-auto h-full">
               <div className="flex items-center justify-between py-2">
                 <h3 className="font-medium">{t("locations")}</h3>
               </div>
@@ -159,7 +165,7 @@ export default function DevicesList({ facilityId }: Props) {
             <DialogHeader>
               <DialogTitle>{t("locations")}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 pt-2">
+            <div className="space-y-4 pt-2 max-h-[60vh] overflow-auto">
               {allLocations?.results?.length &&
                 allLocations.results
                   .filter(
@@ -174,7 +180,10 @@ export default function DevicesList({ facilityId }: Props) {
                       selectedLocationId={qParams.locationId || null}
                       expandedLocations={expandedLocations}
                       onToggleExpand={handleToggleExpand}
-                      onSelect={handleLocationSelect}
+                      onSelect={(loc) => {
+                        handleLocationSelect(loc);
+                        setShowLocationFilter(false);
+                      }}
                     />
                   ))}
             </div>
@@ -182,10 +191,10 @@ export default function DevicesList({ facilityId }: Props) {
         </Dialog>
       )}
 
-      <div className="flex-1 min-h-full">
-        <Card className="h-full">
-          <CardContent className="space-y-6 p-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex-1 flex">
+        <Card className="w-full flex flex-col">
+          <CardContent className="p-4 flex flex-col h-full">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div className="flex items-center gap-4">
                 <PageTitle title={t("devices")} className="mt-2" />
                 <Badge
@@ -206,12 +215,14 @@ export default function DevicesList({ facilityId }: Props) {
                     variant="outline"
                     className={cn(
                       "flex items-center gap-2 w-full sm:w-auto",
-                      showLocationFilter &&
-                        "bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-700 border-blue-700",
+                      (!isMobile && showLocationFilter) ||
+                        (isMobile && qParams.locationId)
+                        ? "bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-700 border-blue-700"
+                        : "",
                     )}
                     onClick={() => setShowLocationFilter(!showLocationFilter)}
                   >
-                    <Funnel />
+                    <Funnel className="size-4" />
                     {t("filter_by_locations")}
                   </Button>
 
@@ -221,7 +232,6 @@ export default function DevicesList({ facilityId }: Props) {
                       size="icon"
                       onClick={() => updateQuery({ locationId: undefined })}
                       title={t("clear_location_filter")}
-                      className="w-full sm:w-auto"
                     >
                       <XIcon className="size-4" />
                     </Button>
@@ -284,7 +294,7 @@ export default function DevicesList({ facilityId }: Props) {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="relative flex-1">
                 <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
                 <Input
@@ -344,39 +354,41 @@ export default function DevicesList({ facilityId }: Props) {
               )}
             </div>
 
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <CardGridSkeleton count={6} />
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                  data-cy="devices-list"
-                >
-                  {devices?.results?.length ? (
-                    devices.results.map((device) => (
-                      <DeviceCard key={device.id} device={device} />
-                    ))
-                  ) : (
-                    <Card className="col-span-full">
-                      <CardContent className="p-6 text-center text-gray-500">
-                        {qParams.search_text ||
-                        qParams.care_type ||
-                        qParams.locationId
-                          ? t("no_devices_matching_filters")
-                          : t("no_devices_available")}
-                      </CardContent>
-                    </Card>
+            <div className="flex-grow overflow-auto">
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <CardGridSkeleton count={6} />
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                    data-cy="devices-list"
+                  >
+                    {devices?.results?.length ? (
+                      devices.results.map((device) => (
+                        <DeviceCard key={device.id} device={device} />
+                      ))
+                    ) : (
+                      <Card className="col-span-full">
+                        <CardContent className="p-6 text-center text-gray-500">
+                          {qParams.search_text ||
+                          qParams.care_type ||
+                          qParams.locationId
+                            ? t("no_devices_matching_filters")
+                            : t("no_devices_available")}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                  {devices && devices.count > resultsPerPage && (
+                    <div className="flex justify-center mt-6">
+                      <Pagination totalCount={devices.count} />
+                    </div>
                   )}
                 </div>
-                {devices && devices.count > resultsPerPage && (
-                  <div className="flex justify-center">
-                    <Pagination totalCount={devices.count} />
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
