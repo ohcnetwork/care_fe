@@ -184,20 +184,16 @@ export default function LocationSettings({
                 id="location-list-view"
                 className="data-[state=active]:text-primary"
               >
-                <div className="flex items-center gap-1">
-                  <CareIcon icon="l-list-ul" className="text-lg" />
-                  <span>{t("list")}</span>
-                </div>
+                <CareIcon icon="l-list-ul" className="text-lg" />
+                <span>{t("list")}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="map"
                 id="location-map-view"
                 className="data-[state=active]:text-primary"
               >
-                <div className="flex items-center gap-1">
-                  <CareIcon icon="l-map" className="text-lg" />
-                  <span>{t("map")}</span>
-                </div>
+                <CareIcon icon="l-map" className="text-lg" />
+                <span>{t("map")}</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
