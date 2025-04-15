@@ -233,7 +233,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel required>{t("patient_name")}</FormLabel>
+                    <FormLabel aria-required>{t("patient_name")}</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder={t("type_patient_name")} />
                     </FormControl>
@@ -246,7 +246,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 name="gender"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
-                    <FormLabel required>{t("sex")}</FormLabel>
+                    <FormLabel aria-required>{t("sex")}</FormLabel>
                     <FormControl>
                       <RadioGroup
                         {...field}
@@ -255,10 +255,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         className="flex gap-5 flex-wrap"
                       >
                         {GENDER_TYPES.map((g) => (
-                          <FormItem
-                            key={g.id}
-                            className="flex items-center space-x-2 space-y-0"
-                          >
+                          <FormItem key={g.id} className="flex">
                             <FormControl>
                               <RadioGroupItem
                                 value={g.id}
@@ -283,7 +280,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   name="ageInputType"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>
+                      <FormLabel aria-required>
                         {t("date_of_birth_or_age")}
                       </FormLabel>
                       <FormControl>
@@ -318,7 +315,9 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                     name="date_of_birth"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel required>{t("date_of_birth")}</FormLabel>
+                        <FormLabel aria-required>
+                          {t("date_of_birth")}
+                        </FormLabel>
                         <FormControl>
                           <DateField
                             date={
@@ -342,7 +341,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                     name="age"
                     render={() => (
                       <FormItem className="flex flex-col">
-                        <FormLabel required>{t("age")}</FormLabel>
+                        <FormLabel aria-required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
                             {...form.register("age")}
@@ -381,7 +380,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 name="address"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel required>{t("current_address")}</FormLabel>
+                    <FormLabel aria-required>{t("current_address")}</FormLabel>
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
@@ -395,7 +394,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 name="pincode"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel required>{t("pincode")}</FormLabel>
+                    <FormLabel aria-required>{t("pincode")}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>

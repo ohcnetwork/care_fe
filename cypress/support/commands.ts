@@ -88,11 +88,21 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
   "clickAndSelectOption",
-  (element: string, reference: string) => {
-    // Click to open the select dropdown
-    cy.get(element).click();
+  (
+    element: string,
+    reference: string,
+    options: { position?: "first" | "last" } = {},
+  ) => {
+    // Click to open the select dropdown based on position
+    if (options.position === "first") {
+      cy.get(element).first().click();
+    } else if (options.position === "last") {
+      cy.get(element).last().click();
+    } else {
+      cy.get(element).click();
+    }
 
-    // Select the option from the popover content
+    // Common selection logic
     cy.get('[role="listbox"]')
       .find('[role="option"]')
       .contains(reference)
@@ -171,12 +181,14 @@ Cypress.Commands.add(
       clearBeforeTyping?: boolean;
       skipVerification?: boolean;
       delay?: number;
+      position?: "first" | "last";
     } = {},
   ) => {
     const {
       clearBeforeTyping = false,
       skipVerification = false,
       delay = 0,
+      position,
     } = options;
     const inputField = cy.get(selector);
 
@@ -184,15 +196,19 @@ Cypress.Commands.add(
       inputField.clear();
     }
 
-    inputField
-      .scrollIntoView()
-      .should("be.visible")
-      .click()
-      .type(value, { delay })
-      .then(() => {
-        if (!skipVerification) {
-          cy.get(selector).should("have.value", value);
-        }
-      });
+    // Handle click based on position
+    if (position === "first") {
+      inputField.first().scrollIntoView().should("be.visible").click();
+    } else if (position === "last") {
+      inputField.last().scrollIntoView().should("be.visible").click();
+    } else {
+      inputField.scrollIntoView().should("be.visible").click();
+    }
+
+    inputField.type(value, { delay }).then(() => {
+      if (!skipVerification) {
+        cy.get(selector).should("have.value", value);
+      }
+    });
   },
 );

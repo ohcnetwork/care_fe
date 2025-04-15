@@ -450,7 +450,7 @@ export function ValueSetForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>{t("name")}</FormLabel>
+              <FormLabel aria-required>{t("name")}</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -464,7 +464,7 @@ export function ValueSetForm({
           name="slug"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>{t("slug")}</FormLabel>
+              <FormLabel aria-required>{t("slug")}</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -492,7 +492,7 @@ export function ValueSetForm({
           name="status"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>{t("status")}</FormLabel>
+              <FormLabel aria-required>{t("status")}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
