@@ -253,7 +253,8 @@ export function HistoricalRecordSelector<T>({
                               )
                             : "No date"}
                           {encounter.period.end
-                            ? format(
+                            ? " - " +
+                              format(
                                 new Date(encounter.period.end),
                                 "dd MMM, yyyy hh:mm a",
                               )
