@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1]
+        containers: [1, 2, 3]
     env:
       REACT_CARE_API_URL: https://careapi.ohc.network
 

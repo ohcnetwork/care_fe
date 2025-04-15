@@ -144,7 +144,7 @@ export default function ServiceHistoryForm({
           name="serviced_on"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel required>{t("service_date")}</FormLabel>
+              <FormLabel aria-required>{t("service_date")}</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -182,7 +182,7 @@ export default function ServiceHistoryForm({
           name="note"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>{t("service_notes")}</FormLabel>
+              <FormLabel aria-required>{t("service_notes")}</FormLabel>
               <FormControl>
                 <Textarea
                   data-cy="service-notes-input"
