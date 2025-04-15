@@ -291,7 +291,7 @@ export function EncounterQuestion({
               <AlertDialogContent className="w-full sm:max-w-xl">
                 <AlertDialogHeader>
                   <AlertDialogTitle>{t("confirm_discharge")}</AlertDialogTitle>
-                  <AlertDialogDescription className="space-y-2">
+                  <AlertDialogDescription className="space-y-2 text-left">
                     <p>{t("discharge_confirmation_message")}</p>
                     <ul className="list-disc list-inside space-y-1">
                       <li>{t("discharge_confirmation_status_change")}</li>
