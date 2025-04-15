@@ -441,7 +441,7 @@ export function MedicationRequestQuestion({
                             </div>
                           </div>
                           <CollapsibleContent>
-                            <div className="py-4 space-y-4 bg-white mx-2 mb-1">
+                            <div className="mt-2 px-1 py-4 space-y-4 bg-white mx-1 mb-1">
                               <MedicationRequestGridRow
                                 medication={medication}
                                 disabled={disabled}
@@ -653,7 +653,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </span>
       </div>
       {/* Dosage */}
-      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 px-1 py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -944,6 +944,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             placeholder={t("select_additional_instructions")}
             disabled={disabled || isReadOnly}
             data-cy="medication-instructions"
+            wrapTextForSmallScreen
           />
         )}
       </div>

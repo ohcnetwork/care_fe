@@ -45,20 +45,20 @@ export function ComboboxQuantityInput({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [activeIndex, setActiveIndex] = React.useState<number>(-1);
 
-  const showDropdown = /^-?\d*\.?\d*$/.test(inputValue) && inputValue !== ".";
+  const showDropdown = /^\d*\.?\d*$/.test(inputValue) && inputValue !== ".";
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (disabled) return;
     const value = e.target.value;
-    if (value === "" || /^-?\d*\.?\d*$/.test(value)) {
+    if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setInputValue(value);
       setOpen(true);
       setActiveIndex(0);
       if (value && selectedUnit && value !== ".") {
-        onChange({
-          value: parseFloat(value),
-          unit: selectedUnit,
-        });
+        const parsedValue = parseFloat(value);
+        if (!isNaN(parsedValue)) {
+          onChange({ value: parsedValue, unit: selectedUnit });
+        }
       }
     }
   };
@@ -86,7 +86,10 @@ export function ComboboxQuantityInput({
         setSelectedUnit(unit);
         setOpen(false);
         setActiveIndex(-1);
-        onChange({ value: parseFloat(inputValue), unit });
+        const parsedValue = parseFloat(inputValue);
+        if (!isNaN(parsedValue)) {
+          onChange({ value: parsedValue, unit });
+        }
       }
     }
   };
@@ -107,8 +110,8 @@ export function ComboboxQuantityInput({
             <Input
               ref={inputRef}
               type="text"
-              inputMode="numeric"
-              pattern="\d*"
+              inputMode="decimal"
+              pattern="\d*\.?\d*"
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
