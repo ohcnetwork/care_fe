@@ -214,6 +214,13 @@ export function DiagnosisQuestion({
     }
   }, [patientDiagnoses, patientChronicConditions]);
 
+  useEffect(() => {
+    console.log(
+      "questionnaireResponse",
+      questionnaireResponse.values?.[0]?.value,
+    );
+  }, [questionnaireResponse]);
+
   const handleCodeSelect = (code: Code) => {
     setSelectedCode(code);
     setNewDiagnosis((prev) => ({ ...prev, code }));
@@ -334,7 +341,10 @@ export function DiagnosisQuestion({
   ) => {
     const newDiagnoses = [
       ...sortedDiagnoses,
-      ...selectedDiagnoses.map(({ id: _id, ...diagnosis }) => diagnosis),
+      ...selectedDiagnoses.map(({ id: _id, ...diagnosis }) => ({
+        ...diagnosis,
+        dirty: true,
+      })),
     ];
     updateQuestionnaireResponseCB(
       [{ type: "diagnosis", value: newDiagnoses }],
