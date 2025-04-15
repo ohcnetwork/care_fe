@@ -145,9 +145,11 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
               <div className="flex justify-between">
                 <span className="text-gray-500">{t("diet_preference")}</span>
                 <span className="font-semibold text-gray-950">
-                  {t(
-                    `encounter_diet_preference__${encounter.hospitalization?.diet_preference}`,
-                  )}
+                  {encounter.hospitalization?.diet_preference
+                    ? t(
+                        `encounter_diet_preference__${encounter.hospitalization?.diet_preference}`,
+                      )
+                    : "--"}
                 </span>
               </div>
               <div className="flex justify-between">
