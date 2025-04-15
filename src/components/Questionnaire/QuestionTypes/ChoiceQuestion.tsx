@@ -13,7 +13,6 @@ import {
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { properCase } from "@/Utils/utils";
 import { Code } from "@/types/questionnaire/code";
 import type {
   QuestionnaireResponse,
@@ -107,7 +106,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                 value={option.value.toString()}
                 className="whitespace-normal break-words py-3"
               >
-                {properCase(option.display || option.value)}
+                {option.display || option.value}
               </SelectItem>
             ))}
           </SelectContent>
@@ -125,14 +124,14 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                 className="cursor-pointer"
                 key={option.value.toString()}
               >
-                <Card className="shadow-sm rounded-sm border-1 p-3 sm:p-6 transition-all hover:bg-gray-50/90 [&:has([data-state=checked])]:border-primary w-full">
-                  <div className="flex items-center space-x-2">
+                <Card className="shadow-none rounded-md border-1 p-3 transition-all hover:bg-gray-50/90 [&:has([data-state=checked])]:border-primary w-full">
+                  <div className="flex flex-row items-center gap-2">
                     <RadioGroupItem
                       value={option.value.toString()}
                       id={option.value.toString()}
                     />
-                    <div className="font-medium">
-                      {properCase(option.display || option.value)}
+                    <div className="font-medium leading-5">
+                      {option.display || option.value}
                     </div>
                   </div>
                 </Card>
