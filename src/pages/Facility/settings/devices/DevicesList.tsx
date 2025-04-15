@@ -192,7 +192,7 @@ export default function DevicesList({ facilityId }: Props) {
 
                 {pluginDevices.length > 0 ? (
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild className="lg:w-auto w-full">
+                    <DropdownMenuTrigger asChild className="w-full sm:w-auto">
                       <Button
                         variant="white"
                         className="flex items-center gap-2"
@@ -203,7 +203,7 @@ export default function DevicesList({ facilityId }: Props) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
-                      className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                      className="w-[var(--radix-dropdown-menu-trigger-width)] md:w-auto"
                     >
                       {pluginDevices.map((pluginDevice) => {
                         const DeviceIcon = pluginDevice.icon || CubeIcon;
