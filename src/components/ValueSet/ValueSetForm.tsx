@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
+import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -63,6 +64,10 @@ function ConceptFields({
     name: `compose.${type}.${nestIndex}.concept`,
   });
 
+  const [verifyingIndex, setVerifyingIndex] = React.useState<number | null>(
+    null,
+  );
+
   const lookupMutation = useMutation({
     mutationFn: mutate(valuesetApi.lookup, {
       silent: true, // Suppress default error handling since we have custom handling
@@ -83,12 +88,19 @@ function ConceptFields({
             response.metadata.display,
             { shouldValidate: true },
           );
+          parentForm.setValue(
+            `compose.${type}.${nestIndex}.concept.${conceptIndex}.isVerified` as any,
+            true,
+            { shouldValidate: true },
+          );
         }
         toast.success("Code verified successfully");
       }
+      setVerifyingIndex(null);
     },
     onError: () => {
       toast.error("Failed to verify code");
+      setVerifyingIndex(null);
     },
   });
 
@@ -102,7 +114,7 @@ function ConceptFields({
       toast.error("Please select a system and enter a code first");
       return;
     }
-
+    setVerifyingIndex(index);
     lookupMutation.mutate({ system, code });
   };
 
@@ -139,6 +151,11 @@ function ConceptFields({
                         "",
                         { shouldValidate: true },
                       );
+                      parentForm.setValue(
+                        `compose.${type}.${nestIndex}.concept.${index}.isVerified` as any,
+                        false,
+                        { shouldValidate: true },
+                      );
                     }}
                   />
                 </FormControl>
@@ -161,15 +178,25 @@ function ConceptFields({
               </FormItem>
             )}
           />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => handleVerify(index)}
-            disabled={lookupMutation.isPending}
-          >
-            <UpdateIcon className="size-4" />
-          </Button>
+          {parentForm.getValues(
+            `compose.${type}.${nestIndex}.concept.${index}.isVerified` as any,
+          ) ? (
+            <span title="Verified">
+              <CareIcon icon="l-check" className="size-4 text-green-500" />
+            </span>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => handleVerify(index)}
+              disabled={verifyingIndex === index && lookupMutation.isPending}
+            >
+              <UpdateIcon
+                className={`size-4 ${verifyingIndex === index && lookupMutation.isPending ? "animate-spin" : ""}`}
+              />
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"
