@@ -6,10 +6,11 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Input } from "@/components/ui/input";
 
-const PasswordInput = React.forwardRef<
-  HTMLInputElement,
-  React.ComponentProps<"input">
->(({ className, ...props }, ref) => {
+function PasswordInput({
+  className,
+  ref,
+  ...props
+}: React.ComponentProps<"input">) {
   const [showPassword, setShowPassword] = React.useState(false);
   return (
     <div className="relative">
@@ -28,7 +29,7 @@ const PasswordInput = React.forwardRef<
       </button>
     </div>
   );
-});
+}
 
 PasswordInput.displayName = "PasswordInput";
 
