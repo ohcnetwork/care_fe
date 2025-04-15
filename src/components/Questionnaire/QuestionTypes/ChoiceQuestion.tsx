@@ -98,7 +98,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                 value={option.value.toString()}
                 className="whitespace-normal break-words py-3"
               >
-                {option.display || option.value}
+                {option.value}
               </SelectItem>
             ))}
           </SelectContent>
