@@ -3,73 +3,62 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-const Tabs = TabsPrimitive.Root;
-
-const TabsList = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn(
-      "inline-flex h-9 items-center justify-center rounded-lg bg-gray-100 p-1 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
-      className,
-    )}
-    {...props}
-  />
-));
-TabsList.displayName = TabsPrimitive.List.displayName;
-
-const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-white transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-950 data-[state=active]:shadow-sm dark:ring-offset-gray-950 dark:focus-visible:ring-gray-300 dark:data-[state=active]:bg-gray-950 dark:data-[state=active]:text-gray-50",
-      className,
-    )}
-    {...props}
-  />
-));
-TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
-
-const TabsContent = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Content
-    ref={ref}
-    className={cn(
-      "mt-2 ring-offset-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 dark:ring-offset-gray-950 dark:focus-visible:ring-gray-300",
-      className,
-    )}
-    {...props}
-  />
-));
-TabsContent.displayName = TabsPrimitive.Content.displayName;
-
-interface SectionTabsProps {
-  activeTab: string;
-  onChange: (newTab: string) => void;
-  tabs: { label: string; value: string }[];
+function Tabs({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+  return (
+    <TabsPrimitive.Root
+      data-slot="tabs"
+      className={cn("flex flex-col gap-2", className)}
+      {...props}
+    />
+  );
 }
 
-const SectionTabs = (props: SectionTabsProps) => (
-  <Tabs value={props.activeTab} onValueChange={props.onChange} className="mt-3">
-    <TabsList className="h-auto mb-4 bg-transparent p-0 border-b border-b-gray-200 w-full justify-start gap-4 overflow-auto ">
-      {props.tabs.map(({ label, value }) => (
-        <TabsTrigger
-          key={value}
-          className=" bg-transparent px-1 py-1 data-[state=active]:bg-transparent border-b-2 text-base font-semibold text-gray-500 border-b-transparent transition-all rounded-none data-[state=active]:shadow-none data-[state=active]:border-b-primary-500 data-[state=active]:text-primary-500"
-          value={value}
-        >
-          {label}
-        </TabsTrigger>
-      ))}
-    </TabsList>
-  </Tabs>
-);
+function TabsList({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.List>) {
+  return (
+    <TabsPrimitive.List
+      data-slot="tabs-list"
+      className={cn(
+        "bg-gray-100 text-gray-500 inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px] dark:bg-gray-800 dark:text-gray-400",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, SectionTabs };
+function TabsTrigger({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+  return (
+    <TabsPrimitive.Trigger
+      data-slot="tabs-trigger"
+      className={cn(
+        "data-[state=active]:bg-white dark:data-[state=active]:text-gray-950 focus-visible:border-gray-950 focus-visible:ring-gray-950/50 focus-visible:outline-ring dark:data-[state=active]:border-gray-200 dark:data-[state=active]:bg-gray-200/30 text-gray-950 dark:text-gray-500 inline-flex h-[calc(100%-1px)] items-center justify-center gap-1.5 rounded-md border border-gray-200 border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:data-[state=active]:bg-gray-950 dark:dark:data-[state=active]:text-gray-50 dark:focus-visible:border-gray-300 dark:focus-visible:ring-gray-300/50 dark:dark:data-[state=active]:border-gray-800 dark:dark:data-[state=active]:bg-gray-800/30 dark:text-gray-50 dark:dark:text-gray-400 dark:border-gray-800",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+function TabsContent({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Content>) {
+  return (
+    <TabsPrimitive.Content
+      data-slot="tabs-content"
+      className={cn("flex-1 outline-none", className)}
+      {...props}
+    />
+  );
+}
+
+export { Tabs, TabsList, TabsTrigger, TabsContent };

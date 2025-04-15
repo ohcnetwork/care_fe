@@ -249,7 +249,7 @@ export default function LinkConsentDialog({
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel required>{t("consent_date")}</FormLabel>
+                    <FormLabel aria-required>{t("consent_date")}</FormLabel>
                     <DatePicker date={field.value} onChange={field.onChange} />
                     <FormMessage />
                   </FormItem>
@@ -285,7 +285,7 @@ export default function LinkConsentDialog({
                 name="decision"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("consent_decision")}</FormLabel>
+                    <FormLabel aria-required>{t("consent_decision")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}

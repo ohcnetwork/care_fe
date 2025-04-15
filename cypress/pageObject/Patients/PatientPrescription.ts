@@ -1,9 +1,9 @@
 interface MedicationDetails {
-  medicineName: string;
-  dosage: string;
-  frequency: string;
-  instructions: string;
-  notes: string;
+  medicineName?: string;
+  dosage?: string;
+  frequency?: string;
+  instructions?: string;
+  notes?: string;
 }
 
 export class PatientPrescription {
@@ -17,16 +17,39 @@ export class PatientPrescription {
   }
   addMedication(details: MedicationDetails) {
     const { medicineName, dosage, frequency, instructions, notes } = details;
-    cy.typeAndSelectOption(
-      '[data-cy="add-medication-request"]',
-      medicineName,
-      false,
-    );
-    cy.get('[data-cy="dosage"]').click().type(dosage);
-    cy.get('[role="option"]').contains(dosage).click();
-    cy.clickAndSelectOption('[data-cy="frequency"]', frequency);
-    cy.clickAndSelectOption('[data-cy="instructions"]', instructions);
-    cy.typeIntoField('[data-cy="notes"]', notes, { skipVerification: true });
+
+    if (medicineName) {
+      cy.typeAndSelectOption(
+        '[data-cy="add-medication-request"]',
+        medicineName,
+        false,
+      );
+    }
+
+    if (dosage) {
+      cy.get('[data-cy="dosage"]').last().click().type(dosage);
+      cy.get('[role="option"]').contains(dosage).click();
+    }
+
+    if (frequency) {
+      cy.clickAndSelectOption('[data-cy="frequency"]', frequency, {
+        position: "last",
+      });
+    }
+
+    if (instructions) {
+      cy.clickAndSelectOption('[data-cy="instructions"]', instructions, {
+        position: "last",
+      });
+    }
+
+    if (notes) {
+      cy.typeIntoField('[data-cy="notes"]', notes, {
+        position: "last",
+        skipVerification: true,
+      });
+    }
+
     return this;
   }
   verifyMedication(details: MedicationDetails) {
@@ -41,7 +64,11 @@ export class PatientPrescription {
     return this;
   }
   removeMedication() {
-    cy.get('[data-cy="remove-medication"]').first().click();
+    cy.get('[data-cy="remove-medication"]')
+      .filter(":visible")
+      .not(":disabled")
+      .first()
+      .click();
     cy.verifyAndClickElement('[data-cy="confirm-remove-medication"]', "Remove");
     return this;
   }

@@ -275,7 +275,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                             (o) => o.text === statusOption,
                           )?.icon || "l-folder-open"
                         }
-                        className="mr-2 size-4"
+                        className="size-4"
                       />
                       {t(`resource_status__${statusOption}`)}
                     </TabsTrigger>
