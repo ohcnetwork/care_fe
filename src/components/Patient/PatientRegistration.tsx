@@ -404,6 +404,7 @@ export default function PatientRegistration(
                             form.setValue(
                               "emergency_phone_number",
                               value || "",
+                              { shouldDirty: true },
                             );
                           }
                         }}
@@ -531,9 +532,7 @@ export default function PatientRegistration(
               <Tabs
                 value={form.watch("age_or_dob")}
                 onValueChange={(v) => {
-                  form.setValue("age_or_dob", v as "dob" | "age", {
-                    shouldDirty: true,
-                  });
+                  form.setValue("age_or_dob", v as "dob" | "age");
                   if (v === "age") {
                     form.setValue("date_of_birth", undefined);
                   } else {
@@ -713,7 +712,9 @@ export default function PatientRegistration(
                             shouldDirty: true,
                           });
                           if (form.getValues("same_address")) {
-                            form.setValue("permanent_address", e.target.value);
+                            form.setValue("permanent_address", e.target.value, {
+                              shouldDirty: true,
+                            });
                           }
                         }}
                         data-cy="current-address-input"
