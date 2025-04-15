@@ -196,7 +196,7 @@ export interface EncounterRequest {
   facility: string;
 }
 
-export const completedEncounterStatus = ["completed", "discharged"];
+export const completedEncounterStatus = ["completed"];
 export const inactiveEncounterStatus = [
   ...["cancelled", "entered_in_error", "discontinued"],
   ...completedEncounterStatus,

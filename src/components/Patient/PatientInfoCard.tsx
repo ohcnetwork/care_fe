@@ -195,7 +195,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         >
                           {completedEncounterStatus.includes(
                             props.encounter.status,
-                          ) ? (
+                          ) || props.encounter.status === "discharged" ? (
                             <CircleCheck
                               className="size-4 text-green-300"
                               fill="green"
