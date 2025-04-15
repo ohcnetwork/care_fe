@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   ArchiveIcon,
+  Eye,
   FileCheckIcon,
   HelpCircle,
   NotepadTextDashedIcon,
@@ -170,8 +171,17 @@ const RenderCard = ({
                     }
                     className="hover:bg-primary/5"
                   >
-                    <Pencil className="size-4 mr-0" />
-                    {t("edit")}
+                    {valueset.is_system_defined ? (
+                      <>
+                        <Eye className="size-4 mr-0" />
+                        {t("view")}
+                      </>
+                    ) : (
+                      <>
+                        <Pencil className="size-4 mr-0" />
+                        {t("edit")}
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
@@ -274,8 +284,17 @@ const RenderTable = ({
                       navigate(`/admin/valuesets/${valueset.slug}/edit`)
                     }
                   >
-                    <Pencil className="size-4 mr-0" />
-                    {t("edit")}
+                    {valueset.is_system_defined ? (
+                      <>
+                        <Eye className="size-4 mr-0" />
+                        {t("view")}
+                      </>
+                    ) : (
+                      <>
+                        <Pencil className="size-4 mr-0" />
+                        {t("edit")}
+                      </>
+                    )}
                   </Button>
                 </TableCell>
               </TableRow>

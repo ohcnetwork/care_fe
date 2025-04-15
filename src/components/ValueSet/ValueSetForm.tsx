@@ -517,7 +517,11 @@ export function ValueSetForm({
           <RuleFields type="include" form={form} />
           <RuleFields type="exclude" form={form} />
         </div>
-
+        {isSystemDefined && (
+          <div className="text-red-600 text-sm flex justify-end">
+            {t("saving_is_disabled_for_system_valuesets")}
+          </div>
+        )}
         <div className="flex gap-2 w-full justify-end">
           <Button
             variant="outline"
@@ -527,15 +531,16 @@ export function ValueSetForm({
           >
             {t("cancel")}
           </Button>
-          {!isSystemDefined && (
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={isSubmitting || !form.formState.isDirty}
-            >
-              {isSubmitting ? t("saving") : t("save_valueset")}
-            </Button>
-          )}
+
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={
+              isSystemDefined || isSubmitting || !form.formState.isDirty
+            }
+          >
+            {isSubmitting ? t("saving") : t("save_valueset")}
+          </Button>
         </div>
       </form>
     </Form>
