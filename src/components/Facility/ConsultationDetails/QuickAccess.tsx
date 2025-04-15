@@ -224,19 +224,17 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
                       </span>
                     </div>
                   )}
-                {encounter.status !== "discharged" && (
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="font-semibold rounded-md border-gray-400 text-gray-950"
+                <Button
+                  asChild
+                  variant="outline"
+                  className="font-semibold rounded-md border-gray-400 text-gray-950"
+                >
+                  <Link
+                    href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
                   >
-                    <Link
-                      href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
-                    >
-                      {t("update_hospitalisation_details")}
-                    </Link>
-                  </Button>
-                )}
+                    {t("update_hospitalisation_details")}
+                  </Link>
+                </Button>
               </div>
             </section>
           </>
