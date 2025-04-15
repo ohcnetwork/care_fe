@@ -288,7 +288,7 @@ export function EncounterQuestion({
                   {t("mark_for_discharge")}
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent className="w-full sm:max-w-xl">
                 <AlertDialogHeader>
                   <AlertDialogTitle>{t("confirm_discharge")}</AlertDialogTitle>
                   <AlertDialogDescription className="space-y-2">
