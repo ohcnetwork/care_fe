@@ -397,7 +397,9 @@ export default function PatientRegistration(
                       <PhoneInput
                         {...field}
                         onChange={(value) => {
-                          form.setValue("phone_number", value || "");
+                          form.setValue("phone_number", value || "", {
+                            shouldDirty: true,
+                          });
                           if (form.getValues("same_phone_number")) {
                             form.setValue(
                               "emergency_phone_number",
@@ -529,7 +531,9 @@ export default function PatientRegistration(
               <Tabs
                 value={form.watch("age_or_dob")}
                 onValueChange={(v) => {
-                  form.setValue("age_or_dob", v as "dob" | "age");
+                  form.setValue("age_or_dob", v as "dob" | "age", {
+                    shouldDirty: true,
+                  });
                   if (v === "age") {
                     form.setValue("date_of_birth", undefined);
                   } else {
@@ -593,6 +597,7 @@ export default function PatientRegistration(
                                 e.target.value
                                   ? Number(e.target.value)
                                   : (null as unknown as number),
+                                { shouldDirty: true },
                               )
                             }
                             data-cy="age-input"
@@ -704,7 +709,9 @@ export default function PatientRegistration(
                       <Textarea
                         {...field}
                         onChange={(e) => {
-                          form.setValue("address", e.target.value);
+                          form.setValue("address", e.target.value, {
+                            shouldDirty: true,
+                          });
                           if (form.getValues("same_address")) {
                             form.setValue("permanent_address", e.target.value);
                           }
@@ -777,7 +784,8 @@ export default function PatientRegistration(
                             "pincode",
                             e.target.value
                               ? Number(e.target.value)
-                              : (undefined as unknown as number), // intentionally setting to undefined, when the value is empty to avoid 0 in the input field
+                              : (undefined as unknown as number),
+                            { shouldDirty: true },
                           )
                         }
                         data-cy="pincode-input"
@@ -803,7 +811,9 @@ export default function PatientRegistration(
                           }))}
                           {...field}
                           onChange={(value) =>
-                            form.setValue("nationality", value)
+                            form.setValue("nationality", value, {
+                              shouldDirty: true,
+                            })
                           }
                           data-cy="nationality-input"
                         />
@@ -828,7 +838,9 @@ export default function PatientRegistration(
                             selected={selectedLevels}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
-                              form.setValue("geo_organization", value)
+                              form.setValue("geo_organization", value, {
+                                shouldDirty: true,
+                              })
                             }
                           />
                         </FormControl>
