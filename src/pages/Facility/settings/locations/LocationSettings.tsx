@@ -21,6 +21,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
+import { getParentChain } from "@/pages/Facility/locations/Utils";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -32,18 +33,6 @@ import { LocationCard } from "./components/LocationCard";
 interface LocationSettingsProps {
   facilityId: string;
   locationId?: string;
-}
-
-export function getParentChain(location: LocationListType): Set<string> {
-  const parentIds = new Set<string>();
-  let current = location.parent;
-
-  while (current) {
-    parentIds.add(current.id);
-    current = current.parent;
-  }
-
-  return parentIds;
 }
 
 export default function LocationSettings({

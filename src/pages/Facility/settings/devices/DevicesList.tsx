@@ -33,9 +33,9 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
+import { getParentChain } from "@/pages/Facility/locations/Utils";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
 import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
-import { getParentChain } from "@/pages/Facility/settings/locations/LocationSettings";
 import deviceApi from "@/types/device/deviceApi";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
