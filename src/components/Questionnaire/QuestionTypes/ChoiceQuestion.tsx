@@ -13,6 +13,7 @@ import {
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import { properCase } from "@/Utils/utils";
 import { Code } from "@/types/questionnaire/code";
 import type {
   QuestionnaireResponse,
@@ -106,13 +107,13 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                 value={option.value.toString()}
                 className="whitespace-normal break-words py-3"
               >
-                {option.display || option.value}
+                {properCase(option.display || option.value)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       ) : (
-        <div className="mt-2 mx-1 mr-4">
+        <div className="mt-2">
           <RadioGroup
             onValueChange={handleValueChange}
             disabled={disabled}
@@ -124,14 +125,18 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                 className="cursor-pointer"
                 key={option.value.toString()}
               >
-                <Card className="shadow-none rounded-md border-1 p-3 transition-all hover:bg-gray-50/90 [&:has([data-state=checked])]:border-primary w-full">
+                <Card
+                  className="shadow-none rounded-md border-1 border-gray-300 p-2 transition-all hover:bg-gray-50/90 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:border-1 [&:has([data-state=checked])]:bg-gray-200 w-full"
+                  role="presentation"
+                >
                   <div className="flex flex-row items-center gap-2">
                     <RadioGroupItem
                       value={option.value.toString()}
                       id={option.value.toString()}
+                      className="sr-only"
                     />
                     <div className="font-medium leading-5">
-                      {option.display || option.value}
+                      {properCase(option.display || option.value)}
                     </div>
                   </div>
                 </Card>
