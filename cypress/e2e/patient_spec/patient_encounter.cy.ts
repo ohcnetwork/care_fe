@@ -5,6 +5,10 @@ import {
   generateRandomCharacter,
   getRandomAllergyCriticality,
   getRandomAllergyStatus,
+  getRandomConditionName,
+  getRandomConditionStatus,
+  getRandomDiagnosisVerification,
+  getRandomSymptomSeverity,
 } from "@/utils/commonUtils";
 import { getRandomAllergyName } from "@/utils/commonUtils";
 import { viewPort } from "@/utils/viewPort";
@@ -104,7 +108,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
   it("Create and edit a symptom and verify the changes", () => {
     facilityCreation.selectFacility("GHC Payyanur");
     const createSymptomsDetails = {
-      symptomName: "Adenosine deaminase 2 deficiency",
+      symptomName: getRandomConditionName(),
       severity: "Moderate",
       status: "Active",
     };
@@ -119,8 +123,8 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
 
     const updateSymptomsDetails = {
       allergyName: createSymptomsDetails.symptomName,
-      severity: "Mild",
-      status: "Recurrence",
+      severity: getRandomSymptomSeverity(),
+      status: getRandomConditionStatus(),
       notes: "Edit symptom notes",
     };
 
@@ -132,5 +136,42 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientEncounter.clickEditSymptoms().deleteSymptom();
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifySymptomDelete(createSymptomsDetails.symptomName);
+  });
+
+  it("Create and edit a diagnosis and verify the changes", () => {
+    facilityCreation.selectFacility("GHC Payyanur");
+    const createDiagnosisDetails = {
+      diagnosisName: getRandomConditionName(),
+      verification: "Confirmed",
+      status: "Active",
+    };
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails()
+      .clickEditDiagnosis()
+      .addDiagnosis(createDiagnosisDetails);
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifyDiagnoses(createDiagnosisDetails);
+
+    const updateDiagnosisDetails = {
+      allergyName: createDiagnosisDetails.diagnosisName,
+      verification: getRandomDiagnosisVerification(),
+      status: getRandomConditionStatus(),
+      notes: "Edit diagnosis notes",
+    };
+
+    patientEncounter
+      .clickEditDiagnosis()
+      .updateDiagnosis(updateDiagnosisDetails);
+
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifyDiagnoses(updateDiagnosisDetails);
+
+    patientEncounter.clickEditDiagnosis().deleteDiagnosis();
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifyDiagnosisDelete(
+      createDiagnosisDetails.diagnosisName,
+    );
   });
 });

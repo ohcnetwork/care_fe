@@ -5,6 +5,13 @@ interface AllergyDetails {
   notes?: string;
 }
 
+interface DiagnosisDetails {
+  diagnosisName?: string;
+  status?: string;
+  verification?: string;
+  notes?: string;
+}
+
 interface SymptomDetails {
   symptomName?: string;
   severity?: string;
@@ -132,8 +139,7 @@ export class PatientEncounter {
   deleteSymptom() {
     cy.get('[data-cy="options"]').last().scrollIntoView();
     cy.get('[data-cy="options"]').last().click();
-    cy.get('[data-cy="remove-symptom"]').last().scrollIntoView();
-    cy.get('[data-cy="remove-symptom"]').last().click();
+    cy.get('[data-cy="remove-symptom"]').click();
   }
 
   verifySymptomDelete(name: string) {
@@ -145,16 +151,85 @@ export class PatientEncounter {
 
   verifySymptom(details: SymptomDetails) {
     const { symptomName, severity, status, notes } = details;
-    cy.verifyContentPresence('[data-cy="symptoms-table"]', [
-      symptomName,
-      severity,
-      status,
-    ]);
+    if (symptomName && severity && status) {
+      cy.verifyContentPresence('[data-cy="symptoms-table"]', [
+        symptomName,
+        severity,
+        status,
+      ]);
+    }
 
     if (notes) {
       cy.get('[data-cy="symptom-see-note"]').first().scrollIntoView();
       cy.get('[data-cy="symptom-see-note"]').first().click();
       cy.get('[data-cy="symptom-note"]').first().should("contain", notes);
+    }
+
+    return this;
+  }
+
+  clickEditDiagnosis() {
+    cy.verifyAndClickElement('[data-cy="edit-diagnoses"]', "Edit");
+    return this;
+  }
+
+  addDiagnosis(details: DiagnosisDetails) {
+    const { diagnosisName } = details;
+    cy.get('[data-cy="add-diagnoses"]').scrollIntoView();
+    cy.typeAndSelectOption('[data-cy="add-diagnoses"]', diagnosisName, false);
+    cy.verifyAndClickElement('[data-cy="add-diagnosis"]', "Add Diagnosis");
+    return this;
+  }
+
+  updateDiagnosis(details: DiagnosisDetails) {
+    const { verification, status, notes } = details;
+    if (verification) {
+      cy.clickAndSelectOption('[data-cy="verification"]', verification, {
+        position: "last",
+      });
+    }
+    if (status) {
+      cy.clickAndSelectOption('[data-cy="diagnosis-status"]', status, {
+        position: "last",
+      });
+    }
+    if (notes) {
+      cy.get('[data-cy="diagnosis-options"]').last().click();
+      cy.get('[data-cy="add-diagnosis-notes"]').last().click();
+      cy.typeIntoField('[data-cy="diagnosis-notes"]', notes, {
+        position: "last",
+        skipVerification: true,
+      });
+    }
+  }
+
+  deleteDiagnosis() {
+    cy.clickAndSelectOption(
+      '[data-cy="diagnosis-status"]',
+      "Entered in Error",
+      {
+        position: "last",
+      },
+    );
+  }
+
+  verifyDiagnosisDelete(name: string) {
+    cy.get('[data-cy="diagnoses-table"]').then(($el) => {
+      cy.wrap($el).should("not.contain", name);
+    });
+  }
+
+  verifyDiagnoses(details: DiagnosisDetails) {
+    const { diagnosisName, verification, status, notes } = details;
+    cy.verifyContentPresence('[data-cy="diagnoses-table"]', [
+      diagnosisName,
+      verification,
+      status,
+    ]);
+
+    if (notes) {
+      cy.get('[data-cy="diagnosis-see-note"]').last().click();
+      cy.get('[data-cy="diagnosis-note"]').last().should("contain", notes);
     }
 
     return this;

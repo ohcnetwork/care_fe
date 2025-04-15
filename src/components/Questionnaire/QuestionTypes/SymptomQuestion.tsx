@@ -371,15 +371,13 @@ const SymptomRow = React.memo(function SymptomRow({
                   <div className="block text-sm font-medium text-gray-500 mb-1">
                     {t("notes")}
                   </div>
-                  <div data-cy="notes">
-                    <Input
-                      type="text"
-                      placeholder={t("add_notes_about_symptom")}
-                      value={symptom.note || ""}
-                      onChange={handleNotesChange}
-                      disabled={disabled}
-                    />
-                  </div>
+                  <Input
+                    type="text"
+                    placeholder={t("add_notes_about_symptom")}
+                    value={symptom.note || ""}
+                    onChange={handleNotesChange}
+                    disabled={disabled}
+                  />
                 </div>
               </CardContent>
             </CollapsibleContent>
@@ -465,7 +463,7 @@ const SymptomRow = React.memo(function SymptomRow({
       </TableRow>
       {showNotes && (
         <TableRow>
-          <TableCell colSpan={5} className="px-3 pb-3">
+          <TableCell colSpan={5} className="px-3 pb-3" data-cy="notes">
             <Input
               type="text"
               placeholder={t("add_notes_about_symptom")}

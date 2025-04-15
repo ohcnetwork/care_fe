@@ -99,7 +99,9 @@ const DiagnosisListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
+      <CardContent className="px-2 pb-2" data-cy="diagnoses-table">
+        {children}
+      </CardContent>
     </Card>
   );
 };

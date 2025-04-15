@@ -6,7 +6,13 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -56,6 +62,8 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import {
+  ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
+  DIAGNOSIS_CATEGORY,
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
@@ -132,11 +140,24 @@ export function DiagnosisQuestion({
   });
   const isMobile = useBreakpoints({ default: true, md: false });
 
-  // Sort diagnoses by date
+  // Sort diagnoses: chronic conditions first, then by date
   const sortedDiagnoses = useMemo(() => {
     const diagnoses =
       (questionnaireResponse.values?.[0]?.value as DiagnosisRequest[]) || [];
     return [...diagnoses].sort((a, b) => {
+      // First sort by category (chronic conditions first)
+      if (
+        a.category === "chronic_condition" &&
+        b.category !== "chronic_condition"
+      )
+        return -1;
+      if (
+        a.category !== "chronic_condition" &&
+        b.category === "chronic_condition"
+      )
+        return 1;
+
+      // Then sort by date within each category
       const dateA = a.onset?.onset_datetime
         ? new Date(a.onset.onset_datetime)
         : new Date();
@@ -154,7 +175,21 @@ export function DiagnosisQuestion({
       queryParams: {
         encounter: encounterId,
         limit: 100,
-        category: "encounter_diagnosis,chronic_condition",
+        category: "encounter_diagnosis",
+        exclude_verification_status: "entered_in_error",
+      },
+    }),
+    enabled: !isPreview,
+  });
+
+  const { data: patientChronicConditions } = useQuery({
+    queryKey: ["chronic_condition", patientId],
+    queryFn: query(diagnosisApi.listDiagnosis, {
+      pathParams: { patientId },
+      queryParams: {
+        category: "chronic_condition",
+        limit: 100,
+        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
         exclude_verification_status: "entered_in_error",
       },
     }),
@@ -162,18 +197,21 @@ export function DiagnosisQuestion({
   });
 
   useEffect(() => {
-    if (patientDiagnoses?.results) {
+    if (patientDiagnoses?.results && patientChronicConditions?.results) {
       updateQuestionnaireResponseCB(
         [
           {
             type: "diagnosis",
-            value: patientDiagnoses.results.map(convertToDiagnosisRequest),
+            value: [
+              ...patientChronicConditions.results,
+              ...patientDiagnoses.results,
+            ].map(convertToDiagnosisRequest),
           },
         ],
         questionnaireResponse.question_id,
       );
     }
-  }, [patientDiagnoses]);
+  }, [patientDiagnoses, patientChronicConditions]);
 
   const handleCodeSelect = (code: Code) => {
     setSelectedCode(code);
@@ -292,6 +330,12 @@ export function DiagnosisQuestion({
 
   const diagnosisDetailsContent = (
     <div className="space-y-4 p-4">
+      <CategorySelector
+        categories={DIAGNOSIS_CATEGORY}
+        selectedCategory={selectedCategory}
+        onCategorySelect={setSelectedCategory}
+      />
+
       <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
           <Label className="text-sm">{t("date")}</Label>
@@ -401,7 +445,7 @@ export function DiagnosisQuestion({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {selectedCode && (
-            <Label className="text-md font-medium">
+            <Label className="text-sm font-medium">
               {selectedCode.display}
             </Label>
           )}
@@ -410,6 +454,12 @@ export function DiagnosisQuestion({
           {t("cancel")}
         </Button>
       </div>
+      <CategorySelector
+        categories={DIAGNOSIS_CATEGORY}
+        selectedCategory={selectedCategory}
+        onCategorySelect={setSelectedCategory}
+        gridCols="grid-cols-1 md:grid-cols-2"
+      />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label className="text-sm">{t("date")}</Label>
@@ -491,7 +541,7 @@ export function DiagnosisQuestion({
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2" data-cy="add">
+      <div className="flex justify-end space-x-2" data-cy="add-diagnosis">
         <Button onClick={handleCategoryConfirm}>{t("add_diagnosis")}</Button>
       </div>
     </div>
@@ -672,6 +722,7 @@ const DiagnosisTableRow = ({
         className={cn(
           diagnosis.verification_status === "entered_in_error" &&
             "opacity-40 pointer-events-none",
+          diagnosis.category === "chronic_condition" && "bg-yellow-50/50",
         )}
       >
         <TableCell className="py-1">
@@ -682,7 +733,14 @@ const DiagnosisTableRow = ({
             >
               {diagnosis.code.display}
             </div>
-            <div className="text-xs px-2 py-0.5 rounded-full shrink-0 bg-gray-100 text-gray-700">
+            <div
+              className={cn(
+                "text-xs px-2 py-0.5 rounded-full shrink-0",
+                diagnosis.category === "chronic_condition"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-gray-100 text-gray-700",
+              )}
+            >
               {t(`Diagnosis_${diagnosis.category}__title`)}
             </div>
           </div>
@@ -767,12 +825,16 @@ const DiagnosisTableRow = ({
                 size="icon"
                 disabled={disabled}
                 className="size-9"
+                data-cy="diagnosis-options"
               >
                 <DotsVerticalIcon className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
+              <DropdownMenuItem
+                onClick={() => setShowNotes(!showNotes)}
+                data-cy="add-diagnosis-notes"
+              >
                 <Pencil2Icon className="size-4 mr-2" />
                 {showNotes
                   ? t("hide_notes")
@@ -784,6 +846,7 @@ const DiagnosisTableRow = ({
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onClick={onRemove}
+                data-cy="remove-diagnosis"
               >
                 <MinusCircledIcon className="size-4 mr-2" />
                 {t("remove_diagnosis")}
@@ -794,7 +857,11 @@ const DiagnosisTableRow = ({
       </TableRow>
       {showNotes && (
         <TableRow>
-          <TableCell colSpan={5} className="px-4 py-2">
+          <TableCell
+            colSpan={5}
+            className="px-4 py-2"
+            data-cy="diagnosis-notes"
+          >
             <Input
               type="text"
               placeholder={t("add_notes_about_diagnosis")}
@@ -825,6 +892,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
       className={cn("group hover:bg-gray-50", {
         "opacity-40 pointer-events-none":
           diagnosis.verification_status === "entered_in_error",
+        "bg-yellow-50/50": diagnosis.category === "chronic_condition",
       })}
     >
       {/* Mobile View - Card Layout */}
@@ -859,7 +927,10 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                         <span className="mr-2">{diagnosis.code.display}</span>
                         <div
                           className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-700",
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
+                            diagnosis.category === "chronic_condition"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-gray-100 text-gray-700",
                           )}
                         >
                           {t(`Diagnosis_${diagnosis.category}__title`)}
@@ -1017,3 +1088,50 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
     </div>
   );
 };
+
+function CategorySelector({
+  categories,
+  selectedCategory,
+  onCategorySelect,
+  gridCols = "grid-cols-1",
+}: {
+  categories: readonly string[];
+  selectedCategory: DiagnosisRequest["category"];
+  onCategorySelect: Dispatch<SetStateAction<DiagnosisRequest["category"]>>;
+  gridCols?: string;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div className={cn("grid gap-4", gridCols)}>
+      {categories.map((category) => (
+        <div
+          key={category}
+          className={cn(
+            "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
+            selectedCategory === category
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-primary/50",
+          )}
+          onClick={() =>
+            onCategorySelect(category as DiagnosisRequest["category"])
+          }
+        >
+          <div className="flex items-center space-x-2">
+            <div className="flex-1">
+              <div className="font-medium">
+                {t(`Diagnosis_${category}__title`)}
+              </div>
+              <div className="flex-1 text-sm text-muted-foreground">
+                {t(`Diagnosis_${category}__description`)}
+              </div>
+            </div>
+            {selectedCategory === category && (
+              <div className="size-4 rounded-full bg-primary" />
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
