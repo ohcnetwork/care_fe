@@ -186,6 +186,7 @@ export const PatientHome = (props: {
                       <PLUGIN_Component
                         __name="PatientHomeActions"
                         patient={patientData}
+                        facilityId={facilityId}
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                       />
                     </div>
