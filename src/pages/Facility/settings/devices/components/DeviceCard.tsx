@@ -58,7 +58,10 @@ export default function DeviceCard({ device, encounter }: Props) {
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-2">
             <div className="mt-1">
-              <DeviceTypeIcon className="size-5 text-gray-500" type={device.care_type}/>
+              <DeviceTypeIcon
+                className="size-5 text-gray-500"
+                type={device.care_type}
+              />
             </div>
             <div>
               <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-1">
