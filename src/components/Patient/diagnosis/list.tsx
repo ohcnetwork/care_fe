@@ -36,7 +36,7 @@ export function DiagnosisList({
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
-        category: ["encounter_diagnosis"],
+        category: "encounter_diagnosis,chronic_condition",
         clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
         exclude_verification_status: "entered_in_error",
         ...(encounterId ? { encounter: encounterId } : {}),
@@ -44,20 +44,7 @@ export function DiagnosisList({
     }),
   });
 
-  const { data: chronicConditions, isLoading: isChronicConditionsLoading } =
-    useQuery({
-      queryKey: ["chronic_condition", patientId, encounterId],
-      queryFn: query(diagnosisApi.listDiagnosis, {
-        pathParams: { patientId },
-        queryParams: {
-          category: "chronic_condition",
-          clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
-          exclude_verification_status: "entered_in_error",
-        },
-      }),
-    });
-
-  if (!diagnoses?.results.length && !chronicConditions?.results.length) {
+  if (!diagnoses?.results.length) {
     return (
       <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-3 pt-2">
@@ -70,20 +57,6 @@ export function DiagnosisList({
   return (
     <DiagnosisListLayout className={className} readOnly={readOnly}>
       <div className="space-y-2">
-        {isChronicConditionsLoading && (
-          <CardContent className="px-2 pb-2">
-            <Skeleton className="h-[100px] w-full" />
-            <Skeleton className="h-[100px] w-full" />
-          </CardContent>
-        )}
-        {chronicConditions?.results.length ? (
-          <DiagnosisTable
-            diagnoses={chronicConditions?.results}
-            title={t("chronic_condition", {
-              count: 2,
-            })}
-          />
-        ) : null}
         {isDiagnosesLoading && (
           <CardContent className="px-2 pb-2">
             <Skeleton className="h-[100px] w-full" />
