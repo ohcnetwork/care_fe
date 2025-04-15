@@ -740,7 +740,7 @@ export function SymptomQuestion({
               {
                 key: "code",
                 label: t("symptom"),
-                render: (code: Code) => code?.display,
+                render: (code: Code) => code?.display || "",
               },
               {
                 key: "clinical_status",
@@ -758,11 +758,11 @@ export function SymptomQuestion({
                 render: (note: string | undefined) => note || "-",
               },
             ],
-            queryKey: ["symptoms", patientId, encounterId],
-            queryFn: async (encounterId) => {
+            queryKey: ["symptoms", patientId],
+            queryFn: async (limit: number, offset: number) => {
               const response = await query(symptomApi.listSymptoms, {
                 pathParams: { patientId },
-                queryParams: { encounter: encounterId },
+                queryParams: { offset, limit },
               })({ signal: new AbortController().signal });
               return response.results.map(convertToSymptomRequest);
             },

@@ -583,7 +583,7 @@ export function DiagnosisQuestion({
               {
                 key: "code",
                 label: t("diagnosis"),
-                render: (code: Code) => code?.display,
+                render: (code: Code) => code?.display || "-",
               },
               {
                 key: "clinical_status",
@@ -601,15 +601,11 @@ export function DiagnosisQuestion({
                 render: (note: string | undefined) => note || "-",
               },
             ],
-            queryKey: [
-              "diagnoses_and_chronic_conditions",
-              patientId,
-              encounterId,
-            ],
-            queryFn: async (encounterId: string) => {
+            queryKey: ["diagnoses_and_chronic_conditions", patientId],
+            queryFn: async (limit: number, offset: number) => {
               const response = await query(diagnosisApi.listDiagnosis, {
                 pathParams: { patientId },
-                queryParams: { encounter: encounterId },
+                queryParams: { offset, limit },
               })({ signal: new AbortController().signal });
               return response.results.map(convertToDiagnosisRequest);
             },

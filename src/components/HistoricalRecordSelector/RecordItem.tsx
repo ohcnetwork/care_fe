@@ -6,7 +6,14 @@ import { TableCell, TableRow } from "@/components/ui/table";
 export interface DisplayField<T> {
   key: keyof T | string;
   label: string;
-  render: (value: any) => string | undefined;
+  render?: (value: any) => string;
+}
+
+interface RecordItemProps<T> {
+  record: T;
+  isSelected: boolean;
+  onToggleSelect: (record: T) => void;
+  displayFields: DisplayField<T>[];
 }
 
 export function RecordItem<T>({
@@ -14,37 +21,38 @@ export function RecordItem<T>({
   isSelected,
   onToggleSelect,
   displayFields,
-}: {
-  record: T;
-  isSelected: boolean;
-  onToggleSelect: (record: T) => void;
-  displayFields: DisplayField<T>[];
-}) {
+}: RecordItemProps<T>) {
+  const handleToggle = () => {
+    onToggleSelect(record);
+  };
+
   return (
-    <TableRow
-      className={cn(
-        "border border-gray-200 hover:bg-gray-50 divide-x",
-        isSelected && "bg-emerald-50",
-      )}
-    >
-      <TableCell className="w-10">
+    <TableRow className="divide-x">
+      <TableCell>
         <Checkbox
           checked={isSelected}
-          onCheckedChange={() => onToggleSelect(record)}
+          onCheckedChange={handleToggle}
           className="border-emerald-600 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
         />
       </TableCell>
-      {displayFields.map((field, index) => (
-        <TableCell
-          key={index}
-          className={cn(
-            "p-2 text-sm whitespace-pre-wrap",
-            index % 2 == 1 && "bg-white",
-          )}
-        >
-          {field.render(record[field.key as keyof T])}
-        </TableCell>
-      ))}
+      {displayFields.map((field, index) => {
+        const value = record[field.key as keyof T];
+        const displayValue = field.render
+          ? field.render(value)
+          : value?.toString() || "-";
+
+        return (
+          <TableCell
+            key={field.key.toString()}
+            className={cn(
+              "p-2 text-sm whitespace-pre-wrap",
+              index % 2 === 1 && "bg-white",
+            )}
+          >
+            <div className="text-sm">{displayValue}</div>
+          </TableCell>
+        );
+      })}
     </TableRow>
   );
 }

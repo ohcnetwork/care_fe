@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
-import { Clock } from "lucide-react";
-import { ChevronDown } from "lucide-react";
+import { ChevronsDownUp, ChevronsUpDown, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -19,11 +19,19 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import query from "@/Utils/request/query";
+import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import { Encounter } from "@/types/emr/encounter";
+import { BatchRequestBody } from "@/types/questionnaire/batch";
 
 import { DisplayField, RecordItem } from "./RecordItem";
 
@@ -31,7 +39,7 @@ interface StructuredTypeConfig<T> {
   type: string;
   displayFields: DisplayField<T>[];
   queryKey: string[];
-  queryFn: (encounterId: string) => Promise<T[]>;
+  queryFn: (limit: number, offset: number) => Promise<T[]>;
 }
 
 interface HistoricalRecordSelectorProps<T> {
@@ -49,6 +57,17 @@ interface EncounterWithRecords<T> extends Encounter {
     data: T[];
   }[];
   isLoading?: boolean;
+  isFetched?: boolean;
+}
+
+interface BatchSubmissionResult {
+  reference_id: string;
+  status_code: number;
+  data?: any;
+}
+
+interface BatchResponse {
+  results: BatchSubmissionResult[];
 }
 
 export function HistoricalRecordSelector<T>({
@@ -67,84 +86,178 @@ export function HistoricalRecordSelector<T>({
   const [activeType, setActiveType] = useState<string>(
     structuredTypes[0]?.type,
   );
-  const [expandedEncounterId, setExpandedEncounterId] = useState<
-    Record<string, string | null>
-  >({});
+  const [expandedEncounterId, setExpandedEncounterId] = useState<Set<string>>(
+    new Set(),
+  );
+  const [currentOffset, setCurrentOffset] = useState<Record<string, number>>(
+    {},
+  );
+  const LIMIT = 14;
 
-  // Fetch encounters
-  const { data: encounterData } = useQuery({
-    queryKey: ["encounters", patientId],
-    queryFn: query(
-      {
-        path: "/api/v1/encounter/",
-        method: "GET",
-        TRes: {} as { results: Encounter[] },
-      },
-      {
-        queryParams: {
-          patient: patientId,
-          limit: 100,
-        },
-      },
-    ),
+  const { mutateAsync: submitBatch } = useMutation<
+    BatchResponse,
+    unknown,
+    BatchRequestBody
+  >({
+    mutationFn: (variables) =>
+      mutate(routes.batchRequest, { silent: true })(variables),
   });
 
-  // Fetch records for the expanded encounter
-  const { data: recordsData } = useQuery({
+  // Fetch records for the active type
+  const { data: recordsData, isLoading: isLoadingRecords } = useQuery({
     queryKey: [
       "historical-records",
-      expandedEncounterId[activeType],
       activeType,
+      currentOffset[activeType],
       ...(structuredTypes.find((st) => st.type === activeType)?.queryKey || []),
     ],
     queryFn: async () => {
-      if (!expandedEncounterId[activeType]) return [];
-
       const activeTypeConfig = structuredTypes.find(
         (st) => st.type === activeType,
       );
       if (!activeTypeConfig) return [];
-
-      return activeTypeConfig.queryFn(expandedEncounterId[activeType]!);
+      return activeTypeConfig.queryFn(LIMIT, currentOffset[activeType] || 0);
     },
-    enabled: !!expandedEncounterId[activeType] && isOpen,
+    enabled: isOpen,
   });
 
-  useEffect(() => {
-    if (encounterData?.results) {
-      setEncounters(encounterData.results);
-    }
-  }, [encounterData]);
+  // Fetch encounters for the records
+  const { data: encounterData } = useQuery({
+    queryKey: ["encounters", patientId, recordsData],
+    queryFn: async () => {
+      if (!recordsData?.length) return { results: [] };
 
-  useEffect(() => {
-    if (recordsData && expandedEncounterId[activeType]) {
-      setEncounters((prev) =>
-        prev.map((encounter) =>
-          encounter.id === expandedEncounterId[activeType]
-            ? {
-                ...encounter,
-                records: [
-                  {
-                    type: activeType,
-                    data: recordsData,
-                  },
-                ],
-                isLoading: false,
-              }
-            : encounter,
-        ),
+      // Get unique encounter IDs from records that we haven't fetched yet
+      const newEncounterIds = new Set(
+        recordsData
+          .map((record: any) => record.encounter)
+          .filter(
+            (id): id is string =>
+              !!id && !encounters.find((e) => e.id === id)?.isFetched,
+          ),
       );
-    }
-  }, [recordsData, expandedEncounterId, activeType]);
 
-  const handleExpandEncounter = (encounterId: string) => {
-    setExpandedEncounterId((prev) => ({
+      if (newEncounterIds.size === 0) return { results: [] };
+
+      // Create batch request for new encounters
+      const batchRequest: BatchRequestBody = {
+        requests: Array.from(newEncounterIds).map((id) => ({
+          url: `/api/v1/encounter/${id}/?patient=${patientId}`,
+          method: "GET",
+          reference_id: `Encounter ${id}`,
+          body: {},
+        })),
+      };
+
+      try {
+        const response = await submitBatch(batchRequest);
+        if (!response) return { results: [] };
+
+        // Process batch response
+        const results = response.results
+          .map((result: BatchSubmissionResult) => {
+            if (result.status_code === 200 && result.data) {
+              return { ...result.data, isFetched: true };
+            }
+            console.error(`Failed to fetch encounter: ${result.reference_id}`);
+            return null;
+          })
+          .filter(Boolean);
+
+        return { results };
+      } catch (error) {
+        console.error("Failed to fetch encounters:", error);
+        return { results: [] };
+      }
+    },
+    enabled: isOpen && !!recordsData?.length && !isLoadingRecords,
+  });
+
+  // Update state when data changes
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Update encounters with their records
+    if (recordsData) {
+      // Group records by encounter
+      const groupedRecords = recordsData.reduce(
+        (acc, record: any) => {
+          const encounterId = record.encounter;
+          if (!encounterId) return acc;
+
+          if (!acc[encounterId]) {
+            acc[encounterId] = [];
+          }
+          acc[encounterId].push(record);
+          return acc;
+        },
+        {} as Record<string, T[]>,
+      );
+
+      // Update encounters with their records
+      setEncounters((prev) => {
+        const updatedEncounters = [...prev];
+
+        // Add new encounters from batch response
+        if (encounterData?.results) {
+          encounterData.results.forEach(
+            (encounter: EncounterWithRecords<T>) => {
+              const existingEncounterIndex = updatedEncounters.findIndex(
+                (e) => e.id === encounter.id,
+              );
+
+              if (existingEncounterIndex === -1) {
+                // New encounter
+                updatedEncounters.push({
+                  ...encounter,
+                  isFetched: true,
+                  records: [
+                    {
+                      type: activeType,
+                      data: groupedRecords[encounter.id] || [],
+                    },
+                  ],
+                });
+                setExpandedEncounterId((prev) =>
+                  new Set(prev).add(encounter.id),
+                );
+              } else {
+                // Existing encounter - append new records
+                const existingRecords =
+                  updatedEncounters[existingEncounterIndex].records || [];
+                const existingTypeRecords = existingRecords.find(
+                  (r) => r.type === activeType,
+                );
+
+                if (existingTypeRecords) {
+                  // Append new records to existing type
+                  existingTypeRecords.data = [
+                    ...existingTypeRecords.data,
+                    ...(groupedRecords[encounter.id] || []),
+                  ];
+                } else {
+                  // Add new type records
+                  existingRecords.push({
+                    type: activeType,
+                    data: groupedRecords[encounter.id] || [],
+                  });
+                }
+                updatedEncounters[existingEncounterIndex].isFetched = true;
+              }
+            },
+          );
+        }
+
+        return updatedEncounters;
+      });
+    }
+  }, [isOpen, recordsData, encounterData, activeType]);
+
+  const handleLoadMore = () => {
+    setCurrentOffset((prev) => ({
       ...prev,
-      [activeType]: encounterId,
+      [activeType]: (prev[activeType] || 0) + LIMIT,
     }));
-    setEncounters((prev) =>
-      prev.map((e) => (e.id === encounterId ? { ...e, isLoading: true } : e)),
-    );
   };
 
   const handleToggleSelect = (record: T) => {
@@ -166,23 +279,64 @@ export function HistoricalRecordSelector<T>({
   };
 
   const handleTabChange = (type: string) => {
+    handleReset();
     setActiveType(type);
-    // Clear expanded encounter for the new tab if it was expanded in the previous tab
-    if (expandedEncounterId[type]) {
-      setEncounters((prev) =>
-        prev.map((e) => ({
-          ...e,
-          records: e.records?.filter((r) => r.type !== type),
-          isLoading: false,
-        })),
-      );
-    }
+    setCurrentOffset((prev) => ({
+      ...prev,
+      [type]: prev[type] || 0,
+    }));
   };
 
-  const handleClose = () => setIsOpen(false);
+  const handleReset = () => {
+    setSelectedRecords({});
+    setEncounters([]);
+    setExpandedEncounterId(new Set());
+    setCurrentOffset({});
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    handleReset();
+    setActiveType(structuredTypes[0]?.type || "");
+  };
+
+  const handleExpandEncounter = (encounterId: string, isOpen: boolean) => {
+    setExpandedEncounterId((prev) => {
+      const newSet = new Set(prev);
+      if (isOpen) {
+        newSet.add(encounterId);
+      } else {
+        newSet.delete(encounterId);
+      }
+      return newSet;
+    });
+  };
+
+  const filteredEncounters = encounters
+    .filter((encounter) => encounter.id !== currentEncounterId)
+    .filter((encounter) => {
+      const records = encounter.records?.find(
+        (r) => r.type === activeType,
+      )?.data;
+      return records && records.length > 0;
+    })
+    .sort((a, b) => {
+      const dateA = a.period?.start ? new Date(a.period.start).getTime() : 0;
+      const dateB = b.period?.start ? new Date(b.period.start).getTime() : 0;
+      return dateB - dateA; // Sort in descending order (newest first)
+    });
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          handleClose();
+        } else {
+          setIsOpen(true);
+        }
+      }}
+    >
       <SheetTrigger asChild>
         <div className="flex items-center justify-end">
           <Button
@@ -195,7 +349,7 @@ export function HistoricalRecordSelector<T>({
           </Button>
         </div>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-3xl p-0">
+      <SheetContent className="w-full sm:max-w-3xl p-0 overflow-y-auto">
         <div className="flex flex-col gap-2 p-2">
           <SheetHeader className="p-0">
             <SheetTitle className="text-lg font-medium">{title}</SheetTitle>
@@ -216,52 +370,58 @@ export function HistoricalRecordSelector<T>({
         </div>
 
         <div className="space-y-0">
-          {encounters
-            .slice()
-            .filter((encounter) => encounter.id !== currentEncounterId)
-            .map((encounter) => (
+          {filteredEncounters.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <Clock className="size-8 text-gray-400 mb-2" />
+              <p className="text-sm text-gray-500">{t("no_records_found")}</p>
+            </div>
+          ) : (
+            filteredEncounters.map((encounter) => (
               <Collapsible
                 key={encounter.id}
-                open={expandedEncounterId[activeType] === encounter.id}
-                onOpenChange={(isOpen) => {
-                  if (isOpen) {
-                    handleExpandEncounter(encounter.id);
-                  } else {
-                    setExpandedEncounterId((prev) => ({
-                      ...prev,
-                      [activeType]: null,
-                    }));
-                  }
-                }}
+                open={expandedEncounterId.has(encounter.id)}
+                onOpenChange={(isOpen) =>
+                  handleExpandEncounter(encounter.id, isOpen)
+                }
                 className=""
               >
                 <div className="border rounded-md m-2 bg-gray-50 border-gray-200">
                   <CollapsibleTrigger className="w-full">
                     <div className="flex justify-between items-center p-1 cursor-pointer">
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mt-1">
                           <div className="w-1 h-5 bg-emerald-600 rounded-full" />
-                          <h2 className="font-semibold text-sm">
-                            {t("encounter")}
-                          </h2>
+                          <p className="text-sm text-gray-500">
+                            {encounter.period.start
+                              ? format(
+                                  new Date(encounter.period.start),
+                                  "dd MMM, yyyy hh:mm a",
+                                )
+                              : "No date"}
+                            {encounter.period.end
+                              ? format(
+                                  new Date(encounter.period.end),
+                                  "dd MMM, yyyy hh:mm a",
+                                )
+                              : ""}
+                          </p>
+                          {encounter.organizations &&
+                            encounter.organizations.map((org) => (
+                              <Badge
+                                variant="outline"
+                                key={org.id}
+                                className="ml-2"
+                              >
+                                {org.name}
+                              </Badge>
+                            ))}
                         </div>
-                        <p className="text-sm text-gray-500 ml-3">
-                          {encounter.period.start
-                            ? format(
-                                new Date(encounter.period.start),
-                                "dd MMM, yyyy hh:mm a",
-                              )
-                            : "No date"}
-                          {encounter.period.end
-                            ? " - " +
-                              format(
-                                new Date(encounter.period.end),
-                                "dd MMM, yyyy hh:mm a",
-                              )
-                            : ""}
-                        </p>
                       </div>
-                      <ChevronDown className="h-5 w-5 text-gray-500 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      {expandedEncounterId.has(encounter.id) ? (
+                        <ChevronsDownUp className="size-4 text-gray-400" />
+                      ) : (
+                        <ChevronsUpDown className="size-4 text-gray-400" />
+                      )}
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -272,7 +432,19 @@ export function HistoricalRecordSelector<T>({
                         </div>
                       ) : encounter.records?.find((r) => r.type === activeType)
                           ?.data.length ? (
-                        <Table className="w-full p-2">
+                        <Table className="w-full p-2 border rounded-md">
+                          <TableHeader>
+                            <TableRow className="divide-x">
+                              <TableHead className="w-fit"></TableHead>
+                              {structuredTypes
+                                .find((st) => st.type === activeType)
+                                ?.displayFields.map((field) => (
+                                  <TableHead key={String(field.key)}>
+                                    {field.label}
+                                  </TableHead>
+                                ))}
+                            </TableRow>
+                          </TableHeader>
                           <TableBody className="[&_tr:last-child]:border-1">
                             {encounter.records
                               .find((r) => r.type === activeType)
@@ -302,10 +474,28 @@ export function HistoricalRecordSelector<T>({
                   </CollapsibleContent>
                 </div>
               </Collapsible>
-            ))}
+            ))
+          )}
+        </div>
+        <div className="flex justify-between items-center p-2">
+          {isLoadingRecords && <Skeleton className="h-8 w-full" />}
         </div>
 
-        <div className="flex justify-between items-center p-4 border-t">
+        <div className="flex flex-col gap-2 p-4 border-t">
+          {filteredEncounters.length > 0 &&
+            (isLoadingRecords ? (
+              <div className="flex justify-center p-4">
+                <Skeleton className="h-8 w-full" />
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={handleLoadMore}
+                className="w-full"
+              >
+                {t("load_more")}
+              </Button>
+            ))}
           <div className="text-sm">
             <span className="font-medium">
               {(selectedRecords[activeType] || []).length} {activeType}

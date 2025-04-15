@@ -320,11 +320,11 @@ export function MedicationStatementQuestion({
                   instructions?.[0]?.additional_instruction?.[0]?.display,
               },
             ],
-            queryKey: ["medication_requests", patientId, encounterId],
-            queryFn: async (encounterId) => {
+            queryKey: ["medication_requests", patientId],
+            queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationRequestApi.list, {
                 pathParams: { patientId },
-                queryParams: { encounter: encounterId },
+                queryParams: { limit, offset },
               })({ signal: new AbortController().signal });
               return response.results;
             },
@@ -353,11 +353,11 @@ export function MedicationStatementQuestion({
                 render: (note) => note || "-",
               },
             ],
-            queryKey: ["medication_statements", patientId, encounterId],
-            queryFn: async (encounterId) => {
+            queryKey: ["medication_statements", patientId],
+            queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationStatementApi.list, {
                 pathParams: { patientId },
-                queryParams: { encounter: encounterId },
+                queryParams: { limit, offset },
               })({ signal: new AbortController().signal });
               return response.results;
             },
