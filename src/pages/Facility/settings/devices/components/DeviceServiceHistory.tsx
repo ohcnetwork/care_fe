@@ -105,7 +105,7 @@ export default function DeviceServiceHistory({
                       <TableCell className="font-medium">
                         {format(new Date(service.serviced_on), "PPP")}
                       </TableCell>
-                      <TableCell className="max-w-md">
+                      <TableCell className="max-w-md whitespace-normal">
                         <ClampableText text={service.note} />
                       </TableCell>
                       <TableCell className="text-right ">
