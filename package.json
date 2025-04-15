@@ -27,7 +27,7 @@
   "author": "Open Healthcare Network Contributors",
   "license": "MIT",
   "scripts": {
-    "dev": "npm run supported-browsers && vite",
+    "dev": "test -f src/pluginMap.ts || npm run setup && npm run supported-browsers && vite",
     "local": "npm run supported-browsers && vite --mode docker",
     "preview": "cross-env NODE_ENV=production vite preview",
     "preview:scan": "npm run preview & npx react-scan localhost:4000",
