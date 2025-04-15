@@ -12,7 +12,7 @@
   "automergeStrategy": "squash",
   "automergeType": "pr",
   "schedule": [
-    "* * * * 0,1"
+    "* 0-3 * * 1"
   ],
   "packageRules": [
     {
