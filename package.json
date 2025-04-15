@@ -27,7 +27,7 @@
   "author": "Open Healthcare Network Contributors",
   "license": "MIT",
   "scripts": {
-    "dev": "npm run supported-browsers && vite",
+    "dev": "test -f src/pluginMap.ts || npm run setup && npm run supported-browsers && vite",
     "local": "npm run supported-browsers && vite --mode docker",
     "preview": "cross-env NODE_ENV=production vite preview",
     "preview:scan": "npm run preview & npx react-scan localhost:4000",
@@ -99,7 +99,7 @@
     "input-otp": "^1.4.2",
     "jspdf": "^3.0.0",
     "libphonenumber-js": "^1.11.18",
-    "lucide-react": "^0.487.0",
+    "lucide-react": "^0.488.0",
     "markdown-it": "^14.1.0",
     "next-themes": "^0.4.3",
     "pigeon-maps": "^0.22.1",
