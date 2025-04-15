@@ -207,6 +207,7 @@ export default function CreateScheduleExceptionSheet({
                         <Input
                           placeholder="e.g. Holiday Leave, Conference, etc."
                           {...field}
+                          data-cy="exception-reason"
                         />
                       </FormControl>
                       <FormMessage />
@@ -224,6 +225,7 @@ export default function CreateScheduleExceptionSheet({
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
+                          data-cy="valid-from-exception-date"
                         />
                         <FormMessage />
                       </FormItem>
@@ -239,6 +241,7 @@ export default function CreateScheduleExceptionSheet({
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
+                          data-cy="valid-till-exception-date"
                         />
                         <FormMessage />
                       </FormItem>
@@ -255,6 +258,7 @@ export default function CreateScheduleExceptionSheet({
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          data-cy="unavailable-all-day-checkbox"
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
@@ -313,7 +317,12 @@ export default function CreateScheduleExceptionSheet({
                       {t("cancel")}
                     </Button>
                   </SheetClose>
-                  <Button variant="primary" type="submit" disabled={isPending}>
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    disabled={isPending}
+                    data-cy="submit-exception"
+                  >
                     {t("confirm_unavailability")}
                   </Button>
                 </SheetFooter>

@@ -13,6 +13,13 @@ export interface TemplateData {
   remarks?: string;
 }
 
+export interface ExceptionData {
+  reason: string;
+  validFrom: string;
+  validTill: string;
+  fullDayUnavailable?: boolean;
+}
+
 export class PatientAppointment {
   private selectors = {
     mySchedules: "[data-cy=my-schedules]",
@@ -33,7 +40,14 @@ export class PatientAppointment {
     editTemplateName: "[data-cy=edit-template-name]",
     editTemplateValidFrom: "[data-cy=edit-template-valid-from]",
     editTemplateValidTill: "[data-cy=edit-template-valid-till]",
+    exceptionTab: "[data-cy=exception-tab-button]",
+    addExceptionButton: "[data-cy=add-exception-button]",
+    exceptionReason: "[data-cy=exception-reason]",
     editTemplateSubmit: "[data-cy=edit-template-submit]",
+    validFromExceptionDate: "[data-cy=valid-from-exception-date]",
+    validTillExceptionDate: "[data-cy=valid-till-exception-date]",
+    unavailableAllDayCheckbox: "[data-cy=unavailable-all-day-checkbox]",
+    submitException: "[data-cy=submit-exception]",
   };
 
   clickMySchedules() {
@@ -201,7 +215,7 @@ export class PatientAppointment {
 
   fillEditTemplateValidTill(date: string) {
     cy.get(this.selectors.editTemplateValidTill).click();
-    cy.get(`[aria-label="${date}"]`).click(); // Assumes date picker uses aria-label for dates
+    cy.get(`[aria-label="${date}"]`).click();
     return this;
   }
 
@@ -217,6 +231,81 @@ export class PatientAppointment {
     this.fillEditTemplateValidTill(data.validTill);
     this.submitEditTemplate();
     this.verifyTemplateUpdationAPICall();
+    return this;
+  }
+
+  fillExceptionReason(reason: string) {
+    cy.typeIntoField(this.selectors.exceptionReason, reason, {
+      clearBeforeTyping: true,
+    });
+    return this;
+  }
+
+  fillValidFromExceptionDate(date: string) {
+    cy.get(this.selectors.validFromExceptionDate).click();
+    cy.get(`[aria-label="${date}"]`).click();
+    return this;
+  }
+
+  fillValidTillExceptionDate(date: string) {
+    cy.get(this.selectors.validTillExceptionDate).click();
+    cy.get(`[aria-label="${date}"]`).click();
+    return this;
+  }
+
+  toggleUnavailableAllDay(enable: boolean) {
+    cy.get(this.selectors.unavailableAllDayCheckbox).then(($el) => {
+      if ($el.prop("checked") !== enable) {
+        cy.wrap($el).click();
+      }
+    });
+    return this;
+  }
+
+  submitException() {
+    cy.get(this.selectors.submitException).click();
+    return this;
+  }
+
+  interceptExceptionCreation() {
+    cy.intercept("POST", "/api/v1/facility/*/exceptions/").as(
+      "createException",
+    );
+    return this;
+  }
+
+  verifyExceptionCreationAPICall() {
+    cy.wait("@createException").then((interception) => {
+      expect(interception.response.statusCode).to.equal(201);
+    });
+    return this;
+  }
+
+  clickExceptionTab() {
+    cy.verifyAndClickElement(this.selectors.exceptionTab, "Exception");
+    return this;
+  }
+
+  clickAddExceptionButton() {
+    cy.verifyAndClickElement(
+      this.selectors.addExceptionButton,
+      "Add Exception",
+    );
+    return this;
+  }
+
+  fillExceptionForm(data: ExceptionData) {
+    this.interceptExceptionCreation();
+    this.fillExceptionReason(data.reason);
+    this.fillValidFromExceptionDate(data.validFrom);
+    this.fillValidTillExceptionDate(data.validTill);
+    if (data.fullDayUnavailable) {
+      this.toggleUnavailableAllDay(true);
+    } else {
+      this.toggleUnavailableAllDay(false);
+    }
+    this.submitException();
+    this.verifyExceptionCreationAPICall();
     return this;
   }
 }

@@ -242,6 +242,7 @@ export default function UserAvailabilityTab({
                 view === "exceptions" && "shadow-sm",
                 "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
               )}
+              data-cy="exception-tab-button"
             >
               {t("exceptions")}
             </Button>
@@ -332,6 +333,7 @@ function DayDetailsPopover({
               valid_to: dateQueryString(date),
             })
           }
+          data-cy="add-exception-button"
         >
           {t("add_exception")}
         </Button>

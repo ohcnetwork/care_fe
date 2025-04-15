@@ -1,5 +1,8 @@
 import { PatientAppointment } from "@/pageObject/Patients/PatientAppointment";
-import { TemplateData } from "@/pageObject/Patients/PatientAppointment";
+import {
+  ExceptionData,
+  TemplateData,
+} from "@/pageObject/Patients/PatientAppointment";
 // import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 import { viewPort } from "@/utils/viewPort";
@@ -15,6 +18,7 @@ describe("User Schedule and Patient Appointment", () => {
   });
 
   it("Create and update a new User Schedule template", () => {
+    // Test data for template creation
     const formData: TemplateData = {
       templateName: "Test-Template",
       validFrom: "2025-08-01",
@@ -28,6 +32,7 @@ describe("User Schedule and Patient Appointment", () => {
       patientsPerSlot: 2,
     };
 
+    // Test data for template creation
     const updateData: TemplateData = {
       templateName: "Test-Template-updated",
       validFrom: "2025-09-01",
@@ -42,8 +47,22 @@ describe("User Schedule and Patient Appointment", () => {
       .clickUpdateTemplateIcon()
       .fillEditForm(updateData);
   });
+  it("Create a new exception", () => {
+    // Test data for exception creation
+    const exceptionData: ExceptionData = {
+      reason: "Holiday",
+      validFrom: "2025-08-15",
+      validTill: "2025-08-15",
+      fullDayUnavailable: true,
+    };
+
+    facilityCreation.selectFacility("GHC Payyanur");
+    patientAppointment
+      .clickExceptionTab()
+      .clickAddExceptionButton()
+      .clickMySchedules()
+      .fillExceptionForm(exceptionData);
+  });
 });
 
-// Test for Template Creation and Updation
-// Test for Exception
 // Test for Patient Appointments
