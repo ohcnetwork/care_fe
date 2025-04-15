@@ -63,9 +63,9 @@ export const ValidationHelper = ({
 
 export const validateRule = (
   isConditionMet: boolean,
-  initialMessage: JSX.Element | string,
+  initialMessage: React.ReactNode,
   isInitialRender: boolean = false,
-  successMessage: JSX.Element | string,
+  successMessage: React.ReactNode,
 ) => {
   return (
     <div>
