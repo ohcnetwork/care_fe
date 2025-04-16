@@ -136,6 +136,11 @@ function AppointmentDialog({
                           <AlertDescription>
                             {t(
                               "this_will_permanently_cancel_the_appointment_and_cannot_be_undone",
+                              {
+                                date: formatAppointmentSlotTime(appointment),
+                                practitioner: formatName(appointment.user),
+                                facility: appointment.facility.name,
+                              },
                             )}
                           </AlertDescription>
                         </Alert>
