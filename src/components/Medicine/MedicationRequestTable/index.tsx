@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { PencilIcon } from "lucide-react";
-import { Link } from "raviger";
+import { Link, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -82,8 +82,12 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
     encounter.permissions,
   );
   const canAccess = canViewClinicalData || canViewEncounter;
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityIdExists = !!subpathMatch?.facilityId;
   const canWrite =
-    canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
+    facilityIdExists &&
+    canWriteEncounter &&
+    !inactiveEncounterStatus.includes(encounter.status);
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
@@ -188,17 +192,19 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
                       </Link>
                     </Button>
                   )}
-                  <Button
-                    variant="outline"
-                    disabled={!activeMedications?.results?.length}
-                    size="sm"
-                    className="text-gray-950 hover:text-gray-700 h-9"
-                  >
-                    <Link href={`prescriptions/print`}>
-                      <CareIcon icon="l-print" className="mr-2" />
-                      {t("print")}
-                    </Link>
-                  </Button>
+                  {facilityIdExists && (
+                    <Button
+                      variant="outline"
+                      disabled={!activeMedications?.results?.length}
+                      size="sm"
+                      className="text-gray-950 hover:text-gray-700 h-9"
+                    >
+                      <Link href={`prescriptions/print`}>
+                        <CareIcon icon="l-print" className="mr-2" />
+                        {t("print")}
+                      </Link>
+                    </Button>
+                  )}
                 </div>
               </div>
 

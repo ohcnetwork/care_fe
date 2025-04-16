@@ -1,3 +1,5 @@
+import { usePathParams } from "raviger";
+
 import SideOverview from "@/components/Facility/ConsultationDetails/OverviewSideBar";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
@@ -21,8 +23,11 @@ export const EncounterOverviewTab = ({
     canViewEncounter,
     canSubmitEncounterQuestionnaire,
   } = getPermissions(hasPermission, encounter.permissions);
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityIdExists = !!subpathMatch?.facilityId;
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
+    facilityIdExists &&
     canSubmitEncounterQuestionnaire &&
     !inactiveEncounterStatus.includes(encounter.status ?? "");
 

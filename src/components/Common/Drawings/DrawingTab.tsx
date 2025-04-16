@@ -1,7 +1,7 @@
 import { exportToSvg } from "@excalidraw/excalidraw";
 import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate, usePathParams } from "raviger";
 import { memo, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -129,6 +129,8 @@ export const DrawingTab = (props: DrawingsTabProps) => {
   const { t } = useTranslation();
   const { type, patient, encounter, patientId } = props;
   const { hasPermission } = usePermissions();
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityIdExists = !!subpathMatch?.facilityId;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["name"],
@@ -158,6 +160,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
       : canViewClinicalData;
 
   const canWriteCurrentEncounter =
+    facilityIdExists &&
     canWriteEncounter &&
     encounter &&
     !inactiveEncounterStatus.includes(encounter.status);
