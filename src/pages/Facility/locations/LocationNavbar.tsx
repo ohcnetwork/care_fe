@@ -87,9 +87,12 @@ export function LocationTreeNode({
         )}
         <div
           className="flex items-center flex-1 text-sm gap-2 w-0"
-          onClick={() =>
-            hasChildren ? onToggleExpand(location.id) : onSelect(location)
-          }
+          onClick={() => {
+            onSelect(location);
+            if (location.has_children) {
+              onToggleExpand(location.id);
+            }
+          }}
         >
           <Icon className="size-4" />
           <span className="truncate">{location.name}</span>
