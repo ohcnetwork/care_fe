@@ -54,11 +54,11 @@ jobs:
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
           echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .id' project_data.json) >> $GITHUB_ENV
           echo 'TEAM_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .id' project_data.json) >> $GITHUB_ENV
-          
+
           echo 'TRIAGE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Triage") | .id' project_data.json) >> $GITHUB_ENV
           echo 'IN_PROGRESS_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="In Progress") | .id' project_data.json) >> $GITHUB_ENV
           echo 'DONE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Done") | .id' project_data.json) >> $GITHUB_ENV
-          
+
           echo 'TEAM_CORE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Core") | .id' project_data.json) >> $GITHUB_ENV
           echo 'TEAM_INTERNS_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Interns") | .id' project_data.json) >> $GITHUB_ENV
           echo 'TEAM_COMMUNITY_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Community") | .id' project_data.json) >> $GITHUB_ENV
@@ -157,7 +157,7 @@ jobs:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           ASSIGNEE_DATA=$(curl -s "https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${ASSIGNEE}.md")
-          
+
           if echo "$ASSIGNEE_DATA" | grep -q "role: core"; then
             TEAM_OPTION_ID=${{ env.TEAM_CORE_OPTION_ID }}
             gh issue edit $ISSUE_NUMBER --remove-label "core" --repo $REPO || true
@@ -168,7 +168,7 @@ jobs:
           else
             exit 0
           fi
-          
+
           gh api graphql -f query='
             mutation($project: ID!, $item: ID!, $team_field: ID!, $team_value: String!) {
               updateProjectV2ItemFieldValue(input: {
