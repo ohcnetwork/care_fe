@@ -330,14 +330,14 @@ export const FilesPage = ({
     );
   };
 
-  const FileUploadButtons = (): JSX.Element => {
+  const FileUploadButtons = () => {
     if (!canEdit) return <></>;
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline_primary"
-            className="flex flex-row items-center"
+            className="flex flex-row items-center mr-2"
           >
             <CareIcon icon="l-file-upload" className="mr-1" />
             <span>{t("add_files")}</span>
