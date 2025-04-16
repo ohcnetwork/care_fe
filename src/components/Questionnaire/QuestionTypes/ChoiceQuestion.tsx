@@ -1,5 +1,8 @@
 import { memo } from "react";
 
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -41,6 +44,10 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   index = 0,
 }: ChoiceQuestionProps) {
   const options = question.answer_option || [];
+  const selectType =
+    question.answer_option?.length && question.answer_option?.length > 5
+      ? "dropdown"
+      : "radio";
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
   const currentCoding = questionnaireResponse.values[index]?.coding;
   const handleValueChange = (newValue: string) => {
@@ -84,7 +91,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           value={currentCoding}
           onSelect={handleCodingChange}
         ></ValueSetSelect>
-      ) : (
+      ) : selectType === "dropdown" ? (
         <Select
           value={currentValue}
           onValueChange={handleValueChange}
@@ -105,6 +112,38 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
             ))}
           </SelectContent>
         </Select>
+      ) : (
+        <div className="mt-2">
+          <RadioGroup
+            onValueChange={handleValueChange}
+            disabled={disabled}
+            className="flex flex-col gap-3"
+          >
+            {options.map((option: AnswerOption) => (
+              <Label
+                htmlFor={option.value.toString()}
+                className="cursor-pointer"
+                key={option.value.toString()}
+              >
+                <Card
+                  className="shadow-none rounded-md border-1 border-gray-400 bg-gray-200 p-2 transition-all hover:bg-gray-50/90 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary-300 [&:has([data-state=checked])]:shadow-sm w-full"
+                  role="presentation"
+                >
+                  <div className="flex flex-row items-center gap-2">
+                    <RadioGroupItem
+                      value={option.value.toString()}
+                      id={option.value.toString()}
+                      className="sr-only"
+                    />
+                    <div className="font-medium leading-5">
+                      {properCase(option.display || option.value)}
+                    </div>
+                  </div>
+                </Card>
+              </Label>
+            ))}
+          </RadioGroup>
+        </div>
       )}
     </>
   );
