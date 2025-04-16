@@ -166,7 +166,7 @@ const AllergyTableRow = ({
         <TableCell className="font-medium py-1 pl-1">
           {allergy.code.display}
         </TableCell>
-        <TableCell className="py-1" data-cy="criticality">
+        <TableCell className="py-1" data-cy="allergy-criticality">
           <Select
             value={allergy.criticality}
             onValueChange={(value) => onUpdate?.({ criticality: value })}
@@ -184,7 +184,7 @@ const AllergyTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="py-1" data-cy="status">
+        <TableCell className="py-1" data-cy="allergy-status">
           <Select
             value={allergy.verification_status}
             onValueChange={(value) => {
@@ -230,7 +230,7 @@ const AllergyTableRow = ({
                 size="icon"
                 disabled={disabled}
                 className="size-9"
-                data-cy="options"
+                data-cy="allergy-options"
               >
                 <DotsVerticalIcon className="size-4" />
               </Button>
@@ -238,7 +238,7 @@ const AllergyTableRow = ({
             <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={() => setShowNotes((n) => !n)}
-                data-cy="add-notes"
+                data-cy="add-allergy-notes"
               >
                 <Pencil2Icon className="size-4 mr-2" />
                 {showNotes
@@ -286,7 +286,7 @@ const AllergyTableRow = ({
       </TableRow>
       {showNotes && (
         <TableRow>
-          <TableCell colSpan={6} className="px-4 py-2" data-cy="notes">
+          <TableCell colSpan={6} className="px-4 py-2" data-cy="allergy-notes">
             <Input
               type="text"
               placeholder={t("add_notes_about_the_allergy")}

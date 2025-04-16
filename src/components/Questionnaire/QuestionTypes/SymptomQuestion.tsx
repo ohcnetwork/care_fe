@@ -143,13 +143,13 @@ function SymptomActionsMenu({
           size="icon"
           disabled={disabled}
           className="size-9"
-          data-cy="options"
+          data-cy="symptom-options"
         >
           <DotsVerticalIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onToggleNotes} data-cy="add-notes">
+        <DropdownMenuItem onClick={onToggleNotes} data-cy="add-symptom-notes">
           <Pencil2Icon className="size-4 mr-2" />
           {showNotes
             ? t("hide_notes")
@@ -414,7 +414,7 @@ const SymptomRow = React.memo(function SymptomRow({
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
-        <TableCell data-cy="status">
+        <TableCell data-cy="symptom-status">
           <Select
             value={symptom.clinical_status}
             onValueChange={handleStatusChange}
@@ -432,7 +432,7 @@ const SymptomRow = React.memo(function SymptomRow({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell data-cy="severity">
+        <TableCell data-cy="symptom-severity">
           <Select
             value={symptom.severity}
             onValueChange={handleSeverityChange}
@@ -463,7 +463,7 @@ const SymptomRow = React.memo(function SymptomRow({
       </TableRow>
       {showNotes && (
         <TableRow>
-          <TableCell colSpan={5} className="px-3 pb-3" data-cy="notes">
+          <TableCell colSpan={5} className="px-3 pb-3" data-cy="symptom-notes">
             <Input
               type="text"
               placeholder={t("add_notes_about_symptom")}

@@ -760,7 +760,7 @@ const DiagnosisTableRow = ({
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
-        <TableCell className="py-1" data-cy="status">
+        <TableCell className="py-1" data-cy="diagnosis-status">
           <Select
             value={diagnosis.clinical_status}
             onValueChange={(value) =>
@@ -788,7 +788,7 @@ const DiagnosisTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="py-1" data-cy="verification">
+        <TableCell className="py-1" data-cy="diagnosis-verification">
           <Select
             value={diagnosis.verification_status}
             onValueChange={(value) =>

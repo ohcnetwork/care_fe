@@ -55,17 +55,17 @@ export class PatientEncounter {
   updateAllergy(details: AllergyDetails) {
     const { criticality, status, notes } = details;
     if (criticality) {
-      cy.clickAndSelectOption('[data-cy="criticality"]', criticality, {
+      cy.clickAndSelectOption('[data-cy="allergy-criticality"]', criticality, {
         position: "first",
       });
     }
     if (status) {
-      cy.clickAndSelectOption('[data-cy="status"]', status, {
+      cy.clickAndSelectOption('[data-cy="allergy-status"]', status, {
         position: "first",
       });
     }
     if (notes) {
-      cy.typeIntoField('[data-cy="notes"]', notes, {
+      cy.typeIntoField('[data-cy="allergy-notes"]', notes, {
         position: "first",
         skipVerification: true,
       });
@@ -73,7 +73,7 @@ export class PatientEncounter {
   }
 
   deleteAllergy() {
-    cy.clickAndSelectOption('[data-cy="status"]', "Entered in Error", {
+    cy.clickAndSelectOption('[data-cy="allergy-status"]', "Entered in Error", {
       position: "first",
     });
   }
@@ -115,21 +115,21 @@ export class PatientEncounter {
   updateSymptom(details: SymptomDetails) {
     const { severity, status, notes } = details;
     if (severity) {
-      cy.get('[data-cy="severity"]').scrollIntoView();
-      cy.clickAndSelectOption('[data-cy="severity"]', severity, {
+      cy.get('[data-cy="symptom-severity"]').scrollIntoView();
+      cy.clickAndSelectOption('[data-cy="symptom-severity"]', severity, {
         position: "last",
       });
     }
     if (status) {
-      cy.get('[data-cy="status"]').scrollIntoView();
-      cy.clickAndSelectOption('[data-cy="status"]', status, {
+      cy.get('[data-cy="symptom-status"]').scrollIntoView();
+      cy.clickAndSelectOption('[data-cy="symptom-status"]', status, {
         position: "last",
       });
     }
     if (notes) {
-      cy.get('[data-cy="options"]').last().click();
-      cy.get('[data-cy="add-notes"]').last().click();
-      cy.typeIntoField('[data-cy="notes"]', notes, {
+      cy.get('[data-cy="symptom-options"]').last().click();
+      cy.get('[data-cy="add-symptom-notes"]').last().click();
+      cy.typeIntoField('[data-cy="symptom-notes"]', notes, {
         position: "last",
         skipVerification: true,
       });
@@ -137,8 +137,8 @@ export class PatientEncounter {
   }
 
   deleteSymptom() {
-    cy.get('[data-cy="options"]').last().scrollIntoView();
-    cy.get('[data-cy="options"]').last().click();
+    cy.get('[data-cy="symptom-options"]').last().scrollIntoView();
+    cy.get('[data-cy="symptom-options"]').last().click();
     cy.get('[data-cy="remove-symptom"]').click();
   }
 
@@ -184,9 +184,13 @@ export class PatientEncounter {
   updateDiagnosis(details: DiagnosisDetails) {
     const { verification, status, notes } = details;
     if (verification) {
-      cy.clickAndSelectOption('[data-cy="verification"]', verification, {
-        position: "last",
-      });
+      cy.clickAndSelectOption(
+        '[data-cy="diagnosis-verification"]',
+        verification,
+        {
+          position: "last",
+        },
+      );
     }
     if (status) {
       cy.clickAndSelectOption('[data-cy="diagnosis-status"]', status, {
@@ -205,7 +209,7 @@ export class PatientEncounter {
 
   deleteDiagnosis() {
     cy.clickAndSelectOption(
-      '[data-cy="diagnosis-status"]',
+      '[data-cy="diagnosis-verification"]',
       "Entered in Error",
       {
         position: "last",
@@ -221,11 +225,12 @@ export class PatientEncounter {
 
   verifyDiagnoses(details: DiagnosisDetails) {
     const { diagnosisName, verification, status, notes } = details;
-    cy.verifyContentPresence('[data-cy="diagnoses-table"]', [
-      diagnosisName,
-      verification,
-      status,
-    ]);
+    if (diagnosisName && verification && status)
+      cy.verifyContentPresence('[data-cy="diagnoses-table"]', [
+        diagnosisName,
+        verification,
+        status,
+      ]);
 
     if (notes) {
       cy.get('[data-cy="diagnosis-see-note"]').last().click();
