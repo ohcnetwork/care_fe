@@ -773,9 +773,10 @@ export function SymptomQuestion({
           onSelect={handleCodeSelect}
           onBack={handleBack}
           onConfirm={handleConfirmSymptom}
-          entityDetailsContent={symptomDetailsContent}
           addPlaceholder={addSymptomPlaceholder}
-        />
+        >
+          {symptomDetailsContent}
+        </EntitySelectionDrawer>
       ) : (
         <ValueSetSelect
           system="system-condition-code"

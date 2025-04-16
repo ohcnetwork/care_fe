@@ -521,9 +521,10 @@ export function MedicationStatementQuestion({
           onSelect={handleAddMedication}
           onBack={handleBack}
           onConfirm={handleConfirmMedication}
-          entityDetailsContent={medicationDetailsContent}
           addPlaceholder={addMedicationPlaceholder}
-        />
+        >
+          {medicationDetailsContent}
+        </EntitySelectionDrawer>
       ) : (
         <div className="max-w-4xl">
           <ValueSetSelect

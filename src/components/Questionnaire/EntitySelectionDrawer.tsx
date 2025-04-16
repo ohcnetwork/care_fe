@@ -106,9 +106,9 @@ interface EntitySelectionDrawerProps {
   titleAddition?: string;
   /**
    * Content to display when an entity is selected (the form for entity details)
-   * This should be a React node that contains the form elements for configuring the entity
+   * This is provided as children for better React composition
    */
-  entityDetailsContent: ReactNode;
+  children: ReactNode;
   /**
    * Optional add placeholder text override
    */
@@ -142,7 +142,7 @@ export function EntitySelectionDrawer({
   onSelect,
   onBack,
   onConfirm,
-  entityDetailsContent,
+  children,
   addPlaceholder,
   confirmButtonText,
 }: EntitySelectionDrawerProps) {
@@ -186,9 +186,7 @@ export function EntitySelectionDrawer({
                   {selectedEntity.display}
                 </SheetTitle>
               </SheetHeader>
-              <div className="flex-1 overflow-y-auto pb-safe">
-                {entityDetailsContent}
-              </div>
+              <div className="flex-1 overflow-y-auto pb-safe">{children}</div>
             </div>
           ) : (
             <ValueSetSelect

@@ -590,9 +590,10 @@ export function MedicationRequestQuestion({
           onSelect={handleAddMedication}
           onBack={handleBack}
           onConfirm={handleConfirmMedication}
-          entityDetailsContent={medicationDetailsContent}
           addPlaceholder={addMedicationPlaceholder}
-        />
+        >
+          {medicationDetailsContent}
+        </EntitySelectionDrawer>
       ) : (
         <div className="max-w-4xl" data-cy="add-medication-request">
           <ValueSetSelect

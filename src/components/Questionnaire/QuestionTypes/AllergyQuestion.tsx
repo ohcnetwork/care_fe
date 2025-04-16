@@ -810,9 +810,10 @@ export function AllergyQuestion({
           onSelect={handleAddAllergy}
           onBack={handleBack}
           onConfirm={handleConfirmAllergy}
-          entityDetailsContent={allergyDetailsContent}
           addPlaceholder={addAllergyPlaceholder}
-        />
+        >
+          {allergyDetailsContent}
+        </EntitySelectionDrawer>
       ) : (
         <ValueSetSelect
           system="system-allergy-code"

@@ -563,9 +563,10 @@ export function DiagnosisQuestion({
           onSelect={handleCodeSelect}
           onBack={handleBack}
           onConfirm={handleCategoryConfirm}
-          entityDetailsContent={diagnosisDetailsContent}
           addPlaceholder={addDiagnosisPlaceholder}
-        />
+        >
+          {diagnosisDetailsContent}
+        </EntitySelectionDrawer>
       ) : showCategorySelection ? (
         desktopDiagnosisContent
       ) : (
