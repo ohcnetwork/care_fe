@@ -357,6 +357,7 @@ export default function PatientRegistration(
             <PLUGIN_Component
               __name="PatientRegistrationForm"
               form={form}
+              facilityId={facilityId}
               patientId={patientId}
             />
 
