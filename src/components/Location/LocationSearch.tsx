@@ -50,7 +50,7 @@ export function LocationSearch({
     queryKey: ["locations", facilityId, mode, search],
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode, name: search, form, available: "true" },
+      queryParams: { mode, name: search, form },
     }),
     enabled: facilityId !== "preview",
   });
