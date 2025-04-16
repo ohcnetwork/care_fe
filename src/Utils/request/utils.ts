@@ -96,3 +96,15 @@ export function handleUploadPercentage(
     setUploadPercent(percentComplete);
   }
 }
+
+export function MoveUp(arr: any[], idx: number) {
+  const newArray = [...arr];
+  [newArray[idx - 1], newArray[idx]] = [newArray[idx], newArray[idx - 1]];
+  return newArray;
+}
+
+export function MoveDown(arr: any[], idx: number) {
+  const newArray = [...arr];
+  [newArray[idx + 1], newArray[idx]] = [newArray[idx], newArray[idx + 1]];
+  return newArray;
+}
