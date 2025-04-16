@@ -10,15 +10,30 @@ import { FileUploadQuestion } from "@/types/files/files";
 import { Code } from "@/types/questionnaire/code";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
+import { Quantity } from "./quantity";
+
 /**
  * A short hand for defining response value types
  */
-type RV<T extends string, V> = {
+type RVBase<T extends string, V> = {
   coding?: Code;
   unit?: Code;
   type: T;
   value?: V;
 };
+type RVValue<T extends string, V> = RVBase<T, V> & {
+  value: V;
+};
+
+type RVCode<T extends string> = RVBase<T, Code> & {
+  value: Code;
+};
+
+type RVQuantity<T extends string> = RVBase<T, Quantity> & {
+  value: Quantity;
+};
+
+type RV<T extends string, V> = RVValue<T, V> | RVCode<T> | RVQuantity<T>;
 
 export type ResponseValue =
   | RV<"string", string | undefined>

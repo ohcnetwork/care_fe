@@ -70,11 +70,8 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     const newValues = [...questionnaireResponse.values];
     newValues[index] = {
       type: "quantity",
-      coding: {
-        code: newValue.code,
-        system: newValue.system,
-        display: newValue.display,
-      },
+      coding: newValue,
+      value: Number(currentValue),
     };
 
     updateQuestionnaireResponseCB(

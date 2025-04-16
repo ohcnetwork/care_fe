@@ -662,7 +662,10 @@ export function QuestionnaireForm({
                 if (value.type === "dateTime" && value.value) {
                   return {
                     ...value,
-                    value: value.value.toISOString(),
+                    value:
+                      value.value instanceof Date
+                        ? value.value.toISOString()
+                        : value.value,
                   };
                 }
                 if (value.unit) {
