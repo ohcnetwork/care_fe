@@ -54,10 +54,12 @@ function ConceptFields({
   nestIndex,
   type,
   parentForm,
+  disabled,
 }: {
   nestIndex: number;
   type: "include" | "exclude";
   parentForm: ReturnType<typeof useForm<ValuesetFormType>>;
+  disabled?: boolean;
 }) {
   const { fields, append, remove } = useFieldArray({
     control: parentForm.control,
@@ -116,6 +118,7 @@ function ConceptFields({
           variant="outline"
           size="sm"
           onClick={() => append({ code: "", display: "" })}
+          disabled={disabled}
         >
           <PlusIcon className="size-4 mr-2" />
           Add Concept
@@ -132,6 +135,7 @@ function ConceptFields({
                   <Input
                     {...field}
                     placeholder="Code"
+                    disabled={disabled}
                     onChange={(e) => {
                       field.onChange(e);
                       // Clear display and set isVerified to false when code changes
@@ -167,7 +171,7 @@ function ConceptFields({
             variant="outline"
             size="icon"
             onClick={() => handleVerify(index)}
-            disabled={lookupMutation.isPending}
+            disabled={lookupMutation.isPending || disabled}
           >
             <UpdateIcon className="size-4" />
           </Button>
@@ -176,6 +180,7 @@ function ConceptFields({
             variant="ghost"
             size="icon"
             onClick={() => remove(index)}
+            disabled={disabled}
           >
             <TrashIcon className="size-4" />
           </Button>
@@ -188,9 +193,11 @@ function ConceptFields({
 function FilterFields({
   nestIndex,
   type,
+  disabled,
 }: {
   nestIndex: number;
   type: "include" | "exclude";
+  disabled?: boolean;
 }) {
   const form = useForm();
   const { fields, append, remove } = useFieldArray({
@@ -207,6 +214,7 @@ function FilterFields({
           variant="outline"
           size="sm"
           onClick={() => append({ property: "", op: "", value: "" })}
+          disabled={disabled}
         >
           <PlusIcon className="size-4 mr-2" />
           Add Filter
@@ -220,7 +228,11 @@ function FilterFields({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                  <Input {...field} placeholder="Property" />
+                  <Input
+                    {...field}
+                    placeholder="Property"
+                    disabled={disabled}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -231,7 +243,11 @@ function FilterFields({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                  <Input {...field} placeholder="Operator" />
+                  <Input
+                    {...field}
+                    placeholder="Operator"
+                    disabled={disabled}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -242,7 +258,7 @@ function FilterFields({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                  <Input {...field} placeholder="Value" />
+                  <Input {...field} placeholder="Value" disabled={disabled} />
                 </FormControl>
               </FormItem>
             )}
@@ -252,6 +268,7 @@ function FilterFields({
             variant="ghost"
             size="icon"
             onClick={() => remove(index)}
+            disabled={disabled}
           >
             <TrashIcon className="size-4" />
           </Button>
@@ -264,9 +281,11 @@ function FilterFields({
 function RuleFields({
   type,
   form,
+  disabled,
 }: {
   type: "include" | "exclude";
   form: ReturnType<typeof useForm<ValuesetFormType>>;
+  disabled?: boolean;
 }) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -290,6 +309,7 @@ function RuleFields({
               filter: [],
             })
           }
+          disabled={disabled}
         >
           <PlusIcon className="size-4 mr-2" />
           Add Rule
@@ -308,6 +328,7 @@ function RuleFields({
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={disabled}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -333,12 +354,18 @@ function RuleFields({
                 variant="ghost"
                 size="icon"
                 onClick={() => remove(index)}
+                disabled={disabled}
               >
                 <TrashIcon className="size-4" />
               </Button>
             </div>
-            <ConceptFields nestIndex={index} type={type} parentForm={form} />
-            <FilterFields nestIndex={index} type={type} />
+            <ConceptFields
+              nestIndex={index}
+              type={type}
+              parentForm={form}
+              disabled={disabled}
+            />
+            <FilterFields nestIndex={index} type={type} disabled={disabled} />
           </div>
         ))}
       </CardContent>
@@ -450,6 +477,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="name"
+          disabled={isSystemDefined}
           render={({ field }) => (
             <FormItem>
               <FormLabel aria-required>{t("name")}</FormLabel>
@@ -464,6 +492,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="slug"
+          disabled={isSystemDefined}
           render={({ field }) => (
             <FormItem>
               <FormLabel aria-required>{t("slug")}</FormLabel>
@@ -478,6 +507,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="description"
+          disabled={isSystemDefined}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("description")}</FormLabel>
@@ -495,7 +525,11 @@ export function ValueSetForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel aria-required>{t("status")}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={isSystemDefined}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select Status" />
@@ -514,8 +548,8 @@ export function ValueSetForm({
         />
 
         <div className="space-y-6">
-          <RuleFields type="include" form={form} />
-          <RuleFields type="exclude" form={form} />
+          <RuleFields type="include" form={form} disabled={isSystemDefined} />
+          <RuleFields type="exclude" form={form} disabled={isSystemDefined} />
         </div>
         {isSystemDefined && (
           <div className="text-red-600 text-sm flex justify-end">
