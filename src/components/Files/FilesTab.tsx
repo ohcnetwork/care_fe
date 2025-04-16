@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { t } from "i18next";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -60,6 +60,8 @@ export interface FilesTabProps {
 }
 
 export const FilesTab = (props: FilesTabProps) => {
+  const { t } = useTranslation();
+
   const { patient, type, encounter } = props;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
@@ -374,7 +376,7 @@ export const FilesTab = (props: FilesTabProps) => {
     );
   };
 
-  const FileUploadButtons = (): JSX.Element => {
+  const FileUploadButtons = (): React.ReactNode => {
     if (!canEdit) return <></>;
     return (
       <DropdownMenu>
@@ -659,17 +661,9 @@ export const FilesTab = (props: FilesTabProps) => {
         }
       >
         {type === "encounter" && (
-          <TabsList className="bg-gray-200 py-0 w-fit">
-            <TabsTrigger
-              value="all"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("all")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="discharge_summary"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
+          <TabsList>
+            <TabsTrigger value="all">{t("all")}</TabsTrigger>
+            <TabsTrigger value="discharge_summary">
               {t("discharge_summary")}
             </TabsTrigger>
           </TabsList>

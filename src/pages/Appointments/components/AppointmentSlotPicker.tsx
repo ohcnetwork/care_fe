@@ -258,7 +258,6 @@ export function AppointmentSlotPicker({
                                   : slot.id,
                               );
                             }}
-                            allowOngoingSlots={true}
                           />
                         ))}
                       </div>
@@ -279,13 +278,11 @@ export const TokenSlotButton = ({
   availability,
   selectedSlotId,
   onClick,
-  allowOngoingSlots,
 }: {
   slot: Omit<TokenSlot, "availability">;
   availability: TokenSlot["availability"];
   selectedSlotId: string | undefined;
   onClick: () => void;
-  allowOngoingSlots: boolean;
 }) => {
   const { t } = useTranslation();
 
@@ -302,10 +299,7 @@ export const TokenSlotButton = ({
       size="lg"
       variant={selectedSlotId === slot.id ? "primary" : "outline"}
       onClick={onClick}
-      disabled={
-        slot.allocated === availability.tokens_per_slot ||
-        (!allowOngoingSlots && isOngoingSlot)
-      }
+      disabled={slot.allocated === availability.tokens_per_slot}
       className="flex flex-col items-center group gap-0 w-24 relative"
     >
       <span className="font-semibold">
