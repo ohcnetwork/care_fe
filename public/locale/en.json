@@ -2902,6 +2902,7 @@
   "update_available": "Update Available",
   "update_bed": "Update Bed",
   "update_department": "Update Department",
+  "update_device": "Update Device",
   "update_device_with_type": "Update {{type}} Device",
   "update_encounter": "Update Encounter",
   "update_encounter_details": "Update Encounter Details",
