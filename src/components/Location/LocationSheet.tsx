@@ -804,14 +804,14 @@ export function LocationSheet({
               {canWrite && (
                 <TabsTrigger
                   value="assign"
-                  className="data-[state=active]:border-b-4 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                  className="border-0 data-[state=active]:border-b-2 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
                 >
                   {t("assign_location")}
                 </TabsTrigger>
               )}
               <TabsTrigger
                 value="history"
-                className="data-[state=active]:border-b-4 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                className="border-0 data-[state=active]:border-b px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
               >
                 {t("location_history")}
               </TabsTrigger>

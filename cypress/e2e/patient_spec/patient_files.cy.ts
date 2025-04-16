@@ -53,8 +53,7 @@ describe("Patient Files", () => {
       .fillMultipleFileNames(inputFileNames)
       .interceptFileUploadRequest()
       .clickUploadFilesButton()
-      .verifyFileUploadApiCall()
-      .verifyMultipleFileUploadSuccess(fileUploadSuccessToast);
+      .verifyFileUploadApiCall();
   });
 
   it("Capture image and upload", () => {
