@@ -141,3 +141,15 @@ jobs:
                 }
               }' -f project=$PROJECT_ID -f item=$ITEM_ID
           fi
+
+      - name: Check if assignee is core and add label
+        if: github.event.action == 'assigned'
+        env:
+          ASSIGNEE: ${{ github.event.assignee.login }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          if curl -s "https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${ASSIGNEE}.md" | grep -q "role : core"; then
+            gh issue edit $ISSUE_NUMBER --add-label "core" --repo $REPO
+          fi
