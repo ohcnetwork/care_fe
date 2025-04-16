@@ -22,6 +22,8 @@ interface LocationTreeNodeProps {
   onToggleExpand: (locationId: string) => void;
   level?: number;
   facilityId: string;
+
+  showAllForms?: boolean;
 }
 
 export function LocationTreeNode({
@@ -32,6 +34,7 @@ export function LocationTreeNode({
   onToggleExpand,
   level = 0,
   facilityId,
+  showAllForms,
 }: LocationTreeNodeProps) {
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = location.id === selectedLocationId;
@@ -45,7 +48,7 @@ export function LocationTreeNode({
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: location.id,
-        mode: "kind",
+        mode: showAllForms ? undefined : "kind",
       },
     }),
     enabled: true,

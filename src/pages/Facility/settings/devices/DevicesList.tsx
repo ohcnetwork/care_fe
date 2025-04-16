@@ -146,6 +146,7 @@ export default function DevicesList({ facilityId }: Props) {
                   )
                   .map((location) => (
                     <LocationTreeNode
+                      showAllForms={true}
                       key={location.id}
                       location={location}
                       facilityId={facilityId}
