@@ -7,7 +7,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/sheet";
 
 import PageTitle from "@/components/Common/PageTitle";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import useFilters from "@/hooks/useFilters";
@@ -46,7 +46,10 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
 import { getParentChain } from "@/pages/Facility/locations/Utils";
-import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
+import {
+  DeviceCard,
+  DeviceTable,
+} from "@/pages/Facility/settings/devices/components/DeviceCard";
 import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import deviceApi from "@/types/device/deviceApi";
 import { LocationList as LocationListType } from "@/types/location/location";
@@ -68,6 +71,12 @@ export default function DevicesList({ facilityId }: Props) {
     disableCache: true,
   });
   const isMobile = useBreakpoints({ default: true, md: false });
+
+  useEffect(() => {
+    if (!qParams.locationId) {
+      setExpandedLocations(new Set());
+    }
+  }, [qParams.locationId]);
 
   const handleToggleExpand = useCallback((locationId: string) => {
     setExpandedLocations((prev) => {
@@ -179,6 +188,7 @@ export default function DevicesList({ facilityId }: Props) {
                   .map((location) => (
                     <LocationTreeNode
                       key={location.id}
+                      showAllForms={true}
                       location={location}
                       facilityId={facilityId}
                       selectedLocationId={qParams.locationId || null}
@@ -298,7 +308,7 @@ export default function DevicesList({ facilityId }: Props) {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
+            <div className="relative flex-1 max-w-md">
               <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
               <Input
                 data-cy="search-devices-input"
@@ -359,21 +369,18 @@ export default function DevicesList({ facilityId }: Props) {
 
           <div className="flex-grow overflow-auto">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <CardGridSkeleton count={6} />
-              </div>
+              <CardListSkeleton count={7} />
             ) : (
               <div className="space-y-6">
-                <div
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                  data-cy="devices-list"
-                >
+                <div data-cy="devices-list">
                   {devices?.results?.length ? (
-                    devices.results.map((device) => (
-                      <DeviceCard key={device.id} device={device} />
-                    ))
+                    !isMobile ? (
+                      <DeviceTable devices={devices.results} />
+                    ) : (
+                      <DeviceCard devices={devices.results} />
+                    )
                   ) : (
-                    <Card className="col-span-full">
+                    <Card>
                       <CardContent className="p-6 text-center text-gray-500">
                         {qParams.search_text ||
                         qParams.care_type ||
