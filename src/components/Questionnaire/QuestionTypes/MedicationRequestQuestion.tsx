@@ -381,7 +381,7 @@ export function MedicationRequestQuestion({
             },
           },
           {
-            type: t("ongoing_medications"),
+            type: t("medication_statements"),
             displayFields: [
               {
                 key: "medication",

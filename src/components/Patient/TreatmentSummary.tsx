@@ -508,7 +508,7 @@ export default function TreatmentSummary({
 
               {/* Medication Statements */}
               {medicationStatement?.count != 0 && (
-                <SectionLayout title={t("ongoing_medications")}>
+                <SectionLayout title={t("medication_statements")}>
                   <PrintTable
                     headers={[
                       { key: "medication" },
