@@ -47,6 +47,7 @@ export interface Symptom {
   created_by: UserBase;
   updated_by: UserBase;
   category: string;
+  encounter: string;
 }
 
 export interface SymptomRequest {

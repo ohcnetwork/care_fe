@@ -276,6 +276,8 @@ export function HistoricalRecordSelector<T>({
       [activeType]: [],
     }));
     setIsOpen(false);
+    setActiveType(structuredTypes[0]?.type || "");
+    handleLightReset();
   };
 
   const handleTabChange = (type: string) => {
@@ -287,11 +289,15 @@ export function HistoricalRecordSelector<T>({
     }));
   };
 
-  const handleReset = () => {
-    setSelectedRecords({});
+  const handleLightReset = () => {
     setEncounters([]);
     setExpandedEncounterId(new Set());
     setCurrentOffset({});
+  };
+
+  const handleReset = () => {
+    setSelectedRecords({});
+    handleLightReset();
   };
 
   const handleClose = () => {
@@ -325,6 +331,11 @@ export function HistoricalRecordSelector<T>({
       const dateB = b.period?.start ? new Date(b.period.start).getTime() : 0;
       return dateB - dateA; // Sort in descending order (newest first)
     });
+
+  useEffect(() => {
+    console.log("encounters", encounters);
+    console.log("filteredEncounters", filteredEncounters);
+  }, [encounters, filteredEncounters]);
 
   return (
     <Sheet

@@ -112,6 +112,29 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
   };
 }
 
+function checkForDuplicateDiagnosis(
+  existingDiagnoses: DiagnosisRequest[],
+  newDiagnosis: Pick<DiagnosisRequest, "code"> | Code,
+  t: (key: string) => string,
+) {
+  const codeToCheck = "code" in newDiagnosis ? newDiagnosis.code : newDiagnosis;
+  if (typeof codeToCheck === "string") {
+    return false;
+  }
+
+  const isDuplicate = existingDiagnoses.some(
+    (diagnosis) =>
+      diagnosis.code.code === codeToCheck.code &&
+      diagnosis.verification_status !== "entered_in_error",
+  );
+
+  if (isDuplicate) {
+    toast.warning(t("diagnosis_already_exist_warning"));
+    return true;
+  }
+  return false;
+}
+
 export function DiagnosisQuestion({
   patientId,
   encounterId,
@@ -176,13 +199,6 @@ export function DiagnosisQuestion({
     }
   }, [patientDiagnoses]);
 
-  useEffect(() => {
-    console.log(
-      "questionnaireResponse",
-      questionnaireResponse.values?.[0]?.value,
-    );
-  }, [questionnaireResponse]);
-
   const handleCodeSelect = (code: Code) => {
     setSelectedCode(code);
     setNewDiagnosis((prev) => ({ ...prev, code }));
@@ -192,14 +208,7 @@ export function DiagnosisQuestion({
   const handleCategoryConfirm = () => {
     if (!selectedCode) return;
 
-    const isDuplicate = sortedDiagnoses.some(
-      (diagnosis) =>
-        diagnosis.code.code === selectedCode.code &&
-        diagnosis.verification_status !== "entered_in_error",
-    );
-
-    if (isDuplicate) {
-      toast.warning(t("diagnosis_already_exist_warning"));
+    if (checkForDuplicateDiagnosis(sortedDiagnoses, selectedCode, t)) {
       return;
     }
 
@@ -301,9 +310,18 @@ export function DiagnosisQuestion({
   const handleAddHistoricalDiagnoses = async (
     selectedDiagnoses: DiagnosisRequest[],
   ) => {
+    // Filter out duplicates before adding
+    const nonDuplicateDiagnoses = selectedDiagnoses.filter(
+      (diagnosis) => !checkForDuplicateDiagnosis(sortedDiagnoses, diagnosis, t),
+    );
+
+    if (nonDuplicateDiagnoses.length === 0) {
+      return;
+    }
+
     const newDiagnoses = [
       ...sortedDiagnoses,
-      ...selectedDiagnoses.map(({ id: _id, ...diagnosis }) => ({
+      ...nonDuplicateDiagnoses.map(({ id: _id, ...diagnosis }) => ({
         ...diagnosis,
         dirty: true,
       })),
