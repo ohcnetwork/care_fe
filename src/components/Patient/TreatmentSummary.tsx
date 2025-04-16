@@ -30,7 +30,7 @@ import medicationStatementApi from "@/types/emr/medicationStatement/medicationSt
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
 interface TreatmentSummaryProps {
-  facilityId: string;
+  facilityId?: string;
   encounterId: string;
 
   patientId: string;
@@ -54,6 +54,7 @@ const SectionLayout = ({
 };
 
 export default function TreatmentSummary({
+  facilityId,
   encounterId,
   patientId,
 }: TreatmentSummaryProps) {
@@ -63,7 +64,9 @@ export default function TreatmentSummary({
     queryKey: ["encounter", encounterId],
     queryFn: query(api.encounter.get, {
       pathParams: { id: encounterId },
-      queryParams: { patient: patientId },
+      queryParams: facilityId
+        ? { facility: facilityId }
+        : { patient: patientId },
     }),
     enabled: !!encounterId && !!patientId,
   });
