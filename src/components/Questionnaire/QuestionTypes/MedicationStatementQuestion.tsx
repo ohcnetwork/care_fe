@@ -43,9 +43,11 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import {
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequest,
+  MedicationRequestRead,
 } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import {
@@ -54,6 +56,7 @@ import {
   MedicationStatementRequest,
   MedicationStatementStatus,
 } from "@/types/emr/medicationStatement";
+import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
@@ -326,7 +329,7 @@ export function MedicationStatementQuestion({
                 pathParams: { patientId },
                 queryParams: { limit, offset },
               })({ signal: new AbortController().signal });
-              return response.results;
+              return response as PaginatedResponse<MedicationRequestRead>;
             },
           },
           {
@@ -359,7 +362,7 @@ export function MedicationStatementQuestion({
                 pathParams: { patientId },
                 queryParams: { limit, offset },
               })({ signal: new AbortController().signal });
-              return response.results;
+              return response as PaginatedResponse<MedicationStatementRead>;
             },
           },
         ]}

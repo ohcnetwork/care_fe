@@ -30,6 +30,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { Encounter } from "@/types/emr/encounter";
 import { BatchRequestBody } from "@/types/questionnaire/batch";
 
@@ -39,7 +40,8 @@ interface StructuredTypeConfig<T> {
   type: string;
   displayFields: DisplayField<T>[];
   queryKey: string[];
-  queryFn: (limit: number, offset: number) => Promise<T[]>;
+  queryFn: (limit: number, offset: number) => Promise<PaginatedResponse<any>>;
+  converter?: (item: any) => T;
 }
 
 interface HistoricalRecordSelectorProps<T> {
@@ -115,24 +117,35 @@ export function HistoricalRecordSelector<T>({
       const activeTypeConfig = structuredTypes.find(
         (st) => st.type === activeType,
       );
-      if (!activeTypeConfig) return [];
-      return activeTypeConfig.queryFn(LIMIT, currentOffset[activeType] || 0);
+      if (!activeTypeConfig) return { results: [], count: 0 };
+      const response = await activeTypeConfig.queryFn(
+        LIMIT,
+        currentOffset[activeType] || 0,
+      );
+      return {
+        results: activeTypeConfig.converter
+          ? response.results.map(activeTypeConfig.converter)
+          : response.results,
+        count: response.count,
+      };
     },
     enabled: isOpen,
   });
+
+  console.log("recordsData", recordsData);
 
   // Fetch encounters for the records
   const { data: encounterData } = useQuery({
     queryKey: ["encounters", patientId, recordsData],
     queryFn: async () => {
-      if (!recordsData?.length) return { results: [] };
+      if (!recordsData?.results?.length) return { results: [] };
 
       // Get unique encounter IDs from records that we haven't fetched yet
       const newEncounterIds = new Set(
-        recordsData
+        recordsData.results
           .map((record: any) => record.encounter)
           .filter(
-            (id): id is string =>
+            (id: string): id is string =>
               !!id && !encounters.find((e) => e.id === id)?.isFetched,
           ),
       );
@@ -170,7 +183,7 @@ export function HistoricalRecordSelector<T>({
         return { results: [] };
       }
     },
-    enabled: isOpen && !!recordsData?.length && !isLoadingRecords,
+    enabled: isOpen && !!recordsData?.results?.length && !isLoadingRecords,
   });
 
   // Update state when data changes
@@ -178,12 +191,11 @@ export function HistoricalRecordSelector<T>({
     if (!isOpen) return;
 
     // Update encounters with their records
-    if (recordsData) {
+    if (recordsData?.results && encounterData?.results) {
       // Group records by encounter
-      const groupedRecords = recordsData.reduce(
-        (acc, record: any) => {
+      const groupedRecords = recordsData.results.reduce(
+        (acc: Record<string, T[]>, record: any) => {
           const encounterId = record.encounter;
-          if (!encounterId) return acc;
 
           if (!acc[encounterId]) {
             acc[encounterId] = [];
@@ -199,54 +211,50 @@ export function HistoricalRecordSelector<T>({
         const updatedEncounters = [...prev];
 
         // Add new encounters from batch response
-        if (encounterData?.results) {
-          encounterData.results.forEach(
-            (encounter: EncounterWithRecords<T>) => {
-              const existingEncounterIndex = updatedEncounters.findIndex(
-                (e) => e.id === encounter.id,
-              );
-
-              if (existingEncounterIndex === -1) {
-                // New encounter
-                updatedEncounters.push({
-                  ...encounter,
-                  isFetched: true,
-                  records: [
-                    {
-                      type: activeType,
-                      data: groupedRecords[encounter.id] || [],
-                    },
-                  ],
-                });
-                setExpandedEncounterId((prev) =>
-                  new Set(prev).add(encounter.id),
-                );
-              } else {
-                // Existing encounter - append new records
-                const existingRecords =
-                  updatedEncounters[existingEncounterIndex].records || [];
-                const existingTypeRecords = existingRecords.find(
-                  (r) => r.type === activeType,
-                );
-
-                if (existingTypeRecords) {
-                  // Append new records to existing type
-                  existingTypeRecords.data = [
-                    ...existingTypeRecords.data,
-                    ...(groupedRecords[encounter.id] || []),
-                  ];
-                } else {
-                  // Add new type records
-                  existingRecords.push({
-                    type: activeType,
-                    data: groupedRecords[encounter.id] || [],
-                  });
-                }
-                updatedEncounters[existingEncounterIndex].isFetched = true;
-              }
-            },
+        encounterData.results.forEach((encounter: EncounterWithRecords<T>) => {
+          const existingEncounterIndex = updatedEncounters.findIndex(
+            (e) => e.id === encounter.id,
           );
-        }
+
+          if (existingEncounterIndex === -1) {
+            // New encounter
+            updatedEncounters.push({
+              ...encounter,
+              isFetched: true,
+              records: [
+                {
+                  type: activeType,
+                  data: groupedRecords[encounter.id] || [],
+                },
+              ],
+            });
+            setExpandedEncounterId((prevIds) =>
+              new Set(prevIds).add(encounter.id),
+            );
+          } else {
+            // Existing encounter - append new records
+            const existingRecords =
+              updatedEncounters[existingEncounterIndex].records || [];
+            const existingTypeRecords = existingRecords.find(
+              (r) => r.type === activeType,
+            );
+
+            if (existingTypeRecords) {
+              // Append new records to existing type
+              existingTypeRecords.data = [
+                ...existingTypeRecords.data,
+                ...(groupedRecords[encounter.id] || []),
+              ];
+            } else {
+              // Add new type records
+              existingRecords.push({
+                type: activeType,
+                data: groupedRecords[encounter.id] || [],
+              });
+            }
+            updatedEncounters[existingEncounterIndex].isFetched = true;
+          }
+        });
 
         return updatedEncounters;
       });
@@ -277,7 +285,7 @@ export function HistoricalRecordSelector<T>({
     }));
     setIsOpen(false);
     setActiveType(structuredTypes[0]?.type || "");
-    handleLightReset();
+    handleSoftReset();
   };
 
   const handleTabChange = (type: string) => {
@@ -289,7 +297,7 @@ export function HistoricalRecordSelector<T>({
     }));
   };
 
-  const handleLightReset = () => {
+  const handleSoftReset = () => {
     setEncounters([]);
     setExpandedEncounterId(new Set());
     setCurrentOffset({});
@@ -297,7 +305,7 @@ export function HistoricalRecordSelector<T>({
 
   const handleReset = () => {
     setSelectedRecords({});
-    handleLightReset();
+    handleSoftReset();
   };
 
   const handleClose = () => {
@@ -341,10 +349,12 @@ export function HistoricalRecordSelector<T>({
     <Sheet
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) {
-          handleClose();
-        } else {
+        if (open) {
+          handleReset();
+          setActiveType(structuredTypes[0]?.type || "");
           setIsOpen(true);
+        } else {
+          setIsOpen(false);
         }
       }}
     >
@@ -498,7 +508,8 @@ export function HistoricalRecordSelector<T>({
               <div className="flex justify-center p-4">
                 <Skeleton className="h-8 w-full" />
               </div>
-            ) : (
+            ) : recordsData?.count &&
+              recordsData.count > (currentOffset[activeType] || 0) + LIMIT ? (
               <Button
                 variant="outline"
                 onClick={handleLoadMore}
@@ -506,7 +517,7 @@ export function HistoricalRecordSelector<T>({
               >
                 {t("load_more")}
               </Button>
-            ))}
+            ) : null)}
           <div className="text-sm">
             <span className="font-medium">
               {(selectedRecords[activeType] || []).length} {activeType}

@@ -547,6 +547,7 @@ export function DiagnosisQuestion({
         structuredTypes={[
           {
             type: t("diagnoses"),
+            converter: convertToDiagnosisRequest,
             displayFields: [
               {
                 key: "code",
@@ -575,7 +576,7 @@ export function DiagnosisQuestion({
                 pathParams: { patientId },
                 queryParams: { offset, limit },
               })({ signal: new AbortController().signal });
-              return response.results.map(convertToDiagnosisRequest);
+              return response;
             },
           },
         ]}

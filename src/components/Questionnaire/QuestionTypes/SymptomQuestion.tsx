@@ -837,8 +837,9 @@ export function SymptomQuestion({
                 pathParams: { patientId },
                 queryParams: { offset, limit },
               })({ signal: new AbortController().signal });
-              return response.results.map(convertToSymptomRequest);
+              return response;
             },
+            converter: convertToSymptomRequest,
           },
         ]}
         buttonLabel={t("symptom_history")}

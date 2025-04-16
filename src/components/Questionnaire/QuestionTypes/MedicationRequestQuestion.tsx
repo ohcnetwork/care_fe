@@ -377,7 +377,7 @@ export function MedicationRequestQuestion({
                 pathParams: { patientId },
                 queryParams: { limit, offset },
               })({ signal: new AbortController().signal });
-              return response.results;
+              return response;
             },
           },
           {
@@ -410,7 +410,7 @@ export function MedicationRequestQuestion({
                 pathParams: { patientId },
                 queryParams: { limit, offset },
               })({ signal: new AbortController().signal });
-              return response.results;
+              return response;
             },
           },
         ]}
