@@ -150,6 +150,6 @@ jobs:
           REPO: ${{ github.repository }}
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          if curl -s "https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${ASSIGNEE}.md" | grep -q "role : core"; then
+          if curl -s "https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${ASSIGNEE}.md" | grep -q "role: core"; then
             gh issue edit $ISSUE_NUMBER --add-label "core" --repo $REPO
           fi
