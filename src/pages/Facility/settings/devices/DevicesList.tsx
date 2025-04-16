@@ -18,12 +18,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -36,6 +30,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 import PageTitle from "@/components/Common/PageTitle";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
@@ -160,12 +160,15 @@ export default function DevicesList({ facilityId }: Props) {
         </div>
       )}
       {isMobile && (
-        <Dialog open={showLocationFilter} onOpenChange={setShowLocationFilter}>
-          <DialogContent className="max-w-sm">
-            <DialogHeader>
-              <DialogTitle>{t("locations")}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-2 max-h-[60vh] overflow-auto">
+        <Sheet open={showLocationFilter} onOpenChange={setShowLocationFilter}>
+          <SheetContent
+            side="bottom"
+            className="h-[80vh] w-full sm:max-w-md bottom-0 right-0 top-auto rounded-tl-[10px] rounded-tr-[10px] data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom overflow-y-auto"
+          >
+            <SheetHeader>
+              <SheetTitle>{t("locations")}</SheetTitle>
+            </SheetHeader>
+            <div className="space-y-4 pt-2 max-h-[calc(80vh-80px)] overflow-auto">
               {allLocations?.results?.length &&
                 allLocations.results
                   .filter(
@@ -187,8 +190,8 @@ export default function DevicesList({ facilityId }: Props) {
                     />
                   ))}
             </div>
-          </DialogContent>
-        </Dialog>
+          </SheetContent>
+        </Sheet>
       )}
 
       <div className="flex-1 flex">
