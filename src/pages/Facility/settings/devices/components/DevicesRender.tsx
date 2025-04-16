@@ -65,10 +65,10 @@ export function DeviceTable({ devices, encounter }: Props) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Device</TableHead>
-            <TableHead className="text-center">Status</TableHead>
-            <TableHead className="text-center">Care Type</TableHead>
-            <TableHead className="text-center">Actions</TableHead>
+            <TableHead>{t("device")}</TableHead>
+            <TableHead className="text-center">{t("status")}</TableHead>
+            <TableHead className="text-center">{t("care_type")}</TableHead>
+            <TableHead className="text-center">{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
