@@ -52,7 +52,7 @@ import { getParentChain } from "@/pages/Facility/locations/Utils";
 import {
   DeviceCard,
   DeviceTable,
-} from "@/pages/Facility/settings/devices/components/DeviceCard";
+} from "@/pages/Facility/settings/devices/components/DevicesRender";
 import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import deviceApi from "@/types/device/deviceApi";
 import { LocationList as LocationListType } from "@/types/location/location";
