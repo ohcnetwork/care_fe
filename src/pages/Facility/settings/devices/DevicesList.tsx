@@ -195,205 +195,203 @@ export default function DevicesList({ facilityId }: Props) {
       )}
 
       <div className="flex-1 flex">
-        <Card className="w-full flex flex-col">
-          <CardContent className="p-4 flex flex-col h-full">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <div className="flex items-center gap-4">
-                <PageTitle title={t("devices")} className="mt-2" />
-                <Badge
-                  className="bg-purple-50 text-purple-700 text-sm font-medium rounded-xl px-3 w-max"
+        <div className="w-full flex flex-col h-full">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <PageTitle title={t("devices")} className="mt-2" />
+              <Badge
+                className="bg-purple-50 text-purple-700 text-sm font-medium rounded-xl px-3 w-max"
+                variant="outline"
+              >
+                {isLoading
+                  ? t("loading")
+                  : t("entity_count", {
+                      count: devices?.count ?? 0,
+                      entity: t("device"),
+                    })}
+              </Badge>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button
                   variant="outline"
+                  className={cn(
+                    "flex items-center gap-2 w-full sm:w-auto",
+                    (!isMobile && showLocationFilter) ||
+                      (isMobile && qParams.locationId)
+                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-700 border-blue-700"
+                      : "",
+                  )}
+                  onClick={() => setShowLocationFilter(!showLocationFilter)}
                 >
-                  {isLoading
-                    ? t("loading")
-                    : t("entity_count", {
-                        count: devices?.count ?? 0,
-                        entity: t("device"),
-                      })}
-                </Badge>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                <div className="flex gap-2 w-full sm:w-auto">
+                  <Funnel className="size-4" />
+                  {t("filter_by_locations")}
+                </Button>
+
+                {qParams.locationId && (
                   <Button
                     variant="outline"
-                    className={cn(
-                      "flex items-center gap-2 w-full sm:w-auto",
-                      (!isMobile && showLocationFilter) ||
-                        (isMobile && qParams.locationId)
-                        ? "bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-700 border-blue-700"
-                        : "",
-                    )}
-                    onClick={() => setShowLocationFilter(!showLocationFilter)}
+                    size="icon"
+                    onClick={() => updateQuery({ locationId: undefined })}
+                    title={t("clear_location_filter")}
                   >
-                    <Funnel className="size-4" />
-                    {t("filter_by_locations")}
-                  </Button>
-
-                  {qParams.locationId && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => updateQuery({ locationId: undefined })}
-                      title={t("clear_location_filter")}
-                    >
-                      <XIcon className="size-4" />
-                    </Button>
-                  )}
-                </div>
-
-                {pluginDevices.length > 0 ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild className="w-full sm:w-auto">
-                      <Button
-                        variant="white"
-                        className="flex items-center justify-between gap-2 w-full sm:w-auto"
-                      >
-                        {t("add_device")}
-                        <CareIcon icon="l-angle-down" className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="w-[var(--radix-dropdown-menu-trigger-width)] md:w-auto"
-                    >
-                      {pluginDevices.map((pluginDevice) => {
-                        const DeviceIcon = pluginDevice.icon || CubeIcon;
-                        return (
-                          <DropdownMenuItem
-                            key={pluginDevice.type}
-                            className="capitalize"
-                            asChild
-                          >
-                            <Link
-                              href={`/devices/create?type=${pluginDevice.type}`}
-                            >
-                              <DeviceIcon className="size-4 mr-1" />
-                              {pluginDevice.type}
-                            </Link>
-                          </DropdownMenuItem>
-                        );
-                      })}
-                      <DropdownMenuItem asChild>
-                        <Link href="/devices/create">
-                          <CubeIcon className="size-4 mr-1" />
-                          {t("other")}
-                        </Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <Button
-                    variant="white"
-                    asChild
-                    data-cy="add-device-button"
-                    className="w-full sm:w-auto"
-                  >
-                    <Link href="/devices/create">
-                      <PlusIcon className="size-4" />
-                      {t("add_device")}
-                    </Link>
+                    <XIcon className="size-4" />
                   </Button>
                 )}
               </div>
-            </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="relative flex-1">
-                <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
-                <Input
-                  data-cy="search-devices-input"
-                  placeholder={t("search_devices")}
-                  value={qParams.search_text || ""}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-
-              {pluginDevices.length > 0 && (
-                <Popover>
-                  <PopoverTrigger asChild>
+              {pluginDevices.length > 0 ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild className="w-full sm:w-auto">
                     <Button
-                      variant="outline"
-                      className="flex items-center gap-2 w-full sm:w-auto"
+                      variant="white"
+                      className="flex items-center justify-between gap-2 w-full sm:w-auto"
                     >
-                      {qParams.care_type ? (
-                        <span className="capitalize">{qParams.care_type}</span>
-                      ) : (
-                        t("filter_by_type")
-                      )}
-                      <CaretSortIcon className="ml-2 size-4" />
+                      {t("add_device")}
+                      <CareIcon icon="l-angle-down" className="size-4" />
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="min-w-[var(--radix-popover-trigger-width)] max-w-[200px] p-2"
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
                     align="end"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)] md:w-auto"
                   >
-                    <div className="space-y-2">
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start font-normal"
-                        onClick={() => handleCareTypeChange(null)}
-                      >
-                        {t("all_types")}
-                      </Button>
-                      <Separator />
-                      {pluginDevices.map((device) => {
-                        const DeviceIcon = device.icon || CubeIcon;
-                        return (
-                          <Button
-                            key={device.type}
-                            variant="ghost"
-                            className="w-full capitalize justify-start font-normal"
-                            onClick={() => handleCareTypeChange(device.type)}
+                    {pluginDevices.map((pluginDevice) => {
+                      const DeviceIcon = pluginDevice.icon || CubeIcon;
+                      return (
+                        <DropdownMenuItem
+                          key={pluginDevice.type}
+                          className="capitalize"
+                          asChild
+                        >
+                          <Link
+                            href={`/devices/create?type=${pluginDevice.type}`}
                           >
-                            <DeviceIcon className="mr-2 size-4" />
-                            {device.type}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                            <DeviceIcon className="size-4 mr-1" />
+                            {pluginDevice.type}
+                          </Link>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                    <DropdownMenuItem asChild>
+                      <Link href="/devices/create">
+                        <CubeIcon className="size-4 mr-1" />
+                        {t("other")}
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button
+                  variant="white"
+                  asChild
+                  data-cy="add-device-button"
+                  className="w-full sm:w-auto"
+                >
+                  <Link href="/devices/create">
+                    <PlusIcon className="size-4" />
+                    {t("add_device")}
+                  </Link>
+                </Button>
               )}
             </div>
+          </div>
 
-            <div className="flex-grow overflow-auto">
-              {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <CardGridSkeleton count={6} />
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                    data-cy="devices-list"
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="relative flex-1">
+              <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
+              <Input
+                data-cy="search-devices-input"
+                placeholder={t("search_devices")}
+                value={qParams.search_text || ""}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
+            {pluginDevices.length > 0 && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 w-full sm:w-auto"
                   >
-                    {devices?.results?.length ? (
-                      devices.results.map((device) => (
-                        <DeviceCard key={device.id} device={device} />
-                      ))
+                    {qParams.care_type ? (
+                      <span className="capitalize">{qParams.care_type}</span>
                     ) : (
-                      <Card className="col-span-full">
-                        <CardContent className="p-6 text-center text-gray-500">
-                          {qParams.search_text ||
-                          qParams.care_type ||
-                          qParams.locationId
-                            ? t("no_devices_matching_filters")
-                            : t("no_devices_available")}
-                        </CardContent>
-                      </Card>
+                      t("filter_by_type")
                     )}
+                    <CaretSortIcon className="ml-2 size-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="min-w-[var(--radix-popover-trigger-width)] max-w-[200px] p-2"
+                  align="end"
+                >
+                  <div className="space-y-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start font-normal"
+                      onClick={() => handleCareTypeChange(null)}
+                    >
+                      {t("all_types")}
+                    </Button>
+                    <Separator />
+                    {pluginDevices.map((device) => {
+                      const DeviceIcon = device.icon || CubeIcon;
+                      return (
+                        <Button
+                          key={device.type}
+                          variant="ghost"
+                          className="w-full capitalize justify-start font-normal"
+                          onClick={() => handleCareTypeChange(device.type)}
+                        >
+                          <DeviceIcon className="mr-2 size-4" />
+                          {device.type}
+                        </Button>
+                      );
+                    })}
                   </div>
-                  {devices && devices.count > resultsPerPage && (
-                    <div className="flex justify-center mt-6">
-                      <Pagination totalCount={devices.count} />
-                    </div>
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
+
+          <div className="flex-grow overflow-auto">
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <CardGridSkeleton count={6} />
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                  data-cy="devices-list"
+                >
+                  {devices?.results?.length ? (
+                    devices.results.map((device) => (
+                      <DeviceCard key={device.id} device={device} />
+                    ))
+                  ) : (
+                    <Card className="col-span-full">
+                      <CardContent className="p-6 text-center text-gray-500">
+                        {qParams.search_text ||
+                        qParams.care_type ||
+                        qParams.locationId
+                          ? t("no_devices_matching_filters")
+                          : t("no_devices_available")}
+                      </CardContent>
+                    </Card>
                   )}
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                {devices && devices.count > resultsPerPage && (
+                  <div className="flex justify-center mt-6">
+                    <Pagination totalCount={devices.count} />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
