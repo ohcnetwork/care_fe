@@ -78,6 +78,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { MoveDown, MoveUp } from "@/Utils/request/utils";
 import organizationApi from "@/types/organization/organizationApi";
 import {
+  AnswerOption,
   EnableWhen,
   Question,
   QuestionType,
@@ -1719,7 +1720,7 @@ function QuestionEditor({
                                     <DropdownMenuItem
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        const newOptions = MoveUp(
+                                        const newOptions = MoveUp<AnswerOption>(
                                           answer_option,
                                           idx,
                                         );
@@ -1737,10 +1738,11 @@ function QuestionEditor({
                                     <DropdownMenuItem
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        const newOptions = MoveDown(
-                                          answer_option,
-                                          idx,
-                                        );
+                                        const newOptions =
+                                          MoveDown<AnswerOption>(
+                                            answer_option,
+                                            idx,
+                                          );
                                         updateField(
                                           "answer_option",
                                           newOptions,
@@ -1880,21 +1882,19 @@ function QuestionEditor({
                       parentId={getQuestionPath()}
                       onMoveUp={() => {
                         if (idx > 0) {
-                          const newQuestions = [...(questions || [])];
-                          [newQuestions[idx - 1], newQuestions[idx]] = [
-                            newQuestions[idx],
-                            newQuestions[idx - 1],
-                          ];
+                          const newQuestions = MoveUp<Question>(
+                            questions || [],
+                            idx,
+                          );
                           updateField("questions", newQuestions);
                         }
                       }}
                       onMoveDown={() => {
                         if (idx < (questions?.length || 0) - 1) {
-                          const newQuestions = [...(questions || [])];
-                          [newQuestions[idx], newQuestions[idx + 1]] = [
-                            newQuestions[idx + 1],
-                            newQuestions[idx],
-                          ];
+                          const newQuestions = MoveDown<Question>(
+                            questions || [],
+                            idx,
+                          );
                           updateField("questions", newQuestions);
                         }
                       }}
