@@ -38,7 +38,10 @@ import {
 } from "@/components/ui/sheet";
 
 import PageTitle from "@/components/Common/PageTitle";
-import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  CardListSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import useFilters from "@/hooks/useFilters";
@@ -369,7 +372,13 @@ export default function DevicesList({ facilityId }: Props) {
 
           <div className="flex-grow overflow-auto">
             {isLoading ? (
-              <CardListSkeleton count={7} />
+              <div className="grid gap-2">
+                {!isMobile ? (
+                  <CardListSkeleton count={7} />
+                ) : (
+                  <CardGridSkeleton count={4} />
+                )}
+              </div>
             ) : (
               <div className="space-y-6">
                 <div data-cy="devices-list">
