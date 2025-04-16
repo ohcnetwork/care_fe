@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -16,8 +15,6 @@ import Loading from "@/components/Common/Loading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
@@ -25,6 +22,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { Patient } from "@/types/emr/newPatient";
 
 interface EmptyStateProps {
   searching?: boolean;
@@ -64,24 +62,26 @@ export const EmptyState = ({
 
 interface Props {
   readonly?: boolean;
-  patientId: string;
+  patient: Patient;
   encounter: Encounter;
 }
 
-export default function MedicationRequestTable({
-  patientId,
-  encounter,
-}: Props) {
+export default function MedicationRequestTable({ patient, encounter }: Props) {
   const { t } = useTranslation();
 
+  const patientId = patient.id;
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
   const { hasPermission } = usePermissions();
-  const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
-    getPermissions(hasPermission, encounter.permissions);
+  const { canViewClinicalData } = getPermissions(
+    hasPermission,
+    patient.permissions,
+  );
+  const { canViewEncounter, canWriteEncounter } = getPermissions(
+    hasPermission,
+    encounter.permissions,
+  );
   const canAccess = canViewClinicalData || canViewEncounter;
-  const { goBack } = useAppHistory();
-
   const canWrite =
     canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
@@ -111,14 +111,6 @@ export default function MedicationRequestTable({
     }),
     enabled: !!patientId && canAccess,
   });
-
-  useEffect(() => {
-    if (!canAccess) {
-      toast.error("You do not have permission to view this encounter");
-      goBack();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAccess]);
 
   const medications = showStopped
     ? [
@@ -254,8 +246,8 @@ export default function MedicationRequestTable({
             <AdministrationTab
               patientId={patientId}
               encounterId={encounter.id}
-              canAccess={canAccess}
               canWrite={canWrite}
+              canAccess={canAccess}
             />
           </TabsContent>
         </Tabs>

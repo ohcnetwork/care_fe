@@ -16,14 +16,20 @@ import Loading from "@/components/Common/Loading";
 
 import useFilters from "@/hooks/useFilters";
 
+import { getPermissions } from "@/common/Permissions";
+
+import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { Encounter } from "@/types/emr/encounter";
+import { usePermissions } from "@/context/PermissionContext";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
+import { Patient } from "@/types/emr/newPatient";
 import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
 
 export interface DrawingsTabProps {
   type: "encounter" | "patient";
-  patientId?: string;
+  patient?: Patient;
   encounter?: Encounter;
+  patientId?: string;
 }
 
 interface ExcalidrawPreviewProps {
@@ -121,26 +127,57 @@ ExcalidrawPreview.displayName = "ExcalidrawPreview";
 
 export const DrawingTab = (props: DrawingsTabProps) => {
   const { t } = useTranslation();
+  const { type, patient, encounter, patientId } = props;
+  const { hasPermission } = usePermissions();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["name"],
   });
 
-  const associatingId =
-    props.type === "encounter" ? props.encounter?.id : props.patientId;
+  const { data: patientData } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.patient.getPatient, {
+      pathParams: { id: patientId ?? "" },
+    }),
+    enabled: !!patient && !!patientId,
+  });
+
+  const associatingId = type === "encounter" ? encounter?.id : patientId;
+
+  const { canViewClinicalData, canWritePatient } = getPermissions(
+    hasPermission,
+    patient?.permissions ?? patientData?.permissions ?? [],
+  );
+  const { canViewEncounter, canWriteEncounter } = getPermissions(
+    hasPermission,
+    encounter?.permissions ?? [],
+  );
+  const canAccess =
+    type === "encounter"
+      ? canViewClinicalData || canViewEncounter
+      : canViewClinicalData;
+
+  const canWriteCurrentEncounter =
+    canWriteEncounter &&
+    encounter &&
+    !inactiveEncounterStatus.includes(encounter.status);
+
+  const canEdit =
+    type === "encounter" ? canWriteCurrentEncounter : canWritePatient;
 
   const { data, isLoading } = useQuery({
     queryKey: ["drawings", associatingId, qParams, resultsPerPage],
     queryFn: query.debounced(metaArtifactApi.list, {
       queryParams: {
         object_type: "drawing",
-        associating_type: props.type,
+        associating_type: type,
         name: qParams.name,
         associating_id: associatingId,
         limit: resultsPerPage,
         offset: (qParams.page - 1) * resultsPerPage,
       },
     }),
+    enabled: canAccess,
   });
 
   return (
@@ -154,10 +191,12 @@ export const DrawingTab = (props: DrawingsTabProps) => {
           onChange={(e) => updateQuery({ name: e.target.value })}
           className="w-full sm:w-1/3"
         />
-        <Button variant="white" onClick={() => navigate("drawings/new")}>
-          <CareIcon icon="l-pen" />
-          {t("new_drawing")}
-        </Button>
+        {canEdit && (
+          <Button variant="white" onClick={() => navigate("drawings/new")}>
+            <CareIcon icon="l-pen" />
+            {t("new_drawing")}
+          </Button>
+        )}
       </div>
       {isLoading ? (
         <Loading />
@@ -167,7 +206,9 @@ export const DrawingTab = (props: DrawingsTabProps) => {
             <div className="flex flex-col items-center justify-center p-8 text-gray-500">
               <CareIcon icon="l-image" className="text-4xl mb-2" />
               <p className="text-lg font-medium">{t("no_drawings_so_far")}</p>
-              <p className="text-sm">{t("create_new_drawing_message")}</p>
+              {canEdit && (
+                <p className="text-sm">{t("create_new_drawing_message")}</p>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

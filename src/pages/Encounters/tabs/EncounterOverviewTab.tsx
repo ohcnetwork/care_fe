@@ -1,13 +1,8 @@
-import { useEffect } from "react";
-import { toast } from "sonner";
-
 import SideOverview from "@/components/Facility/ConsultationDetails/OverviewSideBar";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
-
-import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -30,15 +25,6 @@ export const EncounterOverviewTab = ({
   const canEdit =
     canSubmitEncounterQuestionnaire &&
     !inactiveEncounterStatus.includes(encounter.status ?? "");
-  const { goBack } = useAppHistory();
-
-  useEffect(() => {
-    if (!canAccess) {
-      toast.error("You do not have permission to view this encounter");
-      goBack();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAccess]);
 
   return (
     <div className="flex flex-col gap-4">
