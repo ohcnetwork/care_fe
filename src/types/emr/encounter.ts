@@ -182,6 +182,9 @@ export interface EncounterEditRequest {
   priority: EncounterPriority;
   external_identifier?: string;
   facility: string;
+
+  // ✅ Newly added field to support controlled Textarea
+  discharge_summary_advice?: string | null;
 }
 
 export interface EncounterRequest {
