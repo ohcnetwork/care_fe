@@ -311,14 +311,14 @@ export function MedicationRequestQuestion({
           <div className="min-w-fit">
             <div
               className={cn(
-                "max-w-[2304px] relative lg:border border-gray-200 rounded-md",
+                "max-w-[2344px] relative lg:border border-gray-200 rounded-md",
                 {
                   "bg-gray-50/50": !desktopLayout,
                 },
               )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[280px_180px_170px_160px_300px_180px_250px_180px_160px_200px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_200px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
@@ -441,7 +441,7 @@ export function MedicationRequestQuestion({
                             </div>
                           </div>
                           <CollapsibleContent>
-                            <div className="py-4 space-y-4 bg-white mx-2 mb-1">
+                            <div className="mt-2 px-1 py-4 space-y-4 bg-white mx-1 mb-1">
                               <MedicationRequestGridRow
                                 medication={medication}
                                 disabled={disabled}
@@ -526,7 +526,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
 
   const formatDoseRange = (range?: DoseRange) => {
     if (!range?.high?.value) return "";
-    return `${range.low?.value} ${range.low?.unit?.display} → ${range.high?.value} ${range.high?.unit?.display}`;
+    const formatValue = (value: number) =>
+      value.toString().includes(".") ? value.toFixed(2) : value.toString();
+    return `${formatValue(range.low?.value)} → ${formatValue(range.high?.value)} ${range.high?.unit?.display}`;
   };
   interface DosageDialogProps {
     dosageRange: DoseRange;
@@ -631,7 +633,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[280px_180px_170px_160px_300px_180px_250px_180px_160px_200px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50",
+        "grid grid-cols-1 lg:grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_200px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50",
         {
           "opacity-40 pointer-events-none": disabled,
         },
@@ -651,7 +653,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </span>
       </div>
       {/* Dosage */}
-      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 px-1 py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -724,7 +726,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               <PopoverTrigger asChild>
                 <div className="w-full" />
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-4" align="start">
+              <PopoverContent className="w-55 p-4" align="start">
                 <DosageDialog
                   dosageRange={dosageInstruction.dose_and_rate.dose_range}
                 />
@@ -942,6 +944,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             placeholder={t("select_additional_instructions")}
             disabled={disabled || isReadOnly}
             data-cy="medication-instructions"
+            wrapTextForSmallScreen
           />
         )}
       </div>
