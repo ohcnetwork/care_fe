@@ -35,8 +35,6 @@ export function DiagnosisList({
   className = "",
   readOnly = false,
 }: DiagnosisListProps) {
-  const { t } = useTranslation();
-
   const { data: diagnoses, isLoading: isDiagnosesLoading } = useQuery({
     queryKey: ["encounter_diagnosis", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
@@ -62,10 +60,7 @@ export function DiagnosisList({
     <DiagnosisListLayout
       className={className}
       readOnly={readOnly}
-      count={
-        (diagnoses?.results?.length ?? 0) +
-        (chronicConditions?.results?.length ?? 0)
-      }
+      count={diagnoses?.results?.length ?? 0}
     >
       <div className="space-y-2">
         {isDiagnosesLoading && (
@@ -99,7 +94,6 @@ const DiagnosisListLayout = ({
     <Accordion
       type="single"
       collapsible
-      defaultValue={count > 0 ? "diagnoses" : undefined}
       className={cn(
         "w-full bg-white rounded-md shadow-sm border border-gray-100",
         className,
@@ -108,28 +102,30 @@ const DiagnosisListLayout = ({
       <AccordionItem value="diagnoses" className="border-none">
         <AccordionTrigger
           className={cn(
-            "px-4 py-2 flex items-center justify-between rounded-sm",
-            "data-[state=open]:bg-gray-50 hover:bg-gray-50 hover:no-underline",
-            count === 0 && "pointer-events-none opacity-50",
+            "px-4 py-2 rounded-sm hover:no-underline [&>svg]:mt-1",
+            count > 0 && "data-[state=open]:bg-gray-50 hover:bg-gray-50",
+            count === 0 &&
+              "[&>svg]:opacity-50 pointer-events-none [&>div>div]:opacity-50",
           )}
-          disabled={count === 0}
         >
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-medium">
-              {t("diagnoses_count", { count })}
-            </span>
-          </div>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-medium">
+                {t("diagnoses_count", { count })}
+              </span>
+            </div>
 
-          {!readOnly && (
-            <Link
-              href={`questionnaire/diagnosis`}
-              className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 no-underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <CareIcon icon="l-pen" className="size-4" />
-              {t("edit")}
-            </Link>
-          )}
+            {!readOnly && (
+              <Link
+                href={`questionnaire/diagnosis`}
+                className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 no-underline pointer-events-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CareIcon icon="l-pen" className="size-4" />
+                {t("edit")}
+              </Link>
+            )}
+          </div>
         </AccordionTrigger>
 
         <AccordionContent className="px-2 pb-2">{children}</AccordionContent>

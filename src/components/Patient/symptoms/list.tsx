@@ -143,7 +143,6 @@ const SymptomListLayout = ({
     <Accordion
       type="single"
       collapsible
-      defaultValue={count > 0 ? "symptoms" : undefined}
       className={cn(
         "w-full bg-white rounded-md shadow-sm border border-gray-100",
         className,
@@ -152,28 +151,29 @@ const SymptomListLayout = ({
       <AccordionItem value="symptoms" className="border-none">
         <AccordionTrigger
           className={cn(
-            "px-4 py-2 flex items-center justify-between rounded-sm",
-            "data-[state=open]:bg-gray-50 hover:bg-gray-50 hover:no-underline",
-            count === 0 && "pointer-events-none opacity-50",
+            "px-4 py-2 rounded-sm hover:no-underline [&>svg]:mt-1",
+            count > 0 && "data-[state=open]:bg-gray-50 hover:bg-gray-50",
+            count === 0 &&
+              "[&>svg]:opacity-50 pointer-events-none [&>div>div]:opacity-50",
           )}
-          disabled={count === 0}
         >
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-medium">
-              {t("symptoms_count", { count })}
-            </span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-medium">
+                {t("symptoms_count", { count })}
+              </span>
+            </div>
+            {!readOnly && (
+              <Link
+                href={`questionnaire/symptom`}
+                className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 no-underline pointer-events-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CareIcon icon="l-pen" className="size-4" />
+                {t("edit")}
+              </Link>
+            )}
           </div>
-
-          {!readOnly && (
-            <Link
-              href={`questionnaire/symptom`}
-              className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 no-underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <CareIcon icon="l-pen" className="size-4" />
-              {t("edit")}
-            </Link>
-          )}
         </AccordionTrigger>
 
         <AccordionContent className="px-2 pb-2">{children}</AccordionContent>
