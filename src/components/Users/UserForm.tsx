@@ -664,12 +664,6 @@ export default function UserForm({
                           placeholder={t("confirm_password")}
                           {...field}
                           id="c_password"
-                          onKeyDown={(e) => {
-                            if (e.key === "Tab") {
-                              e.preventDefault();
-                              document.getElementById("phone_number")?.focus();
-                            }
-                          }}
                         />
                       </FormControl>
                       <FormMessage />
