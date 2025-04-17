@@ -86,12 +86,6 @@ export function LocationNavigation({
             />
           </div>
         </div>
-
-        {!isLoadingLocations && locations.length === 0 && (
-          <div className="text-center text-gray-500 text-sm py-4">
-            {t("no_locations_found")}
-          </div>
-        )}
         {selectedBed && (
           <div className="bg-green-50 border border-green-200 p-3 rounded-md">
             <p className="text-sm text-green-800 flex items-center justify-between">
