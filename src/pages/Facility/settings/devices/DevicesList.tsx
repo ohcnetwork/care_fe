@@ -183,27 +183,28 @@ export default function DevicesList({ facilityId }: Props) {
               <SheetTitle>{t("locations")}</SheetTitle>
             </SheetHeader>
             <div className="space-y-4 pt-2 max-h-[calc(80vh-80px)] overflow-auto">
-              {allLocations?.results?.length &&
-                allLocations.results
-                  .filter(
-                    (loc) =>
-                      !loc.parent || Object.keys(loc.parent).length === 0,
-                  )
-                  .map((location) => (
-                    <LocationTreeNode
-                      key={location.id}
-                      showAllForms={true}
-                      location={location}
-                      facilityId={facilityId}
-                      selectedLocationId={qParams.locationId || null}
-                      expandedLocations={expandedLocations}
-                      onToggleExpand={handleToggleExpand}
-                      onSelect={(loc) => {
-                        handleLocationSelect(loc);
-                        setShowLocationFilter(false);
-                      }}
-                    />
-                  ))}
+              {allLocations?.results?.length
+                ? allLocations.results
+                    .filter(
+                      (loc) =>
+                        !loc.parent || Object.keys(loc.parent).length === 0,
+                    )
+                    .map((location) => (
+                      <LocationTreeNode
+                        key={location.id}
+                        showAllForms={true}
+                        location={location}
+                        facilityId={facilityId}
+                        selectedLocationId={qParams.locationId || null}
+                        expandedLocations={expandedLocations}
+                        onToggleExpand={handleToggleExpand}
+                        onSelect={(loc) => {
+                          handleLocationSelect(loc);
+                          setShowLocationFilter(false);
+                        }}
+                      />
+                    ))
+                : t("no_locations_available")}
             </div>
           </SheetContent>
         </Sheet>
