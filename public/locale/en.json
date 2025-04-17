@@ -2993,6 +2993,7 @@
   "vaccine_name": "Vaccine name",
   "valid_from": "Valid From",
   "valid_otp_found": "Valid OTP found, Navigating to Appointments",
+  "valid_till_equal_or_after_valid_from": "Valid till must be equal to or after valid from date",
   "valid_to": "Valid Till",
   "valid_year_of_birth": "Please enter a valid year of birth (YYYY)",
   "validation_failed": "Validation failed",
