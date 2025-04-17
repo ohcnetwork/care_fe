@@ -150,24 +150,25 @@ export default function DevicesList({ facilityId }: Props) {
               <div className="flex items-center justify-between py-2">
                 <h3 className="font-medium">{t("locations")}</h3>
               </div>
-              {allLocations?.results?.length &&
-                allLocations.results
-                  .filter(
-                    (loc) =>
-                      !loc.parent || Object.keys(loc.parent).length === 0,
-                  )
-                  .map((location) => (
-                    <LocationTreeNode
-                      showAllForms={true}
-                      key={location.id}
-                      location={location}
-                      facilityId={facilityId}
-                      selectedLocationId={qParams.locationId || null}
-                      expandedLocations={expandedLocations}
-                      onToggleExpand={handleToggleExpand}
-                      onSelect={handleLocationSelect}
-                    />
-                  ))}
+              {allLocations?.results?.length
+                ? allLocations.results
+                    .filter(
+                      (loc) =>
+                        !loc.parent || Object.keys(loc.parent).length === 0,
+                    )
+                    .map((location) => (
+                      <LocationTreeNode
+                        showAllForms={true}
+                        key={location.id}
+                        location={location}
+                        facilityId={facilityId}
+                        selectedLocationId={qParams.locationId || null}
+                        expandedLocations={expandedLocations}
+                        onToggleExpand={handleToggleExpand}
+                        onSelect={handleLocationSelect}
+                      />
+                    ))
+                : t("no_locations_available")}
             </CardContent>
           </Card>
         </div>
