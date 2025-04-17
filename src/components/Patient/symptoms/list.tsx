@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -138,6 +138,11 @@ const SymptomListLayout = ({
   count: number;
 }) => {
   const { t } = useTranslation();
+  const [value, setValue] = useState(count > 0 ? "symptoms" : undefined);
+
+  useEffect(() => {
+    setValue(count > 0 ? "symptoms" : undefined);
+  }, [count]);
 
   return (
     <Accordion
@@ -147,6 +152,8 @@ const SymptomListLayout = ({
         "w-full bg-white rounded-md shadow-sm border border-gray-100",
         className,
       )}
+      value={value}
+      onValueChange={(value) => setValue(value)}
     >
       <AccordionItem value="symptoms" className="border-none">
         <AccordionTrigger

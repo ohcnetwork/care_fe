@@ -6,7 +6,7 @@ import {
   LeafIcon,
 } from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -286,6 +286,11 @@ const AllergyListLayout = ({
   count: number;
 }) => {
   const { t } = useTranslation();
+  const [value, setValue] = useState(count > 0 ? "allergies" : undefined);
+
+  useEffect(() => {
+    setValue(count > 0 ? "allergies" : undefined);
+  }, [count]);
 
   return (
     <Accordion
@@ -295,6 +300,8 @@ const AllergyListLayout = ({
         "w-full bg-white rounded-md shadow-sm border border-gray-100",
         className,
       )}
+      value={value}
+      onValueChange={(value) => setValue(value)}
     >
       <AccordionItem value="allergies" className="border-none">
         <AccordionTrigger
