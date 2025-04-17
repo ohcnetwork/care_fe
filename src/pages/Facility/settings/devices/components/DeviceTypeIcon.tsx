@@ -6,8 +6,7 @@ const DeviceTypeIcon = ({
   type,
   ...props
 }: {
-  type?: string | undefined;
-  // TODO: switch to using React.ComponentProps<"div"> once upgraded to React 19
+  type: string | undefined;
   className?: string;
 }) => {
   const deviceTypes = usePluginDevices();
