@@ -49,7 +49,7 @@ export const useCareAppEncounterTabs = () => {
   }, {});
 };
 
-// If required; Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => JSX.Element>
+// If required; Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => React.ReactNode>
 export function usePluginRoutes() {
   const careApps = useCareApps();
   const routes = careApps.reduce((acc, plugin) => {
