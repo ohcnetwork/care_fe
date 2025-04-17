@@ -114,11 +114,6 @@ export class PatientFiles {
     return this;
   }
 
-  verifyMultipleFileUploadSuccess(message: string) {
-    cy.verifyNotification(message);
-    return this;
-  }
-
   clickRecordAudioButton() {
     cy.get('[data-cy="record-audio-button"]').click();
     return this;

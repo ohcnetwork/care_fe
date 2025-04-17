@@ -37,17 +37,18 @@ const initials = (name: string): string => {
     .toUpperCase();
 };
 
-interface AvatarProps {
+function Avatar({
+  colors: propColors,
+  name,
+  imageUrl,
+  className,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
   colors?: [string, string];
   name: string;
   imageUrl?: string;
   className?: string;
-}
-
-const Avatar = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Root>,
-  AvatarProps
->(({ colors: propColors, name, imageUrl, className }, ref) => {
+}) {
   const avatarText = name.match(/[a-zA-Z]+/g)?.join(" ");
 
   const [bgColor, textColor] =
@@ -56,21 +57,26 @@ const Avatar = React.forwardRef<
 
   return (
     <AvatarPrimitive.Root
-      ref={ref}
-      className={cn("w-full h-full rounded-md", className)}
+      data-slot="avatar"
+      className={cn("aspect-square size-full rounded-md", className)}
       style={{
         background: bgColor,
       }}
+      {...props}
     >
       <AvatarPrimitive.Image
+        data-slot="avatar-image"
         src={imageUrl}
         alt={name}
         className={cn(
-          "aspect-square h-full w-full object-cover rounded-md",
+          "aspect-square size-full object-cover rounded-md",
           className,
         )}
       />
-      <AvatarPrimitive.Fallback className="flex h-full w-full select-none items-center justify-center text-center">
+      <AvatarPrimitive.Fallback
+        data-slot="avatar-fallback"
+        className="flex h-full w-full select-none items-center justify-center text-center"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           version="1.1"
@@ -94,9 +100,8 @@ const Avatar = React.forwardRef<
       </AvatarPrimitive.Fallback>
     </AvatarPrimitive.Root>
   );
-});
+}
 
 Avatar.displayName = "Avatar";
 
 export { Avatar };
-export type { AvatarProps };
