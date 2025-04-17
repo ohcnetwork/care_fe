@@ -1,5 +1,6 @@
 // create a layout for the facility settings page
-import { Link, useRoutes } from "raviger";
+import { Link, navigate, useRoutes } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,6 +48,11 @@ const getRoutes = (facilityId: string) => ({
 export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
   const { t } = useTranslation();
   const basePath = `/facility/${facilityId}/settings`;
+  useEffect(() => {
+    if (window.location.pathname === basePath) {
+      navigate(`${basePath}/general`, { replace: true });
+    }
+  }, [basePath]);
   const routeResult = useRoutes(getRoutes(facilityId), {
     basePath,
     routeProps: {
