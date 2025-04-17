@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -13,9 +13,13 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { AnimatedWrapper } from "@/components/Common/AnimatedWrapper";
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import { useLocationManagement } from "@/hooks/useLocationManagement";
 
@@ -29,7 +33,8 @@ import locationApi from "@/types/location/locationApi";
 import LocationMap from "./LocationMap";
 import LocationSheet from "./LocationSheet";
 import LocationView from "./LocationView";
-import { AnimatedLocationCard } from "./components/AnimatedLocationCard";
+import { LocationCard } from "./components/LocationCard";
+import { LocationTable } from "./components/LocationTable";
 
 interface LocationSettingsProps {
   facilityId: string;
@@ -109,8 +114,14 @@ export default function LocationSettings({
     enabled: activeTab === "map",
   });
 
+  // Reset page to 1 when locationId changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [locationId, setCurrentPage]);
+
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
+      // Reset page to 1 when navigating to a new location
       navigate(`/facility/${facilityId}/settings/location/${location.id}`);
       const parentIds = getParentChain(location);
       parentIds.add(location.id);
@@ -257,38 +268,73 @@ export default function LocationSettings({
                     </div>
 
                     <div className="space-y-4 overflow-hidden">
-                      <div
-                        className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4 sm:px-4"
-                        data-cy="location-card-container"
-                      >
+                      {/* Desktop table view */}
+                      <div className="hidden lg:block">
                         {isLoading ? (
-                          <CardGridSkeleton count={2} />
+                          <TableSkeleton count={5} />
                         ) : currentPageItems?.length ? (
-                          currentPageItems.map((childLocation, index) => (
-                            <AnimatedLocationCard
-                              key={childLocation.id}
-                              location={childLocation}
-                              onEdit={handleEditLocation}
-                              onView={handleLocationSelect}
-                              onMoveUp={handleMoveUp}
-                              onMoveDown={handleMoveDown}
-                              facilityId={facilityId}
-                              index={index}
-                              totalCount={currentPageItems.length}
-                              isFirstPage={currentPage === 1}
-                              isLastPage={isLastPage}
-                              currentPage={currentPage}
-                              setPage={setCurrentPage}
-                            />
-                          ))
+                          <LocationTable
+                            locations={currentPageItems}
+                            onEdit={handleEditLocation}
+                            onView={handleLocationSelect}
+                            onMoveUp={handleMoveUp}
+                            onMoveDown={handleMoveDown}
+                            facilityId={facilityId}
+                            isFirstPage={currentPage === 1}
+                            isLastPage={isLastPage}
+                            currentPage={currentPage}
+                            setPage={setCurrentPage}
+                          />
                         ) : (
-                          <Card className="col-span-full">
+                          <Card>
                             <CardContent className="p-4 text-center text-gray-500">
                               {t("no_locations_found")}
                             </CardContent>
                           </Card>
                         )}
                       </div>
+
+                      {/* Mobile and tablet card view */}
+                      <div
+                        className="lg:hidden flex flex-col gap-4 sm:px-4"
+                        data-cy="location-card-container"
+                      >
+                        {isLoading ? (
+                          <CardGridSkeleton count={3} />
+                        ) : currentPageItems?.length ? (
+                          <div className="flex flex-col gap-4">
+                            {currentPageItems.map((childLocation, index) => (
+                              <AnimatedWrapper
+                                key={childLocation.id}
+                                keyValue={childLocation.id}
+                                data-testid={`location-card-${childLocation.id}`}
+                              >
+                                <LocationCard
+                                  location={childLocation}
+                                  onEdit={handleEditLocation}
+                                  onView={handleLocationSelect}
+                                  onMoveUp={handleMoveUp}
+                                  onMoveDown={handleMoveDown}
+                                  facilityId={facilityId}
+                                  index={index}
+                                  totalCount={currentPageItems.length}
+                                  isFirstPage={currentPage === 1}
+                                  isLastPage={isLastPage}
+                                  currentPage={currentPage}
+                                  setPage={setCurrentPage}
+                                />
+                              </AnimatedWrapper>
+                            ))}
+                          </div>
+                        ) : (
+                          <Card>
+                            <CardContent className="p-4 text-center text-gray-500">
+                              {t("no_locations_found")}
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+
                       {childLocations && childLocations.count > 9 && (
                         <div className="flex justify-center mt-2 sm:mt-4">
                           <Pagination

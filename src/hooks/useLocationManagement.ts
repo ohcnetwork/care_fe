@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import routes from "@/Utils/request/api";
@@ -28,6 +28,12 @@ export function useLocationManagement({
     null,
   );
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  // Reset searchQuery and page when parentId changes
+  useEffect(() => {
+    setSearchQuery("");
+    setPage(1);
+  }, [parentId, facilityId]);
 
   const { data: children, isLoading } = useQuery({
     queryKey: [

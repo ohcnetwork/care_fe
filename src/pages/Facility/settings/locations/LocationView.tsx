@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -17,9 +18,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { AnimatedWrapper } from "@/components/Common/AnimatedWrapper";
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import { useLocationManagement } from "@/hooks/useLocationManagement";
@@ -29,7 +34,8 @@ import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
-import { AnimatedLocationCard } from "./components/AnimatedLocationCard";
+import { LocationCard } from "./components/LocationCard";
+import { LocationTable } from "./components/LocationTable";
 
 interface Props {
   id: string;
@@ -86,6 +92,11 @@ export default function LocationView({
     isNested,
   });
 
+  // Reset page to 1 when location id changes
+  useEffect(() => {
+    setPage(1);
+  }, [id, setPage]);
+
   const handleViewLocation = (location: LocationList) => {
     if (isNested && onSelectLocation) {
       onSelectLocation(location);
@@ -100,6 +111,7 @@ export default function LocationView({
     if (breadcrumbId === id) return;
 
     if (onSelectLocation) {
+      // Reset page when navigating via breadcrumbs
       const locationForNavigation = { id: breadcrumbId } as LocationList;
       onSelectLocation(locationForNavigation);
     } else if (onBackToParent) {
@@ -265,32 +277,36 @@ export default function LocationView({
 
           <div className="space-y-4">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
-                <CardGridSkeleton count={2} />
-              </div>
+              <>
+                {/* Desktop view skeleton */}
+                <div className="hidden lg:block">
+                  <TableSkeleton count={5} />
+                </div>
+
+                {/* Mobile view skeleton */}
+                <div className="lg:hidden flex flex-col gap-4">
+                  <CardGridSkeleton count={3} />
+                </div>
+              </>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4">
+                {/* Desktop table view */}
+                <div className="hidden lg:block">
                   {currentPageItems?.length ? (
-                    currentPageItems.map((child, index) => (
-                      <AnimatedLocationCard
-                        key={child.id}
-                        location={child}
-                        onEdit={handleEditLocation}
-                        onView={handleViewLocation}
-                        onMoveUp={handleMoveUp}
-                        onMoveDown={handleMoveDown}
-                        facilityId={facilityId}
-                        index={index}
-                        totalCount={currentPageItems.length}
-                        isFirstPage={page === 1}
-                        isLastPage={isLastPage}
-                        currentPage={page}
-                        setPage={setPage}
-                      />
-                    ))
+                    <LocationTable
+                      locations={currentPageItems}
+                      onEdit={handleEditLocation}
+                      onView={handleViewLocation}
+                      onMoveUp={handleMoveUp}
+                      onMoveDown={handleMoveDown}
+                      facilityId={facilityId}
+                      isFirstPage={page === 1}
+                      isLastPage={isLastPage}
+                      currentPage={page}
+                      setPage={setPage}
+                    />
                   ) : (
-                    <Card className="col-span-full">
+                    <Card>
                       <CardContent className="p-4 text-center text-gray-500">
                         {searchQuery
                           ? t("no_locations_found")
@@ -299,6 +315,45 @@ export default function LocationView({
                     </Card>
                   )}
                 </div>
+
+                {/* Mobile and tablet card view */}
+                <div className="lg:hidden flex flex-col gap-4">
+                  {currentPageItems?.length ? (
+                    <div className="flex flex-col gap-4">
+                      {currentPageItems.map((child, index) => (
+                        <AnimatedWrapper
+                          key={child.id}
+                          keyValue={child.id}
+                          data-testid={`location-card-${child.id}`}
+                        >
+                          <LocationCard
+                            location={child}
+                            onEdit={handleEditLocation}
+                            onView={handleViewLocation}
+                            onMoveUp={handleMoveUp}
+                            onMoveDown={handleMoveDown}
+                            facilityId={facilityId}
+                            index={index}
+                            totalCount={currentPageItems.length}
+                            isFirstPage={page === 1}
+                            isLastPage={isLastPage}
+                            currentPage={page}
+                            setPage={setPage}
+                          />
+                        </AnimatedWrapper>
+                      ))}
+                    </div>
+                  ) : (
+                    <Card>
+                      <CardContent className="p-4 text-center text-gray-500">
+                        {searchQuery
+                          ? t("no_locations_found")
+                          : t("no_child_locations_found")}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
                 {children && children.count > limit && (
                   <div className="flex justify-center mt-4">
                     <Pagination
