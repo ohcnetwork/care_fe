@@ -115,13 +115,13 @@ export class PatientEncounter {
   updateSymptom(details: SymptomDetails) {
     const { severity, status, notes } = details;
     if (severity) {
-      cy.get('[data-cy="symptom-severity"]').scrollIntoView();
+      cy.get('[data-cy="symptom-severity"]').last().scrollIntoView();
       cy.clickAndSelectOption('[data-cy="symptom-severity"]', severity, {
         position: "last",
       });
     }
     if (status) {
-      cy.get('[data-cy="symptom-status"]').scrollIntoView();
+      cy.get('[data-cy="symptom-status"]').last().scrollIntoView();
       cy.clickAndSelectOption('[data-cy="symptom-status"]', status, {
         position: "last",
       });
@@ -151,13 +151,11 @@ export class PatientEncounter {
 
   verifySymptom(details: SymptomDetails) {
     const { symptomName, severity, status, notes } = details;
-    if (symptomName && severity && status) {
-      cy.verifyContentPresence('[data-cy="symptoms-table"]', [
-        symptomName,
-        severity,
-        status,
-      ]);
-    }
+    cy.verifyContentPresence('[data-cy="symptoms-table"]', [
+      symptomName,
+      severity,
+      status,
+    ]);
 
     if (notes) {
       cy.get('[data-cy="symptom-see-note"]').first().scrollIntoView();
@@ -184,6 +182,7 @@ export class PatientEncounter {
   updateDiagnosis(details: DiagnosisDetails) {
     const { verification, status, notes } = details;
     if (verification) {
+      cy.get('[data-cy="diagnosis-verification"]').last().scrollIntoView();
       cy.clickAndSelectOption(
         '[data-cy="diagnosis-verification"]',
         verification,
@@ -193,6 +192,7 @@ export class PatientEncounter {
       );
     }
     if (status) {
+      cy.get('[data-cy="diagnosis-status"]').last().scrollIntoView();
       cy.clickAndSelectOption('[data-cy="diagnosis-status"]', status, {
         position: "last",
       });
@@ -208,6 +208,7 @@ export class PatientEncounter {
   }
 
   deleteDiagnosis() {
+    cy.get('[data-cy="diagnosis-verification"]').last().scrollIntoView();
     cy.clickAndSelectOption(
       '[data-cy="diagnosis-verification"]',
       "Entered in Error",
@@ -225,12 +226,11 @@ export class PatientEncounter {
 
   verifyDiagnoses(details: DiagnosisDetails) {
     const { diagnosisName, verification, status, notes } = details;
-    if (diagnosisName && verification && status)
-      cy.verifyContentPresence('[data-cy="diagnoses-table"]', [
-        diagnosisName,
-        verification,
-        status,
-      ]);
+    cy.verifyContentPresence('[data-cy="diagnoses-table"]', [
+      diagnosisName,
+      verification,
+      status,
+    ]);
 
     if (notes) {
       cy.get('[data-cy="diagnosis-see-note"]').last().click();

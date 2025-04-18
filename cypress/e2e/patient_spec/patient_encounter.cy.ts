@@ -122,7 +122,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientEncounter.verifySymptom(createSymptomsDetails);
 
     const updateSymptomsDetails = {
-      allergyName: createSymptomsDetails.symptomName,
+      symptomName: createSymptomsDetails.symptomName,
       severity: getRandomSymptomSeverity(),
       status: getRandomConditionStatus(),
       notes: "Edit symptom notes",
@@ -155,7 +155,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientEncounter.verifyDiagnoses(createDiagnosisDetails);
 
     const updateDiagnosisDetails = {
-      allergyName: createDiagnosisDetails.diagnosisName,
+      diagnosisName: createDiagnosisDetails.diagnosisName,
       verification: getRandomDiagnosisVerification(),
       status: getRandomConditionStatus(),
       notes: "Edit diagnosis notes",
