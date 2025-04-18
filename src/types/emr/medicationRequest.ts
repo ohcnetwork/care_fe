@@ -4,28 +4,33 @@ import { Code } from "@/types/questionnaire/code";
 
 export const DOSAGE_UNITS_CODES = [
   {
+    code: "{tbl}",
+    display: "tablets",
+    system: "http://unitsofmeasure.org",
+  },
+  {
     code: "mg",
-    display: "Milligram",
+    display: "milligram",
     system: "http://unitsofmeasure.org",
   },
   {
     code: "g",
-    display: "Gram",
+    display: "gram",
     system: "http://unitsofmeasure.org",
   },
   {
     code: "mL",
-    display: "Milliliter",
+    display: "milliliter",
     system: "http://unitsofmeasure.org",
   },
   {
     code: "[drp]",
-    display: "Drop",
+    display: "drop",
     system: "http://unitsofmeasure.org",
   },
   {
-    code: "{tbl}",
-    display: "Tablets",
+    code: "ug",
+    display: "microgram",
     system: "http://unitsofmeasure.org",
   },
 ] as const;
