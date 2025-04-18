@@ -62,5 +62,9 @@
   "devdevices": {
     "username": "devdevices",
     "password": "Test@123"
+  },
+  "devdepartment": {
+    "username": "devdepartment",
+    "password": "Test@123"
   }
 }

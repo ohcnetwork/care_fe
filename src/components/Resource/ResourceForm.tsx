@@ -402,15 +402,13 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormItem>
                       <FormLabel aria-required>{t("assigned_to")}</FormLabel>
                       <FormControl>
-                        <div data-cy="select-assigned-user">
-                          <UserSelector
-                            selected={assignedToUser}
-                            onChange={handleUserChange}
-                            placeholder={t("search_users")}
-                            noOptionsMessage={t("no_users_found")}
-                            popoverClassName="w-full"
-                          />
-                        </div>
+                        <UserSelector
+                          selected={assignedToUser}
+                          onChange={handleUserChange}
+                          placeholder={t("search_users")}
+                          noOptionsMessage={t("no_users_found")}
+                          popoverClassName="w-full"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

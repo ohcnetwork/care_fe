@@ -286,3 +286,10 @@ export function generateRandomCharacter(
 
   return paragraphs.join("\n\n");
 }
+
+export function generateDeptName(prefix = ""): string {
+  const deptTypes = ["Ops", "Med", "Tech", "Infra", "QA"];
+  const randomDeptType = deptTypes[getRandomIndex(deptTypes.length)];
+  const randomNumber = (getRandomIndex(900) + 100).toString();
+  return `${prefix}${randomDeptType}-${randomNumber}`;
+}

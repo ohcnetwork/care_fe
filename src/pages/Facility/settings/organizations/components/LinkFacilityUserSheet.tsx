@@ -117,7 +117,7 @@ export default function LinkFacilityUserSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button>
+        <Button data-cy="link-user">
           <CareIcon icon="l-plus" className="mr-2 size-4" />
           {t("link_user")}
         </Button>
@@ -191,7 +191,10 @@ export default function LinkFacilityUserSheet({
                   {t("select_role")}
                 </label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger className="h-12">
+                  <SelectTrigger
+                    className="h-12"
+                    data-cy="select-role-dropdown"
+                  >
                     <SelectValue placeholder={t("select_role")} />
                   </SelectTrigger>
                   <SelectContent
@@ -221,6 +224,7 @@ export default function LinkFacilityUserSheet({
                 className="w-full"
                 onClick={handleAddUser}
                 disabled={!selectedRole}
+                data-cy="add-user-to-organization"
               >
                 {t("add_to_organization")}
               </Button>

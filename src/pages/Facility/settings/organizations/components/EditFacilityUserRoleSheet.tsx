@@ -218,7 +218,11 @@ export default function EditUserRoleSheet({
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  data-cy="remove-user"
+                >
                   {t("remove_user")}
                 </Button>
               </AlertDialogTrigger>
@@ -239,6 +243,7 @@ export default function EditUserRoleSheet({
                   <AlertDialogAction
                     onClick={() => removeRole()}
                     className={cn(buttonVariants({ variant: "destructive" }))}
+                    data-cy="confirm-remove-user"
                   >
                     {t("remove")}
                   </AlertDialogAction>
