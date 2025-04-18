@@ -15,17 +15,7 @@ async function writeHeaders() {
   console.log(`Writing headers to file at path: ${headersPath}`);
 
   try {
-    // Format the headers correctly for Netlify _headers file
-    // Format: "/*" followed by each header on a new line with proper indentation
-    const headerEntries = headers.split(" | ");
-    let formattedHeaders = "/*\n"; // This applies headers to all paths
-
-    for (const header of headerEntries) {
-      // Each header should be indented and in format "Header-Name: value"
-      formattedHeaders += `  ${header}\n`;
-    }
-
-    await writeFile(headersPath, formattedHeaders, "utf-8");
+    await writeFile(headersPath, headers, "utf-8");
     console.log("Headers written to file successfully.");
     process.exit(0);
   } catch (error) {
