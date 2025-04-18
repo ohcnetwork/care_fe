@@ -24,7 +24,7 @@ const pdfWorkerPath = path.join(
   ),
   "build",
   "pdf.worker.min.mjs",
-);
+).replace(/\\/g, "/");
 
 // Convert goal description markdown to HTML
 function getDescriptionHtml(description: string) {
@@ -299,6 +299,14 @@ export default defineConfig(({ mode }) => {
       port: 4000,
       host: "0.0.0.0",
       allowedHosts: true,
+      headers: {
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "X-XSS-Protection": "1; mode=block",
+        "X-Frame-Options": "SAMEORIGIN",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "geolocation=(self), microphone=()",
+      }
     },
     preview: {
       headers: {
