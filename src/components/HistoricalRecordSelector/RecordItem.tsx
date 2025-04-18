@@ -32,7 +32,7 @@ export function RecordItem<T>({
         <Checkbox
           checked={isSelected}
           onCheckedChange={handleToggle}
-          className="mr-1 border-emerald-600 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+          className="mr-1 size-5"
         />
       </TableCell>
       {displayFields.map((field, index) => {

@@ -1,11 +1,11 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown, Clock } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
@@ -28,15 +28,16 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import routes from "@/Utils/request/api";
-import mutate from "@/Utils/request/mutate";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { Encounter } from "@/types/emr/encounter";
-import { BatchRequestBody } from "@/types/questionnaire/batch";
 
 import { DisplayField, RecordItem } from "./RecordItem";
 
-interface StructuredTypeConfig<T> {
+interface BaseRecord {
+  created_date?: string;
+  [key: string]: any;
+}
+
+interface StructuredTypeConfig<T extends BaseRecord> {
   type: string;
   displayFields: DisplayField<T>[];
   queryKey: string[];
@@ -44,73 +45,121 @@ interface StructuredTypeConfig<T> {
   converter?: (item: any) => T;
 }
 
-interface HistoricalRecordSelectorProps<T> {
-  patientId: string;
+interface HistoricalRecordSelectorProps<T extends BaseRecord> {
   structuredTypes: StructuredTypeConfig<T>[];
   onAddSelected: (selected: T[]) => void;
   buttonLabel?: string;
   title?: string;
-  currentEncounterId: string;
 }
 
-interface EncounterWithRecords<T> extends Encounter {
-  records?: {
-    type: string;
-    data: T[];
-  }[];
-  isLoading?: boolean;
-  isFetched?: boolean;
+interface DateGroupedRecords<T extends BaseRecord> {
+  date: string;
+  records: T[];
 }
 
-interface BatchSubmissionResult {
-  reference_id: string;
-  status_code: number;
-  data?: any;
+interface RecordState<T extends BaseRecord> {
+  selectedRecords: Record<string, T[]>;
+  dateGroupedRecords: DateGroupedRecords<T>[];
+  expandedDates: Set<string>;
+  currentOffset: Record<string, number>;
 }
 
-interface BatchResponse {
-  results: BatchSubmissionResult[];
+const LIMIT = 14;
+
+function useRecordState<T extends BaseRecord>() {
+  const [state, setState] = useState<RecordState<T>>({
+    selectedRecords: {},
+    dateGroupedRecords: [],
+    expandedDates: new Set(),
+    currentOffset: {},
+  });
+
+  const resetState = useCallback(() => {
+    setState({
+      selectedRecords: {},
+      dateGroupedRecords: [],
+      expandedDates: new Set(),
+      currentOffset: {},
+    });
+  }, []);
+
+  const updateState = useCallback((updates: Partial<RecordState<T>>) => {
+    setState((prev) => ({ ...prev, ...updates }));
+  }, []);
+
+  return { state, updateState, resetState };
 }
 
-export function HistoricalRecordSelector<T>({
-  patientId,
+function useRecordSelection<T extends BaseRecord>(
+  state: RecordState<T>,
+  updateState: (updates: Partial<RecordState<T>>) => void,
+  activeType: string,
+) {
+  const handleToggleSelect = useCallback(
+    (record: T) => {
+      updateState({
+        selectedRecords: {
+          ...state.selectedRecords,
+          [activeType]: state.selectedRecords[activeType]?.includes(record)
+            ? state.selectedRecords[activeType]!.filter((r) => r !== record)
+            : [...(state.selectedRecords[activeType] || []), record],
+        },
+      });
+    },
+    [state.selectedRecords, activeType, updateState],
+  );
+
+  const handleSelectAllInDateGroup = useCallback(
+    (date: string, records: T[]) => {
+      const allSelected = records.every((record) =>
+        (state.selectedRecords[activeType] || []).includes(record),
+      );
+
+      updateState({
+        selectedRecords: {
+          ...state.selectedRecords,
+          [activeType]: allSelected
+            ? (state.selectedRecords[activeType] || []).filter(
+                (record) => !records.includes(record),
+              )
+            : [
+                ...new Set([
+                  ...(state.selectedRecords[activeType] || []),
+                  ...records,
+                ]),
+              ],
+        },
+      });
+    },
+    [state.selectedRecords, activeType, updateState],
+  );
+
+  return { handleToggleSelect, handleSelectAllInDateGroup };
+}
+
+export function HistoricalRecordSelector<T extends BaseRecord>({
   structuredTypes,
   onAddSelected,
   buttonLabel = "View History",
   title = "History",
-  currentEncounterId,
 }: HistoricalRecordSelectorProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedRecords, setSelectedRecords] = useState<Record<string, T[]>>(
-    {},
-  );
-  const [encounters, setEncounters] = useState<EncounterWithRecords<T>[]>([]);
   const [activeType, setActiveType] = useState<string>(
     structuredTypes[0]?.type,
   );
-  const [expandedEncounterId, setExpandedEncounterId] = useState<Set<string>>(
-    new Set(),
+  const { state, updateState, resetState } = useRecordState<T>();
+  const { handleToggleSelect, handleSelectAllInDateGroup } = useRecordSelection(
+    state,
+    updateState,
+    activeType,
   );
-  const [currentOffset, setCurrentOffset] = useState<Record<string, number>>(
-    {},
-  );
-  const LIMIT = 14;
-
-  const { mutateAsync: submitBatch } = useMutation<
-    BatchResponse,
-    unknown,
-    BatchRequestBody
-  >({
-    mutationFn: (variables) =>
-      mutate(routes.batchRequest, { silent: true })(variables),
-  });
 
   // Fetch records for the active type
   const { data: recordsData, isLoading: isLoadingRecords } = useQuery({
     queryKey: [
       "historical-records",
       activeType,
-      currentOffset[activeType],
+      state.currentOffset[activeType],
       ...(structuredTypes.find((st) => st.type === activeType)?.queryKey || []),
     ],
     queryFn: async () => {
@@ -120,237 +169,176 @@ export function HistoricalRecordSelector<T>({
       if (!activeTypeConfig) return { results: [], count: 0 };
       const response = await activeTypeConfig.queryFn(
         LIMIT,
-        currentOffset[activeType] || 0,
+        state.currentOffset[activeType] || 0,
       );
+      const results = activeTypeConfig.converter
+        ? response.results.map(activeTypeConfig.converter)
+        : (response.results as T[]);
       return {
-        results: activeTypeConfig.converter
-          ? response.results.map(activeTypeConfig.converter)
-          : response.results,
+        results,
         count: response.count,
       };
     },
     enabled: isOpen,
-  });
-
-  console.log("recordsData", recordsData);
-
-  // Fetch encounters for the records
-  const { data: encounterData } = useQuery({
-    queryKey: ["encounters", patientId, recordsData],
-    queryFn: async () => {
-      if (!recordsData?.results?.length) return { results: [] };
-
-      // Get unique encounter IDs from records that we haven't fetched yet
-      const newEncounterIds = new Set(
-        recordsData.results
-          .map((record: any) => record.encounter)
-          .filter(
-            (id: string): id is string =>
-              !!id && !encounters.find((e) => e.id === id)?.isFetched,
-          ),
-      );
-
-      if (newEncounterIds.size === 0) return { results: [] };
-
-      // Create batch request for new encounters
-      const batchRequest: BatchRequestBody = {
-        requests: Array.from(newEncounterIds).map((id) => ({
-          url: `/api/v1/encounter/${id}/?patient=${patientId}`,
-          method: "GET",
-          reference_id: `Encounter ${id}`,
-          body: {},
-        })),
-      };
-
-      try {
-        const response = await submitBatch(batchRequest);
-        if (!response) return { results: [] };
-
-        // Process batch response
-        const results = response.results
-          .map((result: BatchSubmissionResult) => {
-            if (result.status_code === 200 && result.data) {
-              return { ...result.data, isFetched: true };
-            }
-            console.error(`Failed to fetch encounter: ${result.reference_id}`);
-            return null;
-          })
-          .filter(Boolean);
-
-        return { results };
-      } catch (error) {
-        console.error("Failed to fetch encounters:", error);
-        return { results: [] };
-      }
-    },
-    enabled: isOpen && !!recordsData?.results?.length && !isLoadingRecords,
+    staleTime: 0,
   });
 
   // Update state when data changes
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !recordsData?.results) return;
 
-    // Update encounters with their records
-    if (recordsData?.results && encounterData?.results) {
-      // Group records by encounter
-      const groupedRecords = recordsData.results.reduce(
-        (acc: Record<string, T[]>, record: any) => {
-          const encounterId = record.encounter;
+    // Group records by date
+    const groupedByDate = recordsData.results.reduce(
+      (acc: Record<string, T[]>, record: T) => {
+        const date = record.created_date
+          ? format(new Date(record.created_date), "dd MMM, yyyy")
+          : "No date";
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push(record);
+        return acc;
+      },
+      {} as Record<string, T[]>,
+    );
 
-          if (!acc[encounterId]) {
-            acc[encounterId] = [];
-          }
-          acc[encounterId].push(record);
-          return acc;
-        },
-        {} as Record<string, T[]>,
-      );
-
-      // Update encounters with their records
-      setEncounters((prev) => {
-        const updatedEncounters = [...prev];
-
-        // Add new encounters from batch response
-        encounterData.results.forEach((encounter: EncounterWithRecords<T>) => {
-          const existingEncounterIndex = updatedEncounters.findIndex(
-            (e) => e.id === encounter.id,
-          );
-
-          if (existingEncounterIndex === -1) {
-            // New encounter
-            updatedEncounters.push({
-              ...encounter,
-              isFetched: true,
-              records: [
-                {
-                  type: activeType,
-                  data: groupedRecords[encounter.id] || [],
-                },
-              ],
-            });
-            setExpandedEncounterId((prevIds) =>
-              new Set(prevIds).add(encounter.id),
-            );
-          } else {
-            // Existing encounter - append new records
-            const existingRecords =
-              updatedEncounters[existingEncounterIndex].records || [];
-            const existingTypeRecords = existingRecords.find(
-              (r) => r.type === activeType,
-            );
-
-            if (existingTypeRecords) {
-              // Append new records to existing type
-              existingTypeRecords.data = [
-                ...existingTypeRecords.data,
-                ...(groupedRecords[encounter.id] || []),
-              ];
-            } else {
-              // Add new type records
-              existingRecords.push({
-                type: activeType,
-                data: groupedRecords[encounter.id] || [],
-              });
-            }
-            updatedEncounters[existingEncounterIndex].isFetched = true;
-          }
-        });
-
-        return updatedEncounters;
+    // Convert to array and sort by date
+    const sortedGroups: DateGroupedRecords<T>[] = Object.entries(groupedByDate)
+      .map(([date, records]) => ({ date, records }))
+      .sort((a, b) => {
+        if (a.date === "No date") return 1;
+        if (b.date === "No date") return -1;
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
+
+    // Merge with existing records
+    updateState({
+      dateGroupedRecords: [...state.dateGroupedRecords, ...sortedGroups]
+        .reduce((acc: DateGroupedRecords<T>[], group) => {
+          const existingGroupIndex = acc.findIndex(
+            (g) => g.date === group.date,
+          );
+          if (existingGroupIndex >= 0) {
+            // Merge records for existing date
+            const existingRecords = acc[existingGroupIndex].records;
+            const newRecords = group.records.filter(
+              (newRecord) =>
+                !existingRecords.some(
+                  (existingRecord) =>
+                    JSON.stringify(existingRecord) ===
+                    JSON.stringify(newRecord),
+                ),
+            );
+            acc[existingGroupIndex].records = [
+              ...existingRecords,
+              ...newRecords,
+            ];
+          } else {
+            // Add new date group
+            acc.push(group);
+          }
+          return acc;
+        }, [])
+        .sort((a, b) => {
+          if (a.date === "No date") return 1;
+          if (b.date === "No date") return -1;
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        }),
+    });
+
+    // Expand the first 5 date groups on initial load
+    if (
+      !state.currentOffset[activeType] ||
+      state.currentOffset[activeType] === 0
+    ) {
+      const top5Dates = new Set(
+        sortedGroups.slice(0, 5).map((group) => group.date),
+      );
+      updateState({ expandedDates: top5Dates });
     }
-  }, [isOpen, recordsData, encounterData, activeType]);
+  }, [
+    isOpen,
+    recordsData,
+    state.currentOffset[activeType],
+    activeType,
+    updateState,
+  ]);
 
-  const handleLoadMore = () => {
-    setCurrentOffset((prev) => ({
-      ...prev,
-      [activeType]: (prev[activeType] || 0) + LIMIT,
-    }));
-  };
+  const handleLoadMore = useCallback(() => {
+    updateState({
+      currentOffset: {
+        ...state.currentOffset,
+        [activeType]: (state.currentOffset[activeType] || 0) + LIMIT,
+      },
+    });
+  }, [state.currentOffset, activeType, updateState]);
 
-  const handleToggleSelect = (record: T) => {
-    setSelectedRecords((prev) => ({
-      ...prev,
-      [activeType]: prev[activeType]?.includes(record)
-        ? prev[activeType]!.filter((r) => r !== record)
-        : [...(prev[activeType] || []), record],
-    }));
-  };
-
-  const handleAddSelected = () => {
-    onAddSelected(selectedRecords[activeType] || []);
-    setSelectedRecords((prev) => ({
-      ...prev,
-      [activeType]: [],
-    }));
+  const handleAddSelected = useCallback(() => {
+    onAddSelected(state.selectedRecords[activeType] || []);
+    updateState({
+      selectedRecords: {
+        ...state.selectedRecords,
+        [activeType]: [],
+      },
+    });
     setIsOpen(false);
     setActiveType(structuredTypes[0]?.type || "");
-    handleSoftReset();
-  };
+    resetState();
+  }, [
+    state.selectedRecords,
+    activeType,
+    onAddSelected,
+    structuredTypes,
+    updateState,
+    resetState,
+  ]);
 
-  const handleTabChange = (type: string) => {
-    handleReset();
-    setActiveType(type);
-    setCurrentOffset((prev) => ({
-      ...prev,
-      [type]: prev[type] || 0,
-    }));
-  };
+  const handleTabChange = useCallback(
+    (type: string) => {
+      setActiveType(type);
+      updateState({
+        selectedRecords: {},
+        dateGroupedRecords: [],
+        expandedDates: new Set(),
+        currentOffset: {
+          ...state.currentOffset,
+          [type]: 0,
+        },
+      });
+    },
+    [state.currentOffset, updateState],
+  );
 
-  const handleSoftReset = () => {
-    setEncounters([]);
-    setExpandedEncounterId(new Set());
-    setCurrentOffset({});
-  };
-
-  const handleReset = () => {
-    setSelectedRecords({});
-    handleSoftReset();
-  };
-
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsOpen(false);
-    handleReset();
+    resetState();
     setActiveType(structuredTypes[0]?.type || "");
-  };
+  }, [structuredTypes, resetState]);
 
-  const handleExpandEncounter = (encounterId: string, isOpen: boolean) => {
-    setExpandedEncounterId((prev) => {
-      const newSet = new Set(prev);
+  const handleExpandDate = useCallback(
+    (date: string, isOpen: boolean) => {
+      const newSet = new Set(state.expandedDates);
       if (isOpen) {
-        newSet.add(encounterId);
+        newSet.add(date);
       } else {
-        newSet.delete(encounterId);
+        newSet.delete(date);
       }
-      return newSet;
-    });
-  };
+      updateState({ expandedDates: newSet });
+    },
+    [state.expandedDates, updateState],
+  );
 
-  const filteredEncounters = encounters
-    .filter((encounter) => encounter.id !== currentEncounterId)
-    .filter((encounter) => {
-      const records = encounter.records?.find(
-        (r) => r.type === activeType,
-      )?.data;
-      return records && records.length > 0;
-    })
-    .sort((a, b) => {
-      const dateA = a.period?.start ? new Date(a.period.start).getTime() : 0;
-      const dateB = b.period?.start ? new Date(b.period.start).getTime() : 0;
-      return dateB - dateA; // Sort in descending order (newest first)
-    });
-
-  useEffect(() => {
-    console.log("encounters", encounters);
-    console.log("filteredEncounters", filteredEncounters);
-  }, [encounters, filteredEncounters]);
+  const activeTypeConfig = useMemo(
+    () => structuredTypes.find((st) => st.type === activeType),
+    [structuredTypes, activeType],
+  );
 
   return (
     <Sheet
       open={isOpen}
       onOpenChange={(open) => {
         if (open) {
-          handleReset();
+          resetState();
           setActiveType(structuredTypes[0]?.type || "");
           setIsOpen(true);
         } else {
@@ -391,54 +379,43 @@ export function HistoricalRecordSelector<T>({
         </div>
 
         <div className="space-y-0">
-          {filteredEncounters.length === 0 ? (
+          {state.dateGroupedRecords.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
               <Clock className="size-8 text-gray-400 mb-2" />
               <p className="text-sm text-gray-500">{t("no_records_found")}</p>
             </div>
           ) : (
-            filteredEncounters.map((encounter) => (
+            state.dateGroupedRecords.map(({ date, records }) => (
               <Collapsible
-                key={encounter.id}
-                open={expandedEncounterId.has(encounter.id)}
-                onOpenChange={(isOpen) =>
-                  handleExpandEncounter(encounter.id, isOpen)
-                }
+                key={date}
+                open={state.expandedDates.has(date)}
+                onOpenChange={(isOpen) => handleExpandDate(date, isOpen)}
                 className=""
               >
                 <div className="border rounded-md m-2 bg-gray-50 border-gray-200">
                   <CollapsibleTrigger className="w-full">
                     <div className="flex justify-between items-center p-1 cursor-pointer">
-                      <div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          checked={records.every((record) =>
+                            (state.selectedRecords[activeType] || []).includes(
+                              record,
+                            ),
+                          )}
+                          onCheckedChange={() => {
+                            handleSelectAllInDateGroup(date, records);
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          className="ml-1 size-5"
+                        />
                         <div className="flex items-center gap-2 mt-1">
                           <div className="w-1 h-5 bg-emerald-600 rounded-full" />
-                          <p className="text-sm text-gray-500">
-                            {encounter.period.start
-                              ? format(
-                                  new Date(encounter.period.start),
-                                  "dd MMM, yyyy hh:mm a",
-                                )
-                              : "No date"}
-                            {encounter.period.end
-                              ? format(
-                                  new Date(encounter.period.end),
-                                  "dd MMM, yyyy hh:mm a",
-                                )
-                              : ""}
-                          </p>
-                          {encounter.organizations &&
-                            encounter.organizations.map((org) => (
-                              <Badge
-                                variant="outline"
-                                key={org.id}
-                                className="ml-2"
-                              >
-                                {org.name}
-                              </Badge>
-                            ))}
+                          <p className="text-sm text-gray-500">{date}</p>
                         </div>
                       </div>
-                      {expandedEncounterId.has(encounter.id) ? (
+                      {state.expandedDates.has(date) ? (
                         <ChevronsDownUp className="size-4 text-gray-400" />
                       ) : (
                         <ChevronsUpDown className="size-4 text-gray-400" />
@@ -447,43 +424,36 @@ export function HistoricalRecordSelector<T>({
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <div className="overflow-x-auto p-2">
-                      {encounter.isLoading ? (
+                      {isLoadingRecords ? (
                         <div className="space-y-2 p-2">
                           <Skeleton className="h-8 w-full" />
                         </div>
-                      ) : encounter.records?.find((r) => r.type === activeType)
-                          ?.data.length ? (
+                      ) : records.length ? (
                         <Table className="w-full p-2 border rounded-md">
                           <TableHeader>
                             <TableRow className="divide-x">
                               <TableHead className="w-fit"></TableHead>
-                              {structuredTypes
-                                .find((st) => st.type === activeType)
-                                ?.displayFields.map((field) => (
-                                  <TableHead key={String(field.key)}>
-                                    {field.label}
-                                  </TableHead>
-                                ))}
+                              {activeTypeConfig?.displayFields.map((field) => (
+                                <TableHead key={String(field.key)}>
+                                  {field.label}
+                                </TableHead>
+                              ))}
                             </TableRow>
                           </TableHeader>
                           <TableBody className="[&_tr:last-child]:border-1">
-                            {encounter.records
-                              .find((r) => r.type === activeType)
-                              ?.data.map((record: T, index: number) => (
-                                <RecordItem
-                                  key={index}
-                                  record={record}
-                                  isSelected={(
-                                    selectedRecords[activeType] || []
-                                  ).includes(record)}
-                                  onToggleSelect={handleToggleSelect}
-                                  displayFields={
-                                    structuredTypes.find(
-                                      (st) => st.type === activeType,
-                                    )?.displayFields || []
-                                  }
-                                />
-                              ))}
+                            {records.map((record: T, index: number) => (
+                              <RecordItem
+                                key={index}
+                                record={record}
+                                isSelected={(
+                                  state.selectedRecords[activeType] || []
+                                ).includes(record)}
+                                onToggleSelect={handleToggleSelect}
+                                displayFields={
+                                  activeTypeConfig?.displayFields || []
+                                }
+                              />
+                            ))}
                           </TableBody>
                         </Table>
                       ) : (
@@ -503,13 +473,14 @@ export function HistoricalRecordSelector<T>({
         </div>
 
         <div className="flex flex-col gap-2 p-4 border-t">
-          {filteredEncounters.length > 0 &&
+          {state.dateGroupedRecords.length > 0 &&
             (isLoadingRecords ? (
               <div className="flex justify-center p-4">
                 <Skeleton className="h-8 w-full" />
               </div>
             ) : recordsData?.count &&
-              recordsData.count > (currentOffset[activeType] || 0) + LIMIT ? (
+              recordsData.count >
+                (state.currentOffset[activeType] || 0) + LIMIT ? (
               <Button
                 variant="outline"
                 onClick={handleLoadMore}
@@ -520,7 +491,7 @@ export function HistoricalRecordSelector<T>({
             ) : null)}
           <div className="text-sm">
             <span className="font-medium">
-              {(selectedRecords[activeType] || []).length} {activeType}
+              {(state.selectedRecords[activeType] || []).length} {activeType}
             </span>{" "}
             {t("selected")}
           </div>
@@ -530,7 +501,7 @@ export function HistoricalRecordSelector<T>({
             </Button>
             <Button
               onClick={handleAddSelected}
-              disabled={(selectedRecords[activeType] || []).length === 0}
+              disabled={(state.selectedRecords[activeType] || []).length === 0}
               className="bg-emerald-600 hover:bg-emerald-700"
               data-cy="add-selected-records"
             >

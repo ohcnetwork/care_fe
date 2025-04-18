@@ -55,7 +55,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import {
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
@@ -108,6 +108,8 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     category: diagnosis.category,
     note: diagnosis.note,
     encounter: diagnosis.encounter,
+    created_by: diagnosis.created_by,
+    created_date: diagnosis.created_date,
     dirty: false,
   };
 }
@@ -542,8 +544,6 @@ export function DiagnosisQuestion({
   return (
     <div className="space-y-4">
       <HistoricalRecordSelector<DiagnosisRequest>
-        patientId={patientId}
-        currentEncounterId={encounterId}
         structuredTypes={[
           {
             type: t("diagnoses"),
@@ -569,12 +569,21 @@ export function DiagnosisQuestion({
                 label: t("notes"),
                 render: (note: string | undefined) => note || "-",
               },
+              {
+                key: "created_by",
+                label: t("recorded_by"),
+                render: (created_by) => formatName(created_by),
+              },
             ],
             queryKey: ["diagnoses_and_chronic_conditions", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(diagnosisApi.listDiagnosis, {
                 pathParams: { patientId },
-                queryParams: { offset, limit },
+                queryParams: {
+                  offset,
+                  limit,
+                  exclude_verification_status: "entered_in_error",
+                },
               })({ signal: new AbortController().signal });
               return response;
             },

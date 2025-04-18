@@ -4,7 +4,7 @@ import {
   Pencil2Icon,
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, formatDate } from "date-fns";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -54,8 +54,9 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import {
+  Onset,
   SYMPTOM_CLINICAL_STATUS,
   SYMPTOM_SEVERITY,
   SYMPTOM_VERIFICATION_STATUS,
@@ -109,6 +110,9 @@ function convertToSymptomRequest(symptom: Symptom): SymptomRequest {
     note: symptom.note,
     category: symptom.category,
     encounter: symptom.encounter,
+    created_date: symptom.created_date,
+    updated_date: symptom.updated_date,
+    created_by: symptom.created_by,
   };
 }
 
@@ -804,8 +808,6 @@ export function SymptomQuestion({
   return (
     <div className="space-y-2">
       <HistoricalRecordSelector<SymptomRequest>
-        patientId={patientId}
-        currentEncounterId={encounterId}
         structuredTypes={[
           {
             type: t("symptoms"),
@@ -821,6 +823,14 @@ export function SymptomQuestion({
                 render: (status: string) => t(status),
               },
               {
+                key: "onset",
+                label: t("onset_date"),
+                render: (onset: Onset) =>
+                  onset?.onset_datetime
+                    ? formatDate(onset.onset_datetime, "dd-MM-yyyy")
+                    : "",
+              },
+              {
                 key: "severity",
                 label: t("severity"),
                 render: (severity: string) => t(severity),
@@ -830,12 +840,21 @@ export function SymptomQuestion({
                 label: t("notes"),
                 render: (note: string | undefined) => note || "-",
               },
+              {
+                key: "created_by",
+                label: t("recorded_by"),
+                render: (created_by) => formatName(created_by),
+              },
             ],
             queryKey: ["symptoms", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(symptomApi.listSymptoms, {
                 pathParams: { patientId },
-                queryParams: { offset, limit },
+                queryParams: {
+                  offset,
+                  limit,
+                  exclude_clinical_status: "entered_in_error",
+                },
               })({ signal: new AbortController().signal });
               return response;
             },

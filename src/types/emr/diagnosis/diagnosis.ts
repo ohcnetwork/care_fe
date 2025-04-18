@@ -61,6 +61,8 @@ export interface Diagnosis {
   created_by: UserBase;
   updated_by: UserBase;
   encounter: string;
+  created_date?: string;
+  updated_date?: string;
 }
 
 export type DiagnosisCategory = (typeof DIAGNOSIS_CATEGORY)[number];
@@ -76,6 +78,9 @@ export interface DiagnosisRequest {
   category: DiagnosisCategory;
   encounter: string;
   dirty: boolean;
+  created_by?: UserBase;
+  created_date?: string;
+  updated_date?: string;
 }
 
 export const DIAGNOSIS_CLINICAL_STATUS_STYLES = {
