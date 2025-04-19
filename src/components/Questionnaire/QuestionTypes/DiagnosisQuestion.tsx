@@ -61,6 +61,7 @@ import {
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
   DiagnosisRequest,
+  Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { Code } from "@/types/questionnaire/code";
@@ -120,13 +121,12 @@ function checkForDuplicateDiagnosis(
   t: (key: string) => string,
 ) {
   const codeToCheck = "code" in newDiagnosis ? newDiagnosis.code : newDiagnosis;
-  if (typeof codeToCheck === "string") {
-    return false;
-  }
+  const codeValue =
+    typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
 
   const isDuplicate = existingDiagnoses.some(
     (diagnosis) =>
-      diagnosis.code.code === codeToCheck.code &&
+      diagnosis.code.code === codeValue &&
       diagnosis.verification_status !== "entered_in_error",
   );
 
@@ -560,9 +560,12 @@ export function DiagnosisQuestion({
                 render: (status: string) => t(status),
               },
               {
-                key: "verification_status",
-                label: t("verification_status"),
-                render: (status: string) => t(status),
+                key: "onset",
+                label: t("onset_date"),
+                render: (onset: Onset) =>
+                  onset?.onset_datetime
+                    ? format(new Date(onset.onset_datetime), "dd-MM-yyyy")
+                    : "",
               },
               {
                 key: "note",

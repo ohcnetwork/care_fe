@@ -4,7 +4,7 @@ import {
   Pencil2Icon,
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { format, formatDate } from "date-fns";
+import { format } from "date-fns";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -537,6 +537,7 @@ function checkForDuplicateSymptom(
   const codeToCheck = "code" in newSymptom ? newSymptom.code : newSymptom;
   const codeValue =
     typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
+
   const isDuplicate = existingSymptoms.some(
     (symptom) =>
       symptom.code.code === codeValue &&
@@ -824,7 +825,7 @@ export function SymptomQuestion({
                 label: t("onset_date"),
                 render: (onset: Onset) =>
                   onset?.onset_datetime
-                    ? formatDate(onset.onset_datetime, "dd-MM-yyyy")
+                    ? format(new Date(onset.onset_datetime), "dd-MM-yyyy")
                     : "",
               },
               {
