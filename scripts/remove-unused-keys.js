@@ -57,13 +57,23 @@ async function extractAndCleanTranslations(options) {
       },
     );
 
-    if (content.includes("{ Trans, useTranslation }")) {
+    if (
+      content.includes("Trans") &&
+      (content.includes("react-i18next") || content.includes("i18next"))
+    ) {
       let jsContent = content;
-      const result = babel.transformSync(content, {
-        filename: filePath,
-        presets: ["@babel/preset-typescript"],
-      });
-      jsContent = result.code;
+      try {
+        const result = babel.transformSync(content, {
+          filename: filePath,
+          presets: ["@babel/preset-typescript"],
+        });
+        jsContent = result.code;
+      } catch (error) {
+        console.warn(
+          `Warning: Failed to transform file, using js file instead ${filePath}: ${error.message}`,
+        );
+        jsContent = content;
+      }
       parser.parseTransFromString(jsContent, (key, options) => {
         parser.set(key, options);
         allUsedKeys.add(key);
