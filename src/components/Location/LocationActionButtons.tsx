@@ -47,7 +47,7 @@ export function LocationActionButtons({
     buttons.push({
       label: t("cancel_plan"),
       onClick: onCancel,
-      variant: "outline",
+      variant: "link",
       className: "underline underline-offset-2",
       "data-cy": "cancel-bed-plan-button",
     });
