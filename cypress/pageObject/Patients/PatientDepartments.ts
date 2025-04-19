@@ -154,4 +154,32 @@ export class PatientDepartments {
     cy.verifyNotification("User removed from organization successfully");
     return this;
   }
+
+  selectAllOrganizationsTab() {
+    cy.verifyAndClickElement(
+      `[data-cy="all-organizations-tab"]`,
+      "All Organizations",
+    );
+    return this;
+  }
+
+  selectOrganization(organization: string) {
+    cy.clickAndSelectOption('[data-cy="facility-organization"]', organization);
+    return this;
+  }
+
+  clickAddOrganizationToEncounterSubmit() {
+    cy.verifyAndClickElement("[data-cy=add-organization]", "Add Organizations");
+    return this;
+  }
+
+  clickAddOrganization() {
+    cy.get('[data-cy="add-organization-badge"]').first().click();
+    return this;
+  }
+
+  verifyOrganizationAdded(orgName: string) {
+    cy.verifyContentPresence('[data-cy="add-organization-badge"]', [orgName]);
+    return this;
+  }
 }

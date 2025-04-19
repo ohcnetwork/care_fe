@@ -262,6 +262,7 @@ export default function LinkDepartmentsSheet({
                   >)
                 }
                 disabled={!selectedOrg || isAdding}
+                data-cy="add-organization"
               >
                 {isAdding && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {t("add_organization", {
