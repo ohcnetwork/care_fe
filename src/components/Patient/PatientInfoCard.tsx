@@ -338,7 +338,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               variant="outline"
                             >
                               <Building className="size-4 text-blue-400" />
-                              Add Organizations
+                              {t("add_organization_other")}
                             </Badge>
                           )}
                         </div>
