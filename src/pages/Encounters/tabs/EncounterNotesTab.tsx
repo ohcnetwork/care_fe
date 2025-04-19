@@ -293,7 +293,7 @@ const MobileNav = ({
   onOpenThreads: () => void;
   onNewThread: () => void;
 }) => (
-  <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-50 divide-x">
+  <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-[50] divide-x">
     <Button
       variant="ghost"
       size="sm"
@@ -584,7 +584,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
 
       {/* Main Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex flex-col h-full pb-[60px] lg:pb-0">
+        <div className="flex flex-col h-full pb-[80px] lg:pb-0">
           {/* Header */}
           <div className="p-4 border-b border-gray-200 sticky top-0 z-10">
             {selectedThread ? (
@@ -668,7 +668,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                   </ScrollArea>
                   {/* Message Input */}
                   {canWriteCurrentEncounter && (
-                    <div className="border-t border-gray-200 p-4 sticky bottom-0">
+                    <div className="border-t border-gray-200 p-4 sticky bottom-0 bg-white z-[51]">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
