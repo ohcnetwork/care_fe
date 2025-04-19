@@ -18,42 +18,61 @@ describe("Manage departments/teams association to an encounter", () => {
 
   const departmentName = generateDeptName();
 
-  it("Create a new department and a sub-department, then verify that the search functionality works correctly on the dashboard", () => {
+  it("Create a new department/team and a sub-department/team, then verify that the search functionality works correctly on the dashboard", () => {
     const subDepartmentName = generateDeptName("Sub-");
     const description = generateRandomCharacter({
       charLimit: 50,
     });
+    const OrganizationType = "Department";
+    const updatedOrganizationType = "Team";
+    const updatedDescription = generateRandomCharacter({
+      charLimit: 50,
+    });
+    const updatedDepartmentTeamName = generateDeptName("Updated-Sub-");
     patientDepartments
       .navigateToSettings()
       .navigateToDevicesTab()
-      .clickAddDepartment()
+      .clickAddDepartmentTeam()
       .enterName(departmentName)
-      .selectType("Department")
+      .selectType(OrganizationType)
       .enterDescription(description)
       .interceptCreateRequest()
       .clickCreateOrganization()
       .verifyCreateRequest()
       .assertCreationSuccess()
-      .searchDepartment(departmentName)
-      .openDepartmentsDetails()
-      .clickAddDepartment()
+      .searchDepartmentTeam(departmentName)
+      .openDepartmentsTeamDetails()
+      .clickAddDepartmentTeam()
       .enterName(subDepartmentName)
-      .selectType("Department")
+      .selectType(OrganizationType)
       .enterDescription(description)
       .interceptCreateRequest()
       .clickCreateOrganization()
       .verifyCreateRequest()
       .assertCreationSuccess()
-      .searchDepartment(subDepartmentName)
-      .verifyDepartmentInList(subDepartmentName);
+      .searchDepartmentTeam(subDepartmentName)
+      .verifyDepartmentTeamContentInList(subDepartmentName, OrganizationType)
+      .clickEditOrganization()
+      .enterName(updatedDepartmentTeamName)
+      .selectType(updatedOrganizationType)
+      .enterDescription(updatedDescription)
+      .interceptUpdateRequest()
+      .clickUpdateOrganization()
+      .verifyUpdateRequest()
+      .assertUpdateSuccess()
+      .searchDepartmentTeam(updatedDepartmentTeamName)
+      .verifyDepartmentTeamContentInList(
+        updatedDepartmentTeamName,
+        updatedOrganizationType,
+      );
   });
 
   it("Navigate to the facility's administration department and link a user to the facility", () => {
     patientDepartments
       .navigateToSettings()
       .navigateToDevicesTab()
-      .searchDepartment("Administration")
-      .openDepartmentsDetails()
+      .searchDepartmentTeam("Administration")
+      .openDepartmentsTeamDetails()
       .clickUsersTab()
       .clickLinkUser()
       .selectAssignedUser("devnurse3")

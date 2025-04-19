@@ -11,11 +11,16 @@ export class PatientDepartments {
     return this;
   }
 
-  clickAddDepartment() {
+  clickAddDepartmentTeam() {
     cy.verifyAndClickElement(
       '[data-cy="add-department/team-button"]',
       "Add Department/Team",
     );
+    return this;
+  }
+
+  clickEditOrganization() {
+    cy.verifyAndClickElement('[data-cy="edit-department-team"]', "Edit");
     return this;
   }
 
@@ -45,9 +50,19 @@ export class PatientDepartments {
     cy.intercept("POST", "**/api/v1/facility/**").as("createOrganization");
     return this;
   }
+  interceptUpdateRequest() {
+    cy.intercept("PUT", "**/api/v1/facility/**").as("updateOrganization");
+    return this;
+  }
 
   verifyCreateRequest() {
     cy.wait("@createOrganization").then((interception) => {
+      expect(interception.response?.statusCode).to.equal(200);
+    });
+    return this;
+  }
+  verifyUpdateRequest() {
+    cy.wait("@updateOrganization").then((interception) => {
       expect(interception.response?.statusCode).to.equal(200);
     });
     return this;
@@ -60,27 +75,42 @@ export class PatientDepartments {
     );
     return this;
   }
+  clickUpdateOrganization() {
+    cy.verifyAndClickElement(
+      '[data-cy="update-organization-button"]',
+      "Update Organization",
+    );
+    return this;
+  }
 
   assertCreationSuccess() {
     cy.verifyNotification("Organization created successfully");
     return this;
   }
+  assertUpdateSuccess() {
+    cy.verifyNotification("Organization updated successfully");
+    return this;
+  }
 
-  searchDepartment(departmentName: string) {
+  searchDepartmentTeam(departmentName: string) {
     cy.typeIntoField('[data-cy="search-department-team"]', departmentName, {
       clearBeforeTyping: true,
     });
     return this;
   }
 
-  verifyDepartmentInList(departmentName: string) {
+  verifyDepartmentTeamContentInList(
+    OrganizationName: string,
+    OrganizationType: string,
+  ) {
     cy.verifyContentPresence('[data-cy="department-team-list"]', [
-      departmentName,
+      OrganizationName,
+      OrganizationType,
     ]);
     return this;
   }
 
-  openDepartmentsDetails() {
+  openDepartmentsTeamDetails() {
     cy.get('[data-cy="department-team-list"]')
       .first()
       .contains("See Details")
@@ -132,10 +162,6 @@ export class PatientDepartments {
     return this;
   }
 
-  verifyUserInList(userName: string) {
-    cy.verifyContentPresence('[data-cy="user-list-0"]', [userName]);
-    return this;
-  }
   clickEditRole() {
     cy.verifyAndClickElement('[data-cy="edit-user-role"]', "Edit Role");
     return this;
@@ -164,7 +190,7 @@ export class PatientDepartments {
   }
 
   selectOrganization(organization: string) {
-    cy.clickAndSelectOption('[data-cy="facility-organization"]', organization);
+    cy.typeAndSelectOption('[data-cy="facility-organization"]', organization);
     return this;
   }
 

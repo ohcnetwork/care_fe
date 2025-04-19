@@ -160,7 +160,7 @@ export default function FacilityOrganizationFormSheet({
       <SheetTrigger asChild>
         {isEditMode ? (
           <Button
-            data-cy="edit_department_team"
+            data-cy="edit-department-team"
             variant="white"
             size="sm"
             className="font-semibold"
