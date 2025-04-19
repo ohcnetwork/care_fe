@@ -535,16 +535,13 @@ function checkForDuplicateSymptom(
   t: (key: string) => string,
 ) {
   const codeToCheck = "code" in newSymptom ? newSymptom.code : newSymptom;
-  if (typeof codeToCheck === "string") {
-    return false;
-  }
-
+  const codeValue =
+    typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
   const isDuplicate = existingSymptoms.some(
     (symptom) =>
-      symptom.code.code === codeToCheck.code &&
+      symptom.code.code === codeValue &&
       symptom.verification_status !== "entered_in_error",
   );
-
   if (isDuplicate) {
     toast.warning(t("symptom_already_exist_warning"));
     return true;
