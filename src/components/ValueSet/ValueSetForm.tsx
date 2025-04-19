@@ -178,33 +178,43 @@ function ConceptFields({
               </FormItem>
             )}
           />
-          {parentForm.getValues(
-            `compose.${type}.${nestIndex}.concept.${index}.isVerified` as any,
-          ) ? (
-            <span title="Verified">
-              <CareIcon icon="l-check" className="size-4 text-green-500" />
-            </span>
-          ) : (
+          <div className="flex gap-2 items-start">
+            <div className="w-8 flex items-center justify-center">
+              {parentForm.getValues(
+                `compose.${type}.${nestIndex}.concept.${index}.isVerified` as any,
+              ) ? (
+                <span title="Verified">
+                  <CareIcon icon="l-check" className="size-4 text-green-500" />
+                </span>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleVerify(index)}
+                  disabled={
+                    verifyingIndex === index && lookupMutation.isPending
+                  }
+                >
+                  <UpdateIcon
+                    className={`size-4 ${
+                      verifyingIndex === index && lookupMutation.isPending
+                        ? "animate-spin"
+                        : ""
+                    }`}
+                  />
+                </Button>
+              )}
+            </div>
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="icon"
-              onClick={() => handleVerify(index)}
-              disabled={verifyingIndex === index && lookupMutation.isPending}
+              onClick={() => remove(index)}
             >
-              <UpdateIcon
-                className={`size-4 ${verifyingIndex === index && lookupMutation.isPending ? "animate-spin" : ""}`}
-              />
+              <TrashIcon className="size-4" />
             </Button>
-          )}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => remove(index)}
-          >
-            <TrashIcon className="size-4" />
-          </Button>
+          </div>
         </div>
       ))}
     </div>
