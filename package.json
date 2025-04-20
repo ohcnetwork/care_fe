@@ -47,7 +47,8 @@
     "unimported": "unimported",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./cypress --write",
-    "sort-locales": "node ./scripts/sort-locales.js"
+    "sort-locales": "node ./scripts/sort-locales.js",
+    "remove-unused-keys": "node ./scripts/remove-unused-keys.js"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.0",
