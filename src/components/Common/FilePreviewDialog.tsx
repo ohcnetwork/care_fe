@@ -12,15 +12,10 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import CircularProgress from "@/components/Common/CircularProgress";
@@ -298,252 +293,336 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       isDragging: false,
     }));
   };
+  console.log("pdf url", fileUrl);
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 rounded-lg p-4 shadow-xl md:p-6 overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-sm text-gray-600">
-            {t("file_preview")}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="fixed inset-0 z-50 grid bg-[#f5f6fa] animate-in data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 p-0 shadow-none duration-200 w-screen h-screen max-w-none max-h-none rounded-none border-none">
         {fileUrl ? (
-          <>
-            <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
-              <div>
+          <div className="flex flex-col h-screen">
+            {/* Header */}
+            <div className="bg-white shadow-sm border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 py-3">
+              <div className="flex-1 min-w-0 mr-2">
                 <TooltipComponent content={fileName}>
-                  <p className="text-2xl font-bold text-gray-800 truncate">
+                  <p className="text-lg sm:text-xl font-medium text-gray-800 truncate">
                     {fileNameTooltip}
                   </p>
                 </TooltipComponent>
-                {uploadedFiles &&
-                  uploadedFiles[index] &&
-                  uploadedFiles[index].created_date && (
-                    <p className="mt-1 text-sm text-gray-600">
-                      {t("created_on")}{" "}
-                      {new Date(
-                        uploadedFiles[index].created_date!,
-                      ).toLocaleString("en-US", {
-                        dateStyle: "long",
-                        timeStyle: "short",
-                      })}
-                    </p>
-                  )}
               </div>
-              <div className="flex gap-4 mt-2 md:mt-0">
+              <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
                 {downloadURL && downloadURL.length > 0 && (
-                  <Button variant="primary" data-cy="file-preview-download">
+                  <Button
+                    variant="primary"
+                    data-cy="file-preview-download"
+                    className="whitespace-nowrap"
+                  >
                     <a
                       href={downloadURL}
-                      className="text-white"
+                      className="text-white flex items-center"
                       download={`${file_state.name}.${file_state.extension}`}
                     >
-                      <CareIcon icon="l-file-download" className="size-4" />
-                      <span>{t("download")}</span>
+                      <CareIcon
+                        icon="l-file-download"
+                        className="size-4 mr-1 sm:mr-2"
+                      />
+                      <span className="hidden sm:inline">{t("download")}</span>
+                      <span className="sm:hidden">Download</span>
                     </a>
                   </Button>
                 )}
+                {/* <Button
+                variant="ghost"
+                onClick={handleClose}
+                className="p-1 sm:p-2 flex-shrink-0"
+                aria-label={t("close")}
+              >
+                <CareIcon icon="l-times" className="size-4 sm:size-5 text-gray-700" />
+              </Button> */}
               </div>
             </div>
-            <div className="flex flex-1 items-center justify-center">
-              {uploadedFiles && uploadedFiles.length > 1 && (
-                <Button
-                  variant="primary"
-                  className="mr-4"
-                  onClick={() => handleNext(index - 1)}
-                  disabled={index <= 0}
-                  aria-label="Previous file"
-                >
-                  <CareIcon icon="l-arrow-left" className="size-4" />
-                </Button>
-              )}
-              <div
-                className={cn(
-                  "flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200 touch-none",
-                  dragState.isDragging ? "cursor-grabbing" : "cursor-grab",
+
+            {/* Created date subheader */}
+            <div className="text-sm text-gray-500 px-6 py-1 bg-white border-b border-gray-200">
+              {uploadedFiles &&
+                uploadedFiles[index] &&
+                uploadedFiles[index].created_date && (
+                  <p className="text-sm text-gray-600">
+                    {t("created_on")}{" "}
+                    {new Date(
+                      uploadedFiles[index].created_date!,
+                    ).toLocaleString("en-US", {
+                      dateStyle: "long",
+                      timeStyle: "short",
+                    })}
+                  </p>
                 )}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-              >
-                {file_state.isImage ? (
+            </div>
+
+            {/* Controls and content container */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Toolbar */}
+              <div className="bg-white border-b border-gray-200 px-6 py-2 flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  {/* Zoom controls */}
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleZoomOut}
+                      disabled={
+                        file_state.isImage
+                          ? file_state.zoom === 1
+                          : scale <= 0.5
+                      }
+                      className="p-1.5 h-9 w-9 border border-gray-300"
+                    >
+                      <CareIcon icon="l-search-minus" className="size-5" />
+                    </Button>
+                    <div className="border border-gray-300 px-2.5 py-1.5 rounded-md min-w-[70px] h-9 flex items-center justify-center">
+                      <span className="text-sm font-medium">
+                        {file_state.isImage
+                          ? `${25 * file_state.zoom}%`
+                          : `${Math.round(scale * 100)}%`}
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={handleZoomIn}
+                      disabled={
+                        file_state.isImage
+                          ? file_state.zoom === zoom_values.length
+                          : scale >= 2
+                      }
+                      className="p-1.5 h-9 w-9 border border-gray-300"
+                    >
+                      <CareIcon icon="l-search-plus" className="size-4" />
+                    </Button>
+                  </div>
+
+                  {/* Fit width button */}
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      file_state.isImage
+                        ? setFileState({ ...file_state, zoom: 4 })
+                        : setScale(1);
+                    }}
+                    className="text-sm"
+                  >
+                    <CareIcon icon="l-arrows-h" className="size-4 mr-1" />
+                    {t("fit_width")}
+                  </Button>
+                </div>
+
+                {/* Right side controls */}
+                <div className="flex items-center space-x-2">
+                  {file_state.isImage && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleRotate(-90)}
+                        className="p-1 h-8"
+                      >
+                        <CareIcon icon="l-corner-up-left" className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleRotate(90)}
+                        className="p-1 h-8"
+                      >
+                        <CareIcon icon="l-corner-up-right" className="size-4" />
+                      </Button>
+                    </>
+                  )}
+                  {/* {file_state.extension === "pdf" && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                        disabled={page === 1}
+                        className="p-1 ant-btn css-1x0dypw ant-btn-default ant-btn-color-default ant-btn-variant-outlined !rounded-button whitespace-nowrap-8"
+                      >
+                        <CareIcon icon="l-arrow-left" className="size-4 anticon anticon-left" />
+                      </Button>
+                      <span className="text-sm mx-2 font-medium">
+                        {page}/{numPages}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setPage((prev) => Math.min(numPages, prev + 1))}
+                        disabled={page === numPages}
+                        className="p-ant-btn css-1x0dypw ant-btn-default ant-btn-color-default ant-btn-variant-outlined !rounded-button whitespace-nowrap h-8"
+                      >
+                        <CareIcon icon="l-arrow-right" className="size-4" />
+                      </Button>
+                    </>
+                  )} */}
+
+                  {file_state.extension === "pdf" && (
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                        disabled={page === 1}
+                        className="h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 border border-gray-300"
+                        aria-label="Previous Page"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                        <span className="ml-1">Previous Page</span>
+                      </Button>
+
+                      <div className="flex items-center text-sm font-medium text-gray-700">
+                        <span>
+                          Page {page} of {numPages}
+                        </span>
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          setPage((prev) => Math.min(numPages, prev + 1))
+                        }
+                        disabled={page === numPages}
+                        className="h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 border border-gray-300"
+                        aria-label="Next Page"
+                      >
+                        <span className="mr-1">Next Page</span>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* <Button
+                    variant="ghost"
+                    onClick={() => { }}
+                    className="p-1 h-8"
+                  >
+                    <CareIcon icon="l-expand-arrows-alt" className="size-4" />
+                  </Button> */}
+                </div>
+              </div>
+
+              {/* Main content area */}
+              <div className="flex-1 flex items-center justify-center bg-gray-200 p-6 overflow-auto">
+                <div className="flex items-center">
+                  {uploadedFiles && uploadedFiles.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      className="mr-4 bg-white/70 hover:bg-white/90 rounded-full h-10 w-10 p-0 shadow-md"
+                      onClick={() => handleNext(index - 1)}
+                      disabled={index <= 0}
+                      aria-label={t("previous_file")}
+                    >
+                      <CareIcon icon="l-arrow-left" className="size-4" />
+                    </Button>
+                  )}
+
                   <div
                     className={cn(
-                      "flex items-center justify-center w-full h-full transition-transform duration-100",
-                      dragState.isDragging ? "duration-0" : "",
+                      "flex h-[65vh] w-full max-w-4xl items-center justify-center overflow-hidden rounded-lg border border-secondary-200 bg-white touch-none",
+                      dragState.isDragging ? "cursor-grabbing" : "cursor-grab",
                     )}
-                    style={{
-                      transform: `translate(${dragState.position.x}px, ${dragState.position.y}px)`,
-                    }}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
                   >
-                    <img
-                      src={fileUrl}
-                      alt="file"
-                      className={cn(
-                        "max-h-full max-w-full select-none object-contain",
-                        zoom_values[file_state.zoom - 1],
-                        getRotationClass(file_state.rotation),
-                      )}
-                      draggable={false}
-                    />
-                  </div>
-                ) : file_state.extension === "pdf" ? (
-                  <Suspense fallback={<CircularProgress />}>
-                    <PDFViewer
-                      url={fileUrl}
-                      onDocumentLoadSuccess={(numPages: number) => {
-                        setPage(1);
-                        setNumPages(numPages);
-                      }}
-                      pageNumber={page}
-                      scale={scale}
-                    />
-                  </Suspense>
-                ) : previewExtensions.includes(file_state.extension) ? (
-                  <iframe
-                    sandbox=""
-                    title={t("source_file")}
-                    src={fileUrl}
-                    className="h-[50vh] md:h-[75vh] w-full"
-                  />
-                ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center">
-                    <CareIcon
-                      icon="l-file"
-                      className="mb-4 text-5xl text-secondary-600"
-                    />
-                    {t("file_preview_not_supported")}
-                  </div>
-                )}
-              </div>
-              {uploadedFiles && uploadedFiles.length > 1 && (
-                <Button
-                  variant="primary"
-                  className="ml-4"
-                  onClick={() => handleNext(index + 1)}
-                  disabled={index >= uploadedFiles.length - 1}
-                  aria-label={t("next_file")}
-                >
-                  <CareIcon icon="l-arrow-right" className="size-4" />
-                </Button>
-              )}
-            </div>
-            <div className="flex items-center justify-center">
-              <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-4">
-                {file_state.isImage && (
-                  <>
-                    {[
-                      [
-                        t("zoom_in"),
-                        "l-search-plus",
-                        handleZoomIn,
-                        file_state.zoom === zoom_values.length,
-                      ],
-                      [
-                        `${25 * file_state.zoom}%`,
-                        false,
-                        () => {
-                          setFileState({ ...file_state, zoom: 4 });
-                        },
-                        false,
-                      ],
-                      [
-                        t("zoom_out"),
-                        "l-search-minus",
-                        handleZoomOut,
-                        file_state.zoom === 1,
-                      ],
-                      [
-                        t("rotate_left"),
-                        "l-corner-up-left",
-                        () => handleRotate(-90),
-                        false,
-                      ],
-                      [
-                        t("rotate_right"),
-                        "l-corner-up-right",
-                        () => handleRotate(90),
-                        false,
-                      ],
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button[2] as () => void}
+                    {file_state.isImage ? (
+                      <div
                         className={cn(
-                          "z-50 rounded bg-white/60 text-black backdrop-blur-sm transition hover:bg-white/70",
-                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
+                          "flex items-center justify-center w-full h-full transition-transform duration-100",
+                          dragState.isDragging ? "duration-0" : "",
                         )}
-                        disabled={button[3] as boolean}
+                        style={{
+                          transform: `translate(${dragState.position.x}px, ${dragState.position.y}px)`,
+                        }}
                       >
-                        <div>
-                          {button[1] && (
-                            <CareIcon
-                              icon={button[1] as IconName}
-                              className="text-lg"
-                            />
+                        <img
+                          src={fileUrl}
+                          alt="file"
+                          className={cn(
+                            "max-h-full max-w-full select-none object-contain",
+                            zoom_values[file_state.zoom - 1],
+                            getRotationClass(file_state.rotation),
                           )}
-                          <div>{button[0] as string}</div>
-                        </div>
-                      </Button>
-                    ))}
-                  </>
-                )}
-                {file_state.extension === "pdf" && (
-                  <>
-                    {[
-                      [t("zoom_in"), "l-search-plus", handleZoomIn, scale >= 2],
-                      [`${Math.round(scale * 100)}%`, false, () => {}, false],
-                      [
-                        t("zoom_out"),
-                        "l-search-minus",
-                        handleZoomOut,
-                        scale <= 0.5,
-                      ],
-                      [
-                        t("previous"),
-                        "l-arrow-left",
-                        () => setPage((prev) => prev - 1),
-                        page === 1,
-                      ],
-                      [`${page}/${numPages}`, false, () => ({}), false],
-                      [
-                        t("next"),
-                        "l-arrow-right",
-                        () => setPage((prev) => prev + 1),
-                        page === numPages,
-                      ],
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button[2] as () => void}
-                        className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
-                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
-                        )}
-                        disabled={button[3] as boolean}
-                      >
-                        {button[1] && (
-                          <CareIcon
-                            icon={button[1] as IconName}
-                            className="mr-2 text-lg"
-                          />
-                        )}
-                        {button[0] as string}
-                      </Button>
-                    ))}
-                  </>
-                )}
+                          draggable={false}
+                        />
+                      </div>
+                    ) : file_state.extension === "pdf" ? (
+                      <Suspense fallback={<CircularProgress />}>
+                        <PDFViewer
+                          url={fileUrl}
+                          onDocumentLoadSuccess={(numPages: number) => {
+                            setPage(1);
+
+                            setNumPages(numPages);
+                          }}
+                          pageNumber={page}
+                          scale={scale}
+                        />
+                      </Suspense>
+                    ) : previewExtensions.includes(file_state.extension) ? (
+                      <iframe
+                        sandbox=""
+                        title={t("source_file")}
+                        src={fileUrl}
+                        className="h-[50vh] md:h-[75vh] w-full"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center">
+                        <CareIcon
+                          icon="l-file"
+                          className="mb-4 text-5xl text-secondary-600"
+                        />
+                        {t("file_preview_not_supported")}
+                      </div>
+                    )}
+                  </div>
+
+                  {uploadedFiles && uploadedFiles.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      className="ml-4 bg-white/70 hover:bg-white/90 rounded-full h-10 w-10 p-0 shadow-md"
+                      onClick={() => handleNext(index + 1)}
+                      disabled={index >= uploadedFiles.length - 1}
+                      aria-label={t("next_file")}
+                    >
+                      <CareIcon icon="l-arrow-right" className="size-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
+
+              {/* Footer - Currently empty as in your design */}
+              <div className="bg-white border-t border-gray-200 h-10"></div>
             </div>
-          </>
+          </div>
         ) : (
-          <div className="flex h-[50vh] md:h-[75vh] items-center justify-center">
+          <div className="flex h-full items-center justify-center">
             <CircularProgress />
           </div>
         )}
@@ -551,4 +630,5 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     </Dialog>
   );
 };
+
 export default FilePreviewDialog;
