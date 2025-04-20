@@ -8,14 +8,23 @@ async function extractAndCleanTranslations(options) {
   const { src, localesPath, extensions, locales } = options;
   const translationFileDynamicKeyPattern = /[a-zA-Z_]*__[a-zA-Z._]*/;
 
+  // check if src and localesPath are provided
   if (!src || !localesPath) {
     throw new Error("src, localesPath are required options.");
   }
 
+  // get all files in src with the given extensions
   const files = glob.sync(`**/*.+(${extensions.join("|")})`, {
     cwd: src,
     ignore: ["node_modules/**", "style/**", "types/**"],
   });
+
+  if (files.length === 0) {
+    throw new Error(
+      `No files found in ${src} with extensions ${extensions.join(", ")}.`,
+    );
+  }
+
   const allUsedKeys = new Set();
 
   const scanOptions = {
@@ -43,6 +52,7 @@ async function extractAndCleanTranslations(options) {
     },
   };
 
+  // Create parser and iterate over all files
   const parser = new scanner.Parser(scanOptions);
   files.forEach((file) => {
     const filePath = path.join(src, file);
@@ -57,32 +67,32 @@ async function extractAndCleanTranslations(options) {
       },
     );
 
+    // To handle Trans component, transform the file into js and scan it for Trans component
     if (
       content.includes("Trans") &&
       (content.includes("react-i18next") || content.includes("i18next"))
     ) {
-      let jsContent = content;
+      let content = content;
       try {
         const result = babel.transformSync(content, {
           filename: filePath,
           presets: ["@babel/preset-typescript"],
         });
-        jsContent = result.code;
+        content = result.code;
       } catch (error) {
         console.warn(
-          `Warning: Failed to transform file, using js file instead ${filePath}: ${error.message}`,
+          `Warning: Failed to transform file, using ts file instead ${filePath}: ${error.message}`,
         );
-        jsContent = content;
       }
-      parser.parseTransFromString(jsContent, (key, options) => {
+      parser.parseTransFromString(content, (key, options) => {
         parser.set(key, options);
         allUsedKeys.add(key);
       });
     }
   });
 
+  // get all locale files in localesPath
   const localeFiles = [];
-
   locales.forEach((locale) => {
     const files = glob.sync(`${locale}.json`, { cwd: localesPath });
     if (files.length > 0) {
@@ -90,6 +100,7 @@ async function extractAndCleanTranslations(options) {
     }
   });
 
+  // iterate over all locale files and clean the unused keys, if dynamic keys are found, keep them
   for (const localeFile of localeFiles) {
     const locale = path.basename(localeFile, ".json");
     const localeFilePath = path.join(localesPath, localeFile);
@@ -114,6 +125,7 @@ async function extractAndCleanTranslations(options) {
   }
 }
 async function main() {
+  // get locales from command line
   const args = process.argv.slice(2);
   let locales = ["en"];
   const localesArgIndex = args.indexOf("--locales");
@@ -126,6 +138,8 @@ async function main() {
       );
     }
   }
+
+  // Run the script, with following options
   try {
     await extractAndCleanTranslations({
       src: "./src",
