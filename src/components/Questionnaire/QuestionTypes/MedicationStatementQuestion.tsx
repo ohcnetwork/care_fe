@@ -149,6 +149,8 @@ export function MedicationStatementQuestion({
       queryParams: {
         limit: 100,
         encounter: encounterId,
+        // TODO: medicationStatementAPI should have exclude_status param.. otherwise entered_in_error entries can be remodified
+        // exclude_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
@@ -437,10 +439,6 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
     <div
       className={cn(
         "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] border-b border-gray-200 hover:bg-gray-50/50",
-        {
-          "opacity-40 pointer-events-none":
-            medication.status === "entered_in_error",
-        },
       )}
     >
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
