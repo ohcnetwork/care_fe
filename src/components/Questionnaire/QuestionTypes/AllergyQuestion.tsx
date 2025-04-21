@@ -124,8 +124,6 @@ const AllergyTableRow = ({
     <>
       <TableRow
         className={cn(
-          allergy.verification_status === "entered_in_error" &&
-            "opacity-40 pointer-events-none",
           allergy.clinical_status === "inactive" && "opacity-60",
           allergy.clinical_status === "resolved" && "line-through",
         )}
@@ -316,6 +314,8 @@ export function AllergyQuestion({
       pathParams: { patientId },
       queryParams: {
         limit: 100,
+        // TODO: allergyIntoleranceAPI should have exclude_verification_status param.. otherwise entered_in_error entries can be remodified
+        // exclude_verification_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
@@ -438,8 +438,6 @@ export function AllergyQuestion({
                 key={index}
                 className={cn(
                   "p-3 space-y-3",
-                  allergy.verification_status === "entered_in_error" &&
-                    "opacity-40 pointer-events-none",
                   allergy.clinical_status === "inactive" && "opacity-60",
                   allergy.clinical_status === "resolved" && "line-through",
                 )}
