@@ -25,11 +25,18 @@ const CameraSelect: React.FC<CameraSelectProps> = ({ onChange }) => {
         <SelectValue placeholder="Select a camera" />
       </SelectTrigger>
       <SelectContent>
-        {devices.map((device) => (
-          <SelectItem key={device.deviceId} value={device.deviceId}>
-            {device.label || `Camera ${device.deviceId}`}
-          </SelectItem>
-        ))}
+        {devices.length == 0 ? (
+          <SelectItem value="no-camera">No cameras available</SelectItem>
+        ) : (
+          devices.map((device) => (
+            <SelectItem
+              key={device.deviceId}
+              value={device.deviceId || "No camera available"}
+            >
+              {device.label || `Camera ${device.deviceId}`}
+            </SelectItem>
+          ))
+        )}
       </SelectContent>
     </Select>
   );
