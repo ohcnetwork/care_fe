@@ -220,12 +220,7 @@ const SymptomRow = React.memo(function SymptomRow({
   // For mobile view - Card Layout
   if (isMobile) {
     return (
-      <div
-        className={cn("group hover:bg-gray-50", {
-          "opacity-40 pointer-events-none":
-            symptom.verification_status === "entered_in_error",
-        })}
-      >
+      <div className={cn("group hover:bg-gray-50")}>
         <Card
           className={cn("mb-2 rounded-lg", {
             "border border-primary-500": isOpen,
@@ -388,12 +383,7 @@ const SymptomRow = React.memo(function SymptomRow({
   // For desktop view - Table Row
   return (
     <>
-      <TableRow
-        className={cn({
-          "opacity-40 pointer-events-none":
-            symptom.verification_status === "entered_in_error",
-        })}
-      >
+      <TableRow>
         <TableCell className="font-medium">
           <div className="truncate max-w-[300px]" title={symptom.code.display}>
             {symptom.code.display}
@@ -503,6 +493,7 @@ export function SymptomQuestion({
       queryParams: {
         limit: 100,
         encounter: encounterId,
+        exclude_verification_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
