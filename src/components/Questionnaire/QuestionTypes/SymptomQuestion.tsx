@@ -220,7 +220,7 @@ const SymptomRow = React.memo(function SymptomRow({
   // For mobile view - Card Layout
   if (isMobile) {
     return (
-      <div className={cn("group hover:bg-gray-50")}>
+      <div className="group hover:bg-gray-50">
         <Card
           className={cn("mb-2 rounded-lg", {
             "border border-primary-500": isOpen,
