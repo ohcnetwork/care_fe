@@ -306,7 +306,6 @@ export default defineConfig(({ mode }) => {
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "Permissions-Policy": "geolocation=(self), microphone=()",
-        "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://cdn.ohc.network; connect-src 'self' https://careapi.ohc.network https://sbom.ohc.network https://sentry.io; font-src 'self' data:; frame-src 'self' https://www.google.com/recaptcha/; object-src 'self' https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;"
       },
     },
     preview: {
