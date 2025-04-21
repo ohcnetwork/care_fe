@@ -18,8 +18,9 @@ import {
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface FacilityOrganizationSelectorProps {
-  value?: string | null;
-  onChange: (value: string | null) => void;
+  selectedOrganizations: FacilityOrganization[];
+  onSelect: (organization: FacilityOrganization) => void;
+  onRemove: (organizationId: string) => void;
   facilityId: string;
 }
 
@@ -33,11 +34,11 @@ export default function FacilityOrganizationSelector(
   props: FacilityOrganizationSelectorProps,
 ) {
   const { t } = useTranslation();
-  const { onChange, facilityId } = props;
+  const { onSelect, onRemove, facilityId, selectedOrganizations } = props;
   const [selectedLevels, setSelectedLevels] = useState<FacilityOrganization[]>(
     [],
   );
-  const [selectedOrganization, setSelectedOrganization] =
+  const [currentOrganization, setCurrentOrganization] =
     useState<FacilityOrganization | null>(null);
   const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
   const [showAllOrgs, setShowAllOrgs] = useState(false);
@@ -86,8 +87,7 @@ export default function FacilityOrganizationSelector(
     const newLevels = selectedLevels.slice(0, level);
     newLevels.push(selectedOrg);
     setSelectedLevels(newLevels);
-    setSelectedOrganization(selectedOrg);
-    onChange(selectedOrg.id);
+    setCurrentOrganization(selectedOrg);
   };
 
   const getOrganizationOptions = (
@@ -106,25 +106,20 @@ export default function FacilityOrganizationSelector(
     setSelectedLevels(newLevels);
     if (newLevels.length > 0) {
       const lastOrg = newLevels[newLevels.length - 1];
-      setSelectedOrganization(lastOrg);
-      onChange(lastOrg.id);
+      setCurrentOrganization(lastOrg);
     } else {
-      setSelectedOrganization(null);
-      onChange(null);
+      setCurrentOrganization(null);
     }
   };
 
-  const handleRemoveOrganization = () => {
-    setSelectedLevels([]);
-    setSelectedOrganization(null);
-    onChange(null);
+  const handleRemoveOrganization = (organizationId: string) => {
+    onRemove(organizationId);
   };
 
   const handleOrganizationViewChange = (value: string) => {
     setShowAllOrgs(value === "all");
     setSelectedLevels([]);
-    setSelectedOrganization(null);
-    onChange(null);
+    setCurrentOrganization(null);
   };
 
   const renderOrganizationLevel = (level: number) => {
@@ -198,28 +193,35 @@ export default function FacilityOrganizationSelector(
       </Tabs>
 
       <div className="space-y-3">
-        {selectedOrganization && (
-          <div className="flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5">
-            <Building className="size-4 text-sky-600 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm text-sky-900 truncate">
-                {selectedOrganization.name}
-              </p>
-              {selectedOrganization.has_children && (
-                <p className="text-xs text-sky-600">
-                  {t("has_sub_departments")}
-                </p>
-              )}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="size-8 p-0 text-gray-500 hover:text-gray-900"
-              onClick={handleRemoveOrganization}
-            >
-              <X className="size-4" />
-              <span className="sr-only">{t("remove_organization")}</span>
-            </Button>
+        {selectedOrganizations.length > 0 && (
+          <div className="space-y-2">
+            {selectedOrganizations.map((org) => (
+              <div
+                key={org.id}
+                className="flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5"
+              >
+                <Building className="size-4 text-sky-600 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm text-sky-900 truncate">
+                    {org.name}
+                  </p>
+                  {org.has_children && (
+                    <p className="text-xs text-sky-600">
+                      {t("has_sub_departments")}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="size-8 p-0 text-gray-500 hover:text-gray-900"
+                  onClick={() => handleRemoveOrganization(org.id)}
+                >
+                  <X className="size-4" />
+                  <span className="sr-only">{t("remove_organization")}</span>
+                </Button>
+              </div>
+            ))}
           </div>
         )}
         <div className="space-y-1.5">
@@ -230,6 +232,20 @@ export default function FacilityOrganizationSelector(
             selectedLevels[selectedLevels.length - 1]?.has_children) &&
             renderOrganizationLevel(selectedLevels.length)}
         </div>
+        {currentOrganization && (
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2 border-dashed border-2 border-sky-500 text-sky-700 hover:bg-sky-50"
+            onClick={() => {
+              onSelect(currentOrganization);
+              setCurrentOrganization(null);
+              setSelectedLevels([]);
+            }}
+          >
+            <CareIcon icon="l-plus" className="size-4" />
+            {t("Add_Selected_Organization")}
+          </Button>
+        )}
       </div>
     </div>
   );

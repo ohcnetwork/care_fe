@@ -187,7 +187,9 @@ export default function LinkDepartmentsSheet({
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
+  const [selectedOrganizations, setSelectedOrganizations] = useState<
+    FacilityOrganization[]
+  >([]);
   const queryClient = useQueryClient();
   const { route, pathParams } = getMutationParams(
     entityType,
@@ -204,7 +206,7 @@ export default function LinkDepartmentsSheet({
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
       toast.success(t("organization_added_successfully"));
-      setSelectedOrg(null);
+      setSelectedOrganizations([]);
       setOpen(false);
       onUpdate?.();
     },
@@ -215,6 +217,25 @@ export default function LinkDepartmentsSheet({
       });
     },
   });
+
+  const handleOrganizationSelect = (organization: FacilityOrganization) => {
+    if (!selectedOrganizations.find((org) => org.id === organization.id)) {
+      setSelectedOrganizations([...selectedOrganizations, organization]);
+    }
+  };
+
+  const handleOrganizationRemove = (organizationId: string) => {
+    setSelectedOrganizations(
+      selectedOrganizations.filter((org) => org.id !== organizationId),
+    );
+  };
+
+  const handleAddOrganizations = () => {
+    if (selectedOrganizations.length === 0) return;
+    selectedOrganizations.forEach((org) => {
+      addOrganization({ [orgType]: org.id } as Record<typeof orgType, string>);
+    });
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -248,24 +269,19 @@ export default function LinkDepartmentsSheet({
             <div className="space-y-4">
               <FacilityOrganizationSelector
                 facilityId={facilityId}
-                value={selectedOrg}
-                onChange={setSelectedOrg}
+                selectedOrganizations={selectedOrganizations}
+                onSelect={handleOrganizationSelect}
+                onRemove={handleOrganizationRemove}
               />
 
               <Button
                 className="w-full"
-                onClick={() =>
-                  selectedOrg &&
-                  addOrganization({ [orgType]: selectedOrg } as Record<
-                    typeof orgType,
-                    string
-                  >)
-                }
-                disabled={!selectedOrg || isAdding}
+                onClick={handleAddOrganizations}
+                disabled={selectedOrganizations.length === 0 || isAdding}
               >
                 {isAdding && <Loader2 className="mr-2 size-4 animate-spin" />}
-                {t("add_organization", {
-                  count: entityType === "device" ? 1 : 0,
+                {t("add_organizations", {
+                  count: selectedOrganizations.length,
                 })}
               </Button>
             </div>
