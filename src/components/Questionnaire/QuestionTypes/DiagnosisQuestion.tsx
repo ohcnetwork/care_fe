@@ -814,7 +814,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
   );
   const { t } = useTranslation();
   return (
-    <div className={cn("group hover:bg-gray-50")}>
+    <div className="group hover:bg-gray-50">
       {/* Mobile View - Card Layout */}
       <Card
         className={cn("mb-2 rounded-lg", {
