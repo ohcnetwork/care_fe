@@ -81,6 +81,8 @@ export default function LocationSettings({
     }),
   });
 
+  const ITEMS_PER_PAGE = 9;
+
   const {
     page: currentPage,
     setPage: setCurrentPage,
@@ -99,7 +101,7 @@ export default function LocationSettings({
   } = useLocationManagement({
     facilityId,
     parentId: locationId,
-    itemsPerPage: 9,
+    itemsPerPage: ITEMS_PER_PAGE,
   });
 
   const { data: mapLocations } = useQuery({
@@ -335,16 +337,17 @@ export default function LocationSettings({
                         )}
                       </div>
 
-                      {childLocations && childLocations.count > 9 && (
-                        <div className="flex justify-center mt-2 sm:mt-4">
-                          <Pagination
-                            data={{ totalCount: childLocations.count }}
-                            onChange={setCurrentPage}
-                            defaultPerPage={9}
-                            cPage={currentPage}
-                          />
-                        </div>
-                      )}
+                      {childLocations &&
+                        childLocations.count > ITEMS_PER_PAGE && (
+                          <div className="flex justify-center mt-2 sm:mt-4">
+                            <Pagination
+                              data={{ totalCount: childLocations.count }}
+                              onChange={setCurrentPage}
+                              defaultPerPage={ITEMS_PER_PAGE}
+                              cPage={currentPage}
+                            />
+                          </div>
+                        )}
                     </div>
                   </>
                 )}

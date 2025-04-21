@@ -11,6 +11,8 @@ import {
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -117,7 +119,7 @@ export function LocationTable({
             const hideUpButton = isFirstPage && isFirst;
             const hideDownButton = isLastPage && isLast;
 
-            const canView = location.form !== "bd" && onView;
+            const canView = location.mode === "kind" && onView;
 
             return (
               <AnimatedTableRow
@@ -129,16 +131,19 @@ export function LocationTable({
                   damping: 30,
                   mass: 0.8,
                 }}
-                className={`hover:bg-gray-50 group ${canView ? "cursor-pointer" : ""}`}
+                className={cn(
+                  "hover:bg-gray-50 group",
+                  canView && "cursor-pointer",
+                )}
                 onClick={canView ? () => onView?.(location) : undefined}
-                data-cy={canView ? "view-location-row" : undefined}
+                data-cy="view-location-row"
               >
                 <TableCell>
                   <div className="font-medium flex items-center gap-2 py-2">
                     <Icon className="size-4 text-gray-500" />
                     <span
                       className={
-                        location.form === "bd"
+                        location.mode === "instance"
                           ? ""
                           : "group-hover:underline group-hover:text-primary"
                       }
@@ -209,7 +214,7 @@ export function LocationTable({
                             </TooltipContent>
                           </Tooltip>
                         ) : (
-                          <div className="w-9 h-9"></div>
+                          <div className="size-9"></div>
                         )}
 
                         {/* Move Down button or spacer */}
@@ -232,7 +237,7 @@ export function LocationTable({
                             </TooltipContent>
                           </Tooltip>
                         ) : (
-                          <div className="w-9 h-9"></div>
+                          <div className="size-9"></div>
                         )}
 
                         {/* Edit button or spacer */}
@@ -251,7 +256,7 @@ export function LocationTable({
                             <TooltipContent>{t("edit")}</TooltipContent>
                           </Tooltip>
                         ) : (
-                          <div className="w-9 h-9"></div>
+                          <div className="size-9"></div>
                         )}
 
                         {/* Delete button or spacer */}
@@ -310,7 +315,7 @@ export function LocationTable({
                             </AlertDialogContent>
                           </AlertDialog>
                         ) : (
-                          <div className="w-9 h-9"></div>
+                          <div className="size-9"></div>
                         )}
                       </TooltipProvider>
                     </div>

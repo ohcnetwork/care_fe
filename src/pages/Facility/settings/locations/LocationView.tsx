@@ -92,7 +92,6 @@ export default function LocationView({
     isNested,
   });
 
-  // Reset page to 1 when location id changes
   useEffect(() => {
     setPage(1);
   }, [id, setPage]);
@@ -111,7 +110,6 @@ export default function LocationView({
     if (breadcrumbId === id) return;
 
     if (onSelectLocation) {
-      // Reset page when navigating via breadcrumbs
       const locationForNavigation = { id: breadcrumbId } as LocationList;
       onSelectLocation(locationForNavigation);
     } else if (onBackToParent) {
