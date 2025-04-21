@@ -55,8 +55,9 @@ function useLocationState(
       navigate(`/facility/${facilityId}/encounters/locations/${location.id}`);
 
       // Get parent chain and include the current location ID
-      const parentIds = getParentChain(location);
-      parentIds.add(location.id);
+      const parentChain = getParentChain(location);
+      const parentIds = parentChain.map((loc) => loc.id);
+      parentIds.push(location.id);
 
       setState((prev) => ({
         ...prev,

@@ -96,8 +96,11 @@ export default function DevicesList({ facilityId }: Props) {
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
       updateQuery({ locationId: location.id });
-      const parentIds = getParentChain(location);
-      parentIds.add(location.id);
+
+      const parentChain = getParentChain(location);
+      const parentIds = parentChain.map((loc) => loc.id);
+      parentIds.push(location.id);
+
       setExpandedLocations(new Set([...expandedLocations, ...parentIds]));
     },
     [expandedLocations, updateQuery],

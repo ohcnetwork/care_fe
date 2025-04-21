@@ -1,13 +1,13 @@
 import { LocationList as LocationListType } from "@/types/location/location";
 
-export function getParentChain(location: LocationListType): Set<string> {
-  const parentIds = new Set<string>();
+export function getParentChain(location: LocationListType): LocationListType[] {
+  const parentChain: LocationListType[] = [];
   let current = location.parent;
 
   while (current) {
-    parentIds.add(current.id);
+    parentChain.push(current);
     current = current.parent;
   }
 
-  return parentIds;
+  return parentChain;
 }
