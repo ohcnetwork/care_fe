@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -103,7 +102,7 @@ function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
         <div className="flex items-center gap-2">
           <Avatar
             name={formatName(statement.created_by, true)}
-            className="w-4 h-4"
+            className="size-4"
             imageUrl={statement.created_by.read_profile_picture_url}
           />
           <span className="text-sm">{formatName(statement.created_by)}</span>
@@ -234,6 +233,8 @@ const MedicationStatementListLayout = ({
   className?: string;
   medicationsCount?: number | undefined;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Card className={cn("rounded-sm ", className)}>
       <CardHeader className="px-4 pt-4 pb-2">

@@ -231,6 +231,7 @@ export default function LocationView({
             <div className="flex flex-col xl:flex-row justify-between items-start w-full gap-4">
               <div className="w-full xl:w-72">
                 <Input
+                  data-cy="location-child-search-input"
                   placeholder={t("search_by_name")}
                   value={searchQuery}
                   onChange={(e) => {
@@ -246,6 +247,7 @@ export default function LocationView({
                   "mode" in location &&
                   location.mode === "kind" && (
                     <Button
+                      data-cy="add-child-location-button"
                       variant="primary"
                       onClick={handleAddLocation}
                       className="w-full sm:w-auto"
@@ -263,7 +265,7 @@ export default function LocationView({
                     trigger={
                       <Button variant="outline" className="w-full md:w-auto">
                         <CareIcon icon="l-building" className="size-4 mr-2" />
-                        {t("manage_organization_other")}
+                        {t("manage_organization", { count: 0 })}
                       </Button>
                     }
                     onUpdate={() => {

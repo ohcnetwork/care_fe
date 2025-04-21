@@ -358,6 +358,7 @@ export default function PatientRegistration(
             <PLUGIN_Component
               __name="PatientRegistrationForm"
               form={form}
+              facilityId={facilityId}
               patientId={patientId}
             />
 
@@ -374,7 +375,7 @@ export default function PatientRegistration(
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("name")}</FormLabel>
+                    <FormLabel aria-required>{t("name")}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder={t("type_patient_name")}
@@ -392,14 +393,17 @@ export default function PatientRegistration(
                 name="phone_number"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("phone_number")}</FormLabel>
+                    <FormLabel aria-required>{t("phone_number")}</FormLabel>
                     <FormControl>
                       <PhoneInput
                         {...field}
                         onChange={(value) => {
                           field.onChange(value);
                           if (form.getValues("same_phone_number")) {
-                            form.setValue("emergency_phone_number", value);
+                            form.setValue(
+                              "emergency_phone_number",
+                              value || "",
+                            );
                           }
                         }}
                         data-cy="patient-phone-input"
@@ -452,7 +456,7 @@ export default function PatientRegistration(
                 disabled={form.watch("same_phone_number")}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>
+                    <FormLabel aria-required>
                       {t("emergency_phone_number")}
                     </FormLabel>
                     <FormControl>
@@ -471,7 +475,7 @@ export default function PatientRegistration(
                 name="gender"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
-                    <FormLabel required>{t("sex")}</FormLabel>
+                    <FormLabel aria-required>{t("sex")}</FormLabel>
                     <FormControl>
                       <RadioGroup
                         {...field}
@@ -480,10 +484,7 @@ export default function PatientRegistration(
                         className="flex gap-5 flex-wrap"
                       >
                         {GENDER_TYPES.map((g) => (
-                          <FormItem
-                            key={g.id}
-                            className="flex items-center space-x-2 space-y-0"
-                          >
+                          <FormItem key={g.id} className="flex">
                             <FormControl>
                               <RadioGroupItem
                                 value={g.id}
@@ -507,7 +508,7 @@ export default function PatientRegistration(
                 name="blood_group"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("blood_group")}</FormLabel>
+                    <FormLabel aria-required>{t("blood_group")}</FormLabel>
                     <Select
                       {...field}
                       onValueChange={field.onChange}
@@ -586,7 +587,7 @@ export default function PatientRegistration(
                     name="age"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>{t("age")}</FormLabel>
+                        <FormLabel aria-required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -706,7 +707,7 @@ export default function PatientRegistration(
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("current_address")}</FormLabel>
+                    <FormLabel aria-required>{t("current_address")}</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -763,7 +764,9 @@ export default function PatientRegistration(
                 disabled={form.watch("same_address")}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("permanent_address")}</FormLabel>
+                    <FormLabel aria-required>
+                      {t("permanent_address")}
+                    </FormLabel>
                     <FormControl>
                       <Textarea {...field} data-cy="permanent-address-input" />
                     </FormControl>
@@ -777,7 +780,7 @@ export default function PatientRegistration(
                 name="pincode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("pincode")}</FormLabel>
+                    <FormLabel aria-required>{t("pincode")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -803,7 +806,7 @@ export default function PatientRegistration(
                   name="nationality"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>{t("nationality")}</FormLabel>
+                      <FormLabel aria-required>{t("nationality")}</FormLabel>
                       <FormControl>
                         <Autocomplete
                           options={countryList.map((c) => ({

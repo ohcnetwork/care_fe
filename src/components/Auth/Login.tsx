@@ -33,7 +33,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
-import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
@@ -323,7 +322,6 @@ const Login = (props: LoginProps) => {
   return (
     <div className="relative flex min-h-screen flex-col md:h-screen md:flex-row">
       <AuthHero />
-      {!forgotPassword && <BrowserWarning />}
 
       {/* Login Forms Section */}
       <div className="login-hero-form my-4 w-full md:mt-0 md:h-full md:w-1/2">
@@ -379,9 +377,13 @@ const Login = (props: LoginProps) => {
                     }
                   }}
                 >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="staff">Staff Login</TabsTrigger>
-                    <TabsTrigger value="patient">Patient Login</TabsTrigger>
+                  <TabsList className="flex w-full">
+                    <TabsTrigger className="flex-1" value="staff">
+                      {t("staff_login")}
+                    </TabsTrigger>
+                    <TabsTrigger className="flex-1" value="patient">
+                      {t("patient_login")}
+                    </TabsTrigger>
                   </TabsList>
 
                   {/* Staff Login */}
@@ -530,7 +532,7 @@ const Login = (props: LoginProps) => {
                           name="phone"
                           value={phone}
                           onChange={(value) => {
-                            setPhone(value);
+                            setPhone(value ?? "");
                             setOtpError("");
                             setOtpValidationError("");
                           }}
@@ -564,7 +566,11 @@ const Login = (props: LoginProps) => {
                                   <InputOTPSlot
                                     key={index}
                                     index={index}
-                                    className="size-10"
+                                    className={cn(
+                                      "size-10",
+                                      otpValidationError &&
+                                        "border-red-500 focus-visible:ring-red-500",
+                                    )}
                                   />
                                 ))}
                               </InputOTPGroup>
