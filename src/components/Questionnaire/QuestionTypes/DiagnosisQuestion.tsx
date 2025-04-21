@@ -666,12 +666,7 @@ const DiagnosisTableRow = ({
   const { t } = useTranslation();
   return (
     <>
-      <TableRow
-        className={cn(
-          diagnosis.verification_status === "entered_in_error" &&
-            "opacity-40 pointer-events-none",
-        )}
-      >
+      <TableRow>
         <TableCell className="py-1">
           <div className="flex items-center space-x-2 min-w-0">
             <div
@@ -819,12 +814,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
   );
   const { t } = useTranslation();
   return (
-    <div
-      className={cn("group hover:bg-gray-50", {
-        "opacity-40 pointer-events-none":
-          diagnosis.verification_status === "entered_in_error",
-      })}
-    >
+    <div className={cn("group hover:bg-gray-50")}>
       {/* Mobile View - Card Layout */}
       <Card
         className={cn("mb-2 rounded-lg", {
