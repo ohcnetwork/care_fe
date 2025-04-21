@@ -808,13 +808,13 @@ export function LocationSheet({
             </TabsList>
 
             <TabsContent value="assign" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-8rem)] p-2  pr-3">
+              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)] p-3 md:p-4">
                 {renderScreen()}
               </ScrollArea>
             </TabsContent>
 
             <TabsContent value="history" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-8rem)]">
+              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)]">
                 <LocationHistoryComponent history={history} />
               </ScrollArea>
             </TabsContent>
