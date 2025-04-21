@@ -737,10 +737,6 @@ export default function PatientRegistration(
                                       form.getValues("address"),
                                       { shouldValidate: true },
                                     );
-                                  } else {
-                                    form.setValue("permanent_address", "", {
-                                      shouldValidate: true,
-                                    });
                                   }
                                 }}
                                 data-cy="same-address-checkbox"
@@ -790,7 +786,6 @@ export default function PatientRegistration(
                             ? Number(e.target.value)
                             : undefined;
                           field.onChange(value);
-                          form.trigger("pincode");
                         }}
                         data-cy="pincode-input"
                       />
