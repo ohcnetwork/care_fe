@@ -49,7 +49,9 @@ export function RolesIndex() {
 
   return (
     <Page title={t("roles")}>
-      <p className="text-gray-600 px-3 md:px-0">{t("manage_and_view_roles")}</p>
+      <p className="text-gray-600 px-3 mb-3 md:px-0">
+        {t("manage_and_view_roles")}
+      </p>
 
       <div className="overflow-auto h-[calc(100vh-12rem)] md:h-[calc(100vh-9rem)]">
         <div className="relative w-full p-1">
