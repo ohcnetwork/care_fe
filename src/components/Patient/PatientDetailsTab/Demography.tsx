@@ -56,7 +56,7 @@ export const Demography = (props: PatientProps) => {
   };
 
   const EmergencyContact = (props: { number?: string; name?: string }) => (
-    <div className="sm:col-span-2">
+    <div className="lg:col-span-2">
       <div className="mr-6 flex flex-col items-start justify-between rounded-md border border-orange-300 bg-orange-50 p-4 sm:flex-row">
         {/* Emergency Contact Section */}
         <div className="flex-1">
