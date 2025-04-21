@@ -77,7 +77,7 @@ export function RolesIndex() {
               {allPermissions.map((permission) => (
                 <TableRow
                   key={permission.slug}
-                  className="even:bg-gray-100 odd:bg-gray-50"
+                  className="even:bg-gray-100 odd:bg-gray-50 hover:bg-gray-100"
                 >
                   <TableCell className="sticky left-0 z-10 max-w-48 font-semibold bg-inherit whitespace-normal">
                     {permission.name}
