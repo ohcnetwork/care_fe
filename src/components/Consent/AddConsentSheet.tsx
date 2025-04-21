@@ -13,14 +13,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Form,
   FormControl,
   FormDescription,
@@ -37,10 +29,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
-import useAuthUser from "@/hooks/useAuthUser";
 import useFileUpload from "@/hooks/useFileUpload";
 
 import mutate from "@/Utils/request/mutate";
@@ -50,64 +49,63 @@ import {
   CONSENT_STATUSES,
   CreateConsentRequest,
   VERIFICATION_TYPES,
+  VerificationType,
 } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
-import { UserBase } from "@/types/user/user";
 
-const consentFormSchema = () =>
-  z
-    .object({
-      decision: z.enum(CONSENT_DECISIONS).default("permit"),
-      category: z.enum(CONSENT_CATEGORIES).default("treatment"),
-      status: z.enum(CONSENT_STATUSES).default("active"),
-      date: z.date(),
-      period: z.object({
-        start: z.date().optional(),
-        end: z.date().optional(),
-      }),
-      verification_type: z.enum(VERIFICATION_TYPES).default("validation"),
-      source_attachments: z.array(z.instanceof(File)).default([]),
-    })
-    .superRefine((data, ctx) => {
-      if (data.source_attachments.length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: t("please_upload_a_file"),
-          path: ["source_attachments"],
-        });
-      }
+const consentFormSchema = z
+  .object({
+    decision: z.enum(CONSENT_DECISIONS).default("permit"),
+    category: z.enum(CONSENT_CATEGORIES).default("treatment"),
+    status: z.enum(CONSENT_STATUSES).default("active"),
+    date: z.date(),
+    period: z.object({
+      start: z.date().optional(),
+      end: z.date().optional(),
+    }),
+    verification_type: z.enum(VERIFICATION_TYPES).default("validation"),
+    source_attachments: z.array(z.instanceof(File)).default([]),
+    note: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.source_attachments.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("please_upload_a_file"),
+        path: ["source_attachments"],
+      });
+    }
 
-      if (data.period.end && data.date > data.period.end) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: t("consent_after_end"),
-          path: ["date"],
-        });
-      }
-    });
+    if (data.period.end && data.date > data.period.end) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("consent_after_end"),
+        path: ["date"],
+      });
+    }
+  });
 
-type ConsentFormValues = z.infer<ReturnType<typeof consentFormSchema>>;
+type ConsentFormValues = z.infer<typeof consentFormSchema>;
 
-interface LinkConsentDialogProps {
+interface AddConsentSheetProps {
   patientId: string;
   encounterId: string;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
 }
 
-export default function LinkConsentDialog({
+export default function AddConsentSheet({
   patientId,
   encounterId,
   trigger,
   onSuccess,
-}: LinkConsentDialogProps) {
+}: AddConsentSheetProps) {
   const { t } = useTranslation();
 
   const [isOpen, setIsOpen] = useState(false);
   const [associatingId, setAssociatingId] = useState<string | null>(null);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const queryClient = useQueryClient();
-  const authUser = useAuthUser();
 
   const fileUpload = useFileUpload({
     type: "consent",
@@ -122,6 +120,7 @@ export default function LinkConsentDialog({
       });
       setOpenUploadDialog(false);
       setIsOpen(false);
+      form.reset();
     },
   });
 
@@ -131,9 +130,35 @@ export default function LinkConsentDialog({
     });
     setIsOpen(false);
     onSuccess?.();
-    form.reset();
     fileUpload.clearFiles();
   };
+
+  const { mutate: addVerification } = useMutation({
+    mutationFn: (params: {
+      id: string;
+      verificationType: VerificationType;
+      note?: string;
+    }) =>
+      mutate(consentApi.addVerification, {
+        pathParams: { patientId, id: params.id },
+      })({
+        verification_type: params.verificationType,
+        verified: true,
+        note: params.note,
+      }),
+    onSuccess: () => {
+      if (form.getValues("source_attachments")?.length === 0) {
+        handleSuccess();
+        toast.success(t("consent_created_successfully"));
+        return;
+      }
+
+      setOpenUploadDialog(true);
+    },
+    onError: () => {
+      toast.error(t("error_adding_verification"));
+    },
+  });
 
   const { mutate: createConsent, isPending } = useMutation({
     mutationFn: (data: CreateConsentRequest) =>
@@ -141,22 +166,20 @@ export default function LinkConsentDialog({
         pathParams: { patientId },
       })(data),
     onSuccess: async (response) => {
-      if (form.getValues("source_attachments")?.length === 0) {
-        handleSuccess();
-        toast.success(t("consent_created_successfully"));
-        return;
-      }
-
       setAssociatingId(response.id);
-      setOpenUploadDialog(true);
+      // After consent is created, add verification as a separate call
+      addVerification({
+        id: response.id,
+        verificationType: form.getValues("verification_type"),
+        note: form.getValues("note"),
+      });
     },
     onError: () => {
       toast.error(t("error_creating_consent"));
     },
   });
-
   const form = useForm<ConsentFormValues>({
-    resolver: zodResolver(consentFormSchema()),
+    resolver: zodResolver(consentFormSchema),
     defaultValues: {
       decision: "permit",
       category: "treatment",
@@ -168,6 +191,7 @@ export default function LinkConsentDialog({
       },
       verification_type: "validation",
       source_attachments: [],
+      note: "",
     },
   });
 
@@ -176,23 +200,6 @@ export default function LinkConsentDialog({
   }, [fileUpload.files, form]);
 
   const onSubmit = (values: ConsentFormValues) => {
-    const verifier: UserBase = {
-      id: authUser.external_id,
-      first_name: authUser.first_name,
-      last_name: authUser.last_name,
-      phone_number: authUser.phone_number || "",
-      user_type: authUser.user_type,
-      gender: authUser.gender || "non_binary",
-      username: authUser.username,
-      email: authUser.email || "",
-      prefix: authUser.prefix || "",
-      suffix: authUser.suffix || "",
-      mfa_enabled: authUser.mfa_enabled || false,
-      last_login: authUser.last_login || new Date().toISOString(),
-      profile_picture_url: authUser.read_profile_picture_url || "",
-      deleted: authUser.deleted || false,
-    };
-
     createConsent({
       status: values.status,
       category: values.category,
@@ -204,14 +211,8 @@ export default function LinkConsentDialog({
       },
       encounter: encounterId,
       source_attachments: [],
-      verification_details: [
-        {
-          verified: true,
-          verified_by: verifier,
-          verification_date: new Date().toISOString(),
-          verification_type: values.verification_type,
-        },
-      ],
+      verification_details: [],
+      note: values.note,
     });
   };
 
@@ -224,24 +225,24 @@ export default function LinkConsentDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
         {trigger || (
           <Button variant="outline" className="gap-2">
             <Plus className="size-4" />
-            {t("link_consent")}
+            {t("add_consent")}
           </Button>
         )}
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t("link_consent")}</DialogTitle>
-          <DialogDescription>{t("link_consent_description")}</DialogDescription>
-        </DialogHeader>
+      </SheetTrigger>
+      <SheetContent className="overflow-y-auto sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>{t("add_consent")}</SheetTitle>
+          <SheetDescription>{t("add_consent_description")}</SheetDescription>
+        </SheetHeader>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-2 space-y-4"
+            className="mt-8 space-y-4 pr-6"
           >
             <>
               <FormField
@@ -408,6 +409,24 @@ export default function LinkConsentDialog({
 
               <FormField
                 control={form.control}
+                name="note"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("note")}</FormLabel>
+                    <FormControl>
+                      <textarea
+                        className="w-full field-sizing-content border border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-md"
+                        rows={3}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="source_attachments"
                 render={({ field }) => (
                   <FormItem>
@@ -451,12 +470,12 @@ export default function LinkConsentDialog({
               />
             </>
 
-            <Button type="submit" className="w-full" disabled={isPending}>
+            <Button type="submit" className="w-full mt-6" disabled={isPending}>
               {isPending ? t("saving") : t("save")}
             </Button>
           </form>
         </Form>
-      </DialogContent>
+      </SheetContent>
       {fileUpload.Dialogues}
       <FileUploadDialog
         open={openUploadDialog}
@@ -465,6 +484,6 @@ export default function LinkConsentDialog({
         associatingId={associatingId!}
         type="consent"
       />
-    </Dialog>
+    </Sheet>
   );
 }
