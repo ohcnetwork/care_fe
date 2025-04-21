@@ -2,6 +2,8 @@ import { ChevronRight } from "lucide-react";
 import { ActiveLink } from "raviger";
 import { useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import {
@@ -29,15 +31,15 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import { NavigationLink } from "./facility-nav";
 
+const isChildActive = (link: NavigationLink) => {
+  if (!link.children) return false;
+  const currentPath = window.location.pathname;
+  return link.children.some((child) => currentPath.startsWith(child.url));
+};
+
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-
-  const isChildActive = (link: NavigationLink) => {
-    if (!link.children) return false;
-    const currentPath = window.location.pathname;
-    return link.children.some((child) => currentPath.startsWith(child.url));
-  };
 
   return (
     <SidebarGroup>
@@ -58,7 +60,10 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   >
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton tooltip={link.name}>
+                        <SidebarMenuButton
+                          tooltip={link.name}
+                          className="cursor-pointer hover:bg-gray-200 hover:text-green-700"
+                        >
                           {link.icon ? (
                             <CareIcon icon={link.icon as IconName} />
                           ) : (
@@ -143,7 +148,12 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <SidebarMenuButton tooltip={link.name}>
+        <SidebarMenuButton
+          tooltip={link.name}
+          className={cn("cursor-pointer", {
+            "bg-gray-100 text-green-700 shadow": isChildActive(link),
+          })}
+        >
           {link.icon ? (
             <CareIcon icon={link.icon as IconName} />
           ) : (
