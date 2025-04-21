@@ -165,7 +165,7 @@ export function LocationTable({
                 <TableCell>
                   <Badge
                     variant={
-                      location.status === "active" ? "default" : "secondary"
+                      location.status === "active" ? "outline" : "secondary"
                     }
                   >
                     {t(location.status)}
@@ -174,7 +174,7 @@ export function LocationTable({
                 <TableCell>
                   <Badge
                     variant={
-                      !location.current_encounter ? "default" : "destructive"
+                      !location.current_encounter ? "outline" : "destructive"
                     }
                   >
                     {location.current_encounter

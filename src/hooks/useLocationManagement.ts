@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import routes from "@/Utils/request/api";
@@ -118,6 +118,7 @@ export function useLocationManagement({
           variables.previousData,
         );
       }
+      const { t } = useTranslation();
       let errorMessage = t("failed_to_update_order");
 
       if (error && typeof error === "object" && "cause" in error) {
