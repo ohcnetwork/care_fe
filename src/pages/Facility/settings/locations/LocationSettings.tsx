@@ -269,7 +269,7 @@ export default function LocationSettings({
 
                     <div className="space-y-4 overflow-hidden">
                       {/* Desktop table view */}
-                      <div className="hidden lg:block">
+                      <div className="hidden lg:block md:px-4">
                         {isLoading ? (
                           <TableSkeleton count={5} />
                         ) : currentPageItems?.length ? (
