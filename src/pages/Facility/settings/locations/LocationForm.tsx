@@ -200,6 +200,7 @@ export default function LocationForm({
     onSuccess: () => {
       toast.success(isEditMode ? t("location_updated") : t("location_created"));
       queryClient.invalidateQueries({ queryKey: ["locations"] });
+      queryClient.invalidateQueries({ queryKey: ["location", facilityId] });
       onSuccess?.();
     },
   });

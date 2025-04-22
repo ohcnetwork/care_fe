@@ -265,8 +265,6 @@ export default function LocationSettings({
                       navigate(`/facility/${facilityId}/settings/locations`)
                     }
                     onSelectLocation={handleLocationSelect}
-                    canWrite={canWriteFacilityLocation}
-                    canWriteOrganization={canManageFacilityOrganization}
                   />
                 ) : (
                   <>
@@ -311,10 +309,8 @@ export default function LocationSettings({
                               <LocationCard
                                 key={childLocation.id}
                                 location={childLocation}
-                                onEdit={handleEditLocation}
                                 onView={handleLocationSelect}
                                 facilityId={facilityId}
-                                canWrite={canWriteFacilityLocation}
                               />
                             ),
                           )

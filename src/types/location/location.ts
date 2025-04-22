@@ -38,6 +38,9 @@ export interface LocationBase {
 export interface LocationDetail extends LocationBase {
   id: string;
   organizations: FacilityOrganization[];
+  permissions: string[];
+  current_encounter?: Encounter;
+  parent?: LocationList;
 }
 
 export interface LocationList extends LocationBase {

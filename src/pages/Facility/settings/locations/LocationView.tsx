@@ -1,10 +1,23 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PenLine } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -13,7 +26,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,7 +36,11 @@ import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
+import { getPermissions } from "@/common/Permissions";
+
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -36,8 +53,6 @@ interface Props {
   isNested?: boolean;
   onBackToParent?: () => void;
   onSelectLocation?: (location: LocationList) => void;
-  canWrite: boolean;
-  canWriteOrganization: boolean;
 }
 
 export default function LocationView({
@@ -46,8 +61,6 @@ export default function LocationView({
   isNested,
   onBackToParent,
   onSelectLocation,
-  canWrite,
-  canWriteOrganization,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -65,6 +78,10 @@ export default function LocationView({
       pathParams: { facility_id: facilityId, id },
     }),
   });
+
+  const { hasPermission } = usePermissions();
+  const { canWriteFacilityLocation, canManageFacilityOrganization } =
+    getPermissions(hasPermission, location?.permissions ?? []);
 
   const { data: locationOrganizations } = useQuery({
     queryKey: ["location", id, "organizations"],
@@ -90,6 +107,21 @@ export default function LocationView({
         name: searchQuery || undefined,
       },
     }),
+  });
+
+  const { mutate: removeLocation } = useMutation({
+    mutationFn: mutate(locationApi.delete, {
+      pathParams: { facility_id: facilityId, id: location?.id },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["locations", facilityId],
+      });
+      toast.success(t("location_removed_successfully"));
+      navigate(
+        `/facility/${facilityId}/settings/location/${location?.parent?.id}`,
+      );
+    },
   });
 
   const handleAddLocation = () => {
@@ -229,6 +261,56 @@ export default function LocationView({
                   >
                     {location?.status}
                   </Badge>
+                  {canWriteFacilityLocation && location && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        handleEditLocation(location as unknown as LocationList)
+                      }
+                      className="shrink-0"
+                    >
+                      <PenLine className="size-4" />
+                    </Button>
+                  )}
+                  {canWriteFacilityLocation &&
+                    children?.results?.length === 0 &&
+                    !location?.current_encounter && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            data-cy="delete-location-button"
+                          >
+                            <CareIcon icon="l-trash" className="size-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("remove_location", { name: location?.name })}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("are_you_sure_want_to_delete", {
+                                name: location?.name,
+                              })}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                            <AlertDialogAction
+                              data-cy="remove-location-button"
+                              onClick={() => removeLocation({})}
+                              className={buttonVariants({
+                                variant: "destructive",
+                              })}
+                            >
+                              {t("remove")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                 </>
               )}
             </div>
@@ -250,7 +332,7 @@ export default function LocationView({
                   location &&
                   "mode" in location &&
                   location.mode === "kind" &&
-                  canWrite && (
+                  canWriteFacilityLocation && (
                     <Button
                       data-cy="add-child-location-button"
                       variant="primary"
@@ -263,7 +345,7 @@ export default function LocationView({
                   )}
                 {!isLocationLoading &&
                   locationOrganizations &&
-                  canWriteOrganization && (
+                  canManageFacilityOrganization && (
                     <LinkDepartmentsSheet
                       entityType="location"
                       entityId={id}
@@ -299,10 +381,8 @@ export default function LocationView({
                       <LocationCard
                         key={child.id}
                         location={child}
-                        onEdit={handleEditLocation}
                         onView={handleViewLocation}
                         facilityId={facilityId}
-                        canWrite={canWrite}
                       />
                     ))
                   ) : (
