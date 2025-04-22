@@ -757,7 +757,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </span>
       </div>
       {/* Dosage */}
-      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 px-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -1149,7 +1149,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Notes */}
       <div
-        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        className="lg:px-2 px-1 py-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
         data-cy="notes"
       >
         <Label className="mb-1.5 block text-sm lg:hidden">{t("note")}</Label>
