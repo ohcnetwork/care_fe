@@ -290,28 +290,30 @@ function ResponseCard({
             </span>
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              {t("print")}
-              <ChevronDown className="ml-2 size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <Link href={`questionnaire_response/${item.id}/print`}>
-              <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
-            </Link>
-            <Link
-              href={`questionnaire/${item.questionnaire?.id}/responses/print`}
-            >
-              <DropdownMenuItem>
-                {t("print_all_responses", {
-                  title: item.questionnaire?.title,
-                })}
-              </DropdownMenuItem>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {!isPrintPreview && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                {t("print")}
+                <ChevronDown className="ml-2 size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <Link href={`questionnaire_response/${item.id}/print`}>
+                <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
+              </Link>
+              <Link
+                href={`questionnaire/${item.questionnaire?.id}/responses/print`}
+              >
+                <DropdownMenuItem>
+                  {t("print_all_responses", {
+                    title: item.questionnaire?.title,
+                  })}
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {item.questionnaire && (
