@@ -12,11 +12,12 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 
-interface NavigationLink {
+export interface NavigationLink {
   name: string;
   url: string;
   icon?: string;
   visibility?: boolean;
+  children?: NavigationLink[];
 }
 
 interface FacilityNavProps {
@@ -46,19 +47,27 @@ function generateFacilityLinks(
       visibility: permissions.canViewAppointments,
     },
     {
-      name: t("search_patients"),
+      name: t("patients"),
       url: `${baseUrl}/patients`,
       icon: "d-patient",
       visibility:
         permissions.canCreateAppointment ||
         permissions.canListEncounters ||
         permissions.canCreateEncounter,
-    },
-    {
-      name: t("encounters"),
-      url: `${baseUrl}/encounters`,
-      icon: "d-patient",
-      visibility: permissions.canListEncounters,
+      children: [
+        {
+          name: t("search_patients"),
+          url: `${baseUrl}/patients`,
+        },
+        {
+          name: t("encounters"),
+          url: `${baseUrl}/encounters/patients`,
+        },
+        {
+          name: t("locations"),
+          url: `${baseUrl}/encounters/locations`,
+        },
+      ],
     },
     {
       name: t("resource"),
@@ -70,6 +79,24 @@ function generateFacilityLinks(
       name: t("settings"),
       url: `${baseUrl}/settings/general`,
       icon: "l-setting",
+      children: [
+        {
+          name: t("general"),
+          url: `${baseUrl}/settings/general`,
+        },
+        {
+          name: t("departments"),
+          url: `${baseUrl}/settings/departments`,
+        },
+        {
+          name: t("locations"),
+          url: `${baseUrl}/settings/locations`,
+        },
+        {
+          name: t("devices"),
+          url: `${baseUrl}/settings/devices`,
+        },
+      ],
     },
   ];
 
