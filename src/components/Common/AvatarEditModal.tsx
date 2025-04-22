@@ -6,7 +6,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import Cropper from "react-easy-crop";
 import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
 import { toast } from "sonner";
@@ -24,9 +23,10 @@ import {
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
-import { getCroppedImg } from "@/Utils/getCroppedImg";
 import { useImageCapture } from "@/Utils/imageUtils";
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
+
+import ImageCropper from "./ImageCropper";
 
 interface Props {
   title: string;
@@ -84,18 +84,7 @@ const AvatarEditModal = ({
   const { captureWebcamImage, processCroppedImage } = useImageCapture();
   const [isDragging, setIsDragging] = useState(false);
   const { requestPermission } = useMediaDevicePermission();
-  const [cropState, setCropState] = useState({
-    crop: { x: 0, y: 0 },
-    zoom: 1,
-    croppedAreaPixels: null as {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    } | null,
-    croppedImage: null as string | null,
-    isCropping: false,
-  });
+  const [isCropping, setIsCropping] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSwitchCamera = useCallback(() => {
@@ -105,21 +94,6 @@ const AvatarEditModal = ({
         : VideoConstraints.user,
     );
   }, [constraint]);
-
-  const onCropComplete = useCallback(
-    (
-      croppedArea: { x: number; y: number; width: number; height: number },
-      croppedAreaPixels: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      },
-    ) => {
-      setCropState((prev) => ({ ...prev, croppedAreaPixels }));
-    },
-    [],
-  );
 
   const captureImage = async () => {
     const { screenshot, file, error } = await captureWebcamImage(webRef);
@@ -131,90 +105,40 @@ const AvatarEditModal = ({
     if (screenshot && file) {
       setPreviewImage(screenshot);
       setSelectedFile(file);
-
-      // Reset crop state when capturing a new image
-      setCropState((prev) => ({
-        ...prev,
-        crop: { x: 0, y: 0 },
-        zoom: 1,
-        croppedAreaPixels: null,
-        croppedImage: null,
-        isCropping: true, // Automatically enter cropping mode when capturing an image
-      }));
+      // Enter cropping mode when capturing a new image
+      setIsCropping(true);
     }
   };
 
-  const handleCropImage = async () => {
-    if (!previewImage && !preview) {
-      return;
-    }
+  const handleCroppedImageComplete = useCallback(
+    async (croppedImage: string) => {
+      setIsProcessing(true);
 
-    setIsProcessing(true);
-    const imageSrc = previewImage || preview;
+      try {
+        const { file, error } = await processCroppedImage(croppedImage);
 
-    try {
-      if (!cropState.croppedAreaPixels) {
-        toast.error(t("AVATAR_EDIT__NO_AREA_SELECTED"));
-        return;
-      }
-
-      // Set a maximum size for cropped images to ensure they don't exceed server limits
-      const croppedImage = await getCroppedImg(
-        imageSrc as string,
-        cropState.croppedAreaPixels,
-      );
-
-      // Make sure we have a valid cropped image result
-      if (!croppedImage) {
-        toast.error(t("AVATAR_EDIT__UNABLE_TO_CROP"));
-        return;
-      }
-
-      setCropState((prev) => ({ ...prev, croppedImage }));
-      // Clear any previous error messages when cropping succeeds
-      setErrorMessage(null);
-    } catch (error) {
-      console.error("Cropping error:", error);
-      toast.error(t("AVATAR_EDIT__UNABLE_TO_CROP"));
-      setCropState((prev) => ({ ...prev, croppedImage: null }));
-      setErrorMessage(t("AVATAR_EDIT__CROPPING_ERROR"));
-    } finally {
-      setIsProcessing(false);
-      setCropState((prev) => ({ ...prev, isCropping: false }));
-    }
-  };
-
-  useEffect(() => {
-    if (cropState.croppedImage) {
-      const processCroppedImageData = async () => {
-        try {
-          const { file, error } = await processCroppedImage(
-            cropState.croppedImage!,
-          );
-
-          if (error) {
-            setErrorMessage(error);
-            return;
-          }
-
-          if (file) {
-            setSelectedFile(file);
-            setPreview(cropState.croppedImage!);
-            setCropState((prev) => ({ ...prev, croppedImage: null }));
-            // Reset loading states to ensure they only appear when submitting
-            setIsCaptureImgBeingUploaded(false);
-            setIsProcessing(false);
-            setErrorMessage(null);
-          }
-        } catch (error) {
-          console.error("Error processing cropped image:", error);
-          setErrorMessage(t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"));
+        if (error) {
+          setErrorMessage(error);
+          return;
         }
-      };
 
-      processCroppedImageData();
-    }
-  }, [cropState.croppedImage, processCroppedImage]);
+        if (file) {
+          setSelectedFile(file);
+          setPreview(croppedImage);
+          setIsCropping(false);
+          setIsCaptureImgBeingUploaded(false);
+          setIsProcessing(false);
+          setErrorMessage(null);
+        }
+      } catch (error) {
+        console.error("Error processing cropped image:", error);
+        setErrorMessage(t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"));
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [processCroppedImage, t],
+  );
 
   const closeModal = () => {
     setPreview(undefined);
@@ -222,13 +146,7 @@ const AvatarEditModal = ({
     setSelectedFile(undefined);
     setPreviewImage(null);
     setIsCaptureImgBeingUploaded(false);
-    setCropState({
-      crop: { x: 0, y: 0 },
-      zoom: 1,
-      croppedAreaPixels: null,
-      croppedImage: null,
-      isCropping: false,
-    });
+    setIsCropping(false);
     setErrorMessage(null);
     onOpenChange(false);
   };
@@ -253,13 +171,7 @@ const AvatarEditModal = ({
       return;
     }
     setSelectedFile(e.target.files[0]);
-    setCropState((prev) => ({
-      ...prev,
-      crop: { x: 0, y: 0 },
-      zoom: 1,
-      croppedAreaPixels: null,
-      isCropping: true,
-    }));
+    setIsCropping(true);
   };
 
   const uploadAvatar = async () => {
@@ -379,13 +291,7 @@ const AvatarEditModal = ({
         t("AVATAR_EDIT__PLEASE_DROP_IMAGE_FILE"),
       );
     setSelectedFile(droppedFile);
-    setCropState((prev) => ({
-      ...prev,
-      crop: { x: 0, y: 0 },
-      zoom: 1,
-      croppedAreaPixels: null,
-      isCropping: true,
-    }));
+    setIsCropping(true);
   };
 
   const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -453,28 +359,13 @@ const AvatarEditModal = ({
                   <>
                     <div className="flex flex-1 items-center justify-center rounded-lg relative">
                       <div className="w-full overflow-hidden max-w-full max-h-[calc(100vh-200px)]">
-                        {cropState.isCropping ? (
-                          <div className="w-full overflow-hidden relative h-[48vh] max-h-[300px] mx-auto">
-                            <Cropper
-                              image={preview || imageUrl || ""}
-                              crop={cropState.crop}
-                              zoom={cropState.zoom}
-                              aspect={1}
-                              onCropChange={(crop) =>
-                                setCropState((prev) => ({
-                                  ...prev,
-                                  crop,
-                                }))
-                              }
-                              onZoomChange={(zoom) =>
-                                setCropState((prev) => ({
-                                  ...prev,
-                                  zoom,
-                                }))
-                              }
-                              onCropComplete={onCropComplete}
-                            />
-                          </div>
+                        {isCropping ? (
+                          <ImageCropper
+                            imageSrc={preview || imageUrl || ""}
+                            onCropComplete={handleCroppedImageComplete}
+                            onCancel={() => setIsCropping(false)}
+                            isProcessing={isProcessing}
+                          />
                         ) : (
                           <img
                             src={DOMPurify.sanitize(preview || imageUrl || "")}
@@ -574,39 +465,10 @@ const AvatarEditModal = ({
                   >
                     {t("open_camera")}
                   </Button>
-                  {cropState.isCropping && (
-                    <div className="flex gap-4 relative justify-center md:absolute md:bottom-5 md:left-1/2 md:transform md:-translate-x-1/2">
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setCropState({
-                            crop: { x: 0, y: 0 },
-                            zoom: 1,
-                            croppedAreaPixels: null,
-                            croppedImage: null,
-                            isCropping: false,
-                          });
-                        }}
-                      >
-                        {t("cancel")}
-                      </Button>
-                      <Button onClick={handleCropImage} variant="primary">
-                        {t("crop")}
-                      </Button>
-                    </div>
-                  )}
-                  {preview && !cropState.isCropping && (
+                  {!isCropping && preview && (
                     <Button
                       variant="primary"
-                      onClick={() =>
-                        setCropState((prev) => ({
-                          ...prev,
-                          crop: { x: 0, y: 0 },
-                          zoom: 1,
-                          croppedAreaPixels: null,
-                          isCropping: true,
-                        }))
-                      }
+                      onClick={() => setIsCropping(true)}
                     >
                       {t("crop")}
                     </Button>
@@ -689,28 +551,13 @@ const AvatarEditModal = ({
                     </>
                   ) : (
                     <>
-                      {cropState.isCropping ? (
-                        <div className="aspect-square max-w-[720px] w-full h-[48vh] max-h-[300px] overflow-hidden relative">
-                          <Cropper
-                            image={previewImage || ""}
-                            crop={cropState.crop}
-                            zoom={cropState.zoom}
-                            aspect={1}
-                            onCropChange={(crop) =>
-                              setCropState((prev) => ({
-                                ...prev,
-                                crop,
-                              }))
-                            }
-                            onZoomChange={(zoom) =>
-                              setCropState((prev) => ({
-                                ...prev,
-                                zoom,
-                              }))
-                            }
-                            onCropComplete={onCropComplete}
-                          />
-                        </div>
+                      {isCropping ? (
+                        <ImageCropper
+                          imageSrc={previewImage}
+                          onCropComplete={handleCroppedImageComplete}
+                          onCancel={() => setIsCropping(false)}
+                          isProcessing={isProcessing}
+                        />
                       ) : (
                         <div className="aspect-square max-w-[720px] w-full overflow-hidden">
                           <img
@@ -743,38 +590,7 @@ const AvatarEditModal = ({
                     </>
                   ) : (
                     <>
-                      {cropState.isCropping ? (
-                        <>
-                          <Button
-                            variant="primary"
-                            onClick={() => {
-                              setCropState({
-                                crop: { x: 0, y: 0 },
-                                zoom: 1,
-                                croppedAreaPixels: null,
-                                croppedImage: null,
-                                isCropping: false,
-                              });
-                            }}
-                          >
-                            {t("cancel")}
-                          </Button>
-                          <Button
-                            variant="primary"
-                            onClick={handleCropImage}
-                            disabled={isProcessing}
-                          >
-                            {isProcessing ? (
-                              <CareIcon
-                                icon="l-spinner"
-                                className="animate-spin text-lg"
-                              />
-                            ) : (
-                              t("crop")
-                            )}
-                          </Button>
-                        </>
-                      ) : (
+                      {isCropping ? null : ( // Buttons now handled inside the ImageCropper component
                         <>
                           <Button
                             variant="primary"
@@ -786,15 +602,7 @@ const AvatarEditModal = ({
                           </Button>
                           <Button
                             variant="primary"
-                            onClick={() =>
-                              setCropState((prev) => ({
-                                ...prev,
-                                crop: { x: 0, y: 0 },
-                                zoom: 1,
-                                croppedAreaPixels: null,
-                                isCropping: true,
-                              }))
-                            }
+                            onClick={() => setIsCropping(true)}
                           >
                             {t("crop")}
                           </Button>
@@ -832,13 +640,7 @@ const AvatarEditModal = ({
                     onClick={() => {
                       setPreviewImage(null);
                       setIsCameraOpen(false);
-                      setCropState({
-                        crop: { x: 0, y: 0 },
-                        zoom: 1,
-                        croppedAreaPixels: null,
-                        croppedImage: null,
-                        isCropping: false,
-                      });
+                      setIsCropping(false);
                       if (webRef.current?.stream) {
                         const tracks = webRef.current.stream.getTracks();
                         tracks.forEach((track) => track.stop());

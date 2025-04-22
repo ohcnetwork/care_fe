@@ -8,13 +8,7 @@
 // Export the hook (recommended approach)
 export { default as useImageCapture } from "@/hooks/useImageCapture";
 
-// Re-export legacy utilities (deprecated, but maintained for backward compatibility)
-export {
-  canvasToFile,
-  // Legacy API (deprecated)
-  processWebcamImage,
-  captureWebcamImage,
-  processCroppedImage,
-} from "./imageCaptureUtils";
+// Re-export core utilities that may be needed directly
+export { canvasToFile, cropImage } from "./imageProcessingCore";
 
 // Note: imageProcessingCore.ts is an internal utility not meant to be directly imported
