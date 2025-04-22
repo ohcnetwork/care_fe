@@ -1609,9 +1609,9 @@ function QuestionEditor({
               <Card>
                 {question.type === "choice" && (
                   <>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardHeader className="flex sm:flex-row sm:items-center sm:justify-between sm:space-y-0 sm:pb-2 flex-col">
                       <div>
-                        <CardTitle className="text-base font-medium">
+                        <CardTitle className="text-base font-medium ">
                           {t("answer_options")}
                         </CardTitle>
                         <p className="text-sm text-gray-500">
@@ -1662,14 +1662,14 @@ function QuestionEditor({
                 )}
 
                 {question.type === "choice" && !question.answer_value_set ? (
-                  <CardContent className="space-y-4">
+                  <CardContent className="sm:space-y-4 space-y-8">
                     {answer_option &&
                       answer_option.map((opt, idx) => (
                         <div
                           key={idx}
-                          className="space-y-4 pb-4 border-b border-gray-200 last:border-0 last:pb-0"
+                          className="space-y-4 pb-4 border-b border-gray-300 last:border-0 last:pb-0"
                         >
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
                             <div>
                               <Label>{t("value")}</Label>
                               <Input
