@@ -76,10 +76,12 @@ export function LocationTable({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { mutate: removeLocation } = useMutation({
-    mutationFn: mutate(locationApi.delete, {
-      pathParams: { facility_id: facilityId, id: "" },
-    }),
+  const deleteLocation = useMutation({
+    mutationFn: (locationId: string) => {
+      return mutate(locationApi.delete, {
+        pathParams: { facility_id: facilityId, id: locationId },
+      })({});
+    },
     onSuccess: () => {
       // If this is the last item on the page and not the first page
       if (locations.length === 1 && currentPage > 1 && setPage) {
@@ -298,12 +300,7 @@ export function LocationTable({
                                 <AlertDialogAction
                                   data-cy="remove-location-button"
                                   onClick={() =>
-                                    removeLocation({
-                                      pathParams: {
-                                        facility_id: facilityId,
-                                        id: location.id,
-                                      },
-                                    })
+                                    deleteLocation.mutate(location.id)
                                   }
                                   className={buttonVariants({
                                     variant: "destructive",
