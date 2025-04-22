@@ -112,6 +112,7 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
+                        data-cy="diagnosis-see-note"
                         variant="outline"
                         size="sm"
                         className="h-7 text-xs shrink-0"
@@ -120,7 +121,10 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-4">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                      <p
+                        data-cy="diagnosis-note"
+                        className="text-sm text-gray-700 whitespace-pre-wrap"
+                      >
                         {diagnosis.note}
                       </p>
                     </PopoverContent>

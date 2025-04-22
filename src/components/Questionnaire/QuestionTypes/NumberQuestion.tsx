@@ -45,6 +45,7 @@ export function NumberQuestion({
 
   return (
     <Input
+      data-cy="number-question-input"
       type="number"
       value={questionnaireResponse.values[index]?.value?.toString() || ""}
       onChange={(e) => handleChange(e.target.value)}

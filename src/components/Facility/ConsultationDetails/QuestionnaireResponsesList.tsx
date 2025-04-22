@@ -492,6 +492,7 @@ function ResponseCard({
     </Card>
   ) : (
     <EncounterAccordionLayout
+      data-cy={`questionnaire-response-card-${item.id}`}
       title={isStructured && structuredType ? structuredType : title}
       actionButton={<PrintButton item={item} />}
     >

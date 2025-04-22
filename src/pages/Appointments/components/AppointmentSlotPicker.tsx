@@ -295,6 +295,7 @@ export const TokenSlotButton = ({
 
   return (
     <Button
+      data-cy="appointment-slot-button"
       key={slot.id}
       size="lg"
       variant={selectedSlotId === slot.id ? "primary" : "outline"}

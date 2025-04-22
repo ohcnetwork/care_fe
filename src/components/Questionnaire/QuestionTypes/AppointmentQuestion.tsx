@@ -131,6 +131,7 @@ export function AppointmentQuestion({
           {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <Textarea
+          data-cy="reason-for-visit"
           placeholder={t("reason_for_visit_placeholder")}
           value={value.reason_for_visit || ""}
           onChange={(e) =>
@@ -151,6 +152,7 @@ export function AppointmentQuestion({
           {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <div
+          data-cy="select-practitioner"
           className={cn(
             "rounded-md",
             !resource &&
@@ -187,7 +189,7 @@ export function AppointmentQuestion({
           )}
         >
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
+            <SheetTrigger data-cy="select-appointment-slot" asChild>
               {value.slot_id && selectedSlot ? (
                 <Button variant="outline" className="w-full justify-start">
                   <span className="font-normal">

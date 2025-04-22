@@ -283,6 +283,7 @@ export function QuestionInput({
             >
               <div
                 className={cn("space-y-1", { "flex-1": removeButton })}
+                data-cy={`question-input-${question.link_id}`}
                 data-question-id={question.id}
               >
                 {index === 0 && (

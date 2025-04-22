@@ -47,6 +47,7 @@ export function TextQuestion({
     <>
       {question.type === "text" ? (
         <Textarea
+          data-cy="text-area-question-input"
           value={questionnaireResponse.values[index]?.value?.toString() || ""}
           onChange={(e) => handleChange(e.target.value)}
           className="min-h-[100px]"
@@ -55,6 +56,7 @@ export function TextQuestion({
       ) : (
         <Input
           type="text"
+          data-cy="text-input-question-input"
           value={questionnaireResponse.values[index]?.value?.toString() || ""}
           onChange={(e) => handleChange(e.target.value)}
           disabled={disabled}

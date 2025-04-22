@@ -644,7 +644,7 @@ export function MedicationStatementQuestion({
       )}
 
       {desktopLayout ? (
-        <div className="max-w-4xl">
+        <div data-cy="add-medication-statement" className="max-w-4xl">
           <ValueSetSelect
             system="system-medication"
             placeholder={addMedicationPlaceholder}
@@ -796,7 +796,10 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           }
           disabled={disabled}
         >
-          <SelectTrigger className="h-9 text-sm capitalize">
+          <SelectTrigger
+            data-cy="medication-statement-status"
+            className="h-9 text-sm capitalize"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -816,6 +819,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           <span className="text-red-500 ml-0.5">*</span>
         </Label>
         <Input
+          data-cy="medication-statement-dosage-instructions"
           value={medication.dosage_text || ""}
           onChange={(e) => onUpdate?.({ dosage_text: e.target.value })}
           placeholder={t("enter_dosage_instructions")}
@@ -847,7 +851,10 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
               "border border-red-500 rounded-md p-2",
           )}
         >
-          <div className="w-full sm:w-1/2">
+          <div
+            data-cy="medication-statement-start-date"
+            className="w-full sm:w-1/2"
+          >
             <Label className="text-xs text-gray-500 mb-1 block lg:hidden">
               {t("start_date")}
             </Label>
@@ -869,7 +876,10 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
               disabled={disabled || isReadOnly}
             />
           </div>
-          <div className="w-full sm:w-1/2">
+          <div
+            data-cy="medication-statement-end-date"
+            className="w-full sm:w-1/2"
+          >
             <Label className="text-xs text-gray-500 mb-1 block lg:hidden">
               {t("end_date")}
             </Label>
@@ -917,6 +927,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("note")}</Label>
         <Input
+          data-cy="medication-statement-notes"
           value={medication.note || ""}
           onChange={(e) => onUpdate?.({ note: e.target.value })}
           placeholder={t("additional_notes")}

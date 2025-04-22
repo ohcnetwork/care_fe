@@ -263,7 +263,7 @@ function SymptomActionsMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger data-cy="symptom-actions-menu" asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -274,7 +274,7 @@ function SymptomActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onToggleNotes}>
+        <DropdownMenuItem data-cy="symptom-add-notes" onClick={onToggleNotes}>
           <Pencil2Icon className="size-4 mr-2" />
           {showNotes
             ? t("hide_notes")

@@ -88,6 +88,7 @@ export function CombinedDatePicker({
             </TabsList>
             <TabsContent value="absolute" className="p-0">
               <Calendar
+                data-cy="calendar-input"
                 mode="single"
                 selected={value}
                 onSelect={handleSelect}

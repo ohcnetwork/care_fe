@@ -720,7 +720,7 @@ const DiagnosisTableRow = ({
         </TableCell>
         <TableCell className="py-1 text-center">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger data-cy="diagnosis-actions-menu" asChild>
               <Button
                 variant="ghost"
                 size="icon"
@@ -731,7 +731,10 @@ const DiagnosisTableRow = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
+              <DropdownMenuItem
+                data-cy="diagnosis-add-notes"
+                onClick={() => setShowNotes(!showNotes)}
+              >
                 <Pencil2Icon className="size-4 mr-2" />
                 {showNotes
                   ? t("hide_notes")
