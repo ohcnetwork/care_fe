@@ -483,6 +483,7 @@ export function MedicationRequestQuestion({
                                           disabled={isInactive || disabled}
                                           className="size-10 p-4 border border-gray-400 bg-white shadow text-destructive"
                                           data-cy="remove-medication"
+                                          aria-label="Remove medication"
                                         >
                                           <MinusCircledIcon className="size-5" />
                                         </Button>
@@ -491,6 +492,11 @@ export function MedicationRequestQuestion({
                                         variant="ghost"
                                         size="icon"
                                         className="size-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
+                                        aria-label={
+                                          expandedMedicationIndex === index
+                                            ? "Collapse medication"
+                                            : "Expand medication"
+                                        }
                                       >
                                         {expandedMedicationIndex === index ? (
                                           <ChevronsDownUp className="size-5" />
@@ -1171,6 +1177,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onClick={onRemove}
           disabled={disabled}
           className="size-8"
+          aria-label="Remove medication"
         >
           <MinusCircledIcon className="size-4" />
         </Button>
