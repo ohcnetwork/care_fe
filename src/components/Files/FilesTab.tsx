@@ -57,7 +57,7 @@ export const FilesTab = (props: FilesTabsProps) => {
           })
         }
       >
-        <TabsList className="bg-gray-200 py-0 w-fit mt-2 ml-2">
+        <TabsList className="bg-gray-200 w-fit mt-2 ml-2 p-0">
           <TabsTrigger
             value="all"
             className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
