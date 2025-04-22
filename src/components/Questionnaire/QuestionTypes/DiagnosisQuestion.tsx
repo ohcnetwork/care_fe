@@ -115,7 +115,7 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     category: diagnosis.category,
     note: diagnosis.note,
     encounter: diagnosis.encounter,
-    dirty: false,
+    dirty: true,
   };
 }
 
@@ -176,7 +176,6 @@ export function DiagnosisQuestion({
         encounter: encounterId,
         limit: 100,
         category: "encounter_diagnosis",
-        exclude_verification_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
@@ -190,7 +189,6 @@ export function DiagnosisQuestion({
         category: "chronic_condition",
         limit: 100,
         clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
-        exclude_verification_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
