@@ -1,5 +1,8 @@
 import { Link, navigate, usePathParams } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -22,6 +25,7 @@ interface QuickAccessProps {
 
 export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
   const { t } = useTranslation();
+  const [isExpanded, setIsExpanded] = useState(false);
   const questionnaireOptions = useQuestionnaireOptions(
     "encounter_actions",
     canEdit,
@@ -124,57 +128,117 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
         </div>
       </section>
 
-      {encounter.hospitalization?.admit_source && (
-        <>
-          <div className="w-full border-t border-dashed border-gray-300" />
+      {/* Discharge Information - Show when status is discharged */}
+      {encounter.status === "discharged" &&
+        encounter.discharge_summary_advice && (
+          <>
+            <div className="w-full border-t border-dashed border-gray-300" />
+            <section>
+              <h3 className="text-lg font-medium mb-2">
+                {t("discharge_details")}
+              </h3>
+              <div className="space-y-2 text-sm mt-4 bg-gray-50 p-2 rounded-md">
+                {encounter.discharge_summary_advice && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-gray-500">
+                      {t("discharge_summary_advice")}
+                    </span>
+                    <div className="font-sm text-gray-950">
+                      <p
+                        className={cn(
+                          "whitespace-pre-wrap",
+                          !isExpanded && "line-clamp-2",
+                        )}
+                      >
+                        {encounter.discharge_summary_advice}
+                      </p>
+                      {encounter.discharge_summary_advice.length > 100 && (
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto font-sm text-gray-500 hover:text-gray-800"
+                          onClick={() => setIsExpanded(!isExpanded)}
+                        >
+                          {isExpanded ? t("see_less") : t("see_more")}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+          </>
+        )}
 
-          {/* Hospitalisation Details */}
-          <section>
-            <h3 className="text-lg font-medium mb-3">
-              {t("hospitalisation_details")}
-            </h3>
-            <div className="space-y-2 text-sm mt-4 bg-gray-50 p-2 rounded-md">
-              <div className="flex justify-between">
-                <span className="text-gray-500">{t("admit_source")}</span>
-                <span className="font-semibold text-gray-950">
-                  {t(
-                    `encounter_admit_sources__${encounter.hospitalization?.admit_source}`,
+      {/* Hospitalisation Details */}
+      {encounter.hospitalization &&
+        Object.keys(encounter.hospitalization).length > 0 && (
+          <>
+            <div className="w-full border-t border-dashed border-gray-300" />
+
+            {/* Hospitalisation Details */}
+            <section>
+              <h3 className="text-lg font-medium mb-2">
+                {t("hospitalisation_details")}
+              </h3>
+              <div className="space-y-2 text-sm mt-4 bg-gray-50 p-2 rounded-md">
+                {encounter.hospitalization.admit_source && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">{t("admit_source")}</span>
+                    <span className="font-semibold text-gray-950">
+                      {t(
+                        `encounter_admit_sources__${encounter.hospitalization.admit_source}`,
+                      )}
+                    </span>
+                  </div>
+                )}
+                {encounter.hospitalization.diet_preference && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">
+                      {t("diet_preference")}
+                    </span>
+                    <span className="font-semibold text-gray-950">
+                      {t(
+                        `encounter_diet_preference__${encounter.hospitalization.diet_preference}`,
+                      )}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{t("re_admission")}</span>
+                  <span className="font-semibold text-gray-950">
+                    {t(
+                      `encounter_re_admission__${encounter.hospitalization.re_admission ?? false}`,
+                    )}
+                  </span>
+                </div>
+                {encounter.status === "discharged" &&
+                  encounter.hospitalization.discharge_disposition && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">
+                        {t("discharge_disposition")}
+                      </span>
+                      <span className="font-semibold text-gray-950">
+                        {t(
+                          `encounter_discharge_disposition__${encounter.hospitalization.discharge_disposition}`,
+                        )}
+                      </span>
+                    </div>
                   )}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">{t("diet_preference")}</span>
-                <span className="font-semibold text-gray-950">
-                  {encounter.hospitalization?.diet_preference
-                    ? t(
-                        `encounter_diet_preference__${encounter.hospitalization?.diet_preference}`,
-                      )
-                    : "--"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">{t("re_admission")}</span>
-                <span className="font-semibold text-gray-950">
-                  {t(
-                    `encounter_re_admission__${encounter.hospitalization?.re_admission}`,
-                  )}
-                </span>
-              </div>
-              <Button
-                asChild
-                variant="outline"
-                className="font-semibold rounded-md border-gray-400 text-gray-950"
-              >
-                <Link
-                  href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
+                <Button
+                  asChild
+                  variant="outline"
+                  className="font-semibold rounded-md border-gray-400 text-gray-950"
                 >
-                  {t("update_hospitalisation_details")}
-                </Link>
-              </Button>
-            </div>
-          </section>
-        </>
-      )}
+                  <Link
+                    href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
+                  >
+                    {t("update_hospitalisation_details")}
+                  </Link>
+                </Button>
+              </div>
+            </section>
+          </>
+        )}
     </div>
   );
 }
