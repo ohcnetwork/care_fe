@@ -5,6 +5,14 @@ on:
     branches:
       - develop
       - staging
+    paths:
+      - 'src/**'
+      - 'cypress/**'
+      - 'package.json'
+      - 'package-lock.json'  
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
