@@ -15,21 +15,20 @@ import { Quantity } from "./quantity";
 /**
  * A short hand for defining response value types
  */
-type RVBase<T extends string, V> = {
+type RVBase<T extends string> = {
   coding?: Code;
   unit?: Code;
   type: T;
-  value?: V;
 };
-type RVValue<T extends string, V> = RVBase<T, V> & {
+type RVValue<T extends string, V> = RVBase<T> & {
   value: V;
 };
 
-type RVCode<T extends string> = RVBase<T, Code> & {
+type RVCode<T extends string> = RVBase<T> & {
   value: Code;
 };
 
-type RVQuantity<T extends string> = RVBase<T, Quantity> & {
+type RVQuantity<T extends string> = RVBase<T> & {
   value: Quantity;
 };
 
