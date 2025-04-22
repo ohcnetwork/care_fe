@@ -10,9 +10,6 @@ on:
       - 'cypress/**'
       - 'package.json'
       - 'package-lock.json'  
-    paths-ignore:
-      - 'README.md'
-      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
