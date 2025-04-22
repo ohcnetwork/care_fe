@@ -64,7 +64,7 @@ export default function useImageCapture() {
    * @param webRef - Reference to the webcam component
    * @returns Promise that resolves to the processed image data
    */
-  const captureWebcamImage = async (webRef: React.RefObject<Webcam>) => {
+  const captureWebcamImage = async (webRef: React.RefObject<Webcam | null>) => {
     if (!webRef.current) {
       return {
         screenshot: null,
