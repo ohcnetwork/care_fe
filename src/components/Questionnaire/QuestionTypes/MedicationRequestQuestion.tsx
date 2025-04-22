@@ -1,6 +1,7 @@
 import { MinusCircledIcon, Pencil2Icon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
+import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Collapsible,
@@ -516,6 +518,30 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   const isReadOnly = !!medication.id;
   const { hasError } = useFieldError(questionId, errors, index);
 
+  const [currentInstructions, setCurrentInstructions] = useState<Code[]>(
+    dosageInstruction?.additional_instruction || [],
+  );
+
+  const updateInstructions = (instructions: Code[]) => {
+    setCurrentInstructions(instructions);
+    handleUpdateDosageInstruction({
+      additional_instruction:
+        instructions.length > 0 ? instructions : undefined,
+    });
+  };
+
+  const addInstruction = (instruction: Code) => {
+    if (!currentInstructions.some((item) => item.code === instruction.code)) {
+      updateInstructions([...currentInstructions, instruction]);
+    }
+  };
+
+  const removeInstruction = (instructionCode: string) => {
+    updateInstructions(
+      currentInstructions.filter((item) => item.code !== instructionCode),
+    );
+  };
+
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
   ) => {
@@ -933,19 +959,53 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             disabled={disabled || isReadOnly}
           />
         ) : (
-          <ValueSetSelect
-            system="system-additional-instruction"
-            value={dosageInstruction?.additional_instruction?.[0]}
-            onSelect={(instruction) =>
-              handleUpdateDosageInstruction({
-                additional_instruction: instruction ? [instruction] : undefined,
-              })
-            }
-            placeholder={t("select_additional_instructions")}
-            disabled={disabled || isReadOnly}
-            data-cy="medication-instructions"
-            wrapTextForSmallScreen
-          />
+          <div className="space-y-4">
+            {currentInstructions.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {currentInstructions.map((instruction) => (
+                  <Badge
+                    key={instruction.code}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {instruction.display}
+                    {!isReadOnly && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-4 w-4 p-0 rounded-full"
+                        onClick={() => removeInstruction(instruction.code)}
+                        disabled={disabled}
+                      >
+                        <X className="h-3 w-3" />
+                        <span className="sr-only">{t("remove")}</span>
+                      </Button>
+                    )}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {!isReadOnly && (
+              <ValueSetSelect
+                system="system-additional-instruction"
+                value={null}
+                onSelect={(instruction) => {
+                  if (instruction) {
+                    addInstruction(instruction as Code);
+                  }
+                }}
+                placeholder={
+                  currentInstructions.length > 0
+                    ? t("add_more_instructions")
+                    : t("select_additional_instructions")
+                }
+                disabled={disabled || isReadOnly}
+                data-cy="medication-instructions"
+                wrapTextForSmallScreen
+              />
+            )}
+          </div>
         )}
       </div>
       {/* Route */}
