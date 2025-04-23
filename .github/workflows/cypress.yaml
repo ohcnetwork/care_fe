@@ -23,9 +23,6 @@ jobs:
           runTests: false
           build: npm run build
 
-      - name: Build application
-        run: npm run build
-
       - name: Save build folder
         uses: actions/upload-artifact@v4
         with:
@@ -33,7 +30,7 @@ jobs:
           if-no-files-found: error
           path: build
 
-  ui-chrome-tests:
+  parallel-job:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
