@@ -1090,11 +1090,11 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-4 w-4 p-0 rounded-full"
+                        className="size-4 p-0 rounded-full"
                         onClick={() => removeInstruction(instruction.code)}
                         disabled={disabled}
                       >
-                        <X className="h-3 w-3" />
+                        <X className="size-3" />
                         <span className="sr-only">{t("remove")}</span>
                       </Button>
                     )}
