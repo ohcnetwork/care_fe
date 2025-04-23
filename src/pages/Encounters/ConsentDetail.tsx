@@ -303,18 +303,19 @@ export function ConsentDetailPage() {
                   <h3 className="text-lg font-semibold">
                     {t("supporting_documents")}
                   </h3>
-                  <div className="flex gap-3">
+                  <div className="flex rounded-md border border-gray-200">
                     <Label
                       htmlFor="file_upload_consent"
-                      className="cursor-pointer flex items-center px-4 py-2 border border-gray-200 rounded-md hover:bg-gray-50"
+                      className="cursor-pointer flex items-center px-4 py-2 rounded-l-md hover:bg-gray-50 transition-colors"
                     >
                       <PlusCircle className="size-4 mr-2" />
                       {t("select")} {t("files")}
                       {fileUpload.Input({ className: "hidden" })}
                     </Label>
+                    <div className="border-l border-gray-200" />
                     <Button
-                      variant="outline"
-                      className="gap-2"
+                      variant="ghost"
+                      className="gap-2 rounded-r-md rounded-l-none px-4 py-2 text-primary hover:bg-gray-50 transition-colors"
                       onClick={() => setOpenUploadDialog(true)}
                       disabled={fileUpload.files.length === 0}
                     >
