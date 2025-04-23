@@ -17,6 +17,10 @@ jobs:
       - name: Checkout 📥
         uses: actions/checkout@v4
 
+      - name: Determine PR Origin
+        id: pr_origin
+        run: echo "is_forked=$(echo ${{ github.event.pull_request.head.repo.fork }})" >> $GITHUB_OUTPUT
+
       - name: Cypress install
         uses: cypress-io/github-action@v6
         with:
@@ -51,11 +55,9 @@ jobs:
           name: build
           path: build
 
-      - name: Determine PR Origin
-        id: pr_origin
-        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
-
-      - name: "UI Tests - Chrome"
+      # For non-forked PRs
+      - name: "UI Tests - Chrome (Non-forked)"
+        if: needs.install.outputs.is_forked == 'false'
         uses: cypress-io/github-action@v6
         with:
           start: "npx vite preview --host"
@@ -74,6 +76,28 @@ jobs:
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
 
+      # For forked PRs
+      - name: "UI Tests - Chrome (Forked)"
+        if: needs.install.outputs.is_forked == 'true'
+        uses: cypress-io/github-action@v6
+        with:
+          start: "npx vite preview --host"
+          wait-on: "http://localhost:4000"
+          wait-on-timeout: 300
+          browser: chrome
+          record: false
+          parallel: true
+          group: "UI - Chrome"
+          config-file: cypress.config.ts
+        env:
+          CYPRESS_SPLIT_TESTS: "true"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max_old_space_size=4096
+          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
+          COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
+          SPLIT: ${{ strategy.job-total }}
+          SPLIT_INDEX: ${{ strategy.job-index }}
+
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
         if: failure()
@@ -83,7 +107,7 @@ jobs:
 
       - name: Upload cypress videos 📹
         uses: actions/upload-artifact@v4
-        if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
+        if: ${{ failure() && needs.install.outputs.is_forked == 'true' }}
         with:
           name: cypress-videos
           path: cypress/videos
