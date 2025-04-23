@@ -1,4 +1,4 @@
-name: Cypress Tests with Dependency and Artifact Caching
+name: Cypress Tests
 
 on:
   pull_request:
@@ -10,21 +10,18 @@ on:
 jobs:
   install:
     runs-on: ubuntu-latest
+    container:
+      image: cypress/browsers:node-22.13.0-chrome-132.0.6834.83-1-ff-134.0.1-edge-131.0.2903.147-1
+      options: --user 1001
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Cypress install
+        uses: cypress-io/github-action@v6
         with:
-          node-version: "22.14.0"
-          cache: "npm"
-
-      - name: Install dependencies 📦
-        run: npm ci
-
-      - name: Build ⚙️
-        run: npm run build
+          runTests: false
+          build: npm run build
 
       - name: Save build folder
         uses: actions/upload-artifact@v4
@@ -33,23 +30,22 @@ jobs:
           if-no-files-found: error
           path: build
 
-  cypress-run:
-    permissions: write-all
-    if: github.repository == 'ohcnetwork/care_fe'
+  ui-chrome-tests:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
+    container:
+      image: cypress/browsers:node-22.13.0-chrome-132.0.6834.83-1-ff-134.0.1-edge-131.0.2903.147-1
+      options: --user 1001
     needs: install
     strategy:
       fail-fast: false
       matrix:
         containers: [1, 2, 3]
-    env:
-      REACT_CARE_API_URL: https://careapi.ohc.network
-
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
 
-      - name: Download the build folder
+      - name: Download the build folders
         uses: actions/download-artifact@v4
         with:
           name: build
@@ -59,45 +55,25 @@ jobs:
         id: pr_origin
         run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
 
-      - name: Cypress run for Non-Forked PRs 🥬
-        if: steps.pr_origin.outputs.is_forked == 'false'
+      - name: "UI Tests - Chrome"
         uses: cypress-io/github-action@v6
         with:
-          env: SKIP_PREFLIGHT_CHECK=true
-          install: false
           start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
+          browser: chrome
           record: true
           parallel: true
-          browser: chrome
+          group: "UI - Chrome"
+          spec: cypress/tests/ui/*
+          config-file: cypress.config.ts
         env:
+          CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
-
-      - name: Cypress run for Forked PRs 🥬
-        if: steps.pr_origin.outputs.is_forked == 'true'
-        uses: cypress-io/github-action@v6
-        with:
-          env: SKIP_PREFLIGHT_CHECK=true
-          install: false
-          start: "npx vite preview --host"
-          wait-on: "http://localhost:4000"
-          wait-on-timeout: 300
-          record: true
-          parallel: true
-          browser: chrome
-        env:
-          CYPRESS_SPLIT_TESTS: "true"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_OPTIONS: --max_old_space_size=4096
-          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
-          COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
-          SPLIT: ${{ strategy.job-total }}
-          SPLIT_INDEX: ${{ strategy.job-index }}
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
