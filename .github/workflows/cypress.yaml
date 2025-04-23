@@ -38,12 +38,11 @@ jobs:
       - name: Build ⚙️
         run: npm run build
 
-      - name: Install Firefox ESR
+      - name: Install Chrome
         run: |
-          sudo apt-get update
-          sudo apt-get install -y firefox-esr
-          sudo ln -sf /usr/bin/firefox-esr /usr/bin/firefox
-          echo "FIREFOX_BIN=/usr/bin/firefox-esr" >> $GITHUB_ENV
+          sudo apt-get install -y wget
+          sudo wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_arm64.deb
+          sudo apt-get install ./google-chrome-stable_current_arm64.deb
 
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
@@ -56,14 +55,13 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: firefox
+          browser: chrome
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
-          FIREFOX_BIN: /usr/bin/firefox-esr
 
       - name: Cypress run for Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'true'
@@ -76,7 +74,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: firefox
+          browser: chrome
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -85,7 +83,6 @@ jobs:
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
-          FIREFOX_BIN: /usr/bin/firefox-esr
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
