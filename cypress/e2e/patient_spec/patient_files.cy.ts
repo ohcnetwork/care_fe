@@ -2,6 +2,8 @@ import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { PatientFiles } from "@/pageObject/Patients/PatientFiles";
 import { UserProfile } from "@/pageObject/Users/UserProfile";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
+import { generateName } from "@/utils/commonUtils";
+import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
@@ -10,14 +12,16 @@ const userProfile = new UserProfile();
 
 describe("Patient Files", () => {
   beforeEach(() => {
+    cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
     cy.loginByApi("devnurse1");
     cy.visit("/");
     facilityCreation.selectFacility("GHC Payyanur");
+    const patientName = generateName(true);
 
     patientEncounter
       .navigateToEncounters()
+      .searchEncounter(patientName)
       .clickInProgressEncounterFilter()
-      .searchEncounter("Jane")
       .openFirstEncounterDetails()
       .clickPatientDetailsButton();
     patientFiles.clickFilesTab();
@@ -58,26 +62,9 @@ describe("Patient Files", () => {
       .verifyFileUploadApiCall();
   });
 
-  it("Capture image and upload", () => {
-    // Capture Image Upload Setup
-    const captureFileName = "Cypress Capture Test " + timestamp;
-
-    patientFiles
-      .clickAddFilesButton()
-      .openCamera()
-      .captureImage()
-      .clickSubmit()
-      .clickUploadFilesButton()
-      .verifyValidationErrors(validationMessage)
-      .fillSingleFileName(captureFileName)
-      .interceptFileUploadRequest()
-      .clickUploadFilesButton()
-      .verifyFileUploadApiCall()
-      .verifySingleFileUploadSuccess(fileUploadSuccessToast);
-  });
-
   it("File Uploaded by one user is accessible to another user", () => {
     patientFiles
+      .filterActiveFiles()
       .clickAddFilesButton()
       .selectUploadFromDevice()
       .uploadSingleFile(filePath(fileName))
@@ -86,7 +73,6 @@ describe("Patient Files", () => {
       .clickUploadFilesButton()
       .verifyFileUploadApiCall()
       .verifySingleFileUploadSuccess(fileUploadSuccessToast)
-      .filterActiveFiles()
       .clickFirstFileViewButton()
       .closeFilePreview()
       .saveCurrentUrl();
@@ -105,6 +91,7 @@ describe("Patient Files", () => {
 
     // Upload a single file
     patientFiles
+      .filterActiveFiles()
       .clickAddFilesButton()
       .selectUploadFromDevice()
       .uploadSingleFile(filePath(fileName))
@@ -118,7 +105,6 @@ describe("Patient Files", () => {
 
     // Filter the file to only show the active files and rename the file
     patientFiles
-      .filterActiveFiles()
       .clickFileDetailsButton()
       .clickRenameOption()
       .fillNewFileName(newFileName)

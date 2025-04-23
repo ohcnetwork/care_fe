@@ -8,17 +8,40 @@ on:
   workflow_dispatch:
 
 jobs:
-  cypress-run:
-    permissions: write-all
+  install:
     if: github.repository == 'ohcnetwork/care_fe'
-    runs-on: ubuntu-24.04-arm
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 📥
+        uses: actions/checkout@v4
+
+      - name: Cypress install
+        uses: cypress-io/github-action@v6
+        with:
+          runTests: false
+          build: npm run build
+
+      - name: Save build folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          if-no-files-found: error
+          path: build
+          retention-days: 1
+
+  parallel-job:
+    if: github.repository == 'ohcnetwork/care_fe'
+    permissions: write-all
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    needs: install
+    env:
+      REACT_CARE_API_URL: https://careapi.ohc.network
     strategy:
       fail-fast: false
       matrix:
         containers: [1, 2, 3]
-    env:
-      REACT_CARE_API_URL: https://careapi.ohc.network
-
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
@@ -27,46 +50,46 @@ jobs:
         id: pr_origin
         run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Download the build folders
+        uses: actions/download-artifact@v4
         with:
-          node-version: "22.14.0"
+          name: build
+          path: build
 
-      - name: Install dependencies 📦
-        run: npm ci
-
-      - name: Build ⚙️
-        run: npm run build
-
-      - name: Cypress run for Non-Forked PRs 🥬
+      # For non-forked PRs
+      - name: "UI Tests - Chrome (Non-forked)"
         if: steps.pr_origin.outputs.is_forked == 'false'
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
-          env: SKIP_PREFLIGHT_CHECK=true
-          install: false
           start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
+          browser: chrome
           record: true
           parallel: true
+          group: "UI - Chrome"
+          config-file: cypress.config.ts
         env:
+          CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
 
-      - name: Cypress run for Forked PRs 🥬
+      # For forked PRs
+      - name: "UI Tests - Chrome (Forked)"
         if: steps.pr_origin.outputs.is_forked == 'true'
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
-          env: SKIP_PREFLIGHT_CHECK=true
-          install: false
           start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
-          record: true
+          browser: chrome
+          record: false
           parallel: true
+          group: "UI - Chrome"
+          config-file: cypress.config.ts
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -89,3 +112,13 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
+
+  cleanup:
+    if: always() && github.repository == 'ohcnetwork/care_fe'
+    needs: parallel-job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete build artifact
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build
