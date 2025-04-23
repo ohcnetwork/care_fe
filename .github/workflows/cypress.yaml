@@ -9,6 +9,9 @@ on:
 
 jobs:
   install:
+    if: github.repository == 'ohcnetwork/care_fe'
+    permissions:
+      write-all: true
     runs-on: ubuntu-latest
     container:
       image: cypress/browsers:node-22.13.0-chrome-132.0.6834.83-1-ff-134.0.1-edge-131.0.2903.147-1
@@ -31,6 +34,9 @@ jobs:
           path: build
 
   parallel-job:
+    if: github.repository == 'ohcnetwork/care_fe'
+    permissions:
+      write-all: true
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
