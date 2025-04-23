@@ -83,6 +83,7 @@
     "browser-image-compression": "^2.0.2",
     "browserslist": "^4.24.4",
     "browserslist-useragent-regexp": "^4.1.3",
+    "care_fe": "file:",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

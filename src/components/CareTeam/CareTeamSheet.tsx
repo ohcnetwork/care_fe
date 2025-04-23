@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -36,9 +36,12 @@ import UserSelector from "@/components/Common/UserSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import Autocomplete from "@/src/components/ui/autocomplete";
 import careTeamApi from "@/types/careTeam/careTeamApi";
 import { Encounter } from "@/types/emr/encounter";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { Code } from "@/types/questionnaire/code";
 import { UserBase } from "@/types/user/user";
 
@@ -66,6 +69,7 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const [selectedUser, setSelectedUser] = useState<UserBase | undefined>();
+  const [selectedOrganization, setSelectedOrganization] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<Code | null>(null);
   const [memberToRemove, setMemberToRemove] = useState<UserBase | undefined>();
 
@@ -77,6 +81,14 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
       setMemberToRemove(undefined);
     }
   }, [open]);
+
+  const { data } = useQuery({
+    queryKey: ["organizations", encounter.facility.id],
+    queryFn: query.debounced(facilityOrganizationApi.list, {
+      pathParams: { facilityId: encounter.facility.id },
+    }),
+  });
+  const organizations = data?.results || [];
 
   const { mutate: saveCareTeam, isPending } = useMutation({
     mutationFn: mutate(careTeamApi.setCareTeam, {
@@ -197,15 +209,31 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
 
         <ScrollArea className="h-full my-6 pb-12 pr-6">
           <div className="space-y-6">
-            <div className="flex flex-col md:flex-row gap-2">
-              <div className="flex flex-col">
-                <UserSelector
-                  selected={selectedUser}
-                  onChange={setSelectedUser}
-                  placeholder={t("select_member")}
-                  facilityId={encounter.facility.id}
+            <div className="flex flex-col gap-2">
+              <div>
+                <Autocomplete
+                  options={organizations.map((org) => {
+                    return {
+                      label: org.name,
+                      value: org.id,
+                    };
+                  })}
+                  value={selectedOrganization}
+                  onChange={(value: string) => setSelectedOrganization(value)}
+                  placeholder={t("select_organization_placeholder")}
                 />
               </div>
+              {selectedOrganization && (
+                <div className="flex flex-col">
+                  <UserSelector
+                    selected={selectedUser}
+                    onChange={setSelectedUser}
+                    placeholder={t("select_member")}
+                    facilityId={encounter.facility.id}
+                    organizationId={selectedOrganization}
+                  />
+                </div>
+              )}
               <ValueSetSelect
                 system="system-practitioner-role-code"
                 value={selectedRole}

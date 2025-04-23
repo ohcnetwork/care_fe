@@ -24,7 +24,10 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
+import { OrganizationUserRole } from "@/types/organization/organization";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
@@ -35,6 +38,7 @@ interface Props {
   noOptionsMessage?: string;
   popoverClassName?: string;
   facilityId?: string;
+  organizationId?: string;
 }
 
 export default function UserSelector({
@@ -44,25 +48,34 @@ export default function UserSelector({
   noOptionsMessage,
   popoverClassName,
   facilityId,
+  organizationId,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { data, isFetching } = useQuery({
-    queryKey: ["users", search, facilityId],
+  const { data: usersList, isFetching } = useQuery({
+    queryKey: ["users", search, facilityId, organizationId],
     queryFn: query.debounced(
-      facilityId ? routes.facility.getUsers : UserApi.list,
+      facilityId
+        ? organizationId
+          ? facilityOrganizationApi.listUsers
+          : routes.facility.getUsers
+        : UserApi.list,
       {
-        pathParams: facilityId ? { facility_id: facilityId } : undefined,
+        pathParams: facilityId
+          ? organizationId
+            ? { facilityId, organizationId }
+            : { facility_id: facilityId }
+          : undefined,
         queryParams: {
           search_text: search,
         },
       },
     ),
+    select: (data: PaginatedResponse<UserBase | OrganizationUserRole>) =>
+      data?.results.map((res: any) => res.user) || data?.results || [],
   });
-
-  const usersList = data?.results || [];
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -109,7 +122,7 @@ export default function UserSelector({
                 : noOptionsMessage || t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {usersList.map((user: UserBase) => (
+              {(usersList || []).map((user: UserBase) => (
                 <CommandItem
                   key={user.id}
                   value={user.id}
