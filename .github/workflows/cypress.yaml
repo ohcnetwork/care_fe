@@ -90,7 +90,6 @@ jobs:
           browser: chrome
           record: false
           parallel: false
-          group: "UI - Chrome"
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,8 +99,6 @@ jobs:
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
           DEBUG: "cypress-split,find-cypress-specs"
-          CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
