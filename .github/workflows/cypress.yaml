@@ -31,6 +31,7 @@ jobs:
           name: build
           if-no-files-found: error
           path: build
+          retention-days: 1
 
   parallel-job:
     if: github.repository == 'ohcnetwork/care_fe'
@@ -117,8 +118,3 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-
-      - name: Delete build artifact
-        uses: actions/delete-artifact@v3
-        with:
-          name: build
