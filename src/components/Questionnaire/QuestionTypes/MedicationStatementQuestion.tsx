@@ -2,7 +2,7 @@ import { MinusCircledIcon, Pencil2Icon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -231,10 +231,13 @@ export function MedicationStatementQuestion({
           <AlertDialogHeader>
             <AlertDialogTitle>{t("remove_medication")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("remove_medication_confirmation", {
-                medication:
-                  medications[medicationToDelete!]?.medication?.display,
-              })}
+              <Trans
+                i18nKey={"remove_medication_confirmation"}
+                values={{
+                  medication:
+                    medications[medicationToDelete!]?.medication?.display,
+                }}
+              />
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

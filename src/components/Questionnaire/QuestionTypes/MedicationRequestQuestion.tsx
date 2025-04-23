@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -342,10 +342,13 @@ export function MedicationRequestQuestion({
           <AlertDialogHeader>
             <AlertDialogTitle>{t("remove_medication")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("remove_medication_confirmation", {
-                medication:
-                  medications[medicationToDelete!]?.medication?.display,
-              })}
+              <Trans
+                i18nKey={"remove_medication_confirmation"}
+                values={{
+                  medication:
+                    medications[medicationToDelete!]?.medication?.display,
+                }}
+              />
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
