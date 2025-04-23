@@ -68,7 +68,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
     limit: 15,
     cacheBlacklist: ["title"],
   });
-  const { status, title, flow } = qParams;
+  const { status, title, outgoing } = qParams;
 
   const isActive = !status || !COMPLETED.includes(status);
   const currentStatuses = isActive ? ACTIVE : COMPLETED;
@@ -76,7 +76,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   // Set default status based on active/completed tab
   const defaultStatus = isActive ? "pending" : "completed";
   const currentStatus = status || defaultStatus;
-  const currentFlow = flow || "outgoing";
 
   const { data: queryResources, isLoading } = useQuery<
     PaginatedResponse<ResourceRequest>
@@ -84,11 +83,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
     queryKey: ["resources", facilityId, qParams],
     queryFn: query.debounced(routes.listResourceRequests, {
       queryParams: {
-        status: currentStatus == "all" ? undefined : currentStatus,
+        status: currentStatus,
         title,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
-        ...(currentFlow == "outgoing"
+        ...(outgoing
           ? { origin_facility: facilityId }
           : { assigned_facility: facilityId }),
       },
@@ -170,14 +169,18 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   </PopoverContent>
                 </Popover>
                 <div className="items-center">
-                  <Tabs value={currentFlow} className="w-full">
+                  <Tabs
+                    value={outgoing ? "outgoing" : "incoming"}
+                    className="w-full"
+                  >
                     <TabsList className="bg-transparent p-0 h-8">
                       <TabsTrigger
                         value="outgoing"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                         onClick={() =>
                           updateQuery({
-                            flow: "outgoing",
+                            outgoing: true,
+                            title,
                           })
                         }
                         data-cy="tab-outgoing"
@@ -189,7 +192,8 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                         onClick={() =>
                           updateQuery({
-                            flow: "incoming",
+                            outgoing: false,
+                            title,
                           })
                         }
                         data-cy="tab-incoming"
@@ -213,6 +217,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       onClick={() =>
                         updateQuery({
                           status: "pending",
+                          title,
                         })
                       }
                     >
@@ -224,6 +229,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       onClick={() =>
                         updateQuery({
                           status: "completed",
+                          title,
                         })
                       }
                     >
@@ -239,14 +245,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
             <div className="p-4 h-auto overflow-hidden">
               <Tabs value={currentStatus} className="w-full">
                 <TabsList className="bg-transparent p-0 h-auto flex-wrap justify-start gap-y-2 overflow-auto">
-                  <TabsTrigger
-                    key="all"
-                    value="all"
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    onClick={() => updateQuery({ status: "all" })}
-                  >
-                    {t("all_status")}
-                  </TabsTrigger>
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger
                       key={statusOption}
@@ -256,6 +254,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       onClick={() =>
                         updateQuery({
                           status: statusOption,
+                          title,
                         })
                       }
                     >
