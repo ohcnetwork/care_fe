@@ -1,13 +1,10 @@
 export class PatientDepartments {
   navigateToSettings() {
-    cy.verifyAndClickElement('[data-sidebar="content"]', "Settings");
+    cy.verifyAndClickElement('[data-cy="nav-settings"]', "Settings");
     return this;
   }
   navigateToDevicesTab() {
-    cy.verifyAndClickElement(
-      '[data-cy="settings-departments-tab"]',
-      "Departments",
-    );
+    cy.verifyAndClickElement('[data-cy="nav-departments"]', "Departments");
     return this;
   }
 
