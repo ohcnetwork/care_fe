@@ -9,7 +9,10 @@ on:
       - 'src/**'
       - 'cypress/**'
       - 'package.json'
-      - 'package-lock.json'  
+      - 'package-lock.json'
+      - 'plugins/**'  
+      - 'public/**'
+      - '.github/workflows/cypress.yaml'
   workflow_dispatch:
 
 jobs:
