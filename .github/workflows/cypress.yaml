@@ -17,6 +17,12 @@ jobs:
       - name: Checkout 📥
         uses: actions/checkout@v4
 
+      - name: Cypress install
+        uses: cypress-io/github-action@v6
+        with:
+          runTests: false
+          build: npm run build
+
       - name: Build application
         run: npm run build
 
