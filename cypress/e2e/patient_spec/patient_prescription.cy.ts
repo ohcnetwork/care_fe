@@ -26,7 +26,7 @@ describe("Patient Prescription Management", () => {
       notes: "testing notes",
     };
     facilityCreation.selectFacility("GHC Payyanur");
-    const patientName = generateName();
+    const patientName = generateName(true);
     patientEncounter
       .navigateToEncounters()
       .searchEncounter(patientName)
@@ -40,6 +40,7 @@ describe("Patient Prescription Management", () => {
       .clickMedicinesTab()
       .verifyMedication(medicationDetails)
       .clickEditPrescription()
+      .verifyMedicineName(medicationDetails.medicineName)
       .removeMedication()
       .submitQuestionnaire()
       .clickMedicinesTab()

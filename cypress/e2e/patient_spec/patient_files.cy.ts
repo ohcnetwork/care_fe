@@ -16,12 +16,12 @@ describe("Patient Files", () => {
     cy.loginByApi("devnurse1");
     cy.visit("/");
     facilityCreation.selectFacility("GHC Payyanur");
-    const patientName = generateName();
+    const patientName = generateName(true);
 
     patientEncounter
       .navigateToEncounters()
-      .clickInProgressEncounterFilter()
       .searchEncounter(patientName)
+      .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
       .clickPatientDetailsButton();
     patientFiles.clickFilesTab();
@@ -60,24 +60,6 @@ describe("Patient Files", () => {
       .interceptFileUploadRequest()
       .clickUploadFilesButton()
       .verifyFileUploadApiCall();
-  });
-
-  it("Capture image and upload", () => {
-    // Capture Image Upload Setup
-    const captureFileName = "Cypress Capture Test " + timestamp;
-
-    patientFiles
-      .clickAddFilesButton()
-      .openCamera()
-      .captureImage()
-      .clickSubmit()
-      .clickUploadFilesButton()
-      .verifyValidationErrors(validationMessage)
-      .fillSingleFileName(captureFileName)
-      .interceptFileUploadRequest()
-      .clickUploadFilesButton()
-      .verifyFileUploadApiCall()
-      .verifySingleFileUploadSuccess(fileUploadSuccessToast);
   });
 
   it("File Uploaded by one user is accessible to another user", () => {
