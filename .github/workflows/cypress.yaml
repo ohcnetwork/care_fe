@@ -38,12 +38,10 @@ jobs:
       - name: Build ⚙️
         run: npm run build
 
-      - name: Install Chromium
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
-          sudo ln -s /usr/bin/chromium-browser /usr/bin/chromium
-          echo "CHROME_BIN=/usr/bin/chromium" >> $GITHUB_ENV
+      - name: Install Chrome for Testing
+        uses: browser-actions/setup-chrome-for-testing@v1
+        with:
+          version: "latest"
 
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
@@ -56,14 +54,13 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chromium
+          browser: chrome-for-testing
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
-          CHROME_BIN: /usr/bin/chromium
 
       - name: Cypress run for Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'true'
@@ -76,7 +73,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chromium
+          browser: chrome-for-testing
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -85,7 +82,6 @@ jobs:
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
-          CHROME_BIN: /usr/bin/chromium
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
