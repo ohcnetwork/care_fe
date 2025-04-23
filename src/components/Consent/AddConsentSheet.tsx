@@ -8,8 +8,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -46,8 +44,6 @@ import {
   CONSENT_STATUSES,
   ConsentModel,
   CreateConsentRequest,
-  VERIFICATION_TYPES,
-  VerificationType,
 } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
 
@@ -61,7 +57,6 @@ const consentFormSchema = z
       start: z.date().optional(),
       end: z.date().optional(),
     }),
-    verification_type: z.enum(VERIFICATION_TYPES).default("validation"),
     note: z.string().optional(),
   })
   .superRefine((data, ctx) => {
@@ -108,46 +103,20 @@ export default function AddConsentSheet({
     }
     setIsOpen(false);
     onSuccess?.();
+    toast.success(
+      isEdit
+        ? t("consent_updated_successfully")
+        : t("consent_created_successfully"),
+    );
   };
-
-  const { mutate: addVerification } = useMutation({
-    mutationFn: (params: {
-      id: string;
-      verificationType: VerificationType;
-      note?: string;
-    }) =>
-      mutate(consentApi.addVerification, {
-        pathParams: { patientId, id: params.id },
-      })({
-        verification_type: params.verificationType,
-        verified: true,
-        note: params.note,
-      }),
-    onSuccess: () => {
-      handleSuccess();
-      toast.success(
-        isEdit
-          ? t("consent_updated_successfully")
-          : t("consent_created_successfully"),
-      );
-    },
-    onError: () => {
-      toast.error(t("error_adding_verification"));
-    },
-  });
 
   const { mutate: createConsent, isPending: isCreating } = useMutation({
     mutationFn: (data: CreateConsentRequest) =>
       mutate(consentApi.create, {
         pathParams: { patientId },
       })(data),
-    onSuccess: async (response) => {
-      // After consent is created, add verification as a separate call
-      addVerification({
-        id: response.id,
-        verificationType: form.getValues("verification_type"),
-        note: form.getValues("note"),
-      });
+    onSuccess: async () => {
+      handleSuccess();
     },
     onError: () => {
       toast.error(t("error_creating_consent"));
@@ -161,19 +130,6 @@ export default function AddConsentSheet({
       })(data),
     onSuccess: () => {
       handleSuccess();
-      toast.success(t("consent_updated_successfully"));
-
-      const currentVerificationType =
-        existingConsent?.verification_details?.[0]?.verification_type;
-      const newVerificationType = form.getValues("verification_type");
-
-      if (newVerificationType !== currentVerificationType) {
-        addVerification({
-          id: existingConsent?.id ?? "",
-          verificationType: newVerificationType,
-          note: form.getValues("note"),
-        });
-      }
     },
     onError: () => {
       toast.error(t("error_updating_consent"));
@@ -193,7 +149,6 @@ export default function AddConsentSheet({
         start: new Date(),
         end: undefined,
       },
-      verification_type: "validation",
       note: "",
     },
   });
@@ -214,9 +169,6 @@ export default function AddConsentSheet({
             ? new Date(existingConsent.period.end)
             : undefined,
         },
-        verification_type:
-          existingConsent.verification_details?.[0]?.verification_type ||
-          "validation",
         note: existingConsent.note || "",
       });
     }
@@ -430,66 +382,6 @@ export default function AddConsentSheet({
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="verification_type"
-              render={({ field }) => (
-                <FormItem className="space-y-4">
-                  <FormLabel>{t("consent_verification_type")}</FormLabel>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                    className="grid grid-cols-2 gap-4"
-                  >
-                    <Label
-                      htmlFor="family"
-                      className={cn(
-                        "flex flex-col space-y-1 rounded-md border border-gray-200 p-4 cursor-pointer items-start justify-center",
-                        field.value === "family" &&
-                          "border-2 border-green-500 bg-green-50",
-                      )}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="family" id="family" />
-                        <Label
-                          htmlFor="family"
-                          className="font-medium cursor-pointer"
-                        >
-                          {t("consent_verification_type__family")}
-                        </Label>
-                      </div>
-                      <p className="text-xs text-gray-500 ps-6">
-                        {t("consent_verification_type__family_description")}
-                      </p>
-                    </Label>
-                    <Label
-                      htmlFor="validation"
-                      className={cn(
-                        "flex flex-col space-y-1 rounded-md border border-gray-200 p-4 cursor-pointer items-start justify-center",
-                        field.value === "validation" &&
-                          "border-2 border-green-500 bg-green-50",
-                      )}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="validation" id="validation" />
-                        <Label
-                          htmlFor="validation"
-                          className="font-medium cursor-pointer"
-                        >
-                          {t("consent_verification_type__validation")}
-                        </Label>
-                      </div>
-                      <p className="text-xs text-gray-500 ps-6">
-                        {t("consent_verification_type__validation_description")}
-                      </p>
-                    </Label>
-                  </RadioGroup>
                   <FormMessage />
                 </FormItem>
               )}

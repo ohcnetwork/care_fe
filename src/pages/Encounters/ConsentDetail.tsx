@@ -21,7 +21,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -254,45 +253,6 @@ export function ConsentDetailPage() {
                       {t(`consent_status__${consent.status}`)}
                     </p>
                   </div>
-
-                  {consent.verification_details &&
-                    consent.verification_details.length > 0 && (
-                      <>
-                        <Separator />
-                        <div>
-                          <h3 className="text-sm font-medium text-gray-500">
-                            {t("verification_details")}
-                          </h3>
-                          <div className="mt-2 space-y-2">
-                            {consent.verification_details.map(
-                              (verification, index) => (
-                                <div
-                                  key={index}
-                                  className="p-3 bg-gray-50 border border-gray-200 rounded-md"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-500">
-                                      {formatDateTime(
-                                        verification.verification_date,
-                                      )}
-                                    </span>
-                                    <p className="text-base font-semibold text-gray-700">
-                                      {t(
-                                        `consent_verification_type__${verification.verification_type}`,
-                                      )}
-                                    </p>
-                                  </div>
-                                  <p className="text-base font-semibold text-gray-700">
-                                    {t("verified_by")}:{" "}
-                                    {verification.verified_by.username}
-                                  </p>
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      </>
-                    )}
                 </div>
               </Card>
             </div>
