@@ -420,13 +420,16 @@ export function AllergyQuestion({
                   <AllergyTableRow
                     key={index}
                     allergy={allergy}
-                    disabled={patientAllergies?.results
-                      .filter(
-                        (result) =>
-                          result.verification_status === "entered_in_error",
-                      )
-                      .map((result) => result.id)
-                      .includes(allergy.id as string)}
+                    disabled={
+                      disabled ||
+                      patientAllergies?.results
+                        .filter(
+                          (result) =>
+                            result.verification_status === "entered_in_error",
+                        )
+                        .map((result) => result.id)
+                        .includes(allergy.id as string)
+                    }
                     onUpdate={(updates) => handleUpdateAllergy(index, updates)}
                     onRemove={() => handleRemoveAllergy(index)}
                   />

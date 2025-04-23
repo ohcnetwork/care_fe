@@ -728,13 +728,16 @@ export function SymptomQuestion({
                     <SymptomRow
                       symptom={symptom}
                       index={index}
-                      disabled={patientSymptoms?.results
-                        .filter(
-                          (result) =>
-                            result.verification_status === "entered_in_error",
-                        )
-                        .map((result) => result.id)
-                        .includes(symptom.id as string)}
+                      disabled={
+                        disabled ||
+                        patientSymptoms?.results
+                          .filter(
+                            (result) =>
+                              result.verification_status === "entered_in_error",
+                          )
+                          .map((result) => result.id)
+                          .includes(symptom.id as string)
+                      }
                       onUpdate={handleUpdateSymptom}
                       onRemove={handleRemoveSymptom}
                       key={
@@ -754,13 +757,16 @@ export function SymptomQuestion({
                 <SymptomRow
                   symptom={symptom}
                   index={index}
-                  disabled={patientSymptoms?.results
-                    .filter(
-                      (result) =>
-                        result.verification_status === "entered_in_error",
-                    )
-                    .map((result) => result.id)
-                    .includes(symptom.id as string)}
+                  disabled={
+                    disabled ||
+                    patientSymptoms?.results
+                      .filter(
+                        (result) =>
+                          result.verification_status === "entered_in_error",
+                      )
+                      .map((result) => result.id)
+                      .includes(symptom.id as string)
+                  }
                   onUpdate={handleUpdateSymptom}
                   onRemove={handleRemoveSymptom}
                   key={symptom.id || `symptom-${symptom.code.code}-${index}`}
