@@ -1500,8 +1500,6 @@
   "initiate_encounter": "Initiate Patient Encounter",
   "instruction_on_titration": "Instruction on titration",
   "instructions": "Instructions",
-  "instructions_count_one": "{{count}} instruction",
-  "instructions_count_other": "{{count}} instructions",
   "insurance__insurer_id": "Insurer ID",
   "insurance__insurer_name": "Insurer Name",
   "insurance__member_id": "Member ID",

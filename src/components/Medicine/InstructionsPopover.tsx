@@ -39,10 +39,13 @@ export default function InstructionsPopover({
           className="w-full justify-between"
           disabled={disabled}
         >
-          <span className="truncate">
+          <span className="truncate block max-w-full">
             {currentInstructions.length === 0
               ? t("no_instructions")
-              : t("instructions_count", { count: currentInstructions.length })}
+              : currentInstructions
+                  .map((i) => i.display)
+                  .filter(Boolean)
+                  .join(", ")}
           </span>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
