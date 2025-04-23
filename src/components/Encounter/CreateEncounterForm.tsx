@@ -56,6 +56,7 @@ import {
   EncounterClass,
   EncounterRequest,
 } from "@/types/emr/encounter";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 interface Props {
   patientId: string;
@@ -112,6 +113,8 @@ export default function CreateEncounterForm({
       );
     },
   });
+
+  const [selectedOrgs, setSelectedOrgs] = useState<FacilityOrganization[]>([]);
 
   function onSubmit(data: z.infer<typeof encounterFormSchema>) {
     const encounterRequest: EncounterRequest = {
@@ -323,17 +326,18 @@ export default function CreateEncounterForm({
             <FormField
               control={form.control}
               name="organizations"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FacilityOrganizationSelector
                     facilityId={facilityId}
-                    value={field.value[0]}
-                    onChange={(value) => {
-                      if (value === null) {
-                        form.setValue("organizations", []);
-                      } else {
-                        form.setValue("organizations", [value]);
-                      }
+                    selectedOrganizations={selectedOrgs}
+                    onSelect={(org) => {
+                      setSelectedOrgs([org]);
+                      form.setValue("organizations", [org.id]);
+                    }}
+                    onRemove={() => {
+                      setSelectedOrgs([]);
+                      form.setValue("organizations", []);
                     }}
                   />
                   <FormMessage />
