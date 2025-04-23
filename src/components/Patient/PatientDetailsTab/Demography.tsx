@@ -56,7 +56,7 @@ export const Demography = (props: PatientProps) => {
   };
 
   const EmergencyContact = (props: { number?: string; name?: string }) => (
-    <div className="lg:col-span-2">
+    <div className="sm:col-span-2">
       <div className="mr-6 flex flex-col items-start justify-between rounded-md border border-orange-300 bg-orange-50 p-4 sm:flex-row">
         {/* Emergency Contact Section */}
         <div className="flex-1">
@@ -267,7 +267,7 @@ export const Demography = (props: PatientProps) => {
                       </Button>
                     )}
                   </div>
-                  <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
+                  <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
                     {subtab.details.map((detail, j) =>
                       detail &&
                       typeof detail === "object" &&
