@@ -168,7 +168,7 @@ export function ConsentDetailPage() {
 
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">
-                      {t("consent_date")}
+                      {t("consent_given_on")}
                     </h3>
                     <p className="text-base font-semibold text-gray-700">
                       {formatDateTime(consent.date, "MMMM D, YYYY")}

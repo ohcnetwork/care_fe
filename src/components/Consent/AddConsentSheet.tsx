@@ -250,7 +250,7 @@ export default function AddConsentSheet({
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel aria-required>{t("consent_date")}</FormLabel>
+                    <FormLabel aria-required>{t("consent_given_on")}</FormLabel>
                     <DatePicker date={field.value} onChange={field.onChange} />
                     <FormMessage />
                   </FormItem>
