@@ -75,13 +75,22 @@ function ConsentCard({
           <div className="flex flex-wrap gap-1.5 items-center w-full mt-1">
             <div className="flex items-center gap-1.5 w-full">
               <div className="flex flex-wrap text-sm font-medium space-x-1">
-                <span className="break-words">
-                  {primaryAttachment?.name || t("no_files_attached")}
-                  {totalAttachments > 1 && ", "}
-                </span>
-                {totalAttachments > 1 && (
-                  <span className="text-muted-foreground break-words">
-                    +{t("more_files_count", { count: totalAttachments - 1 })}
+                {totalAttachments > 0 ? (
+                  <>
+                    <span className="break-words">
+                      {primaryAttachment?.name}
+                      {totalAttachments > 1 && ", "}
+                    </span>
+                    {totalAttachments > 1 && (
+                      <span className="text-muted-foreground break-words">
+                        +
+                        {t("more_files_count", { count: totalAttachments - 1 })}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-gray-500 italic">
+                    {t("no_files_attached")}
                   </span>
                 )}
               </div>
