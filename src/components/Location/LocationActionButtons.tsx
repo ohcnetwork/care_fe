@@ -1,6 +1,8 @@
 import { MoreVertical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -81,18 +83,20 @@ export function LocationActionButtons({
   }
 
   return (
-    <div className="flex gap-2">
-      {buttons.map((button, index) => (
-        <Button
-          key={index}
-          variant={button.variant}
-          onClick={button.onClick}
-          className={button.className}
-          data-cy={button["data-cy"]}
-        >
-          {button.label}
-        </Button>
-      ))}
+    <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap gap-2 flex-1">
+        {buttons.map((button, index) => (
+          <Button
+            key={index}
+            variant={button.variant}
+            onClick={button.onClick}
+            className={cn("sm:w-auto w-full", button.className)}
+            data-cy={button["data-cy"]}
+          >
+            {button.label}
+          </Button>
+        ))}
+      </div>
       {onUpdateTime && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
