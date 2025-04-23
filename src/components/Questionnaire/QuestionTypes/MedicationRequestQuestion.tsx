@@ -1,7 +1,7 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { ChevronsDownUp, ChevronsUpDown, X } from "lucide-react";
+import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,7 +17,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -43,7 +42,7 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
-import { MultiValueSetSelect } from "@/components/Medicine/MultiValueSetSelect";
+import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -1048,81 +1047,35 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {t("instructions")}
         </Label>
         {dosageInstruction?.as_needed_boolean ? (
-          <MultiValueSetSelect
-            options={[
-              {
-                system: "system-as-needed-reason",
-                value: dosageInstruction?.as_needed_for || null,
-                label: t("prn_reason"),
-                placeholder: t("select_prn_reason"),
-                onSelect: (value: Code | null) => {
-                  handleUpdateDosageInstruction({
-                    as_needed_for: value || undefined,
-                  });
-                },
-              },
-              {
-                system: "system-additional-instruction",
-                value: dosageInstruction?.additional_instruction?.[0] || null,
-                label: t("additional_instructions"),
-                placeholder: t("select_additional_instructions"),
-                onSelect: (value: Code | null) => {
-                  handleUpdateDosageInstruction({
-                    additional_instruction: value ? [value] : undefined,
-                  });
-                },
-              },
-            ]}
-            disabled={disabled || isReadOnly}
-          />
-        ) : (
-          <div className="space-y-4">
-            {currentInstructions.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-2">
-                {currentInstructions.map((instruction) => (
-                  <Badge
-                    key={instruction.code}
-                    variant="secondary"
-                    className="flex items-center gap-1"
-                  >
-                    {instruction.display}
-                    {!isReadOnly && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="size-4 p-0 rounded-full"
-                        onClick={() => removeInstruction(instruction.code)}
-                        disabled={disabled}
-                      >
-                        <X className="size-3" />
-                        <span className="sr-only">{t("remove")}</span>
-                      </Button>
-                    )}
-                  </Badge>
-                ))}
-              </div>
-            )}
+          <div className="space-y-2">
+            <ValueSetSelect
+              system="system-as-needed-reason"
+              value={dosageInstruction?.as_needed_for || null}
+              placeholder={t("select_prn_reason")}
+              onSelect={(value: Code | null) => {
+                handleUpdateDosageInstruction({
+                  as_needed_for: value || undefined,
+                });
+              }}
+              disabled={disabled || isReadOnly}
+            />
 
-            {!isReadOnly && (
-              <ValueSetSelect
-                system="system-additional-instruction"
-                value={null}
-                onSelect={(instruction) => {
-                  if (instruction) {
-                    addInstruction(instruction as Code);
-                  }
-                }}
-                placeholder={
-                  currentInstructions.length > 0
-                    ? t("add_more_instructions")
-                    : t("select_additional_instructions")
-                }
-                disabled={disabled || isReadOnly}
-                data-cy="medication-instructions"
-                wrapTextForSmallScreen
-              />
-            )}
+            <InstructionsPopover
+              currentInstructions={currentInstructions}
+              removeInstruction={removeInstruction}
+              addInstruction={addInstruction}
+              isReadOnly={isReadOnly}
+              disabled={disabled}
+            />
           </div>
+        ) : (
+          <InstructionsPopover
+            currentInstructions={currentInstructions}
+            removeInstruction={removeInstruction}
+            addInstruction={addInstruction}
+            isReadOnly={isReadOnly}
+            disabled={disabled}
+          />
         )}
       </div>
       {/* Route */}
