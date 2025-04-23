@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, CalendarRange, Plus, Search } from "lucide-react";
-import { Link, usePathParams } from "raviger";
+import { List, Plus, Search } from "lucide-react";
+import { useNavigate, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,14 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
-import PDFViewer from "@/components/Common/PDFViewer";
 import AddConsentSheet from "@/components/Consent/AddConsentSheet";
-import { FileUploadModel } from "@/components/Patient/models";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
@@ -47,44 +43,6 @@ export const EmptyState = () => {
   );
 };
 
-// Component to preview the file based on its type
-function PreviewFile({ file }: { file: FileUploadModel }) {
-  if (!file.read_signed_url) {
-    return null;
-  }
-
-  if (file.mime_type === "application/pdf") {
-    return (
-      <PDFViewer
-        url={file.read_signed_url}
-        pageNumber={1}
-        onDocumentLoadSuccess={() => {}}
-        scale={1}
-        className="object-cover w-full h-full overflow-hidden!"
-      />
-    );
-  }
-
-  if (file.mime_type?.startsWith("image")) {
-    return (
-      <img
-        src={file.read_signed_url}
-        alt={file.name}
-        className="object-cover w-full h-full"
-      />
-    );
-  }
-
-  return (
-    <iframe
-      src={file.read_signed_url}
-      title={file.name}
-      className="object-cover w-full h-full"
-      sandbox="allow-same-origin"
-    />
-  );
-}
-
 function ConsentCard({
   consent,
   encounter,
@@ -93,6 +51,7 @@ function ConsentCard({
   encounter: Encounter;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
   const encounterId = consent.encounter;
   const consentId = consent.id;
@@ -100,141 +59,101 @@ function ConsentCard({
   const primaryAttachment = consent.source_attachments[0];
   const totalAttachments = consent.source_attachments.length;
 
-  const { data: consentFile } = useQuery({
-    queryKey: ["file_upload", primaryAttachment?.id],
-    queryFn: query(routes.retrieveUpload, {
-      pathParams: { id: primaryAttachment?.id ?? "" },
-    }),
-    enabled: !!primaryAttachment?.id,
-  });
-
   return (
-    <Link
-      href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounterId}/consents/${consentId}`}
-      className="block h-full"
-    >
-      <Card className="overflow-hidden transition-all h-full flex flex-col hover:shadow-md cursor-pointer group">
-        <CardContent className="p-0 group">
-          <div className="relative aspect-video">
-            {consentFile ? (
-              <div className="h-full w-full object-cover">
-                <div className="h-full w-full transition-opacity">
-                  <PreviewFile file={consentFile} />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-center p-2">
-                    <span className="text-white font-medium flex items-center gap-1">
-                      <CareIcon icon="l-eye" />
-                      {t("view")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full w-full bg-gray-100">
-                <img
-                  src="/images/placeholder.svg"
-                  alt={consent.category}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            )}
-          </div>
-        </CardContent>
-        <CardFooter className="flex-1 flex flex-col justify-evenly p-4 pt-5 gap-3">
-          <div className="flex flex-col justify-between items-start w-full gap-2">
-            <div className="flex justify-start items-center flex-wrap w-full gap-1.5">
-              <div>
-                <div className="flex flex-wrap gap-1.5 items-center">
-                  <Badge
-                    variant="secondary"
-                    className="border border-gray-300 rounded-full"
-                  >
-                    <h3 className="font-semibold text-xs text-gray-900">
-                      {t(`consent_category__${consent.category}`)}
-                    </h3>
-                  </Badge>
-                </div>
-              </div>
-              <div className="flex items-center">
-                {consent.decision === "permit" ? (
-                  <Badge
-                    className="flex gap-1 items-center py-1 rounded-full"
-                    variant={"primary"}
-                  >
-                    {t("permitted")}
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="primary"
-                    className="flex gap-1 items-center py-1 rounded-full bg-red-100 border-red-300 text-red-900"
-                  >
-                    {t("denied")}
-                  </Badge>
+    <Card className="overflow-hidden transition-all h-full flex flex-col">
+      <Badge
+        variant="outline"
+        className="w-fit justify-center border-b border-gray-300 rounded-b-md rounded-t-none px-2.5 py-1 text-center ml-3 bg-indigo-100 text-indigo-900"
+      >
+        <h3 className="font-semibold text-xs text-gray-900 uppercase">
+          {t(`consent_category__${consent.category}`)}
+        </h3>
+      </Badge>
+
+      <CardContent className="flex-1 flex flex-col justify-between p-4 gap-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-1.5 items-center w-full mt-1">
+            <div className="flex items-center gap-1.5 w-full">
+              <div className="flex flex-wrap text-sm font-medium space-x-1">
+                <span className="break-words">
+                  {primaryAttachment?.name || t("no_files_attached")}
+                  {totalAttachments > 1 && ", "}
+                </span>
+                {totalAttachments > 1 && (
+                  <span className="text-muted-foreground break-words">
+                    +{t("more_files_count", { count: totalAttachments - 1 })}
+                  </span>
                 )}
               </div>
-              <div className="flex items-center">
-                <Badge
-                  variant={
-                    consent.status === "active" ? "primary" : "secondary"
-                  }
-                  className="flex gap-1 items-center py-1 rounded-full"
-                >
-                  {t(`consent_status__${consent.status}`)}
-                </Badge>
-              </div>
             </div>
           </div>
 
-          <Separator />
-
-          <div className="flex justify-between items-start w-full flex-col gap-2">
-            <div className="flex flex-wrap gap-1.5 items-center w-full">
-              <div className="flex items-center gap-1.5 w-full">
-                <CareIcon
-                  icon="l-file-alt"
-                  className="size-3.5 text-muted-foreground"
-                />
-                <div className="flex flex-wrap text-sm font-medium space-x-1">
-                  <span className="break-words">
-                    {primaryAttachment?.name || t("no_files_attached")}
-                    {totalAttachments > 1 && ", "}
-                  </span>
-                  {totalAttachments > 1 && (
-                    <span className="text-muted-foreground break-words">
-                      +{t("more_files_count", { count: totalAttachments - 1 })}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between items-center gap-1.5 text-xs text-secondary-700">
-              <Calendar className="size-3.5 text-muted-foreground" />
-              <p className="font-medium">
-                {formatDateTime(consent.date, "MMMM D, YYYY")}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-1.5 text-secondary-700">
-              <p>
-                <CalendarRange className="size-3.5 text-muted-foreground" />
-              </p>
-              <p className="text-xs font-medium">
-                <span>
-                  {consent.period.start
-                    ? formatDateTime(consent.period.start, "MMMM D, YYYY")
-                    : t("NA")}
-                </span>
-                {" - "}
-                <span>
-                  {consent.period.end
-                    ? formatDateTime(consent.period.end, "MMMM D, YYYY")
-                    : t("NA")}
-                </span>
-              </p>
-            </div>
+          <div className="flex justify-start items-center flex-wrap w-full gap-1.5">
+            {consent.decision === "permit" ? (
+              <Badge
+                className="flex gap-1 items-center text-xs"
+                variant={"primary"}
+              >
+                {t("permitted")}
+              </Badge>
+            ) : (
+              <Badge
+                variant="destructive"
+                className="flex gap-1 items-center text-xs"
+              >
+                {t("denied")}
+              </Badge>
+            )}
+            <Badge
+              variant={consent.status === "active" ? "primary" : "secondary"}
+              className="flex gap-1 items-center text-xs"
+            >
+              {t(`consent_status__${consent.status}`)}
+            </Badge>
           </div>
-        </CardFooter>
-      </Card>
-    </Link>
+        </div>
+
+        <div className="flex justify-between items-start w-full gap-4 text-sm">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-gray-500">{t("consent_date")}</span>
+            <p className="font-medium">
+              {formatDateTime(consent.date, "MMM D, YYYY")}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-gray-500">{t("valid_period")}</span>
+            <p className="font-medium text-right">
+              <span>
+                {consent.period.start
+                  ? formatDateTime(consent.period.start, "MMM DD")
+                  : t("NA")}
+              </span>
+              {" - "}
+              <span>
+                {consent.period.end
+                  ? formatDateTime(consent.period.end, "MMM DD, YYYY")
+                  : t("NA")}
+              </span>
+            </p>
+          </div>
+        </div>
+      </CardContent>
+
+      <CardFooter className="p-0 border-t">
+        <Button
+          variant="ghost"
+          className="w-full justify-center items-center gap-2 rounded-t-none"
+          onClick={() =>
+            navigate(
+              `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounterId}/consents/${consentId}`,
+            )
+          }
+        >
+          <List className="size-4" />
+          {t("see_details")}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }
 
