@@ -383,7 +383,7 @@ const SymptomRow = React.memo(function SymptomRow({
   // For desktop view - Table Row
   return (
     <>
-      <TableRow>
+      <TableRow className={cn(disabled && "opacity-40 pointer-events-none")}>
         <TableCell className="font-medium">
           <div className="truncate max-w-[300px]" title={symptom.code.display}>
             {symptom.code.display}
@@ -493,7 +493,6 @@ export function SymptomQuestion({
       queryParams: {
         limit: 100,
         encounter: encounterId,
-        exclude_verification_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
@@ -729,7 +728,13 @@ export function SymptomQuestion({
                     <SymptomRow
                       symptom={symptom}
                       index={index}
-                      disabled={disabled}
+                      disabled={patientSymptoms?.results
+                        .filter(
+                          (result) =>
+                            result.verification_status === "entered_in_error",
+                        )
+                        .map((result) => result.id)
+                        .includes(symptom.id as string)}
                       onUpdate={handleUpdateSymptom}
                       onRemove={handleRemoveSymptom}
                       key={
@@ -749,7 +754,13 @@ export function SymptomQuestion({
                 <SymptomRow
                   symptom={symptom}
                   index={index}
-                  disabled={disabled}
+                  disabled={patientSymptoms?.results
+                    .filter(
+                      (result) =>
+                        result.verification_status === "entered_in_error",
+                    )
+                    .map((result) => result.id)
+                    .includes(symptom.id as string)}
                   onUpdate={handleUpdateSymptom}
                   onRemove={handleRemoveSymptom}
                   key={symptom.id || `symptom-${symptom.code.code}-${index}`}
