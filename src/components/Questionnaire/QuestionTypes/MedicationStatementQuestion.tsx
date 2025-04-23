@@ -149,8 +149,6 @@ export function MedicationStatementQuestion({
       queryParams: {
         limit: 100,
         encounter: encounterId,
-        // TODO: medicationStatementAPI should have exclude_status param.. otherwise entered_in_error entries can be remodified
-        // exclude_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
@@ -306,7 +304,16 @@ export function MedicationStatementQuestion({
                             expandedMedicationIndex === index ? null : index,
                           );
                         }}
-                        className="border-b last:border-b-0"
+                        className={cn("border-b last:border-b-0", {
+                          "opacity-40 pointer-events-none":
+                            patientMedications?.results
+                              .filter(
+                                (result) =>
+                                  result.status === "entered_in_error",
+                              )
+                              .map((result) => result.id)
+                              .includes(medication.id as string),
+                        })}
                       >
                         <div
                           className={cn(
@@ -366,7 +373,16 @@ export function MedicationStatementQuestion({
                           <div className="mt-2 px-2 py-4 space-y-4 bg-white mx-1 mb-1">
                             <MedicationStatementGridRow
                               medication={medication}
-                              disabled={disabled}
+                              disabled={
+                                disabled ||
+                                patientMedications?.results
+                                  .filter(
+                                    (result) =>
+                                      result.status === "entered_in_error",
+                                  )
+                                  .map((result) => result.id)
+                                  .includes(medication.id as string)
+                              }
                               onUpdate={(updates) =>
                                 handleUpdateMedication(index, updates)
                               }
@@ -439,6 +455,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
     <div
       className={cn(
         "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] border-b border-gray-200 hover:bg-gray-50/50",
+        { "opacity-40 pointer-events-none": disabled },
       )}
     >
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
