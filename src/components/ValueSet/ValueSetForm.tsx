@@ -179,7 +179,7 @@ function ConceptFields({
             )}
           />
           <div className="flex gap-2 items-start">
-            <div className="w-8 flex items-center justify-center">
+            <div className="w-8 flex items-center h-10 justify-center">
               {parentForm.getValues(
                 `compose.${type}.${nestIndex}.concept.${index}.isVerified` as any,
               ) ? (
@@ -191,6 +191,7 @@ function ConceptFields({
                   type="button"
                   variant="outline"
                   size="icon"
+                  className="h-9"
                   onClick={() => handleVerify(index)}
                   disabled={
                     verifyingIndex === index && lookupMutation.isPending
