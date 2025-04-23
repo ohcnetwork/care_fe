@@ -518,6 +518,8 @@ function SidebarMenuButton({
   size = "default",
   tooltip,
   className,
+  children,
+  onClick,
   ...props
 }: React.ComponentProps<"button"> & {
   asChild?: boolean;
@@ -526,6 +528,14 @@ function SidebarMenuButton({
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot : "button";
   const { isMobile, state } = useSidebar();
+  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    onClick?.(e);
+    console.log("c1");
+    setIsTooltipOpen(false);
+    e.stopPropagation();
+  };
 
   const button = (
     <Comp
@@ -533,28 +543,27 @@ function SidebarMenuButton({
       data-size={size}
       data-active={isActive}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+      onClick={handleClick}
+      onMouseEnter={() => setIsTooltipOpen(true)}
+      onMouseLeave={() => setIsTooltipOpen(false)}
       {...props}
-    />
+    >
+      {children}
+    </Comp>
   );
 
-  if (!tooltip) {
-    return button;
-  }
-
-  if (typeof tooltip === "string") {
-    tooltip = {
-      children: tooltip,
-    };
-  }
+  if (!tooltip) return button;
 
   return (
-    <Tooltip>
+    <Tooltip
+      open={isTooltipOpen && (state === "collapsed" || isMobile)}
+      onOpenChange={setIsTooltipOpen}
+    >
       <TooltipTrigger asChild>{button}</TooltipTrigger>
       <TooltipContent
         side="right"
         align="center"
-        hidden={state !== "collapsed" || isMobile}
-        {...tooltip}
+        {...(typeof tooltip === "string" ? { children: tooltip } : tooltip)}
       />
     </Tooltip>
   );
@@ -668,8 +677,16 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
 }
 SidebarMenuSub.displayName = "SidebarMenuSub";
 
-function SidebarMenuSubItem(props: React.ComponentProps<"li">) {
-  return <li {...props} />;
+function SidebarMenuSubItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"li">) {
+  return (
+    <li className={cn("list-none", className)} {...props}>
+      {children}
+    </li>
+  );
 }
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem";
 
@@ -678,29 +695,68 @@ function SidebarMenuSubButton({
   size = "md",
   isActive,
   className,
+  onClick,
+  children,
   ...props
-}: React.ComponentProps<"a"> & {
+}: React.ComponentProps<"button"> & {
   asChild?: boolean;
   size?: "sm" | "md";
   isActive?: boolean;
 }) {
-  const Comp = asChild ? Slot : "a";
+  const Comp = asChild ? Slot : "button";
+  const { state } = useSidebar();
+  const [_isTooltipOpen, setIsTooltipOpen] = React.useState(false);
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    console.log("c2");
+    onClick?.(e);
+    setIsTooltipOpen(false);
+
+    // Close any parent tooltips
+    const parentButton = e.currentTarget.closest(
+      '[data-sidebar="menu-button"]',
+    );
+    if (parentButton) {
+      const tooltipTrigger = parentButton.querySelector('[role="tooltip"]');
+      if (tooltipTrigger) {
+        (tooltipTrigger as HTMLElement).blur();
+      }
+    }
+
+    // e.stopPropagation();
+  };
 
   return (
-    <Comp
-      data-sidebar="menu-sub-button"
-      data-size={size}
-      data-active={isActive}
-      className={cn(
-        "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground outline-hidden ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
-        "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
-        size === "sm" && "text-xs",
-        size === "md" && "text-sm",
-        "group-data-[collapsible=icon]:hidden",
-        className,
-      )}
-      {...props}
-    />
+    <SidebarMenuSubItem>
+      <Tooltip open={state === "collapsed"} onOpenChange={setIsTooltipOpen}>
+        <TooltipTrigger asChild>
+          <Comp
+            data-sidebar="menu-sub-button"
+            data-size={size}
+            data-active={isActive}
+            className={cn(
+              "flex h-7 w-full min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground outline-hidden ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
+              "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
+              size === "sm" && "text-xs",
+              size === "md" && "text-sm",
+              "group-data-[collapsible=icon]:hidden",
+              className,
+            )}
+            onClick={handleClick}
+            onMouseEnter={() => setIsTooltipOpen(true)}
+            onMouseLeave={() => setIsTooltipOpen(false)}
+            {...props}
+          >
+            {children}
+          </Comp>
+        </TooltipTrigger>
+        <TooltipContent
+          side="right"
+          align="center"
+          {...(typeof children === "string" ? { children } : {})}
+        />
+      </Tooltip>
+    </SidebarMenuSubItem>
   );
 }
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
