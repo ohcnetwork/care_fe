@@ -10,9 +10,9 @@ on:
       - 'cypress/**'
       - 'package.json'
       - 'package-lock.json'
-      - 'plugins/**'  
+      - 'plugins/**'
       - 'public/**'
-      - '.github/workflows/cypress.yaml'  # test trigger – safe change
+      - '.github/workflows/cypress.yaml'
   workflow_dispatch:
 
 jobs:
