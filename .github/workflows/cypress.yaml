@@ -12,7 +12,7 @@ on:
       - 'package-lock.json'
       - 'plugins/**'  
       - 'public/**'
-      - '.github/workflows/cypress.yaml'
+      - '.github/**'
   workflow_dispatch:
 
 jobs:
