@@ -31,8 +31,15 @@ export default defineConfig({
       return config;
     },
     baseUrl: "http://localhost:4000",
-    retries: 2,
+    retries: {
+      runMode: 1,
+      openMode: 0,
+    },
     requestTimeout: 15000,
+    numTestsKeptInMemory: 15,
+    experimentalMemoryManagement: true,
+    video: true,
+    screenshotOnRunFailure: true,
   },
   env: {
     API_URL: process.env.REACT_CARE_API_URL,
