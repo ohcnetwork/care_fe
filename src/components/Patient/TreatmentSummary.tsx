@@ -514,8 +514,15 @@ export default function TreatmentSummary({
                         status: t(`medication_status_${medication.status}`),
                         dosage: dosage,
                         frequency: instruction?.as_needed_boolean
-                          ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
-                          : `${frequency?.meaning ?? "-"}${additionalInstructions ? `, ${additionalInstructions}` : ""}`,
+                          ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})` +
+                            (instruction?.additional_instruction?.length
+                              ? `, ${additionalInstructions}`
+                              : "")
+                          : `${frequency?.meaning ?? "-"}${
+                              instruction?.additional_instruction?.length
+                                ? `, ${additionalInstructions}`
+                                : ""
+                            }`,
                         duration: duration
                           ? `${duration.value} ${duration.unit}`
                           : "-",
