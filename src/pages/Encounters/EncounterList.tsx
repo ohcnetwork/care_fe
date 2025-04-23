@@ -218,7 +218,7 @@ export function EncounterList({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[20rem] p-0"
+                    className="w-[20rem] p-0 border-none"
                     align="start"
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
@@ -227,7 +227,7 @@ export function EncounterList({
                       options={searchOptions}
                       onFieldChange={handleFieldChange}
                       onSearch={handleSearch}
-                      className="w-full"
+                      className="w-full border border-gray-300 rounded-md"
                       autoFocus
                     />
                   </PopoverContent>

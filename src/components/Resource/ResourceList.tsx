@@ -139,7 +139,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[20rem]"
+                    className="w-[20rem] border-none"
                     align="start"
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
@@ -163,7 +163,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                           [key]: value || undefined,
                         })
                       }
-                      className="w-full border-none shadow-none"
+                      className="w-full border border-gray-300 rounded-md shadow-none"
                       autoFocus
                     />
                   </PopoverContent>

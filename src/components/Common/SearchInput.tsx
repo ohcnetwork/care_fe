@@ -261,10 +261,7 @@ export default function SearchInput({
 
   return (
     <div
-      className={cn(
-        "border rounded-lg border-gray-200 bg-white shadow-sm",
-        className,
-      )}
+      className={cn("border rounded-sm border-gray-200 bg-white", className)}
     >
       <div
         role="searchbox"
@@ -278,7 +275,7 @@ export default function SearchInput({
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="focus:ring-0 px-2 ml-1"
+                className="focus:ring-0  ml-1"
                 size="sm"
                 onClick={() => setOpen(true)}
               >
@@ -395,7 +392,7 @@ export default function SearchInput({
           ))}
         </div>
       )}
-      {searchValue.length !== 0 && (
+      {searchValue.length !== 0 && !isSingleOption && (
         <Button
           variant="ghost"
           size="sm"
