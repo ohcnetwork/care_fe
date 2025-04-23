@@ -61,6 +61,7 @@ function ConceptFields({
   parentForm: ReturnType<typeof useForm<ValuesetFormType>>;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation(); // Add translation hook
   const { fields, append, remove } = useFieldArray({
     control: parentForm.control,
     name: `compose.${type}.${nestIndex}.concept`,
@@ -87,11 +88,11 @@ function ConceptFields({
             { shouldValidate: true },
           );
         }
-        toast.success("Code verified successfully");
+        toast.success(t("code_verified_successfully"));
       }
     },
     onError: () => {
-      toast.error("Failed to verify code");
+      toast.error(t("failed_to_verify_code"));
     },
   });
 
@@ -102,7 +103,7 @@ function ConceptFields({
     );
 
     if (!system || !code) {
-      toast.error("Please select a system and enter a code first");
+      toast.error(t("please_select_system_and_code"));
       return;
     }
 
@@ -112,7 +113,7 @@ function ConceptFields({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">Concepts</h4>
+        <h4 className="text-sm font-medium">{t("concepts")}</h4>
         <Button
           type="button"
           variant="outline"
@@ -121,7 +122,7 @@ function ConceptFields({
           disabled={disabled}
         >
           <PlusIcon className="size-4 mr-2" />
-          Add Concept
+          {t("add_concept")}
         </Button>
       </div>
       {fields.map((field, index) => (
@@ -158,7 +159,7 @@ function ConceptFields({
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="Unverified"
+                    placeholder={t("unverified")}
                     className={!field.value ? "text-gray-500" : undefined}
                     readOnly
                   />
@@ -200,6 +201,7 @@ function FilterFields({
   disabled?: boolean;
 }) {
   const form = useForm();
+  const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: `compose.${type}.${nestIndex}.filter`,
@@ -208,7 +210,7 @@ function FilterFields({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">Filters</h4>
+        <h4 className="text-sm font-medium">{t("filters")}</h4>
         <Button
           type="button"
           variant="outline"
@@ -217,7 +219,7 @@ function FilterFields({
           disabled={disabled}
         >
           <PlusIcon className="size-4 mr-2" />
-          Add Filter
+          {t("add_filter")}
         </Button>
       </div>
       {fields.map((field, index) => (
@@ -287,6 +289,7 @@ function RuleFields({
   form: ReturnType<typeof useForm<ValuesetFormType>>;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: `compose.${type}`,
@@ -296,7 +299,7 @@ function RuleFields({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-medium">
-          {type === "include" ? "Include Rules" : "Exclude Rules"}
+          {type === "include" ? t("include_rules") : t("exclude_rules")}
         </CardTitle>
         <Button
           type="button"
@@ -312,7 +315,7 @@ function RuleFields({
           disabled={disabled}
         >
           <PlusIcon className="size-4 mr-2" />
-          Add Rule
+          {t("add_rule")}
         </Button>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -324,7 +327,7 @@ function RuleFields({
                 name={`compose.${type}.${index}.system`}
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>System</FormLabel>
+                    <FormLabel>{t("system")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -332,7 +335,7 @@ function RuleFields({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select system" />
+                          <SelectValue placeholder={t("select_system")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
