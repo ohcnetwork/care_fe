@@ -146,7 +146,6 @@ export function DiagnosisQuestion({
       return dateA.getTime() - dateB.getTime();
     });
   }, [questionnaireResponse.values]);
-
   const { data: patientDiagnoses } = useQuery({
     queryKey: ["diagnoses", patientId],
     queryFn: query(diagnosisApi.listDiagnosis, {
@@ -155,7 +154,6 @@ export function DiagnosisQuestion({
         encounter: encounterId,
         limit: 100,
         category: "encounter_diagnosis,chronic_condition",
-        exclude_verification_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
@@ -533,7 +531,13 @@ export function DiagnosisQuestion({
                       `diagnosis-${diagnosis.code.code}-${index}`
                     }
                     diagnosis={diagnosis}
-                    disabled={disabled}
+                    disabled={patientDiagnoses?.results
+                      .filter(
+                        (result) =>
+                          result.verification_status === "entered_in_error",
+                      )
+                      .map((result) => result.id)
+                      .includes(diagnosis.id as string)}
                     onUpdate={(updates) =>
                       handleUpdateDiagnosis(index, updates)
                     }
@@ -552,7 +556,13 @@ export function DiagnosisQuestion({
                   diagnosis.id || `diagnosis-${diagnosis.code.code}-${index}`
                 }
                 diagnosis={diagnosis}
-                disabled={disabled}
+                disabled={patientDiagnoses?.results
+                  .filter(
+                    (result) =>
+                      result.verification_status === "entered_in_error",
+                  )
+                  .map((result) => result.id)
+                  .includes(diagnosis.id as string)}
                 onUpdate={(updates) => handleUpdateDiagnosis(index, updates)}
                 onRemove={() => handleRemoveDiagnosis(index)}
               />
@@ -670,7 +680,7 @@ const DiagnosisTableRow = ({
   const { t } = useTranslation();
   return (
     <>
-      <TableRow>
+      <TableRow className={cn(disabled && "opacity-40 pointer-events-none")}>
         <TableCell className="py-1">
           <div className="flex items-center space-x-2 min-w-0">
             <div
