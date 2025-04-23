@@ -119,6 +119,6 @@ jobs:
           path: cypress/videos
 
       - name: Delete build artifact
-        uses: actions/delete-artifact@v4
+        uses: actions/delete-artifact@v3
         with:
           name: build
