@@ -59,10 +59,10 @@ export function DeviceTable({ devices, encounter }: Props) {
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border bg-white">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="hover:bg-transparent">
             <TableHead>{t("device")}</TableHead>
             <TableHead className="text-center">{t("status")}</TableHead>
             <TableHead className="text-center">{t("care_type")}</TableHead>

@@ -149,9 +149,11 @@ export default function DevicesList({ facilityId }: Props) {
       {showLocationFilter && !isMobile && (
         <div className="md:w-1/4 min-h-full">
           <Card className="w-full h-full flex flex-col">
-            <CardContent className="p-4 space-y-4 flex-grow overflow-auto h-full">
-              <div className="flex items-center justify-between py-2">
-                <h3 className="font-medium">{t("locations")}</h3>
+            <CardContent className="p-4 flex-grow overflow-auto h-full">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-base font-semibold text-gray-800">
+                  {t("locations")}
+                </h3>
               </div>
               {allLocations?.results?.length
                 ? allLocations.results

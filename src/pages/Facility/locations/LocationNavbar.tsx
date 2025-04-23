@@ -48,7 +48,7 @@ export function LocationTreeNode({
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: location.id,
-        mode: showAllForms ? undefined : "kind",
+        ...(!showAllForms && { mode: "kind" }),
       },
     }),
     enabled: true,
