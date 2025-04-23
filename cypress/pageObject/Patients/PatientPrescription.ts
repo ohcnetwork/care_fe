@@ -24,6 +24,9 @@ export class PatientPrescription {
         medicineName,
         false,
       );
+      cy.get('[data-cy="medicine-name-view"]')
+        .should("be.visible")
+        .and("contain", medicineName);
     }
 
     if (dosage) {
