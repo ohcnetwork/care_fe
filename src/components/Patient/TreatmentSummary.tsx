@@ -348,6 +348,24 @@ export default function TreatmentSummary({
               </div>
             </div>
 
+            {encounter.discharge_summary_advice && (
+              <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr]">
+                <span className="text-gray-600">
+                  {t("discharge_summary_advice")}
+                </span>
+                <span className="text-gray-600">:</span>
+                <span className="font-semibold">
+                  {encounter.discharge_summary_advice
+                    .split("\n")
+                    .map((paragraph, index) => (
+                      <p key={index} className="font-semibold text-justify">
+                        {paragraph}
+                      </p>
+                    ))}
+                </span>
+              </div>
+            )}
+
             {/* Care Team Section */}
             <div className="mt-4 space-y-4">
               {encounter.care_team.length > 0 && (
