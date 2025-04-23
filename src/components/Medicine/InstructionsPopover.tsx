@@ -36,6 +36,7 @@ export default function InstructionsPopover({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
+          data-cy="instructions"
           className="w-full justify-between"
           disabled={disabled}
         >
@@ -50,7 +51,10 @@ export default function InstructionsPopover({
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-4" align="start">
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-4"
+        align="start"
+      >
         <div className="space-y-4">
           {currentInstructions.length > 0 && (
             <ScrollArea className="max-h-60">
@@ -81,23 +85,25 @@ export default function InstructionsPopover({
           )}
 
           {!isReadOnly && (
-            <ValueSetSelect
-              system="system-additional-instruction"
-              value={null}
-              onSelect={(instruction: Code) => {
-                if (instruction) {
-                  addInstruction(instruction);
+            <div data-cy="medication-instructions-dropdown">
+              <ValueSetSelect
+                system="system-additional-instruction"
+                value={null}
+                onSelect={(instruction: Code) => {
+                  if (instruction) {
+                    addInstruction(instruction);
+                  }
+                }}
+                placeholder={
+                  currentInstructions.length > 0
+                    ? t("add_more_instructions")
+                    : t("select_additional_instructions")
                 }
-              }}
-              placeholder={
-                currentInstructions.length > 0
-                  ? t("add_more_instructions")
-                  : t("select_additional_instructions")
-              }
-              disabled={disabled || isReadOnly}
-              data-cy="medication-instructions"
-              wrapTextForSmallScreen
-            />
+                disabled={disabled || isReadOnly}
+                data-cy="medication-instructions"
+                wrapTextForSmallScreen
+              />
+            </div>
           )}
         </div>
       </PopoverContent>
