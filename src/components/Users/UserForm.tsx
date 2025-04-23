@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -445,7 +447,10 @@ export default function UserForm({
 
                   <>
                     <div
-                      className={`text-small mt-2 pl-2 text-secondary-500 ${isUsernameFieldFocused ? "block" : "hidden"}`}
+                      className={cn(
+                        "text-small mt-2 pl-2 text-secondary-500",
+                        isUsernameFieldFocused ? "block" : "hidden",
+                      )}
                       aria-live="polite"
                     >
                       {(isUsernameChecking || !isUsernameTaken) && (
@@ -539,6 +544,7 @@ export default function UserForm({
                             ? "bg-white border-primary"
                             : "bg-transparent  border-gray-200"
                         }`}
+                        onClick={() => field.onChange("immediate")}
                       >
                         <RadioGroupItem
                           value="immediate"
@@ -565,6 +571,7 @@ export default function UserForm({
                             ? "bg-white border-primary"
                             : "bg-transparent  border-gray-200"
                         }`}
+                        onClick={() => field.onChange("email")}
                       >
                         <RadioGroupItem
                           value="email"
@@ -614,7 +621,10 @@ export default function UserForm({
 
                       <div
                         data-cy="password-validation"
-                        className={`text-small mt-2 pl-2 text-secondary-500 ${isPasswordFieldFocused ? "block" : "hidden"} `}
+                        className={cn(
+                          "text-small mt-2 pl-2 text-secondary-500",
+                          isPasswordFieldFocused ? "block" : "hidden",
+                        )}
                         aria-live="polite"
                       >
                         <ValidationHelper
