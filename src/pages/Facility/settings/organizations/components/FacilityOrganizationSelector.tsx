@@ -112,7 +112,11 @@ export default function FacilityOrganizationSelector(
     }
   };
 
-  const handleRemoveOrganization = (organizationId: string) => {
+  const handleOrganizationSelect = (organization: FacilityOrganization) => {
+    onSelect(organization);
+  };
+
+  const handleOrganizationRemove = (organizationId: string) => {
     onRemove(organizationId);
   };
 
@@ -215,7 +219,7 @@ export default function FacilityOrganizationSelector(
                   variant="ghost"
                   size="sm"
                   className="size-8 p-0 text-gray-500 hover:text-gray-900"
-                  onClick={() => handleRemoveOrganization(org.id)}
+                  onClick={() => handleOrganizationRemove(org.id)}
                 >
                   <X className="size-4" />
                   <span className="sr-only">{t("remove_organization")}</span>
@@ -237,7 +241,7 @@ export default function FacilityOrganizationSelector(
             variant="outline"
             className="w-full flex items-center justify-center gap-2 border-dashed border-2 border-sky-500 text-sky-700 hover:bg-sky-50"
             onClick={() => {
-              onSelect(currentOrganization);
+              handleOrganizationSelect(currentOrganization);
               setCurrentOrganization(null);
               setSelectedLevels([]);
             }}
