@@ -3,8 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import dayjs from "dayjs";
 import { CalendarIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -122,20 +122,6 @@ export default function ServiceHistoryForm({
     }
   };
 
-  const { note, serviced_on } = useWatch({ control: form.control });
-
-  const isFormNotReady = useMemo(() => {
-    const isAnyFieldEmpty = !note || !serviced_on;
-    if (serviceRecord) {
-      const areFormValuesUnchanged =
-        note === serviceRecord.note &&
-        serviced_on?.toISOString() ===
-          new Date(serviceRecord.serviced_on).toISOString();
-      return isAnyFieldEmpty || areFormValuesUnchanged;
-    }
-    return isAnyFieldEmpty;
-  }, [note, serviced_on, serviceRecord]);
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -198,7 +184,7 @@ export default function ServiceHistoryForm({
         <div className="flex justify-end space-x-2 pt-4">
           <Button
             type="submit"
-            disabled={isFormNotReady || isPending}
+            disabled={!form.formState.isDirty || isPending}
             data-cy="submit-button"
           >
             {isPending
