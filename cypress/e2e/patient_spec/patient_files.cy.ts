@@ -64,6 +64,7 @@ describe("Patient Files", () => {
 
   it("File Uploaded by one user is accessible to another user", () => {
     patientFiles
+      .filterActiveFiles()
       .clickAddFilesButton()
       .selectUploadFromDevice()
       .uploadSingleFile(filePath(fileName))
@@ -72,7 +73,6 @@ describe("Patient Files", () => {
       .clickUploadFilesButton()
       .verifyFileUploadApiCall()
       .verifySingleFileUploadSuccess(fileUploadSuccessToast)
-      .filterActiveFiles()
       .clickFirstFileViewButton()
       .closeFilePreview()
       .saveCurrentUrl();
@@ -91,6 +91,7 @@ describe("Patient Files", () => {
 
     // Upload a single file
     patientFiles
+      .filterActiveFiles()
       .clickAddFilesButton()
       .selectUploadFromDevice()
       .uploadSingleFile(filePath(fileName))
@@ -104,7 +105,6 @@ describe("Patient Files", () => {
 
     // Filter the file to only show the active files and rename the file
     patientFiles
-      .filterActiveFiles()
       .clickFileDetailsButton()
       .clickRenameOption()
       .fillNewFileName(newFileName)

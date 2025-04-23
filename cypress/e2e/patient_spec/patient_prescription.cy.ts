@@ -17,14 +17,16 @@ describe("Patient Prescription Management", () => {
 
   it("Add and remove medicine from patient prescription", () => {
     const dosage = "6";
+    const medicineName = getRandomMedicineName();
     const medicationDetails = {
-      medicineName: getRandomMedicineName(),
+      medicineName,
       dosage,
       dosageInput: `${dosage} Milligram`,
       frequency: "BID (1-0-1)",
       instructions: "Until symptoms improve",
       notes: "testing notes",
     };
+
     facilityCreation.selectFacility("GHC Payyanur");
     const patientName = generateName(true);
     patientEncounter
@@ -40,7 +42,7 @@ describe("Patient Prescription Management", () => {
       .clickMedicinesTab()
       .verifyMedication(medicationDetails)
       .clickEditPrescription()
-      .verifyMedicineName(medicationDetails.medicineName)
+      .verifyMedicineName(medicineName)
       .removeMedication()
       .submitQuestionnaire()
       .clickMedicinesTab()
