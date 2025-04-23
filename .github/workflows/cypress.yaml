@@ -56,11 +56,6 @@ jobs:
           name: build
           path: build
 
-      - name: Delete build artifact
-        uses: geekyeggo/delete-artifact@v5
-        with:
-          name: build
-
       # For non-forked PRs
       - name: "UI Tests - Chrome (Non-forked)"
         if: steps.pr_origin.outputs.is_forked == 'false'
@@ -117,3 +112,13 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
+
+  cleanup:
+    if: always() && github.repository == 'ohcnetwork/care_fe'
+    needs: parallel-job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete build artifact
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build
