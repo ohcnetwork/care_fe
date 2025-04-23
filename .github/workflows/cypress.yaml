@@ -17,10 +17,6 @@ jobs:
       - name: Checkout 📥
         uses: actions/checkout@v4
 
-      - name: Determine PR Origin
-        id: pr_origin
-        run: echo "is_forked=$(echo ${{ github.event.pull_request.head.repo.fork }})" >> $GITHUB_OUTPUT
-
       - name: Cypress install
         uses: cypress-io/github-action@v6
         with:
@@ -49,6 +45,10 @@ jobs:
       - name: Checkout 📥
         uses: actions/checkout@v4
 
+      - name: Determine PR Origin
+        id: pr_origin
+        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
+
       - name: Download the build folders
         uses: actions/download-artifact@v4
         with:
@@ -57,7 +57,7 @@ jobs:
 
       # For non-forked PRs
       - name: "UI Tests - Chrome (Non-forked)"
-        if: needs.install.outputs.is_forked == 'false'
+        if: steps.pr_origin.outputs.is_forked == 'false'
         uses: cypress-io/github-action@v6
         with:
           start: "npx vite preview --host"
@@ -78,7 +78,7 @@ jobs:
 
       # For forked PRs
       - name: "UI Tests - Chrome (Forked)"
-        if: needs.install.outputs.is_forked == 'true'
+        if: steps.pr_origin.outputs.is_forked == 'true'
         uses: cypress-io/github-action@v6
         with:
           start: "npx vite preview --host"
@@ -107,7 +107,7 @@ jobs:
 
       - name: Upload cypress videos 📹
         uses: actions/upload-artifact@v4
-        if: ${{ failure() && needs.install.outputs.is_forked == 'true' }}
+        if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
         with:
           name: cypress-videos
           path: cypress/videos
