@@ -2,7 +2,6 @@ import careConfig from "@careConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { Hospital, Trash2 } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -34,6 +33,7 @@ import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
@@ -75,6 +75,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
+  const { goBack } = useAppHistory();
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -106,11 +107,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         queryKey: ["facility", facilityId],
       });
 
-      if (facilityData?.geo_organization) {
-        navigate(`/org/${facilityData.geo_organization.id}/facilities`);
-      } else {
-        navigate("/");
-      }
+      goBack("/");
     },
   });
 
