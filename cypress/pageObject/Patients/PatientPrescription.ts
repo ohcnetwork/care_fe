@@ -65,6 +65,7 @@ export class PatientPrescription {
   }
   removeMedication() {
     cy.get('[data-cy="remove-medication"]')
+      .scrollIntoView()
       .filter(":visible")
       .not(":disabled")
       .first()
