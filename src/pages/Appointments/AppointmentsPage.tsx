@@ -556,32 +556,34 @@ export default function AppointmentsPage({
       </div>
 
       {activeTab === "board" ? (
-        <ScrollArea>
-          <div className="flex w-max space-x-4">
-            {(
-              [
-                "booked",
-                "checked_in",
-                "in_consultation",
-                "fulfilled",
-                "noshow",
-              ] as const
-            ).map((status) => (
-              <AppointmentColumn
-                key={status}
-                status={status}
-                facilityId={facilityId}
-                slot={slot?.id}
-                practitioner={practitioner?.id ?? null}
-                date_from={qParams.date_from}
-                date_to={qParams.date_to}
-                search={qParams.search?.toLowerCase()}
-                canViewAppointments={canViewAppointments}
-              />
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        <div className="md:w-[calc(100vw-8.2rem)]">
+          <ScrollArea>
+            <div className="flex w-max space-x-4">
+              {(
+                [
+                  "booked",
+                  "checked_in",
+                  "in_consultation",
+                  "fulfilled",
+                  "noshow",
+                ] as const
+              ).map((status) => (
+                <AppointmentColumn
+                  key={status}
+                  status={status}
+                  facilityId={facilityId}
+                  slot={slot?.id}
+                  practitioner={practitioner?.id ?? null}
+                  date_from={qParams.date_from}
+                  date_to={qParams.date_to}
+                  search={qParams.search?.toLowerCase()}
+                  canViewAppointments={canViewAppointments}
+                />
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </div>
       ) : (
         <AppointmentRow
           facilityId={facilityId}
