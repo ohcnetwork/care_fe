@@ -304,16 +304,6 @@ export function MedicationStatementQuestion({
                             expandedMedicationIndex === index ? null : index,
                           );
                         }}
-                        className={cn("border-b last:border-b-0", {
-                          "opacity-40 pointer-events-none":
-                            patientMedications?.results
-                              .filter(
-                                (result) =>
-                                  result.status === "entered_in_error",
-                              )
-                              .map((result) => result.id)
-                              .includes(medication.id as string),
-                        })}
                       >
                         <div
                           className={cn(
@@ -397,7 +387,15 @@ export function MedicationStatementQuestion({
                     ) : (
                       <MedicationStatementGridRow
                         medication={medication}
-                        disabled={disabled}
+                        disabled={
+                          disabled ||
+                          patientMedications?.results
+                            .filter(
+                              (result) => result.status === "entered_in_error",
+                            )
+                            .map((result) => result.id)
+                            .includes(medication.id as string)
+                        }
                         onUpdate={(updates) =>
                           handleUpdateMedication(index, updates)
                         }
