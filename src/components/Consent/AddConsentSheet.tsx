@@ -10,8 +10,6 @@ import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -41,10 +39,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import FileUploadDialog from "@/components/Files/FileUploadDialog";
-
-import useFileUpload from "@/hooks/useFileUpload";
-
 import mutate from "@/Utils/request/mutate";
 import {
   CONSENT_CATEGORIES,
@@ -68,18 +62,9 @@ const consentFormSchema = z
       end: z.date().optional(),
     }),
     verification_type: z.enum(VERIFICATION_TYPES).default("validation"),
-    source_attachments: z.array(z.instanceof(File)).default([]),
     note: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.source_attachments.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: t("please_upload_a_file"),
-        path: ["source_attachments"],
-      });
-    }
-
     if (data.period.end && data.date > data.period.end) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -110,31 +95,7 @@ export default function AddConsentSheet({
   const isEdit = !!existingConsent;
 
   const [isOpen, setIsOpen] = useState(false);
-  const [associatingId, setAssociatingId] = useState<string | null>(null);
-  const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const queryClient = useQueryClient();
-
-  const fileUpload = useFileUpload({
-    type: "consent",
-    category: "consent_attachment",
-    multiple: false,
-    allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
-    allowNameFallback: false,
-    compress: false,
-    onUpload: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["consents", patientId, encounterId],
-      });
-      if (isEdit) {
-        queryClient.invalidateQueries({
-          queryKey: ["consent", existingConsent?.id],
-        });
-      }
-      setOpenUploadDialog(false);
-      setIsOpen(false);
-      form.reset();
-    },
-  });
 
   const handleSuccess = () => {
     queryClient.invalidateQueries({
@@ -147,7 +108,6 @@ export default function AddConsentSheet({
     }
     setIsOpen(false);
     onSuccess?.();
-    fileUpload.clearFiles();
   };
 
   const { mutate: addVerification } = useMutation({
@@ -164,17 +124,12 @@ export default function AddConsentSheet({
         note: params.note,
       }),
     onSuccess: () => {
-      if (form.getValues("source_attachments")?.length === 0) {
-        handleSuccess();
-        toast.success(
-          isEdit
-            ? t("consent_updated_successfully")
-            : t("consent_created_successfully"),
-        );
-        return;
-      }
-
-      setOpenUploadDialog(true);
+      handleSuccess();
+      toast.success(
+        isEdit
+          ? t("consent_updated_successfully")
+          : t("consent_created_successfully"),
+      );
     },
     onError: () => {
       toast.error(t("error_adding_verification"));
@@ -187,7 +142,6 @@ export default function AddConsentSheet({
         pathParams: { patientId },
       })(data),
     onSuccess: async (response) => {
-      setAssociatingId(response.id);
       // After consent is created, add verification as a separate call
       addVerification({
         id: response.id,
@@ -206,14 +160,8 @@ export default function AddConsentSheet({
         pathParams: { patientId, id: existingConsent?.id ?? "" },
       })(data),
     onSuccess: () => {
-      if (form.getValues("source_attachments")?.length === 0) {
-        handleSuccess();
-        toast.success(t("consent_updated_successfully"));
-        return;
-      }
-
-      setAssociatingId(existingConsent?.id ?? null);
-      setOpenUploadDialog(true);
+      handleSuccess();
+      toast.success(t("consent_updated_successfully"));
 
       const currentVerificationType =
         existingConsent?.verification_details?.[0]?.verification_type;
@@ -246,14 +194,9 @@ export default function AddConsentSheet({
         end: undefined,
       },
       verification_type: "validation",
-      source_attachments: [],
       note: "",
     },
   });
-
-  useEffect(() => {
-    form.setValue("source_attachments", fileUpload.files);
-  }, [fileUpload.files, form]);
 
   // Prefill the form with existing consent data when in edit mode
   useEffect(() => {
@@ -274,7 +217,6 @@ export default function AddConsentSheet({
         verification_type:
           existingConsent.verification_details?.[0]?.verification_type ||
           "validation",
-        source_attachments: [],
         note: existingConsent.note || "",
       });
     }
@@ -303,14 +245,6 @@ export default function AddConsentSheet({
     }
   };
 
-  const handleUploadDialogClose = (open: boolean) => {
-    setOpenUploadDialog(open);
-
-    if (!open) {
-      handleSuccess();
-    }
-  };
-
   return (
     <Sheet
       open={isOpen}
@@ -318,7 +252,6 @@ export default function AddConsentSheet({
         setIsOpen(open);
         if (!open) {
           form.reset();
-          fileUpload.clearFiles();
         }
       }}
     >
@@ -580,56 +513,6 @@ export default function AddConsentSheet({
               )}
             />
 
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">
-                {t("uploaded")} {t("files")} ({fileUpload.files.length || 0})
-              </h3>
-
-              <FormField
-                control={form.control}
-                name="source_attachments"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl {...field}>
-                      <>
-                        <Label
-                          htmlFor={`file_upload_consent`}
-                          className="w-full inline-flex items-center justify-center px-4 py-2 cursor-pointer border border-gray-200 rounded-md hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <CareIcon icon="l-file-upload-alt" className="mr-1" />
-                          <span
-                            className="truncate"
-                            title={fileUpload.files
-                              .map((file) => file.name)
-                              .join(", ")}
-                          >
-                            {fileUpload.files.length > 0
-                              ? fileUpload.files
-                                  .map((file) => file.name)
-                                  .join(", ")
-                              : t("upload")}
-                          </span>
-                          {fileUpload.Input({ className: "hidden" })}
-                        </Label>
-
-                        {fileUpload.files.length > 0 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full mt-2"
-                            onClick={() => fileUpload.clearFiles()}
-                          >
-                            {t("clear")}
-                          </Button>
-                        )}
-                      </>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
@@ -649,14 +532,6 @@ export default function AddConsentSheet({
           </form>
         </Form>
       </SheetContent>
-      {fileUpload.Dialogues}
-      <FileUploadDialog
-        open={openUploadDialog}
-        onOpenChange={handleUploadDialogClose}
-        fileUpload={fileUpload}
-        associatingId={associatingId!}
-        type="consent"
-      />
     </Sheet>
   );
 }
