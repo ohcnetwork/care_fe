@@ -92,9 +92,9 @@ export const QuantityQuestion = memo(function QuantityQuestion({
   };
 
   return (
-    <div className="flex gap-4">
+    <div className="block space-y-4 mt-2 md:flex gap-4">
       {question.answer_value_set && (
-        <div className="space-y-2">
+        <div className="md:space-y-2">
           <Label htmlFor={`${question.id}-coding`}>Type</Label>
           <div className="w-[200px]">
             <ValueSetSelect
@@ -105,7 +105,7 @@ export const QuantityQuestion = memo(function QuantityQuestion({
           </div>
         </div>
       )}
-      <div className="space-y-2">
+      <div className="md:space-y-2">
         <Label htmlFor={`${question.id}-value`}>Value</Label>
         <Input
           id={`${question.id}-value`}
@@ -117,7 +117,7 @@ export const QuantityQuestion = memo(function QuantityQuestion({
           className="w-[200px]"
         />
       </div>
-      <div className="space-y-2">
+      <div className="md:space-y-2">
         <Label htmlFor={`${question.id}-unit`}>Unit</Label>
         <div className="w-[200px]">
           <ValueSetSelect
