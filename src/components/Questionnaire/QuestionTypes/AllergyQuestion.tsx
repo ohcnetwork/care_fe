@@ -314,8 +314,6 @@ export function AllergyQuestion({
       pathParams: { patientId },
       queryParams: {
         limit: 100,
-        // TODO: allergyIntoleranceAPI should have exclude_verification_status param.. otherwise entered_in_error entries can be remodified
-        // exclude_verification_status: "entered_in_error",
       },
     }),
     enabled: !isPreview,
@@ -422,7 +420,13 @@ export function AllergyQuestion({
                   <AllergyTableRow
                     key={index}
                     allergy={allergy}
-                    disabled={disabled}
+                    disabled={patientAllergies?.results
+                      .filter(
+                        (result) =>
+                          result.verification_status === "entered_in_error",
+                      )
+                      .map((result) => result.id)
+                      .includes(allergy.id as string)}
                     onUpdate={(updates) => handleUpdateAllergy(index, updates)}
                     onRemove={() => handleRemoveAllergy(index)}
                   />
@@ -440,6 +444,14 @@ export function AllergyQuestion({
                   "p-3 space-y-3",
                   allergy.clinical_status === "inactive" && "opacity-60",
                   allergy.clinical_status === "resolved" && "line-through",
+                  patientAllergies?.results
+                    .filter(
+                      (result) =>
+                        result.verification_status === "entered_in_error",
+                    )
+                    .map((result) => result.id)
+                    .includes(allergy.id as string) &&
+                    "opacity-40 pointer-events-none",
                 )}
               >
                 <div className="flex items-center justify-between">
