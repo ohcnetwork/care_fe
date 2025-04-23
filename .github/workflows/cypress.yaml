@@ -38,10 +38,11 @@ jobs:
       - name: Build ⚙️
         run: npm run build
 
-      - name: Install Chrome for Testing
-        uses: browser-actions/setup-chrome-for-testing@v1
+      - name: Install Chrome
+        uses: cypress-io/github-action@v5
         with:
-          version: "latest"
+          install-browser: true
+          browser: chrome
 
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
@@ -54,7 +55,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chrome-for-testing
+          browser: chrome
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,7 +74,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chrome-for-testing
+          browser: chrome
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
