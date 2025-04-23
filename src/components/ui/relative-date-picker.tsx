@@ -75,7 +75,6 @@ export function RelativeDatePicker({
 }: RelativeDatePickerProps) {
   const [selected, setSelected] = useState(() => {
     const initialState = computeTimeUnits(value);
-    console.log(initialState);
     return {
       unit: initialState.unit,
       value: initialState.value,
@@ -109,7 +108,8 @@ export function RelativeDatePicker({
 
     setResultDate(newDate);
     onDateChange(newDate);
-  }, [selected, onDateChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   const handleUnitChange = (newUnit: TimeUnit) => {
     setSelected((prev) => ({ ...prev, unit: newUnit }));

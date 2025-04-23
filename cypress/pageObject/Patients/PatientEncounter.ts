@@ -1,7 +1,8 @@
 export class PatientEncounter {
   // Navigation
   navigateToEncounters() {
-    cy.get('[data-sidebar="content"]').contains("Encounters").click();
+    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
+    cy.verifyAndClickElement('[data-cy="nav-encounters"]', "Encounters");
     return this;
   }
 
