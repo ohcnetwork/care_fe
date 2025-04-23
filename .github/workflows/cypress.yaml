@@ -12,7 +12,7 @@ on:
       - 'package-lock.json'
       - 'plugins/**'  
       - 'public/**'
-      - '.github/workflows/cypress.yaml'
+      - '.github/workflows/cypress.yaml'  # test trigger – safe change
   workflow_dispatch:
 
 jobs:
