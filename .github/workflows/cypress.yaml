@@ -78,7 +78,7 @@ jobs:
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
 
       # For forked PRs
-      - name: Cypress run for Forked PRs 🥬
+      - name: UI Tests - Chrome (Forked)
         if: steps.pr_origin.outputs.is_forked == 'true'
         uses: cypress-io/github-action@v6
         with:
