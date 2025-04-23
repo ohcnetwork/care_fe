@@ -38,11 +38,12 @@ jobs:
       - name: Build ⚙️
         run: npm run build
 
-      - name: Install Chrome
-        uses: cypress-io/github-action@v5
-        with:
-          install-browser: true
-          browser: chrome
+      - name: Install Firefox
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y firefox-esr
+          sudo ln -s /usr/bin/firefox-esr /usr/bin/firefox
+          echo "FIREFOX_BIN=/usr/bin/firefox" >> $GITHUB_ENV
 
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
@@ -55,13 +56,14 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chrome
+          browser: firefox
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
+          FIREFOX_BIN: /usr/bin/firefox
 
       - name: Cypress run for Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'true'
@@ -74,7 +76,7 @@ jobs:
           wait-on-timeout: 300
           record: true
           parallel: true
-          browser: chrome
+          browser: firefox
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -83,6 +85,7 @@ jobs:
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
+          FIREFOX_BIN: /usr/bin/firefox
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
