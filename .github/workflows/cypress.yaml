@@ -16,6 +16,16 @@ jobs:
       - name: Checkout 📥
         uses: actions/checkout@v4
 
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Cypress install
         uses: cypress-io/github-action@v6
         with:
@@ -78,10 +88,12 @@ jobs:
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
 
       # For forked PRs
-      - name: "UI Tests - Chrome (Forked)"
+      - name: Cypress run for Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'true'
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
+          env: SKIP_PREFLIGHT_CHECK=true
+          install: false
           start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
@@ -89,7 +101,6 @@ jobs:
           record: false
           parallel: true
           group: "UI - Chrome"
-          config-file: cypress.config.ts
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
