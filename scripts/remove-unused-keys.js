@@ -72,19 +72,19 @@ async function extractAndCleanTranslations(options) {
       content.includes("Trans") &&
       (content.includes("react-i18next") || content.includes("i18next"))
     ) {
-      let content = content;
+      let parsedContent = content;
       try {
         const result = babel.transformSync(content, {
           filename: filePath,
           presets: ["@babel/preset-typescript"],
         });
-        content = result.code;
+        parsedContent = result.code;
       } catch (error) {
         console.warn(
           `Warning: Failed to transform file, using ts file instead ${filePath}: ${error.message}`,
         );
       }
-      parser.parseTransFromString(content, (key, options) => {
+      parser.parseTransFromString(parsedContent, (key, options) => {
         parser.set(key, options);
         allUsedKeys.add(key);
       });
