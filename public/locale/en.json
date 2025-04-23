@@ -492,6 +492,7 @@
   "association_start_date": "Association start date",
   "at_least_one_department_is_required": "At least one department is required",
   "at_time": "at <strong>{{time}}</strong>",
+  "attach_files_to_consent_description": "Attach supporting documents to the consent.",
   "atypical_presentation_details": "Atypical presentation details",
   "audio__allow_permission": "Please allow microphone permission in site settings",
   "audio__allow_permission_button": "Click here to know how to allow",

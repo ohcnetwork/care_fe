@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   ArrowLeft,
@@ -6,8 +6,11 @@ import {
   Download,
   Edit,
   FileText,
+  PlusCircle,
+  Upload,
 } from "lucide-react";
 import { Link, usePathParams } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -17,14 +20,17 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import AddConsentSheet from "@/components/Consent/AddConsentSheet";
+import FileUploadDialog from "@/components/Files/FileUploadDialog";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
+import useFileUpload from "@/hooks/useFileUpload";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -37,6 +43,9 @@ export function ConsentDetailPage() {
     usePathParams(
       "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId",
     ) ?? {};
+
+  const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  const queryClient = useQueryClient();
 
   // Load consent data
   const { data: consent, isLoading: isLoadingConsent } = useQuery({
@@ -65,6 +74,21 @@ export function ConsentDetailPage() {
       pathParams: { id: attachmentId! },
     }),
     enabled: !!attachmentId,
+  });
+
+  const fileUpload = useFileUpload({
+    type: "consent",
+    category: "consent_attachment",
+    multiple: false,
+    allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
+    allowNameFallback: false,
+    compress: false,
+    onUpload: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["consent", consentId],
+      });
+      setOpenUploadDialog(false);
+    },
   });
 
   const fileManager = useFileManager({
@@ -138,6 +162,13 @@ export function ConsentDetailPage() {
         </Button>
       </div>
     );
+  };
+
+  const handleUploadDialogClose = (open: boolean) => {
+    setOpenUploadDialog(open);
+    if (!open) {
+      fileUpload.clearFiles();
+    }
   };
 
   return (
@@ -267,12 +298,74 @@ export function ConsentDetailPage() {
             </div>
 
             <div className="lg:col-span-2">
-              {consent.source_attachments.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">
                     {t("supporting_documents")}
                   </h3>
-                  <Card className="p-5">
+                  <div className="flex gap-3">
+                    <Label
+                      htmlFor="file_upload_consent"
+                      className="cursor-pointer flex items-center px-4 py-2 border border-gray-200 rounded-md hover:bg-gray-50"
+                    >
+                      <PlusCircle className="size-4 mr-2" />
+                      {t("select")} {t("files")}
+                      {fileUpload.Input({ className: "hidden" })}
+                    </Label>
+                    <Button
+                      variant="outline"
+                      className="gap-2"
+                      onClick={() => setOpenUploadDialog(true)}
+                      disabled={fileUpload.files.length === 0}
+                    >
+                      <Upload className="size-4" />
+                      {t("upload")}
+                      {fileUpload.files.length > 0 &&
+                        ` (${fileUpload.files.length})`}
+                    </Button>
+                  </div>
+                </div>
+
+                {fileUpload.files.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-base font-medium mb-2">
+                      {t("selected_files")}
+                    </h4>
+                    <Card className="p-4">
+                      <div className="space-y-2">
+                        {fileUpload.files.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between rounded-md bg-gray-50 px-4 py-2"
+                          >
+                            <span className="flex items-center gap-2 truncate">
+                              <CareIcon
+                                icon="l-paperclip"
+                                className="shrink-0"
+                              />
+                              <span
+                                className="truncate max-w-[200px]"
+                                title={file.name}
+                              >
+                                {file.name}
+                              </span>
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => fileUpload.removeFile(index)}
+                            >
+                              <CareIcon icon="l-times" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  </div>
+                )}
+
+                <Card className="p-5">
+                  {consent.source_attachments.length > 0 ? (
                     <div>
                       <div className="divide-y">
                         {consent.source_attachments.map((attachment, index) => {
@@ -318,9 +411,21 @@ export function ConsentDetailPage() {
                         })}
                       </div>
                     </div>
-                  </Card>
-                </div>
-              )}
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <div className="rounded-full bg-gray-100 p-3 mb-4">
+                        <FileText className="size-6 text-gray-400" />
+                      </div>
+                      <h4 className="text-base font-medium mb-2">
+                        {t("no_files_attached")}
+                      </h4>
+                      <p className="text-sm text-gray-500 mb-4 max-w-md">
+                        {t("attach_files_to_consent_description")}
+                      </p>
+                    </div>
+                  )}
+                </Card>
+              </div>
               {consent?.note && (
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold mb-2">{t("note")}</h3>
@@ -336,6 +441,15 @@ export function ConsentDetailPage() {
           </div>
         </div>
       </Page>
+      {fileManager.Dialogues}
+      {fileUpload.Dialogues}
+      <FileUploadDialog
+        open={openUploadDialog}
+        onOpenChange={handleUploadDialogClose}
+        fileUpload={fileUpload}
+        associatingId={associatingId}
+        type="consent"
+      />
     </div>
   );
 }
