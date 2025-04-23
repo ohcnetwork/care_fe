@@ -146,7 +146,7 @@ export function ConsentDetailPage() {
           >
             <span className="flex flex-row items-center gap-1">
               <CareIcon icon="l-eye" />
-              {t("view")}
+              <span className="hidden sm:inline">{t("view")}</span>
             </span>
           </Button>
         )}
@@ -157,7 +157,7 @@ export function ConsentDetailPage() {
         >
           <span className="flex flex-row items-center gap-1">
             <Download className="size-4 mr-1" />
-            {t("download")}
+            <span className="hidden sm:inline">{t("download")}</span>
           </span>
         </Button>
       </div>
