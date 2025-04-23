@@ -1,7 +1,8 @@
 export class PatientEncounter {
   // Navigation
   navigateToEncounters() {
-    cy.get('[data-sidebar="content"]').contains("Encounters").click();
+    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
+    cy.verifyAndClickElement('[data-cy="nav-encounters"]', "Encounters");
     return this;
   }
 
@@ -50,7 +51,8 @@ export class PatientEncounter {
         if ($el.is("select")) {
           cy.wrap($el).select(value);
         } else {
-          cy.wrap($el).type(value);
+          // Find the actual input element within the container
+          cy.wrap($el).find("input, textarea").click().type(value);
         }
       });
     });

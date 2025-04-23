@@ -72,6 +72,10 @@ export function formatValue(
     case "decimal":
     case "integer":
       return typeof value === "number" ? value.toString() : value.toString();
+    case "boolean":
+      return value === "true" ? t("yes") : t("no");
+    case "time":
+      return value.toString().slice(0, 5);
     default:
       return value.toString();
   }
@@ -202,6 +206,8 @@ function StructuredResponseBadge({
   type: string;
   submitType: string;
 }) {
+  const { t } = useTranslation();
+
   const colors = {
     symptom: "bg-yellow-100 text-yellow-800",
     diagnosis: "bg-blue-100 text-blue-800",
@@ -230,6 +236,8 @@ function ResponseCard({
   item: QuestionnaireResponse;
   isPrintPreview?: boolean;
 }) {
+  const { t } = useTranslation();
+
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
 
@@ -282,28 +290,30 @@ function ResponseCard({
             </span>
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              {t("print")}
-              <ChevronDown className="ml-2 size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <Link href={`questionnaire_response/${item.id}/print`}>
-              <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
-            </Link>
-            <Link
-              href={`questionnaire/${item.questionnaire?.id}/responses/print`}
-            >
-              <DropdownMenuItem>
-                {t("print_all_responses", {
-                  title: item.questionnaire?.title,
-                })}
-              </DropdownMenuItem>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {!isPrintPreview && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                {t("print")}
+                <ChevronDown className="ml-2 size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <Link href={`questionnaire_response/${item.id}/print`}>
+                <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
+              </Link>
+              <Link
+                href={`questionnaire/${item.questionnaire?.id}/responses/print`}
+              >
+                <DropdownMenuItem>
+                  {t("print_all_responses", {
+                    title: item.questionnaire?.title,
+                  })}
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {item.questionnaire && (
