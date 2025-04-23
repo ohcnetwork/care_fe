@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
-import { Plus } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -50,6 +50,7 @@ import {
   CONSENT_CATEGORIES,
   CONSENT_DECISIONS,
   CONSENT_STATUSES,
+  ConsentModel,
   CreateConsentRequest,
   VERIFICATION_TYPES,
   VerificationType,
@@ -95,6 +96,7 @@ interface AddConsentSheetProps {
   encounterId: string;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
+  existingConsent?: ConsentModel;
 }
 
 export default function AddConsentSheet({
@@ -102,8 +104,10 @@ export default function AddConsentSheet({
   encounterId,
   trigger,
   onSuccess,
+  existingConsent,
 }: AddConsentSheetProps) {
   const { t } = useTranslation();
+  const isEdit = !!existingConsent;
 
   const [isOpen, setIsOpen] = useState(false);
   const [associatingId, setAssociatingId] = useState<string | null>(null);
@@ -121,6 +125,11 @@ export default function AddConsentSheet({
       queryClient.invalidateQueries({
         queryKey: ["consents", patientId, encounterId],
       });
+      if (isEdit) {
+        queryClient.invalidateQueries({
+          queryKey: ["consent", existingConsent?.id],
+        });
+      }
       setOpenUploadDialog(false);
       setIsOpen(false);
       form.reset();
@@ -131,6 +140,11 @@ export default function AddConsentSheet({
     queryClient.invalidateQueries({
       queryKey: ["consents", patientId, encounterId],
     });
+    if (isEdit) {
+      queryClient.invalidateQueries({
+        queryKey: ["consent", existingConsent?.id],
+      });
+    }
     setIsOpen(false);
     onSuccess?.();
     fileUpload.clearFiles();
@@ -152,7 +166,11 @@ export default function AddConsentSheet({
     onSuccess: () => {
       if (form.getValues("source_attachments")?.length === 0) {
         handleSuccess();
-        toast.success(t("consent_created_successfully"));
+        toast.success(
+          isEdit
+            ? t("consent_updated_successfully")
+            : t("consent_created_successfully"),
+        );
         return;
       }
 
@@ -163,7 +181,7 @@ export default function AddConsentSheet({
     },
   });
 
-  const { mutate: createConsent, isPending } = useMutation({
+  const { mutate: createConsent, isPending: isCreating } = useMutation({
     mutationFn: (data: CreateConsentRequest) =>
       mutate(consentApi.create, {
         pathParams: { patientId },
@@ -181,6 +199,41 @@ export default function AddConsentSheet({
       toast.error(t("error_creating_consent"));
     },
   });
+
+  const { mutate: updateConsent, isPending: isUpdating } = useMutation({
+    mutationFn: (data: CreateConsentRequest) =>
+      mutate(consentApi.update, {
+        pathParams: { patientId, id: existingConsent?.id ?? "" },
+      })(data),
+    onSuccess: () => {
+      if (form.getValues("source_attachments")?.length === 0) {
+        handleSuccess();
+        toast.success(t("consent_updated_successfully"));
+        return;
+      }
+
+      setAssociatingId(existingConsent?.id ?? null);
+      setOpenUploadDialog(true);
+
+      const currentVerificationType =
+        existingConsent?.verification_details?.[0]?.verification_type;
+      const newVerificationType = form.getValues("verification_type");
+
+      if (newVerificationType !== currentVerificationType) {
+        addVerification({
+          id: existingConsent?.id ?? "",
+          verificationType: newVerificationType,
+          note: form.getValues("note"),
+        });
+      }
+    },
+    onError: () => {
+      toast.error(t("error_updating_consent"));
+    },
+  });
+
+  const isPending = isCreating || isUpdating;
+
   const form = useForm<ConsentFormValues>({
     resolver: zodResolver(consentFormSchema),
     defaultValues: {
@@ -202,8 +255,33 @@ export default function AddConsentSheet({
     form.setValue("source_attachments", fileUpload.files);
   }, [fileUpload.files, form]);
 
+  // Prefill the form with existing consent data when in edit mode
+  useEffect(() => {
+    if (isEdit && existingConsent) {
+      form.reset({
+        decision: existingConsent.decision,
+        category: existingConsent.category,
+        status: existingConsent.status,
+        date: new Date(existingConsent.date),
+        period: {
+          start: existingConsent.period.start
+            ? new Date(existingConsent.period.start)
+            : undefined,
+          end: existingConsent.period.end
+            ? new Date(existingConsent.period.end)
+            : undefined,
+        },
+        verification_type:
+          existingConsent.verification_details?.[0]?.verification_type ||
+          "validation",
+        source_attachments: [],
+        note: existingConsent.note || "",
+      });
+    }
+  }, [isEdit, existingConsent, form]);
+
   const onSubmit = (values: ConsentFormValues) => {
-    createConsent({
+    const consentData = {
       status: values.status,
       category: values.category,
       date: values.date,
@@ -216,7 +294,13 @@ export default function AddConsentSheet({
       source_attachments: [],
       verification_details: [],
       note: values.note,
-    });
+    };
+
+    if (isEdit && existingConsent) {
+      updateConsent(consentData);
+    } else {
+      createConsent(consentData);
+    }
   };
 
   const handleUploadDialogClose = (open: boolean) => {
@@ -241,15 +325,32 @@ export default function AddConsentSheet({
       <SheetTrigger asChild>
         {trigger || (
           <Button variant="outline" className="gap-2">
-            <Plus className="size-4" />
-            {t("add_consent")}
+            {isEdit ? (
+              <>
+                <Edit className="size-4" />
+                {t("edit_consent")}
+              </>
+            ) : (
+              <>
+                <Plus className="size-4" />
+                {t("add")} {t("consent")}
+              </>
+            )}
           </Button>
         )}
       </SheetTrigger>
       <SheetContent className="overflow-y-auto sm:max-w-lg">
         <SheetHeader className="mb-6">
-          <SheetTitle>{t("add_consent")}</SheetTitle>
-          <SheetDescription>{t("add_consent_description")}</SheetDescription>
+          <SheetTitle>
+            {isEdit
+              ? t("edit") + " " + t("consent")
+              : t("add") + " " + t("consent")}
+          </SheetTitle>
+          <SheetDescription>
+            {isEdit
+              ? t("edit_consent_description")
+              : t("add_consent_description")}
+          </SheetDescription>
         </SheetHeader>
 
         <Form {...form}>
@@ -301,6 +402,7 @@ export default function AddConsentSheet({
                   <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    value={field.value}
                     className="flex gap-4"
                   >
                     <div className="flex items-center space-x-2">
@@ -330,6 +432,7 @@ export default function AddConsentSheet({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -379,6 +482,7 @@ export default function AddConsentSheet({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -407,6 +511,7 @@ export default function AddConsentSheet({
                   <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    value={field.value}
                     className="grid grid-cols-2 gap-4"
                   >
                     <Label

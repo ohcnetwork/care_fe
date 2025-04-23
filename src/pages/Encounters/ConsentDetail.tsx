@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ChevronLeft,
   Download,
+  Edit,
   FileText,
 } from "lucide-react";
 import { Link, usePathParams } from "raviger";
@@ -20,6 +21,7 @@ import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import AddConsentSheet from "@/components/Consent/AddConsentSheet";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
@@ -148,7 +150,19 @@ export function ConsentDetailPage() {
         {t("back")}
       </Link>
       <Page title={t("consent")}>
-        <div className="mb-4 flex justify-between items-center"></div>
+        <div className="mb-4 flex justify-end">
+          <AddConsentSheet
+            patientId={patientId!}
+            encounterId={encounterId!}
+            existingConsent={consent}
+            trigger={
+              <Button variant="outline" className="gap-2">
+                <Edit className="size-4" />
+                {t("edit")}
+              </Button>
+            }
+          />
+        </div>
         <div className="container mx-auto py-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div>
