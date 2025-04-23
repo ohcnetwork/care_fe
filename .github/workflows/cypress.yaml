@@ -12,9 +12,6 @@ jobs:
     if: github.repository == 'ohcnetwork/care_fe'
     permissions: write-all
     runs-on: ubuntu-latest
-    container:
-      image: cypress/browsers:node-22.13.0-chrome-132.0.6834.83-1-ff-134.0.1-edge-131.0.2903.147-1
-      options: --user 1001
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
@@ -38,9 +35,6 @@ jobs:
     permissions: write-all
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    container:
-      image: cypress/browsers:node-22.13.0-chrome-132.0.6834.83-1-ff-134.0.1-edge-131.0.2903.147-1
-      options: --user 1001
     needs: install
     env:
       REACT_CARE_API_URL: https://careapi.ohc.network
@@ -61,6 +55,11 @@ jobs:
         with:
           name: build
           path: build
+
+      - name: Delete build artifact
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build
 
       # For non-forked PRs
       - name: "UI Tests - Chrome (Non-forked)"
