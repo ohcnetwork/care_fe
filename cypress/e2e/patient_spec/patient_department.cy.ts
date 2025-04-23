@@ -31,7 +31,7 @@ describe("Manage departments/teams association to an encounter", () => {
     const updatedDepartmentTeamName = generateDeptName("Updated-Sub-");
     patientDepartments
       .navigateToSettings()
-      .navigateToDevicesTab()
+      .navigateToDepartments()
       .clickAddDepartmentTeam()
       .enterName(departmentName)
       .selectType(OrganizationType)
@@ -70,7 +70,7 @@ describe("Manage departments/teams association to an encounter", () => {
   it("Navigate to the facility's administration department and link a user to the facility", () => {
     patientDepartments
       .navigateToSettings()
-      .navigateToDevicesTab()
+      .navigateToDepartments()
       .searchDepartmentTeam("Administration")
       .openDepartmentsTeamDetails()
       .clickUsersTab()

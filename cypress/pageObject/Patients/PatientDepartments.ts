@@ -3,7 +3,7 @@ export class PatientDepartments {
     cy.verifyAndClickElement('[data-cy="nav-settings"]', "Settings");
     return this;
   }
-  navigateToDevicesTab() {
+  navigateToDepartments() {
     cy.verifyAndClickElement('[data-cy="nav-departments"]', "Departments");
     return this;
   }
