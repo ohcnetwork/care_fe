@@ -228,7 +228,16 @@ export default function AddConsentSheet({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) {
+          form.reset();
+          fileUpload.clearFiles();
+        }
+      }}
+    >
       <SheetTrigger asChild>
         {trigger || (
           <Button variant="outline" className="gap-2">
