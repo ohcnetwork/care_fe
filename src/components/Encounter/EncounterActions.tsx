@@ -79,6 +79,7 @@ export default function EncounterActions({
       priority: encounter.priority,
       external_identifier: encounter.external_identifier,
       facility: encounter.facility.id,
+      discharge_summary_advice: encounter.discharge_summary_advice,
     });
   };
 
