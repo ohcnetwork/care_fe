@@ -513,7 +513,6 @@ export default function UserForm({
                       <Input
                         data-cy="email-input"
                         type="email"
-                        id="email"
                         placeholder={t("email")}
                         {...field}
                       />
@@ -523,7 +522,6 @@ export default function UserForm({
                 )}
               />
             )}
-
             <FormField
               control={form.control}
               name="password_setup_method"
@@ -535,29 +533,29 @@ export default function UserForm({
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                       className="space-y-3"
                     >
+                      {/* Set password now option */}
                       <div
-                        className={`flex items-start space-x-3 rounded-md border p-3 ${
+                        className={`flex items-start space-x-3 rounded-md border p-3 cursor-pointer transition-colors ${
                           field.value === "immediate"
                             ? "bg-white border-primary"
-                            : "bg-transparent  border-gray-200"
+                            : "bg-transparent border-gray-200 hover:bg-gray-100"
                         }`}
-                        onClick={() => field.onChange("immediate")}
                       >
                         <RadioGroupItem
                           value="immediate"
                           id="immediate"
                           className="mt-1"
                         />
-                        <div className="space-y-1.5">
+                        <div className="space-y-1.5 flex-1">
                           <Label
                             htmlFor="immediate"
-                            className="text-base font-medium cursor-pointer flex items-center"
+                            className="text-base font-medium cursor-pointer flex items-center gap-2"
                           >
                             <Lock className="size-4" />
-                            {t("set_password_now")}
+                            <span>{t("set_password_now")}</span>
                           </Label>
                           <p className="text-sm text-muted-foreground">
                             {t("set_password_now_description")}
@@ -565,26 +563,26 @@ export default function UserForm({
                         </div>
                       </div>
 
+                      {/* Send email invitation option */}
                       <div
-                        className={`flex items-start space-x-3 rounded-md border p-3 ${
+                        className={`flex items-start space-x-3 rounded-md border p-3 cursor-pointer transition-colors ${
                           field.value === "email"
                             ? "bg-white border-primary"
-                            : "bg-transparent  border-gray-200"
+                            : "bg-transparent border-gray-200 hover:bg-gray-100"
                         }`}
-                        onClick={() => field.onChange("email")}
                       >
                         <RadioGroupItem
                           value="email"
                           id="email"
                           className="mt-1"
                         />
-                        <div className="space-y-1.5">
+                        <div className="space-y-1.5 flex-1">
                           <Label
                             htmlFor="email"
-                            className="text-base font-medium cursor-pointer flex items-center"
+                            className="text-base font-medium cursor-pointer flex items-center gap-2"
                           >
                             <Mail className="size-4" />
-                            {t("send_email_invitation")}
+                            <span>{t("send_email_invitation")}</span>
                           </Label>
                           <p className="text-sm text-muted-foreground">
                             {t("send_email_invitation_description")}
@@ -604,9 +602,8 @@ export default function UserForm({
                   control={form.control}
                   name="password"
                   render={({ field }) => (
-                    <FormItem id="password">
-                      <FormLabel aria-required>{t("password")} *</FormLabel>
-
+                    <FormItem>
+                      <FormLabel aria-required>{t("password")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <PasswordInput
@@ -673,7 +670,6 @@ export default function UserForm({
                           data-cy="confirm-password-input"
                           placeholder={t("confirm_password")}
                           {...field}
-                          id="c_password"
                         />
                       </FormControl>
                       <FormMessage />
@@ -697,7 +693,6 @@ export default function UserForm({
                     data-cy="phone-number-input"
                     placeholder={t("enter_phone_number")}
                     {...field}
-                    id="phone_number"
                   />
                 </FormControl>
                 <FormMessage />
@@ -709,8 +704,8 @@ export default function UserForm({
             control={form.control}
             name="gender"
             render={({ field }) => (
-              <FormItem id="gender">
-                <FormLabel aria-required>{t("gender")} *</FormLabel>
+              <FormItem>
+                <FormLabel aria-required>{t("gender")}</FormLabel>
                 <Select
                   {...field}
                   onValueChange={field.onChange}
