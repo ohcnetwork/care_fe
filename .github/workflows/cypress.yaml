@@ -38,12 +38,12 @@ jobs:
       - name: Build ⚙️
         run: npm run build
 
-      - name: Install Firefox
+      - name: Install Firefox ESR
         run: |
           sudo apt-get update
-          sudo apt-get install -y firefox   
-          sudo ln -s /usr/bin/firefox /usr/bin/firefox
-          echo "FIREFOX_BIN=/usr/bin/firefox" >> $GITHUB_ENV
+          sudo apt-get install -y firefox-esr
+          sudo ln -sf /usr/bin/firefox-esr /usr/bin/firefox
+          echo "FIREFOX_BIN=/usr/bin/firefox-esr" >> $GITHUB_ENV
 
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
@@ -63,7 +63,7 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=4096
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
-          FIREFOX_BIN: /usr/bin/firefox
+          FIREFOX_BIN: /usr/bin/firefox-esr
 
       - name: Cypress run for Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'true'
@@ -85,7 +85,7 @@ jobs:
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
-          FIREFOX_BIN: /usr/bin/firefox
+          FIREFOX_BIN: /usr/bin/firefox-esr
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
