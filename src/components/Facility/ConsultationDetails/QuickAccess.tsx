@@ -129,7 +129,8 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
       </section>
 
       {/* Discharge Information - Show when status is discharged */}
-      {encounter.status === "discharged" &&
+      {(encounter.status === "discharged" ||
+        encounter.status === "completed") &&
         encounter.discharge_summary_advice && (
           <>
             <div className="w-full border-t border-dashed border-gray-300" />
