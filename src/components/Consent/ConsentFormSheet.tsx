@@ -67,6 +67,18 @@ const consentFormSchema = z
         path: ["date"],
       });
     }
+
+    if (
+      data.period.start &&
+      data.period.end &&
+      data.period.start > data.period.end
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("valid_from_after_valid_untill"),
+        path: ["period.start"],
+      });
+    }
   });
 
 type ConsentFormValues = z.infer<typeof consentFormSchema>;
