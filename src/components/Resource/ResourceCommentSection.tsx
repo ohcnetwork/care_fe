@@ -13,6 +13,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import PaginationComponent from "@/components/Common/Pagination";
+import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
@@ -20,7 +21,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 
 const CommentSection = ({ id }: { id: string }) => {
@@ -153,13 +154,10 @@ export const Comment = ({
           <span className="text-gray-700 font-medium text-xs md:text-sm">
             {formatName(created_by)}
           </span>
-          <time
+          <RelativeDateTooltip
+            date={created_date}
             className="text-gray-500 text-xs"
-            dateTime={created_date}
-            title={formatDateTime(created_date)}
-          >
-            {relativeTime(created_date)}
-          </time>
+          />
         </div>
         <div className="break-words whitespace-pre-wrap mt-1">
           <Markdown content={comment} />
