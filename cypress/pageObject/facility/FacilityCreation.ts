@@ -86,6 +86,14 @@ export class FacilityCreation {
     cy.clickSubmitButton("Create Facility");
   }
 
+  interceptFacilityCreation() {
+    cy.intercept("POST", "**/api/v1/facility/").as("facilityCreation");
+  }
+
+  verifyFacilityCreation() {
+    cy.wait("@facilityCreation").its("response.statusCode").should("eq", 200);
+  }
+
   // Verification Methods
   verifySuccessMessage() {
     cy.verifyNotification("Facility created successfully");
