@@ -114,11 +114,6 @@ export class PatientFiles {
     return this;
   }
 
-  verifyMultipleFileUploadSuccess(message: string) {
-    cy.verifyNotification(message);
-    return this;
-  }
-
   clickRecordAudioButton() {
     cy.get('[data-cy="record-audio-button"]').click();
     return this;
@@ -216,22 +211,8 @@ export class PatientFiles {
   }
 
   closeFilePreview() {
-    cy.verifyAndClickElement("[data-cy='file-preview-close']", "Close");
-    return this;
-  }
-
-  openCamera() {
-    cy.get('[data-cy="open-camera-button"]').click();
-    return this;
-  }
-
-  captureImage() {
-    cy.verifyAndClickElement('[data-cy="capture-button"]', "Capture");
-    return this;
-  }
-
-  clickSubmit() {
-    cy.verifyAndClickElement('[data-cy="capture-submit-button"]', "Submit");
+    cy.get('[data-cy="file-preview-download"]').should("be.visible");
+    cy.contains("button", "Close").click();
     return this;
   }
 

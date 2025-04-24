@@ -37,10 +37,10 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import roleApi from "@/types/emr/role/roleApi";
 import { FacilityOrganizationUserRole } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
@@ -64,7 +64,7 @@ export default function EditUserRoleSheet({
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
-    queryFn: query(routes.role.list),
+    queryFn: query(roleApi.listRoles),
     enabled: open,
   });
 
@@ -190,7 +190,7 @@ export default function EditUserRoleSheet({
               <SelectTrigger className="h-12">
                 <SelectValue placeholder={t("select_role")} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-[var(--radix-select-trigger-width)]">
                 {roles?.results?.map((role) => (
                   <SelectItem key={role.id} value={role.id}>
                     <div className="flex flex-col text-left">

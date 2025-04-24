@@ -1,5 +1,3 @@
-"use client";
-
 import {
   DotsVerticalIcon,
   MinusCircledIcon,
@@ -7,9 +5,9 @@ import {
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -17,14 +15,14 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Command, CommandDrawer, CommandList } from "@/components/ui/command";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
+import { Command, CommandList } from "@/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,19 +32,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { RelativeDatePicker } from "@/components/ui/relative-date-picker";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -124,13 +124,17 @@ function SymptomActionsMenu({
   disabled,
   onToggleNotes,
   onRemove,
+  symptom,
 }: {
   showNotes: boolean;
   verificationStatus: string;
   disabled?: boolean;
   onToggleNotes: () => void;
   onRemove: () => void;
+  symptom: SymptomRequest;
 }) {
+  const { t } = useTranslation();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -138,7 +142,7 @@ function SymptomActionsMenu({
           variant="ghost"
           size="icon"
           disabled={disabled}
-          className="size-8 p-2 border border-gray-200 bg-white shadow"
+          className="size-9"
         >
           <DotsVerticalIcon className="size-4" />
         </Button>
@@ -146,7 +150,11 @@ function SymptomActionsMenu({
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={onToggleNotes}>
           <Pencil2Icon className="size-4 mr-2" />
-          {showNotes ? t("hide_notes") : t("add_notes")}
+          {showNotes
+            ? t("hide_notes")
+            : symptom.note
+              ? t("show_notes")
+              : t("add_notes")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -171,11 +179,11 @@ const SymptomRow = React.memo(function SymptomRow({
   onUpdate,
   onRemove,
 }: SymptomRowProps) {
+  const { t } = useTranslation();
+
   const [showNotes, setShowNotes] = useState(Boolean(symptom.note));
-  const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
-    "absolute",
-  );
   const [isOpen, setIsOpen] = useState(!symptom.id);
+  const isMobile = useBreakpoints({ default: true, md: false });
 
   const handleDateChange = useCallback(
     (date: Date | undefined) =>
@@ -208,136 +216,16 @@ const SymptomRow = React.memo(function SymptomRow({
   );
 
   const handleRemove = useCallback(() => onRemove(index), [index, onRemove]);
-  const handleToggleNotes = useCallback(() => setShowNotes((n) => !n), []);
 
-  return (
-    <div
-      className={cn("group hover:bg-gray-50", {
-        "opacity-40 pointer-events-none":
-          symptom.verification_status === "entered_in_error",
-      })}
-    >
-      {/* Desktop View */}
-      <div className="hidden md:grid md:grid-cols-12 md:items-center md:gap-4 py-1 px-2">
-        <div className="flex items-center justify-between md:col-span-5">
-          <div
-            className="font-medium text-sm truncate"
-            title={symptom.code.display}
-          >
-            {symptom.code.display}
-          </div>
-        </div>
-        <div className="col-span-2">
-          <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
-            {t("date")}
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-8 md:h-9 w-full justify-start font-normal"
-                disabled={disabled || !!symptom.id}
-              >
-                {symptom.onset?.onset_datetime ? (
-                  new Date(symptom.onset.onset_datetime).toLocaleDateString()
-                ) : (
-                  <span className="text-muted-foreground">
-                    {t("select_date")}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-auto" align="start">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) =>
-                  setActiveTab(v as "absolute" | "relative")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="absolute">
-                    {t("absolute_date")}
-                  </TabsTrigger>
-                  <TabsTrigger value="relative">
-                    {t("relative_date")}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="absolute" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      symptom.onset?.onset_datetime
-                        ? new Date(symptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onSelect={(date: Date | undefined) => {
-                      handleDateChange(date);
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="relative" className="p-0">
-                  <RelativeDatePicker
-                    value={
-                      symptom.onset?.onset_datetime
-                        ? new Date(symptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onDateChange={(date) => handleDateChange(date)}
-                  />
-                </TabsContent>
-              </Tabs>
-            </PopoverContent>
-          </Popover>
-        </div>
-        <div className="col-span-2">
-          <Select
-            value={symptom.clinical_status}
-            onValueChange={handleStatusChange}
-            disabled={disabled}
-          >
-            <SelectTrigger className="h-8 md:h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SYMPTOM_CLINICAL_STATUS.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {t(status)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="col-span-2">
-          <Select
-            value={symptom.severity}
-            onValueChange={handleSeverityChange}
-            disabled={disabled}
-          >
-            <SelectTrigger className="h-8 md:h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SYMPTOM_SEVERITY.map((severity) => (
-                <SelectItem key={severity} value={severity}>
-                  {t(severity)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="col-span-1 flex justify-center">
-          <SymptomActionsMenu
-            showNotes={showNotes}
-            verificationStatus={symptom.verification_status}
-            disabled={disabled}
-            onToggleNotes={handleToggleNotes}
-            onRemove={handleRemove}
-          />
-        </div>
-      </div>
-
-      {/* Mobile View - Card Layout */}
-      <div className="md:hidden rounded-lg">
+  // For mobile view - Card Layout
+  if (isMobile) {
+    return (
+      <div
+        className={cn("group hover:bg-gray-50", {
+          "opacity-40 pointer-events-none":
+            symptom.verification_status === "entered_in_error",
+        })}
+      >
         <Card
           className={cn("mb-2 rounded-lg", {
             "border border-primary-500": isOpen,
@@ -383,7 +271,7 @@ const SymptomRow = React.memo(function SymptomRow({
                           }}
                           className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
                         >
-                          <MinusCircledIcon className="h-5 w-5" />
+                          <MinusCircledIcon className="size-5" />
                         </Button>
                       )}
                       <Button
@@ -392,9 +280,9 @@ const SymptomRow = React.memo(function SymptomRow({
                         className="h-10 w-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
                       >
                         {isOpen ? (
-                          <ChevronsDownUp className="h-5 w-5" />
+                          <ChevronsDownUp className="size-5" />
                         ) : (
-                          <ChevronsUpDown className="h-5 w-5" />
+                          <ChevronsUpDown className="size-5" />
                         )}
                       </Button>
                     </div>
@@ -423,65 +311,17 @@ const SymptomRow = React.memo(function SymptomRow({
                   <div className="block text-sm font-medium text-gray-500 mb-1">
                     {t("onset_date")}
                   </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="h-8 md:h-9 w-full justify-start font-normal"
-                        disabled={disabled || !!symptom.id}
-                      >
-                        {symptom.onset?.onset_datetime ? (
-                          new Date(
-                            symptom.onset.onset_datetime,
-                          ).toLocaleDateString()
-                        ) : (
-                          <span className="text-muted-foreground">
-                            {t("select_date")}
-                          </span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0 w-auto" align="start">
-                      <Tabs
-                        value={activeTab}
-                        onValueChange={(v) =>
-                          setActiveTab(v as "absolute" | "relative")
-                        }
-                      >
-                        <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="absolute">
-                            {t("absolute_date")}
-                          </TabsTrigger>
-                          <TabsTrigger value="relative">
-                            {t("relative_date")}
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="absolute" className="p-0">
-                          <Calendar
-                            mode="single"
-                            selected={
-                              symptom.onset?.onset_datetime
-                                ? new Date(symptom.onset.onset_datetime)
-                                : undefined
-                            }
-                            onSelect={(date: Date | undefined) => {
-                              handleDateChange(date);
-                            }}
-                          />
-                        </TabsContent>
-                        <TabsContent value="relative" className="p-0">
-                          <RelativeDatePicker
-                            value={
-                              symptom.onset?.onset_datetime
-                                ? new Date(symptom.onset.onset_datetime)
-                                : undefined
-                            }
-                            onDateChange={(date) => handleDateChange(date)}
-                          />
-                        </TabsContent>
-                      </Tabs>
-                    </PopoverContent>
-                  </Popover>
+                  <CombinedDatePicker
+                    value={
+                      symptom.onset?.onset_datetime
+                        ? new Date(symptom.onset.onset_datetime)
+                        : undefined
+                    }
+                    onChange={handleDateChange}
+                    disabled={disabled || !!symptom.id}
+                    buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+                    dateFormat="P"
+                  />
                 </div>
                 <div>
                   <div className="block text-sm font-medium text-gray-500 mb-1">
@@ -542,20 +382,97 @@ const SymptomRow = React.memo(function SymptomRow({
           </Collapsible>
         </Card>
       </div>
+    );
+  }
 
-      {/* Notes for Desktop */}
-      {showNotes && (
-        <div className="hidden md:block px-3 pb-3">
-          <Input
-            type="text"
-            placeholder={t("add_notes_about_symptom")}
-            value={symptom.note || ""}
-            onChange={handleNotesChange}
-            disabled={disabled}
+  // For desktop view - Table Row
+  return (
+    <>
+      <TableRow
+        className={cn({
+          "opacity-40 pointer-events-none":
+            symptom.verification_status === "entered_in_error",
+        })}
+      >
+        <TableCell className="font-medium">
+          <div className="truncate max-w-[300px]" title={symptom.code.display}>
+            {symptom.code.display}
+          </div>
+        </TableCell>
+        <TableCell>
+          <CombinedDatePicker
+            value={
+              symptom.onset?.onset_datetime
+                ? new Date(symptom.onset.onset_datetime)
+                : undefined
+            }
+            onChange={handleDateChange}
+            disabled={disabled || !!symptom.id}
+            dateFormat="P"
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
-        </div>
+        </TableCell>
+        <TableCell>
+          <Select
+            value={symptom.clinical_status}
+            onValueChange={handleStatusChange}
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-8 md:h-9">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SYMPTOM_CLINICAL_STATUS.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </TableCell>
+        <TableCell>
+          <Select
+            value={symptom.severity}
+            onValueChange={handleSeverityChange}
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-8 md:h-9">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SYMPTOM_SEVERITY.map((severity) => (
+                <SelectItem key={severity} value={severity}>
+                  {t(severity)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </TableCell>
+        <TableCell className="text-center">
+          <SymptomActionsMenu
+            symptom={symptom}
+            showNotes={showNotes}
+            verificationStatus={symptom.verification_status}
+            disabled={disabled}
+            onToggleNotes={() => setShowNotes((n) => !n)}
+            onRemove={handleRemove}
+          />
+        </TableCell>
+      </TableRow>
+      {showNotes && (
+        <TableRow>
+          <TableCell colSpan={5} className="px-3 pb-3">
+            <Input
+              type="text"
+              placeholder={t("add_notes_about_symptom")}
+              value={symptom.note || ""}
+              onChange={handleNotesChange}
+              disabled={disabled}
+            />
+          </TableCell>
+        </TableRow>
       )}
-    </div>
+    </>
   );
 });
 
@@ -566,6 +483,8 @@ export function SymptomQuestion({
   disabled,
   encounterId,
 }: SymptomQuestionProps) {
+  const { t } = useTranslation();
+
   const isPreview = patientId === "preview";
   const symptoms =
     (questionnaireResponse.values?.[0]?.value as SymptomRequest[]) || [];
@@ -698,17 +617,6 @@ export function SymptomQuestion({
     );
   };
 
-  const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
-    "absolute",
-  );
-
-  const handleDateChange = (date: Date | undefined) => {
-    setNewSymptom((prev) => ({
-      ...prev,
-      onset: { onset_datetime: dateQueryString(date) },
-    }));
-  };
-
   const symptomDetailsContent = (
     <div className="space-y-4 p-4">
       <div className="grid grid-cols-1 gap-4">
@@ -716,63 +624,22 @@ export function SymptomQuestion({
           <div className="text-sm font-medium text-gray-700">
             {t("onset_date")}
           </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-8 md:h-9 w-full justify-start font-normal"
-                disabled={disabled || !!newSymptom.id}
-              >
-                {newSymptom.onset?.onset_datetime ? (
-                  new Date(newSymptom.onset.onset_datetime).toLocaleDateString()
-                ) : (
-                  <span className="text-muted-foreground">
-                    {t("select_date")}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-auto" align="start">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) =>
-                  setActiveTab(v as "absolute" | "relative")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="absolute">
-                    {t("absolute_date")}
-                  </TabsTrigger>
-                  <TabsTrigger value="relative">
-                    {t("relative_date")}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="absolute" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      newSymptom.onset?.onset_datetime
-                        ? new Date(newSymptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onSelect={(date: Date | undefined) => {
-                      handleDateChange(date);
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="relative" className="p-0">
-                  <RelativeDatePicker
-                    value={
-                      newSymptom.onset?.onset_datetime
-                        ? new Date(newSymptom.onset.onset_datetime)
-                        : undefined
-                    }
-                    onDateChange={(date) => handleDateChange(date)}
-                  />
-                </TabsContent>
-              </Tabs>
-            </PopoverContent>
-          </Popover>
+          <CombinedDatePicker
+            value={
+              newSymptom.onset?.onset_datetime
+                ? new Date(newSymptom.onset.onset_datetime)
+                : undefined
+            }
+            onChange={(date) => {
+              setNewSymptom((prev) => ({
+                ...prev,
+                onset: { onset_datetime: dateQueryString(date) },
+              }));
+            }}
+            disabled={disabled || !!newSymptom.id}
+            dateFormat="P"
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+          />
         </div>
         <div className="space-y-2">
           <div className="text-sm font-medium text-gray-700">{t("status")}</div>
@@ -839,7 +706,7 @@ export function SymptomQuestion({
       </div>
 
       <div className="flex justify-between space-x-2">
-        <Button variant="outline" onClick={handleBackToValueSet}>
+        <Button type="button" variant="outline" onClick={handleBackToValueSet}>
           {t("cancel")}
         </Button>
         <Button onClick={handleConfirmSymptom}>{t("add_symptom")}</Button>
@@ -850,27 +717,56 @@ export function SymptomQuestion({
   return (
     <div className="space-y-2">
       {symptoms.length > 0 && (
-        <div className="md:rounded-lg md:border md:border-gray-200">
-          <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
-            <div className="col-span-5">{t("symptom")}</div>
-            <div className="col-span-2 text-center">{t("date")}</div>
-            <div className="col-span-2 text-center">{t("status")}</div>
-            <div className="col-span-2 text-center">{t("severity")}</div>
-            <div className="col-span-1 text-center">{t("action")}</div>
-          </div>
-          <div className="md:divide-y md:divide-gray-200">
-            {symptoms.map((symptom, index) => (
-              <SymptomRow
-                symptom={symptom}
-                index={index}
-                disabled={disabled}
-                onUpdate={handleUpdateSymptom}
-                onRemove={handleRemoveSymptom}
-                key={symptom.id || `symptom-${symptom.code.code}-${index}`}
-              />
-            ))}
-          </div>
-        </div>
+        <>
+          {/* Desktop View - Table */}
+          {!isMobile && (
+            <div className="rounded-lg border border-gray-200">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-50">
+                    <TableHead className="w-[40%]">{t("symptom")}</TableHead>
+                    <TableHead className="text-center">{t("date")}</TableHead>
+                    <TableHead className="text-center">{t("status")}</TableHead>
+                    <TableHead className="text-center">
+                      {t("severity")}
+                    </TableHead>
+                    <TableHead className="text-center">{t("action")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {symptoms.map((symptom, index) => (
+                    <SymptomRow
+                      symptom={symptom}
+                      index={index}
+                      disabled={disabled}
+                      onUpdate={handleUpdateSymptom}
+                      onRemove={handleRemoveSymptom}
+                      key={
+                        symptom.id || `symptom-${symptom.code.code}-${index}`
+                      }
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {/* Mobile View - Cards */}
+          {isMobile && (
+            <div>
+              {symptoms.map((symptom, index) => (
+                <SymptomRow
+                  symptom={symptom}
+                  index={index}
+                  disabled={disabled}
+                  onUpdate={handleUpdateSymptom}
+                  onRemove={handleRemoveSymptom}
+                  key={symptom.id || `symptom-${symptom.code.code}-${index}`}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {isMobile && showSymptomSelection ? (
@@ -881,7 +777,7 @@ export function SymptomQuestion({
             onSelect={handleCodeSelect}
             disabled={disabled}
           />
-          <CommandDrawer
+          <Sheet
             open={showSymptomSelection}
             onOpenChange={setShowSymptomSelection}
           >
@@ -898,12 +794,20 @@ export function SymptomQuestion({
                       className="h-8 w-8"
                       onClick={handleBackToValueSet}
                     >
-                      <CareIcon icon="l-times" className="h-5 w-5" />
+                      <CareIcon icon="l-times" className="size-5" />
                     </Button>
                   </div>
-                  <CommandList className="max-h-[100vh] overflow-y-auto pb-1">
-                    {symptomDetailsContent}
-                  </CommandList>
+                  <SheetContent
+                    side="bottom"
+                    className="px-0 pt-2 pb-0 rounded-t-lg"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+                    <div className="mt-6 h-full">
+                      <CommandList className="max-h-[calc(80vh-2rem)] overflow-y-auto">
+                        {symptomDetailsContent}
+                      </CommandList>
+                    </div>
+                  </SheetContent>
                 </>
               ) : (
                 <>
@@ -917,23 +821,31 @@ export function SymptomQuestion({
                       className="h-8 w-8"
                       onClick={handleCloseDrawer}
                     >
-                      <CareIcon icon="l-times" className="h-5 w-5" />
+                      <CareIcon icon="l-times" className="size-5" />
                     </Button>
                   </div>
-                  <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
-                    <ValueSetSelect
-                      system="system-condition-code"
-                      placeholder={t("search_symptom")}
-                      onSelect={handleCodeSelect}
-                      disabled={disabled}
-                      hideTrigger={true}
-                      controlledOpen={true}
-                    />
-                  </CommandList>
+                  <SheetContent
+                    side="bottom"
+                    className=" px-0 pt-2 pb-0 rounded-t-lg"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+                    <div className="mt-6 h-full">
+                      <CommandList className="overflow-y-auto">
+                        <ValueSetSelect
+                          system="system-condition-code"
+                          placeholder={t("search_symptom")}
+                          onSelect={handleCodeSelect}
+                          disabled={disabled}
+                          hideTrigger={true}
+                          controlledOpen={true}
+                        />
+                      </CommandList>
+                    </div>
+                  </SheetContent>
                 </>
               )}
             </Command>
-          </CommandDrawer>
+          </Sheet>
         </>
       ) : (
         <ValueSetSelect

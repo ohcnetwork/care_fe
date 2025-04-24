@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -26,10 +27,10 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import UserSelector from "@/components/Common/UserSelector";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import roleApi from "@/types/emr/role/roleApi";
 import organizationApi from "@/types/organization/organizationApi";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
@@ -68,7 +69,7 @@ export default function LinkUserSheet({
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
-    queryFn: query(routes.role.list),
+    queryFn: query(roleApi.listRoles),
     enabled: open,
   });
 
@@ -185,9 +186,9 @@ export default function LinkUserSheet({
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">
+                <Label className="text-sm font-medium">
                   {t("select_role")}
-                </label>
+                </Label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger
                     className="h-12"
@@ -195,7 +196,7 @@ export default function LinkUserSheet({
                   >
                     <SelectValue placeholder={t("select_role")} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
                     {roles?.results?.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
                         <div className="flex flex-col text-left">

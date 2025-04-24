@@ -32,6 +32,7 @@ import { NumberQuestion } from "./NumberQuestion";
 import { QuantityQuestion } from "./QuantityQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
 import { TextQuestion } from "./TextQuestion";
+import { TimeQuestion } from "./TimeQuestion";
 
 interface QuestionInputProps {
   question: Question;
@@ -209,6 +210,9 @@ export function QuestionInput({
       case "display":
         return null;
 
+      case "time":
+        return <TimeQuestion {...commonProps} />;
+
       default:
         return <TextQuestion {...commonProps} />;
     }
@@ -220,7 +224,7 @@ export function QuestionInput({
       : questionnaireResponse.values;
 
     return (
-      <div className="bg-gray-100 md:bg-transparent px-2 py-3">
+      <div className="bg-gray-100 md:bg-transparent px-2 py-1.5">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 && (
@@ -252,8 +256,11 @@ export function QuestionInput({
                 )}
                 <div
                   className={cn("w-full", {
-                    "flex flex-col md:flex-row": !question.structured_type,
-                    "flex-col": question.repeats || question.type === "text",
+                    "flex flex-col md:flex-row":
+                      !question.structured_type && question.type !== "choice",
+                    "flex flex-col gap-2": question.type === "choice",
+                    "flex-col gap-1":
+                      question.repeats || question.type === "text",
                   })}
                 >
                   <div className="flex-1 min-w-0">
@@ -264,7 +271,10 @@ export function QuestionInput({
                     <NotesInput
                       className={cn("w-min", {
                         "bg-white border md:rounded-l-none md:-ml-2 mt-2 md:mt-0":
-                          !(question.type === "text"),
+                          !(
+                            question.type === "text" ||
+                            question.type === "choice"
+                          ),
                         "mt-2": question.type === "text",
                       })}
                       questionnaireResponse={questionnaireResponse}
