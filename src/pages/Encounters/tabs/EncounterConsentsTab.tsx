@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { List, Plus, Search } from "lucide-react";
 import { useNavigate, usePathParams } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -46,9 +48,11 @@ export const EmptyState = () => {
 function ConsentCard({
   consent,
   encounter,
+  isHighlighted,
 }: {
   consent: ConsentModel;
   encounter: Encounter;
+  isHighlighted: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -60,7 +64,12 @@ function ConsentCard({
   const totalAttachments = consent.source_attachments.length;
 
   return (
-    <Card className="overflow-hidden transition-all h-full flex flex-col">
+    <Card
+      className={cn(
+        "overflow-hidden transition-all h-full flex flex-col",
+        isHighlighted && "ring-2 ring-primary animate-pulse",
+      )}
+    >
       <Badge
         variant="outline"
         className="w-fit justify-center border-b border-gray-300 rounded-b-md rounded-t-none px-2.5 py-1 text-center ml-3 bg-indigo-100 text-indigo-900"
@@ -170,6 +179,18 @@ function ConsentCard({
 export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [newConsentId, setNewConsentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Clear the highlight after 3 seconds
+    if (newConsentId) {
+      const timer = setTimeout(() => {
+        setNewConsentId(null);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [newConsentId]);
 
   const { data: existingConsents, isLoading } = useQuery({
     queryKey: ["consents", encounter.patient.id, encounter.id],
@@ -187,6 +208,10 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
       attachment?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   });
+
+  const handleConsentAdded = (consentId?: string) => {
+    consentId && setNewConsentId(consentId);
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -209,6 +234,7 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
           <AddConsentSheet
             patientId={encounter.patient.id}
             encounterId={encounter.id}
+            onSuccess={handleConsentAdded}
             trigger={
               <Button className="flex items-center gap-1">
                 <Plus className="size-4" />
@@ -226,6 +252,7 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
               key={consent.id}
               consent={consent}
               encounter={encounter}
+              isHighlighted={consent.id === newConsentId}
             />
           ))}
         </div>

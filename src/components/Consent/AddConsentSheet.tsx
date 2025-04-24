@@ -75,7 +75,7 @@ interface AddConsentSheetProps {
   patientId: string;
   encounterId: string;
   trigger?: React.ReactNode;
-  onSuccess?: () => void;
+  onSuccess?: (consentId?: string) => void;
   existingConsent?: ConsentModel;
 }
 
@@ -92,7 +92,7 @@ export default function AddConsentSheet({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const handleSuccess = () => {
+  const handleSuccess = (consentId?: string) => {
     queryClient.invalidateQueries({
       queryKey: ["consents", patientId, encounterId],
     });
@@ -102,7 +102,7 @@ export default function AddConsentSheet({
       });
     }
     setIsOpen(false);
-    onSuccess?.();
+    onSuccess?.(consentId);
     toast.success(
       isEdit
         ? t("consent_updated_successfully")
@@ -115,8 +115,8 @@ export default function AddConsentSheet({
       mutate(consentApi.create, {
         pathParams: { patientId },
       })(data),
-    onSuccess: async () => {
-      handleSuccess();
+    onSuccess: async (response) => {
+      handleSuccess(response.id);
     },
     onError: () => {
       toast.error(t("error_creating_consent"));
@@ -129,7 +129,7 @@ export default function AddConsentSheet({
         pathParams: { patientId, id: existingConsent?.id ?? "" },
       })(data),
     onSuccess: () => {
-      handleSuccess();
+      handleSuccess(existingConsent?.id);
     },
     onError: () => {
       toast.error(t("error_updating_consent"));
