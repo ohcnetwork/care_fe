@@ -42,7 +42,7 @@ export function OrganizationLevel({
     <Autocomplete
       popoverClassName={cn(
         "lg:border-0 lg:border-0 lg:shadow-none lg:rounded-none min-w-56 lg:max-w-72",
-        index !== 0 && "lg:border-l lg:border-secondary-500",
+        index !== 0 && "lg:border-l lg:border-secondary-400",
       )}
       key={`dropdown-${index}`}
       value={selectedLevels[index]?.id || ""}
@@ -54,7 +54,7 @@ export function OrganizationLevel({
           ? t("select") +
             " " +
             t(`SYSTEM__govt_org_type__${orgType?.toLowerCase()}`)
-          : t("select_previous")
+          : t("select_location")
       }
       disabled={index > selectedLevels.length}
       align="start"
