@@ -35,13 +35,14 @@ interface FacilityOrganizationSelectorProps {
   value?: string[] | null;
   onChange: (value: string[] | null) => void;
   facilityId: string;
+  currentOrganizations?: FacilityOrganization[];
 }
 
 export default function FacilityOrganizationSelector(
   props: FacilityOrganizationSelectorProps,
 ) {
   const { t } = useTranslation();
-  const { onChange, facilityId } = props;
+  const { onChange, facilityId, currentOrganizations } = props;
 
   const [selectedOrganizations, setSelectedOrganizations] = useState<
     FacilityOrganization[]
@@ -87,12 +88,8 @@ export default function FacilityOrganizationSelector(
 
   const handleSelect = (org: FacilityOrganization) => {
     if (org.has_children) {
-      if (currentSelection?.id === org.id) {
-        handleConfirmSelection();
-      } else {
-        setNavigationLevels([...navigationLevels, org]);
-        setCurrentSelection(org);
-      }
+      setNavigationLevels([...navigationLevels, org]);
+      setCurrentSelection(org);
     } else {
       setCurrentSelection(org);
     }
@@ -200,7 +197,10 @@ export default function FacilityOrganizationSelector(
             className="border-none focus:ring-0"
           />
         </div>
-        <CommandList className="max-h-[300px] overflow-auto">
+        <CommandList
+          className="max-h-[calc(100vh-30rem)]"
+          onWheel={(e) => e.stopPropagation()}
+        >
           <CommandEmpty>
             {isLoadingRoot ||
             organizationQueries[navigationLevels.length - 1]?.isLoading ? (
@@ -263,6 +263,15 @@ export default function FacilityOrganizationSelector(
               size="sm"
               className="h-8 gap-2"
               onClick={handleConfirmSelection}
+              disabled={
+                selectedOrganizations.some(
+                  (org) => org.id === currentSelection.id,
+                ) ||
+                !currentOrganizations ||
+                currentOrganizations.some(
+                  (org) => org.id === currentSelection.id,
+                )
+              }
               data-cy="confirm-organization"
             >
               <span>{t("confirm")}</span>

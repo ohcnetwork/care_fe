@@ -240,8 +240,9 @@ export default function LinkDepartmentsSheet({
     const batchRequest: BatchRequestBody = {
       requests: selectedOrgs.map((orgId) => {
         const resolvedPath = route.path
-          .replace("{facility_id}", facilityId)
-          .replace("{id}", entityId);
+          .replace("{facilityId}", facilityId)
+          .replace("{id}", entityId)
+          .replace("{encounterId}", entityId);
 
         return {
           url: resolvedPath,
@@ -291,6 +292,7 @@ export default function LinkDepartmentsSheet({
                 facilityId={facilityId}
                 value={selectedOrgs}
                 onChange={setSelectedOrgs}
+                currentOrganizations={currentOrganizations}
               />
 
               <Button
