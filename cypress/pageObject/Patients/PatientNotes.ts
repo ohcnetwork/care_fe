@@ -10,7 +10,9 @@ export class PatientNotes {
   }
 
   typeThreadTitle(title: string) {
-    cy.typeIntoField('[data-cy="new-thread-title-input"]', title);
+    cy.typeIntoField('[data-cy="new-thread-title-input"]', title, {
+      clearBeforeTyping: true,
+    });
     return this;
   }
 
