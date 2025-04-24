@@ -10,7 +10,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandDrawer,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -23,6 +22,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -145,6 +145,14 @@ export default function FacilityOrganizationSelector(
   const renderNavigationPath = () => {
     return (
       <div className="flex items-center gap-2 flex-wrap">
+        {/* Clear button */}
+        <button
+          type="button"
+          onClick={() => setNavigationLevels([])}
+          className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
+        >
+          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+        </button>
         {navigationLevels.map((org, index) => (
           <div key={org.id} className="flex items-center gap-2">
             <button
@@ -153,7 +161,7 @@ export default function FacilityOrganizationSelector(
                 setNavigationLevels(navigationLevels.slice(0, index + 1));
                 setFacilityOrgSearch("");
               }}
-              className="text-sm font-medium text-gray-700 hover:text-primary-600"
+              className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
             >
               {org.name}
             </button>
@@ -161,6 +169,108 @@ export default function FacilityOrganizationSelector(
           </div>
         ))}
       </div>
+    );
+  };
+
+  const renderOrganizationPopover = (className?: string) => {
+    return (
+      <Command className={className}>
+        <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
+          <span className="font-semibold text-base text-gray-900">
+            {t("select_department")}
+          </span>
+          <span className="text-sm text-gray-500 mt-0.5">
+            {t("select_department_description")}
+          </span>
+        </div>
+        <div className="flex items-center px-3 py-2 border-b sticky top-[48px] bg-white z-10">
+          {navigationLevels.length > 0 ? (
+            renderNavigationPath()
+          ) : (
+            <span className="text-sm text-gray-500">
+              {t("select_from_list")}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center border-b px-3 sticky top-[96px] bg-white z-10">
+          <CommandInput
+            placeholder={t("search_organizations")}
+            onValueChange={setFacilityOrgSearch}
+            value={facilityOrgSearch}
+            className="border-none focus:ring-0"
+          />
+        </div>
+        <CommandList className="max-h-[300px] overflow-auto">
+          <CommandEmpty>
+            {isLoadingRoot ||
+            organizationQueries[navigationLevels.length - 1]?.isLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                <span className="ml-2 text-sm text-gray-500">
+                  {t("loading_organizations")}
+                </span>
+              </div>
+            ) : (
+              t("no_organizations_found")
+            )}
+          </CommandEmpty>
+          <CommandGroup>
+            {!(
+              isLoadingRoot ||
+              organizationQueries[navigationLevels.length - 1]?.isLoading
+            ) &&
+              getCurrentLevelOrganizations().map((org) => {
+                const isSelected = currentSelection?.id === org.id;
+                return (
+                  <CommandItem
+                    key={org.id}
+                    value={org.name}
+                    onSelect={() => handleSelect(org)}
+                    className={cn(
+                      "flex items-center justify-between",
+                      isSelected && "bg-sky-50/50",
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <span>{org.name}</span>
+                      {isSelected && (
+                        <CareIcon
+                          icon="l-check"
+                          className="ml-2 h-4 w-4 text-sky-600"
+                        />
+                      )}
+                    </div>
+                    {org.has_children && (
+                      <ChevronRight className="h-4 w-4 opacity-50" />
+                    )}
+                  </CommandItem>
+                );
+              })}
+          </CommandGroup>
+        </CommandList>
+        {currentSelection && (
+          <div className="md:m-0 m-2 flex items-center justify-between px-3 py-2  bg-sky-50/50 border-sky-200 rounded-md ">
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-500 mb-0.5">
+                {t("selected")}
+              </span>
+              <span className="font-medium text-sm text-sky-900">
+                {currentSelection.name}
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-2"
+              onClick={handleConfirmSelection}
+              data-cy="confirm-organization"
+            >
+              <span>{t("confirm")}</span>
+              <CareIcon icon="l-check" className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </Command>
     );
   };
 
@@ -213,123 +323,29 @@ export default function FacilityOrganizationSelector(
             ))}
             {isMobile ? (
               <>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className="w-full justify-between border-dashed"
-                  data-cy="facility-organization"
-                  onClick={() => setOpen(true)}
-                  type="button" // Prevents unintended form submission
-                >
-                  <span className="truncate text-gray-500">
-                    {currentSelection
-                      ? currentSelection.name
-                      : t("select_department")}
-                  </span>
-                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-                <CommandDrawer open={open} onOpenChange={setOpen}>
-                  <div className="p-4">
-                    <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
-                      <span className="font-semibold text-base text-gray-900">
-                        {t("select_department")}
+                <Sheet open={open} onOpenChange={setOpen}>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full justify-between border-dashed"
+                      data-cy="facility-organization"
+                      onClick={() => setOpen(true)}
+                      type="button" // Prevents unintended form submission
+                    >
+                      <span className="truncate text-gray-500">
+                        {currentSelection
+                          ? currentSelection.name
+                          : t("select_department")}
                       </span>
-                      <span className="text-sm text-gray-500 mt-0.5">
-                        {t("select_department_description")}
-                      </span>
-                    </div>
-                    <div className="flex items-center px-3 py-2 border-b sticky top-[48px] bg-white z-10">
-                      {navigationLevels.length > 0 ? (
-                        renderNavigationPath()
-                      ) : (
-                        <span className="text-sm text-gray-500">
-                          {t("select_from_list")}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center border-b px-3 sticky top-[96px] bg-white z-10">
-                      <CommandInput
-                        placeholder={t("search_organizations")}
-                        onValueChange={setFacilityOrgSearch}
-                        value={facilityOrgSearch}
-                        className="border-none focus:ring-0"
-                      />
-                    </div>
-                    <CommandList>
-                      <CommandEmpty>
-                        {isLoadingRoot ||
-                        organizationQueries[navigationLevels.length - 1]
-                          ?.isLoading ? (
-                          <div className="flex items-center justify-center py-6">
-                            <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                            <span className="ml-2 text-sm text-gray-500">
-                              {t("loading_organizations")}
-                            </span>
-                          </div>
-                        ) : (
-                          t("no_organizations_found")
-                        )}
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {!(
-                          isLoadingRoot ||
-                          organizationQueries[navigationLevels.length - 1]
-                            ?.isLoading
-                        ) &&
-                          getCurrentLevelOrganizations().map((org) => {
-                            const isSelected = currentSelection?.id === org.id;
-                            return (
-                              <CommandItem
-                                key={org.id}
-                                value={org.name}
-                                onSelect={() => handleSelect(org)}
-                                className={cn(
-                                  "flex items-center justify-between",
-                                  isSelected && "bg-sky-50/50",
-                                )}
-                              >
-                                <div className="flex items-center">
-                                  <span>{org.name}</span>
-                                  {isSelected && (
-                                    <CareIcon
-                                      icon="l-check"
-                                      className="ml-2 h-4 w-4 text-sky-600"
-                                    />
-                                  )}
-                                </div>
-                                {org.has_children && (
-                                  <ChevronRight className="h-4 w-4 opacity-50" />
-                                )}
-                              </CommandItem>
-                            );
-                          })}
-                      </CommandGroup>
-                    </CommandList>
-                    {currentSelection && (
-                      <div className="flex items-center justify-between px-3 py-2 border-t bg-sky-50/50 sticky bottom-0 z-10">
-                        <div className="flex flex-col">
-                          <span className="text-xs text-gray-500 mb-0.5">
-                            {t("selected")}
-                          </span>
-                          <span className="font-medium text-sm text-sky-900">
-                            {currentSelection.name}
-                          </span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 gap-2"
-                          onClick={handleConfirmSelection}
-                          data-cy="confirm-organization"
-                        >
-                          <span>{t("confirm")}</span>
-                          <CareIcon icon="l-check" className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CommandDrawer>
+                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent className="p-0" side="bottom">
+                    {renderOrganizationPopover("mb-12")}
+                  </SheetContent>
+                </Sheet>
               </>
             ) : (
               <Popover open={open} onOpenChange={handleOpenChange}>
@@ -350,119 +366,11 @@ export default function FacilityOrganizationSelector(
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                  side="top"
-                  updatePositionStrategy="always"
+                  align="start"
+                  sideOffset={4}
                   className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
-                  style={{
-                    position: "fixed",
-                    bottom: isMobile ? "50vh" : "50px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    touchAction: "manipulation",
-                    overscrollBehavior: "contain",
-                    WebkitOverflowScrolling: "touch",
-                    zIndex: 1000,
-                  }}
                 >
-                  <Command>
-                    <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
-                      <span className="font-semibold text-base text-gray-900">
-                        {t("select_department")}
-                      </span>
-                      <span className="text-sm text-gray-500 mt-0.5">
-                        {t("select_department_description")}
-                      </span>
-                    </div>
-                    <div className="flex items-center px-3 py-2 border-b sticky top-[48px] bg-white z-10">
-                      {navigationLevels.length > 0 ? (
-                        renderNavigationPath()
-                      ) : (
-                        <span className="text-sm text-gray-500">
-                          {t("select_from_list")}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center border-b px-3 sticky top-[96px] bg-white z-10">
-                      <CommandInput
-                        placeholder={t("search_organizations")}
-                        onValueChange={setFacilityOrgSearch}
-                        value={facilityOrgSearch}
-                        className="border-none focus:ring-0"
-                      />
-                    </div>
-                    <CommandList>
-                      <CommandEmpty>
-                        {isLoadingRoot ||
-                        organizationQueries[navigationLevels.length - 1]
-                          ?.isLoading ? (
-                          <div className="flex items-center justify-center py-6">
-                            <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                            <span className="ml-2 text-sm text-gray-500">
-                              {t("loading_organizations")}
-                            </span>
-                          </div>
-                        ) : (
-                          t("no_organizations_found")
-                        )}
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {!(
-                          isLoadingRoot ||
-                          organizationQueries[navigationLevels.length - 1]
-                            ?.isLoading
-                        ) &&
-                          getCurrentLevelOrganizations().map((org) => {
-                            const isSelected = currentSelection?.id === org.id;
-                            return (
-                              <CommandItem
-                                key={org.id}
-                                value={org.name}
-                                onSelect={() => handleSelect(org)}
-                                className={cn(
-                                  "flex items-center justify-between",
-                                  isSelected && "bg-sky-50/50",
-                                )}
-                              >
-                                <div className="flex items-center">
-                                  <span>{org.name}</span>
-                                  {isSelected && (
-                                    <CareIcon
-                                      icon="l-check"
-                                      className="ml-2 h-4 w-4 text-sky-600"
-                                    />
-                                  )}
-                                </div>
-                                {org.has_children && (
-                                  <ChevronRight className="h-4 w-4 opacity-50" />
-                                )}
-                              </CommandItem>
-                            );
-                          })}
-                      </CommandGroup>
-                    </CommandList>
-                    {currentSelection && (
-                      <div className="flex items-center justify-between px-3 py-2 border-t bg-sky-50/50 sticky bottom-0 z-10">
-                        <div className="flex flex-col">
-                          <span className="text-xs text-gray-500 mb-0.5">
-                            {t("selected")}
-                          </span>
-                          <span className="font-medium text-sm text-sky-900">
-                            {currentSelection.name}
-                          </span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 gap-2"
-                          onClick={handleConfirmSelection}
-                          data-cy="confirm-organization"
-                        >
-                          <span>{t("confirm")}</span>
-                          <CareIcon icon="l-check" className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </Command>
+                  {renderOrganizationPopover()}
                 </PopoverContent>
               </Popover>
             )}
