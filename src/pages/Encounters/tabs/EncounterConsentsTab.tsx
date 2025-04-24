@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { List, Plus, Search } from "lucide-react";
+import { List, Search } from "lucide-react";
 import { useNavigate, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -232,19 +232,11 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
           />
         </div>
 
-        {
-          <AddConsentSheet
-            patientId={encounter.patient.id}
-            encounterId={encounter.id}
-            onSuccess={handleConsentAdded}
-            trigger={
-              <Button className="flex items-center gap-1">
-                <Plus className="size-4" />
-                {t("add") + " " + t("consent")}
-              </Button>
-            }
-          />
-        }
+        <AddConsentSheet
+          patientId={encounter.patient.id}
+          encounterId={encounter.id}
+          onSuccess={handleConsentAdded}
+        />
       </div>
 
       {filteredConsents && filteredConsents.length > 0 ? (

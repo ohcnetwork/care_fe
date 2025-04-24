@@ -38,7 +38,14 @@ const PatientRoutes: AppRoutes = {
     />
   ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId":
-    () => <ConsentDetailPage />,
+    ({ facilityId, patientId, encounterId, consentId }) => (
+      <ConsentDetailPage
+        facilityId={facilityId}
+        patientId={patientId}
+        encounterId={encounterId}
+        consentId={consentId}
+      />
+    ),
   "/facility/:facilityId/patients/verify": ({ facilityId }) => (
     <VerifyPatient facilityId={facilityId} />
   ),

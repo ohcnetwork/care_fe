@@ -74,7 +74,6 @@ type ConsentFormValues = z.infer<typeof consentFormSchema>;
 interface AddConsentSheetProps {
   patientId: string;
   encounterId: string;
-  trigger?: React.ReactNode;
   onSuccess?: (consentId?: string) => void;
   existingConsent?: ConsentModel;
 }
@@ -82,7 +81,6 @@ interface AddConsentSheetProps {
 export default function AddConsentSheet({
   patientId,
   encounterId,
-  trigger,
   onSuccess,
   existingConsent,
 }: AddConsentSheetProps) {
@@ -208,21 +206,19 @@ export default function AddConsentSheet({
       }}
     >
       <SheetTrigger asChild>
-        {trigger || (
-          <Button variant="outline" className="gap-2">
-            {isEdit ? (
-              <>
-                <Edit className="size-4" />
-                {t("edit_consent")}
-              </>
-            ) : (
-              <>
-                <Plus className="size-4" />
-                {t("add")} {t("consent")}
-              </>
-            )}
-          </Button>
-        )}
+        <Button variant={isEdit ? "outline" : "primary"} className="gap-2">
+          {isEdit ? (
+            <>
+              <Edit className="size-4" />
+              {t("edit")}
+            </>
+          ) : (
+            <>
+              <Plus className="size-4" />
+              {t("add")} {t("consent")}
+            </>
+          )}
+        </Button>
       </SheetTrigger>
       <SheetContent className="overflow-y-auto sm:max-w-lg">
         <SheetHeader className="mb-6">

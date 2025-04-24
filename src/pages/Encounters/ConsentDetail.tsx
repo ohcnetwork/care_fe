@@ -4,12 +4,11 @@ import {
   ArrowLeft,
   ChevronLeft,
   Download,
-  Edit,
   FileText,
   PlusCircle,
   Upload,
 } from "lucide-react";
-import { Link, usePathParams } from "raviger";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -32,12 +31,20 @@ import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import consentApi from "@/types/consent/consentApi";
 
-export function ConsentDetailPage() {
+interface ConsentDetailPageProps {
+  facilityId: string;
+  patientId: string;
+  encounterId: string;
+  consentId: string;
+}
+
+export function ConsentDetailPage({
+  facilityId,
+  patientId,
+  encounterId,
+  consentId,
+}: ConsentDetailPageProps) {
   const { t } = useTranslation();
-  const { facilityId, patientId, encounterId, consentId } =
-    usePathParams(
-      "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId",
-    ) ?? {};
 
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const queryClient = useQueryClient();
@@ -46,7 +53,7 @@ export function ConsentDetailPage() {
   const { data: consent, isLoading: isLoadingConsent } = useQuery({
     queryKey: ["consent", consentId],
     queryFn: query(consentApi.retrieve, {
-      pathParams: { patientId: patientId!, id: consentId! },
+      pathParams: { patientId, id: consentId },
     }),
     enabled: !!consentId && !!patientId,
   });
@@ -123,15 +130,9 @@ export function ConsentDetailPage() {
       <Page title="">
         <div className="mb-4 flex justify-end">
           <AddConsentSheet
-            patientId={patientId!}
-            encounterId={encounterId!}
+            patientId={patientId}
+            encounterId={encounterId}
             existingConsent={consent}
-            trigger={
-              <Button variant="outline" className="gap-2">
-                <Edit className="size-4" />
-                {t("edit")}
-              </Button>
-            }
           />
         </div>
         <div className="container mx-auto py-4">
