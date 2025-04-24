@@ -90,7 +90,6 @@ describe("Patient Files", () => {
 
     // Upload a single file
     patientFiles
-      .filterActiveFiles()
       .clickAddFilesButton()
       .selectUploadFromDevice()
       .uploadSingleFile(filePath(fileName))
@@ -104,6 +103,7 @@ describe("Patient Files", () => {
 
     // Rename the file
     patientFiles
+      .filterActiveFiles()
       .clickFileDetailsButton()
       .clickRenameOption()
       .fillNewFileName(newFileName)
@@ -118,7 +118,6 @@ describe("Patient Files", () => {
 
     // Upload a single file
     patientFiles
-      .filterActiveFiles()
       .clickAddFilesButton()
       .selectUploadFromDevice()
       .uploadSingleFile(filePath(fileName))
@@ -132,6 +131,7 @@ describe("Patient Files", () => {
 
     // Archive the file
     patientFiles
+      .filterActiveFiles()
       .clickFileDetailsButton()
       .clickArchiveOption()
       .fillArchiveReason(archiveReason)
