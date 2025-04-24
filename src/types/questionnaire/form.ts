@@ -10,8 +10,6 @@ import { FileUploadQuestion } from "@/types/files/files";
 import { Code } from "@/types/questionnaire/code";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
-import { Quantity } from "./quantity";
-
 /**
  * A short hand for defining response value types
  */
@@ -21,15 +19,15 @@ type RVBase<T extends string> = {
   type: T;
 };
 type RVValue<T extends string, V> = RVBase<T> & {
-  value: V;
+  value?: V;
 };
 
 type RVCode<T extends string> = RVBase<T> & {
-  value: Code;
+  value?: Code;
 };
 
 type RVQuantity<T extends string> = RVBase<T> & {
-  value: Quantity;
+  value?: number;
 };
 
 type RV<T extends string, V> = RVValue<T, V> | RVCode<T> | RVQuantity<T>;
