@@ -11,8 +11,6 @@ export class PatientLocation {
   private selectors = {
     locationForm: '[data-cy="location-form-options"]',
     addChildLocationButton: '[data-cy="add-child-location-button"]',
-    sidebarContent: '[data-sidebar="content"]',
-    locationTab: '[data-cy="settings-locations-tab"]',
     nameInput: '[data-cy="location-name-input"]',
     bedCountsSelect: '[data-cy="bed-counts-select"]',
     locationDescription: '[data-cy="location-description"]',
@@ -77,12 +75,12 @@ export class PatientLocation {
 
   // Navigation
   navigateToSettings() {
-    cy.verifyAndClickElement(this.selectors.sidebarContent, "Settings");
+    cy.verifyAndClickElement('[data-cy="nav-settings"]', "Settings");
     return this;
   }
 
   clickLocationTab() {
-    cy.verifyAndClickElement(this.selectors.locationTab, "Location");
+    cy.verifyAndClickElement('[data-cy="nav-locations"]', "Location");
     return this;
   }
 
