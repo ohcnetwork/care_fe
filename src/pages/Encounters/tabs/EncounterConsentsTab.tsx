@@ -12,7 +12,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import Loading from "@/components/Common/Loading";
-import AddConsentSheet from "@/components/Consent/AddConsentSheet";
+import ConsentFormSheet from "@/components/Consent/ConsentFormSheet";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -232,7 +232,7 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
           />
         </div>
 
-        <AddConsentSheet
+        <ConsentFormSheet
           patientId={encounter.patient.id}
           encounterId={encounter.id}
           onSuccess={handleConsentAdded}

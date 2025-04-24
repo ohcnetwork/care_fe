@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import AddConsentSheet from "@/components/Consent/AddConsentSheet";
+import ConsentFormSheet from "@/components/Consent/ConsentFormSheet";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
 import useFileManager from "@/hooks/useFileManager";
@@ -128,7 +128,7 @@ export function ConsentDetailPage({
       </Link>
       <Page title="">
         <div className="mb-4 flex justify-end">
-          <AddConsentSheet
+          <ConsentFormSheet
             patientId={patientId}
             encounterId={encounterId}
             existingConsent={consent}

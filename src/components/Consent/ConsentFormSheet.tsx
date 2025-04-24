@@ -71,19 +71,19 @@ const consentFormSchema = z
 
 type ConsentFormValues = z.infer<typeof consentFormSchema>;
 
-interface AddConsentSheetProps {
+interface ConsentFormSheetProps {
   patientId: string;
   encounterId: string;
   onSuccess?: (consentId?: string) => void;
   existingConsent?: ConsentModel;
 }
 
-export default function AddConsentSheet({
+export default function ConsentFormSheet({
   patientId,
   encounterId,
   onSuccess,
   existingConsent,
-}: AddConsentSheetProps) {
+}: ConsentFormSheetProps) {
   const { t } = useTranslation();
   const isEdit = !!existingConsent;
 
