@@ -29,7 +29,7 @@ export default function RelativeDateTooltip({
   if (isToday && isMidnight) {
     return (
       <TooltipComponent content={formatDateTime(dateObj)}>
-        <span className={className}>Today</span>
+        <span className={className}>{t("today")}</span>
       </TooltipComponent>
     );
   }
