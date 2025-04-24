@@ -13,8 +13,6 @@ import { Link, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -26,7 +24,6 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import AddConsentSheet from "@/components/Consent/AddConsentSheet";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
-import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
@@ -65,16 +62,6 @@ export function ConsentDetailPage() {
     enabled: !!encounterId && !!patientId,
   });
 
-  // Load file data for the primary attachment
-  const attachmentId = consent?.source_attachments[0]?.id;
-  const { data: fileData, isLoading: isLoadingFile } = useQuery({
-    queryKey: ["file_upload", attachmentId],
-    queryFn: query(routes.retrieveUpload, {
-      pathParams: { id: attachmentId! },
-    }),
-    enabled: !!attachmentId,
-  });
-
   const fileUpload = useFileUpload({
     type: "consent",
     category: "consent_attachment",
@@ -92,18 +79,12 @@ export function ConsentDetailPage() {
 
   const fileManager = useFileManager({
     type: "consent",
-    uploadedFiles:
-      consent?.source_attachments.map((attachment) => {
-        if (fileData && fileData.id === attachment.id) {
-          return fileData;
-        }
-        return attachment;
-      }) || [],
+    uploadedFiles: consent?.source_attachments || [],
     onArchive: () => {},
     onEdit: () => {},
   });
 
-  const isLoading = isLoadingConsent || isLoadingFile || isLoadingEncounter;
+  const isLoading = isLoadingConsent || isLoadingEncounter;
 
   if (isLoading) {
     return <Loading />;
@@ -133,35 +114,6 @@ export function ConsentDetailPage() {
   }
 
   const associatingId = consent.id;
-
-  const DetailButtons = ({ file }: { file: FileUploadModel }) => {
-    return (
-      <div className="flex flex-row gap-2 justify-end">
-        {fileManager.isPreviewable(file) && (
-          <Button
-            variant="secondary"
-            className="cursor-pointer"
-            onClick={() => fileManager.viewFile(file, associatingId)}
-          >
-            <span className="flex flex-row items-center gap-1">
-              <CareIcon icon="l-eye" />
-              <span className="hidden sm:inline">{t("view")}</span>
-            </span>
-          </Button>
-        )}
-        <Button
-          variant="secondary"
-          className="cursor-pointer"
-          onClick={() => fileManager.downloadFile(file, associatingId)}
-        >
-          <span className="flex flex-row items-center gap-1">
-            <Download className="size-4 mr-1" />
-            <span className="hidden sm:inline">{t("download")}</span>
-          </span>
-        </Button>
-      </div>
-    );
-  };
 
   const handleUploadDialogClose = (open: boolean) => {
     setOpenUploadDialog(open);
@@ -290,7 +242,7 @@ export function ConsentDetailPage() {
                 {fileUpload.files.length > 0 && (
                   <div className="mb-4">
                     <h4 className="text-base font-medium mb-2">
-                      {t("selected_files")}
+                      {t("selected")} {t("files")}
                     </h4>
                     <Card className="p-4">
                       <div className="space-y-2">
@@ -329,47 +281,66 @@ export function ConsentDetailPage() {
                   {consent.source_attachments.length > 0 ? (
                     <div>
                       <div className="divide-y">
-                        {consent.source_attachments.map((attachment, index) => {
-                          const isActive =
-                            fileData && fileData.id === attachment.id;
-                          return (
-                            <div
-                              key={attachment.id}
-                              className={cn(
-                                "py-2 flex items-center justify-between",
-                                isActive && "bg-primary-50",
-                              )}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={cn(
-                                    "flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium",
-                                  )}
-                                >
-                                  {index + 1}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium break-all">
-                                    {attachment.name}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {formatDateTime(attachment.created_date)}
-                                  </p>
-                                </div>
+                        {consent.source_attachments.map((attachment, index) => (
+                          <div
+                            key={attachment.id}
+                            className="py-2 flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium">
+                                {index + 1}
                               </div>
-                              <div className="flex items-center gap-2">
-                                {fileData && (
-                                  <div className="mt-4 flex justify-end">
-                                    {fileData && (
-                                      <DetailButtons file={fileData} />
-                                    )}
-                                    {fileManager.Dialogues}
-                                  </div>
-                                )}
+                              <div>
+                                <p className="text-sm font-medium break-all">
+                                  {attachment.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {formatDateTime(attachment.created_date)}
+                                </p>
                               </div>
                             </div>
-                          );
-                        })}
+                            <div className="flex items-center gap-2">
+                              <div className="flex justify-end">
+                                {fileManager.isPreviewable(attachment) && (
+                                  <Button
+                                    variant="secondary"
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      fileManager.viewFile(
+                                        attachment,
+                                        associatingId,
+                                      )
+                                    }
+                                  >
+                                    <span className="flex flex-row items-center gap-1">
+                                      <CareIcon icon="l-eye" />
+                                      <span className="hidden sm:inline">
+                                        {t("view")}
+                                      </span>
+                                    </span>
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="secondary"
+                                  className="cursor-pointer ml-2"
+                                  onClick={() =>
+                                    fileManager.downloadFile(
+                                      attachment,
+                                      associatingId,
+                                    )
+                                  }
+                                >
+                                  <span className="flex flex-row items-center gap-1">
+                                    <Download className="size-4 mr-1" />
+                                    <span className="hidden sm:inline">
+                                      {t("download")}
+                                    </span>
+                                  </span>
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ) : (
