@@ -49,7 +49,6 @@ export function ConsentDetailPage({
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const queryClient = useQueryClient();
 
-  // Load consent data
   const { data: consent, isLoading: isLoadingConsent } = useQuery({
     queryKey: ["consent", consentId],
     queryFn: query(consentApi.retrieve, {

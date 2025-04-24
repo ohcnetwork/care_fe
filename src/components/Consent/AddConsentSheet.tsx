@@ -96,7 +96,7 @@ export default function AddConsentSheet({
     });
     if (isEdit) {
       queryClient.invalidateQueries({
-        queryKey: ["consent", existingConsent?.id],
+        queryKey: ["consent", existingConsent!.id],
       });
     }
     setIsOpen(false);
@@ -124,10 +124,10 @@ export default function AddConsentSheet({
   const { mutate: updateConsent, isPending: isUpdating } = useMutation({
     mutationFn: (data: CreateConsentRequest) =>
       mutate(consentApi.update, {
-        pathParams: { patientId, id: existingConsent?.id ?? "" },
+        pathParams: { patientId, id: existingConsent!.id },
       })(data),
     onSuccess: () => {
-      handleSuccess(existingConsent?.id);
+      handleSuccess(existingConsent!.id);
     },
     onError: () => {
       toast.error(t("error_updating_consent"));
@@ -153,21 +153,21 @@ export default function AddConsentSheet({
 
   // Prefill the form with existing consent data when in edit mode
   useEffect(() => {
-    if (isEdit && existingConsent) {
+    if (isEdit) {
       form.reset({
-        decision: existingConsent.decision,
-        category: existingConsent.category,
-        status: existingConsent.status,
-        date: new Date(existingConsent.date),
+        decision: existingConsent!.decision,
+        category: existingConsent!.category,
+        status: existingConsent!.status,
+        date: new Date(existingConsent!.date),
         period: {
-          start: existingConsent.period.start
-            ? new Date(existingConsent.period.start)
+          start: existingConsent!.period.start
+            ? new Date(existingConsent!.period.start)
             : undefined,
-          end: existingConsent.period.end
-            ? new Date(existingConsent.period.end)
+          end: existingConsent!.period.end
+            ? new Date(existingConsent!.period.end)
             : undefined,
         },
-        note: existingConsent.note || "",
+        note: existingConsent!.note || "",
       });
     }
   }, [isEdit, existingConsent, form]);
@@ -188,7 +188,7 @@ export default function AddConsentSheet({
       note: values.note,
     };
 
-    if (isEdit && existingConsent) {
+    if (isEdit) {
       updateConsent(consentData);
     } else {
       createConsent(consentData);

@@ -1308,6 +1308,7 @@
   "error_in_createUpload": "Error in createUpload",
   "error_loading_questionnaire_response": "Error loading questionnaire response",
   "error_saving_file": "Error saving file",
+  "error_updating_consent": "Error updating consent",
   "error_updating_encounter": "Error to Updating Encounter",
   "error_updating_location": "Error updating location",
   "error_uploading_file": "Error uploading file",
