@@ -16,12 +16,16 @@ import { Input } from "@/components/ui/input";
 import Loading from "@/components/Common/Loading";
 import AddConsentSheet from "@/components/Consent/AddConsentSheet";
 
+import useFilters from "@/hooks/useFilters";
+
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { ConsentModel } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
 import { Encounter } from "@/types/emr/encounter";
+
+const CONSENTS_PER_PAGE = 12;
 
 // Empty state component for when no consents are found
 export const EmptyState = () => {
@@ -181,6 +185,10 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [newConsentId, setNewConsentId] = useState<string | null>(null);
 
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: CONSENTS_PER_PAGE,
+  });
+
   useEffect(() => {
     // Clear the highlight after 3 seconds
     if (newConsentId) {
@@ -193,14 +201,18 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
   }, [newConsentId]);
 
   const { data: existingConsents, isLoading } = useQuery({
-    queryKey: ["consents", encounter.patient.id, encounter.id],
+    queryKey: ["consents", encounter.patient.id, encounter.id, qParams],
     queryFn: query(consentApi.list, {
       pathParams: { patientId: encounter.patient.id },
-      queryParams: { encounter: encounter.id },
+      queryParams: {
+        encounter: encounter.id,
+        limit: resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
+      },
     }),
   });
 
-  const consents = existingConsents?.results?.filter((consent) => {
+  const filteredConsents = existingConsents?.results?.filter((consent) => {
     if (!searchQuery) return true;
 
     // Check if any attachment name matches the search query
@@ -209,8 +221,14 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
     );
   });
 
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    updateQuery({ page: 1 }); // Reset to first page when searching
+  };
+
   const handleConsentAdded = (consentId?: string) => {
     consentId && setNewConsentId(consentId);
+    updateQuery({ page: 1 });
   };
 
   if (isLoading) {
@@ -226,7 +244,7 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
             placeholder={t("search_existing_consent")}
             className="pl-10 focus-visible:ring-1"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearch}
           />
         </div>
 
@@ -245,17 +263,21 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
         }
       </div>
 
-      {consents && consents.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {consents.map((consent) => (
-            <ConsentCard
-              key={consent.id}
-              consent={consent}
-              encounter={encounter}
-              isHighlighted={consent.id === newConsentId}
-            />
-          ))}
-        </div>
+      {filteredConsents && filteredConsents.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredConsents.map((consent) => (
+              <ConsentCard
+                key={consent.id}
+                consent={consent}
+                encounter={encounter}
+                isHighlighted={consent.id === newConsentId}
+              />
+            ))}
+          </div>
+
+          <Pagination totalCount={existingConsents?.count || 0} />
+        </>
       ) : (
         <EmptyState />
       )}
