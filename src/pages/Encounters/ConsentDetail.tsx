@@ -28,7 +28,6 @@ import FileUploadDialog from "@/components/Files/FileUploadDialog";
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import consentApi from "@/types/consent/consentApi";
@@ -50,16 +49,6 @@ export function ConsentDetailPage() {
       pathParams: { patientId: patientId!, id: consentId! },
     }),
     enabled: !!consentId && !!patientId,
-  });
-
-  // Load encounter data for permissions
-  const { isLoading: isLoadingEncounter } = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(routes.encounter.get, {
-      pathParams: { id: encounterId! },
-      queryParams: { patient: patientId! },
-    }),
-    enabled: !!encounterId && !!patientId,
   });
 
   const fileUpload = useFileUpload({
@@ -84,7 +73,7 @@ export function ConsentDetailPage() {
     onEdit: () => {},
   });
 
-  const isLoading = isLoadingConsent || isLoadingEncounter;
+  const isLoading = isLoadingConsent;
 
   if (isLoading) {
     return <Loading />;
