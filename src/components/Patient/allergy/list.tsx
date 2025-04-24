@@ -106,13 +106,7 @@ export function AllergyList({
   );
 
   if (!filteredAllergies?.length) {
-    return (
-      <AllergyListLayout readOnly={readOnly} className={className}>
-        <CardContent className="px-2 pb-3 pt-2">
-          <p className="text-gray-500">{t("no_allergies_recorded")}</p>
-        </CardContent>
-      </AllergyListLayout>
-    );
+    return null;
   }
 
   interface AllergyRowProps {

@@ -1,6 +1,6 @@
 export class FacilityDevices {
   navigateToFacilityDevices() {
-    cy.verifyAndClickElement('[data-cy="settings-devices-tab"]', "Devices");
+    cy.verifyAndClickElement('[data-cy="nav-devices"]', "Devices");
     return this;
   }
 

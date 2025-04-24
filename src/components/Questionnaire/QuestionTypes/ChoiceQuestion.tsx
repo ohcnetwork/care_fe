@@ -103,7 +103,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           <SelectContent className="max-w-[var(--radix-select-trigger-width)] w-full">
             {options.map((option: AnswerOption) => (
               <SelectItem
-                key={option.value.toString()}
+                key={`${question.id}-${option.value.toString()}`}
                 value={option.value.toString()}
                 className="whitespace-normal break-words py-3"
               >
@@ -121,9 +121,9 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           >
             {options.map((option: AnswerOption) => (
               <Label
-                htmlFor={option.value.toString()}
+                htmlFor={`${question.id}-${option.value.toString()}`}
                 className="cursor-pointer"
-                key={option.value.toString()}
+                key={`${question.id}-${option.value.toString()}`}
               >
                 <Card
                   className="shadow-none rounded-md border-1 border-gray-400 bg-gray-200 p-2 transition-all hover:bg-gray-50/90 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary-300 [&:has([data-state=checked])]:shadow-sm w-full"
@@ -132,7 +132,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                   <div className="flex flex-row items-center gap-2">
                     <RadioGroupItem
                       value={option.value.toString()}
-                      id={option.value.toString()}
+                      id={`${question.id}-${option.value.toString()}`}
                       className="sr-only"
                     />
                     <div className="font-medium leading-5">

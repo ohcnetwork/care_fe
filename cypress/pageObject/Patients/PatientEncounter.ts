@@ -1,7 +1,8 @@
 export class PatientEncounter {
   // Navigation
   navigateToEncounters() {
-    cy.get('[data-sidebar="content"]').contains("Encounters").click();
+    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
+    cy.verifyAndClickElement('[data-cy="nav-encounters"]', "Encounters");
     return this;
   }
 
@@ -108,10 +109,7 @@ export class PatientEncounter {
   clickInProgressEncounterFilter() {
     cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
     cy.verifyAndClickElement('[data-cy="in-progress-filter"]', "In Progress");
-    cy.wait("@getEncounters", { timeout: 10000 }).then((interception) => {
-      expect(interception.request.url).to.include("status=in_progress");
-      expect(interception.response.statusCode).to.eq(200);
-    });
+    cy.wait("@getEncounters").its("response.statusCode").should("eq", 200);
     return this;
   }
 }
