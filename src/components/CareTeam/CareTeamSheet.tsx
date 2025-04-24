@@ -45,6 +45,7 @@ import { UserBase } from "@/types/user/user";
 type CareTeamSheetProps = {
   trigger: React.ReactNode;
   encounter: Encounter;
+  canWrite: boolean;
 };
 
 export function EmptyState() {
@@ -61,7 +62,11 @@ export function EmptyState() {
   );
 }
 
-export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
+export function CareTeamSheet({
+  trigger,
+  encounter,
+  canWrite,
+}: CareTeamSheetProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -191,36 +196,38 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
       <SheetContent className="w-full sm:max-w-3xl pr-0">
         <SheetHeader className="space-y-1 mr-2">
           <SheetTitle className="text-xl font-semibold">
-            {t("manage_care_team")}
+            {canWrite ? t("manage_care_team") : t("view_care_team")}
           </SheetTitle>
         </SheetHeader>
 
         <ScrollArea className="h-full my-6 pb-12 pr-6">
           <div className="space-y-6">
-            <div className="flex flex-col md:flex-row gap-2">
-              <div className="flex flex-col">
-                <UserSelector
-                  selected={selectedUser}
-                  onChange={setSelectedUser}
-                  placeholder={t("select_member")}
-                  facilityId={encounter.facility.id}
+            {canWrite && (
+              <div className="flex flex-col md:flex-row gap-2">
+                <div className="flex flex-col">
+                  <UserSelector
+                    selected={selectedUser}
+                    onChange={setSelectedUser}
+                    placeholder={t("select_member")}
+                    facilityId={encounter.facility.id}
+                  />
+                </div>
+                <ValueSetSelect
+                  system="system-practitioner-role-code"
+                  value={selectedRole}
+                  onSelect={setSelectedRole}
+                  placeholder={t("select_role")}
                 />
+                <Button
+                  size="icon"
+                  onClick={handleAddMember}
+                  disabled={!selectedUser || !selectedRole || isPending}
+                  className="w-full md:w-auto px-2 cursor-pointer"
+                >
+                  {t("add")}
+                </Button>
               </div>
-              <ValueSetSelect
-                system="system-practitioner-role-code"
-                value={selectedRole}
-                onSelect={setSelectedRole}
-                placeholder={t("select_role")}
-              />
-              <Button
-                size="icon"
-                onClick={handleAddMember}
-                disabled={!selectedUser || !selectedRole || isPending}
-                className="w-full md:w-auto px-2 cursor-pointer"
-              >
-                {t("add")}
-              </Button>
-            </div>
+            )}
 
             <div className="space-y-2">
               {encounter.care_team.length === 0 ? (
@@ -257,7 +264,7 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
 
                       <div className="flex items-center gap-1 flex-col-reverse md:flex-row">
                         <div className="hidden md:block">
-                          {index !== 0 && (
+                          {canWrite && index !== 0 && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -269,50 +276,57 @@ export function CareTeamSheet({ trigger, encounter }: CareTeamSheetProps) {
                             </Button>
                           )}
                         </div>
-                        <div className="md:hidden">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                        {canWrite && (
+                          <>
+                            <div className="md:hidden">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    disabled={isPending}
+                                    className="cursor-pointer"
+                                  >
+                                    <MoreVertical className="size-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {index !== 0 && (
+                                    <DropdownMenuItem
+                                      onClick={() => handleMakePrimary(index)}
+                                      disabled={isPending}
+                                    >
+                                      {t("mark_as_primary")}
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      confirmRemoveMember(member.member)
+                                    }
+                                    disabled={isPending}
+                                    className="text-destructive"
+                                  >
+                                    {t("remove")}
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+
+                            <div className="hidden md:block">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                disabled={isPending}
-                                className="cursor-pointer"
-                              >
-                                <MoreVertical className="size-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {index !== 0 && (
-                                <DropdownMenuItem
-                                  onClick={() => handleMakePrimary(index)}
-                                  disabled={isPending}
-                                >
-                                  {t("mark_as_primary")}
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem
                                 onClick={() =>
                                   confirmRemoveMember(member.member)
                                 }
                                 disabled={isPending}
-                                className="text-destructive"
+                                className="cursor-pointer"
                               >
-                                {t("remove")}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                        <div className="hidden md:block">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => confirmRemoveMember(member.member)}
-                            disabled={isPending}
-                            className="cursor-pointer"
-                          >
-                            <X className="size-4" />
-                          </Button>
-                        </div>
+                                <X className="size-4" />
+                              </Button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

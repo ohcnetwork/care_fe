@@ -1,7 +1,6 @@
 import { Plus } from "lucide-react";
+import { usePathParams } from "raviger";
 import { Link, navigate } from "raviger";
-import { useEffect } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
@@ -11,8 +10,6 @@ import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
-
-import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -46,19 +43,13 @@ export const EncounterOverviewTab = ({
     canViewEncounter,
     canSubmitEncounterQuestionnaire,
   } = getPermissions(hasPermission, encounter.permissions);
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityIdExists = !!subpathMatch?.facilityId;
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
+    facilityIdExists &&
     canSubmitEncounterQuestionnaire &&
     !inactiveEncounterStatus.includes(encounter.status ?? "");
-  const { goBack } = useAppHistory();
-
-  useEffect(() => {
-    if (!canAccess) {
-      toast.error("You do not have permission to view this encounter");
-      goBack();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAccess]);
 
   return (
     <div className="flex flex-col gap-4">
