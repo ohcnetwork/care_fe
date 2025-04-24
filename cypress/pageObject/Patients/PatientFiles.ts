@@ -154,7 +154,11 @@ export class PatientFiles {
   }
 
   clickFileDetailsButton() {
-    cy.get(`[data-cy="file-options-button"]`).first().click({ force: true });
+    cy.get(`[data-cy="file-options-button"]`)
+      .filter(":visible")
+      .first()
+      .should("be.enabled")
+      .click();
     return this;
   }
 
