@@ -15,7 +15,7 @@ describe("Facility Management", () => {
   const facilityType = "Primary Health Centre";
 
   beforeEach(() => {
-    cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
+    cy.viewport(viewPort.desktop2k.width, viewPort.desktop2k.height);
     cy.loginByApi("nurse");
     cy.visit("/");
   });
