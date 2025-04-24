@@ -388,7 +388,8 @@ export default function ValueSetSelect({
     (system === "system-additional-instruction" ||
       system === "system-route" ||
       system === "system-body-site" ||
-      system === "system-administration-method")
+      system === "system-administration-method" ||
+      system === "system-as-needed-reason")
   ) {
     return (
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
