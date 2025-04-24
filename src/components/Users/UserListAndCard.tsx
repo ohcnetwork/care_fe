@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
+import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
+import { formatName, isUserOnline } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
 interface UserCardProps {
@@ -36,10 +37,7 @@ export const UserStatusIndicator = ({
   const { t } = useTranslation();
 
   return (
-    <span
-      title={`${new Date(user.last_login).toLocaleString()}`}
-      className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}
-    >
+    <span className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}>
       {isUserOnline(user) || isAuthUser ? (
         <Badge variant="outline" className="bg-green-100 whitespace-nowrap">
           <span className="inline-block size-2 shrink-0 rounded-full bg-green-500 mr-2" />
@@ -48,9 +46,11 @@ export const UserStatusIndicator = ({
       ) : user.last_login ? (
         <Badge variant="outline" className="bg-yellow-100 whitespace-nowrap">
           <span className="inline-block size-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
-          <span className="text-xs text-yellow-700">
-            {relativeTime(user.last_login)}
-          </span>
+
+          <RelativeDateTooltip
+            date={user.last_login}
+            className="text-xs text-yellow-700"
+          />
         </Badge>
       ) : (
         <Badge
