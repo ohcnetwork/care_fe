@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { List, Plus, Search } from "lucide-react";
 import { useNavigate, usePathParams } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -52,11 +50,9 @@ export const EmptyState = () => {
 function ConsentCard({
   consent,
   encounter,
-  isHighlighted,
 }: {
   consent: ConsentModel;
   encounter: Encounter;
-  isHighlighted: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -68,12 +64,7 @@ function ConsentCard({
   const totalAttachments = consent.source_attachments.length;
 
   return (
-    <Card
-      className={cn(
-        "overflow-hidden transition-all h-full flex flex-col",
-        isHighlighted && "ring-2 ring-primary animate-pulse",
-      )}
-    >
+    <Card className="overflow-hidden transition-all h-full flex flex-col">
       <Badge
         variant="outline"
         className="w-fit justify-center border-b border-gray-300 rounded-b-md rounded-t-none px-2.5 py-1 text-center ml-3 bg-indigo-100 text-indigo-900"
@@ -183,22 +174,12 @@ function ConsentCard({
 export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [newConsentId, setNewConsentId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: CONSENTS_PER_PAGE,
   });
-
-  useEffect(() => {
-    // Clear the highlight after 3 seconds
-    if (newConsentId) {
-      const timer = setTimeout(() => {
-        setNewConsentId(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [newConsentId]);
 
   const { data: existingConsents, isLoading } = useQuery({
     queryKey: ["consents", encounter.patient.id, encounter.id, qParams],
@@ -227,8 +208,11 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
   };
 
   const handleConsentAdded = (consentId?: string) => {
-    consentId && setNewConsentId(consentId);
-    updateQuery({ page: 1 });
+    if (consentId) {
+      navigate(
+        `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/consents/${consentId}`,
+      );
+    }
   };
 
   if (isLoading) {
@@ -271,7 +255,6 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
                 key={consent.id}
                 consent={consent}
                 encounter={encounter}
-                isHighlighted={consent.id === newConsentId}
               />
             ))}
           </div>
