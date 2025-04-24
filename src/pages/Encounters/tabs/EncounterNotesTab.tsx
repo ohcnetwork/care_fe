@@ -50,6 +50,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
@@ -334,6 +335,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   const canWriteCurrentEncounter =
     canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
   const [commentAdded, setCommentAdded] = useState(false);
+  const isMobile = useIsMobile();
 
   // Fetch threads
   const { data: threadsData, isLoading: threadsLoading } = useQuery({
@@ -474,7 +476,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-12rem)]">
+    <div className="flex h-[calc(100vh-12rem)] overflow-hidden">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
         <div className="p-4 border-b border-gray-200">
@@ -583,10 +585,10 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       </Sheet>
 
       {/* Main Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-col h-full pb-[60px] lg:pb-0">
+      <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex flex-col h-full relative">
           {/* Header */}
-          <div className="p-4 border-b border-gray-200 sticky top-0 z-10">
+          <div className="p-3 sm:p-4 border-b border-gray-200 bg-white z-10">
             {selectedThread ? (
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-medium truncate flex-1">
@@ -626,24 +628,13 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
               ) : (
                 <>
                   {/* Messages List */}
-                  <ScrollArea className="flex-1 px-4 h-full max-h-screen">
-                    <div
-                      className="flex flex-col-reverse h-full py-4"
-                      data-cy="chat-messages"
-                    >
-                      <div ref={messagesEndRef} />
-                      {messages.length === 0 ? (
-                        <div className="text-center py-8">
-                          <MessageSquarePlus className="size-8 text-primary mx-auto mb-4" />
-                          <p className="text-sm font-medium">
-                            {t("encounter_notes__start_conversation")}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {t("encounter_notes__be_first_to_send")}
-                          </p>
-                        </div>
-                      ) : (
-                        messages.map((message) => (
+                  {isMobile ? (
+                    <div className="flex-1 overflow-y-auto overscroll-y-contain -mx-2 px-2">
+                      <div
+                        className="flex flex-col-reverse py-2 min-h-full"
+                        data-cy="chat-messages"
+                      >
+                        {messages.map((message) => (
                           <MessageItem
                             key={message.id}
                             message={message}
@@ -653,22 +644,49 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                                 : undefined
                             }
                           />
-                        ))
-                      )}
-                      {isFetchingNextPage ? (
-                        <div className="py-2">
-                          <div className="space-y-4">
-                            <CardListSkeleton count={3} />
+                        ))}
+                        {isFetchingNextPage && (
+                          <div className="py-2">
+                            <div className="space-y-4">
+                              <CardListSkeleton count={3} />
+                            </div>
                           </div>
-                        </div>
-                      ) : (
+                        )}
                         <div ref={ref} />
-                      )}
+                      </div>
                     </div>
-                  </ScrollArea>
+                  ) : (
+                    <ScrollArea className="flex-1 px-4 h-[calc(100vh-16rem)] overflow-y-auto">
+                      <div
+                        className="flex flex-col-reverse py-4 min-h-full"
+                        data-cy="chat-messages"
+                      >
+                        {messages.map((message) => (
+                          <MessageItem
+                            key={message.id}
+                            message={message}
+                            ref={
+                              message.id === recentMessage?.id
+                                ? recentMessageRef
+                                : undefined
+                            }
+                          />
+                        ))}
+                        {isFetchingNextPage && (
+                          <div className="py-2">
+                            <div className="space-y-4">
+                              <CardListSkeleton count={3} />
+                            </div>
+                          </div>
+                        )}
+                        <div ref={ref} />
+                      </div>
+                    </ScrollArea>
+                  )}
+
                   {/* Message Input */}
                   {canWriteCurrentEncounter && (
-                    <div className="border-t border-gray-200 p-4 sticky bottom-0">
+                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky bottom-0">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
