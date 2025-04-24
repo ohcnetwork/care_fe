@@ -110,7 +110,7 @@ export default function LocationSettings({
 
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
-      navigate(`/facility/${facilityId}/settings/location/${location.id}`);
+      navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
     },
     [facilityId],
   );
