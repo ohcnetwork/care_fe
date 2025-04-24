@@ -82,14 +82,14 @@ jobs:
         if: steps.pr_origin.outputs.is_forked == 'true'
         uses: cypress-io/github-action@v6
         with:
+          env: SKIP_PREFLIGHT_CHECK=true
+          install: true
           start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: chrome
           record: false
-          parallel: true
-          group: "UI - Chrome"
-          config-file: cypress.config.ts
+          parallel: false
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -98,6 +98,7 @@ jobs:
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
+          DEBUG: "cypress-split,find-cypress-specs"
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
