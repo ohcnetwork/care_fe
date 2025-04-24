@@ -27,10 +27,10 @@ describe("Patient Files", () => {
     patientFiles.clickFilesTab();
   });
 
-  const timestamp = new Date().getTime();
+  const timestamp = Date.now().toString().slice(-6);
   const validationMessage = "Please give a name for the file";
   const fileUploadSuccessToast = "File Uploaded Successfully";
-  const newFileName = "Renamed Cypress File1 " + timestamp;
+  const newFileName = `File1-${timestamp}`;
   const archiveReason = "Cypress Archive Reason";
 
   // Single File Upload Setup
@@ -40,12 +40,12 @@ describe("Patient Files", () => {
   // Multiple Files Upload Setup
   const fileNames = ["sample_img1.png", "sample_img2.png", "sample_file.xlsx"];
   const inputFileNames = [
-    "Cypress Image Test 1 " + timestamp,
-    "Cypress Image Test 2 " + timestamp,
-    "Cypress File Test 3 " + timestamp,
+    `Img1-${timestamp}`,
+    `Img2-${timestamp}`,
+    `File3-${timestamp}`,
   ];
 
-  const inputFileName1 = "Cypress Test File Upload 1 " + timestamp;
+  const inputFileName1 = `Upload1-${timestamp}`;
 
   it("Add multiple patient files", () => {
     const filePaths = (fileNames: string[]) =>
@@ -126,7 +126,7 @@ describe("Patient Files", () => {
 
   it("Record, Upload and Download Audio file", () => {
     // Audio File Upload Setup
-    const audioFileName = "Cypress Audio Test " + timestamp;
+    const audioFileName = `Audio-${timestamp}`;
 
     patientFiles
       .clickAddFilesButton()
