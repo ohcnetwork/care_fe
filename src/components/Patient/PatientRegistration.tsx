@@ -225,6 +225,12 @@ export default function PatientRegistration(
         age: values.age_or_dob === "age" ? values.age : undefined,
         date_of_birth:
           values.age_or_dob === "dob" ? values.date_of_birth : undefined,
+        emergency_phone_number: values.same_phone_number
+          ? values.phone_number
+          : values.emergency_phone_number,
+        permanent_address: values.same_address
+          ? values.address
+          : values.permanent_address,
       });
       return;
     }
