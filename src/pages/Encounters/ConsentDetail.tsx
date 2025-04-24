@@ -111,7 +111,7 @@ export function ConsentDetailPage() {
 
   if (!consent) {
     return (
-      <Page title={t("consent_not_found")}>
+      <Page title="">
         <div className="flex flex-col items-center justify-center min-h-[50vh]">
           <FileText className="size-16 text-gray-300 mb-4" />
           <h2 className="text-xl font-semibold mb-2">
@@ -121,11 +121,11 @@ export function ConsentDetailPage() {
             {t("consent_not_found_description")}
           </p>
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`}
-            className="text-primary hover:underline flex items-center gap-2"
+            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents`}
+            className="hover:underline flex items-center gap-2"
           >
             <ChevronLeft className="size-4" />
-            {t("back_to_encounter")}
+            {t("back")}
           </Link>
         </div>
       </Page>
@@ -174,12 +174,12 @@ export function ConsentDetailPage() {
     <div>
       <Link
         href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents`}
-        className="flex items-center text-primary hover:underline md:px-6"
+        className="flex items-center hover:underline md:px-6"
       >
         <ArrowLeft className="size-4" />
         {t("back")}
       </Link>
-      <Page title={t("consent")}>
+      <Page title="">
         <div className="mb-4 flex justify-end">
           <AddConsentSheet
             patientId={patientId!}
@@ -221,7 +221,7 @@ export function ConsentDetailPage() {
 
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">
-                      {t("consent_period")}
+                      {t("valid_period")}
                     </h3>
                     <p className="text-base font-semibold text-gray-700">
                       {consent.period.start
