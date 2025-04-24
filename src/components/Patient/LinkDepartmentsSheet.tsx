@@ -45,7 +45,7 @@ interface EncounterPathParams {
 }
 
 interface LocationPathParams {
-  facility_id: string;
+  facilityId: string;
   id: string;
 }
 
@@ -82,7 +82,7 @@ function getMutationParams(
         ? locationApi.addOrganization
         : locationApi.removeOrganization,
       pathParams: {
-        facility_id: facilityId,
+        facilityId,
         id: entityId,
       } as LocationPathParams,
       queryKey: ["location", entityId],
@@ -249,7 +249,13 @@ export default function LinkDepartmentsSheet({
           method: "POST",
           reference_id: `Add Organization ${orgId}`,
           body: {
-            organization: orgId,
+            ...(entityType === "device"
+              ? {
+                  managing_organization: orgId,
+                }
+              : {
+                  organization: orgId,
+                }),
           },
           pathParams,
         };
@@ -293,6 +299,7 @@ export default function LinkDepartmentsSheet({
                 value={selectedOrgs}
                 onChange={setSelectedOrgs}
                 currentOrganizations={currentOrganizations}
+                singleSelection={entityType === "device"}
               />
 
               <Button
