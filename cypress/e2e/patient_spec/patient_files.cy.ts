@@ -85,8 +85,7 @@ describe("Patient Files", () => {
       .clickDownloadFile();
   });
 
-  it("Add a new patient single file upload , Rename and Archive it", () => {
-    const fileArchiveSuccessToast = "File archived successfully";
+  it("Add a new patient file and rename it", () => {
     const fileRenameSuccessToast = "File name changed successfully";
 
     // Upload a single file
@@ -103,7 +102,7 @@ describe("Patient Files", () => {
       .verifyFileUploadApiCall()
       .verifySingleFileUploadSuccess(fileUploadSuccessToast);
 
-    // Filter the file to only show the active files and rename the file
+    // Rename the file
     patientFiles
       .clickFileDetailsButton()
       .clickRenameOption()
@@ -112,6 +111,24 @@ describe("Patient Files", () => {
       .clickProceedButton()
       .verifyFileRenameApiCall()
       .verifySingleFileUploadSuccess(fileRenameSuccessToast);
+  });
+
+  it("Add a new patient file and archive it", () => {
+    const fileArchiveSuccessToast = "File archived successfully";
+
+    // Upload a single file
+    patientFiles
+      .filterActiveFiles()
+      .clickAddFilesButton()
+      .selectUploadFromDevice()
+      .uploadSingleFile(filePath(fileName))
+      .clickUploadFilesButton()
+      .verifyValidationErrors(validationMessage)
+      .fillSingleFileName(inputFileName1)
+      .interceptFileUploadRequest()
+      .clickUploadFilesButton()
+      .verifyFileUploadApiCall()
+      .verifySingleFileUploadSuccess(fileUploadSuccessToast);
 
     // Archive the file
     patientFiles
@@ -124,7 +141,7 @@ describe("Patient Files", () => {
       .verifySingleFileUploadSuccess(fileArchiveSuccessToast);
   });
 
-  it("Record, Upload and Download Audio file", () => {
+  it("Record and upload audio file", () => {
     // Audio File Upload Setup
     const audioFileName = `Audio-${timestamp}`;
 
