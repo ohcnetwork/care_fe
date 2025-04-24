@@ -1,6 +1,7 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { BadgeCheck, LogOut } from "lucide-react";
 import { navigate } from "raviger";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -36,6 +37,13 @@ export function FacilityNavUser({
   const user = useAuthUser();
   const { isMobile, open } = useSidebar();
   const { signOut } = useAuthContext();
+  const [shouldReload, setShouldReload] = useState(false);
+
+  useEffect(() => {
+    if (shouldReload) {
+      window.location.reload();
+    }
+  }, [shouldReload]);
 
   return (
     <SidebarMenu>
@@ -102,7 +110,13 @@ export function FacilityNavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
+            <DropdownMenuItem
+              data-cy="user-menu-logout"
+              onClick={() => {
+                signOut();
+                setShouldReload(true);
+              }}
+            >
               <LogOut />
               {t("logout")}
             </DropdownMenuItem>
@@ -182,7 +196,12 @@ export function PatientNavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
+            <DropdownMenuItem
+              data-cy="user-menu-logout"
+              onClick={() => {
+                signOut();
+              }}
+            >
               <LogOut />
               {t("logout")}
             </DropdownMenuItem>
