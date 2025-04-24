@@ -48,7 +48,8 @@ jobs:
 
       - name: Determine PR Origin
         id: pr_origin
-        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
+        run: |
+          echo "is_forked=$(echo ${{ github.event.pull_request.head.repo.fork }})" >> $GITHUB_OUTPUT
 
       - name: Download the build folders
         uses: actions/download-artifact@v4
