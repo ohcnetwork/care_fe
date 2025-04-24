@@ -211,6 +211,7 @@ export class PatientFiles {
     cy.verifyAndClickElement('[data-cy="files-filter-button"]', "Filter");
     cy.verifyAndClickElement('[data-cy="active-files-button"]', "Active Files");
     this.verifyFilterApiCall();
+    cy.wait(1000);
     return this;
   }
 
