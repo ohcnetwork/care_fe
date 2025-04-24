@@ -68,8 +68,9 @@ describe("Facility Management", () => {
 
     // Submit and verify
     facilityPage.makePublicFacility();
+    facilityPage.interceptFacilityCreation();
     facilityPage.submitFacilityCreationForm();
-    facilityPage.verifySuccessMessage();
+    facilityPage.verifyFacilityCreation();
 
     // Wait for facility cards to load
     facilityPage.waitForFacilityCardsToLoad();
