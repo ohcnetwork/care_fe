@@ -49,7 +49,9 @@ export function RolesIndex() {
 
   return (
     <Page title={t("roles")}>
-      <p className="text-gray-600">{t("manage_and_view_roles")}</p>
+      <p className="text-gray-600 px-3 mb-3 md:px-0">
+        {t("manage_and_view_roles")}
+      </p>
 
       <div className="overflow-auto h-[calc(100vh-12rem)] md:h-[calc(100vh-9rem)]">
         <div className="relative w-full p-1">
@@ -75,9 +77,9 @@ export function RolesIndex() {
               {allPermissions.map((permission) => (
                 <TableRow
                   key={permission.slug}
-                  className="even:bg-gray-100 odd:bg-gray-50"
+                  className="even:bg-gray-100 odd:bg-gray-50 hover:bg-gray-100"
                 >
-                  <TableCell className="sticky left-0 z-10 max-w-48 font-semibold bg-inherit">
+                  <TableCell className="sticky left-0 z-10 max-w-48 font-semibold bg-inherit whitespace-normal">
                     {permission.name}
                   </TableCell>
                   {roles.map((role) => {
