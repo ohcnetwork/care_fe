@@ -216,21 +216,6 @@ export class PatientFiles {
     return this;
   }
 
-  openCamera() {
-    cy.get('[data-cy="open-camera-button"]').click();
-    return this;
-  }
-
-  captureImage() {
-    cy.verifyAndClickElement('[data-cy="capture-button"]', "Capture");
-    return this;
-  }
-
-  clickSubmit() {
-    cy.verifyAndClickElement('[data-cy="capture-submit-button"]', "Submit");
-    return this;
-  }
-
   navigateToSavedUrl() {
     cy.navigateToSavedUrl();
     return this;
