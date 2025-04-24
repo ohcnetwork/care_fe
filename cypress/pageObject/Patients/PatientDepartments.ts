@@ -187,7 +187,8 @@ export class PatientDepartments {
   }
 
   selectOrganization(organization: string) {
-    cy.typeAndSelectOption('[data-cy="facility-organization"]', organization);
+    cy.clickAndSelectOption('[data-cy="facility-organization"]', organization);
+    cy.get('[data-cy="confirm-organization"]').click();
     return this;
   }
 
