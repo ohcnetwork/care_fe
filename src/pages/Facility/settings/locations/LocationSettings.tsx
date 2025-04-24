@@ -34,18 +34,6 @@ interface LocationSettingsProps {
   locationId?: string;
 }
 
-function getParentChain(location: LocationListType): Set<string> {
-  const parentIds = new Set<string>();
-  let current = location.parent;
-
-  while (current) {
-    parentIds.add(current.id);
-    current = current.parent;
-  }
-
-  return parentIds;
-}
-
 export default function LocationSettings({
   facilityId,
   locationId,
@@ -123,11 +111,8 @@ export default function LocationSettings({
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
       navigate(`/facility/${facilityId}/settings/location/${location.id}`);
-      const parentIds = getParentChain(location);
-      parentIds.add(location.id);
-      setExpandedLocations(new Set([...expandedLocations, ...parentIds]));
     },
-    [expandedLocations, facilityId],
+    [facilityId],
   );
 
   const handleToggleExpand = useCallback((locationId: string) => {

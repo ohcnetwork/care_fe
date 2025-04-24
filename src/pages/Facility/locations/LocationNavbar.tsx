@@ -87,11 +87,10 @@ export function LocationTreeNode({
         )}
         <div
           className="flex items-center flex-1 text-sm gap-2 w-0"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             onSelect(location);
-            if (location.has_children) {
-              onToggleExpand(location.id);
-            }
+            onToggleExpand(location.id);
           }}
         >
           <Icon className="size-4" />
