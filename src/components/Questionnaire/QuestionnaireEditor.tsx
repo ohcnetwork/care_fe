@@ -74,12 +74,8 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-
-import { PaginatedResponse } from "@/Utils/request/types";
-import { MoveDown, MoveUp } from "@/Utils/request/utils";
-
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
-
+import { MoveDown, MoveUp } from "@/Utils/request/utils";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   AnswerOption,
