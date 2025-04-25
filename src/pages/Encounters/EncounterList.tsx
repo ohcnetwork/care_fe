@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -185,12 +185,25 @@ export function EncounterList({
           className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
           variant="outline"
         >
-          {isLoading
-            ? t("loading")
-            : t("entity_count", {
+          {isLoading ? (
+            t("loading")
+          ) : queryEncounters?.count && queryEncounters.count == 1 ? (
+            <Trans
+              i18nKey={"entity_count_one"}
+              values={{
                 count: queryEncounters?.count ?? 0,
                 entity: "Encounter",
-              })}
+              }}
+            />
+          ) : (
+            <Trans
+              i18nKey={"entity_count_other"}
+              values={{
+                count: queryEncounters?.count ?? 0,
+                entity: "Encounter",
+              }}
+            />
+          )}
         </Badge>
       }
     >

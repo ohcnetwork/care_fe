@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -74,12 +74,25 @@ export default function FacilityUsers(props: { facilityId: string }) {
           className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
           variant="outline"
         >
-          {userListFetching
-            ? t("loading")
-            : t("entity_count", {
+          {userListFetching ? (
+            t("loading")
+          ) : userListData?.count && userListData.count == 1 ? (
+            <Trans
+              i18nKey={"entity_count_one"}
+              values={{
                 count: userListData?.count ?? 0,
                 entity: "User",
-              })}
+              }}
+            />
+          ) : (
+            <Trans
+              i18nKey={"entity_count_other"}
+              values={{
+                count: userListData?.count ?? 0,
+                entity: "User",
+              }}
+            />
+          )}
         </Badge>
       }
     >
