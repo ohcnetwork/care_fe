@@ -177,7 +177,7 @@ export default function PatientRegistration(
       emergency_phone_number: "",
       age_or_dob: "dob",
       same_phone_number: false,
-      same_address: false,
+      same_address: true,
     },
     mode: "onChange",
   });
@@ -724,6 +724,7 @@ export default function PatientRegistration(
                           if (form.getValues("same_address")) {
                             form.setValue("permanent_address", e.target.value, {
                               shouldDirty: true,
+                              shouldValidate: true,
                             });
                           }
                         }}
@@ -849,6 +850,7 @@ export default function PatientRegistration(
                             onChange={(value) =>
                               form.setValue("geo_organization", value, {
                                 shouldDirty: true,
+                                shouldValidate: true,
                               })
                             }
                           />
