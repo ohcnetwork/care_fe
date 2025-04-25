@@ -43,6 +43,9 @@ export function useLocationManagement({
       parentId,
       { page, limit: itemsPerPage + 2, searchQuery },
     ],
+    /* The weird offset calculation is to include overlapping items between pages. 
+    Offset is calculated using (page - 1) * itemsPerPage - 1 to include overlapping items between pages. 
+    This enables smooth reordering across pages by showing one item from the previous and one from the next page.*/
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
@@ -56,6 +59,7 @@ export function useLocationManagement({
     }),
   });
 
+  const { t } = useTranslation();
   // Filter the results to show only the current page items
   const currentPageItems = children?.results?.slice(
     page === 1 ? 0 : 1,
@@ -99,10 +103,10 @@ export function useLocationManagement({
             parentId,
           ],
         });
-        toast.success("Location order updated");
+        toast.success(t("location_order_updated"));
       } else {
         variables.onSuccess();
-        toast.success("Location order updated");
+        toast.success(t("location_order_updated"));
       }
     },
     onError: (error, variables) => {
@@ -118,7 +122,6 @@ export function useLocationManagement({
           variables.previousData,
         );
       }
-      const { t } = useTranslation();
       let errorMessage = t("failed_to_update_order");
 
       if (error && typeof error === "object" && "cause" in error) {
