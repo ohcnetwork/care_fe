@@ -100,7 +100,7 @@ export default function LocationView({
     if (isNested && onSelectLocation) {
       onSelectLocation(location);
     } else {
-      navigate(`/facility/${facilityId}/settings/location/${location.id}`);
+      navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
     }
   };
 
@@ -184,7 +184,7 @@ export default function LocationView({
                       <span>{breadcrumb.name}</span>
                     ) : (
                       <Link
-                        href={`/facility/${facilityId}/settings/location/${breadcrumb.id}`}
+                        href={`/facility/${facilityId}/settings/locations/${breadcrumb.id}`}
                       >
                         {breadcrumb.name}
                       </Link>

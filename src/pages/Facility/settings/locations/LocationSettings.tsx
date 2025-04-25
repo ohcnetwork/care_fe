@@ -123,7 +123,6 @@ export default function LocationSettings({
 
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
-      // Reset page to 1 when navigating to a new location
       navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
       const parentIds = getParentChain(location);
       parentIds.add(location.id);
