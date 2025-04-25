@@ -20,6 +20,7 @@ import FacilityOrganizationSelector from "@/pages/Facility/settings/organization
 import deviceApi from "@/types/device/deviceApi";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import locationApi from "@/types/location/locationApi";
+import type { BatchRequestBody } from "@/types/questionnaire/batch";
 
 interface Props {
   entityType: "encounter" | "location" | "device";
@@ -44,7 +45,7 @@ interface EncounterPathParams {
 }
 
 interface LocationPathParams {
-  facility_id: string;
+  facilityId: string;
   id: string;
 }
 
@@ -81,7 +82,7 @@ function getMutationParams(
         ? locationApi.addOrganization
         : locationApi.removeOrganization,
       pathParams: {
-        facility_id: facilityId,
+        facilityId,
         id: entityId,
       } as LocationPathParams,
       queryKey: ["location", entityId],
@@ -182,40 +183,87 @@ export default function LinkDepartmentsSheet({
   facilityId,
   trigger,
   onUpdate,
-  orgType = "organization",
 }: Props) {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
+  const [selectedOrgs, setSelectedOrgs] = useState<string[] | null>(null);
   const queryClient = useQueryClient();
-  const { route, pathParams } = getMutationParams(
-    entityType,
-    entityId,
-    facilityId,
-    true,
-  );
 
-  const { mutate: addOrganization, isPending: isAdding } = useMutation({
-    mutationFn: mutate(route, {
-      pathParams,
-    }),
+  const { mutate: submitBatch, isPending: isAdding } = useMutation({
+    mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
       toast.success(t("organization_added_successfully"));
-      setSelectedOrg(null);
+      setSelectedOrgs(null);
       setOpen(false);
       onUpdate?.();
     },
     onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
-      errorData.errors.forEach((er) => {
-        toast.error(er.msg);
-      });
+      try {
+        const errorData = error.cause as {
+          results?: {
+            data?: { detail?: string; errors?: { msg: string }[] };
+          }[];
+        };
+
+        const errorMessages = errorData?.results
+          ?.flatMap(
+            (result) =>
+              result?.data?.errors?.map((err) => err.msg) || // Extract from `errors[].msg`
+              (result?.data?.detail ? [result.data.detail] : []), // Extract from `data.detail`
+          )
+          .filter(Boolean); // Remove undefined/null values
+
+        if (errorMessages?.length) {
+          errorMessages.forEach((msg) => toast.error(msg));
+        } else {
+          toast.error("An unexpected error occurred");
+        }
+      } catch {
+        toast.error("An unexpected error occurred");
+      }
     },
   });
 
+  const handleAddOrganizations = () => {
+    if (!selectedOrgs?.length) return;
+
+    const { route, pathParams } = getMutationParams(
+      entityType,
+      entityId,
+      facilityId,
+      true,
+    );
+
+    const batchRequest: BatchRequestBody = {
+      requests: selectedOrgs.map((orgId) => {
+        const resolvedPath = route.path
+          .replace("{facilityId}", facilityId)
+          .replace("{id}", entityId)
+          .replace("{encounterId}", entityId);
+
+        return {
+          url: resolvedPath,
+          method: "POST",
+          reference_id: `Add Organization ${orgId}`,
+          body: {
+            ...(entityType === "device"
+              ? {
+                  managing_organization: orgId,
+                }
+              : {
+                  organization: orgId,
+                }),
+          },
+          pathParams,
+        };
+      }),
+    };
+
+    submitBatch(batchRequest);
+  };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -248,20 +296,16 @@ export default function LinkDepartmentsSheet({
             <div className="space-y-4">
               <FacilityOrganizationSelector
                 facilityId={facilityId}
-                value={selectedOrg}
-                onChange={setSelectedOrg}
+                value={selectedOrgs}
+                onChange={setSelectedOrgs}
+                currentOrganizations={currentOrganizations}
+                singleSelection={entityType === "device"}
               />
 
               <Button
                 className="w-full"
-                onClick={() =>
-                  selectedOrg &&
-                  addOrganization({ [orgType]: selectedOrg } as Record<
-                    typeof orgType,
-                    string
-                  >)
-                }
-                disabled={!selectedOrg || isAdding}
+                onClick={handleAddOrganizations}
+                disabled={!selectedOrgs?.length || isAdding}
               >
                 {isAdding && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {t("add_organization", {
