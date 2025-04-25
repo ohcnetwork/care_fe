@@ -42,7 +42,7 @@ export default function InstructionsPopover({
         >
           <span className="truncate block max-w-full">
             {currentInstructions.length === 0
-              ? t("no_instructions")
+              ? t("no_instructions_selected")
               : currentInstructions
                   .map((i) => i.display)
                   .filter(Boolean)
