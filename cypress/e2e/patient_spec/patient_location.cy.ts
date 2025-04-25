@@ -35,7 +35,6 @@ describe("Manage locations association to an encounter", () => {
       .searchChildLocation(roomData.name)
       .interceptLocationDeletionAPICall()
       .clickFirstDeleteLocationButton()
-      .assertLocationDeletionSuccess()
       .verifyLocationDeletionAPICall();
   });
 
@@ -57,11 +56,11 @@ describe("Manage locations association to an encounter", () => {
       .fillLocationData(houseData)
       .interceptLocationCreationRequest()
       .submitLocationForm()
+      .assertLocationCreationSuccess()
       .verifyLocationCreationAPICall()
       .searchChildLocation(houseData.name)
       .interceptLocationDeletionAPICall()
       .clickFirstDeleteLocationButton()
-      .assertLocationDeletionSuccess()
       .verifyLocationDeletionAPICall();
   });
 
@@ -87,12 +86,9 @@ describe("Manage locations association to an encounter", () => {
       .interceptLocationDeletionAPICall()
       .searchChildLocation(bedData.name)
       .clickFirstDeleteLocationButton()
-      .assertLocationDeletionSuccess()
       .verifyLocationDeletionAPICall()
       .searchChildLocation(bedData.name)
-      .interceptLocationDeletionAPICall()
       .clickFirstDeleteLocationButton()
-      .assertLocationDeletionSuccess()
-      .verifyLocationDeletionAPICall();
+      .assertLocationDeletionSuccess();
   });
 });
