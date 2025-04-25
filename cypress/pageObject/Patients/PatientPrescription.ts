@@ -46,6 +46,7 @@ export class PatientPrescription {
         .then(() => {
           cy.get('[role="option"]').contains(dosage).click();
         });
+      cy.wait(200);
     }
 
     if (frequency) {
