@@ -97,18 +97,18 @@ export function handleUploadPercentage(
   }
 }
 
-export function moveUp<T>(arr: T[], idx: number): T[] | undefined {
+export function moveUp<T>(arr: T[], idx: number): T[] {
   if (idx < 0 || idx >= arr.length) {
-    return;
+    return arr;
   }
   const newArray = [...arr];
   [newArray[idx - 1], newArray[idx]] = [newArray[idx], newArray[idx - 1]];
   return newArray;
 }
 
-export function moveDown<T>(arr: T[], idx: number): T[] | undefined {
+export function moveDown<T>(arr: T[], idx: number): T[] {
   if (idx < 0 || idx >= arr.length) {
-    return;
+    return arr;
   }
   const newArray = [...arr];
   [newArray[idx + 1], newArray[idx]] = [newArray[idx], newArray[idx + 1]];
