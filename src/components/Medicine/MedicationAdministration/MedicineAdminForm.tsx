@@ -109,11 +109,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
       setEndTimeError("");
       isValid?.(!startError);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     administrationRequest.occurrence_period_start,
     administrationRequest.occurrence_period_end,
     administrationRequest.status,
-    isValid,
   ]);
 
   const handleDateChange = (newTime: string, isStartTime: boolean) => {
