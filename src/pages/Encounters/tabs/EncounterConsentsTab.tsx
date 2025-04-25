@@ -174,8 +174,6 @@ function ConsentCard({
 export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
-  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: CONSENTS_PER_PAGE,
@@ -206,14 +204,6 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
     updateQuery({ page: 1 });
   };
 
-  const handleConsentAdded = (consentId?: string) => {
-    if (consentId) {
-      navigate(
-        `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/consents/${consentId}`,
-      );
-    }
-  };
-
   if (isLoading) {
     return <Loading />;
   }
@@ -234,7 +224,6 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
         <ConsentFormSheet
           patientId={encounter.patient.id}
           encounterId={encounter.id}
-          onSuccess={handleConsentAdded}
         />
       </div>
 

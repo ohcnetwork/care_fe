@@ -107,14 +107,12 @@ type ConsentFormValues = z.infer<ReturnType<typeof consentFormSchema>>;
 interface ConsentFormSheetProps {
   patientId: string;
   encounterId: string;
-  onSuccess?: (consentId?: string) => void;
   existingConsent?: ConsentModel;
 }
 
 export default function ConsentFormSheet({
   patientId,
   encounterId,
-  onSuccess,
   existingConsent,
 }: ConsentFormSheetProps) {
   const { t } = useTranslation();
@@ -177,9 +175,6 @@ export default function ConsentFormSheet({
     }
     setIsOpen(false);
 
-    if (isEdit) {
-      onSuccess?.(consentId);
-    }
     toast.success(
       isEdit
         ? t("consent_updated_successfully")
@@ -234,7 +229,7 @@ export default function ConsentFormSheet({
         fileEntries: [],
       });
     }
-  }, [isEdit, existingConsent, form]);
+  }, [existingConsent]);
 
   useEffect(() => {
     if (!isOpen) {
