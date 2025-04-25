@@ -34,6 +34,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 
+import RequirementsSelector from "@/components/Common/RequirementsSelector";
+import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -111,165 +113,11 @@ export function validateServiceRequestQuestion(
   }, []);
 }
 
-function SelectedItemCard({
-  title,
-  details,
-  onRemove,
-}: {
-  title: string;
-  details: { label: string; value: string | undefined }[];
-  onRemove: () => void;
-}) {
-  return (
-    <div className="w-full relative flex flex-col rounded-sm border border-gray-200 bg-white px-2 py-1">
-      <Button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onRemove();
-        }}
-        className="absolute right-2 top-0 rounded-full p-1 cursor-pointer"
-        variant="ghost"
-      >
-        <Trash2 className="size-4 text-gray-500" />
-      </Button>
-      <p className="mb-2 font-medium text-sm text-gray-900">{title}</p>
-      <div className="grid grid-cols-1 gap-1 md:grid-cols-2">
-        {details
-          .filter(({ value }) => value)
-          .map(({ label, value }, index) => (
-            <div key={index} className="flex text-sm">
-              <span className="text-gray-500">{label}: </span>
-              <span className="ml-1 text-gray-900">{value}</span>
-            </div>
-          ))}
-      </div>
-    </div>
-  );
-}
-
-function RequirementsSelector({
-  value,
-  onChange,
-  options,
-  isLoading,
-  placeholder,
-  onSearch,
-}: {
-  value: string[];
-  onChange: (value: string[]) => void;
-  options: {
-    label: string;
-    value: string;
-    details: { label: string; value: string | undefined }[];
-  }[];
-  isLoading: boolean;
-  placeholder: string;
-  onSearch: (query: string) => void;
-}) {
-  const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
-
-  const selectedItems = options.filter((option) =>
-    value.includes(option.value),
-  );
-
-  const toggleOption = (optionValue: string) => {
-    const newValue = value.includes(optionValue)
-      ? value.filter((v) => v !== optionValue)
-      : [...value, optionValue];
-    onChange(newValue);
-  };
-
-  const removeItem = (itemValue: string) => {
-    onChange(value.filter((v) => v !== itemValue));
-  };
-
-  return (
-    <div className="flex flex-col gap-3">
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={isOpen}
-            className="w-full justify-between"
-          >
-            <div className="flex items-center gap-2 truncate">
-              {value.length === 0 ? (
-                <span className="text-muted-foreground">{placeholder}</span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <span className="font-medium">{value.length}</span>
-                  {t("items_selected")}
-                </span>
-              )}
-            </div>
-            <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0">
-          <Command>
-            <CommandInput
-              placeholder={t("search")}
-              onValueChange={onSearch}
-              className="h-9"
-            />
-            <CommandEmpty>{t("no_results")}</CommandEmpty>
-            <CommandGroup className="max-h-[300px] overflow-auto">
-              {isLoading ? (
-                <div className="p-4 text-center text-sm text-muted-foreground">
-                  {t("loading")}
-                </div>
-              ) : (
-                options.map((option) => {
-                  const isSelected = value.includes(option.value);
-                  return (
-                    <CommandItem
-                      key={option.value}
-                      onSelect={() => toggleOption(option.value)}
-                      className="flex cursor-pointer items-center gap-2 rounded-md px-2"
-                    >
-                      <div
-                        className={cn(
-                          "flex size-4 shrink-0 items-center justify-center rounded-sm border border-primary",
-                          isSelected
-                            ? "bg-primary text-primary-foreground"
-                            : "opacity-50",
-                        )}
-                      >
-                        {isSelected && <Check className="size-3" />}
-                      </div>
-                      <span>{option.label}</span>
-                    </CommandItem>
-                  );
-                })
-              )}
-            </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
-
-      {selectedItems.length > 0 && (
-        <div className="flex flex-col gap-2">
-          {selectedItems.map((item) => (
-            <SelectedItemCard
-              key={item.value}
-              title={item.label}
-              details={item.details}
-              onRemove={() => removeItem(item.value)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 interface ServiceRequestFormProps {
   serviceRequest: ServiceRequestApplyActivityDefinitionSpec;
   onUpdate?: (updates: Partial<ServiceRequestReadSpec>) => void;
   onRemove?: () => void;
+  onAdd?: () => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
   questionId?: string;
@@ -283,6 +131,7 @@ function ServiceRequestForm({
   serviceRequest,
   onUpdate,
   onRemove,
+  onAdd,
   disabled,
   errors,
   questionId,
@@ -503,9 +352,11 @@ function ServiceRequestForm({
             />
           </div>
 
-          <div className="space-y-2 col-span-2">
+          <div className="rounded-lg border col-span-2 space-y-2 border-gray-200 shadow-sm p-4">
             <Label>{t("locations")}</Label>
             <RequirementsSelector
+              title={t("location_requirements")}
+              description={t("location_requirements_description")}
               value={serviceRequest.service_request.locations || []}
               onChange={(values) =>
                 onUpdate?.({ locations: values as unknown as LocationList[] })
@@ -530,15 +381,23 @@ function ServiceRequestForm({
               isLoading={isLoadingLocations}
               placeholder={t("select_locations")}
               onSearch={setLocationSearch}
+              customSelector={
+                <LocationMultiSelect
+                  facilityId={facilityId}
+                  value={serviceRequest.service_request.locations || []}
+                  onChange={(values) =>
+                    onUpdate?.({
+                      locations: values as unknown as LocationList[],
+                    })
+                  }
+                />
+              }
             />
           </div>
         </div>
         {isPreview && (
           <div className="flex justify-end">
-            <Button
-              onClick={() => onUpdate?.({})}
-              data-cy="add-service-request"
-            >
+            <Button onClick={onAdd} data-cy="add-service-request">
               {t("add")}
             </Button>
           </div>
@@ -772,6 +631,8 @@ function ServiceRequestForm({
               <div className="space-y-2 col-span-2">
                 <Label>{t("locations")}</Label>
                 <RequirementsSelector
+                  title={t("location_requirements")}
+                  description={t("location_requirements_description")}
                   value={serviceRequest.service_request.locations || []}
                   onChange={(values) =>
                     onUpdate?.({
@@ -798,6 +659,17 @@ function ServiceRequestForm({
                   isLoading={isLoadingLocations}
                   placeholder={t("select_locations")}
                   onSearch={setLocationSearch}
+                  customSelector={
+                    <LocationMultiSelect
+                      facilityId={facilityId}
+                      value={serviceRequest.service_request.locations || []}
+                      onChange={(values) =>
+                        onUpdate?.({
+                          locations: values as unknown as LocationList[],
+                        })
+                      }
+                    />
+                  }
                 />
               </div>
             </div>
@@ -959,6 +831,7 @@ export function ServiceRequestQuestion({
           serviceRequest={serviceRequest}
           onUpdate={(updates) => handleUpdateServiceRequest(index, updates)}
           onRemove={() => handleRemoveServiceRequest(index)}
+          onAdd={handleAddServiceRequest}
           disabled={disabled}
           errors={errors}
           questionId={questionnaireResponse.question_id}
@@ -990,11 +863,25 @@ export function ServiceRequestQuestion({
         <ServiceRequestForm
           facilityId={facilityId}
           serviceRequest={previewServiceRequest}
-          onUpdate={() => handleAddServiceRequest()}
+          onUpdate={(updates) => {
+            setPreviewServiceRequest({
+              ...previewServiceRequest,
+              service_request: {
+                ...previewServiceRequest.service_request,
+                ...updates,
+                locations: Array.isArray(updates.locations)
+                  ? updates.locations.map((loc) =>
+                      typeof loc === "string" ? loc : (loc as LocationList).id,
+                    )
+                  : previewServiceRequest.service_request.locations,
+              },
+            });
+          }}
           onRemove={() => {
             setPreviewServiceRequest(null);
             setSelectedActivityDefinition(null);
           }}
+          onAdd={handleAddServiceRequest}
           disabled={disabled}
           isPreview
         />
