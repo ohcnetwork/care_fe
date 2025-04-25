@@ -1,14 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
@@ -46,6 +52,7 @@ export function SymptomsList({
         patientId={patientId}
         encounterId={encounterId}
         readOnly={readOnly}
+        count={0}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -69,10 +76,9 @@ export function SymptomsList({
         patientId={patientId}
         encounterId={encounterId}
         readOnly={readOnly}
+        count={0}
       >
-        <CardContent className="px-2 pb-3 pt-2">
-          <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
-        </CardContent>
+        <></>
       </SymptomListLayout>
     );
   }
@@ -83,6 +89,7 @@ export function SymptomsList({
       encounterId={encounterId}
       className={className}
       readOnly={readOnly}
+      count={filteredSymptoms.length}
     >
       <SymptomTable
         symptoms={[
@@ -120,6 +127,7 @@ const SymptomListLayout = ({
   children,
   className,
   readOnly = false,
+  count,
 }: {
   facilityId?: string;
   patientId: string;
@@ -127,24 +135,56 @@ const SymptomListLayout = ({
   children: ReactNode;
   className?: string;
   readOnly?: boolean;
+  count: number;
 }) => {
   const { t } = useTranslation();
+  const [value, setValue] = useState(count > 0 ? "symptoms" : undefined);
+
+  useEffect(() => {
+    setValue(count > 0 ? "symptoms" : undefined);
+  }, [count]);
 
   return (
-    <Card className={cn("border-none rounded-sm", className)}>
-      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
-        <CardTitle>{t("symptoms")}</CardTitle>
-        {!readOnly && (
-          <Link
-            href={`questionnaire/symptom`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
-          >
-            <CareIcon icon="l-pen" className="size-4" />
-            {t("edit")}
-          </Link>
-        )}
-      </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
-    </Card>
+    <Accordion
+      type="single"
+      collapsible
+      className={cn(
+        "w-full bg-white rounded-md shadow-sm border border-gray-100",
+        className,
+      )}
+      value={value}
+      onValueChange={(value) => setValue(value)}
+    >
+      <AccordionItem value="symptoms" className="border-none">
+        <AccordionTrigger
+          className={cn(
+            "px-4 py-2 rounded-sm hover:no-underline [&>svg]:mt-1",
+            count > 0 && "data-[state=open]:bg-gray-50 hover:bg-gray-50",
+            count === 0 &&
+              "[&>svg]:opacity-50 pointer-events-none [&>div>div]:opacity-50",
+          )}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-medium">
+                {t("symptoms_count", { count })}
+              </span>
+            </div>
+            {!readOnly && (
+              <Link
+                href={`questionnaire/symptom`}
+                className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 no-underline pointer-events-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CareIcon icon="l-pen" className="size-4" />
+                {t("edit")}
+              </Link>
+            )}
+          </div>
+        </AccordionTrigger>
+
+        <AccordionContent className="px-2 pb-2">{children}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };

@@ -154,7 +154,11 @@ export class PatientFiles {
   }
 
   clickFileDetailsButton() {
-    cy.get(`[data-cy="file-options-button"]`).first().click({ force: true });
+    cy.get(`[data-cy="file-options-button"]`)
+      .filter(":visible")
+      .first()
+      .should("be.enabled")
+      .click();
     return this;
   }
 
@@ -207,6 +211,7 @@ export class PatientFiles {
     cy.verifyAndClickElement('[data-cy="files-filter-button"]', "Filter");
     cy.verifyAndClickElement('[data-cy="active-files-button"]', "Active Files");
     this.verifyFilterApiCall();
+    cy.wait(1000);
     return this;
   }
 

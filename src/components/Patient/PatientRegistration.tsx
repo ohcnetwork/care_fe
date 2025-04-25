@@ -226,6 +226,12 @@ export default function PatientRegistration(
         age: values.age_or_dob === "age" ? values.age : undefined,
         date_of_birth:
           values.age_or_dob === "dob" ? values.date_of_birth : undefined,
+        emergency_phone_number: values.same_phone_number
+          ? values.phone_number
+          : values.emergency_phone_number,
+        permanent_address: values.same_address
+          ? values.address
+          : values.permanent_address,
       });
       return;
     }
@@ -403,6 +409,7 @@ export default function PatientRegistration(
                             form.setValue(
                               "emergency_phone_number",
                               value || "",
+                              { shouldDirty: true },
                             );
                           }
                         }}
@@ -601,6 +608,7 @@ export default function PatientRegistration(
                                 e.target.value
                                   ? Number(e.target.value)
                                   : (null as unknown as number),
+                                { shouldDirty: true },
                               )
                             }
                             data-cy="age-input"
@@ -714,7 +722,9 @@ export default function PatientRegistration(
                         onChange={(e) => {
                           field.onChange(e);
                           if (form.getValues("same_address")) {
-                            form.setValue("permanent_address", e.target.value);
+                            form.setValue("permanent_address", e.target.value, {
+                              shouldDirty: true,
+                            });
                           }
                         }}
                         data-cy="current-address-input"
@@ -810,7 +820,9 @@ export default function PatientRegistration(
                           }))}
                           {...field}
                           onChange={(value) =>
-                            form.setValue("nationality", value)
+                            form.setValue("nationality", value, {
+                              shouldDirty: true,
+                            })
                           }
                           data-cy="nationality-input"
                         />
@@ -835,7 +847,9 @@ export default function PatientRegistration(
                             selected={selectedLevels}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
-                              form.setValue("geo_organization", value)
+                              form.setValue("geo_organization", value, {
+                                shouldDirty: true,
+                              })
                             }
                           />
                         </FormControl>

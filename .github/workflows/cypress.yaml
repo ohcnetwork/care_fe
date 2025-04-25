@@ -48,7 +48,8 @@ jobs:
 
       - name: Determine PR Origin
         id: pr_origin
-        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
+        run: |
+          echo "is_forked=$(echo ${{ github.event.pull_request.head.repo.fork }})" >> $GITHUB_OUTPUT
 
       - name: Download the build folders
         uses: actions/download-artifact@v4
@@ -104,14 +105,14 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots
+          name: cypress-screenshots-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.containers }}
           path: cypress/screenshots
 
       - name: Upload cypress videos 📹
         uses: actions/upload-artifact@v4
         if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
         with:
-          name: cypress-videos
+          name: cypress-videos-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.containers }}
           path: cypress/videos
 
   cleanup:
