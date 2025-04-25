@@ -5,11 +5,9 @@ import {
   ChevronLeft,
   Download,
   FileText,
-  PlusCircle,
-  Upload,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -80,6 +78,20 @@ export function ConsentDetailPage({
   });
 
   const isLoading = isLoadingConsent;
+
+  useEffect(() => {
+    if (fileUpload.files.length > 0 && !fileUpload.previewing) {
+      setOpenUploadDialog(true);
+    } else {
+      setOpenUploadDialog(false);
+    }
+  }, [fileUpload.files, fileUpload.previewing]);
+
+  useEffect(() => {
+    if (!openUploadDialog) {
+      fileUpload.clearFiles();
+    }
+  }, [openUploadDialog]);
 
   if (isLoading) {
     return <Loading />;
@@ -204,67 +216,22 @@ export function ConsentDetailPage({
                   <h3 className="text-lg font-semibold">
                     {t("supporting_documents")}
                   </h3>
-                  <div className="flex rounded-md border border-gray-200">
+                  <Button
+                    variant="outline_primary"
+                    className="flex flex-row items-center"
+                    data-cy="add-files-button"
+                    asChild
+                  >
                     <Label
-                      htmlFor="file_upload_consent"
-                      className="cursor-pointer flex items-center px-4 py-2 rounded-l-md hover:bg-gray-50 transition-colors"
+                      htmlFor={`file_upload_consent`}
+                      className="flex flex-row items-center cursor-pointer w-fit"
                     >
-                      <PlusCircle className="size-4 mr-2" />
-                      {t("select")} {t("files")}
+                      <CareIcon icon="l-file-upload" className="mr-1" />
+                      <span>{t("add_files")}</span>
                       {fileUpload.Input({ className: "hidden" })}
                     </Label>
-                    <div className="border-l border-gray-200" />
-                    <Button
-                      variant="ghost"
-                      className="gap-2 rounded-r-md rounded-l-none px-4 py-2 text-primary hover:bg-gray-50 transition-colors"
-                      onClick={() => setOpenUploadDialog(true)}
-                      disabled={fileUpload.files.length === 0}
-                    >
-                      <Upload className="size-4" />
-                      {t("upload")}
-                      {fileUpload.files.length > 0 &&
-                        ` (${fileUpload.files.length})`}
-                    </Button>
-                  </div>
+                  </Button>
                 </div>
-
-                {fileUpload.files.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-base font-medium mb-2">
-                      {t("selected")} {t("files")}
-                    </h4>
-                    <Card className="p-4">
-                      <div className="space-y-2">
-                        {fileUpload.files.map((file, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between rounded-md bg-gray-50 px-4 py-2"
-                          >
-                            <span className="flex items-center gap-2 truncate">
-                              <CareIcon
-                                icon="l-paperclip"
-                                className="shrink-0"
-                              />
-                              <span
-                                className="truncate max-w-[200px]"
-                                title={file.name}
-                              >
-                                {file.name}
-                              </span>
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => fileUpload.removeFile(index)}
-                            >
-                              <CareIcon icon="l-times" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </Card>
-                  </div>
-                )}
 
                 <Card className="p-5">
                   {consent.source_attachments.length > 0 ? (
