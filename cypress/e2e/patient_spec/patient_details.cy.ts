@@ -1,6 +1,7 @@
 import { PatientDetails } from "@/pageObject/Patients/PatientDetails";
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
+import { generateName } from "@/utils/commonUtils";
 import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
@@ -15,11 +16,14 @@ describe("Patient Management", () => {
   });
 
   it("Assign users to a patient", () => {
-    const userName = "nihal-nurse";
+    const userName = "nihal";
     const userRole = "Nurse";
+    const patientName = generateName();
     facilityCreation.selectFacility("GHC Payyanur");
     patientEncounter
       .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .searchEncounter(patientName)
       .openFirstEncounterDetails()
       .clickPatientDetailsButton();
     patientDetails
