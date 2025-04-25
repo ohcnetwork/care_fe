@@ -35,7 +35,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
             </h3>
             <div className="flex flex-col lg:flex-row text-sm text-gray-600">
               <span>{facility.pincode}, </span>
-              <span>{`Ph.: ${facility.phone_number}`}</span>
+              <span className="whitespace-nowrap">{`Ph.: ${facility.phone_number}`}</span>
             </div>
           </div>
 
@@ -51,7 +51,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
           <div>
             <Label>{t("name")}</Label>
             <p className="font-semibold">{patient.name}</p>
-            <p className="text-sm text-gray-600 font-medium">
+            <p className="text-sm text-gray-600 font-medium whitespace-nowrap">
               {formatPatientAge(patient, true)},{" "}
               {t(`GENDER__${patient.gender}`)}
             </p>
@@ -59,7 +59,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
 
           <div className="flex items-center gap-2">
             <div>
-              <Label className="text-black font-semibold text-sm/none">
+              <Label className="text-black font-semibold text-sm/none whitespace-nowrap">
                 Token No.
               </Label>
               <p className="text-5xl font-bold leading-none">
