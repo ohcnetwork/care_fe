@@ -242,12 +242,12 @@ const ScheduleTemplateEditor = ({
             )}
           />
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4 w-full">
             <FormField
               control={form.control}
               name="valid_from"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem className="flex flex-col w-full min-w-[210px]">
                   <FormLabel aria-required>{t("valid_from")}</FormLabel>
                   <DatePicker
                     date={field.value}
