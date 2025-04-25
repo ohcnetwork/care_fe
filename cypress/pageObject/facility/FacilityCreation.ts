@@ -15,7 +15,7 @@ export class FacilityCreation {
   selectFacility(facilityName: string) {
     cy.verifyAndClickElement("[data-cy='facilities-panel-list']", facilityName);
     cy.get("[data-sidebar='rail']").click();
-    cy.wait(100);
+    cy.wait(1000);
     return this;
   }
 

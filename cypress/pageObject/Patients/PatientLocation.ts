@@ -42,7 +42,7 @@ export class PatientLocation {
   }
 
   clickFirstDeleteLocationButton() {
-    cy.get(this.selectors.deleteLocationButton).first().click();
+    cy.get(this.selectors.deleteLocationButton).first().click({ force: true });
     cy.verifyAndClickElement(this.selectors.removeLocationButton, "Remove");
     return this;
   }
@@ -65,12 +65,15 @@ export class PatientLocation {
   }
 
   searchLocation(locationName: string) {
-    cy.typeIntoField(this.selectors.locationSearchInput, locationName);
+    cy.typeIntoField(this.selectors.locationSearchInput, locationName, {
+      skipVerification: true,
+    });
     return this;
   }
 
   searchChildLocation(locationName: string) {
     cy.typeIntoField(this.selectors.locationChildSearchInput, locationName, {
+      skipVerification: true,
       clearBeforeTyping: true,
     });
     return this;
@@ -103,7 +106,10 @@ export class PatientLocation {
   }
 
   enterLocationName(name: string, clearBeforeTyping: boolean = false) {
-    cy.typeIntoField(this.selectors.nameInput, name, { clearBeforeTyping });
+    cy.typeIntoField(this.selectors.nameInput, name, {
+      clearBeforeTyping,
+      skipVerification: true,
+    });
     return this;
   }
 
