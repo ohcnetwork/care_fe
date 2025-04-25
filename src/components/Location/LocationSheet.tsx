@@ -90,6 +90,7 @@ export function LocationSheet({
   const [bedsPage, setBedsPage] = useState(1);
   const [hasMoreLocations, setHasMoreLocations] = useState(true);
   const [hasMoreBeds, setHasMoreBeds] = useState(true);
+  const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const initialState = {
@@ -151,7 +152,7 @@ export function LocationSheet({
         queryParams: {
           limit: ITEMS_PER_PAGE,
           offset: (locationsPage - 1) * ITEMS_PER_PAGE,
-          search: searchTerm,
+          name: searchTerm,
           mode: "kind",
           parent: selectedLocation?.id,
           ...(!selectedLocation ? { mine: true } : {}),
@@ -169,6 +170,7 @@ export function LocationSheet({
       selectedLocation?.id,
       bedsPage,
       showAvailableOnly,
+      searchTerm,
     ],
     queryFn: async ({ signal }) => {
       const response = await query(locationApi.list, {
@@ -177,6 +179,7 @@ export function LocationSheet({
           limit: ITEMS_PER_PAGE,
           offset: (bedsPage - 1) * ITEMS_PER_PAGE,
           mode: "instance",
+          name: searchTerm,
           parent: selectedLocation?.id,
           available: showAvailableOnly ? "true" : undefined,
           ...(!selectedLocation ? { mine: true } : {}),
@@ -185,10 +188,11 @@ export function LocationSheet({
       })({ signal });
       return response;
     },
+    enabled: !!selectedLocation && !!facilityId,
   });
 
   useEffect(() => {
-    if (locationsData) {
+    if (locationsData && open) {
       if (locationsPage === 1) {
         setAllLocations(locationsData.results);
       } else {
@@ -196,7 +200,7 @@ export function LocationSheet({
       }
       setHasMoreLocations(locationsData.count > locationsPage * ITEMS_PER_PAGE);
     }
-  }, [locationsData, locationsPage]);
+  }, [locationsData, locationsPage, open]);
 
   useEffect(() => {
     if (bedsData) {
@@ -207,6 +211,7 @@ export function LocationSheet({
       }
       setHasMoreBeds(bedsData.count > bedsPage * ITEMS_PER_PAGE);
     }
+    setSelectedBed(null);
   }, [bedsData, bedsPage]);
 
   const handleLocationClick = (location: LocationList) => {
@@ -643,6 +648,7 @@ export function LocationSheet({
               >
                 <Button
                   variant="outline"
+                  disabled={!selectedBed}
                   onClick={() => {
                     setSheetState((prev) => ({
                       ...prev,
@@ -770,6 +776,7 @@ export function LocationSheet({
     <>
       <Sheet
         onOpenChange={(open) => {
+          setOpen(open);
           // Reset states when closing the sheet
           if (!open) {
             resetStates();
