@@ -1990,6 +1990,7 @@
   "open_camera": "Open Camera",
   "open_live_monitoring": "Open Live Monitoring",
   "operational_status": "Operational Status",
+  "operator": "Operator",
   "optional": "Optional",
   "oral_issue_for_non_oral_nutrition_route_error": "Can be specified only if nutrition route is set to Oral",
   "ordering": "Ordering",

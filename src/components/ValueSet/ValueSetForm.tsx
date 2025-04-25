@@ -135,7 +135,7 @@ function ConceptFields({
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="Code"
+                    placeholder={t("code")}
                     disabled={disabled}
                     onChange={(e) => {
                       field.onChange(e);
@@ -232,7 +232,7 @@ function FilterFields({
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="Property"
+                    placeholder={t("property")}
                     disabled={disabled}
                   />
                 </FormControl>
@@ -247,7 +247,7 @@ function FilterFields({
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="Operator"
+                    placeholder={t("operator")}
                     disabled={disabled}
                   />
                 </FormControl>
@@ -260,7 +260,11 @@ function FilterFields({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                  <Input {...field} placeholder="Value" disabled={disabled} />
+                  <Input
+                    {...field}
+                    placeholder={t("value")}
+                    disabled={disabled}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -535,7 +539,7 @@ export function ValueSetForm({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select Status" />
+                    <SelectValue placeholder={t("select_status")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
