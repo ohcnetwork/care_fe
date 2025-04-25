@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +39,6 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import Autocomplete from "@/src/components/ui/autocomplete";
 import careTeamApi from "@/types/careTeam/careTeamApi";
 import { Encounter } from "@/types/emr/encounter";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
