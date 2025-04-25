@@ -122,7 +122,7 @@ export default function LocationSettings({
 
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
-      navigate(`/facility/${facilityId}/settings/location/${location.id}`);
+      navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
       const parentIds = getParentChain(location);
       parentIds.add(location.id);
       setExpandedLocations(new Set([...expandedLocations, ...parentIds]));
