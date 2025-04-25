@@ -25,7 +25,6 @@ import { Encounter } from "@/types/emr/encounter";
 
 const CONSENTS_PER_PAGE = 12;
 
-// Empty state component for when no consents are found
 export const EmptyState = () => {
   const { t } = useTranslation();
 
