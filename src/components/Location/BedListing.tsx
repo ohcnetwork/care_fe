@@ -17,7 +17,7 @@ export function BedListing({
   onBedSelect,
   onCheckStatus,
 }: BedListingProps) {
-  if (beds.length === 0) return <></>;
+  if (beds.length === 0) return null;
   return (
     <RadioGroup
       value={selectedBed || ""}
