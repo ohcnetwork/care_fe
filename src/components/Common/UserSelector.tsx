@@ -25,10 +25,8 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
-import { OrganizationUserRole } from "@/types/organization/organization";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
@@ -58,39 +56,46 @@ export default function UserSelector({
   const [search, setSearch] = useState("");
   const { ref, inView } = useInView();
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
-    useInfiniteQuery({
-      queryKey: ["users", facilityId, search],
-      queryFn: async ({ pageParam = 0 }) => {
-        const response = await query(
-          facilityId
-        ? organizationId
-          ? facilityOrganizationApi.listUsers
-          : routes.facility.getUsers
-        : UserApi.list,
-          {
-            pathParams: facilityId
+  const {
+    data: usersList,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+  } = useInfiniteQuery({
+    queryKey: ["users", facilityId, search, organizationId],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await query(
+        facilityId
           ? organizationId
-            ? { facilityId, organizationId }
-            : { facility_id: facilityId }
-          : undefined,
-            queryParams: {
-              limit: String(PAGE_LIMIT),
-              offset: String(pageParam),
-              search_text: search,
-            },
+            ? facilityOrganizationApi.listUsers
+            : routes.facility.getUsers
+          : UserApi.list,
+        {
+          pathParams: facilityId
+            ? organizationId
+              ? { facilityId, organizationId }
+              : { facility_id: facilityId }
+            : undefined,
+          queryParams: {
+            limit: String(PAGE_LIMIT),
+            offset: String(pageParam),
+            search_text: search,
           },
-        )({ signal: new AbortController().signal });
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * PAGE_LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
-
-  const usersList = data?.pages.flatMap((p) => p.results) || [];
+        },
+      )({ signal: new AbortController().signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * PAGE_LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    select: (data) =>
+      data?.pages.flatMap((p) =>
+        p.results.map((u) => ("user" in u ? u.user : u)),
+      ) || [],
+  });
 
   useEffect(() => {
     if (inView && hasNextPage) fetchNextPage();
@@ -130,7 +135,7 @@ export default function UserSelector({
       >
         <Command
           filter={(value, search) => {
-            const user = usersList.find((u) => u.id === value);
+            const user = usersList?.find((u) => u.id === value);
             if (!user) return 0;
 
             const name = formatName(user).toLowerCase();
@@ -152,7 +157,7 @@ export default function UserSelector({
                 : noOptionsMessage || t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {usersList.map((user: UserBase, i) => (
+              {usersList?.map((user: UserBase, i) => (
                 <CommandItem
                   key={user.id}
                   value={user.id}
