@@ -124,7 +124,7 @@ export class PatientFiles {
       .should("be.visible")
       .should("be.enabled")
       .click();
-    cy.wait(2000);
+    cy.wait(200);
     return this;
   }
 
@@ -133,7 +133,7 @@ export class PatientFiles {
       .should("be.visible")
       .should("be.enabled")
       .click();
-    cy.wait(1000);
+    cy.wait(100);
     return this;
   }
 
@@ -144,7 +144,7 @@ export class PatientFiles {
 
   clickStartAgainButton() {
     cy.get('[data-cy="start-again-button"]').click();
-    cy.wait(2000);
+    cy.wait(200);
     return this;
   }
 
@@ -211,7 +211,7 @@ export class PatientFiles {
     cy.verifyAndClickElement('[data-cy="files-filter-button"]', "Filter");
     cy.verifyAndClickElement('[data-cy="active-files-button"]', "Active Files");
     this.verifyFilterApiCall();
-    cy.wait(1000);
+    cy.wait(100);
     return this;
   }
 

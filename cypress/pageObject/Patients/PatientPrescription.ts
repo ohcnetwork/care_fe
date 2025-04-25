@@ -35,7 +35,7 @@ export class PatientPrescription {
         false,
       );
       this.verifyMedicineName(medicineName);
-      cy.wait(1000);
+      cy.wait(100);
     }
 
     if (dosage) {
