@@ -7,7 +7,7 @@ import {
   FileText,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -46,6 +46,7 @@ export function ConsentDetailPage({
 
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: consent, isLoading: isLoadingConsent } = useQuery({
     queryKey: ["consent", consentId],
@@ -90,6 +91,9 @@ export function ConsentDetailPage({
   useEffect(() => {
     if (!openUploadDialog) {
       fileUpload.clearFiles();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   }, [openUploadDialog]);
 
@@ -228,7 +232,10 @@ export function ConsentDetailPage({
                     >
                       <CareIcon icon="l-file-upload" className="mr-1" />
                       <span>{t("add_files")}</span>
-                      {fileUpload.Input({ className: "hidden" })}
+                      {fileUpload.Input({
+                        className: "hidden",
+                        ref: fileInputRef,
+                      })}
                     </Label>
                   </Button>
                 </div>

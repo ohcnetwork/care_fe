@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Edit, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -120,6 +120,7 @@ export default function ConsentFormSheet({
 
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fileUpload = useFileUpload({
     type: "consent",
@@ -154,7 +155,7 @@ export default function ConsentFormSheet({
     form.setValue("fileEntries", fileEntries, {
       shouldValidate: fileEntries.length > 0,
     });
-  }, [fileUpload.files, fileUpload.fileNames]);
+  }, [fileUpload.files, fileUpload.fileNames, form]);
 
   const handleSuccess = async (consentId?: string) => {
     if (fileUpload.files.length > 0 && consentId) {
@@ -234,6 +235,9 @@ export default function ConsentFormSheet({
   useEffect(() => {
     if (!isOpen) {
       fileUpload.clearFiles();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   }, [isOpen]);
 
@@ -525,7 +529,12 @@ export default function ConsentFormSheet({
                               type="button"
                               variant="outline"
                               className="border border-secondary-300"
-                              onClick={() => fileUpload.removeFile(index)}
+                              onClick={() => {
+                                fileUpload.removeFile(index);
+                                if (fileInputRef.current) {
+                                  fileInputRef.current.value = "";
+                                }
+                              }}
                             >
                               <CareIcon icon="l-trash" className="size-4" />
                             </Button>
@@ -541,7 +550,10 @@ export default function ConsentFormSheet({
                   >
                     <CareIcon icon="l-file-upload-alt" className="mr-1" />
                     <span>{t("upload_files")}</span>
-                    {fileUpload.Input({ className: "hidden" })}
+                    {fileUpload.Input({
+                      className: "hidden",
+                      ref: fileInputRef,
+                    })}
                   </Label>
                 </div>
               </div>
