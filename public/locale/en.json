@@ -1314,7 +1314,7 @@
   "error_updating_consent": "Error updating consent",
   "error_updating_encounter": "Error to Updating Encounter",
   "error_updating_location": "Error updating location",
-  "error_uploading_file": "Error uploading file",
+  "error_uploading_files": "Error uploading files",
   "error_verifying_otp": "Error while verifying OTP, Please request a new OTP",
   "error_while_deleting_record": "Error while deleting record",
   "escape": "Escape",

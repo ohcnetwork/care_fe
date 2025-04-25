@@ -8,6 +8,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -19,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -37,6 +40,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import useFileUpload from "@/hooks/useFileUpload";
+
 import mutate from "@/Utils/request/mutate";
 import {
   CONSENT_CATEGORIES,
@@ -46,6 +51,11 @@ import {
   CreateConsentRequest,
 } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
+
+interface FileEntry {
+  file: File;
+  name: string;
+}
 
 const consentFormSchema = z
   .object({
@@ -58,6 +68,14 @@ const consentFormSchema = z
       end: z.date().optional(),
     }),
     note: z.string().optional(),
+    fileEntries: z
+      .array(
+        z.object({
+          file: z.instanceof(File),
+          name: z.string().min(1, { message: t("enter_file_name") }),
+        }),
+      )
+      .default([]),
   })
   .superRefine((data, ctx) => {
     if (data.period.end && data.date > data.period.end) {
@@ -102,7 +120,50 @@ export default function ConsentFormSheet({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const handleSuccess = (consentId?: string) => {
+  const fileUpload = useFileUpload({
+    type: "consent",
+    category: "consent_attachment",
+    multiple: true,
+    allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
+    allowNameFallback: false,
+    compress: false,
+  });
+
+  const form = useForm<ConsentFormValues>({
+    resolver: zodResolver(consentFormSchema),
+    defaultValues: {
+      decision: "permit",
+      category: "treatment",
+      status: "active",
+      date: new Date(),
+      period: {
+        start: new Date(),
+        end: undefined,
+      },
+      note: "",
+      fileEntries: [],
+    },
+  });
+
+  useEffect(() => {
+    const fileEntries: FileEntry[] = fileUpload.files.map((file, index) => ({
+      file,
+      name: fileUpload.fileNames[index] || "",
+    }));
+    form.setValue("fileEntries", fileEntries, {
+      shouldValidate: fileEntries.length > 0,
+    });
+  }, [fileUpload.files, fileUpload.fileNames]);
+
+  const handleSuccess = async (consentId?: string) => {
+    if (fileUpload.files.length > 0 && consentId) {
+      try {
+        await fileUpload.handleFileUpload(consentId);
+      } catch (_error) {
+        toast.error(t("error_uploading_files"));
+      }
+    }
+
     queryClient.invalidateQueries({
       queryKey: ["consents", patientId, encounterId],
     });
@@ -112,7 +173,10 @@ export default function ConsentFormSheet({
       });
     }
     setIsOpen(false);
-    onSuccess?.(consentId);
+    // Only call onSuccess for edit mode, not for create mode
+    if (isEdit) {
+      onSuccess?.(consentId);
+    }
     toast.success(
       isEdit
         ? t("consent_updated_successfully")
@@ -146,22 +210,7 @@ export default function ConsentFormSheet({
     },
   });
 
-  const isPending = isCreating || isUpdating;
-
-  const form = useForm<ConsentFormValues>({
-    resolver: zodResolver(consentFormSchema),
-    defaultValues: {
-      decision: "permit",
-      category: "treatment",
-      status: "active",
-      date: new Date(),
-      period: {
-        start: new Date(),
-        end: undefined,
-      },
-      note: "",
-    },
-  });
+  const isPending = isCreating || isUpdating || fileUpload.uploading;
 
   // Prefill the form with existing consent data when in edit mode
   useEffect(() => {
@@ -180,9 +229,16 @@ export default function ConsentFormSheet({
             : undefined,
         },
         note: existingConsent!.note || "",
+        fileEntries: [],
       });
     }
   }, [isEdit, existingConsent, form]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      fileUpload.clearFiles();
+    }
+  }, [isOpen]);
 
   const onSubmit = (values: ConsentFormValues) => {
     const consentData = {
@@ -413,6 +469,59 @@ export default function ConsentFormSheet({
               )}
             />
 
+            <div>
+              <FormLabel>{t("supporting_documents")}</FormLabel>
+              <div className="flex flex-col gap-2 mt-2">
+                {fileUpload.files.map((file, index) => (
+                  <FormField
+                    key={index}
+                    control={form.control}
+                    name={`fileEntries.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem className="space-y-0">
+                        <div className="flex items-stretch gap-2">
+                          <FormControl>
+                            <Input
+                              placeholder={t("file_name")}
+                              className="flex-1"
+                              {...field}
+                              value={field.value || ""}
+                              onChange={(e) => {
+                                field.onChange(e.target.value);
+                                fileUpload.setFileName(e.target.value, index);
+                              }}
+                            />
+                          </FormControl>
+                          <div className="bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 flex items-center gap-2 max-w-[150px]">
+                            <span className="text-sm truncate">
+                              {file.name}
+                            </span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="border border-secondary-300"
+                            onClick={() => fileUpload.removeFile(index)}
+                          >
+                            <CareIcon icon="l-trash" className="size-4" />
+                          </Button>
+                        </div>
+                        <FormMessage className="mt-1" />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+                <Label
+                  htmlFor="file_upload_consent"
+                  className="w-full inline-flex items-center justify-center px-4 py-2 cursor-pointer border border-gray-200 rounded-md hover:bg-accent hover:text-accent-foreground"
+                >
+                  <CareIcon icon="l-file-upload-alt" className="mr-1" />
+                  <span>{t("upload_files")}</span>
+                  {fileUpload.Input({ className: "hidden" })}
+                </Label>
+              </div>
+            </div>
+
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
@@ -432,6 +541,7 @@ export default function ConsentFormSheet({
           </form>
         </Form>
       </SheetContent>
+      {fileUpload.Dialogues}
     </Sheet>
   );
 }
