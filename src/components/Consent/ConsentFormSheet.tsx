@@ -176,7 +176,7 @@ export default function ConsentFormSheet({
       });
     }
     setIsOpen(false);
-    // Only call onSuccess for edit mode, not for create mode
+
     if (isEdit) {
       onSuccess?.(consentId);
     }
@@ -215,7 +215,6 @@ export default function ConsentFormSheet({
 
   const isPending = isCreating || isUpdating || fileUpload.uploading;
 
-  // Prefill the form with existing consent data when in edit mode
   useEffect(() => {
     if (isEdit) {
       form.reset({

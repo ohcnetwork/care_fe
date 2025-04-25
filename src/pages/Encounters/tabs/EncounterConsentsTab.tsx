@@ -196,7 +196,6 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
   const filteredConsents = existingConsents?.results?.filter((consent) => {
     if (!searchQuery) return true;
 
-    // Check if any attachment name matches the search query
     return consent.source_attachments.some((attachment) =>
       attachment?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
@@ -204,7 +203,7 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    updateQuery({ page: 1 }); // Reset to first page when searching
+    updateQuery({ page: 1 });
   };
 
   const handleConsentAdded = (consentId?: string) => {
