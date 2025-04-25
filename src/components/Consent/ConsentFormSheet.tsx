@@ -57,49 +57,50 @@ interface FileEntry {
   name: string;
 }
 
-const consentFormSchema = z
-  .object({
-    decision: z.enum(CONSENT_DECISIONS).default("permit"),
-    category: z.enum(CONSENT_CATEGORIES).default("treatment"),
-    status: z.enum(CONSENT_STATUSES).default("active"),
-    date: z.date(),
-    period: z.object({
-      start: z.date().optional(),
-      end: z.date().optional(),
-    }),
-    note: z.string().optional(),
-    fileEntries: z
-      .array(
-        z.object({
-          file: z.instanceof(File),
-          name: z.string().min(1, { message: t("enter_file_name") }),
-        }),
-      )
-      .default([]),
-  })
-  .superRefine((data, ctx) => {
-    if (data.period.end && data.date > data.period.end) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: t("consent_after_end"),
-        path: ["date"],
-      });
-    }
+const consentFormSchema = () =>
+  z
+    .object({
+      decision: z.enum(CONSENT_DECISIONS).default("permit"),
+      category: z.enum(CONSENT_CATEGORIES).default("treatment"),
+      status: z.enum(CONSENT_STATUSES).default("active"),
+      date: z.date(),
+      period: z.object({
+        start: z.date().optional(),
+        end: z.date().optional(),
+      }),
+      note: z.string().optional(),
+      fileEntries: z
+        .array(
+          z.object({
+            file: z.instanceof(File),
+            name: z.string().min(1, { message: t("enter_file_name") }),
+          }),
+        )
+        .default([]),
+    })
+    .superRefine((data, ctx) => {
+      if (data.period.end && data.date > data.period.end) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("consent_after_end"),
+          path: ["date"],
+        });
+      }
 
-    if (
-      data.period.start &&
-      data.period.end &&
-      data.period.start > data.period.end
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: t("valid_from_after_valid_untill"),
-        path: ["period.start"],
-      });
-    }
-  });
+      if (
+        data.period.start &&
+        data.period.end &&
+        data.period.start > data.period.end
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("valid_from_after_valid_untill"),
+          path: ["period.start"],
+        });
+      }
+    });
 
-type ConsentFormValues = z.infer<typeof consentFormSchema>;
+type ConsentFormValues = z.infer<ReturnType<typeof consentFormSchema>>;
 
 interface ConsentFormSheetProps {
   patientId: string;
@@ -130,7 +131,7 @@ export default function ConsentFormSheet({
   });
 
   const form = useForm<ConsentFormValues>({
-    resolver: zodResolver(consentFormSchema),
+    resolver: zodResolver(consentFormSchema()),
     defaultValues: {
       decision: "permit",
       category: "treatment",
@@ -459,7 +460,7 @@ export default function ConsentFormSheet({
                   <FormLabel>{t("note")}</FormLabel>
                   <FormControl>
                     <textarea
-                      className="w-full field-sizing-content border border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-md"
+                      className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-md"
                       rows={3}
                       {...field}
                     />
