@@ -76,12 +76,13 @@ export function generateAddress(multiLine: boolean = false): string {
 }
 
 export function generateUsername(firstName: string): string {
-  // Generate a random 4-byte (32-bit) array
-  const randomBytes = new Uint32Array(1);
-  crypto.getRandomValues(randomBytes);
+  const digitLength = getRandomIndex(8) + 1; // Random number between 1-8
+  const randomDigits = new Uint8Array(digitLength);
+  crypto.getRandomValues(randomDigits);
+  const randomSuffix = Array.from(randomDigits)
+    .map((byte) => byte % 10)
+    .join("");
 
-  // Convert to a 4-digit string, ensuring leading zeros
-  const randomSuffix = (randomBytes[0] % 10000).toString().padStart(4, "0");
   return `${firstName.toLowerCase()}${randomSuffix}dev`;
 }
 
