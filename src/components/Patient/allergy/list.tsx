@@ -6,16 +6,22 @@ import {
   LeafIcon,
 } from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -88,7 +94,7 @@ export function AllergyList({
 
   if (isLoading) {
     return (
-      <AllergyListLayout readOnly={readOnly} className={className}>
+      <AllergyListLayout readOnly={readOnly} className={className} count={0}>
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -106,7 +112,11 @@ export function AllergyList({
   );
 
   if (!filteredAllergies?.length) {
-    return null;
+    return (
+      <AllergyListLayout readOnly={readOnly} className={className} count={0}>
+        <></>
+      </AllergyListLayout>
+    );
   }
 
   interface AllergyRowProps {
@@ -195,7 +205,11 @@ export function AllergyList({
   }
 
   return (
-    <AllergyListLayout readOnly={readOnly} className={className}>
+    <AllergyListLayout
+      readOnly={readOnly}
+      className={className}
+      count={filteredAllergies.length}
+    >
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
           <TableRow className="rounded-md overflow-hidden bg-gray-100">
@@ -264,28 +278,62 @@ const AllergyListLayout = ({
   children,
   className,
   readOnly = false,
+  count,
 }: {
   children: ReactNode;
   className?: string;
   readOnly?: boolean;
+  count: number;
 }) => {
   const { t } = useTranslation();
+  const [value, setValue] = useState(count > 0 ? "allergies" : undefined);
+
+  useEffect(() => {
+    setValue(count > 0 ? "allergies" : undefined);
+  }, [count]);
 
   return (
-    <Card className={cn("border-none rounded-sm", className)}>
-      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
-        <CardTitle>{t("allergies")}</CardTitle>
-        {!readOnly && (
-          <Link
-            href={`questionnaire/allergy_intolerance`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
-          >
-            <CareIcon icon="l-pen" className="size-4" />
-            {t("edit")}
-          </Link>
-        )}
-      </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
-    </Card>
+    <Accordion
+      type="single"
+      collapsible
+      className={cn(
+        "w-full bg-white rounded-md shadow-sm border border-gray-100",
+        className,
+      )}
+      value={value}
+      onValueChange={(value) => setValue(value)}
+    >
+      <AccordionItem value="allergies" className="border-none">
+        <AccordionTrigger
+          className={cn(
+            "px-4 py-2 rounded-sm hover:no-underline [&>svg]:mt-1",
+            count > 0 && "data-[state=open]:bg-gray-50 hover:bg-gray-50",
+            count === 0 &&
+              "[&>svg]:opacity-50 pointer-events-none [&>div>div]:opacity-50",
+          )}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-medium">
+                {t("allergies_count", { count })}
+              </span>
+            </div>
+
+            {!readOnly && (
+              <Link
+                href="questionnaire/allergy_intolerance"
+                className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 no-underline pointer-events-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CareIcon icon="l-pen" className="size-4" />
+                {t("edit")}
+              </Link>
+            )}
+          </div>
+        </AccordionTrigger>
+
+        <AccordionContent className="px-2 pb-2">{children}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };
