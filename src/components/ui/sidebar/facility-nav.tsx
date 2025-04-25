@@ -85,7 +85,7 @@ function generateFacilityLinks(
           url: `${baseUrl}/settings/general`,
         },
         {
-          name: "Departments",
+          name: t("departments"),
           url: `${baseUrl}/settings/departments`,
         },
         {
