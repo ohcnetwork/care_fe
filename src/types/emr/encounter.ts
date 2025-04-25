@@ -199,7 +199,7 @@ export interface EncounterRequest {
   discharge_summary_advice?: string;
 }
 
-export const completedEncounterStatus = ["completed", "discharged"];
+export const completedEncounterStatus = ["completed"];
 export const inactiveEncounterStatus = [
   ...["cancelled", "entered_in_error", "discontinued"],
   ...completedEncounterStatus,
