@@ -1,15 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+
+import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
 import symptomApi from "@/types/emr/symptom/symptomApi";
@@ -42,15 +38,14 @@ export function SymptomsList({
 
   if (isLoading) {
     return (
-      <SymptomListLayout
-        patientId={patientId}
-        encounterId={encounterId}
+      <EncounterAccordionLayout
+        title="symptoms"
         readOnly={readOnly}
+        className={className}
+        editLink={!readOnly ? "questionnaire/symptom" : undefined}
       >
-        <CardContent className="px-2 pb-2">
-          <Skeleton className="h-[100px] w-full" />
-        </CardContent>
-      </SymptomListLayout>
+        <Skeleton className="h-[100px] w-full" />
+      </EncounterAccordionLayout>
     );
   }
 
@@ -68,11 +63,11 @@ export function SymptomsList({
   }
 
   return (
-    <SymptomListLayout
-      patientId={patientId}
-      encounterId={encounterId}
-      className={className}
+    <EncounterAccordionLayout
+      title="symptoms"
       readOnly={readOnly}
+      className={className}
+      editLink={!readOnly ? "questionnaire/symptom" : undefined}
     >
       <SymptomTable
         symptoms={[
@@ -102,39 +97,6 @@ export function SymptomsList({
           </div>
         </>
       )}
-    </SymptomListLayout>
+    </EncounterAccordionLayout>
   );
 }
-
-const SymptomListLayout = ({
-  children,
-  className,
-  readOnly = false,
-}: {
-  facilityId?: string;
-  patientId: string;
-  encounterId?: string;
-  children: ReactNode;
-  className?: string;
-  readOnly?: boolean;
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <Card className={cn("border-none rounded-sm", className)}>
-      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
-        <CardTitle>{t("symptoms")}</CardTitle>
-        {!readOnly && (
-          <Link
-            href={`questionnaire/symptom`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
-          >
-            <CareIcon icon="l-pen" className="size-4" />
-            {t("edit")}
-          </Link>
-        )}
-      </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
-    </Card>
-  );
-};
