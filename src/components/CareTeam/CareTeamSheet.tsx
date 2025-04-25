@@ -89,7 +89,7 @@ export function CareTeamSheet({
 
   const { data } = useQuery({
     queryKey: ["organizations", encounter.facility.id],
-    queryFn: query.debounced(facilityOrganizationApi.list, {
+    queryFn: query(facilityOrganizationApi.list, {
       pathParams: { facilityId: encounter.facility.id },
     }),
   });
