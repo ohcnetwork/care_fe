@@ -38,7 +38,7 @@ export default function InstructionsPopover({
           variant="outline"
           data-cy="instructions"
           className="w-full justify-between"
-          disabled={disabled}
+          disabled={(isReadOnly || disabled) && currentInstructions.length <= 1}
         >
           <span className="truncate block max-w-full">
             {currentInstructions.length === 0
