@@ -124,7 +124,7 @@ export class PatientFiles {
       .should("be.visible")
       .should("be.enabled")
       .click();
-    cy.wait(200);
+    cy.wait(2000);
     return this;
   }
 
@@ -133,7 +133,7 @@ export class PatientFiles {
       .should("be.visible")
       .should("be.enabled")
       .click();
-    cy.wait(100);
+    cy.wait(1000);
     return this;
   }
 
@@ -144,7 +144,7 @@ export class PatientFiles {
 
   clickStartAgainButton() {
     cy.get('[data-cy="start-again-button"]').click();
-    cy.wait(200);
+    cy.wait(2000);
     return this;
   }
 
