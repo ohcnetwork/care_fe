@@ -26,15 +26,18 @@ export class PatientLocation {
     completeBedStayButton: '[data-cy="complete-bed-stay-button"]',
     locationCard: '[data-cy="location-card-container"]',
     locationSearchInput: '[data-cy="location-search-input"]',
-    viewDetailsLocationButton: '[data-cy="view-details-location-button"]',
+    viewDetailsLocationButton: '[data-cy="view-location-row"]',
     locationChildSearchInput: '[data-cy="location-child-search-input"]',
     deleteLocationButton: '[data-cy="delete-location-button"]',
     removeLocationButton: '[data-cy="remove-location-button"]',
     showAvailableBeds: "#available-only",
   };
 
-  openFirstExistingLocation() {
-    cy.get(this.selectors.viewDetailsLocationButton).first().click();
+  openFirstExistingLocation(locationName: string) {
+    cy.verifyAndClickElement(
+      this.selectors.viewDetailsLocationButton,
+      locationName,
+    );
     return this;
   }
 

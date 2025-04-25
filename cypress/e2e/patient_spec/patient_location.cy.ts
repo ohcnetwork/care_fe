@@ -69,14 +69,15 @@ describe("Manage locations association to an encounter", () => {
     const roomData = formData[0];
     const houseData = formData[1];
     const bedData = formData[2];
+    const locationName = "Block B";
 
     patientLocation
       .navigateToSettings()
       .clickLocationTab()
 
       // Open Existing Location created by a super admin
-      .searchLocation("Block B")
-      .openFirstExistingLocation()
+      .searchLocation(locationName)
+      .openFirstExistingLocation(locationName)
 
       // Create Room Location with Room data and verify and delete it
       .clickChildAddLocation()
