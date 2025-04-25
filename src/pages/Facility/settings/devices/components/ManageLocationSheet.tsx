@@ -105,7 +105,7 @@ export default function ManageLocationSheet({
                   {t("current_location")}
                 </div>
                 <Link
-                  href={`/location/${device.current_location.id}`}
+                  href={`/locations/${device.current_location.id}`}
                   className="text-sm text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
                 >
                   {device.current_location.name}
