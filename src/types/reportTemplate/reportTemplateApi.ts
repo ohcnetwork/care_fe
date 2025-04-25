@@ -32,7 +32,8 @@ export default {
     method: HttpMethod.DELETE,
   },
   getAvailableSections: {
-    path: "/api/v1/facility/{facility_external_id}/report_template/available_section_sources/",
+    path: "/api/v1/facility/{facility_external_id}/report_template/get_available_section_source/",
     method: HttpMethod.GET,
+    TRes: Type<string[]>(),
   },
 };

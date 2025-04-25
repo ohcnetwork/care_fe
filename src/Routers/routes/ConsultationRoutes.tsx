@@ -11,6 +11,7 @@ import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
+import ReportBuilder from "@/pages/Encounters/ReportBuilder/ReportBuilder";
 
 const ExcalidrawEditor = lazy(
   () => import("@/components/Common/Drawings/ExcalidrawEditor"),
@@ -169,6 +170,10 @@ const consultationRoutes: AppRoutes = {
   "/patient/:patientId/questionnaire": ({ patientId }) => (
     <EncounterQuestionnaire patientId={patientId} subjectType="patient" />
   ),
+  "/patient/:patientId/encounter/:encounterId/report_builder": ({
+    patientId,
+    encounterId,
+  }) => <ReportBuilder patientId={patientId} encounterId={encounterId} />,
 };
 
 export default consultationRoutes;
