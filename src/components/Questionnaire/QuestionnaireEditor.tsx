@@ -75,7 +75,7 @@ import {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
-import { MoveDown, MoveUp } from "@/Utils/request/utils";
+import { moveDown, moveUp } from "@/Utils/request/utils";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   AnswerOption,
@@ -967,16 +967,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               depth={0}
                               onMoveUp={() => {
                                 if (index > 0) {
-                                  const newQuestions = [
-                                    ...questionnaire.questions,
-                                  ];
-                                  [
-                                    newQuestions[index - 1],
-                                    newQuestions[index],
-                                  ] = [
-                                    newQuestions[index],
-                                    newQuestions[index - 1],
-                                  ];
+                                  const newQuestions = moveUp<Question>(
+                                    questionnaire.questions,
+                                    index,
+                                  );
                                   updateQuestionnaireField(
                                     "questions",
                                     newQuestions,
@@ -988,16 +982,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   index <
                                   questionnaire.questions.length - 1
                                 ) {
-                                  const newQuestions = [
-                                    ...questionnaire.questions,
-                                  ];
-                                  [
-                                    newQuestions[index],
-                                    newQuestions[index + 1],
-                                  ] = [
-                                    newQuestions[index + 1],
-                                    newQuestions[index],
-                                  ];
+                                  const newQuestions = moveDown<Question>(
+                                    questionnaire.questions,
+                                    index,
+                                  );
                                   updateQuestionnaireField(
                                     "questions",
                                     newQuestions,
@@ -1769,7 +1757,7 @@ function QuestionEditor({
                                     <DropdownMenuItem
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        const newOptions = MoveUp<AnswerOption>(
+                                        const newOptions = moveUp<AnswerOption>(
                                           answer_option,
                                           idx,
                                         );
@@ -1788,7 +1776,7 @@ function QuestionEditor({
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         const newOptions =
-                                          MoveDown<AnswerOption>(
+                                          moveDown<AnswerOption>(
                                             answer_option,
                                             idx,
                                           );
@@ -1931,7 +1919,7 @@ function QuestionEditor({
                       parentId={getQuestionPath()}
                       onMoveUp={() => {
                         if (idx > 0) {
-                          const newQuestions = MoveUp<Question>(
+                          const newQuestions = moveUp<Question>(
                             questions || [],
                             idx,
                           );
@@ -1940,7 +1928,7 @@ function QuestionEditor({
                       }}
                       onMoveDown={() => {
                         if (idx < (questions?.length || 0) - 1) {
-                          const newQuestions = MoveDown<Question>(
+                          const newQuestions = moveDown<Question>(
                             questions || [],
                             idx,
                           );

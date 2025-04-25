@@ -97,7 +97,7 @@ export function handleUploadPercentage(
   }
 }
 
-export function MoveUp<T>(arr: T[], idx: number): T[] | undefined {
+export function moveUp<T>(arr: T[], idx: number): T[] | undefined {
   if (idx < 0 || idx >= arr.length) {
     return;
   }
@@ -106,7 +106,7 @@ export function MoveUp<T>(arr: T[], idx: number): T[] | undefined {
   return newArray;
 }
 
-export function MoveDown<T>(arr: T[], idx: number): T[] | undefined {
+export function moveDown<T>(arr: T[], idx: number): T[] | undefined {
   if (idx < 0 || idx >= arr.length) {
     return;
   }
