@@ -20,7 +20,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -143,6 +150,12 @@ export function QuestionnaireSearch({
           side="bottom"
           className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
         >
+          <SheetHeader>
+            <SheetTitle>{t("add_questionnaire")}</SheetTitle>
+            <SheetDescription>
+              Search and select a questionnaire
+            </SheetDescription>
+          </SheetHeader>
           <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
           <div className="mt-6 h-full">{content}</div>
         </SheetContent>

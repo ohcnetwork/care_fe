@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/collapsible";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -848,6 +849,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           ) : (
             <Dialog open={showDosageDialog} onOpenChange={setShowDosageDialog}>
               <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("dosage_information")}</DialogTitle>
+                </DialogHeader>
                 <DosageDialog
                   dosageRange={dosageInstruction.dose_and_rate.dose_range}
                 />
