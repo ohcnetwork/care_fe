@@ -1,5 +1,6 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useEffect } from "react";
 import { useState } from "react";
@@ -270,7 +271,7 @@ export function MedicationStatementQuestion({
   );
 
   const addMedicationPlaceholder = t("add_medication", {
-    count: medications.length,
+    count: medications.length + 1,
   });
 
   return (
@@ -313,7 +314,7 @@ export function MedicationStatementQuestion({
               )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500 space-y-3">
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
@@ -430,14 +431,20 @@ export function MedicationStatementQuestion({
                                     </span>
                                     {medication.effective_period?.start ? (
                                       <span>
-                                        {new Date(
-                                          medication.effective_period.start,
-                                        ).toLocaleDateString()}
+                                        {format(
+                                          new Date(
+                                            medication.effective_period.start,
+                                          ),
+                                          "d MMM, yyyy",
+                                        )}
                                         {" - "}
                                         {medication.effective_period?.end
-                                          ? new Date(
-                                              medication.effective_period.end,
-                                            ).toLocaleDateString()
+                                          ? format(
+                                              new Date(
+                                                medication.effective_period.end,
+                                              ),
+                                              "d MMM, yyyy",
+                                            )
                                           : t("ongoing")}
                                       </span>
                                     ) : null}
@@ -544,7 +551,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] border-b border-gray-200 hover:bg-gray-50/50",
+        "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         {
           "opacity-40 pointer-events-none":
             medication.status === "entered_in_error",
