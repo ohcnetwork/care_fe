@@ -440,7 +440,7 @@ export function EncounterList({
               </div>
 
               {/* Status Filter - Desktop */}
-              <div className="hidden md:flex items-center">
+              <div className="hidden md:flex items-center py-1">
                 <Tabs value={status || "all"} className="w-full">
                   <TabsList className="bg-transparent p-0 h-8">
                     <div className="flex flex-wrap">
@@ -532,10 +532,10 @@ export function EncounterList({
             <Separator className="hidden md:block" />
 
             {/* Class Filter - Desktop */}
-            <div className="hidden md:block p-4">
+            <div className="hidden md:flex justify-center items-center p-4 pb-0 md:pb-6 lg:py-2">
               <Tabs value={encounterClass || "all"} className="w-full">
-                <TabsList className="bg-transparent p-0 h-8">
-                  <div className="flex flex-wrap">
+                <TabsList className="bg-transparent p-0 flex-wrap gap-1 ">
+                  <div className="flex flex-wrap gap-1 w-full">
                     <TabsTrigger
                       value="all"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
