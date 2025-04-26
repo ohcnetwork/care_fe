@@ -71,9 +71,17 @@ export default function FileUploadDialog({
           {fileUpload.files.map((file, index) => (
             <div
               key={index}
-              className="rounded-lg p-4 shadow-sm transition-all duration-200 bg-white"
+              className="rounded-lg p-4 shadow-md border-2 border-primary-500 relative"
             >
-              <div className="mb-4 flex items-center justify-between w-full gap-2 rounded-md bg-secondary-300 px-4 py-2 border-2 border-black">
+              {fileUpload.files.length > 1 && (
+                <div className="absolute top-0 left-0 bg-primary-500 text-white px-3 py-1 text-sm font-bold rounded-tr-none rounded-br-none rounded-bl-none rounded-tl-lg">
+                  {t("file")} {index + 1}
+                </div>
+              )}
+
+              <div
+                className={`flex items-center justify-between w-full gap-2 rounded-md bg-secondary-200 px-4 py-2 border border-gray-200 ${fileUpload.files.length > 1 ? "mb-4 mt-6" : "mb-4"}`}
+              >
                 <span className="flex items-center truncate" title={file.name}>
                   <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
                   <span className="truncate">
@@ -93,7 +101,7 @@ export default function FileUploadDialog({
               </div>
 
               {file.type.startsWith("image/") && previewUrls[index] && (
-                <div className="mb-4 w-full max-w-md overflow-hidden rounded-lg border-3 border-black shadow-md">
+                <div className="mb-4 w-full max-w-md overflow-hidden rounded-lg border border-gray-300 shadow-[0_4px_15px_rgba(0,0,0,0.25)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] transition-all duration-300 transform hover:-translate-y-1">
                   <img
                     src={previewUrls[index]}
                     alt="Preview"
@@ -101,12 +109,14 @@ export default function FileUploadDialog({
                   />
                 </div>
               )}
-              <div className="rounded-lg p-4 bg-gray-50 border-2 border-black">
+              <div className="rounded-lg p-4 bg-gray-50 border border-gray-200">
                 <Label
                   htmlFor={`upload-file-name-${index}`}
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-bold text-gray-700 mb-2"
                 >
-                  {t("enter_file_name")} {index + 1}
+                  {fileUpload.files.length > 1
+                    ? `${t("enter_file_name")} ${index + 1}`
+                    : t("enter_file_name")}
                 </Label>
 
                 <Input
