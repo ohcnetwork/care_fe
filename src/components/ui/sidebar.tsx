@@ -722,7 +722,6 @@ function SidebarMenuSubButton({
       }
     }
 
-    // e.stopPropagation();
   };
 
   return (
