@@ -14,6 +14,8 @@ export class FacilityCreation {
 
   selectFacility(facilityName: string) {
     cy.verifyAndClickElement("[data-cy='facilities-panel-list']", facilityName);
+    cy.get("[data-sidebar='rail']").click();
+    cy.wait(1000);
     return this;
   }
 
@@ -83,6 +85,14 @@ export class FacilityCreation {
 
   submitFacilityCreationForm() {
     cy.clickSubmitButton("Create Facility");
+  }
+
+  interceptFacilityCreation() {
+    cy.intercept("POST", "**/api/v1/facility/").as("facilityCreation");
+  }
+
+  verifyFacilityCreation() {
+    cy.wait("@facilityCreation").its("response.statusCode").should("eq", 200);
   }
 
   // Verification Methods
