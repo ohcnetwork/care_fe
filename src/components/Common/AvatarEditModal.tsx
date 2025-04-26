@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import CameraSelect from "@/components/Common/CameraSelect";
+import CameraMenu from "@/components/Common/CameraSelect";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
@@ -391,10 +391,11 @@ const AvatarEditModal = ({
               <>
                 <div className="flex flex-1 flex-wrap items-center justify-center">
                   {!previewImage ? (
-                    <>
-                      <div className="mb-2 w-full">
-                        <CameraSelect
+                    <div>
+                      <div className="w-full flex items-end justify-end">
+                        <CameraMenu
                           onChange={(deviceId) => setSelectedDeviceId(deviceId)}
+                          onSwitchCamera={handleSwitchCamera}
                         />
                       </div>
                       <Webcam
@@ -414,7 +415,7 @@ const AvatarEditModal = ({
                           }
                         }}
                       />
-                    </>
+                    </div>
                   ) : (
                     <>
                       <img src={previewImage} alt="captured" />
@@ -424,10 +425,6 @@ const AvatarEditModal = ({
                 <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                   {!previewImage ? (
                     <>
-                      <Button variant="primary" onClick={handleSwitchCamera}>
-                        <CareIcon icon="l-camera-change" className="text-lg" />
-                        {`${t("switch")} ${t("camera")}`}
-                      </Button>
                       <Button
                         variant="primary"
                         onClick={() => {

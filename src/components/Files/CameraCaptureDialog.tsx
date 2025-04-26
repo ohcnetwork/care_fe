@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import CameraSelect from "@/components/Common/CameraSelect";
+import CameraMenu from "@/components/Common/CameraSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -106,7 +106,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md gap-0">
         <DialogHeader>
           <DialogTitle>
             <div className="flex flex-row">
@@ -123,45 +123,39 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             </div>
           </DialogTitle>
         </DialogHeader>
-        <CameraSelect onChange={(deviceId) => setSelectedDeviceId(deviceId)} />
         <div>
-          {!previewImage ? (
-            <div className="m-3">
-              <Webcam
-                forceScreenshotSourceSize
-                screenshotQuality={1}
-                audio={false}
-                screenshotFormat="image/jpeg"
-                ref={webRef}
-                videoConstraints={{
-                  deviceId: selectedDeviceId,
-                  ...videoConstraints,
-                  facingMode: cameraFacingMode,
-                }}
-              />
-            </div>
-          ) : (
-            <div className="m-3">
-              <img src={previewImage} alt="captured" />
-            </div>
-          )}
+          <div className="flex justify-end">
+            <CameraMenu
+              onChange={(deviceId) => setSelectedDeviceId(deviceId)}
+              onSwitchCamera={handleSwitchCamera}
+            />
+          </div>
+          <div>
+            {!previewImage ? (
+              <div className="m-3">
+                <Webcam
+                  forceScreenshotSourceSize
+                  screenshotQuality={1}
+                  audio={false}
+                  screenshotFormat="image/jpeg"
+                  ref={webRef}
+                  videoConstraints={{
+                    deviceId: selectedDeviceId,
+                    ...videoConstraints,
+                    facingMode: cameraFacingMode,
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="m-3">
+                <img src={previewImage} alt="captured" />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* buttons for mobile and tablet screens */}
         <div className="m-4 flex justify-evenly lg:hidden">
-          <div>
-            {!previewImage ? (
-              <Button
-                variant="primary"
-                onClick={handleSwitchCamera}
-                className="m-2"
-              >
-                {t("switch")}
-              </Button>
-            ) : (
-              <></>
-            )}
-          </div>
           <div>
             {!previewImage ? (
               <>
