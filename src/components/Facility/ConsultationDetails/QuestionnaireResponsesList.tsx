@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { ChevronDown } from "lucide-react";
+import { Printer } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
@@ -199,7 +200,7 @@ function QuestionGroup({
   );
 }
 
-function StructuredResponseBadge({
+export function StructuredResponseBadge({
   type,
   submitType,
 }: {
@@ -229,6 +230,33 @@ function StructuredResponseBadge({
   );
 }
 
+function PrintButton({ item }: { item: QuestionnaireResponse }) {
+  const { t } = useTranslation();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="xs" className="[&_svg]:size-3">
+          <Printer className="size-4" />
+          {t("print")}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <Link href={`questionnaire_response/${item.id}/print`}>
+          <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
+        </Link>
+        <Link href={`questionnaire/${item.questionnaire?.id}/responses/print`}>
+          <DropdownMenuItem>
+            {t("print_all_responses", {
+              title: item.questionnaire?.title,
+            })}
+          </DropdownMenuItem>
+        </Link>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function ResponseCard({
   item,
   isPrintPreview,
@@ -236,88 +264,24 @@ function ResponseCard({
   item: QuestionnaireResponse;
   isPrintPreview?: boolean;
 }) {
-  const { t } = useTranslation();
-
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
+  const title =
+    isStructured && structuredType
+      ? properCase(structuredType.replace(/_/g, " "))
+      : item.questionnaire?.title || "";
 
   return (
-    <Card
+    <EncounterAccordionLayout
+      title={isStructured && structuredType ? structuredType : title}
+      actionButton={isPrintPreview ? null : <PrintButton item={item} />}
       className={cn(
-        "flex flex-col py-3 px-4 transition-colors hover:bg-muted/50",
+        "transition-colors hover:bg-muted/50",
         isPrintPreview && "shadow-none",
       )}
     >
-      <div className="flex items-start justify-between max-sm:flex-col gap-3">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <div className="flex items-center gap-2">
-              {isStructured && structuredType ? (
-                <StructuredResponseBadge
-                  type={structuredType}
-                  submitType={
-                    Object.values(item.structured_responses || {})[0]
-                      ?.submit_type
-                  }
-                />
-              ) : (
-                <Trans
-                  i18nKey="filed"
-                  values={{ title: item.questionnaire?.title }}
-                  components={{ strong: <strong /> }}
-                />
-              )}
-            </div>
-            <span>
-              <Trans
-                i18nKey="at_time"
-                values={{ time: formatDateTime(item.created_date) }}
-                components={{ strong: <strong /> }}
-              />
-            </span>
-            <span>
-              <Trans
-                i18nKey="by_name"
-                values={{
-                  by: `${formatName(item.created_by)}${
-                    item.created_by?.user_type
-                      ? ` (${item.created_by.user_type})`
-                      : ""
-                  }`,
-                }}
-                components={{ strong: <strong /> }}
-              />
-            </span>
-          </div>
-        </div>
-        {!isPrintPreview && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                {t("print")}
-                <ChevronDown className="ml-2 size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <Link href={`questionnaire_response/${item.id}/print`}>
-                <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
-              </Link>
-              <Link
-                href={`questionnaire/${item.questionnaire?.id}/responses/print`}
-              >
-                <DropdownMenuItem>
-                  {t("print_all_responses", {
-                    title: item.questionnaire?.title,
-                  })}
-                </DropdownMenuItem>
-              </Link>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
-
       {item.questionnaire && (
-        <div className="mt-4 space-y-4">
+        <div className="px-2 space-y-4">
           {item.questionnaire?.questions.map((question: Question) => {
             if (question.type === "structured") return null;
             if (question.type === "group") {
@@ -342,10 +306,32 @@ function ResponseCard({
                 response={response}
               />
             );
-          })}
+          })}{" "}
+          <div className="flex items-start justify-between max-sm:flex-col gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <Trans
+                  i18nKey="by_name"
+                  values={{
+                    by: `${formatName(item.created_by)}${
+                      item.created_by?.user_type
+                        ? ` (${item.created_by.user_type})`
+                        : ""
+                    }`,
+                  }}
+                  components={{ strong: <strong /> }}
+                />
+                <Trans
+                  i18nKey="at_time"
+                  values={{ time: formatDateTime(item.created_date) }}
+                  components={{ strong: <strong /> }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       )}
-    </Card>
+    </EncounterAccordionLayout>
   );
 }
 
