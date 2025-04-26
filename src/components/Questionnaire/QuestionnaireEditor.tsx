@@ -75,7 +75,7 @@ import {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
-import { moveDown, moveUp } from "@/Utils/request/utils";
+import { swapElements } from "@/Utils/request/utils";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   AnswerOption,
@@ -967,9 +967,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               depth={0}
                               onMoveUp={() => {
                                 if (index > 0) {
-                                  const newQuestions = moveUp<Question>(
+                                  const newQuestions = swapElements<Question>(
                                     questionnaire.questions,
                                     index,
+                                    index - 1,
                                   );
                                   updateQuestionnaireField(
                                     "questions",
@@ -982,9 +983,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   index <
                                   questionnaire.questions.length - 1
                                 ) {
-                                  const newQuestions = moveDown<Question>(
+                                  const newQuestions = swapElements<Question>(
                                     questionnaire.questions,
                                     index,
+                                    index + 1,
                                   );
                                   updateQuestionnaireField(
                                     "questions",
@@ -1757,10 +1759,12 @@ function QuestionEditor({
                                     <DropdownMenuItem
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        const newOptions = moveUp<AnswerOption>(
-                                          answer_option,
-                                          idx,
-                                        );
+                                        const newOptions =
+                                          swapElements<AnswerOption>(
+                                            answer_option,
+                                            idx,
+                                            idx - 1,
+                                          );
                                         updateField(
                                           "answer_option",
                                           newOptions,
@@ -1776,9 +1780,10 @@ function QuestionEditor({
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         const newOptions =
-                                          moveDown<AnswerOption>(
+                                          swapElements<AnswerOption>(
                                             answer_option,
                                             idx,
+                                            idx + 1,
                                           );
                                         updateField(
                                           "answer_option",
@@ -1919,18 +1924,20 @@ function QuestionEditor({
                       parentId={getQuestionPath()}
                       onMoveUp={() => {
                         if (idx > 0) {
-                          const newQuestions = moveUp<Question>(
+                          const newQuestions = swapElements<Question>(
                             questions || [],
                             idx,
+                            idx - 1,
                           );
                           updateField("questions", newQuestions);
                         }
                       }}
                       onMoveDown={() => {
                         if (idx < (questions?.length || 0) - 1) {
-                          const newQuestions = moveDown<Question>(
+                          const newQuestions = swapElements<Question>(
                             questions || [],
                             idx,
+                            idx + 1,
                           );
                           updateField("questions", newQuestions);
                         }
