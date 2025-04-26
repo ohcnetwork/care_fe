@@ -532,7 +532,6 @@ function SidebarMenuButton({
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(e);
-    console.log("c1");
     setIsTooltipOpen(false);
     e.stopPropagation();
   };
