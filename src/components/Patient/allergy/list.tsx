@@ -131,7 +131,7 @@ export function AllergyList({
             {CATEGORY_ICONS[allergy.category ?? ""]}
           </div>
         </TableCell>
-        <TableCell className="font-medium pl-0 whitespace-normal">
+        <TableCell className="font-medium pl-0 md:whitespace-normal">
           {allergy.code.display}
         </TableCell>
         <TableCell>
