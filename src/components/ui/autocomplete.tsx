@@ -42,7 +42,6 @@ interface AutocompleteProps {
   className?: string;
   popoverClassName?: string;
   freeInput?: boolean;
-  closeOnSelect?: boolean;
   "data-cy"?: string;
 }
 
@@ -60,28 +59,29 @@ export default function Autocomplete({
   className,
   popoverClassName,
   freeInput = false,
-  closeOnSelect = true,
   "data-cy": dataCy,
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
+  const [inputValue, setInputValue] = React.useState("");
 
-  // Maintain an internal state for the input text when freeInput is enabled.
-  // TODO : Find a better way to handle this, maybe as a seperate component
-  const [inputValue, setInputValue] = React.useState(value);
-
-  // Find a matching option from the options list (for non freeInput or when value matches an option)
   const selectedOption = options.find((option) => option.value === value);
-
-  // Sync the inputValue with value prop changes.
   React.useEffect(() => {
-    const selected = options.find((option) => option.value === value);
-    if (value) {
-      setInputValue(selected ? selected.label : value);
-    } else {
+    if (open) {
       setInputValue("");
     }
-  }, [value, options]);
+  }, [open]);
+
+  React.useEffect(() => {
+    if (!open) {
+      const selected = options.find((option) => option.value === value);
+      if (value) {
+        setInputValue(selected ? selected.label : value);
+      } else {
+        setInputValue("");
+      }
+    }
+  }, [value, options, open]);
 
   // Determine what text to display on the button.
   const displayText = freeInput
@@ -118,6 +118,7 @@ export default function Autocomplete({
         onValueChange={handleInputChange}
         // Control the input when freeInput is true.
         {...(freeInput ? { value: inputValue } : {})}
+        autoComplete="off"
         className="outline-hidden border-none ring-0 shadow-none"
         autoFocus
       />
@@ -144,9 +145,7 @@ export default function Autocomplete({
                   );
                   setInputValue(selected ? selected.label : currentValue);
                 }
-                if (closeOnSelect) {
-                  setOpen(false);
-                }
+                setOpen(false);
               }}
             >
               <CheckIcon
