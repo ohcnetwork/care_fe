@@ -18,6 +18,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { formatName } from "@/Utils/utils";
 import {
   SYMPTOM_CLINICAL_STATUS_STYLES,
   SYMPTOM_SEVERITY_STYLES,
@@ -140,12 +141,14 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
             <TableCell className="last:rounded-r-md">
               <div className="flex items-center gap-2">
                 <Avatar
-                  name={symptom.created_by.username}
+                  name={formatName(symptom.created_by, true)}
                   className="size-4"
                   imageUrl={symptom.created_by.profile_picture_url}
                 />
 
-                <span className="text-sm">{symptom.created_by.username}</span>
+                <span className="text-sm">
+                  {formatName(symptom.created_by)}
+                </span>
               </div>
             </TableCell>
           </TableRow>

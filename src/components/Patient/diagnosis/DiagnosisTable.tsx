@@ -20,6 +20,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { formatName } from "@/Utils/utils";
 import {
   DIAGNOSIS_CLINICAL_STATUS_STYLES,
   DIAGNOSIS_VERIFICATION_STATUS_STYLES,
@@ -130,12 +131,13 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
             <TableCell className="last:rounded-r-md">
               <div className="flex items-center gap-2">
                 <Avatar
-                  name={diagnosis.created_by.username}
+                  name={formatName(diagnosis.created_by, true)}
                   className="size-4"
                   imageUrl={diagnosis.created_by.profile_picture_url}
                 />
-
-                <span className="text-sm">{diagnosis.created_by.username}</span>
+                <span className="text-sm">
+                  {formatName(diagnosis.created_by)}
+                </span>
               </div>
             </TableCell>
           </TableRow>
