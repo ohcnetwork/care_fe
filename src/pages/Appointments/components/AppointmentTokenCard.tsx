@@ -60,7 +60,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
           <div className="flex items-center gap-2">
             <div>
               <Label className="text-black font-semibold text-sm/none whitespace-nowrap">
-                Token No.
+                {t("token_no")}
               </Label>
               <p className="text-5xl font-bold leading-none">
                 {/* TODO: get token number from backend */}
