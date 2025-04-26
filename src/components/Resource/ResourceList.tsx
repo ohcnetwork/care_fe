@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -114,25 +114,12 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
           className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
           variant="outline"
         >
-          {isLoading ? (
-            t("loading")
-          ) : queryResources?.count && queryResources.count == 1 ? (
-            <Trans
-              i18nKey={"entity_count_one"}
-              values={{
+          {isLoading
+            ? t("loading")
+            : t("entity_count", {
                 count: queryResources?.count ?? 0,
                 entity: "Resource",
-              }}
-            />
-          ) : (
-            <Trans
-              i18nKey={"entity_count_other"}
-              values={{
-                count: queryResources?.count ?? 0,
-                entity: "Resource",
-              }}
-            />
-          )}
+              })}
         </Badge>
       }
     >
