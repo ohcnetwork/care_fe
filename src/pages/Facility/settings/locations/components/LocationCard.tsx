@@ -1,5 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, Folder, FolderOpen, PenLine } from "lucide-react";
+import {
+  ChevronRight,
+  Folder,
+  FolderOpen,
+  MoreVertical,
+  PenLine,
+  Trash,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -21,6 +28,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import mutate from "@/Utils/request/mutate";
 import { LocationList, LocationTypeIcons } from "@/types/location/location";
@@ -30,16 +43,32 @@ interface Props {
   location: LocationList;
   onEdit?: (location: LocationList) => void;
   onView?: (location: LocationList) => void;
+  onMoveUp?: (location: LocationList) => void;
+  onMoveDown?: (location: LocationList) => void;
   className?: string;
   facilityId: string;
+  index?: number;
+  totalCount?: number;
+  isFirstPage?: boolean;
+  isLastPage?: boolean;
+  currentPage?: number;
+  setPage?: (page: number) => void;
 }
 
 export function LocationCard({
   location,
   onEdit,
   onView,
+  onMoveUp,
+  onMoveDown,
   className,
   facilityId,
+  index = 0,
+  totalCount = 0,
+  isFirstPage = true,
+  isLastPage = true,
+  currentPage = 1,
+  setPage,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -47,11 +76,23 @@ export function LocationCard({
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons] ||
     Folder;
 
+  const isFirst = index === 0;
+  const isLast = totalCount > 0 && index === totalCount - 1;
+
+  // Only hide buttons if we're at absolute boundaries
+  const hideUpButton = isFirstPage && isFirst;
+  const hideDownButton = isLastPage && isLast;
+
   const { mutate: removeLocation } = useMutation({
     mutationFn: mutate(locationApi.delete, {
       pathParams: { facility_id: facilityId, id: location.id },
     }),
     onSuccess: () => {
+      // If this is the last item on the page and not the first page
+      if (totalCount === 1 && currentPage > 1 && setPage) {
+        setPage(currentPage - 1);
+      }
+
       queryClient.invalidateQueries({
         queryKey: ["locations", facilityId],
       });
@@ -103,62 +144,123 @@ export function LocationCard({
               </div>
             </div>
 
-            {onEdit && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onEdit(location)}
-                className="shrink-0"
-              >
-                <PenLine className="size-4" />
-              </Button>
+            {(onEdit ||
+              (!location.has_children && !location.current_encounter)) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="shrink-0">
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onMoveUp && !hideUpButton && (
+                    <DropdownMenuItem onClick={() => onMoveUp(location)}>
+                      <span className="block xl:hidden">
+                        <CareIcon icon="l-arrow-up" className="mr-2" />
+                      </span>
+                      <span className="hidden xl:block">
+                        <CareIcon icon="l-arrow-left" className="mr-2" />
+                      </span>
+                      {isFirst && !isFirstPage ? (
+                        t("move_to_previous_page")
+                      ) : (
+                        <>
+                          <span className="block xl:hidden">
+                            {t("move_up")}
+                          </span>
+                          <span className="hidden xl:block">
+                            {t("move_left")}
+                          </span>
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+                  {onMoveDown && !hideDownButton && (
+                    <DropdownMenuItem onClick={() => onMoveDown(location)}>
+                      <span className="block xl:hidden">
+                        <CareIcon icon="l-arrow-down" className="mr-2" />
+                      </span>
+                      <span className="hidden xl:block">
+                        <CareIcon icon="l-arrow-right" className="mr-2" />
+                      </span>
+                      {isLast && !isLastPage ? (
+                        t("move_to_next_page")
+                      ) : (
+                        <>
+                          <span className="block xl:hidden">
+                            {t("move_down")}
+                          </span>
+                          <span className="hidden xl:block">
+                            {t("move_right")}
+                          </span>
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+                  {onEdit && (
+                    <DropdownMenuItem onClick={() => onEdit(location)}>
+                      <PenLine className="size-4 mr-2" />
+                      {t("edit")}
+                    </DropdownMenuItem>
+                  )}
+                  {!location.has_children && !location.current_encounter && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
+                          className="text-destructive"
+                          data-cy="delete-location-button"
+                        >
+                          <Trash className="size-4 mr-2" />
+                          {t("delete")}
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {t("remove_location", { name: location.name })}
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("are_you_sure_want_to_delete", {
+                              name: location.name,
+                            })}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                          <AlertDialogAction
+                            data-cy="remove-location-button"
+                            onClick={() => removeLocation({})}
+                            className={buttonVariants({
+                              variant: "destructive",
+                            })}
+                          >
+                            {t("remove")}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
-          <div className="flex justify-between">
-            {!location.has_children && !location.current_encounter && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="white" data-cy="delete-location-button">
-                    <CareIcon icon="l-trash" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t("remove_location", { name: location.name })}
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("are_you_sure_want_to_delete", {
-                        name: location.name,
-                      })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      data-cy="remove-location-button"
-                      onClick={() => removeLocation({})}
-                      className={buttonVariants({ variant: "destructive" })}
-                    >
-                      {t("remove")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
+          <div className="flex justify-between items-center">
             <div className="ml-auto">
-              <Button
-                data-cy="view-details-location-button"
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => onView?.(location)}
-              >
-                {t("view_details")}
-                <ChevronRight className="size-4" />
-              </Button>
+              {location.form !== "bd" && onView && (
+                <Button
+                  data-cy="view-details-location-button"
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => onView?.(location)}
+                >
+                  {t("view_details")}
+                  <ChevronRight className="size-4" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
