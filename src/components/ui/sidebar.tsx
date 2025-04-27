@@ -47,6 +47,9 @@ type SidebarContextType = {
 };
 
 const SidebarContext = React.createContext<SidebarContextType | null>(null);
+const SidebarTooltipContext = React.createContext<{
+  closeTooltip: () => void;
+} | null>(null);
 
 function useSidebar() {
   const context = React.useContext(SidebarContext);
@@ -554,17 +557,21 @@ function SidebarMenuButton({
   if (!tooltip) return button;
 
   return (
-    <Tooltip
-      open={isTooltipOpen && (state === "collapsed" || isMobile)}
-      onOpenChange={setIsTooltipOpen}
+    <SidebarTooltipContext.Provider
+      value={{ closeTooltip: () => setIsTooltipOpen(false) }}
     >
-      <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent
-        side="right"
-        align="center"
-        {...(typeof tooltip === "string" ? { children: tooltip } : tooltip)}
-      />
-    </Tooltip>
+      <Tooltip
+        open={isTooltipOpen && (state === "collapsed" || isMobile)}
+        onOpenChange={setIsTooltipOpen}
+      >
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipContent
+          side="right"
+          align="center"
+          {...(typeof tooltip === "string" ? { children: tooltip } : tooltip)}
+        />
+      </Tooltip>
+    </SidebarTooltipContext.Provider>
   );
 }
 SidebarMenuButton.displayName = "SidebarMenuButton";
@@ -705,11 +712,14 @@ function SidebarMenuSubButton({
   const Comp = asChild ? Slot : "button";
   const { state } = useSidebar();
   const [_isTooltipOpen, setIsTooltipOpen] = React.useState(false);
+  const tooltipContext = React.useContext(SidebarTooltipContext);
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    console.log("c2");
     onClick?.(e);
     setIsTooltipOpen(false);
+    tooltipContext?.closeTooltip();
+
+    e.stopPropagation();
 
     // Close any parent tooltips
     const parentButton = e.currentTarget.closest(
@@ -721,7 +731,6 @@ function SidebarMenuSubButton({
         (tooltipTrigger as HTMLElement).blur();
       }
     }
-
   };
 
   return (
