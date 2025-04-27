@@ -314,7 +314,7 @@ export function MedicationStatementQuestion({
               )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500 space-y-3">
+              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
