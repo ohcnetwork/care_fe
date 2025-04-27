@@ -21,6 +21,8 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FileUploadModel } from "@/components/Patient/models";
 
+import { useIsMobile } from "@/hooks/use-mobile";
+
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 export const zoom_values = [
   "scale-25",
@@ -114,6 +116,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     currentIndex,
   } = props;
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [index, setIndex] = useState<number>(currentIndex);
@@ -297,11 +300,30 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="fixed inset-0 z-50 grid bg-[#f5f6fa] animate-in data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 p-0 shadow-none duration-200 w-screen h-screen max-w-none max-h-none rounded-none border-none">
+      <DialogContent
+        className={cn(
+          "fixed inset-0 z-50 grid bg-[#f5f6fa] animate-in data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 p-0 shadow-none duration-200 w-screen max-w-none rounded-none border-none overflow-y-auto",
+          isMobile &&
+            "h-[100dvh] min-h-[100dvh] w-[100vw] min-w-0 max-w-none max-h-none rounded-none border-none overflow-y-auto",
+          props.className,
+        )}
+      >
         {fileUrl ? (
-          <div className="flex flex-col h-screen">
+          <div
+            className={cn(
+              "flex flex-col flex-1",
+              isMobile
+                ? "h-[100dvh] min-h-[100dvh] w-[100vw] max-w-none flex-1 overflow-y-auto"
+                : "h-screen",
+            )}
+          >
             {/* Header */}
-            <div className="bg-white shadow-sm border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 py-3">
+            <div
+              className={cn(
+                "bg-white shadow-sm border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 py-3",
+                isMobile && "px-2 py-2",
+              )}
+            >
               <div className="flex-1 min-w-0 mr-2">
                 <TooltipComponent content={fileName}>
                   <p className="text-lg sm:text-xl font-medium text-gray-800 truncate">
@@ -309,40 +331,14 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   </p>
                 </TooltipComponent>
               </div>
-              <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-                {downloadURL && downloadURL.length > 0 && (
-                  <Button
-                    variant="primary"
-                    data-cy="file-preview-download"
-                    className="whitespace-nowrap"
-                  >
-                    <a
-                      href={downloadURL}
-                      className="text-white flex items-center"
-                      download={`${file_state.name}.${file_state.extension}`}
-                    >
-                      <CareIcon
-                        icon="l-file-download"
-                        className="size-4 mr-1 sm:mr-2"
-                      />
-                      <span className="hidden sm:inline">{t("download")}</span>
-                      <span className="sm:hidden">Download</span>
-                    </a>
-                  </Button>
-                )}
-                {/* <Button
-                variant="ghost"
-                onClick={handleClose}
-                className="p-1 sm:p-2 flex-shrink-0"
-                aria-label={t("close")}
-              >
-                <CareIcon icon="l-times" className="size-4 sm:size-5 text-gray-700" />
-              </Button> */}
-              </div>
             </div>
-
             {/* Created date subheader */}
-            <div className="text-sm text-gray-500 px-6 py-1 bg-white border-b border-gray-200">
+            <div
+              className={cn(
+                "text-sm text-gray-500 px-6 py-1 bg-white border-b border-gray-200",
+                isMobile && "px-2 py-1",
+              )}
+            >
               {uploadedFiles &&
                 uploadedFiles[index] &&
                 uploadedFiles[index].created_date && (
@@ -359,12 +355,38 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
 
             {/* Controls and content container */}
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div
+              className={cn(
+                "flex-1 flex flex-col overflow-hidden",
+                isMobile && "overflow-x-auto w-full min-w-0",
+              )}
+            >
               {/* Toolbar */}
-              <div className="bg-white border-b border-gray-200 px-6 py-2 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  {/* Zoom controls */}
-                  <div className="flex items-center space-x-2">
+              <div
+                className={cn(
+                  "bg-white border-b border-gray-200 px-6 py-2 flex items-center justify-between",
+                  isMobile &&
+                    "px-2 py-2 gap-2 flex-wrap justify-start overflow-x-auto w-full min-w-0",
+                )}
+                style={isMobile ? { maxWidth: "100vw", overflowX: "auto" } : {}}
+              >
+                <div
+                  className={cn(
+                    // Use flex and relative for centering
+                    "flex items-center justify-between w-full px-4 pl-7 relative",
+                    isMobile && "px-1 pl-1 w-full gap-1 flex-wrap",
+                  )}
+                >
+                  {/* Center group: Zoom and Fit Width (centered on desktop, left on mobile) */}
+                  <div
+                    className={cn(
+                      // Center horizontally on desktop, left on mobile
+                      "flex items-center",
+                      !isMobile && "absolute left-1/2 -translate-x-1/2 z-10",
+                      isMobile ? "gap-1" : "space-x-2",
+                    )}
+                  >
+                    {/* Zoom controls */}
                     <Button
                       variant="outline"
                       onClick={handleZoomOut}
@@ -373,11 +395,19 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                           ? file_state.zoom === 1
                           : scale <= 0.5
                       }
-                      className="p-1.5 h-9 w-9 border border-gray-300"
+                      className={cn(
+                        "p-1.5 h-9 w-9 border border-gray-300",
+                        isMobile && "h-8 w-8 p-1",
+                      )}
                     >
                       <CareIcon icon="l-search-minus" className="size-5" />
                     </Button>
-                    <div className="border border-gray-300 px-2.5 py-1.5 rounded-md min-w-[70px] h-9 flex items-center justify-center">
+                    <div
+                      className={cn(
+                        "border border-gray-300 px-2.5 py-1.5 rounded-md min-w-[70px] h-9 flex items-center justify-center",
+                        isMobile && "px-1.5 py-1 min-w-[40px] h-8",
+                      )}
+                    >
                       <span className="text-sm font-medium">
                         {file_state.isImage
                           ? `${25 * file_state.zoom}%`
@@ -392,140 +422,111 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                           ? file_state.zoom === zoom_values.length
                           : scale >= 2
                       }
-                      className="p-1.5 h-9 w-9 border border-gray-300"
+                      className={cn(
+                        "p-1.5 h-9 w-9 border border-gray-300",
+                        isMobile && "h-8 w-8 p-1",
+                      )}
                     >
                       <CareIcon icon="l-search-plus" className="size-4" />
                     </Button>
+                    {/* Fit width button */}
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        file_state.isImage
+                          ? setFileState({ ...file_state, zoom: 4 })
+                          : setScale(1);
+                      }}
+                      className={cn(
+                        "text-sm",
+                        isMobile && "px-1 py-1 min-w-[60px]",
+                      )}
+                    >
+                      <CareIcon icon="l-arrows-h" className="size-4 mr-1" />
+                      {t("fit_width")}
+                    </Button>
                   </div>
 
-                  {/* Fit width button */}
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      file_state.isImage
-                        ? setFileState({ ...file_state, zoom: 4 })
-                        : setScale(1);
-                    }}
-                    className="text-sm"
+                  {/* Right group: Download and image controls */}
+                  <div
+                    className={cn(
+                      "flex items-center justify-end flex-1",
+                      isMobile ? "gap-1" : "space-x-2",
+                    )}
                   >
-                    <CareIcon icon="l-arrows-h" className="size-4 mr-1" />
-                    {t("fit_width")}
-                  </Button>
-                </div>
-
-                {/* Right side controls */}
-                <div className="flex items-center space-x-2">
-                  {file_state.isImage && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleRotate(-90)}
-                        className="p-1 h-8"
-                      >
-                        <CareIcon icon="l-corner-up-left" className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleRotate(90)}
-                        className="p-1 h-8"
-                      >
-                        <CareIcon icon="l-corner-up-right" className="size-4" />
-                      </Button>
-                    </>
-                  )}
-                  {/* {file_state.extension === "pdf" && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                        disabled={page === 1}
-                        className="p-1 ant-btn css-1x0dypw ant-btn-default ant-btn-color-default ant-btn-variant-outlined !rounded-button whitespace-nowrap-8"
-                      >
-                        <CareIcon icon="l-arrow-left" className="size-4 anticon anticon-left" />
-                      </Button>
-                      <span className="text-sm mx-2 font-medium">
-                        {page}/{numPages}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        onClick={() => setPage((prev) => Math.min(numPages, prev + 1))}
-                        disabled={page === numPages}
-                        className="p-ant-btn css-1x0dypw ant-btn-default ant-btn-color-default ant-btn-variant-outlined !rounded-button whitespace-nowrap h-8"
-                      >
-                        <CareIcon icon="l-arrow-right" className="size-4" />
-                      </Button>
-                    </>
-                  )} */}
-
-                  {file_state.extension === "pdf" && (
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                        disabled={page === 1}
-                        className="h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 border border-gray-300"
-                        aria-label="Previous Page"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                    {file_state.isImage && (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleRotate(-90)}
+                          className={cn("p-1 h-8", isMobile && "h-7 w-7 p-0")}
                         >
-                          <polyline points="15 18 9 12 15 6"></polyline>
-                        </svg>
-                        <span className="ml-1">Previous Page</span>
-                      </Button>
-
-                      <div className="flex items-center text-sm font-medium text-gray-700">
-                        <span>
-                          Page {page} of {numPages}
-                        </span>
-                      </div>
-
-                      <Button
-                        variant="outline"
-                        onClick={() =>
-                          setPage((prev) => Math.min(numPages, prev + 1))
-                        }
-                        disabled={page === numPages}
-                        className="h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 border border-gray-300"
-                        aria-label="Next Page"
-                      >
-                        <span className="mr-1">Next Page</span>
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                          <CareIcon
+                            icon="l-corner-up-left"
+                            className="size-4"
+                          />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleRotate(90)}
+                          className={cn("p-1 h-8", isMobile && "h-7 w-7 p-0")}
                         >
-                          <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
+                          <CareIcon
+                            icon="l-corner-up-right"
+                            className="size-4"
+                          />
+                        </Button>
+                      </>
+                    )}
+                    {/* Download button at the right end */}
+                    {downloadURL && downloadURL.length > 0 && (
+                      <Button
+                        variant="primary"
+                        data-cy="file-preview-download"
+                        className={cn(
+                          "whitespace-nowrap",
+                          isMobile && "px-2 py-1 min-w-[60px]",
+                        )}
+                      >
+                        <a
+                          href={downloadURL}
+                          className="text-white flex items-center"
+                          download={`${file_state.name}.${file_state.extension}`}
+                        >
+                          <CareIcon
+                            icon="l-arrow-circle-down"
+                            className="size-4 mr-1"
+                          />
+                          {t("download")}
+                        </a>
                       </Button>
-                    </div>
-                  )}
-
-                  {/* <Button
-                    variant="ghost"
-                    onClick={() => { }}
-                    className="p-1 h-8"
-                  >
-                    <CareIcon icon="l-expand-arrows-alt" className="size-4" />
-                  </Button> */}
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Main content area */}
-              <div className="flex-1 flex items-center justify-center bg-gray-200 p-6 overflow-auto">
+              <div className="flex-1 flex items-center justify-center bg-gray-200 p-6 overflow-auto overflow-y-auto">
                 <div className="flex items-center">
+                  {file_state.extension === "pdf" && (
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "mr-4 rounded-lg h-12 w-12 p-0 flex items-center justify-center border-2 border-gray-400 shadow-sm transition-opacity",
+                        page === 1
+                          ? "opacity-40 pointer-events-none"
+                          : "opacity-100",
+                      )}
+                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                      disabled={page === 1}
+                      aria-label="previous page"
+                      tabIndex={page === 1 ? -1 : 0}
+                    >
+                      <CareIcon icon="l-arrow-left" className="size-6" />
+                    </Button>
+                  )}
+
+                  {/* 
                   {uploadedFiles && uploadedFiles.length > 1 && (
                     <Button
                       variant="ghost"
@@ -536,7 +537,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     >
                       <CareIcon icon="l-arrow-left" className="size-4" />
                     </Button>
-                  )}
+                  )} */}
 
                   <div
                     className={cn(
@@ -578,7 +579,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                           url={fileUrl}
                           onDocumentLoadSuccess={(numPages: number) => {
                             setPage(1);
-
                             setNumPages(numPages);
                           }}
                           pageNumber={page}
@@ -603,7 +603,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     )}
                   </div>
 
-                  {uploadedFiles && uploadedFiles.length > 1 && (
+                  {/* {uploadedFiles && uploadedFiles.length > 1 && (
                     <Button
                       variant="ghost"
                       className="ml-4 bg-white/70 hover:bg-white/90 rounded-full h-10 w-10 p-0 shadow-md"
@@ -615,14 +615,42 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     </Button>
                   )}
                 </div>
+              </div> */}
+
+                  {file_state.extension === "pdf" && (
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "ml-4 rounded-lg h-12 w-12 p-0 flex items-center justify-center border-2 border-gray-400 shadow-sm transition-opacity",
+                        page === numPages
+                          ? "opacity-40 pointer-events-none"
+                          : "opacity-100",
+                      )}
+                      onClick={() =>
+                        setPage((prev) => Math.min(numPages, prev + 1))
+                      }
+                      disabled={page === numPages}
+                      aria-label="next page"
+                      tabIndex={page === numPages ? -1 : 0}
+                    >
+                      <CareIcon icon="l-arrow-right" className="size-6" />
+                    </Button>
+                  )}
+                </div>
               </div>
 
-              {/* Footer - Currently empty as in your design */}
-              <div className="bg-white border-t border-gray-200 h-10"></div>
+              {/* Footer */}
+              <div className="bg-white border-t border-gray-200 h-10">
+                <div className="flex items-center text-sm font-medium text-gray-700 justify-center h-full">
+                  <span>
+                    Page {page} of {numPages}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="flex h-full items-center justify-center">
+          <div className="flex h-[50vh] md:h-[75vh] items-center justify-center">
             <CircularProgress />
           </div>
         )}
@@ -630,5 +658,4 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     </Dialog>
   );
 };
-
 export default FilePreviewDialog;
