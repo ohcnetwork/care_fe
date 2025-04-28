@@ -116,18 +116,7 @@ export default function UserSelector({
         align="start"
         sideOffset={4}
       >
-        <Command
-          filter={(value, search) => {
-            const user = usersList.find((u) => u.id === value);
-            if (!user) return 0;
-
-            const name = formatName(user).toLowerCase();
-            const username = user.username?.toLowerCase() ?? "";
-            const input = search.toLowerCase();
-
-            return name.includes(input) || username.includes(input) ? 1 : 0;
-          }}
-        >
+        <Command>
           <CommandInput
             placeholder={t("search")}
             onValueChange={setSearch}
@@ -143,7 +132,7 @@ export default function UserSelector({
               {usersList.map((user: UserBase, i) => (
                 <CommandItem
                   key={user.id}
-                  value={user.id}
+                  value={`${formatName(user)} ${user.username ?? ""}`}
                   onSelect={() => {
                     onChange(user);
                     setOpen(false);
