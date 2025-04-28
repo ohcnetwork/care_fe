@@ -18,50 +18,37 @@ const ClampableText: React.FC<ClampableTextProps> = ({
   toggleTextBtnVariant = "link",
   toggleTextBtnClassName = "px-0 hover:cursor-pointer text-primary-600",
 }) => {
-  const [isClamped, setIsClamped] = useState(true);
-  const [showToggleButton, setShowToggleButton] = useState(true);
-  const [textExpanded, setTextExpanded] = useState(false);
-
-  const textContainerRef = useRef<HTMLDivElement>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const textRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const elem = textContainerRef.current;
-    if (!elem) return;
-    const observer = new ResizeObserver(() => {
-      setShowToggleButton(elem.scrollHeight > elem.clientHeight);
-    });
-    resizeObserverRef.current = observer;
-    observer.observe(elem);
-    return () => {
-      if (resizeObserverRef.current) {
-        resizeObserverRef.current.disconnect();
-        resizeObserverRef.current = null;
-      }
-    };
-  }, [text]);
+    if (textRef.current) {
+      const isOverflowing =
+        textRef.current.scrollHeight > textRef.current.clientHeight;
+      setHasOverflow(isOverflowing);
+    }
+  }, [text, textRef]);
 
   return (
     <div className={`clampable-text-wrapper ${className}`}>
       <div
-        className={isClamped ? `line-clamp-${linesToClamp}` : ""}
-        ref={textContainerRef}
+        ref={textRef}
+        className={!isExpanded ? `line-clamp-${linesToClamp}` : ""}
       >
         {text}
       </div>
-      {(showToggleButton || (!showToggleButton && textExpanded)) && (
+      {(hasOverflow || isExpanded) && (
         <Button
           variant={toggleTextBtnVariant}
           className={toggleTextBtnClassName}
-          onClick={() => {
-            setTextExpanded((prev) => !prev);
-            setIsClamped((prev) => !prev);
-          }}
+          onClick={() => setIsExpanded((prev) => !prev)}
         >
-          {isClamped ? t("expand_all") : t("hide")}
+          {!isExpanded ? t("expand_all") : t("hide")}
         </Button>
       )}
     </div>
   );
 };
+
 export default ClampableText;
