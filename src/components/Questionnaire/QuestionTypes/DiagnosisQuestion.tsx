@@ -506,7 +506,7 @@ export function DiagnosisQuestion({
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead className="w-[30%]">{t("diagnosis")}</TableHead>
+                  <TableHead className="w-[30%]">{"random"}</TableHead>
                   <TableHead className="w-[15%] text-center">
                     {t("date")}
                   </TableHead>
@@ -918,7 +918,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
             <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
               <div>
                 <div className="block text-sm font-medium text-gray-500 mb-1">
-                  {t("diagnosis")} {t("date")}
+                  {"random"} {t("date")}
                 </div>
                 <CombinedDatePicker
                   value={
