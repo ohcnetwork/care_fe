@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isAfter, isBefore, parse } from "date-fns";
+import dayjs from "dayjs";
 import { useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -82,12 +82,13 @@ export default function CreateScheduleTemplateSheet({
   const formSchema = z
     .object({
       name: z.string().min(1, t("field_required")),
-      valid_from: z.date({
-        required_error: t("field_required"),
-      }),
-      valid_to: z.date({
-        required_error: t("field_required"),
-      }),
+      valid_from: z
+        .date({ required_error: t("field_required") })
+        .min(dayjs().startOf("day").toDate(), {
+          message: t("schedule_creation_for_past_validation_error"),
+        }),
+      valid_to: z.date({ required_error: t("field_required") }),
+
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
@@ -135,9 +136,9 @@ export default function CreateScheduleTemplateSheet({
             .refine(
               (data) => {
                 // Validate each availability's time range
-                const startTime = parse(data.start_time, "HH:mm", new Date());
-                const endTime = parse(data.end_time, "HH:mm", new Date());
-                return isBefore(startTime, endTime);
+                const startTime = dayjs(data.start_time, "HH:mm");
+                const endTime = dayjs(data.end_time, "HH:mm");
+                return startTime.isBefore(endTime);
               },
               {
                 message: t("start_time_must_be_before_end_time"),
@@ -147,10 +148,13 @@ export default function CreateScheduleTemplateSheet({
         )
         .min(1, t("schedule_sessions_min_error")),
     })
-    .refine((data) => !isAfter(data.valid_from, data.valid_to), {
-      message: t("from_date_must_be_before_to_date"),
-      path: ["valid_from"],
-    });
+    .refine(
+      (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
+      {
+        path: ["valid_to"],
+        message: t("to_date_equal_or_after_from_date"),
+      },
+    );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -289,7 +293,7 @@ export default function CreateScheduleTemplateSheet({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>
+                    <FormLabel aria-required>
                       {t("schedule_template_name")}
                     </FormLabel>
                     <FormControl>
@@ -309,7 +313,7 @@ export default function CreateScheduleTemplateSheet({
                   name="valid_from"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>{t("valid_from")}</FormLabel>
+                      <FormLabel aria-required>{t("valid_from")}</FormLabel>
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
@@ -324,7 +328,7 @@ export default function CreateScheduleTemplateSheet({
                   name="valid_to"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>{t("valid_to")}</FormLabel>
+                      <FormLabel aria-required>{t("valid_to")}</FormLabel>
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
@@ -402,7 +406,7 @@ export default function CreateScheduleTemplateSheet({
                           name={`availabilities.${index}.name`}
                           render={({ field }) => (
                             <FormItem className="col-span-2">
-                              <FormLabel required>
+                              <FormLabel aria-required>
                                 {t("session_title")}
                               </FormLabel>
                               <FormControl>
@@ -422,7 +426,7 @@ export default function CreateScheduleTemplateSheet({
                         name={`availabilities.${index}.slot_type`}
                         render={({ field }) => (
                           <FormItem className="col-span-2 md:col-span-1">
-                            <FormLabel required>{t("session_type")}</FormLabel>
+                            <FormLabel aria-required>{t("session_type")}</FormLabel>
                             <Select
                               onValueChange={field.onChange}
                               defaultValue={field.value}
@@ -467,7 +471,9 @@ export default function CreateScheduleTemplateSheet({
                           name={`availabilities.${index}.start_time`}
                           render={({ field }) => (
                             <FormItem className="flex flex-col w-full">
-                              <FormLabel required>{t("start_time")}</FormLabel>
+                              <FormLabel aria-required>
+                                {t("start_time")}
+                              </FormLabel>
                               <FormControl>
                                 <Input
                                   type="time"
@@ -488,7 +494,9 @@ export default function CreateScheduleTemplateSheet({
                           name={`availabilities.${index}.end_time`}
                           render={({ field }) => (
                             <FormItem className="flex flex-col w-full mt-2">
-                              <FormLabel required>{t("end_time")}</FormLabel>
+                              <FormLabel aria-required>
+                                {t("end_time")}
+                              </FormLabel>
                               <FormControl>
                                 <Input
                                   type="time"
@@ -577,7 +585,7 @@ export default function CreateScheduleTemplateSheet({
                               render={({ field }) => (
                                 <FormItem className="flex grow flex-col">
                                   <FormLabel
-                                    required
+                                    aria-required
                                     className="whitespace-nowrap "
                                   >
                                     {t("schedule_slot_size_label")}
@@ -608,7 +616,7 @@ export default function CreateScheduleTemplateSheet({
                               render={({ field }) => (
                                 <FormItem className="flex flex-col grow">
                                   <FormLabel
-                                    required
+                                    aria-required
                                     className="whitespace-nowrap"
                                   >
                                     {t("patients_per_slot")}

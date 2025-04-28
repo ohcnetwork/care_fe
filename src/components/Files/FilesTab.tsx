@@ -74,14 +74,13 @@ export const FilesTab = (props: FilesTabProps) => {
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
-  const {
-    canViewClinicalData,
-    canViewEncounter,
-    canWritePatient,
-    canWriteEncounter,
-  } = getPermissions(
+  const { canViewClinicalData, canWritePatient } = getPermissions(
     hasPermission,
-    encounter?.permissions ?? patient?.permissions ?? [],
+    patient?.permissions ?? [],
+  );
+  const { canViewEncounter, canWriteEncounter } = getPermissions(
+    hasPermission,
+    encounter?.permissions ?? [],
   );
   const canAccess =
     type === "encounter"
@@ -376,7 +375,7 @@ export const FilesTab = (props: FilesTabProps) => {
     );
   };
 
-  const FileUploadButtons = (): JSX.Element => {
+  const FileUploadButtons = (): React.ReactNode => {
     if (!canEdit) return <></>;
     return (
       <DropdownMenu>
@@ -661,17 +660,9 @@ export const FilesTab = (props: FilesTabProps) => {
         }
       >
         {type === "encounter" && (
-          <TabsList className="bg-gray-200 py-0 w-fit">
-            <TabsTrigger
-              value="all"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("all")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="discharge_summary"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
+          <TabsList>
+            <TabsTrigger value="all">{t("all")}</TabsTrigger>
+            <TabsTrigger value="discharge_summary">
               {t("discharge_summary")}
             </TabsTrigger>
           </TabsList>

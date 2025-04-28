@@ -266,15 +266,15 @@ export function QuestionnaireList() {
             >
               <TabsList>
                 <TabsTrigger value="active">
-                  <FileCheckIcon className="size-4 mr-2 " />
+                  <FileCheckIcon className="size-4" />
                   {t("active")}
                 </TabsTrigger>
                 <TabsTrigger value="draft">
-                  <NotepadTextDashedIcon className="size-4 mr-2" />
+                  <NotepadTextDashedIcon className="size-4" />
                   {t("draft")}
                 </TabsTrigger>
                 <TabsTrigger value="retired">
-                  <ArchiveIcon className="size-4 mr-2" />
+                  <ArchiveIcon className="size-4" />
                   {t("retired")}
                 </TabsTrigger>
               </TabsList>
