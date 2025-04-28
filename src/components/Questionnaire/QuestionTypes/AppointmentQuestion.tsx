@@ -67,7 +67,10 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
 export function validateAppointmentQuestion(
   value: CreateAppointmentQuestion,
   questionId: string,
+  required: boolean,
 ): QuestionValidationError[] {
+  APPOINTMENT_FIELDS.REASON.required = required;
+  APPOINTMENT_FIELDS.SLOT.required = required;
   return validateFields(value, questionId, APPOINTMENT_FIELDS);
 }
 
@@ -114,7 +117,7 @@ export function AppointmentQuestion({
       <div>
         <Label className="mb-2">
           {t("reason_for_visit")}
-          <span className="text-red-500 ml-0.5">*</span>
+          {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <Textarea
           placeholder={t("reason_for_visit_placeholder")}
@@ -135,7 +138,7 @@ export function AppointmentQuestion({
       <div>
         <Label className="block mb-2">
           {t("select_practitioner")}
-          <span className="text-red-500 ml-0.5">*</span>
+          {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <div
           className={cn(
@@ -163,7 +166,7 @@ export function AppointmentQuestion({
       <div>
         <Label className="block mb-2">
           {t("appointment_slot")}
-          <span className="text-red-500 ml-0.5">*</span>
+          {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <div
           className={cn(

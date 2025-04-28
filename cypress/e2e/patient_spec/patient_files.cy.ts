@@ -16,6 +16,8 @@ describe("Patient Files", () => {
 
     patientEncounter
       .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .searchEncounter("Jane")
       .openFirstEncounterDetails()
       .clickPatientDetailsButton();
     patientFiles.clickFilesTab();
