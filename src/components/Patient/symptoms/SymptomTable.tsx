@@ -144,7 +144,11 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
                   name={symptom.created_by.username}
                   className="size-4"
                   imageUrl={symptom.created_by.profile_picture_url}
-                  prefix="Dr."
+<Avatar
+  name={symptom.created_by.username}
+  className="size-4"
+  imageUrl={symptom.created_by.profile_picture_url}
+/>
                 />
 
                 <span className="text-sm">
