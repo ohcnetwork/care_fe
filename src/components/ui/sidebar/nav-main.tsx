@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react";
-import { ActiveLink } from "raviger";
+import { ActiveLink, usePath } from "raviger";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -31,15 +31,35 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import { NavigationLink } from "./facility-nav";
 
-const isChildActive = (link: NavigationLink) => {
+const isChildActive = (link: NavigationLink, currentPath: string) => {
   if (!link.children) return false;
-  const currentPath = window.location.pathname;
-  return link.children.some((child) => currentPath.startsWith(child.url));
+
+  if (
+    link.matchPath &&
+    link.matchPath.some((path) => currentPath.includes(path))
+  ) {
+    console.log(`Found match for ${link.name} at top-level`);
+    return true;
+  }
+
+  return link.children.some((child) => {
+    console.log("Checking child:", child.name);
+    if (
+      child.matchPath &&
+      child.matchPath.some((path) => currentPath.includes(path))
+    ) {
+      console.log(`Found match for ${child.name} at child-level`);
+      return true;
+    }
+
+    return currentPath.startsWith(child.url);
+  });
 };
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const currentPath = usePath() || "/";
 
   return (
     <SidebarGroup>
@@ -55,7 +75,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   <Collapsible
                     key={link.name}
                     asChild
-                    defaultOpen={isChildActive(link)}
+                    defaultOpen={isChildActive(link, currentPath)}
                     className="group/collapsible"
                   >
                     <SidebarMenuItem>
@@ -63,7 +83,15 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                         <SidebarMenuButton
                           data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                           tooltip={link.name}
-                          className="cursor-pointer hover:bg-gray-200 hover:text-green-700"
+                          className={cn(
+                            "cursor-pointer hover:bg-gray-200 hover:text-green-700",
+                            {
+                              "bg-white text-green-700 shadow": isChildActive(
+                                link,
+                                currentPath,
+                              ),
+                            },
+                          )}
                         >
                           {link.icon ? (
                             <CareIcon icon={link.icon as IconName} />
@@ -146,14 +174,14 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
 
 function PopoverMenu({ link }: { link: NavigationLink }) {
   const [open, setOpen] = useState(false);
-
+  const currentPath = usePath() || "/";
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <SidebarMenuButton
           tooltip={link.name}
           className={cn("cursor-pointer", {
-            "bg-gray-100 text-green-700 shadow": isChildActive(link),
+            "bg-white text-green-700 shadow": isChildActive(link, currentPath),
           })}
         >
           {link.icon ? (

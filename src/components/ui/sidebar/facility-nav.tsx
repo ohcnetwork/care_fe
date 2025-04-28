@@ -18,6 +18,7 @@ export interface NavigationLink {
   icon?: string;
   visibility?: boolean;
   children?: NavigationLink[];
+  matchPath?: string[];
 }
 
 interface FacilityNavProps {
@@ -62,6 +63,7 @@ function generateFacilityLinks(
         {
           name: t("encounters"),
           url: `${baseUrl}/encounters/patients`,
+          matchPath: [`/updates`],
         },
         {
           name: t("locations"),
