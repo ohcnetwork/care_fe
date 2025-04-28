@@ -237,7 +237,7 @@ export default function CreateScheduleExceptionSheet({
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                   <FormField
                     control={form.control}
                     name="valid_from"
@@ -287,7 +287,7 @@ export default function CreateScheduleExceptionSheet({
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 items-start">
                   <FormField
                     control={form.control}
                     name="start_time"
