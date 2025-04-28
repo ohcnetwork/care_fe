@@ -131,7 +131,7 @@ const AllergyItem = ({
   const { t } = useTranslation();
 
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
-  const desktopLayout = useBreakpoints({ md: true, default: false });
+  const desktopLayout = useBreakpoints({ lg: true, default: false });
 
   const categorySelect = (
     <Select
@@ -466,7 +466,7 @@ export function AllergyQuestion({
 
   const [newAllergyInSheet, setNewAllergyInSheet] =
     useState<AllergyIntoleranceRequest | null>(null);
-  const isMobile = useBreakpoints({ default: true, md: false });
+  const isMobile = useBreakpoints({ default: true, lg: false });
 
   const { data: patientAllergies } = useQuery({
     queryKey: ["allergies", patientId],
@@ -594,7 +594,7 @@ export function AllergyQuestion({
     <div className="space-y-4">
       {allergies.length > 0 && (
         <div className="rounded-lg lg:border lg:border-gray-200">
-          <div className="hidden md:block overflow-x-auto">
+          <div className="hidden lg:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
@@ -628,7 +628,7 @@ export function AllergyQuestion({
             </Table>
           </div>
 
-          <div className="md:hidden">
+          <div className="lg:hidden">
             {allergies.map((allergy, index) => (
               <Collapsible
                 key={index}
