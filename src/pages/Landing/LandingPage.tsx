@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -13,9 +14,22 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { Avatar } from "@/components/Common/Avatar";
+
+import { usePatientSignOut } from "@/hooks/usePatientSignOut";
+
+import { LocalStorageKeys } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { TokenData } from "@/types/auth/otp";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -27,7 +41,15 @@ export function LandingPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOrganization, setSelectedOrganization] =
     useState<Organization | null>(null);
+  const signOut = usePatientSignOut();
+  const tokenData: TokenData = JSON.parse(
+    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
+  );
 
+  const isLoggedIn =
+    tokenData.token &&
+    Object.keys(tokenData).length > 0 &&
+    dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"));
   const { data: organizationsResponse } = useQuery<
     PaginatedResponse<Organization>
   >({
@@ -50,7 +72,6 @@ export function LandingPage() {
     : "unknown";
 
   const inputRef = useRef<HTMLInputElement>(null);
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -104,6 +125,38 @@ export function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col p-5">
       {/* Main Content  */}
+      {isLoggedIn && (
+        <header className="w-full">
+          <div className="flex justify-end items-center gap-2">
+            <Button
+              variant="ghost"
+              className="text-sm font-medium hover:bg-gray-100 px-6"
+              onClick={() => navigate("/patient/home")}
+            >
+              {t("home")}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Avatar name={"User"} className="size-7 rounded-full" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="text-xs text-gray-500">
+                  <span className="font-medium">{tokenData.phoneNumber}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600 cursor-pointer"
+                  onClick={signOut}
+                >
+                  <CareIcon icon="l-signout" className="mr-2 size-4" />
+                  {t("sign_out")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+      )}
       <main className="lg:flex-1 flex flex-col items-center justify-center py-4 md:py-8">
         {/* Logo Section */}
         <div className="w-full flex flex-col items-center mt-2 md:mt-0">
@@ -222,50 +275,55 @@ export function LandingPage() {
         </div>
 
         {/* Login Section */}
-        <div className="w-full max-w-[620px] flex flex-col items-center justify-center bg-gray-100 p-4 rounded-lg">
-          <div className="text-sm font-medium mb-4 md:mb-6 text-center">
-            {t("login_already_registered")}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-full justify-center">
-            <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/staff_background.png')] bg-auto bg-center bg-no-repeat">
-              <div className="rounded-full bg-green-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
-                <CareIcon
-                  icon="d-health-worker"
-                  className="size-8 text-green-700"
-                />
+        {!isLoggedIn && (
+          <div className="w-full max-w-[620px] flex flex-col items-center justify-center bg-gray-100 p-4 rounded-lg">
+            <div className="text-sm font-medium mb-4 md:mb-6 text-center">
+              {t("login_already_registered")}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-full justify-center">
+              <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/staff_background.png')] bg-auto bg-center bg-no-repeat">
+                <div className="rounded-full bg-green-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
+                  <CareIcon
+                    icon="d-health-worker"
+                    className="size-8 text-green-700"
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <Button
+                    variant="outline"
+                    className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
+                    onClick={() => navigate(`/login?mode=staff`)}
+                  >
+                    {t("staff_login")}
+                  </Button>
+                  <p className="text-xs mt-2 w-full text-center">
+                    {t("staff_login_description")}
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col items-center">
-                <Button
-                  variant="outline"
-                  className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                  onClick={() => navigate(`/login?mode=staff`)}
-                >
-                  {t("staff_login")}
-                </Button>
-                <p className="text-xs mt-2 w-full text-center">
-                  {t("staff_login_description")}
-                </p>
+              <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/patient_background.png')] bg-auto bg-center bg-no-repeat">
+                <div className="rounded-full bg-indigo-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
+                  <CareIcon
+                    icon="d-patient"
+                    className="size-8 text-indigo-700"
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <Button
+                    variant="outline"
+                    className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
+                    onClick={() => navigate(`/login?mode=patient`)}
+                  >
+                    {t("patient_login")}
+                  </Button>
+                  <p className="text-xs mt-2 w-full text-center">
+                    {t("patient_login_description")}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/patient_background.png')] bg-auto bg-center bg-no-repeat">
-              <div className="rounded-full bg-indigo-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
-                <CareIcon icon="d-patient" className="size-8 text-indigo-700" />
-              </div>
-              <div className="flex flex-col items-center">
-                <Button
-                  variant="outline"
-                  className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                  onClick={() => navigate(`/login?mode=patient`)}
-                >
-                  {t("patient_login")}
-                </Button>
-                <p className="text-xs mt-2 w-full text-center">
-                  {t("patient_login_description")}
-                </p>
-              </div>
-            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );

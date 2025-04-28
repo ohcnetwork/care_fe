@@ -24,6 +24,7 @@
     <link
       rel="apple-touch-icon"
       href="/images/icons/apple-touch-icon-180x180.png" />
+    %REACT_INJECTED_HEAD%
   </head>
 
   <body>
@@ -102,5 +103,7 @@
       </div>
     </div>
     <script type="module" src="/src/index.tsx"></script>
+    <!-- Script injected by Vite from environment variable -->
+    %REACT_INJECTED_HTML%
   </body>
 </html>

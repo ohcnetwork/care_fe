@@ -247,6 +247,11 @@ export default function VerifyPatient(props: { facilityId: string }) {
                         encounter={encounter}
                         key={encounter.id}
                         permissions={facilityData?.permissions ?? []}
+                        facilityId={
+                          encounter.facility.id === props.facilityId
+                            ? props.facilityId
+                            : undefined
+                        }
                       />
                     ))}
                   </>
