@@ -557,7 +557,6 @@ export function QuestionnaireForm({
         }
 
         if (q.required) {
-          console.log("here");
           // Handle appointment validation
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
