@@ -10,6 +10,7 @@ on:
       - "cypress/**"
       - "package.json"
       - "package-lock.json"
+      - "cypress.config.ts"
       - "plugins/**"
       - "public/**"
       - ".github/workflows/cypress.yaml"
