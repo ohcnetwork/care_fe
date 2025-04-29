@@ -118,7 +118,13 @@ export function EncounterQuestion({
   });
 
   useEffect(() => {
-    if (encounter.status === "discharged" || encounter.status === "completed") {
+    if (
+      encounter.status === "discharged" ||
+      encounter.status === "completed" ||
+      encounter.status === "cancelled" ||
+      encounter.status === "discontinued" ||
+      encounter.status === "entered_in_error"
+    ) {
       if (!encounter.period.end) {
         handleUpdateEncounter({
           period: {
