@@ -1,13 +1,10 @@
 import { z } from "zod";
 
-import {
-  ALIGNMENT_OPTIONS,
-  REPORT_TEMPLATE_TYPE,
-} from "@/types/reportTemplate/reportTemplate";
+import { REPORT_TEMPLATE_TYPE } from "@/types/reportTemplate/reportTemplate";
 
 // Zod schema for the report template configuration
 export const reportTemplateSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   type: z.enum(
     REPORT_TEMPLATE_TYPE.map((type) => type.id) as [string, ...string[]],
   ),
@@ -21,9 +18,7 @@ export const reportTemplateSchema = z.object({
       page_numbering: z.object({
         enabled: z.boolean(),
         format: z.string(),
-        align: z.enum(
-          ALIGNMENT_OPTIONS.map((opt) => opt.id) as [string, ...string[]],
-        ),
+        align: z.string(),
       }),
       text: z.object({
         font: z.string(),
@@ -31,31 +26,30 @@ export const reportTemplateSchema = z.object({
       }),
     }),
     header: z.object({
-      facility_name: z.string(),
-      facility_heading: z.object({
-        align: z.enum(["left", "center", "right"]),
-        size: z.string(),
-        weight: z.string(),
-      }),
-      divider: z.object({
-        length: z.string(),
-        stroke: z.string(),
-      }),
-      title: z.object({
-        text: z.string(),
-        size: z.string(),
-      }),
-      logo: z.object({
-        file_name: z.string(),
-      }),
-      created_on: z.object({
-        label: z.string(),
-        style: z.object({
-          fill: z.string(),
-          weight: z.string(),
-        }),
-        date_format: z.string(),
-      }),
+      rows: z.array(
+        z.array(
+          z.object({
+            type: z.string(),
+            text: z.string().optional(),
+            size: z.string().optional(),
+            weight: z.number().optional(),
+            align: z.string().optional(),
+            length: z.string().optional(),
+            stroke: z.string().optional(),
+            file_name: z.string().optional(),
+            url: z.string().optional(),
+            width: z.string().optional(),
+            label: z.string().optional(),
+            format: z.string().optional(),
+            style: z
+              .object({
+                fill: z.string().optional(),
+                weight: z.number().optional(),
+              })
+              .optional(),
+          }),
+        ),
+      ),
     }),
     sections: z.array(
       z.object({
@@ -64,10 +58,22 @@ export const reportTemplateSchema = z.object({
         enabled: z.boolean(),
         options: z.object({
           title: z.string().optional(),
-          fields: z.array(z.string()).optional(),
+          fields: z
+            .union([
+              z.array(z.string()),
+              z.array(
+                z.object({
+                  label: z.string(),
+                  value: z.string(),
+                }),
+              ),
+            ])
+            .optional(),
           columns: z.array(z.string()).optional(),
-          style: z.enum(["list", "text"]),
+          style: z.enum(["list", "text"]).optional(),
           filters: z.record(z.array(z.string())).optional(),
+          text: z.string().optional(),
+          rows: z.array(z.array(z.string())).optional(),
         }),
       }),
     ),

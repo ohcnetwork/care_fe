@@ -14,20 +14,28 @@ type AlignmentOptions =
   | "top+center";
 
 export const ALIGNMENT_OPTIONS = [
-  { id: "left", value: "LEFT" },
-  { id: "center", value: "CENTER" },
-  { id: "right", value: "RIGHT" },
-  { id: "right + bottom", value: "RIGHT BOTTOM" },
-  { id: "left + bottom", value: "LEFT BOTTOM" },
-  { id: "center + bottom", value: "CENTER BOTTOM" },
-  { id: "top+left", value: "TOP LEFT" },
-  { id: "top+right", value: "TOP RIGHT" },
-  { id: "top+center", value: "TOP CENTER" },
+  { id: "left", value: "Left" },
+  { id: "center", value: "Center" },
+  { id: "right", value: "Right" },
+  { id: "right + bottom", value: "Right Bottom" },
+  { id: "left + bottom", value: "Left Bottom" },
+  { id: "center + bottom", value: "Center Bottom" },
+  { id: "top+left", value: "Top Left" },
+  { id: "top+right", value: "Top Right" },
+  { id: "top+center", value: "Top Center" },
 ] as const;
+
+interface Margins {
+  top: string;
+  right: string;
+  bottom: string;
+  left: string;
+}
 
 interface PageMargin {
   mode: "uniform" | "custom";
-  value: string;
+  value?: string;
+  values?: Margins;
 }
 
 interface PageNumbering {
@@ -44,7 +52,7 @@ export const FONT_OPTIONS = [
   { id: "verdana", value: "Verdana" },
 ] as const;
 
-interface ReportText {
+interface TextConfig {
   font: string;
   size: string;
 }
@@ -158,70 +166,79 @@ export const REPORT_SIZE_OPTIONS = [
   { id: "presentation-16-9", value: "PRESENTATION 16-9" },
   { id: "presentation-4-3", value: "PRESENTATION 4-3" },
 ];
-interface ReportLayout {
+interface Layout {
   page_size: string;
   page_margin: PageMargin;
   page_numbering: PageNumbering;
-  text: ReportText;
+  text: TextConfig;
+}
+
+interface StyleConfig {
+  fill?: string;
+  weight?: string;
+}
+
+interface TextElement {
+  type: "text";
+  text: string;
+  size: string;
+  weight: number;
+  align?: "left" | "center" | "right";
+}
+
+interface ImageElement {
+  type: "image";
+  file_name: string;
+  url: URL;
+  width: string;
+  align?: "left" | "center" | "right";
+}
+
+interface RuleElement {
+  type: "rule";
+  length: string;
+  stroke: string;
+  align?: "left" | "center" | "right";
+}
+
+interface DateTimeElement {
+  type: "datetime";
+  label: string;
+  format: string;
+  style: StyleConfig;
+  align?: "left" | "center" | "right";
+}
+
+export type HeaderElement =
+  | TextElement
+  | ImageElement
+  | RuleElement
+  | DateTimeElement;
+
+interface HeaderConfig {
+  rows: Array<Array<HeaderElement>>;
 }
 
 export const FONT_WEIGHT_OPTIONS = [
-  { id: "normal", value: "Normal" },
-  { id: "medium", value: "Medium" },
-  { id: "semibold", value: "Semibold" },
-  { id: "bold", value: "Bold" },
-  { id: "extra-bold", value: "Extra Bold" },
+  { id: 400, value: "Normal" },
+  { id: 500, value: "Medium" },
+  { id: 600, value: "Semibold" },
+  { id: 700, value: "Bold" },
+  { id: 800, value: "Extra bold" },
 ] as const;
 
-type FONT_WEIGHT = (typeof FONT_WEIGHT_OPTIONS)[number]["id"];
-
-interface FacilityHeading {
-  align: "left" | "center" | "right";
-  size: string;
-  weight: FONT_WEIGHT;
-}
-
-interface Divider {
-  length: string;
-  stroke: string;
-}
-
-interface SummaryTitle {
-  text: string;
-  size: string;
-}
-
-interface LogoConfig {
-  file_name: string;
-}
-
-type StyleType = "fill" | "weight";
-
-type Style = Record<StyleType, string | number>;
-
-interface CreatedOn {
+interface LabelValueField {
   label: string;
-  style: Style;
-  date_format: string;
-}
-
-interface ReportHeader {
-  facility_name: string;
-  facility_heading: FacilityHeading;
-  divider: Divider;
-  title: SummaryTitle;
-
-  logo: LogoConfig;
-
-  created_on: CreatedOn;
+  value: string;
 }
 
 interface SectionOptions {
   title?: string;
-  fields?: string[];
-  columns?: string[];
+  fields: string[] | Array<LabelValueField>;
+  columns: string[];
   style: "list" | "text";
   filters?: Record<string, string[]>;
+  rows?: Array<Array<string>>;
 }
 
 interface SectionConfig {
@@ -232,8 +249,8 @@ interface SectionConfig {
 }
 
 export interface ReportConfig {
-  layout: ReportLayout;
-  header: ReportHeader;
+  layout: Layout;
+  header: HeaderConfig;
   sections: SectionConfig[];
 }
 
@@ -245,7 +262,7 @@ export const REPORT_TEMPLATE_TYPE = [
 export type ReportTemplateType = (typeof REPORT_TEMPLATE_TYPE)[number]["id"];
 
 export interface ReportTemplateBase {
-  id: string;
+  id?: string;
   config: ReportConfig;
   type: ReportTemplateType;
 }

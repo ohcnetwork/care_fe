@@ -134,6 +134,14 @@ const consultationRoutes: AppRoutes = {
     ({ patientId, id }) => (
       <QuestionnaireResponseView responseId={id} patientId={patientId} />
     ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/reportbuilder":
+    ({ facilityId, patientId, encounterId }) => (
+      <ReportBuilder
+        facilityId={facilityId}
+        patientId={patientId}
+        encounterId={encounterId}
+      />
+    ),
   ...["facility", "organization"].reduce((acc: AppRoutes, identifier) => {
     acc[`/${identifier}/:id/patient/:patientId/encounter/:encounterId/:tab`] =
       ({ id, encounterId, tab, patientId }) => (
@@ -170,10 +178,6 @@ const consultationRoutes: AppRoutes = {
   "/patient/:patientId/questionnaire": ({ patientId }) => (
     <EncounterQuestionnaire patientId={patientId} subjectType="patient" />
   ),
-  "/patient/:patientId/encounter/:encounterId/report_builder": ({
-    patientId,
-    encounterId,
-  }) => <ReportBuilder patientId={patientId} encounterId={encounterId} />,
 };
 
 export default consultationRoutes;

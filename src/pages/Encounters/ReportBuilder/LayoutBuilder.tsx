@@ -1,3 +1,4 @@
+import React, { useCallback, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,93 @@ interface LayoutBuilderProps {
   form: UseFormReturn<ReportTemplateFormData>;
 }
 
-export function LayoutBuilder({ form }: LayoutBuilderProps) {
+// Memoized component to prevent unnecessary re-renders
+export const LayoutBuilder = React.memo(function LayoutBuilder({
+  form,
+}: LayoutBuilderProps) {
+  const [pageSizeOpen, setPageSizeOpen] = useState(false);
+  // Memoized handlers to maintain stable references
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      form.setValue("config.layout.page_size", value, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      setPageSizeOpen(false);
+    },
+    [form],
+  );
+
+  const handleMarginModeChange = useCallback(
+    (value: "uniform" | "custom") => {
+      form.setValue("config.layout.page_margin.mode", value, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+    [form],
+  );
+
+  const handleMarginValueChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      form.setValue("config.layout.page_margin.value", e.target.value, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+    [form],
+  );
+
+  const handlePageNumberingEnabledChange = useCallback(
+    (checked: boolean) => {
+      form.setValue("config.layout.page_numbering.enabled", checked, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+    [form],
+  );
+
+  const handlePageNumberingFormatChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      form.setValue("config.layout.page_numbering.format", e.target.value, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+    [form],
+  );
+
+  const handlePageNumberingAlignChange = useCallback(
+    (value: string) => {
+      form.setValue("config.layout.page_numbering.align", value, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+    [form],
+  );
+
+  const handleFontChange = useCallback(
+    (value: string) => {
+      form.setValue("config.layout.text.font", value, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+    [form],
+  );
+
+  const handleFontSizeChange = useCallback(
+    (value: string) => {
+      form.setValue("config.layout.text.size", value, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+    [form],
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -61,7 +148,7 @@ export function LayoutBuilder({ form }: LayoutBuilderProps) {
             <FormItem>
               <FormLabel>Page Size</FormLabel>
               <FormControl>
-                <Popover>
+                <Popover open={pageSizeOpen} onOpenChange={setPageSizeOpen}>
                   <PopoverTrigger asChild className="w-full">
                     <Button variant="outline">
                       {REPORT_SIZE_OPTIONS.find(
@@ -83,7 +170,7 @@ export function LayoutBuilder({ form }: LayoutBuilderProps) {
                           <CommandItem
                             key={size.id}
                             value={size.id}
-                            onSelect={() => field.onChange(size.id)}
+                            onSelect={() => handlePageSizeChange(size.id)}
                           >
                             {size.value}
                           </CommandItem>
@@ -107,7 +194,7 @@ export function LayoutBuilder({ form }: LayoutBuilderProps) {
               <FormLabel>Page Margin</FormLabel>
               <FormControl>
                 <RadioGroup
-                  onValueChange={field.onChange}
+                  onValueChange={handleMarginModeChange}
                   defaultValue={field.value}
                   className="space-y-2"
                 >
@@ -139,6 +226,7 @@ export function LayoutBuilder({ form }: LayoutBuilderProps) {
                   type="text"
                   placeholder="40pt"
                   className="max-w-[200px]"
+                  onChange={handleMarginValueChange}
                 />
               </FormControl>
               <FormMessage />
@@ -156,7 +244,7 @@ export function LayoutBuilder({ form }: LayoutBuilderProps) {
               <FormControl>
                 <Switch
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={handlePageNumberingEnabledChange}
                 />
               </FormControl>
             </FormItem>
@@ -175,6 +263,7 @@ export function LayoutBuilder({ form }: LayoutBuilderProps) {
                   type="text"
                   placeholder="Page {page} of {pages}"
                   className="max-w-[300px]"
+                  onChange={handlePageNumberingFormatChange}
                 />
               </FormControl>
               <p className="text-sm text-muted-foreground">
@@ -192,7 +281,10 @@ export function LayoutBuilder({ form }: LayoutBuilderProps) {
             <FormItem>
               <FormLabel>Alignment</FormLabel>
               <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value}
+                  onValueChange={handlePageNumberingAlignChange}
+                >
                   <SelectTrigger className="max-w-[200px]">
                     <SelectValue placeholder="Select alignment" />
                   </SelectTrigger>
@@ -221,7 +313,10 @@ export function LayoutBuilder({ form }: LayoutBuilderProps) {
                 <FormItem>
                   <FormLabel>Font Family</FormLabel>
                   <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value}
+                      onValueChange={handleFontChange}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select font" />
                       </SelectTrigger>
@@ -246,7 +341,10 @@ export function LayoutBuilder({ form }: LayoutBuilderProps) {
                 <FormItem>
                   <FormLabel>Font Size</FormLabel>
                   <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value}
+                      onValueChange={handleFontSizeChange}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select size" />
                       </SelectTrigger>
@@ -268,4 +366,4 @@ export function LayoutBuilder({ form }: LayoutBuilderProps) {
       </CardContent>
     </Card>
   );
-}
+});

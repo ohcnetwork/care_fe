@@ -1,143 +1,183 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
-
-import { HeaderBuilder } from "./HeaderBuilder";
-import { LayoutBuilder } from "./LayoutBuilder";
-import { SectionBuilder } from "./SectionBuilder";
-import { ReportTemplateFormData, reportTemplateSchema } from "./schema";
+import { HeaderBuilder } from "@/pages/Encounters/ReportBuilder/HeaderBuilder";
+import { LayoutBuilder } from "@/pages/Encounters/ReportBuilder/LayoutBuilder";
+import { SectionBuilder } from "@/pages/Encounters/ReportBuilder/SectionBuilder";
+import {
+  ReportTemplateFormData,
+  reportTemplateSchema,
+} from "@/pages/Encounters/ReportBuilder/schema";
 
 interface ReportBuilderProps {
+  facilityId: string;
   patientId: string;
   encounterId: string;
 }
 
-export default function ReportBuilder(props: ReportBuilderProps) {
-  const { encounterId, patientId } = props;
-  const { data: encounterData } = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(routes.encounter.get, {
-      pathParams: { id: encounterId },
-      queryParams: { patient: patientId },
-    }),
-    enabled: !!encounterId,
-  });
-  const form = useForm<ReportTemplateFormData>({
-    resolver: zodResolver(reportTemplateSchema),
-    defaultValues: {
-      id: "",
-      type: "discharge_summary",
-      config: {
-        layout: {
-          page_size: "a4",
-          page_margin: {
-            mode: "uniform",
-            value: "40pt",
-          },
-          page_numbering: {
-            enabled: true,
-            format: "Page {page} of {pages}",
-            align: "right + bottom",
-          },
-          text: {
-            font: "helvetica",
-            size: "12",
-          },
-        },
-        header: {
-          facility_name: "",
-          facility_heading: {
-            align: "center",
-            size: "16",
-            weight: "bold",
-          },
-          divider: {
-            length: "100%",
-            stroke: "1px",
-          },
-          title: {
-            text: "Patient Discharge Summary",
-            size: "14",
-          },
-          logo: {
-            file_name: "",
-          },
-          created_on: {
-            label: "Created On",
-            style: {
-              fill: "black",
-              weight: "normal",
-            },
-            date_format: "DD/MM/YYYY",
-          },
-        },
-        sections: [],
+// Default template configuration
+const defaultTemplate: ReportTemplateFormData = {
+  type: "discharge_summary",
+  config: {
+    layout: {
+      page_size: "a4",
+      page_margin: {
+        mode: "uniform",
+        value: "40pt",
+      },
+      page_numbering: {
+        enabled: true,
+        format: "1 of 1",
+        align: "right + bottom",
+      },
+      text: {
+        font: "DejaVu Sans",
+        size: "10pt",
       },
     },
+    header: {
+      rows: [
+        [
+          {
+            type: "text",
+            text: "Central Diagnostic Laboratory",
+            size: "24pt",
+            weight: 400,
+            align: "center",
+          },
+        ],
+        [
+          {
+            type: "rule",
+            length: "100%",
+            stroke: "mygray",
+          },
+        ],
+        [
+          {
+            type: "text",
+            text: "Patient Discharge Summary",
+            size: "15pt",
+            weight: 400,
+          },
+          {
+            type: "image",
+            file_name: "care-black-logo.png",
+            url: "https://en.wikipedia.org/static/images/icons/wikipedia.png",
+            width: "20%",
+            align: "right",
+          },
+        ],
+        [
+          {
+            type: "datetime",
+            label: "Created on",
+            format: "[day]/[month]/[year]",
+            style: {
+              fill: "mygray",
+              weight: 500,
+            },
+            align: "right",
+          },
+        ],
+        [
+          {
+            type: "rule",
+            length: "100%",
+            stroke: "mygray",
+          },
+        ],
+      ],
+    },
+    sections: [
+      {
+        source: "patient_info",
+        is_table: false,
+        enabled: true,
+        options: {
+          title: "Patient Information",
+          fields: [
+            "name",
+            "gender",
+            "phone_number",
+            "emergency_phone_number",
+            "address",
+            "permanent_address",
+            "pincode",
+            "date_of_birth",
+            "deceased_datetime",
+            "marital_status",
+            "blood_group",
+          ],
+          style: "list",
+        },
+      },
+    ],
+  },
+};
+
+export default function ReportBuilder({ facilityId }: ReportBuilderProps) {
+  const [activeTab, setActiveTab] = useState("layout");
+
+  const form = useForm<ReportTemplateFormData>({
+    resolver: zodResolver(reportTemplateSchema),
+    defaultValues: defaultTemplate,
   });
 
+  const onSubmit = useCallback((data: ReportTemplateFormData) => {
+    console.log(data);
+  }, []);
+
+  const handleExport = useCallback(() => {
+    console.log("");
+  }, []);
+
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Report Builder Configurator</h1>
-          <p className="text-muted-foreground">
-            Customize your patient discharge summary reports
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline">
-            <span className="mr-2">↓</span>
-            Export Config
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Report Template Builder</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="layout">Layout</TabsTrigger>
+                <TabsTrigger value="header">Header</TabsTrigger>
+                <TabsTrigger value="sections">Sections</TabsTrigger>
+              </TabsList>
+              <TabsContent value="layout">
+                <LayoutBuilder form={form} />
+              </TabsContent>
+              <TabsContent value="header">
+                <HeaderBuilder form={form} />
+              </TabsContent>
+              <TabsContent value="sections">
+                <SectionBuilder form={form} facilityId={facilityId} />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end space-x-2">
+          <Button type="button" variant="outline" onClick={handleExport}>
+            Export
           </Button>
-          <Button>
-            <span className="mr-2">💾</span>
-            Save Changes
-          </Button>
+          <Button type="submit">Save Template</Button>
         </div>
-      </div>
-
-      <Form {...form}>
-        <form className="space-y-6">
-          <Tabs defaultValue="layout" className="w-full">
-            <TabsList className="mb-4 w-full flex justify-between">
-              <TabsTrigger value="layout" className="w-full">
-                Layout
-              </TabsTrigger>
-              <TabsTrigger value="header" className="w-full">
-                Header
-              </TabsTrigger>
-              <TabsTrigger value="sections" className="w-full">
-                Sections
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="layout">
-              <LayoutBuilder form={form} />
-            </TabsContent>
-
-            <TabsContent value="header">
-              <HeaderBuilder form={form} />
-            </TabsContent>
-
-            <TabsContent value="sections">
-              <SectionBuilder
-                form={form}
-                facilityId={encounterData?.facility?.id || ""}
-              />
-            </TabsContent>
-          </Tabs>
-        </form>
-      </Form>
-    </div>
+      </form>
+    </Form>
   );
 }
