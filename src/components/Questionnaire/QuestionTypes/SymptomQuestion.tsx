@@ -524,6 +524,7 @@ export function SymptomQuestion({
 
     if (isDuplicate) {
       toast.warning(t("symptom_already_exist_warning"));
+      setShowSymptomSelection(false);
       return;
     }
 
