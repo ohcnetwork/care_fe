@@ -23,10 +23,10 @@ Cypress.Commands.add("loginByApi", (role: string) => {
 
 Cypress.Commands.add("verifyNotification", (text: string) => {
   return cy
-    .get("li[data-sonner-toast] div[data-title]")
-    .should("exist")
-    .contains(text)
+    .get("li[data-sonner-toast]", { timeout: 10000 })
     .should("be.visible")
+    .find("div[data-title]")
+    .should("contain", text)
     .then(() => {
       cy.closeNotification();
     });
@@ -127,14 +127,15 @@ Cypress.Commands.add("preventPrint", () => {
 
 Cypress.Commands.add("closeNotification", () => {
   return cy
-    .get("li[data-sonner-toast] div[data-title]")
+    .get("li[data-sonner-toast]", { timeout: 10000 })
     .first()
-    .parents("li[data-sonner-toast]")
+    .should("be.visible")
     .then(($toast) => {
       cy.wrap($toast)
         .find('button[aria-label="Close toast"]', { timeout: 5000 })
         .should("be.visible")
-        .click();
+        .should("not.be.disabled")
+        .click({ force: true });
     });
 });
 
