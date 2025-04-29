@@ -58,16 +58,45 @@ function OrganizationLevelSelect({
       authToken,
     });
 
+  let previousLevelRelativeGovtOrgType = "";
+
+  switch (previousLevel?.metadata?.govt_org_type) {
+    case "state":
+      previousLevelRelativeGovtOrgType = "district";
+      break;
+    case "district":
+      previousLevelRelativeGovtOrgType = "local_body";
+      break;
+    case "local_body":
+      previousLevelRelativeGovtOrgType = "ward";
+      break;
+    case "municipality":
+      previousLevelRelativeGovtOrgType = "ward";
+      break;
+    case "grama_panchayat":
+      previousLevelRelativeGovtOrgType = "ward";
+      break;
+    case "district_panchayat":
+      previousLevelRelativeGovtOrgType = "grama_panchayat";
+      break;
+    case "block_panchayat":
+      previousLevelRelativeGovtOrgType = "grama_panchayat";
+      break;
+    case "corporation":
+      previousLevelRelativeGovtOrgType = "ward";
+      break;
+    case "ward":
+      previousLevelRelativeGovtOrgType = "ward";
+      break;
+    default:
+      previousLevelRelativeGovtOrgType = "default";
+      break;
+  }
+
   return (
     <div className="mt-2">
       <Label className="mb-2">
-        {t(
-          currentLevel
-            ? `SYSTEM__govt_org_type__${currentLevel.metadata?.govt_org_type}`
-            : index === 0
-              ? "SYSTEM__govt_org_type__default"
-              : `SYSTEM__govt_org_type__${previousLevel?.metadata?.govt_org_children_type || "default"}`,
-        )}
+        {t(`SYSTEM__govt_org_type__${previousLevelRelativeGovtOrgType}`)}
         {required && <span className="text-red-500">*</span>}
       </Label>
       <div className="flex items-center gap-2">
@@ -77,11 +106,7 @@ function OrganizationLevelSelect({
           options={options}
           onChange={handleChange}
           onSearch={handleSearch}
-          data-cy={`select-${
-            currentLevel?.metadata?.govt_org_type?.toLowerCase() ||
-            previousLevel?.metadata?.govt_org_children_type?.toLowerCase() ||
-            "state"
-          }`}
+          data-cy={`select-${previousLevelRelativeGovtOrgType}`}
         />
       </div>
     </div>
