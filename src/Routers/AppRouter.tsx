@@ -124,7 +124,7 @@ export default function AppRouter() {
               />
             </a>
           </div>
-          <div className="p-3 mt-4" data-cui-page>
+          <div className="rounded-lg" data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {pages}
             </ErrorBoundary>
