@@ -6,13 +6,13 @@ on:
       - develop
       - staging
     paths:
-      - 'src/**'
-      - 'cypress/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'plugins/**'
-      - 'public/**'
-      - '.github/workflows/cypress.yaml'
+      - "src/**"
+      - "cypress/**"
+      - "package.json"
+      - "package-lock.json"
+      - "plugins/**"
+      - "public/**"
+      - ".github/workflows/cypress.yaml"
   workflow_dispatch:
 
 jobs:
