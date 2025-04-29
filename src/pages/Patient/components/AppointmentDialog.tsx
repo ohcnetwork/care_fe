@@ -172,6 +172,7 @@ function AppointmentDialog({
                 <Button
                   variant="secondary"
                   onClick={() => handleRescheduleAppointment(appointment)}
+                  disabled={appointment.status === "in_consultation"}
                 >
                   <span>{t("reschedule")}</span>
                 </Button>
