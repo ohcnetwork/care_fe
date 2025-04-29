@@ -128,11 +128,6 @@ export function AppointmentQuestion({
             hasError(APPOINTMENT_FIELDS.REASON.key) && "border-red-500",
           )}
         />
-        <FieldError
-          fieldKey={APPOINTMENT_FIELDS.REASON.key}
-          questionId={question.id}
-          errors={errors}
-        />
       </div>
 
       <div>
