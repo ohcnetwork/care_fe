@@ -98,19 +98,18 @@ export default function FacilityOrganizationSelector(
       setCurrentSelection(org);
     } else {
       setCurrentSelection(org);
+      handleConfirmSelection(org);
     }
     setFacilityOrgSearch("");
   };
 
-  const handleConfirmSelection = () => {
-    if (currentSelection) {
-      const newSelection = [...selectedOrganizations, currentSelection];
-      setSelectedOrganizations(newSelection);
-      onChange(newSelection.map((org) => org.id));
-      setCurrentSelection(null);
-      setNavigationLevels([]);
-      setOpen(false);
-    }
+  const handleConfirmSelection = (org: FacilityOrganization) => {
+    const newSelection = [...selectedOrganizations, org];
+    setSelectedOrganizations(newSelection);
+    onChange(newSelection.map((org) => org.id));
+    setCurrentSelection(null);
+    setNavigationLevels([]);
+    setOpen(false);
   };
 
   const handleRemoveOrganization = (index: number) => {
@@ -264,26 +263,28 @@ export default function FacilityOrganizationSelector(
                 {currentSelection.name}
               </span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 gap-2"
-              onClick={handleConfirmSelection}
-              disabled={isDisabled}
-              data-cy="confirm-organization"
-            >
-              {isDisabled ? (
-                <>
-                  <span>{t("already_selected")}</span>
-                  <CareIcon icon="l-multiply" className="h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  <span>{t("confirm")}</span>
-                  <CareIcon icon="l-check" className="h-4 w-4" />
-                </>
-              )}
-            </Button>
+            {currentSelection.has_children && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-2"
+                onClick={() => handleConfirmSelection(currentSelection)}
+                disabled={isDisabled}
+                data-cy="confirm-organization"
+              >
+                {isDisabled ? (
+                  <>
+                    <span>{t("already_selected")}</span>
+                    <CareIcon icon="l-multiply" className="h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    <span>{t("confirm")}</span>
+                    <CareIcon icon="l-check" className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         )}
       </Command>

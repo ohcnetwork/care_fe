@@ -50,8 +50,7 @@ class PatientVerify {
   }
 
   selectOrganization(organization: string) {
-    cy.typeAndSelectOption('[data-cy="facility-organization"]', organization);
-    cy.get('[data-cy="confirm-organization"]').click();
+    cy.clickAndSelectOption('[data-cy="facility-organization"]', organization);
     return this;
   }
 
