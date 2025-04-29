@@ -12,8 +12,6 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,7 +20,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
-import { Command, CommandList } from "@/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +36,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -49,6 +45,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -121,15 +118,14 @@ export function DiagnosisQuestion({
   const { t } = useTranslation();
 
   const isPreview = patientId === "preview";
-  const [selectedCategory, setSelectedCategory] = useState<
-    DiagnosisRequest["category"]
-  >("encounter_diagnosis");
-  const [selectedCode, setSelectedCode] = useState<Code | null>(null);
-  const [showCategorySelection, setShowCategorySelection] = useState(false);
+  const [selectedCategory] = useState<DiagnosisRequest["category"]>(
+    "encounter_diagnosis",
+  );
   const [newDiagnosis, setNewDiagnosis] = useState<Partial<DiagnosisRequest>>({
     ...DIAGNOSIS_INITIAL_VALUE,
     onset: { onset_datetime: new Date().toISOString().split("T")[0] },
   });
+  const [showDiagnosisSelection, setShowDiagnosisSelection] = useState(false);
   const isMobile = useBreakpoints({ default: true, md: false });
 
   // Sort diagnoses by date
@@ -176,33 +172,40 @@ export function DiagnosisQuestion({
   }, [patientDiagnoses]);
 
   const handleCodeSelect = (code: Code) => {
-    setSelectedCode(code);
-    setNewDiagnosis((prev) => ({ ...prev, code }));
-    setShowCategorySelection(true);
-  };
-
-  const handleCategoryConfirm = () => {
-    if (!selectedCode) return;
-
     const isDuplicate = sortedDiagnoses.some(
       (diagnosis) =>
-        diagnosis.code.code === selectedCode.code &&
+        diagnosis.code.code === code.code &&
         diagnosis.verification_status !== "entered_in_error",
     );
 
     if (isDuplicate) {
       toast.warning(t("diagnosis_already_exist_warning"));
+      setShowDiagnosisSelection(false);
       return;
     }
 
+    setNewDiagnosis({
+      ...DIAGNOSIS_INITIAL_VALUE,
+      code,
+    });
+
+    if (isMobile) {
+      setShowDiagnosisSelection(true);
+    } else {
+      addNewDiagnosis(code);
+    }
+  };
+
+  const addNewDiagnosis = (code: Code) => {
     const newDiagnoses = [
       ...sortedDiagnoses,
       {
         ...newDiagnosis,
-        code: selectedCode,
+        code,
         category: selectedCategory,
       } as DiagnosisRequest,
     ];
+
     updateQuestionnaireResponseCB(
       [
         {
@@ -213,14 +216,16 @@ export function DiagnosisQuestion({
       questionnaireResponse.question_id,
     );
 
-    // Reset the selection state
-    setSelectedCode(null);
-    setShowCategorySelection(false);
-    setSelectedCategory("encounter_diagnosis");
+    setShowDiagnosisSelection(false);
     setNewDiagnosis({
       ...DIAGNOSIS_INITIAL_VALUE,
       onset: { onset_datetime: new Date().toISOString().split("T")[0] },
     });
+  };
+
+  const handleConfirmDiagnosis = () => {
+    if (!newDiagnosis.code) return;
+    addNewDiagnosis(newDiagnosis.code);
   };
 
   const handleRemoveDiagnosis = (index: number) => {
@@ -276,22 +281,6 @@ export function DiagnosisQuestion({
       ],
       questionnaireResponse.question_id,
     );
-  };
-
-  const handleCloseDrawer = () => {
-    setShowCategorySelection(false);
-    handleBackToValueSet();
-  };
-
-  const handleBackToValueSet = () => {
-    setSelectedCode(null);
-    setSelectedCategory("encounter_diagnosis");
-    setNewDiagnosis({
-      ...DIAGNOSIS_INITIAL_VALUE,
-      onset: {
-        onset_datetime: new Date().toISOString().split("T")[0],
-      },
-    });
   };
 
   const diagnosisDetailsContent = (
@@ -379,7 +368,7 @@ export function DiagnosisQuestion({
           <Label className="text-sm">{t("notes")}</Label>
           <Input
             type="text"
-            placeholder={t("add_notes_about_diagnosis")}
+            placeholder={t("additional_notes")}
             value={newDiagnosis.note || ""}
             onChange={(e) =>
               setNewDiagnosis((prev) => ({
@@ -390,116 +379,12 @@ export function DiagnosisQuestion({
           />
         </div>
       </div>
-
-      <div className="flex justify-between space-x-2">
-        <Button type="button" variant="outline" onClick={handleBackToValueSet}>
-          {t("cancel")}
-        </Button>
-        <Button onClick={handleCategoryConfirm}>{t("add_diagnosis")}</Button>
-      </div>
     </div>
   );
 
-  const desktopDiagnosisContent = (
-    <div className="rounded-lg border p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {selectedCode && (
-            <Label className="text-md font-medium">
-              {selectedCode.display}
-            </Label>
-          )}
-        </div>
-        <Button variant="ghost" size="sm" onClick={handleCloseDrawer}>
-          {t("cancel")}
-        </Button>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm">{t("date")}</Label>
-          <CombinedDatePicker
-            value={
-              newDiagnosis.onset?.onset_datetime
-                ? new Date(newDiagnosis.onset.onset_datetime)
-                : undefined
-            }
-            onChange={(date) =>
-              setNewDiagnosis((prev) => ({
-                ...prev,
-                onset: { onset_datetime: dateQueryString(date) },
-              }))
-            }
-            dateFormat="P"
-            disabled={disabled}
-            buttonClassName="h-9 w-full justify-start font-normal"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-sm">{t("status")}</Label>
-          <Select
-            value={newDiagnosis.clinical_status}
-            onValueChange={(value) =>
-              setNewDiagnosis((prev) => ({
-                ...prev,
-                clinical_status: value as DiagnosisRequest["clinical_status"],
-              }))
-            }
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue
-                placeholder={
-                  <span className="text-gray-500">
-                    {t("diagnosis_status_placeholder")}
-                  </span>
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
-                <SelectItem key={status} value={status} className="capitalize">
-                  {t(status)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label className="text-sm">{t("verification")}</Label>
-          <Select
-            value={newDiagnosis.verification_status}
-            onValueChange={(value) =>
-              setNewDiagnosis((prev) => ({
-                ...prev,
-                verification_status:
-                  value as DiagnosisRequest["verification_status"],
-              }))
-            }
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue
-                placeholder={
-                  <span className="text-gray-500">
-                    {t("diagnosis_verification_placeholder")}
-                  </span>
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
-                <SelectItem key={status} value={status} className="capitalize">
-                  {t(status)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="flex justify-end space-x-2">
-        <Button onClick={handleCategoryConfirm}>{t("add_diagnosis")}</Button>
-      </div>
-    </div>
-  );
+  const addDiagnosisPlaceholder = t("add_diagnosis", {
+    count: sortedDiagnoses.length + 1,
+  });
 
   return (
     <div className="space-y-4">
@@ -561,90 +446,23 @@ export function DiagnosisQuestion({
         </div>
       )}
 
-      {isMobile && showCategorySelection ? (
-        <>
-          <ValueSetSelect
-            system="system-condition-code"
-            placeholder={t("add_another_diagnosis")}
-            onSelect={handleCodeSelect}
-            disabled={disabled}
-          />
-          <Sheet
-            open={showCategorySelection}
-            onOpenChange={setShowCategorySelection}
-          >
-            <Command className="px-0">
-              {selectedCode ? (
-                <>
-                  <div className="py-3 px-4 border-b border-gray-200 flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">
-                      {selectedCode.display}
-                    </h3>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8"
-                      onClick={handleBackToValueSet}
-                    >
-                      <CareIcon icon="l-times" className="size-5" />
-                    </Button>
-                  </div>
-                  <SheetContent
-                    side="bottom"
-                    className="h-[80vh] px-0 pt-2 pb-0 rounded-t-lg"
-                  >
-                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
-                    <div className="mt-6 h-full">
-                      <CommandList className="max-h-[calc(80vh-2rem)] overflow-y-auto">
-                        {diagnosisDetailsContent}
-                      </CommandList>
-                    </div>
-                  </SheetContent>
-                </>
-              ) : (
-                <>
-                  <div className="py-3 px-4 border-b border-gray-200 flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">
-                      {t("select_diagnosis")}
-                    </h3>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8"
-                      onClick={handleCloseDrawer}
-                    >
-                      <CareIcon icon="l-times" className="size-5" />
-                    </Button>
-                  </div>
-                  <SheetContent
-                    side="bottom"
-                    className="h-[80vh] px-0 pt-2 pb-0 rounded-t-lg"
-                  >
-                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
-                    <div className="mt-6 h-full">
-                      <CommandList className="max-h-[calc(80vh-2rem)] overflow-y-auto">
-                        <ValueSetSelect
-                          system="system-condition-code"
-                          placeholder={t("add_another_diagnosis")}
-                          onSelect={handleCodeSelect}
-                          disabled={disabled}
-                          hideTrigger={true}
-                          controlledOpen={true}
-                        />
-                      </CommandList>
-                    </div>
-                  </SheetContent>
-                </>
-              )}
-            </Command>
-          </Sheet>
-        </>
-      ) : showCategorySelection ? (
-        desktopDiagnosisContent
+      {isMobile ? (
+        <EntitySelectionSheet
+          open={showDiagnosisSelection}
+          onOpenChange={setShowDiagnosisSelection}
+          system="system-condition-code"
+          entityType="diagnosis"
+          disabled={disabled}
+          onEntitySelected={handleCodeSelect}
+          onConfirm={handleConfirmDiagnosis}
+          placeholder={addDiagnosisPlaceholder}
+        >
+          {diagnosisDetailsContent}
+        </EntitySelectionSheet>
       ) : (
         <ValueSetSelect
           system="system-condition-code"
-          placeholder={t("add_another_diagnosis")}
+          placeholder={addDiagnosisPlaceholder}
           onSelect={handleCodeSelect}
           disabled={disabled}
         />
@@ -799,7 +617,7 @@ const DiagnosisTableRow = ({
           <TableCell colSpan={5} className="px-4 py-2">
             <Input
               type="text"
-              placeholder={t("add_notes_about_diagnosis")}
+              placeholder={t("additional_notes")}
               value={diagnosis.note || ""}
               onChange={(e) => onUpdate?.({ note: e.target.value })}
               disabled={disabled}
@@ -1006,7 +824,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                 </div>
                 <Input
                   type="text"
-                  placeholder={t("add_notes_about_diagnosis")}
+                  placeholder={t("additional_notes")}
                   value={diagnosis.note || ""}
                   onChange={(e) => onUpdate?.({ note: e.target.value })}
                   disabled={disabled}
