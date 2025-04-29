@@ -317,7 +317,10 @@ const MobileNav = ({
 );
 
 // Main component
-export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
+export const EncounterNotesTab = ({
+  encounter,
+  patient,
+}: EncounterTabProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedThread, setSelectedThread] = useState<string | null>(null);
@@ -329,11 +332,17 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   const recentMessageRef = useRef<HTMLDivElement | null>(null);
   const { ref, inView } = useInView();
   const { hasPermission } = usePermissions();
-  const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
-    getPermissions(hasPermission, encounter.permissions);
+  const { canViewClinicalData } = getPermissions(
+    hasPermission,
+    patient.permissions,
+  );
+  const { canViewEncounter, canWriteEncounter } = getPermissions(
+    hasPermission,
+    encounter.permissions,
+  );
   const canAccess = canViewClinicalData || canViewEncounter;
-  const canWriteCurrentEncounter =
-    canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
+  const inactiveEncounter = inactiveEncounterStatus.includes(encounter.status);
+  const canWriteCurrentEncounter = canWriteEncounter && !inactiveEncounter;
   const [commentAdded, setCommentAdded] = useState(false);
   const isMobile = useIsMobile();
 
@@ -744,11 +753,19 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                 <MessageSquarePlus className="size-5 mr-2" />
                 {t("encounter_notes__start_new_discussion")}
               </Button>
-              {!canWriteCurrentEncounter && (
+              {!canWriteEncounter && (
                 <p className="text-sm text-gray-500 mt-4">
-                  {t("encounter_notes__inactive_encounter", {
-                    encounterStatus: t(`encounter_status__${encounter.status}`),
-                  })}
+                  {inactiveEncounter ? (
+                    <>
+                      {t("encounter_notes__inactive_encounter", {
+                        encounterStatus: t(
+                          `encounter_status__${encounter.status}`,
+                        ),
+                      })}
+                    </>
+                  ) : (
+                    t("permission_denied")
+                  )}
                 </p>
               )}
             </div>

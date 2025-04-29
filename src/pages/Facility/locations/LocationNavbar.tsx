@@ -46,6 +46,7 @@ export function LocationTreeNode({
       queryParams: {
         parent: location.id,
         mode: "kind",
+        ordering: "sort_index",
       },
     }),
     enabled: true,
@@ -141,6 +142,7 @@ export default function LocationNavbar({
       queryParams: {
         mine: true,
         mode: "kind",
+        ordering: "sort_index",
       },
       pageSize: 100,
     }),
