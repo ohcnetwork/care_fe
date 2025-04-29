@@ -48,7 +48,8 @@ jobs:
 
       - name: Determine PR Origin
         id: pr_origin
-        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
+        run: |
+          echo "is_forked=$(echo ${{ github.event.pull_request.head.repo.fork }})" >> $GITHUB_OUTPUT
 
       - name: Download the build folders
         uses: actions/download-artifact@v4
@@ -82,14 +83,14 @@ jobs:
         if: steps.pr_origin.outputs.is_forked == 'true'
         uses: cypress-io/github-action@v6
         with:
+          env: SKIP_PREFLIGHT_CHECK=true
+          install: true
           start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: chrome
           record: false
-          parallel: true
-          group: "UI - Chrome"
-          config-file: cypress.config.ts
+          parallel: false
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -98,19 +99,20 @@ jobs:
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
+          DEBUG: "cypress-split,find-cypress-specs"
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots
+          name: cypress-screenshots-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.containers }}
           path: cypress/screenshots
 
       - name: Upload cypress videos 📹
         uses: actions/upload-artifact@v4
         if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
         with:
-          name: cypress-videos
+          name: cypress-videos-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.containers }}
           path: cypress/videos
 
   cleanup:
