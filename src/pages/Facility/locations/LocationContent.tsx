@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { ArrowRight, Bed } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -36,7 +35,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
   return (
     <div
       className={cn(
-        "border rounded-lg overflow-hidden shadow-xs h-full",
+        "border rounded-lg overflow-hidden shadow-xs h-full flex flex-col",
         isOccupied
           ? "bg-white border-gray-200"
           : "bg-green-50 border-green-200",
@@ -71,7 +70,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
         </div>
       </div>
 
-      <div>
+      <div className="h-full">
         {!location.current_encounter ? (
           <div className="flex flex-col items-center justify-center py-4 h-auto">
             <p className="text-sm text-gray-600 mb-3">
@@ -164,6 +163,8 @@ interface BreadcrumbsProps {
 }
 
 function Breadcrumbs({ location, onSelect }: BreadcrumbsProps) {
+  const { t } = useTranslation();
+
   const items = [];
   let current: LocationList | undefined = location;
 

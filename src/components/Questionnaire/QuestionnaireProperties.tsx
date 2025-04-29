@@ -1,11 +1,10 @@
-import { t } from "i18next";
 import { Building, Tags, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +22,9 @@ import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
+import { OrgSelectorPopover } from "./ManageQuestionnaireOrganizationsSheet";
 import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
+import { TagSelectorPopover } from "./ManageQuestionnaireTagsSheet";
 
 interface Organization {
   id: string;
@@ -72,6 +73,8 @@ function StatusSelector({
   value: QuestionStatus;
   onChange: (value: QuestionStatus) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-2 w-fit">
       <Label htmlFor="status">{t("status")}</Label>
@@ -84,7 +87,7 @@ function StatusSelector({
           <div
             key={status}
             className={cn(
-              "flex items-center px-2 py-1 space-x-2",
+              "flex items-center px-2 py-1",
               status === "active" && "rounded-l-md",
               status === "retired" && "rounded-r-md",
             )}
@@ -110,6 +113,8 @@ function SubjectTypeSelector({
   value: SubjectType;
   onChange: (value: SubjectType) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-2">
       <Label htmlFor="subject_type">{t("subject_type")}</Label>
@@ -125,7 +130,7 @@ function SubjectTypeSelector({
           <div
             key={type.value}
             className={cn(
-              "flex items-center px-2 py-1 space-x-2",
+              "flex items-center px-2 py-1",
               type.value === "patient" && "rounded-l-md",
               type.value === "encounter" && "rounded-r-md",
             )}
@@ -156,6 +161,8 @@ function OrganizationSelector({
   organizations?: OrganizationResponse;
   selection: QuestionnairePropertiesProps["organizationSelection"];
 }) {
+  const { t } = useTranslation();
+
   if (id) {
     return (
       <>
@@ -178,7 +185,7 @@ function OrganizationSelector({
           questionnaireId={id}
           trigger={
             <Button variant="outline" className="w-full justify-start">
-              <Building className="mr-2 h-4 w-4" />
+              <Building className="mr-2 size-4" />
               {t("manage_organization_one")}
             </Button>
           }
@@ -201,7 +208,7 @@ function OrganizationSelector({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-4 w-4 p-0 hover:bg-transparent"
+                className="size-4 p-0 hover:bg-transparent"
                 onClick={() => selection.onToggle(org.id)}
               >
                 <X className="h-3 w-3" />
@@ -217,21 +224,17 @@ function OrganizationSelector({
       {selection.error && (
         <p className="text-sm text-red-500">{selection.error}</p>
       )}
-      <Autocomplete
-        options={(selection.available?.results ?? []).map((org) => ({
-          label: org.name,
-          value: org.id,
-          description: org.description,
-        }))}
-        value=""
-        onChange={(value) => {
+      <OrgSelectorPopover
+        title={t("select_organizations")}
+        selected={selection.selectedOrgs.map((org) => org.id)}
+        onToggle={(value) => {
           selection.onToggle(value);
           if (selection.error) selection.setError(undefined);
         }}
-        onSearch={selection.setSearchQuery}
-        placeholder={t("select_organizations")}
+        searchQuery={selection.searchQuery}
+        onSearchChange={selection.setSearchQuery}
         isLoading={selection.isLoading}
-        noOptionsMessage={t("no_organizations_found")}
+        organizations={selection.available}
       />
     </div>
   );
@@ -246,6 +249,8 @@ function TagSelector({
   selection: QuestionnairePropertiesProps["tagSelection"];
   questionnaire: QuestionnaireDetail;
 }) {
+  const { t } = useTranslation();
+
   if (id) {
     return (
       <>
@@ -268,7 +273,7 @@ function TagSelector({
           questionnaire={questionnaire}
           trigger={
             <Button variant="outline" className="w-full justify-start">
-              <Tags className="mr-2 h-4 w-4" />
+              <Tags className="mr-2 size-4" />
               {t("manage_tags")}
             </Button>
           }
@@ -291,7 +296,7 @@ function TagSelector({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-4 w-4 p-0 hover:bg-transparent"
+                className="size-4 p-0 hover:bg-transparent"
                 onClick={() => selection.onToggle(tag.id)}
               >
                 <X className="h-3 w-3" />
@@ -303,17 +308,14 @@ function TagSelector({
         )}
       </div>
 
-      <Autocomplete
-        options={(selection.available ?? []).map((tag) => ({
-          label: tag.name,
-          value: tag.id,
-        }))}
-        value=""
-        onChange={selection.onToggle}
-        onSearch={selection.setSearchQuery}
-        placeholder={t("select_tags")}
+      <TagSelectorPopover
+        title={t("select_tags")}
+        selected={selection.selectedTags}
+        onToggle={selection.onToggle}
+        searchQuery={selection.searchQuery}
+        onSearchChange={selection.setSearchQuery}
         isLoading={selection.isLoading}
-        noOptionsMessage={t("no_tags_found")}
+        tagOptions={selection.available}
       />
 
       {!id && (
@@ -323,7 +325,7 @@ function TagSelector({
           }}
           trigger={
             <Button variant="outline" className="w-full justify-start">
-              <Tags className="mr-2 h-4 w-4" />
+              <Tags className="mr-2 size-4" />
               {t("create_tag")}
             </Button>
           }
@@ -341,6 +343,8 @@ export function QuestionnaireProperties({
   organizationSelection,
   tagSelection,
 }: QuestionnairePropertiesProps) {
+  const { t } = useTranslation();
+
   return (
     <Card className="border-none bg-transparent shadow-none space-y-4 mt-2 ml-2">
       <CardHeader className="p-0">
@@ -380,7 +384,7 @@ export function QuestionnaireProperties({
             questionnaire={questionnaire}
             trigger={
               <Button variant="outline" className="w-full justify-start">
-                <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-copy" className="mr-2 size-4" />
                 {t("clone_questionnaire")}
               </Button>
             }

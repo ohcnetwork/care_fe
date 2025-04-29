@@ -1,7 +1,7 @@
 import { format } from "date-fns";
-import { t } from "i18next";
 import { useState } from "react";
 import "react-day-picker/style.css";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -33,13 +33,17 @@ export function CombinedDatePicker({
   value,
   onChange,
   disabled,
-  placeholder = t("pick_a_date"),
+  placeholder,
   buttonClassName,
   popoverAlign = "start",
   defaultTab = "absolute",
   classes,
   dateFormat = "PPP",
 }: CombinedDatePickerProps) {
+  const { t } = useTranslation();
+
+  placeholder = placeholder ?? t("pick_a_date");
+
   const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
     defaultTab,
   );
@@ -78,7 +82,7 @@ export function CombinedDatePicker({
           >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="absolute">{t("absolute_date")}</TabsTrigger>
-              <TabsTrigger value="relative">{t("relative_date")}</TabsTrigger>
+              <TabsTrigger value="relative">{t("quick_finder")}</TabsTrigger>
             </TabsList>
             <TabsContent value="absolute" className="p-0">
               <Calendar

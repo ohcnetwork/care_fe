@@ -28,11 +28,16 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
   }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 @layer utilities {
   html {
-    @apply size-full;
+    @apply size-full scroll-smooth;
   }
 
   body {
@@ -145,24 +150,6 @@
 
   .dropdown:hover .dropdown-menu {
     display: block;
-  }
-
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 6px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.4);
   }
 
   /* for gmaps search dropdown */
@@ -278,6 +265,31 @@
   input[type="search"]::-webkit-search-results-button,
   input[type="search"]::-webkit-search-results-decoration {
     display: none;
+  }
+
+  /* Style for required form labels */
+  [data-slot="form-label"][for][aria-required="true"]::after {
+    @apply -ml-1 text-red-500 content-['*'];
+  }
+
+  /* Style for tabs */
+  [data-slot="tabs-trigger"] {
+    @apply not-data-[state=active]:text-gray-500;
+  }
+
+  /* Styling for input otp */
+  [data-slot="input-otp-slot"] {
+    @apply data-[active=true]:ring-primary-500 data-[active=true]:border-primary-500 data-[active=true]:ring-1 not-first:data-[active=true]:border-x;
+  }
+
+  /* Styling for radio group */
+  button[role="radio"] {
+    @apply data-[state=checked]:border-primary-500 data-[state=checked]:text-primary-500 border-gray-300 shadow-sm;
+  }
+
+  /* Styling fix for Select for backwards compatibility */
+  button[role="combobox"] {
+    @apply w-full;
   }
 }
 

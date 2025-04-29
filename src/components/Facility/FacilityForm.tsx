@@ -166,10 +166,7 @@ export default function FacilityForm({
 
     // Scroll to geo-organization field if it has an error
     if (errors.geo_organization) {
-      geoOrganizationRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      geoOrganizationRef.current?.scrollIntoView({ block: "center" });
     }
   });
 
@@ -237,13 +234,13 @@ export default function FacilityForm({
         {/* Basic Information */}
         <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("basic_info")}</h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
             <FormField
               control={form.control}
               name="facility_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("facility_type")}</FormLabel>
+                  <FormLabel aria-required>{t("facility_type")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger data-cy="facility-type">
@@ -272,7 +269,7 @@ export default function FacilityForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("facility_name")}</FormLabel>
+                  <FormLabel aria-required>{t("facility_name")}</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-name"
@@ -332,13 +329,13 @@ export default function FacilityForm({
         {/* Contact Information */}
         <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("contact_info")}</h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
             <FormField
               control={form.control}
               name="phone_number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("phone_number")}</FormLabel>
+                  <FormLabel aria-required>{t("phone_number")}</FormLabel>
                   <FormControl>
                     <PhoneInput
                       data-cy="facility-phone"
@@ -356,7 +353,7 @@ export default function FacilityForm({
               name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("pincode")}</FormLabel>
+                  <FormLabel aria-required>{t("pincode")}</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-pincode"
@@ -401,7 +398,7 @@ export default function FacilityForm({
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("address")}</FormLabel>
+                <FormLabel aria-required>{t("address")}</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}

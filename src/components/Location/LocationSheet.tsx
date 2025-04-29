@@ -90,6 +90,7 @@ export function LocationSheet({
   const [bedsPage, setBedsPage] = useState(1);
   const [hasMoreLocations, setHasMoreLocations] = useState(true);
   const [hasMoreBeds, setHasMoreBeds] = useState(true);
+  const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const initialState = {
@@ -151,7 +152,7 @@ export function LocationSheet({
         queryParams: {
           limit: ITEMS_PER_PAGE,
           offset: (locationsPage - 1) * ITEMS_PER_PAGE,
-          search: searchTerm,
+          name: searchTerm,
           mode: "kind",
           parent: selectedLocation?.id,
           ...(!selectedLocation ? { mine: true } : {}),
@@ -169,6 +170,7 @@ export function LocationSheet({
       selectedLocation?.id,
       bedsPage,
       showAvailableOnly,
+      searchTerm,
     ],
     queryFn: async ({ signal }) => {
       const response = await query(locationApi.list, {
@@ -177,6 +179,7 @@ export function LocationSheet({
           limit: ITEMS_PER_PAGE,
           offset: (bedsPage - 1) * ITEMS_PER_PAGE,
           mode: "instance",
+          name: searchTerm,
           parent: selectedLocation?.id,
           available: showAvailableOnly ? "true" : undefined,
           ...(!selectedLocation ? { mine: true } : {}),
@@ -185,10 +188,11 @@ export function LocationSheet({
       })({ signal });
       return response;
     },
+    enabled: !!selectedLocation && !!facilityId,
   });
 
   useEffect(() => {
-    if (locationsData) {
+    if (locationsData && open) {
       if (locationsPage === 1) {
         setAllLocations(locationsData.results);
       } else {
@@ -196,7 +200,7 @@ export function LocationSheet({
       }
       setHasMoreLocations(locationsData.count > locationsPage * ITEMS_PER_PAGE);
     }
-  }, [locationsData, locationsPage]);
+  }, [locationsData, locationsPage, open]);
 
   useEffect(() => {
     if (bedsData) {
@@ -207,6 +211,7 @@ export function LocationSheet({
       }
       setHasMoreBeds(bedsData.count > bedsPage * ITEMS_PER_PAGE);
     }
+    setSelectedBed(null);
   }, [bedsData, bedsPage]);
 
   const handleLocationClick = (location: LocationList) => {
@@ -609,7 +614,7 @@ export function LocationSheet({
           (!activeLocation && !plannedLocations.length)
         ) {
           return (
-            <div className="space-y-2">
+            <div className="space-y-2" data-cy="location-assign-screen">
               {locationCards}
               <LocationNavigation
                 locations={allLocations}
@@ -637,9 +642,13 @@ export function LocationSheet({
                 onGoBack={goBack}
               />
 
-              <div className="mt-8 flex justify-end gap-2">
+              <div
+                className="mt-8 flex justify-end gap-2"
+                data-cy="location-navigation-buttons"
+              >
                 <Button
                   variant="outline"
+                  disabled={!selectedBed}
                   onClick={() => {
                     setSheetState((prev) => ({
                       ...prev,
@@ -767,6 +776,7 @@ export function LocationSheet({
     <>
       <Sheet
         onOpenChange={(open) => {
+          setOpen(open);
           // Reset states when closing the sheet
           if (!open) {
             resetStates();
@@ -785,26 +795,26 @@ export function LocationSheet({
             <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
               <TabsTrigger
                 value="assign"
-                className="data-[state=active]:border-b-4 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                className="border-0 data-[state=active]:border-b-2 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
               >
                 {t("assign_location")}
               </TabsTrigger>
               <TabsTrigger
                 value="history"
-                className="data-[state=active]:border-b-4 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                className="border-0 data-[state=active]:border-b px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
               >
                 {t("location_history")}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="assign" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-8rem)]">
+              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)] p-3 md:p-4">
                 {renderScreen()}
               </ScrollArea>
             </TabsContent>
 
             <TabsContent value="history" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-8rem)]">
+              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)]">
                 <LocationHistoryComponent history={history} />
               </ScrollArea>
             </TabsContent>

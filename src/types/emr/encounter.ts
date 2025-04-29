@@ -63,19 +63,19 @@ export const ENCOUNTER_DISCHARGE_DISPOSITION = [
 ] as const;
 
 export const ENCOUNTER_PRIORITY = [
+  "stat",
   "ASAP",
+  "emergency",
+  "urgent",
+  "routine",
+  "elective",
+  "rush_reporting",
+  "timing_critical",
   "callback_results",
   "callback_for_scheduling",
-  "elective",
-  "emergency",
   "preop",
   "as_needed",
-  "routine",
-  "rush_reporting",
-  "stat",
-  "timing_critical",
   "use_as_directed",
-  "urgent",
 ] as const;
 
 export const ENCOUNTER_STATUS = [
@@ -170,6 +170,7 @@ export interface Encounter {
   location_history: LocationHistory[];
   permissions: string[];
   care_team: CareTeamResponse[];
+  discharge_summary_advice?: string;
 }
 
 export interface EncounterEditRequest {
@@ -182,6 +183,7 @@ export interface EncounterEditRequest {
   priority: EncounterPriority;
   external_identifier?: string;
   facility: string;
+  discharge_summary_advice?: string | null;
 }
 
 export interface EncounterRequest {
@@ -194,9 +196,10 @@ export interface EncounterRequest {
   priority: EncounterPriority;
   external_identifier?: string;
   facility: string;
+  discharge_summary_advice?: string;
 }
 
-export const completedEncounterStatus = ["completed", "discharged"];
+export const completedEncounterStatus = ["completed"];
 export const inactiveEncounterStatus = [
   ...["cancelled", "entered_in_error", "discontinued"],
   ...completedEncounterStatus,

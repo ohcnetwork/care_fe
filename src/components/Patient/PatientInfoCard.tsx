@@ -9,7 +9,7 @@ import {
   SignatureIcon,
   UserRound,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -58,6 +58,8 @@ export interface PatientInfoCardProps {
 
 export default function PatientInfoCard(props: PatientInfoCardProps) {
   const { patient, encounter, canWrite, disableButtons = false } = props;
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityIdExists = !!subpathMatch?.facilityId;
   const { t } = useTranslation();
 
   return (
@@ -195,7 +197,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         >
                           {completedEncounterStatus.includes(
                             props.encounter.status,
-                          ) ? (
+                          ) || props.encounter.status === "discharged" ? (
                             <CircleCheck
                               className="size-4 text-green-300"
                               fill="green"
@@ -358,6 +360,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
                             variant="outline"
                             title={`Current Location: ${props.encounter.current_location.name}`}
+                            data-cy="current-location-badge"
                           >
                             <CareIcon
                               icon="l-location-point"
@@ -408,6 +411,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                                 <Button
                                   variant="outline"
                                   className="border-gray-400 w-full"
+                                  data-cy="update-encounter-location-button"
                                 >
                                   {t("update_location")}
                                 </Button>
@@ -424,7 +428,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         facilityId={props.encounter.facility.id}
                         encounter={encounter}
                         trigger={
-                          <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                          <div
+                            className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100"
+                            data-cy="add-encounter-location"
+                          >
                             <CareIcon
                               icon="l-location-point"
                               className="size-4 text-green-600"
@@ -456,9 +463,12 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       trigger={
                         <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
                           <UserRound className="size-4 text-green-600" />
-                          {t("manage_care_team")}
+                          {canWrite
+                            ? t("manage_care_team")
+                            : t("view_care_team")}
                         </div>
                       }
+                      canWrite={canWrite}
                     />
                   </Badge>
                 </div>
@@ -483,7 +493,8 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="primary">
-                    {inactiveEncounterStatus.includes(encounter.status)
+                    {inactiveEncounterStatus.includes(encounter.status) ||
+                    !facilityIdExists
                       ? t("actions")
                       : t("update")}
                     <ChevronDown className="ml-2 size-4" />

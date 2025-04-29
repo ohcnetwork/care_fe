@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import {
   Dialog,
@@ -27,6 +27,8 @@ export default function AudioPlayerDialog({
   type: "encounter" | "patient";
   associatingId: string;
 }) {
+  const { t } = useTranslation();
+
   const { data: fileData } = useQuery({
     queryKey: [routes.retrieveUpload, type, file?.id],
     queryFn: query(routes.retrieveUpload, {
@@ -38,6 +40,7 @@ export default function AudioPlayerDialog({
   const { Player, stopPlayback } = AudioPlayer({
     src: fileData?.read_signed_url || "",
   });
+
   return (
     <Dialog
       open={open}
