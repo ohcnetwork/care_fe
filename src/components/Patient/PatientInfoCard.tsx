@@ -168,9 +168,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   <span className="text-xs">
                     {props.encounter.period.end
                       ? formatDateTime(props.encounter.period.end)
-                      : props.encounter.status === "completed"
-                        ? formatDateTime(props.encounter.modified_date)
-                        : t("ongoing")}
+                      : t("ongoing")}
                   </span>
                 </div>
                 {props.encounter.external_identifier && (

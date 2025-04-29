@@ -118,7 +118,7 @@ export function EncounterQuestion({
   });
 
   useEffect(() => {
-    if (encounter.status === "discharged") {
+    if (encounter.status === "discharged" || encounter.status === "completed") {
       if (!encounter.period.end) {
         handleUpdateEncounter({
           period: {
@@ -127,7 +127,7 @@ export function EncounterQuestion({
           },
         });
       }
-    } else if (encounter.status !== "completed") {
+    } else {
       handleUpdateEncounter({
         period: {
           ...encounter.period,
