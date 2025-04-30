@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -148,6 +149,7 @@ export default function ReportBuilder({
   reportTemplateId,
 }: ReportBuilderProps) {
   const [activeTab, setActiveTab] = useState("layout");
+  const { t } = useTranslation();
 
   const { data: templateSchema } = useQuery({
     queryKey: ["report-template", reportTemplateId],
@@ -232,13 +234,13 @@ export default function ReportBuilder({
             )}
           />
           <Button type="button" variant="outline" onClick={handleExport}>
-            Export
+            {t("export")}
           </Button>
-          <Button type="submit">Save Template</Button>
+          <Button type="submit">{t("REPORT_BUILDER_SAVE_TEMPLATE")}</Button>
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Report Template Builder</CardTitle>
+            <CardTitle>{t("REPORT_BUILDER_TITLE")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs
@@ -247,9 +249,15 @@ export default function ReportBuilder({
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="layout">Layout</TabsTrigger>
-                <TabsTrigger value="header">Header</TabsTrigger>
-                <TabsTrigger value="sections">Sections</TabsTrigger>
+                <TabsTrigger value="layout">
+                  {t("REPORT_BUILDER_LAYOUT")}
+                </TabsTrigger>
+                <TabsTrigger value="header">
+                  {t("REPORT_BUILDER_HEADER")}
+                </TabsTrigger>
+                <TabsTrigger value="sections">
+                  {t("REPORT_BUILDER_SECTIONS")}
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="layout">
                 <LayoutBuilder form={form} />

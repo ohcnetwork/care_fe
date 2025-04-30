@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -30,7 +31,10 @@ import {
 } from "@/components/ui/select";
 
 import { ReportTemplateFormData } from "@/pages/Encounters/ReportBuilder/schema";
-import { FONT_WEIGHT_OPTIONS } from "@/types/reportTemplate/reportTemplate";
+import {
+  FONT_WEIGHT_OPTIONS,
+  HeaderElementType,
+} from "@/types/reportTemplate/reportTemplate";
 
 const AlignmentInput = ({
   control,
@@ -40,28 +44,37 @@ const AlignmentInput = ({
   control: Control<ReportTemplateFormData>;
   rowIndex: number;
   elementIndex: number;
-}) => (
-  <Controller
-    control={control}
-    name={`config.header.rows.${rowIndex}.${elementIndex}.align`}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Alignment</FormLabel>
-        <Select value={field.value} onValueChange={field.onChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select alignment" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="left">Left</SelectItem>
-            <SelectItem value="center">Center</SelectItem>
-            <SelectItem value="right">Right</SelectItem>
-          </SelectContent>
-        </Select>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <Controller
+      control={control}
+      name={`config.header.rows.${rowIndex}.${elementIndex}.align`}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{t("REPORT_BUILDER_ALIGNMENT")}</FormLabel>
+          <Select value={field.value} onValueChange={field.onChange}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("REPORT_BUILDER_SELECT_ALIGNMENT")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="left">
+                {t("REPORT_BUILDER_ALIGN_LEFT")}
+              </SelectItem>
+              <SelectItem value="center">
+                {t("REPORT_BUILDER_ALIGN_CENTER")}
+              </SelectItem>
+              <SelectItem value="right">
+                {t("REPORT_BUILDER_ALIGN_RIGHT")}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+};
 
 const TextElement = React.memo(function TextElement({
   rowIndex,
@@ -72,6 +85,7 @@ const TextElement = React.memo(function TextElement({
   elementIndex: number;
   control: Control<ReportTemplateFormData>;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 gap-2 items-start">
       <Controller
@@ -79,7 +93,7 @@ const TextElement = React.memo(function TextElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.text`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Text</FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_TEXT")}</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -92,17 +106,8 @@ const TextElement = React.memo(function TextElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.size`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Size</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="small">Small</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="large">Large</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormLabel>{t("REPORT_BUILDER_SIZE")}</FormLabel>
+            <Input {...field} type="text" placeholder="10pt" />
             <FormMessage />
           </FormItem>
         )}
@@ -112,13 +117,13 @@ const TextElement = React.memo(function TextElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.weight`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Weight</FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_WEIGHT")}</FormLabel>
             <Select
               value={field.value?.toString() || "400"}
               onValueChange={(value) => field.onChange(parseInt(value, 10))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select weight" />
+                <SelectValue placeholder={t("REPORT_BUILDER_SELECT_WEIGHT")} />
               </SelectTrigger>
               <SelectContent>
                 {FONT_WEIGHT_OPTIONS.map((option) => (
@@ -150,6 +155,7 @@ const ImageElement = React.memo(function ImageElement({
   elementIndex: number;
   control: Control<ReportTemplateFormData>;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 gap-2 items-start">
       <Controller
@@ -157,7 +163,7 @@ const ImageElement = React.memo(function ImageElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.file_name`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>File Name</FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_FILE_NAME")}</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -170,7 +176,7 @@ const ImageElement = React.memo(function ImageElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.url`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>URL</FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_URL")}</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -183,7 +189,7 @@ const ImageElement = React.memo(function ImageElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.width`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Width</FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_WIDTH")}</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -209,6 +215,7 @@ const RuleElement = React.memo(function RuleElement({
   elementIndex: number;
   control: Control<ReportTemplateFormData>;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 gap-2 items-start">
       <Controller
@@ -216,7 +223,7 @@ const RuleElement = React.memo(function RuleElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.length`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Length</FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_LENGTH")}</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -229,17 +236,8 @@ const RuleElement = React.memo(function RuleElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.stroke`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Stroke</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select stroke" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="solid">Solid</SelectItem>
-                <SelectItem value="dashed">Dashed</SelectItem>
-                <SelectItem value="dotted">Dotted</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormLabel>{t("REPORT_BUILDER_STROKE")}</FormLabel>
+            <Input {...field} type="color" />
             <FormMessage />
           </FormItem>
         )}
@@ -262,6 +260,7 @@ const DateTimeElement = React.memo(function DateTimeElement({
   elementIndex: number;
   control: Control<ReportTemplateFormData>;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 gap-2 items-start">
       <Controller
@@ -269,7 +268,7 @@ const DateTimeElement = React.memo(function DateTimeElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.label`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Label</FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_LABEL")}</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -282,7 +281,7 @@ const DateTimeElement = React.memo(function DateTimeElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.format`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Format</FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_FORMAT")}</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -295,7 +294,7 @@ const DateTimeElement = React.memo(function DateTimeElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.style.fill`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Fill Color</FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_FILL_COLOR")}</FormLabel>
             <FormControl>
               <Input {...field} type="color" />
             </FormControl>
@@ -308,13 +307,13 @@ const DateTimeElement = React.memo(function DateTimeElement({
         name={`config.header.rows.${rowIndex}.${elementIndex}.style.weight`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Weight</FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_WEIGHT")}</FormLabel>
             <Select
               value={field.value?.toString() || "400"}
               onValueChange={(value) => field.onChange(parseInt(value, 10))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select weight" />
+                <SelectValue placeholder={t("REPORT_BUILDER_SELECT_WEIGHT")} />
               </SelectTrigger>
               <SelectContent>
                 {FONT_WEIGHT_OPTIONS.map((option) => (
@@ -388,14 +387,72 @@ const HeaderElement = React.memo(function HeaderElement({
 
 interface HeaderRowProps {
   rowIndex: number;
-  row: any[];
+  row: HeaderElementType[];
   form: UseFormReturn<ReportTemplateFormData>;
   onRemoveRow: (rowIndex: number) => void;
-  onAddElement: (rowIndex: number, type: string) => number;
+  onAddElement: (rowIndex: number, type: string) => void;
   onRemoveElement: (rowIndex: number, elementIndex: number) => void;
   activeElement: number | null;
-  setActiveElement: (activeElement: number | null) => void;
+  setActiveElement: (elementIndex: number | null) => void;
 }
+
+const RowButtons = ({
+  rowIndex,
+  size = "sm",
+  handleAddElement,
+  onRemoveRow,
+}: {
+  rowIndex: number;
+  size?: "sm" | "xs" | "default" | "lg" | "icon";
+  handleAddElement: (rowIndex: number, type: string) => void;
+  onRemoveRow: (rowIndex: number) => void;
+}) => {
+  const { t } = useTranslation();
+  return (
+    <>
+      <Button
+        type="button"
+        size={size}
+        variant="outline"
+        onClick={() => handleAddElement(rowIndex, "text")}
+      >
+        {t("REPORT_BUILDER_ADD_TEXT")}
+      </Button>
+      <Button
+        type="button"
+        size={size}
+        variant="outline"
+        onClick={() => handleAddElement(rowIndex, "image")}
+      >
+        {t("REPORT_BUILDER_ADD_IMAGE")}
+      </Button>
+      <Button
+        type="button"
+        size={size}
+        variant="outline"
+        onClick={() => handleAddElement(rowIndex, "rule")}
+      >
+        {t("REPORT_BUILDER_ADD_RULE")}
+      </Button>
+      <Button
+        type="button"
+        size={size}
+        variant="outline"
+        onClick={() => handleAddElement(rowIndex, "datetime")}
+      >
+        {t("REPORT_BUILDER_ADD_DATETIME")}
+      </Button>
+      <Button
+        type="button"
+        size={size}
+        variant="destructive"
+        onClick={() => onRemoveRow(rowIndex)}
+      >
+        <CareIcon icon="l-trash" className="w-4 h-4" />
+      </Button>
+    </>
+  );
+};
 
 const HeaderRow = React.memo(function HeaderRow({
   rowIndex,
@@ -408,6 +465,7 @@ const HeaderRow = React.memo(function HeaderRow({
   setActiveElement,
 }: HeaderRowProps) {
   const { t } = useTranslation();
+
   const toggleElement = useCallback(
     (index: number) => {
       setActiveElement(activeElement === index ? null : index);
@@ -417,8 +475,7 @@ const HeaderRow = React.memo(function HeaderRow({
 
   const handleAddElement = useCallback(
     (rowIndex: number, type: string) => {
-      const newIndex = onAddElement(rowIndex, type);
-      setActiveElement(newIndex);
+      onAddElement(rowIndex, type);
     },
     [onAddElement],
   );
@@ -438,101 +495,78 @@ const HeaderRow = React.memo(function HeaderRow({
     }
   };
 
-  const RowButtons = ({
-    rowIndex,
-    size = "sm",
-  }: {
-    rowIndex: number;
-    size?: "sm" | "xs" | "default" | "lg" | "icon";
-  }) => {
+  if (row.length === 0) {
     return (
-      <>
-        <Button
-          size={size}
-          variant="outline"
-          onClick={() => handleAddElement(rowIndex, "text")}
-        >
-          {t("add_text")}
-        </Button>
-        <Button
-          size={size}
-          variant="outline"
-          onClick={() => handleAddElement(rowIndex, "image")}
-        >
-          {t("add_image")}
-        </Button>
-        <Button
-          size={size}
-          variant="outline"
-          onClick={() => handleAddElement(rowIndex, "rule")}
-        >
-          {t("add_rule")}
-        </Button>
-        <Button
-          size={size}
-          variant="outline"
-          onClick={() => handleAddElement(rowIndex, "datetime")}
-        >
-          {t("add_datetime")}
-        </Button>
-        <Button
-          size={size}
-          variant="white"
-          onClick={() => onRemoveRow(rowIndex)}
-        >
-          <CareIcon icon="l-trash" className="w-4 h-4" />
-        </Button>
-      </>
+      <div className="border rounded-lg p-4 bg-gray-100 flex justify-center items-center gap-2">
+        <RowButtons
+          rowIndex={rowIndex}
+          handleAddElement={handleAddElement}
+          onRemoveRow={onRemoveRow}
+        />
+      </div>
     );
-  };
+  }
 
   return (
-    <div className="border rounded p-2">
-      {row.length > 0 ? (
-        <div className="flex justify-end items-center gap-2">
-          <RowButtons rowIndex={rowIndex} />
-        </div>
-      ) : (
-        <div className="flex mt-2 justify-center items-center gap-2">
-          <RowButtons rowIndex={rowIndex} size="default" />
-        </div>
-      )}
+    <div className="border rounded-lg p-2">
+      <div className="flex justify-end items-center gap-2">
+        <RowButtons
+          rowIndex={rowIndex}
+          handleAddElement={handleAddElement}
+          onRemoveRow={onRemoveRow}
+        />
+      </div>
 
       {/* Element Tabs */}
       <div className="flex gap-4 p-3">
-        {row.map((element, elementIndex) => (
-          <Button
-            variant="white"
-            key={elementIndex}
-            className={`flex items-center gap-2 p-2 rounded-md ${
-              activeElement === elementIndex
-                ? "bg-gray-100 hover:bg-gray-100 scale-105"
-                : ""
-            }`}
-            onClick={() => toggleElement(elementIndex)}
-          >
-            <CareIcon icon={getElementIcon(element.type)} className="w-4 h-4" />
-            <span
+        {row.length > 0 &&
+          row.map((element, elementIndex) => (
+            <Badge
+              key={elementIndex}
+              variant={activeElement === elementIndex ? "outline" : "secondary"}
               className={cn(
-                activeElement === elementIndex
-                  ? "font-semibold text-base"
-                  : "text-sm",
+                "flex items-center gap-2",
+                activeElement === elementIndex ? " scale-105" : "",
               )}
             >
-              {t(element.type)}
-            </span>
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemoveElement(rowIndex, elementIndex);
-              }}
-            >
-              <Trash2Icon className="w-3 h-3" />
-            </Button>
-          </Button>
-        ))}
+              <Button
+                variant="ghost"
+                type="button"
+                key={elementIndex}
+                className={`flex items-center gap-2 p-0 rounded-md hover:bg-transparent`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleElement(elementIndex);
+                }}
+              >
+                <CareIcon
+                  icon={getElementIcon(element.type)}
+                  className="w-4 h-4"
+                />
+                <span
+                  className={cn(
+                    activeElement === elementIndex
+                      ? "font-semibold text-base"
+                      : "text-sm",
+                  )}
+                >
+                  {t(`REPORT_BUILDER_${element.type.toUpperCase()}`)}
+                </span>
+              </Button>
+              <Button
+                type="button"
+                size="xs"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemoveElement(rowIndex, elementIndex);
+                }}
+                className="hover:bg-transparent hover:text-red-400"
+              >
+                <Trash2Icon className="w-3 h-3" />
+              </Button>
+            </Badge>
+          ))}
       </div>
 
       {/* Element Content */}
@@ -560,13 +594,23 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
     control: form.control,
     name: "config.header.rows",
   });
-  const [activeElement, setActiveElement] = useState<number | null>(null);
+  const [activeElements, setActiveElements] = useState<
+    Record<number, number | null>
+  >({});
 
   const rows = form.watch("config.header.rows");
 
   const handleAddRow = useCallback(() => {
-    append([]);
-  }, [append]);
+    append([
+      {
+        type: "text",
+        text: t("REPORT_BUILDER_NEW_TEXT"),
+        size: "medium",
+        weight: 400,
+        align: "left",
+      },
+    ]);
+  }, [append, t]);
 
   const handleRemoveRow = useCallback(
     (rowIndex: number) => {
@@ -586,7 +630,7 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
         case "text":
           newElement = {
             type: "text",
-            text: "New Text",
+            text: t("REPORT_BUILDER_NEW_TEXT"),
             size: "medium",
             weight: 400,
             align: "left",
@@ -612,7 +656,7 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
         case "datetime":
           newElement = {
             type: "datetime",
-            label: "Created On",
+            label: t("REPORT_BUILDER_CREATED_ON"),
             format: "DD/MM/YYYY",
             style: {
               fill: "#000000",
@@ -627,10 +671,9 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
 
       updatedRow.push(newElement);
       update(rowIndex, updatedRow);
-      setActiveElement(newElementIndex);
-      return newElementIndex;
+      setActiveElements((prev) => ({ ...prev, [rowIndex]: newElementIndex }));
     },
-    [form, update],
+    [form, update, t],
   );
 
   const handleRemoveElement = useCallback(
@@ -646,9 +689,9 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Header Configuration</CardTitle>
+        <CardTitle>{t("REPORT_BUILDER_HEADER")}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
+      <CardContent className="flex flex-col gap-5">
         {fields.map((field, rowIndex) => (
           <HeaderRow
             key={field.id}
@@ -658,12 +701,14 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
             onRemoveRow={handleRemoveRow}
             onAddElement={handleAddElement}
             onRemoveElement={handleRemoveElement}
-            activeElement={activeElement}
-            setActiveElement={setActiveElement}
+            activeElement={activeElements[rowIndex]}
+            setActiveElement={(index: number | null) =>
+              setActiveElements((prev) => ({ ...prev, [rowIndex]: index }))
+            }
           />
         ))}
         <Button type="button" onClick={handleAddRow} className="mt-4">
-          {t("add_row")}
+          {t("REPORT_BUILDER_ADD_ROW")}
         </Button>
       </CardContent>
     </Card>

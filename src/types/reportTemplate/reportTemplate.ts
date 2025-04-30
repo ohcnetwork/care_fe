@@ -232,14 +232,14 @@ interface DateTimeElement extends BaseHeaderElement {
   style: StyleConfig;
 }
 
-export type HeaderElement =
+export type HeaderElementType =
   | TextElement
   | ImageElement
   | RuleElement
   | DateTimeElement;
 
 interface HeaderConfig {
-  rows: Array<Array<HeaderElement>>;
+  rows: Array<Array<HeaderElementType>>;
 }
 
 export const FONT_WEIGHT_OPTIONS = [
