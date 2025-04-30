@@ -471,7 +471,11 @@ const AppointmentActions = ({
       {canCreateAppointment && (
         <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="lg">
+            <Button
+              variant="outline"
+              size="lg"
+              disabled={appointment.status === "in_consultation"}
+            >
               <CalendarIcon className="size-4 mr-2" />
               {t("reschedule")}
             </Button>
@@ -501,7 +505,11 @@ const AppointmentActions = ({
                 </Button>
                 <Button
                   variant="default"
-                  disabled={!selectedSlotId || isRescheduling}
+                  disabled={
+                    !selectedSlotId ||
+                    isRescheduling ||
+                    appointment.status === "in_consultation"
+                  }
                   onClick={() => {
                     if (selectedSlotId) {
                       rescheduleAppointment({ new_slot: selectedSlotId });

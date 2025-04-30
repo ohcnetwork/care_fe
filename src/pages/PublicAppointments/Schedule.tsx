@@ -328,7 +328,11 @@ export function ScheduleAppointment(props: AppointmentsProps) {
             )}
             <Button
               variant="primary_gradient"
-              disabled={isCreatingAppointment || isCancellingAppointment}
+              disabled={
+                isCreatingAppointment ||
+                isCancellingAppointment ||
+                appointment?.status === "in_consultation"
+              }
               onClick={() => {
                 if (appointmentId && appointment) {
                   handleRescheduleAppointment(appointment);
