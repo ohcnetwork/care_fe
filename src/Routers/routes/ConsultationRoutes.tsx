@@ -134,6 +134,14 @@ const consultationRoutes: AppRoutes = {
     ({ patientId, id }) => (
       <QuestionnaireResponseView responseId={id} patientId={patientId} />
     ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/reportbuilder/new":
+    ({ facilityId, patientId, encounterId }) => (
+      <ReportBuilder
+        facilityId={facilityId}
+        patientId={patientId}
+        encounterId={encounterId}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/reportbuilder/:reportTemplateId":
     ({ facilityId, patientId, encounterId, reportTemplateId }) => (
       <ReportBuilder

@@ -2,15 +2,21 @@ import { z } from "zod";
 
 import {
   ALIGNMENT_OPTIONS,
+  AlignmentOptions,
   HEADER_ALIGNMENT_OPTIONS,
+  HeaderAlignment,
   REPORT_TEMPLATE_TYPE,
+  ReportTemplateType,
 } from "@/types/reportTemplate/reportTemplate";
 
 // Zod schema for the report template configuration
 export const reportTemplateSchema = z.object({
   id: z.string().optional(),
   type: z.enum(
-    REPORT_TEMPLATE_TYPE.map((type) => type.id) as [string, ...string[]],
+    REPORT_TEMPLATE_TYPE.map((type) => type.id) as [
+      ReportTemplateType,
+      ...ReportTemplateType[],
+    ],
   ),
   config: z.object({
     layout: z.object({
@@ -56,7 +62,10 @@ export const reportTemplateSchema = z.object({
         enabled: z.boolean(),
         format: z.string(),
         align: z.enum(
-          ALIGNMENT_OPTIONS.map((option) => option.id) as [string, ...string[]],
+          ALIGNMENT_OPTIONS.map((opt) => opt.id) as [
+            AlignmentOptions,
+            ...AlignmentOptions[],
+          ],
         ),
       }),
       text: z.object({
@@ -67,82 +76,66 @@ export const reportTemplateSchema = z.object({
     header: z.object({
       rows: z.array(
         z.array(
-          z
-            .object({
-              type: z.enum(["text", "rule", "image", "datetime"]),
-              text: z.string().optional(),
-              size: z.string().optional(),
-              weight: z.number().optional(),
+          z.discriminatedUnion("type", [
+            z.object({
+              type: z.literal("text"),
+              text: z.string(),
+              size: z.string(),
+              weight: z.number(),
               align: z
                 .enum(
                   HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
-                    string,
-                    ...string[],
+                    HeaderAlignment,
+                    ...HeaderAlignment[],
                   ],
                 )
                 .optional(),
-              length: z.string().optional(),
-              stroke: z.string().optional(),
-              file_name: z.string().optional(),
-              url: z.string().url().optional(),
-              width: z.string().optional(),
-              label: z.string().optional(),
-              format: z.string().optional(),
-              style: z
-                .object({
-                  fill: z.string().optional(),
-                  weight: z.number().optional(),
-                })
+            }),
+            z.object({
+              type: z.literal("image"),
+              file_name: z.string(),
+              url: z.string().url(),
+              width: z.string(),
+              align: z
+                .enum(
+                  HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                    HeaderAlignment,
+                    ...HeaderAlignment[],
+                  ],
+                )
                 .optional(),
-            })
-            .refine(
-              (data) => {
-                if (data.type === "text") {
-                  return data.weight !== undefined;
-                }
-                return true;
-              },
-              {
-                message: "Weight is required for text elements",
-                path: ["weight"],
-              },
-            )
-            .refine(
-              (data) => {
-                if (data.type === "image") {
-                  return data.width !== undefined;
-                }
-                return true;
-              },
-              {
-                message: "Width is required for images",
-                path: ["width"],
-              },
-            )
-            .refine(
-              (data) => {
-                if (data.type === "datetime") {
-                  return data.format !== undefined;
-                }
-                return true;
-              },
-              {
-                message: "Format is required for datetime elements",
-                path: ["format"],
-              },
-            )
-            .refine(
-              (data) => {
-                if (data.type === "datetime") {
-                  return data.label !== undefined;
-                }
-                return true;
-              },
-              {
-                message: "Label is required for datetime elements",
-                path: ["label"],
-              },
-            ),
+            }),
+            z.object({
+              type: z.literal("rule"),
+              length: z.string(),
+              stroke: z.string(),
+              align: z
+                .enum(
+                  HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                    HeaderAlignment,
+                    ...HeaderAlignment[],
+                  ],
+                )
+                .optional(),
+            }),
+            z.object({
+              type: z.literal("datetime"),
+              label: z.string(),
+              format: z.string(),
+              style: z.object({
+                fill: z.string().optional(),
+                weight: z.number().optional(),
+              }),
+              align: z
+                .enum(
+                  HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                    HeaderAlignment,
+                    ...HeaderAlignment[],
+                  ],
+                )
+                .optional(),
+            }),
+          ]),
         ),
       ),
     }),

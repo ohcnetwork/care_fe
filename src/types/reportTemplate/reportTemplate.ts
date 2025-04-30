@@ -193,7 +193,7 @@ interface StyleConfig {
   weight?: number;
 }
 
-type HeaderAlignment = "left" | "center" | "right";
+export type HeaderAlignment = "left" | "center" | "right";
 
 export const HEADER_ALIGNMENT_OPTIONS = [
   { id: "left", value: "Left" },
@@ -279,8 +279,8 @@ export interface ReportConfig {
 }
 
 export const REPORT_TEMPLATE_TYPE = [
-  { id: "discharge_summary", value: "discharge_summary" },
-  { id: "lab_report", value: "lab_report" },
+  { id: "discharge_summary", value: "Discharge Summary" },
+  { id: "lab_report", value: "Lab Report" },
 ] as const;
 
 export type ReportTemplateType = (typeof REPORT_TEMPLATE_TYPE)[number]["id"];

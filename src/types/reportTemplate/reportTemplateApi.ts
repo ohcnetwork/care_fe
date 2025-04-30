@@ -16,7 +16,8 @@ export default {
   create: {
     path: "/api/v1/facility/{facility_external_id}/report_template/",
     method: HttpMethod.POST,
-    body: Type<ReportTemplateCreate>(),
+    TBody: Type<ReportTemplateCreate>(),
+    TRes: Type<ReportTemplateModel>(),
   },
   get: {
     path: "/api/v1/facility/{facility_external_id}/report_template/{id}/",
@@ -26,7 +27,8 @@ export default {
   update: {
     path: "/api/v1/facility/{facility_external_id}/report_template/{id}/",
     method: HttpMethod.PUT,
-    body: Type<ReportTemplateUpdate>(),
+    TBody: Type<ReportTemplateUpdate>(),
+    TRes: Type<ReportTemplateModel>(),
   },
   delete: {
     path: "/api/v1/facility/{facility_external_id}/report_template/{id}/",

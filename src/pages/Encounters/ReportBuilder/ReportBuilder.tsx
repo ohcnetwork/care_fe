@@ -1,15 +1,29 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HeaderBuilder } from "@/pages/Encounters/ReportBuilder/HeaderBuilder";
 import { LayoutBuilder } from "@/pages/Encounters/ReportBuilder/LayoutBuilder";
@@ -18,13 +32,14 @@ import {
   ReportTemplateFormData,
   reportTemplateSchema,
 } from "@/pages/Encounters/ReportBuilder/schema";
+import { REPORT_TEMPLATE_TYPE } from "@/types/reportTemplate/reportTemplate";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
 
 interface ReportBuilderProps {
   facilityId: string;
   patientId: string;
   encounterId: string;
-  reportTemplateId: string;
+  reportTemplateId?: string;
 }
 
 // Default template configuration
@@ -142,6 +157,24 @@ export default function ReportBuilder({
         id: reportTemplateId,
       },
     }),
+    enabled: !!reportTemplateId,
+  });
+
+  const { mutate: createReportTemplate } = useMutation({
+    mutationFn: mutate(reportTemplateApi.create, {
+      pathParams: {
+        facility_external_id: facilityId,
+      },
+    }),
+  });
+
+  const { mutate: updateReportTemplate } = useMutation({
+    mutationFn: mutate(reportTemplateApi.update, {
+      pathParams: {
+        facility_external_id: facilityId,
+        id: reportTemplateId,
+      },
+    }),
   });
 
   const form = useForm<ReportTemplateFormData>({
@@ -149,9 +182,16 @@ export default function ReportBuilder({
     defaultValues: templateSchema ?? defaultTemplate,
   });
 
-  const onSubmit = useCallback((data: ReportTemplateFormData) => {
-    console.log(data);
-  }, []);
+  const onSubmit = useCallback(
+    (data: ReportTemplateFormData) => {
+      if (reportTemplateId) {
+        updateReportTemplate(data);
+      } else {
+        createReportTemplate(data);
+      }
+    },
+    [reportTemplateId, updateReportTemplate, createReportTemplate],
+  );
 
   const handleExport = useCallback(() => {
     console.log("");
@@ -160,6 +200,42 @@ export default function ReportBuilder({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="flex justify-end space-x-2">
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    disabled={!!reportTemplateId}
+                  >
+                    <FormItem>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a template type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {REPORT_TEMPLATE_TYPE.map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {type.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </FormItem>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="button" variant="outline" onClick={handleExport}>
+            Export
+          </Button>
+          <Button type="submit">Save Template</Button>
+        </div>
         <Card>
           <CardHeader>
             <CardTitle>Report Template Builder</CardTitle>
@@ -187,13 +263,6 @@ export default function ReportBuilder({
             </Tabs>
           </CardContent>
         </Card>
-
-        <div className="flex justify-end space-x-2">
-          <Button type="button" variant="outline" onClick={handleExport}>
-            Export
-          </Button>
-          <Button type="submit">Save Template</Button>
-        </div>
       </form>
     </Form>
   );
