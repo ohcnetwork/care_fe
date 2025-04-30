@@ -600,22 +600,6 @@ export function SymptomQuestion({
     );
   };
 
-  const symptomDetailsContent = (
-    <div className="space-y-4 p-3">
-      {newSymptom.code && (
-        <SymptomRow
-          symptom={newSymptom as SymptomRequest}
-          index={-1}
-          disabled={disabled}
-          onUpdate={(_, updates) => {
-            setNewSymptom((prev) => ({ ...prev, ...updates }));
-          }}
-          onRemove={() => {}}
-        />
-      )}
-    </div>
-  );
-
   const addSymptomPlaceholder = t("add_symptom", {
     count: symptoms.length + 1,
   });
@@ -686,7 +670,17 @@ export function SymptomQuestion({
           onConfirm={handleConfirmSymptom}
           placeholder={addSymptomPlaceholder}
         >
-          {symptomDetailsContent}
+          <div className="space-y-4 p-3">
+            <SymptomRow
+              symptom={newSymptom as SymptomRequest}
+              index={-1}
+              disabled={disabled}
+              onUpdate={(_, updates) => {
+                setNewSymptom((prev) => ({ ...prev, ...updates }));
+              }}
+              onRemove={() => {}}
+            />
+          </div>
         </EntitySelectionSheet>
       ) : (
         <ValueSetSelect
