@@ -131,7 +131,7 @@ export default function ConsentFormSheet({
     compress: false,
   });
 
-  const form = useForm<ConsentFormValues>({
+  const form = useForm({
     resolver: zodResolver(consentFormSchema(isEdit)),
     defaultValues: {
       decision: "permit",
