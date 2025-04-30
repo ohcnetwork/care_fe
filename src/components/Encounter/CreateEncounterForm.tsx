@@ -88,7 +88,7 @@ export default function CreateEncounterForm({
     start_date: z.string(),
   });
 
-  const form = useForm<z.infer<typeof encounterFormSchema>>({
+  const form = useForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: "planned",
@@ -327,12 +327,12 @@ export default function CreateEncounterForm({
                 <FormItem>
                   <FacilityOrganizationSelector
                     facilityId={facilityId}
-                    value={field.value[0]}
+                    value={field.value}
                     onChange={(value) => {
                       if (value === null) {
                         form.setValue("organizations", []);
                       } else {
-                        form.setValue("organizations", [value]);
+                        form.setValue("organizations", value);
                       }
                     }}
                   />

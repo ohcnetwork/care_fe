@@ -78,7 +78,7 @@ export default function FacilityForm({
 
   type FacilityFormValues = z.infer<typeof facilityFormSchema>;
 
-  const form = useForm<FacilityFormValues>({
+  const form = useForm({
     resolver: zodResolver(facilityFormSchema),
     defaultValues: {
       facility_type: "",
@@ -234,7 +234,7 @@ export default function FacilityForm({
         {/* Basic Information */}
         <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("basic_info")}</h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
             <FormField
               control={form.control}
               name="facility_type"
@@ -314,7 +314,7 @@ export default function FacilityForm({
                         icon: obj.icon,
                       }))}
                       onValueChange={handleFeatureChange}
-                      value={field.value.map((val) => val.toString())}
+                      value={field.value?.map((val) => val.toString()) || []}
                       placeholder={t("select_facility_feature")}
                       id="facility-features"
                     />
@@ -329,7 +329,7 @@ export default function FacilityForm({
         {/* Contact Information */}
         <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("contact_info")}</h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
             <FormField
               control={form.control}
               name="phone_number"

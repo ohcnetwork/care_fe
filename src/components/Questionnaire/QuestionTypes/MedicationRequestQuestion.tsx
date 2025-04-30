@@ -750,7 +750,10 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       )}
     >
       {/* Medicine Name */}
-      <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
+      <div
+        className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm"
+        data-cy="medicine-name-view"
+      >
         <span
           className={cn(
             "break-words line-clamp-2 hidden lg:block",

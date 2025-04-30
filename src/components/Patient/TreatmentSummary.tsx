@@ -2,10 +2,8 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
-import { toast } from "sonner";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
@@ -17,23 +15,22 @@ import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetail
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import { getPermissions } from "@/common/Permissions";
 
 import api from "@/Utils/request/api";
+import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
-import { completedEncounterStatus } from "@/types/emr/encounter";
+import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
 interface TreatmentSummaryProps {
-  facilityId: string;
+  facilityId?: string;
   encounterId: string;
 
   patientId: string;
@@ -63,31 +60,39 @@ export default function TreatmentSummary({
 }: TreatmentSummaryProps) {
   const { t } = useTranslation();
 
-  const { data: encounter, isLoading: encounterLoading } = useQuery({
+  const { data: encounter, isLoading: encounterLoading } = useQuery<Encounter>({
     queryKey: ["encounter", encounterId],
     queryFn: query(api.encounter.get, {
       pathParams: { id: encounterId },
-      queryParams: { facility: facilityId },
+      queryParams: facilityId
+        ? { facility: facilityId }
+        : { patient: patientId },
     }),
-    enabled: !!encounterId && !!facilityId,
+    enabled: !!encounterId && !!patientId,
   });
 
-  const { goBack } = useAppHistory();
+  const { data: patient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.patient.getPatient, {
+      pathParams: {
+        id: patientId,
+      },
+    }),
+    enabled: !!patientId,
+  });
+
   const { hasPermission } = usePermissions();
-  const { canViewEncounter, canViewClinicalData } = getPermissions(
+  const { canViewClinicalData } = getPermissions(
+    hasPermission,
+    patient?.permissions ?? [],
+  );
+  const { canViewEncounter } = getPermissions(
     hasPermission,
     encounter?.permissions ?? [],
   );
 
   const canAccess = canViewEncounter || canViewClinicalData;
 
-  useEffect(() => {
-    if (!canAccess && !encounterLoading) {
-      toast.error(t("no_permission_to_view_page"));
-      goBack();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAccess, encounterLoading]);
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query.paginated(allergyIntoleranceApi.getAllergy, {
