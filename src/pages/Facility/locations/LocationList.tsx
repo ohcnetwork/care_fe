@@ -18,18 +18,6 @@ interface LocationState {
   currentPage: number;
 }
 
-function getParentChain(location: LocationListType): Set<string> {
-  const parentIds = new Set<string>();
-  let current = location.parent;
-
-  while (current) {
-    parentIds.add(current.id);
-    current = current.parent;
-  }
-
-  return parentIds;
-}
-
 // Hook for location data management
 function useLocationState(
   initialLocationId?: string,
@@ -65,16 +53,11 @@ function useLocationState(
       // Navigate to the selected location URL
       navigate(`/facility/${facilityId}/encounters/locations/${location.id}`);
 
-      // Get parent chain and include the current location ID
-      const parentIds = getParentChain(location);
-      parentIds.add(location.id);
-
       setState((prev) => ({
         ...prev,
         selectedLocationId: location.id,
         selectedLocation: location,
         searchQuery: "",
-        expandedLocations: new Set([...prev.expandedLocations, ...parentIds]),
       }));
     },
     [facilityId],

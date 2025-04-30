@@ -110,7 +110,7 @@ export default function LocationForm({
 
   const isEditMode = !!location?.id;
 
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       ...defaultValues,
