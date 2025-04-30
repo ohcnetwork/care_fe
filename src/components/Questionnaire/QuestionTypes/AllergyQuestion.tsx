@@ -97,6 +97,232 @@ const ALLERGY_CATEGORIES: Record<AllergyCategory, string> = {
   biologic: "Biologic",
 };
 
+function CategorySelect({
+  category,
+  onValueChange,
+  disabled,
+  hasId,
+  desktopLayout,
+}: {
+  category: AllergyCategory;
+  onValueChange: (value: AllergyCategory) => void;
+  disabled?: boolean;
+  hasId: boolean;
+  desktopLayout: boolean;
+}) {
+  return (
+    <Select
+      value={category}
+      onValueChange={onValueChange}
+      disabled={disabled || hasId}
+    >
+      <SelectTrigger
+        className={
+          desktopLayout
+            ? "h-8 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center"
+            : "h-9 w-full"
+        }
+      >
+        <SelectValue
+          placeholder="Cat"
+          className={
+            desktopLayout
+              ? "text-center h-full flex items-center justify-center m-0 p-0"
+              : ""
+          }
+        >
+          {category && (
+            <div className="flex items-center gap-2">
+              {CATEGORY_ICONS[category]}
+              <span className="block lg:hidden">
+                {ALLERGY_CATEGORIES[category]}
+              </span>
+            </div>
+          )}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {(
+          Object.entries(ALLERGY_CATEGORIES) as [AllergyCategory, string][]
+        ).map(([value, label]) => (
+          <SelectItem key={value} value={value}>
+            <div className="flex items-center gap-2">
+              {CATEGORY_ICONS[value]}
+              <span>{label}</span>
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function CriticalitySelect({
+  criticality,
+  onValueChange,
+  disabled,
+  desktopLayout,
+}: {
+  criticality: string;
+  onValueChange: (value: string) => void;
+  disabled?: boolean;
+  desktopLayout: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select
+      value={criticality}
+      onValueChange={onValueChange}
+      disabled={disabled}
+    >
+      <SelectTrigger
+        className={desktopLayout ? "h-8 w-full px-1 text-sm" : "h-9 mt-1"}
+      >
+        <SelectValue placeholder={t("critical")} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="low">{t("low")}</SelectItem>
+        <SelectItem value="high">{t("high")}</SelectItem>
+        <SelectItem value="unable_to_assess">
+          {t("unable_to_assess")}
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
+function StatusSelect({
+  verificationStatus,
+  onValueChange,
+  disabled,
+  desktopLayout,
+}: {
+  verificationStatus: string;
+  onValueChange: (value: string) => void;
+  disabled?: boolean;
+  desktopLayout: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select
+      value={verificationStatus}
+      onValueChange={onValueChange}
+      disabled={disabled}
+    >
+      <SelectTrigger
+        className={desktopLayout ? "h-8 w-full px-1 text-sm" : "h-9 mt-1"}
+      >
+        <SelectValue placeholder={t("verify")} />
+      </SelectTrigger>
+      <SelectContent>
+        {Object.entries(ALLERGY_VERIFICATION_STATUS).map(([value, label]) => (
+          <SelectItem key={value} value={value}>
+            {label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function OccurrencePicker({
+  lastOccurrence,
+  onChange,
+  disabled,
+  desktopLayout,
+}: {
+  lastOccurrence?: string;
+  onChange: (date: Date | undefined) => void;
+  disabled?: boolean;
+  desktopLayout: boolean;
+}) {
+  return (
+    <CombinedDatePicker
+      value={lastOccurrence ? new Date(lastOccurrence) : undefined}
+      onChange={onChange}
+      disabled={disabled}
+      buttonClassName={
+        desktopLayout
+          ? "h-8 text-sm px-2 justify-start font-normal w-full"
+          : "h-9 mt-1"
+      }
+    />
+  );
+}
+
+function StatusButtons({
+  clinicalStatus,
+  onUpdate,
+  disabled,
+}: {
+  clinicalStatus: string;
+  onUpdate: (updates: Partial<AllergyIntoleranceRequest>) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col gap-2 col-span-2">
+      {clinicalStatus !== "active" && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onUpdate({ clinical_status: "active" })}
+          disabled={disabled}
+        >
+          <CheckCircledIcon className="size-4 mr-2" />
+          {t("mark_active")}
+        </Button>
+      )}
+      {clinicalStatus !== "inactive" && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onUpdate({ clinical_status: "inactive" })}
+          disabled={disabled}
+        >
+          <CircleBackslashIcon className="size-4 mr-2" />
+          {t("mark_inactive")}
+        </Button>
+      )}
+      {clinicalStatus !== "resolved" && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onUpdate({ clinical_status: "resolved" })}
+          disabled={disabled}
+        >
+          <CheckCircledIcon className="size-4 mr-2 text-green-600" />
+          {t("mark_resolved")}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function NotesInput({
+  note,
+  onChange,
+  disabled,
+  desktopLayout,
+}: {
+  note?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  desktopLayout: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Input
+      type="text"
+      placeholder={t("additional_notes")}
+      value={note ?? ""}
+      onChange={onChange}
+      disabled={disabled}
+      className={cn(desktopLayout ? "mt-0.5" : "mt-1")}
+    />
+  );
+}
+
 function convertToAllergyRequest(
   allergy: AllergyIntolerance,
 ): AllergyIntoleranceRequest {
@@ -133,212 +359,6 @@ const AllergyItem = ({
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
 
-  const categorySelect = (
-    <Select
-      value={allergy.category}
-      onValueChange={(value: AllergyCategory) =>
-        onUpdate?.({ category: value })
-      }
-      disabled={disabled || !!allergy.id}
-    >
-      <SelectTrigger
-        className={
-          desktopLayout
-            ? "h-8 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center"
-            : "h-9 w-full"
-        }
-      >
-        <SelectValue
-          placeholder="Cat"
-          className={
-            desktopLayout
-              ? "text-center h-full flex items-center justify-center m-0 p-0"
-              : ""
-          }
-        >
-          {allergy.category && (
-            <div className="flex items-center gap-2">
-              {CATEGORY_ICONS[allergy.category]}
-              <span className="block lg:hidden">
-                {ALLERGY_CATEGORIES[allergy.category]}
-              </span>
-            </div>
-          )}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {(
-          Object.entries(ALLERGY_CATEGORIES) as [AllergyCategory, string][]
-        ).map(([value, label]) => (
-          <SelectItem key={value} value={value}>
-            <div className="flex items-center gap-2">
-              {CATEGORY_ICONS[value]}
-              <span>{label}</span>
-            </div>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-
-  const criticalitySelect = (
-    <Select
-      value={allergy.criticality}
-      onValueChange={(value) => onUpdate?.({ criticality: value })}
-      disabled={disabled}
-    >
-      <SelectTrigger
-        className={desktopLayout ? "h-8 w-full px-1 text-sm" : "h-9 mt-1"}
-      >
-        <SelectValue placeholder={t("critical")} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="low">{t("low")}</SelectItem>
-        <SelectItem value="high">{t("high")}</SelectItem>
-        <SelectItem value="unable_to_assess">
-          {t("unable_to_assess")}
-        </SelectItem>
-      </SelectContent>
-    </Select>
-  );
-
-  const statusSelect = (
-    <Select
-      value={allergy.verification_status}
-      onValueChange={(value) => {
-        onUpdate?.({
-          verification_status: value as AllergyVerificationStatus,
-        });
-      }}
-      disabled={disabled}
-    >
-      <SelectTrigger
-        className={desktopLayout ? "h-8 w-full px-1 text-sm" : "h-9 mt-1"}
-      >
-        <SelectValue placeholder={t("verify")} />
-      </SelectTrigger>
-      <SelectContent>
-        {Object.entries(ALLERGY_VERIFICATION_STATUS).map(([value, label]) => (
-          <SelectItem key={value} value={value}>
-            {label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-
-  const occurrencePicker = (
-    <CombinedDatePicker
-      value={
-        allergy.last_occurrence ? new Date(allergy.last_occurrence) : undefined
-      }
-      onChange={(date) =>
-        onUpdate?.({
-          last_occurrence: dateQueryString(date),
-        })
-      }
-      disabled={disabled}
-      buttonClassName={
-        desktopLayout
-          ? "h-8 text-sm px-2 justify-start font-normal w-full"
-          : "h-9 mt-1"
-      }
-    />
-  );
-
-  const statusButtons = (
-    <div className="flex flex-col gap-2 col-span-2">
-      {allergy.clinical_status !== "active" && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            onUpdate?.({
-              clinical_status: "active",
-            })
-          }
-          disabled={disabled}
-        >
-          <CheckCircledIcon className="size-4 mr-2" />
-          {t("mark_active")}
-        </Button>
-      )}
-      {allergy.clinical_status !== "inactive" && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            onUpdate?.({
-              clinical_status: "inactive",
-            })
-          }
-          disabled={disabled}
-        >
-          <CircleBackslashIcon className="size-4 mr-2" />
-          {t("mark_inactive")}
-        </Button>
-      )}
-      {allergy.clinical_status !== "resolved" && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            onUpdate?.({
-              clinical_status: "resolved",
-            })
-          }
-          disabled={disabled}
-        >
-          <CheckCircledIcon className="size-4 mr-2 text-green-600" />
-          {t("mark_resolved")}
-        </Button>
-      )}
-    </div>
-  );
-
-  const notesInput = (
-    <Input
-      type="text"
-      placeholder={t("additional_notes")}
-      value={allergy.note ?? ""}
-      onChange={(e) => onUpdate?.({ note: e.target.value })}
-      disabled={disabled}
-      className={cn(desktopLayout ? "mt-0.5" : "mt-1")}
-    />
-  );
-
-  // Mobile view layout
-  const formContent = (
-    <div className="grid grid-cols-2 gap-2 space-y-4">
-      <div>
-        <Label className="mb-1">{t("category")}</Label>
-        {categorySelect}
-      </div>
-
-      <div>
-        <Label>{t("criticality")}</Label>
-        {criticalitySelect}
-      </div>
-
-      <div>
-        <Label>{t("status")}</Label>
-        {statusSelect}
-      </div>
-
-      <div className="col-span-2">
-        <Label>{t("occurrence")}</Label>
-        {occurrencePicker}
-      </div>
-
-      {statusButtons}
-
-      <div className="col-span-2">
-        <Label>{t("note")}</Label>
-        {notesInput}
-      </div>
-    </div>
-  );
-
   if (desktopLayout) {
     return (
       <>
@@ -350,13 +370,52 @@ const AllergyItem = ({
             "[&_*]:line-through": allergy.clinical_status === "resolved",
           })}
         >
-          <TableCell className="py-1 pr-0">{categorySelect}</TableCell>
+          <TableCell className="py-1 pr-0">
+            <CategorySelect
+              category={allergy.category}
+              onValueChange={(value: AllergyCategory) =>
+                onUpdate?.({ category: value })
+              }
+              disabled={disabled}
+              hasId={!!allergy.id}
+              desktopLayout={desktopLayout}
+            />
+          </TableCell>
           <TableCell className="font-medium py-1 pl-1">
             {allergy.code.display}
           </TableCell>
-          <TableCell className="py-1 px-0.5">{criticalitySelect}</TableCell>
-          <TableCell className="py-1 px-0.5">{statusSelect}</TableCell>
-          <TableCell className="py-1 px-1">{occurrencePicker}</TableCell>
+          <TableCell className="py-1 px-0.5">
+            <CriticalitySelect
+              criticality={allergy.criticality}
+              onValueChange={(value) => onUpdate?.({ criticality: value })}
+              disabled={disabled}
+              desktopLayout={desktopLayout}
+            />
+          </TableCell>
+          <TableCell className="py-1 px-0.5">
+            <StatusSelect
+              verificationStatus={allergy.verification_status}
+              onValueChange={(value) => {
+                onUpdate?.({
+                  verification_status: value as AllergyVerificationStatus,
+                });
+              }}
+              disabled={disabled}
+              desktopLayout={desktopLayout}
+            />
+          </TableCell>
+          <TableCell className="py-1 px-1">
+            <OccurrencePicker
+              lastOccurrence={allergy.last_occurrence}
+              onChange={(date) =>
+                onUpdate?.({
+                  last_occurrence: dateQueryString(date),
+                })
+              }
+              disabled={disabled}
+              desktopLayout={desktopLayout}
+            />
+          </TableCell>
           <TableCell className="py-1 px-0 flex justify-center items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -437,7 +496,12 @@ const AllergyItem = ({
           <TableRow>
             <TableCell colSpan={6} className="px-4 py-2">
               <Label className="text-xs text-gray-500">{t("note")}</Label>
-              {notesInput}
+              <NotesInput
+                note={allergy.note}
+                onChange={(e) => onUpdate?.({ note: e.target.value })}
+                disabled={disabled}
+                desktopLayout={desktopLayout}
+              />
             </TableCell>
           </TableRow>
         )}
@@ -445,7 +509,77 @@ const AllergyItem = ({
     );
   }
 
-  return formContent;
+  // Mobile view layout
+  return (
+    <div className="grid grid-cols-2 gap-2 space-y-4">
+      <div>
+        <Label className="mb-1">{t("category")}</Label>
+        <CategorySelect
+          category={allergy.category}
+          onValueChange={(value: AllergyCategory) =>
+            onUpdate?.({ category: value })
+          }
+          disabled={disabled}
+          hasId={!!allergy.id}
+          desktopLayout={desktopLayout}
+        />
+      </div>
+
+      <div>
+        <Label>{t("criticality")}</Label>
+        <CriticalitySelect
+          criticality={allergy.criticality}
+          onValueChange={(value) => onUpdate?.({ criticality: value })}
+          disabled={disabled}
+          desktopLayout={desktopLayout}
+        />
+      </div>
+
+      <div>
+        <Label>{t("status")}</Label>
+        <StatusSelect
+          verificationStatus={allergy.verification_status}
+          onValueChange={(value) => {
+            onUpdate?.({
+              verification_status: value as AllergyVerificationStatus,
+            });
+          }}
+          disabled={disabled}
+          desktopLayout={desktopLayout}
+        />
+      </div>
+
+      <div className="col-span-2">
+        <Label>{t("occurrence")}</Label>
+        <OccurrencePicker
+          lastOccurrence={allergy.last_occurrence}
+          onChange={(date) =>
+            onUpdate?.({
+              last_occurrence: dateQueryString(date),
+            })
+          }
+          disabled={disabled}
+          desktopLayout={desktopLayout}
+        />
+      </div>
+
+      <StatusButtons
+        clinicalStatus={allergy.clinical_status}
+        onUpdate={onUpdate || (() => {})}
+        disabled={disabled}
+      />
+
+      <div className="col-span-2">
+        <Label>{t("note")}</Label>
+        <NotesInput
+          note={allergy.note}
+          onChange={(e) => onUpdate?.({ note: e.target.value })}
+          disabled={disabled}
+          desktopLayout={desktopLayout}
+        />
+      </div>
+    </div>
+  );
 };
 
 export function AllergyQuestion({
@@ -565,26 +699,6 @@ export function AllergyQuestion({
       questionnaireResponse.question_id,
     );
   };
-
-  const newAllergySheetContent = (
-    <div className="space-y-4 p-3">
-      {newAllergyInSheet && (
-        <AllergyItem
-          allergy={newAllergyInSheet}
-          disabled={disabled}
-          onUpdate={(updates) => {
-            if (newAllergyInSheet) {
-              setNewAllergyInSheet({
-                ...newAllergyInSheet,
-                ...updates,
-              });
-            }
-          }}
-          onRemove={() => {}}
-        />
-      )}
-    </div>
-  );
 
   const addAllergyPlaceholder = t("add_allergy", {
     count: allergies.length + 1,
@@ -774,7 +888,19 @@ export function AllergyQuestion({
           onConfirm={handleConfirmAllergy}
           placeholder={addAllergyPlaceholder}
         >
-          {newAllergySheetContent}
+          <div className="space-y-4 p-3">
+            <AllergyItem
+              allergy={newAllergyInSheet!}
+              disabled={disabled}
+              onUpdate={(updates) => {
+                setNewAllergyInSheet((prev) => ({
+                  ...prev!,
+                  ...updates,
+                }));
+              }}
+              onRemove={() => {}}
+            />
+          </div>
         </EntitySelectionSheet>
       ) : (
         <ValueSetSelect
