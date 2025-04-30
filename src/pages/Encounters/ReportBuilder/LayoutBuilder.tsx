@@ -37,6 +37,7 @@ import { ReportTemplateFormData } from "@/pages/Encounters/ReportBuilder/schema"
 import {
   ALIGNMENT_OPTIONS,
   FONT_OPTIONS,
+  FONT_SIZES,
   REPORT_SIZE_OPTIONS,
 } from "@/types/reportTemplate/reportTemplate";
 
@@ -322,7 +323,7 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
                       </SelectTrigger>
                       <SelectContent>
                         {FONT_OPTIONS.map((font) => (
-                          <SelectItem key={font.id} value={font.id}>
+                          <SelectItem key={font.id} value={font.value}>
                             {font.value}
                           </SelectItem>
                         ))}
@@ -349,9 +350,9 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
                         <SelectValue placeholder="Select size" />
                       </SelectTrigger>
                       <SelectContent>
-                        {[8, 10, 12, 14, 16, 18, 20, 24].map((size) => (
-                          <SelectItem key={size} value={size.toString()}>
-                            {size}pt
+                        {FONT_SIZES.map((size) => (
+                          <SelectItem key={size.id} value={size.value}>
+                            {size.value}
                           </SelectItem>
                         ))}
                       </SelectContent>

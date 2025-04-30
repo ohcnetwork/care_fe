@@ -11,7 +11,6 @@ import {
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
@@ -38,13 +37,15 @@ interface SectionBuilderProps {
 const SECTION_DISPLAY_NAMES: Record<string, string> = {
   diagnosis: "Active Diagnoses",
   symptom: "Symptoms Reported",
-  allergy: "Allergies",
+  allergy_intolerance: "Allergies",
   observation: "Observations",
   medication_request: "Medications",
-  patient: "Patient Information",
+  patient_info: "Patient Information",
   care_team: "Care Team",
-  file: "Files & Documents",
+  file_upload: "Files & Documents",
   encounter: "Encounter Details",
+  discharge_summary_advice: "Discharge Summary Advice",
+  custom_section: "Custom Section",
 };
 
 const SectionFields = React.memo(function SectionFields({
@@ -102,18 +103,20 @@ const SectionFields = React.memo(function SectionFields({
                       onChange(newFields);
                     }}
                   />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={!isEnabled}
-                    onClick={() => {
-                      const newFields = [...fields];
-                      newFields.splice(fieldIndex, 1);
-                      onChange(newFields);
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  {isEnabled && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={!isEnabled}
+                      onClick={() => {
+                        const newFields = [...fields];
+                        newFields.splice(fieldIndex, 1);
+                        onChange(newFields);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
@@ -283,9 +286,6 @@ const SectionItem = React.memo(function SectionItem({
               <h3 className="text-lg font-semibold">
                 {SECTION_DISPLAY_NAMES[field.source] || "New Section"}
               </h3>
-              <Badge variant="outline">
-                {field.source || "No source selected"}
-              </Badge>
             </div>
 
             <div className="flex items-center space-x-2">

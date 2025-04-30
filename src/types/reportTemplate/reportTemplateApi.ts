@@ -1,4 +1,5 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 import {
   ReportTemplateCreate,
@@ -10,7 +11,7 @@ export default {
   list: {
     path: "/api/v1/facility/{facility_external_id}/report_template/",
     method: HttpMethod.GET,
-    TRes: Type<ReportTemplateModel[]>,
+    TRes: Type<PaginatedResponse<ReportTemplateModel>>(),
   },
   create: {
     path: "/api/v1/facility/{facility_external_id}/report_template/",
@@ -18,17 +19,17 @@ export default {
     body: Type<ReportTemplateCreate>(),
   },
   get: {
-    path: "/api/v1/facility/{facility_external_id}/report_template/{report_template_id}/",
+    path: "/api/v1/facility/{facility_external_id}/report_template/{id}/",
     method: HttpMethod.GET,
     TRes: Type<ReportTemplateModel>(),
   },
   update: {
-    path: "/api/v1/facility/{facility_external_id}/report_template/{report_template_id}/",
+    path: "/api/v1/facility/{facility_external_id}/report_template/{id}/",
     method: HttpMethod.PUT,
     body: Type<ReportTemplateUpdate>(),
   },
   delete: {
-    path: "/api/v1/facility/{facility_external_id}/report_template/{report_template_id}/",
+    path: "/api/v1/facility/{facility_external_id}/report_template/{id}/",
     method: HttpMethod.DELETE,
   },
   getAvailableSections: {

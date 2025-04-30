@@ -2,7 +2,7 @@ import { FacilityModel } from "@/components/Facility/models";
 
 import { UserBase } from "@/types/user/user";
 
-type AlignmentOptions =
+export type AlignmentOptions =
   | "left"
   | "center"
   | "right"
@@ -50,6 +50,21 @@ export const FONT_OPTIONS = [
   { id: "times-new-roman", value: "Times New Roman" },
   { id: "courier", value: "Courier" },
   { id: "verdana", value: "Verdana" },
+  { id: "libertinus-serif", value: "Libertinus Serif" },
+  { id: "new-computer-modern", value: "New Computer Modern" },
+  { id: "new-computer-modern-math", value: "New Computer Modern Math" },
+  { id: "dejavu-sans", value: "DejaVu Sans" },
+] as const;
+
+export const FONT_SIZES = [
+  { id: 8, value: "8pt" },
+  { id: 10, value: "10pt" },
+  { id: 12, value: "12pt" },
+  { id: 14, value: "14pt" },
+  { id: 16, value: "16pt" },
+  { id: 18, value: "18pt" },
+  { id: 20, value: "20pt" },
+  { id: 24, value: "24pt" },
 ] as const;
 
 interface TextConfig {
@@ -175,38 +190,46 @@ interface Layout {
 
 interface StyleConfig {
   fill?: string;
-  weight?: string;
+  weight?: number;
 }
 
-interface TextElement {
+type HeaderAlignment = "left" | "center" | "right";
+
+export const HEADER_ALIGNMENT_OPTIONS = [
+  { id: "left", value: "Left" },
+  { id: "center", value: "Center" },
+  { id: "right", value: "Right" },
+] as const;
+
+interface BaseHeaderElement {
+  align?: HeaderAlignment;
+}
+
+interface TextElement extends BaseHeaderElement {
   type: "text";
   text: string;
   size: string;
   weight: number;
-  align?: "left" | "center" | "right";
 }
 
-interface ImageElement {
+interface ImageElement extends BaseHeaderElement {
   type: "image";
   file_name: string;
-  url: URL;
+  url: string;
   width: string;
-  align?: "left" | "center" | "right";
 }
 
-interface RuleElement {
+interface RuleElement extends BaseHeaderElement {
   type: "rule";
   length: string;
   stroke: string;
-  align?: "left" | "center" | "right";
 }
 
-interface DateTimeElement {
+interface DateTimeElement extends BaseHeaderElement {
   type: "datetime";
   label: string;
   format: string;
   style: StyleConfig;
-  align?: "left" | "center" | "right";
 }
 
 export type HeaderElement =
@@ -234,10 +257,11 @@ interface LabelValueField {
 
 interface SectionOptions {
   title?: string;
-  fields: string[] | Array<LabelValueField>;
-  columns: string[];
-  style: "list" | "text";
+  fields?: string[] | Array<LabelValueField>;
+  columns?: string[];
+  style?: "list" | "text";
   filters?: Record<string, string[]>;
+  text?: string;
   rows?: Array<Array<string>>;
 }
 
@@ -271,7 +295,7 @@ export type ReportTemplateCreate = Omit<ReportTemplateBase, "id">;
 
 export type ReportTemplateUpdate = Omit<ReportTemplateCreate, "type">;
 
-export interface ReportTemplateModel extends ReportTemplateCreate {
+export interface ReportTemplateModel extends ReportTemplateBase {
   facility: FacilityModel;
   created_by: UserBase;
   updated_by: UserBase;

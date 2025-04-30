@@ -134,12 +134,13 @@ const consultationRoutes: AppRoutes = {
     ({ patientId, id }) => (
       <QuestionnaireResponseView responseId={id} patientId={patientId} />
     ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/reportbuilder":
-    ({ facilityId, patientId, encounterId }) => (
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/reportbuilder/:reportTemplateId":
+    ({ facilityId, patientId, encounterId, reportTemplateId }) => (
       <ReportBuilder
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        reportTemplateId={reportTemplateId}
       />
     ),
   ...["facility", "organization"].reduce((acc: AppRoutes, identifier) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -9,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import query from "@/Utils/request/query";
 import { HeaderBuilder } from "@/pages/Encounters/ReportBuilder/HeaderBuilder";
 import { LayoutBuilder } from "@/pages/Encounters/ReportBuilder/LayoutBuilder";
 import { SectionBuilder } from "@/pages/Encounters/ReportBuilder/SectionBuilder";
@@ -16,11 +18,13 @@ import {
   ReportTemplateFormData,
   reportTemplateSchema,
 } from "@/pages/Encounters/ReportBuilder/schema";
+import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
 
 interface ReportBuilderProps {
   facilityId: string;
   patientId: string;
   encounterId: string;
+  reportTemplateId: string;
 }
 
 // Default template configuration
@@ -124,12 +128,25 @@ const defaultTemplate: ReportTemplateFormData = {
   },
 };
 
-export default function ReportBuilder({ facilityId }: ReportBuilderProps) {
+export default function ReportBuilder({
+  facilityId,
+  reportTemplateId,
+}: ReportBuilderProps) {
   const [activeTab, setActiveTab] = useState("layout");
+
+  const { data: templateSchema } = useQuery({
+    queryKey: ["report-template", reportTemplateId],
+    queryFn: query(reportTemplateApi.get, {
+      pathParams: {
+        facility_external_id: facilityId,
+        id: reportTemplateId,
+      },
+    }),
+  });
 
   const form = useForm<ReportTemplateFormData>({
     resolver: zodResolver(reportTemplateSchema),
-    defaultValues: defaultTemplate,
+    defaultValues: templateSchema ?? defaultTemplate,
   });
 
   const onSubmit = useCallback((data: ReportTemplateFormData) => {
