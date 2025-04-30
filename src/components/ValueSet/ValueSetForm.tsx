@@ -43,17 +43,21 @@ interface ValueSetFormProps {
   initialData?: UpdateValuesetModel;
   onSubmit: (data: ValuesetFormType) => void;
   isSubmitting?: boolean;
+  isSystemDefined?: boolean;
 }
 
 function ConceptFields({
   nestIndex,
   type,
   parentForm,
+  disabled,
 }: {
   nestIndex: number;
   type: "include" | "exclude";
   parentForm: ReturnType<typeof useForm<ValuesetFormType>>;
+  disabled?: boolean;
 }) {
+  const { t } = useTranslation(); // Add translation hook
   const { fields, append, remove } = useFieldArray({
     control: parentForm.control,
     name: `compose.${type}.${nestIndex}.concept`,
@@ -62,15 +66,16 @@ function ConceptFields({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">Concepts</h4>
+        <h4 className="text-sm font-medium">{t("concepts")}</h4>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={() => append({ code: "", display: "" })}
+          disabled={disabled}
         >
           <PlusIcon className="size-4 mr-2" />
-          Add Concept
+          {t("add_concept")}
         </Button>
       </div>
       {fields.map((field, index) => (
@@ -86,6 +91,7 @@ function ConceptFields({
             variant="ghost"
             size="icon"
             onClick={() => remove(index)}
+            disabled={disabled}
           >
             <TrashIcon className="size-4" />
           </Button>
@@ -98,12 +104,15 @@ function ConceptFields({
 function FilterFields({
   nestIndex,
   type,
+  disabled,
   parentForm,
 }: {
   nestIndex: number;
   type: "include" | "exclude";
+  disabled?: boolean;
   parentForm: ReturnType<typeof useForm<ValuesetFormType>>;
 }) {
+  const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
     control: parentForm.control,
     name: `compose.${type}.${nestIndex}.filter`,
@@ -112,15 +121,16 @@ function FilterFields({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">Filters</h4>
+        <h4 className="text-sm font-medium">{t("filters")}</h4>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={() => append({ property: "", op: "", value: "" })}
+          disabled={disabled}
         >
           <PlusIcon className="size-4 mr-2" />
-          Add Filter
+          {t("add_filter")}
         </Button>
       </div>
       {fields.map((field, index) => (
@@ -131,7 +141,11 @@ function FilterFields({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                  <Input {...field} placeholder="Property" />
+                  <Input
+                    {...field}
+                    placeholder={t("property")}
+                    disabled={disabled}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -142,7 +156,11 @@ function FilterFields({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                  <Input {...field} placeholder="Operator" />
+                  <Input
+                    {...field}
+                    placeholder={t("operator")}
+                    disabled={disabled}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -153,7 +171,11 @@ function FilterFields({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                  <Input {...field} placeholder="Value" />
+                  <Input
+                    {...field}
+                    placeholder={t("value")}
+                    disabled={disabled}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -163,6 +185,7 @@ function FilterFields({
             variant="ghost"
             size="icon"
             onClick={() => remove(index)}
+            disabled={disabled}
           >
             <TrashIcon className="size-4" />
           </Button>
@@ -175,10 +198,13 @@ function FilterFields({
 function RuleFields({
   type,
   form,
+  disabled,
 }: {
   type: "include" | "exclude";
   form: ReturnType<typeof useForm<ValuesetFormType>>;
+  disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: `compose.${type}`,
@@ -188,7 +214,7 @@ function RuleFields({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-medium">
-          {type === "include" ? "Include Rules" : "Exclude Rules"}
+          {type === "include" ? t("include_rules") : t("exclude_rules")}
         </CardTitle>
         <Button
           type="button"
@@ -201,9 +227,10 @@ function RuleFields({
               filter: [],
             })
           }
+          disabled={disabled}
         >
           <PlusIcon className="size-4 mr-2" />
-          Add Rule
+          {t("add_rule")}
         </Button>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -215,14 +242,15 @@ function RuleFields({
                 name={`compose.${type}.${index}.system`}
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>System</FormLabel>
+                    <FormLabel>{t("system")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={disabled}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select system" />
+                          <SelectValue placeholder={t("select_system")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -244,12 +272,23 @@ function RuleFields({
                 variant="ghost"
                 size="icon"
                 onClick={() => remove(index)}
+                disabled={disabled}
               >
                 <TrashIcon className="size-4" />
               </Button>
             </div>
-            <ConceptFields nestIndex={index} type={type} parentForm={form} />
-            <FilterFields nestIndex={index} type={type} parentForm={form} />
+            <ConceptFields
+              nestIndex={index}
+              type={type}
+              parentForm={form}
+              disabled={disabled}
+            />
+            <FilterFields
+              nestIndex={index}
+              type={type}
+              disabled={disabled}
+              parentForm={form}
+            />
           </div>
         ))}
       </CardContent>
@@ -261,6 +300,7 @@ export function ValueSetForm({
   initialData,
   onSubmit,
   isSubmitting,
+  isSystemDefined,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
   const valuesetFormSchema = z.object({
@@ -348,6 +388,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="name"
+          disabled={isSystemDefined}
           render={({ field }) => (
             <FormItem>
               <FormLabel aria-required>{t("name")}</FormLabel>
@@ -362,6 +403,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="slug"
+          disabled={isSystemDefined}
           render={({ field }) => (
             <FormItem>
               <FormLabel aria-required>{t("slug")}</FormLabel>
@@ -376,6 +418,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="description"
+          disabled={isSystemDefined}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("description")}</FormLabel>
@@ -393,10 +436,14 @@ export function ValueSetForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel aria-required>{t("status")}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={isSystemDefined}
+              >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select Status" />
+                    <SelectValue placeholder={t("select_status")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -412,10 +459,14 @@ export function ValueSetForm({
         />
 
         <div className="space-y-6">
-          <RuleFields type="include" form={form} />
-          <RuleFields type="exclude" form={form} />
+          <RuleFields type="include" form={form} disabled={isSystemDefined} />
+          <RuleFields type="exclude" form={form} disabled={isSystemDefined} />
         </div>
-
+        {isSystemDefined && (
+          <div className="text-red-600 text-sm flex justify-end">
+            {t("saving_is_disabled_for_system_valuesets")}
+          </div>
+        )}
         <div className="flex gap-2 w-full justify-end">
           <Button
             variant="outline"
@@ -425,10 +476,13 @@ export function ValueSetForm({
           >
             {t("cancel")}
           </Button>
+
           <Button
             variant="primary"
             type="submit"
-            disabled={isSubmitting || !form.formState.isDirty}
+            disabled={
+              isSystemDefined || isSubmitting || !form.formState.isDirty
+            }
           >
             {isSubmitting ? t("saving") : t("save_valueset")}
           </Button>

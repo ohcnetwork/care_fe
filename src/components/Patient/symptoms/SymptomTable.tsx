@@ -69,7 +69,7 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
                 : ""
             }`}
           >
-            <TableCell className="font-medium first:rounded-l-md">
+            <TableCell className="font-medium first:rounded-l-md md:whitespace-normal">
               {symptom.code.display}
             </TableCell>
             <TableCell>
