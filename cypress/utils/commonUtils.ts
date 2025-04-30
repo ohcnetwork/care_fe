@@ -298,6 +298,7 @@ export function generateDeptName(prefix = ""): string {
   const randomDeptType = deptTypes[getRandomIndex(deptTypes.length)];
   const randomNumber = (getRandomIndex(900) + 100).toString();
   return `${prefix}${randomDeptType}-${randomNumber}`;
+}
 
 export function generateEmailDomain(): string {
   const domains = [
