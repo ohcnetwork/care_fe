@@ -39,7 +39,9 @@ const ClampableText: React.FC<ClampableTextProps> = ({
     <div className={`${className}`}>
       <div
         ref={textRef}
-        className={!isExpanded ? lineVariants[linesToClamp] : ""}
+        className={
+          !isExpanded ? lineVariants[linesToClamp > 3 ? 3 : linesToClamp] : ""
+        }
       >
         {text}
       </div>
