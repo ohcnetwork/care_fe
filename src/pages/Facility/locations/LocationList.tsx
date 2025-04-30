@@ -6,7 +6,6 @@ import React from "react";
 import query from "@/Utils/request/query";
 import LocationContent from "@/pages/Facility/locations/LocationContent";
 import LocationNavbar from "@/pages/Facility/locations/LocationNavbar";
-import { getParentChain } from "@/pages/Facility/locations/Utils";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 

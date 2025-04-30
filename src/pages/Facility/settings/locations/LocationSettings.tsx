@@ -27,7 +27,6 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
-import { getParentChain } from "@/pages/Facility/locations/Utils";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
