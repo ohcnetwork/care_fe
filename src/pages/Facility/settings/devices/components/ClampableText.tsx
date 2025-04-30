@@ -42,7 +42,7 @@ const ClampableText: React.FC<ClampableTextProps> = ({
   }, [text]);
 
   return (
-    <div className={`clampable-text-wrapper ${className}`}>
+    <div className={`${className}`}>
       <div
         className={isClamped ? `line-clamp-${linesToClamp}` : ""}
         ref={textContainerRef}
