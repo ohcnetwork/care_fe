@@ -54,17 +54,11 @@ function useLocationState(
       // Navigate to the selected location URL
       navigate(`/facility/${facilityId}/encounters/locations/${location.id}`);
 
-      // Get parent chain and include the current location ID
-      const parentChain = getParentChain(location);
-      const parentIds = parentChain.map((loc) => loc.id);
-      parentIds.push(location.id);
-
       setState((prev) => ({
         ...prev,
         selectedLocationId: location.id,
         selectedLocation: location,
         searchQuery: "",
-        expandedLocations: new Set([...prev.expandedLocations, ...parentIds]),
       }));
     },
     [facilityId],

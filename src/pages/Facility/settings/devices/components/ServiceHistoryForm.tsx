@@ -59,7 +59,7 @@ export default function ServiceHistoryForm({
 
   type FormValues = z.infer<typeof formSchema>;
 
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       note: "",

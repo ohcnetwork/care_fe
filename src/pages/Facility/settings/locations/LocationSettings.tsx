@@ -113,12 +113,8 @@ export default function LocationSettings({
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
       navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
-      const parentChain = getParentChain(location);
-      const parentIds = parentChain.map((loc) => loc.id);
-      parentIds.push(location.id);
-      setExpandedLocations(new Set([...expandedLocations, ...parentIds]));
     },
-    [expandedLocations, facilityId],
+    [facilityId],
   );
 
   const handleToggleExpand = useCallback((locationId: string) => {
