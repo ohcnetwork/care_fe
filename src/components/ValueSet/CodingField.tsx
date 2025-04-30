@@ -108,7 +108,6 @@ export const CodingField = ({
         onClick={handleVerify}
         disabled={lookupMutation.isPending}
         className={cn(
-          "focus:ring-0 focus:ring-transparent",
           isVerified
             ? "bg-transparent border-none shadow-none hover:bg-transparent hover:border-none hover:shadow-none"
             : "hover:border-gray-400 hover:bg-gray-100",
