@@ -38,11 +38,13 @@ export const CodingField = ({
           shouldValidate: true,
         });
         setIsVerified(true);
+
         toast.success(t("code_verified_successfully"));
       }
     },
     onError: () => {
       setIsVerified(false);
+
       toast.error(t("failed_to_verify_code"));
     },
   });
@@ -58,7 +60,6 @@ export const CodingField = ({
     lookupMutation.mutate({ system, code });
   };
 
-  // Reset verification state when code changes
   const handleCodeChange = () => {
     setIsVerified(false);
     form.setValue(`${name}.display`, "", { shouldValidate: true });
@@ -107,6 +108,7 @@ export const CodingField = ({
         onClick={handleVerify}
         disabled={lookupMutation.isPending}
         className={cn(
+          "focus:ring-0 focus:ring-transparent",
           isVerified
             ? "bg-transparent border-none shadow-none hover:bg-transparent hover:border-none hover:shadow-none"
             : "hover:border-gray-400 hover:bg-gray-100",
