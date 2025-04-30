@@ -31,8 +31,7 @@ function ExpandableTextContent({
     <div
       ref={contentRef}
       className={cn(
-        `line-clamp-1`,
-        "data-[expanded=true]:line-clamp-none",
+        "line-clamp-1 data-[expanded=true]:line-clamp-none",
         className,
       )}
       data-slot="expandable-text-content"
