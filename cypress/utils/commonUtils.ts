@@ -292,3 +292,20 @@ export function generateRandomCharacter(
 
   return paragraphs.join("\n\n");
 }
+
+export function generateEmailDomain(): string {
+  const domains = [
+    "test.com",
+    "example.com",
+    "demo.com",
+    "qa.com",
+    "dev.com",
+    "staging.com",
+    "sandbox.com",
+    "mock.com",
+    "temp.com",
+    "local.com",
+  ];
+
+  return domains[getRandomIndex(domains.length)];
+}
