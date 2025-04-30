@@ -155,7 +155,7 @@ export default function LinkConsentDialog({
     },
   });
 
-  const form = useForm<ConsentFormValues>({
+  const form = useForm({
     resolver: zodResolver(consentFormSchema()),
     defaultValues: {
       decision: "permit",
