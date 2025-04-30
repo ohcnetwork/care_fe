@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react";
-import { ActiveLink, usePath } from "raviger";
+import { ActiveLink } from "raviger";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -31,41 +31,31 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import { NavigationLink } from "./facility-nav";
 
-const isChildActive = (link: NavigationLink, currentPath: string) => {
-  if (!link.children) return false;
-
+const isChildActive = (link: NavigationLink, currentPath: string): boolean => {
   if (
-    link.matchPath &&
-    link.matchPath.some((path) => currentPath.includes(path))
+    link.url &&
+    (currentPath === link.url || currentPath.startsWith(link.url))
   ) {
-    console.log(`Found match for ${link.name} at top-level`);
     return true;
   }
-
-  return link.children.some((child) => {
-    console.log("Checking child:", child.name);
-    if (
-      child.matchPath &&
-      child.matchPath.some((path) => currentPath.includes(path))
-    ) {
-      console.log(`Found match for ${child.name} at child-level`);
-      return true;
+  if (link.children) {
+    if (link.children) {
+      return link.children.some((child) => isChildActive(child, currentPath));
     }
-
-    return currentPath.startsWith(child.url);
-  });
+  }
+  return false;
 };
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const currentPath = usePath() || "/";
+  const currentPath = window.location.pathname;
 
   return (
     <SidebarGroup>
       <SidebarMenu>
         {links
-          .filter((link) => link.visibility !== false)
+          .filter((link) => link.visibility !== false && !link.hidden)
           .map((link) => (
             <>
               {link.children ? (
@@ -114,9 +104,13 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                               <SidebarMenuSubButton
                                 asChild
                                 data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
-                                className={
-                                  "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-                                }
+                                className={cn(
+                                  "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700",
+                                  {
+                                    "bg-white text-green-700 shadow":
+                                      isChildActive(subItem, currentPath),
+                                  },
+                                )}
                               >
                                 <ActiveLink
                                   href={subItem.url}
@@ -145,7 +139,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                     data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     <ActiveLink
-                      href={link.url}
+                      href={link.url || "/"}
                       activeClass="bg-white text-green-700 shadow-sm"
                       exactActiveClass="bg-white text-green-700 shadow-sm"
                     >
@@ -174,7 +168,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
 
 function PopoverMenu({ link }: { link: NavigationLink }) {
   const [open, setOpen] = useState(false);
-  const currentPath = usePath() || "/";
+  const currentPath = window.location.pathname;
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>

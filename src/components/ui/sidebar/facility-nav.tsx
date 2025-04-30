@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { TFunction } from "i18next";
+import { usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { NavMain } from "@/components/ui/sidebar/nav-main";
@@ -18,7 +19,7 @@ export interface NavigationLink {
   icon?: string;
   visibility?: boolean;
   children?: NavigationLink[];
-  matchPath?: string[];
+  hidden?: boolean;
 }
 
 interface FacilityNavProps {
@@ -35,6 +36,8 @@ function generateFacilityLinks(
     canCreateEncounter: boolean;
     canViewEncounter: boolean;
   },
+  patientId?: string,
+  encounterId?: string,
 ) {
   if (!selectedFacility) return [];
 
@@ -63,7 +66,15 @@ function generateFacilityLinks(
         {
           name: t("encounters"),
           url: `${baseUrl}/encounters/patients`,
-          matchPath: [`/updates`],
+          children: [
+            patientId && encounterId
+              ? {
+                  name: t("encounter_updates"),
+                  url: `${baseUrl}/patient/${patientId}/encounter/${encounterId}/updates`,
+                  hidden: true,
+                }
+              : null,
+          ].filter(Boolean) as NavigationLink[],
         },
         {
           name: t("locations"),
@@ -109,6 +120,14 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
 
+  const currentPath = usePath();
+
+  const pathMatch = currentPath?.match(
+    /\/facility\/[^/]+\/patient\/([^/]+)\/encounter\/([^/]+)\/updates/,
+  );
+  const patientId = pathMatch?.[1];
+  const encounterId = pathMatch?.[2];
+
   const { data: facilityData } = useQuery({
     queryKey: ["facility", selectedFacility?.id],
     queryFn: query(routes.getPermittedFacility, {
@@ -132,6 +151,14 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canViewEncounter,
   };
   return (
-    <NavMain links={generateFacilityLinks(selectedFacility, t, permissions)} />
+    <NavMain
+      links={generateFacilityLinks(
+        selectedFacility,
+        t,
+        permissions,
+        patientId,
+        encounterId,
+      )}
+    />
   );
 }
