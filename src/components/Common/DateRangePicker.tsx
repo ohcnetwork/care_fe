@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -55,7 +56,11 @@ export function DateRangePicker({
           <DatePicker
             date={endDate}
             onChange={handleEndDateChange}
-            disabled={(date) => (startDate ? date < startDate : false)}
+            disabled={(date) => {
+              return startDate
+                ? dayjs(date).isBefore(dayjs(startDate), "day")
+                : false;
+            }}
           />
         </div>
       </div>
