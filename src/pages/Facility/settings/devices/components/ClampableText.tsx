@@ -21,6 +21,11 @@ const ClampableText: React.FC<ClampableTextProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
+  const lineVariants: { [key: number]: string } = {
+    1: "line-clamp-1",
+    2: "line-clamp-2",
+    3: "line-clamp-3",
+  };
 
   useEffect(() => {
     if (textRef.current) {
@@ -34,7 +39,7 @@ const ClampableText: React.FC<ClampableTextProps> = ({
     <div className={`${className}`}>
       <div
         ref={textRef}
-        className={!isExpanded ? `line-clamp-${linesToClamp}` : ""}
+        className={!isExpanded ? lineVariants[linesToClamp] : ""}
       >
         {text}
       </div>
