@@ -85,6 +85,103 @@ const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
   onset: { onset_datetime: new Date().toISOString().split("T")[0] },
 };
 
+function DatePickerField({
+  onsetDatetime,
+  onChange,
+  disabled,
+  isSymptomInSheet,
+  hasId,
+}: {
+  onsetDatetime?: string;
+  onChange: (date: Date | undefined) => void;
+  disabled?: boolean;
+  isSymptomInSheet: boolean;
+  hasId: boolean;
+}) {
+  return (
+    <CombinedDatePicker
+      value={onsetDatetime ? new Date(onsetDatetime) : undefined}
+      onChange={onChange}
+      disabled={disabled || (!isSymptomInSheet && hasId)}
+      dateFormat="P"
+      buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+    />
+  );
+}
+
+function StatusSelect({
+  status,
+  onValueChange,
+  disabled,
+}: {
+  status: string;
+  onValueChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select value={status} onValueChange={onValueChange} disabled={disabled}>
+      <SelectTrigger className="h-8 md:h-9">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {SYMPTOM_CLINICAL_STATUS.map((status) => (
+          <SelectItem key={status} value={status}>
+            {t(status)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function SeveritySelect({
+  severity,
+  onValueChange,
+  disabled,
+}: {
+  severity: string;
+  onValueChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select value={severity} onValueChange={onValueChange} disabled={disabled}>
+      <SelectTrigger className="h-8 md:h-9">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {SYMPTOM_SEVERITY.map((severity) => (
+          <SelectItem key={severity} value={severity}>
+            {t(severity)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function NotesInput({
+  note,
+  onChange,
+  disabled,
+}: {
+  note?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Input
+      type="text"
+      placeholder={t("additional_notes")}
+      value={note || ""}
+      onChange={onChange}
+      disabled={disabled}
+    />
+  );
+}
+
 function convertToSymptomRequest(symptom: Symptom): SymptomRequest {
   return {
     id: symptom.id,
@@ -216,68 +313,6 @@ const SymptomRow = React.memo(function SymptomRow({
 
   const handleRemove = useCallback(() => onRemove(index), [index, onRemove]);
 
-  const datePickerField = (
-    <CombinedDatePicker
-      value={
-        symptom.onset?.onset_datetime
-          ? new Date(symptom.onset.onset_datetime)
-          : undefined
-      }
-      onChange={handleDateChange}
-      disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
-      dateFormat="P"
-      buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
-    />
-  );
-
-  const statusSelect = (
-    <Select
-      value={symptom.clinical_status}
-      onValueChange={handleStatusChange}
-      disabled={disabled}
-    >
-      <SelectTrigger className="h-8 md:h-9">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {SYMPTOM_CLINICAL_STATUS.map((status) => (
-          <SelectItem key={status} value={status}>
-            {t(status)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-
-  const severitySelect = (
-    <Select
-      value={symptom.severity}
-      onValueChange={handleSeverityChange}
-      disabled={disabled}
-    >
-      <SelectTrigger className="h-8 md:h-9">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {SYMPTOM_SEVERITY.map((severity) => (
-          <SelectItem key={severity} value={severity}>
-            {t(severity)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-
-  const notesInput = (
-    <Input
-      type="text"
-      placeholder={t("additional_notes")}
-      value={symptom.note || ""}
-      onChange={handleNotesChange}
-      disabled={disabled}
-    />
-  );
-
   if (isSymptomInSheet) {
     return (
       <div className="space-y-3">
@@ -285,25 +320,43 @@ const SymptomRow = React.memo(function SymptomRow({
           <div className="text-sm font-medium text-gray-700 mb-1">
             {t("onset_date")}
           </div>
-          {datePickerField}
+          <DatePickerField
+            onsetDatetime={symptom.onset?.onset_datetime}
+            onChange={handleDateChange}
+            disabled={disabled}
+            isSymptomInSheet={isSymptomInSheet}
+            hasId={!!symptom.id}
+          />
         </div>
         <div>
           <div className="text-sm font-medium text-gray-700 mb-1">
             {t("status")}
           </div>
-          {statusSelect}
+          <StatusSelect
+            status={symptom.clinical_status}
+            onValueChange={handleStatusChange}
+            disabled={disabled}
+          />
         </div>
         <div>
           <div className="text-sm font-medium text-gray-700 mb-1">
             {t("severity")}
           </div>
-          {severitySelect}
+          <SeveritySelect
+            severity={symptom.severity}
+            onValueChange={handleSeverityChange}
+            disabled={disabled}
+          />
         </div>
         <div>
           <div className="text-sm font-medium text-gray-700 mb-1">
             {t("note")}
           </div>
-          {notesInput}
+          <NotesInput
+            note={symptom.note}
+            onChange={handleNotesChange}
+            disabled={disabled}
+          />
         </div>
       </div>
     );
@@ -403,25 +456,43 @@ const SymptomRow = React.memo(function SymptomRow({
                   <div className="block text-sm font-medium  mb-1">
                     {t("onset_date")}
                   </div>
-                  {datePickerField}
+                  <DatePickerField
+                    onsetDatetime={symptom.onset?.onset_datetime}
+                    onChange={handleDateChange}
+                    disabled={disabled}
+                    isSymptomInSheet={isSymptomInSheet}
+                    hasId={!!symptom.id}
+                  />
                 </div>
                 <div>
                   <div className="block text-sm font-medium mb-1">
                     {t("status")}
                   </div>
-                  {statusSelect}
+                  <StatusSelect
+                    status={symptom.clinical_status}
+                    onValueChange={handleStatusChange}
+                    disabled={disabled}
+                  />
                 </div>
                 <div>
                   <div className="block text-sm font-medium  mb-1">
                     {t("severity")}
                   </div>
-                  {severitySelect}
+                  <SeveritySelect
+                    severity={symptom.severity}
+                    onValueChange={handleSeverityChange}
+                    disabled={disabled}
+                  />
                 </div>
                 <div>
                   <div className="block text-sm font-medium  mb-1">
                     {t("note")}
                   </div>
-                  {notesInput}
+                  <NotesInput
+                    note={symptom.note}
+                    onChange={handleNotesChange}
+                    disabled={disabled}
+                  />
                 </div>
               </CardContent>
             </CollapsibleContent>
@@ -445,9 +516,29 @@ const SymptomRow = React.memo(function SymptomRow({
             {symptom.code.display}
           </div>
         </TableCell>
-        <TableCell>{datePickerField}</TableCell>
-        <TableCell>{statusSelect}</TableCell>
-        <TableCell>{severitySelect}</TableCell>
+        <TableCell>
+          <DatePickerField
+            onsetDatetime={symptom.onset?.onset_datetime}
+            onChange={handleDateChange}
+            disabled={disabled}
+            isSymptomInSheet={isSymptomInSheet}
+            hasId={!!symptom.id}
+          />
+        </TableCell>
+        <TableCell>
+          <StatusSelect
+            status={symptom.clinical_status}
+            onValueChange={handleStatusChange}
+            disabled={disabled}
+          />
+        </TableCell>
+        <TableCell>
+          <SeveritySelect
+            severity={symptom.severity}
+            onValueChange={handleSeverityChange}
+            disabled={disabled}
+          />
+        </TableCell>
         <TableCell className="text-center">
           <SymptomActionsMenu
             symptom={symptom}
@@ -462,7 +553,11 @@ const SymptomRow = React.memo(function SymptomRow({
       {showNotes && (
         <TableRow>
           <TableCell colSpan={5} className="px-3 pb-3">
-            {notesInput}
+            <NotesInput
+              note={symptom.note}
+              onChange={handleNotesChange}
+              disabled={disabled}
+            />
           </TableCell>
         </TableRow>
       )}
