@@ -13,25 +13,12 @@ import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 /**
  * A short hand for defining response value types
  */
-type RVBase<T extends string> = {
+type RV<T extends string, V> = {
   coding?: Code;
   unit?: Code;
   type: T;
+  value: V | Code | number;
 };
-type RVValue<T extends string, V> = RVBase<T> & {
-  value?: V;
-};
-
-type RVCode<T extends string> = RVBase<T> & {
-  value?: Code;
-};
-
-type RVQuantity<T extends string> = RVBase<T> & {
-  value?: number;
-};
-
-type RV<T extends string, V> = RVValue<T, V> | RVCode<T> | RVQuantity<T>;
-
 export type ResponseValue =
   | RV<"string", string | undefined>
   | RV<"number", number | undefined>
