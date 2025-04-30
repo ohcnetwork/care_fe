@@ -169,7 +169,7 @@ export default function PatientRegistration(
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       nationality: "India",
@@ -179,6 +179,7 @@ export default function PatientRegistration(
       same_phone_number: false,
       same_address: true,
     },
+    mode: "onChange",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
@@ -403,9 +404,7 @@ export default function PatientRegistration(
                       <PhoneInput
                         {...field}
                         onChange={(value) => {
-                          form.setValue("phone_number", value || "", {
-                            shouldDirty: true,
-                          });
+                          field.onChange(value);
                           if (form.getValues("same_phone_number")) {
                             form.setValue(
                               "emergency_phone_number",
@@ -432,6 +431,13 @@ export default function PatientRegistration(
                                     form.setValue(
                                       "emergency_phone_number",
                                       form.watch("phone_number"),
+                                      { shouldValidate: true },
+                                    );
+                                  } else {
+                                    form.setValue(
+                                      "emergency_phone_number",
+                                      "",
+                                      { shouldValidate: true },
                                     );
                                   }
                                 }}
@@ -714,12 +720,11 @@ export default function PatientRegistration(
                       <Textarea
                         {...field}
                         onChange={(e) => {
-                          form.setValue("address", e.target.value, {
-                            shouldDirty: true,
-                          });
+                          field.onChange(e);
                           if (form.getValues("same_address")) {
                             form.setValue("permanent_address", e.target.value, {
                               shouldDirty: true,
+                              shouldValidate: true,
                             });
                           }
                         }}
@@ -741,6 +746,7 @@ export default function PatientRegistration(
                                     form.setValue(
                                       "permanent_address",
                                       form.getValues("address"),
+                                      { shouldValidate: true },
                                     );
                                   }
                                 }}
@@ -786,15 +792,12 @@ export default function PatientRegistration(
                       <Input
                         type="number"
                         {...field}
-                        onChange={(e) =>
-                          form.setValue(
-                            "pincode",
-                            e.target.value
-                              ? Number(e.target.value)
-                              : (undefined as unknown as number),
-                            { shouldDirty: true },
-                          )
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value
+                            ? Number(e.target.value)
+                            : undefined;
+                          field.onChange(value);
+                        }}
                         data-cy="pincode-input"
                       />
                     </FormControl>
@@ -847,6 +850,7 @@ export default function PatientRegistration(
                             onChange={(value) =>
                               form.setValue("geo_organization", value, {
                                 shouldDirty: true,
+                                shouldValidate: true,
                               })
                             }
                           />
