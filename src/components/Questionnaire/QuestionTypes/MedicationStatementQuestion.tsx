@@ -247,29 +247,6 @@ export function MedicationStatementQuestion({
     );
   };
 
-  const newMedicationSheetContent = (
-    <div className="space-y-4 p-3">
-      {newMedicationInSheet && (
-        <MedicationStatementGridRow
-          medication={newMedicationInSheet}
-          disabled={disabled}
-          onUpdate={(updates) => {
-            if (newMedicationInSheet) {
-              setNewMedicationInSheet({
-                ...newMedicationInSheet,
-                ...updates,
-              });
-            }
-          }}
-          onRemove={() => {}}
-          index={-1}
-          questionId={question.id}
-          errors={errors}
-        />
-      )}
-    </div>
-  );
-
   const addMedicationPlaceholder = t("add_medication", {
     count: medications.length + 1,
   });
@@ -517,7 +494,24 @@ export function MedicationStatementQuestion({
           onConfirm={handleConfirmMedication}
           placeholder={addMedicationPlaceholder}
         >
-          {newMedicationSheetContent}
+          {
+            <div className="space-y-4 p-3">
+              <MedicationStatementGridRow
+                medication={newMedicationInSheet!}
+                disabled={disabled}
+                onUpdate={(updates) => {
+                  setNewMedicationInSheet((prev) => ({
+                    ...prev!,
+                    ...updates,
+                  }));
+                }}
+                onRemove={() => {}}
+                index={-1}
+                questionId={question.id}
+                errors={errors}
+              />
+            </div>
+          }
         </EntitySelectionSheet>
       )}
     </div>
