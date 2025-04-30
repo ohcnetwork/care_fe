@@ -9,6 +9,11 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  ExpandableText,
+  ExpandableTextContent,
+  ExpandableTextExpandButton,
+} from "@/components/ui/expandable-text";
+import {
   Table,
   TableBody,
   TableCell,
@@ -27,7 +32,6 @@ import { ServiceHistory } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
 import AddServiceHistorySheet from "./AddServiceHistorySheet";
-import ClampableText from "./ClampableText";
 import EditServiceHistorySheet from "./EditServiceHistorySheet";
 
 interface DeviceServiceHistoryProps {
@@ -106,7 +110,14 @@ export default function DeviceServiceHistory({
                         {format(new Date(service.serviced_on), "PPP")}
                       </TableCell>
                       <TableCell className="max-w-md whitespace-normal">
-                        <ClampableText text={service.note} />
+                        <ExpandableText>
+                          <ExpandableTextContent>
+                            {service.note}
+                          </ExpandableTextContent>
+                          <ExpandableTextExpandButton>
+                            {t("read_more")}
+                          </ExpandableTextExpandButton>
+                        </ExpandableText>
                       </TableCell>
                       <TableCell className="text-right ">
                         <EditServiceHistorySheet
