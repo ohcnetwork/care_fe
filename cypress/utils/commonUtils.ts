@@ -8,23 +8,28 @@ function getRandomIndex(max: number): number {
 // Data Generators
 export function generateName(onlyFirstName: boolean = false): string {
   const firstNames = [
-    "John",
-    "Jane",
-    "Alex",
-    "Sarah",
-    "Michael",
-    "Emma",
-    "David",
-    "Maria",
+    "Aarav",
+    "Aditi",
+    "Arjun",
+    "Priya",
+    "Ishaan",
+    "Kavya",
+    "Rahul",
+    "Ananya",
+    "Vihaan",
+    "Meera",
   ];
   const lastNames = [
-    "Smith",
-    "Johnson",
-    "Williams",
-    "Brown",
-    "Jones",
-    "Garcia",
-    "Miller",
+    "Patel",
+    "Sharma",
+    "Singh",
+    "Kumar",
+    "Gupta",
+    "Verma",
+    "Malhotra",
+    "Choudhary",
+    "Mehta",
+    "Reddy",
   ];
 
   const randomFirst = firstNames[getRandomIndex(firstNames.length)];
