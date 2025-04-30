@@ -8,23 +8,28 @@ function getRandomIndex(max: number): number {
 // Data Generators
 export function generateName(onlyFirstName: boolean = false): string {
   const firstNames = [
-    "John",
-    "Jane",
-    "Alex",
-    "Sarah",
-    "Michael",
-    "Emma",
-    "David",
-    "Maria",
+    "Aarav",
+    "Aditi",
+    "Arjun",
+    "Priya",
+    "Ishaan",
+    "Kavya",
+    "Rahul",
+    "Ananya",
+    "Vihaan",
+    "Meera",
   ];
   const lastNames = [
-    "Smith",
-    "Johnson",
-    "Williams",
-    "Brown",
-    "Jones",
-    "Garcia",
-    "Miller",
+    "Patel",
+    "Sharma",
+    "Singh",
+    "Kumar",
+    "Gupta",
+    "Verma",
+    "Malhotra",
+    "Choudhary",
+    "Mehta",
+    "Reddy",
   ];
 
   const randomFirst = firstNames[getRandomIndex(firstNames.length)];
@@ -293,4 +298,20 @@ export function generateDeptName(prefix = ""): string {
   const randomDeptType = deptTypes[getRandomIndex(deptTypes.length)];
   const randomNumber = (getRandomIndex(900) + 100).toString();
   return `${prefix}${randomDeptType}-${randomNumber}`;
+
+export function generateEmailDomain(): string {
+  const domains = [
+    "test.com",
+    "example.com",
+    "demo.com",
+    "qa.com",
+    "dev.com",
+    "staging.com",
+    "sandbox.com",
+    "mock.com",
+    "temp.com",
+    "local.com",
+  ];
+
+  return domains[getRandomIndex(domains.length)];
 }
