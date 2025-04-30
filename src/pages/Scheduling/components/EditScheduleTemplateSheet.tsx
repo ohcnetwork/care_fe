@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isBefore, parse } from "date-fns";
+import dayjs from "dayjs";
 import { Loader2, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -163,12 +163,10 @@ const ScheduleTemplateEditor = ({
       }),
     })
     .refine(
-      (data) => {
-        return isBefore(data.valid_from, data.valid_to);
-      },
+      (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
       {
-        message: t("from_date_must_be_before_to_date"),
-        path: ["valid_from"],
+        message: t("to_date_equal_or_after_from_date"),
+        path: ["valid_to"],
       },
     );
 
@@ -589,10 +587,10 @@ const NewAvailabilityCard = ({
     .refine(
       (data) => {
         // Parse time strings into Date objects for comparison
-        const startTime = parse(data.start_time, "HH:mm", new Date());
-        const endTime = parse(data.end_time, "HH:mm", new Date());
+        const startTime = dayjs(data.start_time, "HH:mm");
+        const endTime = dayjs(data.end_time, "HH:mm");
 
-        return isBefore(startTime, endTime);
+        return startTime.isBefore(endTime);
       },
       {
         message: t("start_time_must_be_before_end_time"),

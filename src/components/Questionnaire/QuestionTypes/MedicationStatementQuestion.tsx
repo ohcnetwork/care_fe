@@ -254,14 +254,14 @@ export function MedicationStatementQuestion({
           <div className="min-w-fit">
             <div
               className={cn(
-                "max-w-[1600px] relative lg:border border-gray-200 rounded-md",
+                "max-w-[2000px] relative lg:border border-gray-200 rounded-md",
                 {
                   "bg-gray-50/50": !desktopLayout,
                 },
               )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_450px_190px_200px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
@@ -361,7 +361,7 @@ export function MedicationStatementQuestion({
                           </div>
                         </div>
                         <CollapsibleContent>
-                          <div className="py-4 space-y-4 bg-white mx-2 mb-1">
+                          <div className="mt-2 px-2 py-4 space-y-4 bg-white mx-1 mb-1">
                             <MedicationStatementGridRow
                               medication={medication}
                               disabled={disabled}
@@ -436,7 +436,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_450px_190px_200px_48px] border-b border-gray-200 hover:bg-gray-50/50",
+        "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] border-b border-gray-200 hover:bg-gray-50/50",
         {
           "opacity-40 pointer-events-none":
             medication.status === "entered_in_error",
@@ -520,7 +520,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
 
       {/* Dosage Instructions */}
-      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 px-1 py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage_instructions")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -601,7 +601,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       </div>
 
       {/* Reason */}
-      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 px-1 py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("reason")}</Label>
         <Input
           maxLength={100}
