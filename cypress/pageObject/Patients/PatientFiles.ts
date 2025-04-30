@@ -208,6 +208,7 @@ export class PatientFiles {
 
   filterActiveFiles() {
     this.interceptFilterRequest();
+    cy.wait(200);
     cy.verifyAndClickElement('[data-cy="files-filter-button"]', "Filter");
     cy.verifyAndClickElement('[data-cy="active-files-button"]', "Active Files");
     this.verifyFilterApiCall();
