@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 type BreathState = "in" | "out";
 
@@ -9,8 +8,6 @@ export function useSessionTimer() {
   const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
-    toast.dismiss();
-
     const tick = () => {
       const now = Date.now();
       const elapsedMs = now - startTimeRef.current;
