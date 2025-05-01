@@ -7,6 +7,101 @@ import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/hooks/useAuthUser";
 import { useSessionTimer } from "@/hooks/useSessionTimer";
 
+// Define digitMaps outside the component to prevent recreation on each render
+const digitMaps: Record<string, number[][]> = {
+  "0": [
+    [1, 1, 1],
+    [1, 0, 1],
+    [1, 0, 1],
+    [1, 0, 1],
+    [1, 1, 1],
+  ],
+  "1": [
+    [0, 0, 1],
+    [0, 0, 1],
+    [0, 0, 1],
+    [0, 0, 1],
+    [0, 0, 1],
+  ],
+  "2": [
+    [1, 1, 1],
+    [0, 0, 1],
+    [1, 1, 1],
+    [1, 0, 0],
+    [1, 1, 1],
+  ],
+  "3": [
+    [1, 1, 1],
+    [0, 0, 1],
+    [1, 1, 1],
+    [0, 0, 1],
+    [1, 1, 1],
+  ],
+  "4": [
+    [1, 0, 1],
+    [1, 0, 1],
+    [1, 1, 1],
+    [0, 0, 1],
+    [0, 0, 1],
+  ],
+  "5": [
+    [1, 1, 1],
+    [1, 0, 0],
+    [1, 1, 1],
+    [0, 0, 1],
+    [1, 1, 1],
+  ],
+  "6": [
+    [1, 1, 1],
+    [1, 0, 0],
+    [1, 1, 1],
+    [1, 0, 1],
+    [1, 1, 1],
+  ],
+  "7": [
+    [1, 1, 1],
+    [0, 0, 1],
+    [0, 0, 1],
+    [0, 0, 1],
+    [0, 0, 1],
+  ],
+  "8": [
+    [1, 1, 1],
+    [1, 0, 1],
+    [1, 1, 1],
+    [1, 0, 1],
+    [1, 1, 1],
+  ],
+  "9": [
+    [1, 1, 1],
+    [1, 0, 1],
+    [1, 1, 1],
+    [0, 0, 1],
+    [1, 1, 1],
+  ],
+  ":": [
+    [0, 0, 0],
+    [0, 1, 0],
+    [0, 0, 0],
+    [0, 1, 0],
+    [0, 0, 0],
+  ],
+  "-": [
+    [0, 0, 0],
+    [0, 0, 0],
+    [1, 1, 1],
+    [0, 0, 0],
+    [0, 0, 0],
+  ],
+  "·": [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 1, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+  ],
+};
+
 export default function RippleDigitalTimer() {
   const { signOut } = useAuthContext();
   const { t } = useTranslation();
@@ -19,100 +114,6 @@ export default function RippleDigitalTimer() {
     useSessionTimer();
 
   const renderSegmentedDigit = (digit: string) => {
-    const digitMaps: Record<string, number[][]> = {
-      "0": [
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 0, 1],
-        [1, 0, 1],
-        [1, 1, 1],
-      ],
-      "1": [
-        [0, 0, 1],
-        [0, 0, 1],
-        [0, 0, 1],
-        [0, 0, 1],
-        [0, 0, 1],
-      ],
-      "2": [
-        [1, 1, 1],
-        [0, 0, 1],
-        [1, 1, 1],
-        [1, 0, 0],
-        [1, 1, 1],
-      ],
-      "3": [
-        [1, 1, 1],
-        [0, 0, 1],
-        [1, 1, 1],
-        [0, 0, 1],
-        [1, 1, 1],
-      ],
-      "4": [
-        [1, 0, 1],
-        [1, 0, 1],
-        [1, 1, 1],
-        [0, 0, 1],
-        [0, 0, 1],
-      ],
-      "5": [
-        [1, 1, 1],
-        [1, 0, 0],
-        [1, 1, 1],
-        [0, 0, 1],
-        [1, 1, 1],
-      ],
-      "6": [
-        [1, 1, 1],
-        [1, 0, 0],
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 1, 1],
-      ],
-      "7": [
-        [1, 1, 1],
-        [0, 0, 1],
-        [0, 0, 1],
-        [0, 0, 1],
-        [0, 0, 1],
-      ],
-      "8": [
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 1, 1],
-      ],
-      "9": [
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 1, 1],
-        [0, 0, 1],
-        [1, 1, 1],
-      ],
-      ":": [
-        [0, 0, 0],
-        [0, 1, 0],
-        [0, 0, 0],
-        [0, 1, 0],
-        [0, 0, 0],
-      ],
-      "-": [
-        [0, 0, 0],
-        [0, 0, 0],
-        [1, 1, 1],
-        [0, 0, 0],
-        [0, 0, 0],
-      ],
-      "·": [
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 1, 0],
-        [0, 0, 0],
-        [0, 0, 0],
-      ],
-    };
-
     const map = digitMaps[digit] || digitMaps["0"];
 
     return (
@@ -216,16 +217,18 @@ export default function RippleDigitalTimer() {
             "It looks like your session timed out for a moment. Take a quick breather, then log in again to continue.",
           )}
         </p>
-        <div className={cn("mt-6 ")} onClick={signOut}>
-          <a
-            className={cn(
-              "  transition duration-300 ease-in-out rounded-md select-none bg-emerald-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800",
-            )}
-            style={{ cursor: "pointer" }}
-          >
-            {t("Log in again")}
-          </a>
-        </div>
+        <button
+          type="button"
+          onClick={signOut}
+          className={cn(
+            "mt-6 transition duration-300 ease-in-out rounded-md select-none",
+            "bg-emerald-700 px-3.5 py-2.5 text-sm font-semibold text-white",
+            "shadow-sm hover:bg-emerald-600 focus-visible:outline-2",
+            "focus-visible:outline-offset-2 focus-visible:outline-emerald-800",
+          )}
+        >
+          {t("Log in again")}
+        </button>
       </div>
 
       {/* Animations are now defined in the Tailwind config */}
