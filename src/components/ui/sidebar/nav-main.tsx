@@ -73,14 +73,10 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                         <SidebarMenuButton
                           data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                           tooltip={link.name}
+                          isActive={isChildActive(link, currentPath)}
                           className={cn(
                             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
-                            {
-                              "bg-white text-green-700 shadow": isChildActive(
-                                link,
-                                currentPath,
-                              ),
-                            },
+                            "group-data-[state=closed]/collapsible:data-[active=true]:bg-white group-data-[state=closed]/collapsible:data-[active=true]:text-green-700 group-data-[state=closed]/collapsible:data-[active=true]:shadow",
                           )}
                         >
                           {link.icon ? (
