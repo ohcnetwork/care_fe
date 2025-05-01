@@ -20,6 +20,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
@@ -253,7 +254,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
                       </p>
                       <p className="flex items-center gap-1">
                         <CareIcon icon="l-user" className="text-gray-400" />
-                        {drawing.created_by.username}
+                        {formatName(drawing.created_by)}
                       </p>
                     </div>
                   </CardContent>

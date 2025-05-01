@@ -59,7 +59,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { inactiveEncounterStatus } from "@/types/emr/encounter";
@@ -152,7 +152,7 @@ function MessageItem({
           >
             <span className="flex pr-2">
               <Avatar
-                name={message.created_by?.username}
+                name={formatName(message?.created_by, true)}
                 imageUrl={message.created_by?.profile_picture_url}
                 className="size-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
               />
@@ -169,7 +169,7 @@ function MessageItem({
         >
           <p className="text-xs space-x-2 mb-1">
             <span className="text-gray-700 font-medium">
-              {message.created_by.username}
+              {formatName(message.created_by)}
             </span>
             <time
               className="text-gray-500"
