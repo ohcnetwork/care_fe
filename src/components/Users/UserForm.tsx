@@ -359,7 +359,6 @@ export default function UserForm({
                     label: prefix,
                     value: prefix,
                   }))}
-                  freeInput
                   value={field.value || ""}
                   onChange={field.onChange}
                   noOptionsMessage=""
