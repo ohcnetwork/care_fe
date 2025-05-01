@@ -102,7 +102,7 @@ const digitMaps: Record<string, number[][]> = {
   ],
 };
 
-export default function RippleDigitalTimer() {
+export default function SessionExpired() {
   const { signOut } = useAuthContext();
   const { t } = useTranslation();
 
