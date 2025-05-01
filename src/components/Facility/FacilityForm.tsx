@@ -78,7 +78,7 @@ export default function FacilityForm({
 
   type FacilityFormValues = z.infer<typeof facilityFormSchema>;
 
-  const form = useForm<FacilityFormValues>({
+  const form = useForm({
     resolver: zodResolver(facilityFormSchema),
     defaultValues: {
       facility_type: "",
@@ -314,7 +314,7 @@ export default function FacilityForm({
                         icon: obj.icon,
                       }))}
                       onValueChange={handleFeatureChange}
-                      value={field.value.map((val) => val.toString())}
+                      value={field.value?.map((val) => val.toString()) || []}
                       placeholder={t("select_facility_feature")}
                       id="facility-features"
                     />
