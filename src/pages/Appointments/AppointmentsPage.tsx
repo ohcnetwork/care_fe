@@ -520,16 +520,23 @@ export default function AppointmentsPage({
                             : undefined
                         }
                         onChange={(date) => {
+                          if (qParams.date_to && date) {
+                            if (
+                              dayjs(date).isAfter(dayjs(qParams.date_to), "day")
+                            ) {
+                              updateQuery({
+                                date_from: date ? dateQueryString(date) : null,
+                                date_to: null,
+                                slot: null,
+                              });
+                              return;
+                            }
+                          }
                           updateQuery({
                             date_from: date ? dateQueryString(date) : null,
                             slot: null,
                           });
                         }}
-                        disabled={(date) =>
-                          qParams.date_to
-                            ? dayjs(date).isAfter(dayjs(qParams.date_to), "day")
-                            : false
-                        }
                       />
                     </div>
 
