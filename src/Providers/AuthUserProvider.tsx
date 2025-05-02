@@ -61,7 +61,7 @@ export default function AuthUserProvider({
 
   const setUser = useSetAtom(userAtom);
   useEffect(() => {
-    setUser(user?.username ? { username: user.username } : {});
+    setUser(user);
   }, [user, setUser]);
   const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
 
