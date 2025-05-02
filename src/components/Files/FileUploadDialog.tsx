@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -52,7 +54,6 @@ export default function FileUploadDialog({
       urls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [fileUpload.files]);
-
   return (
     <Dialog
       open={open}
@@ -139,7 +140,10 @@ export default function FileUploadDialog({
                 )}
 
                 <div
-                  className={`flex items-center justify-between w-full gap-2 rounded-md bg-secondary-200 px-4 py-2 border border-gray-200 ${fileUpload.files.length > 1 ? "mb-4 mt-6" : "mb-4"}`}
+                  className={cn(
+                    "flex items-center justify-between w-full gap-2 rounded-md bg-secondary-200 px-4 py-2 border border-gray-200",
+                    fileUpload.files.length > 1 ? "mb-4 mt-6" : "mb-4",
+                  )}
                 >
                   <span
                     className="flex items-center truncate"
