@@ -11,6 +11,7 @@ import {
   isYesterday,
   subDays,
 } from "date-fns";
+import dayjs from "dayjs";
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect } from "react";
@@ -23,6 +24,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import {
   Command,
   CommandEmpty,
@@ -57,7 +59,6 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { DateRangePicker } from "@/components/Common/DateRangePicker";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -505,25 +506,72 @@ export default function AppointmentsPage({
                       </Button>
                     </div>
 
-                    <DateRangePicker
-                      date={{
-                        from: qParams.date_from
-                          ? new Date(qParams.date_from)
-                          : undefined,
-                        to: qParams.date_to
-                          ? new Date(qParams.date_to)
-                          : undefined,
-                      }}
-                      onChange={(date) =>
-                        updateQuery({
-                          date_from: date?.from
-                            ? dateQueryString(date.from)
-                            : null,
-                          date_to: date?.to ? dateQueryString(date?.to) : null,
-                          slot: null,
-                        })
-                      }
-                    />
+                    <div className="flex flex-col gap-2">
+                      <label
+                        htmlFor="start-date"
+                        className="text-sm font-medium text-muted-foreground"
+                      >
+                        {t("start_date")}
+                      </label>
+                      <CombinedDatePicker
+                        value={
+                          qParams.date_from
+                            ? new Date(qParams.date_from)
+                            : undefined
+                        }
+                        onChange={(date) => {
+                          if (
+                            qParams.date_to &&
+                            date &&
+                            dayjs(date).isAfter(dayjs(qParams.date_to), "day")
+                          ) {
+                            toast.error(
+                              t("start_date_cannot_be_after_end_date"),
+                            );
+                            return;
+                          }
+                          updateQuery({
+                            date_from: date ? dateQueryString(date) : null,
+                            slot: null,
+                          });
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label
+                        htmlFor="end-date"
+                        className="text-sm font-medium text-muted-foreground"
+                      >
+                        {t("end_date")}
+                      </label>
+                      <CombinedDatePicker
+                        value={
+                          qParams.date_to
+                            ? new Date(qParams.date_to)
+                            : undefined
+                        }
+                        onChange={(date) => {
+                          if (
+                            qParams.date_from &&
+                            date &&
+                            dayjs(date).isBefore(
+                              dayjs(qParams.date_from),
+                              "day",
+                            )
+                          ) {
+                            toast.error(
+                              t("end_date_cannot_be_before_start_date"),
+                            );
+                            return;
+                          }
+                          updateQuery({
+                            date_to: date ? dateQueryString(date) : null,
+                            slot: null,
+                          });
+                        }}
+                      />
+                    </div>
                   </div>
                 </PopoverContent>
               </Popover>
