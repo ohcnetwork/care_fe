@@ -39,9 +39,7 @@ const isChildActive = (link: NavigationLink, currentPath: string): boolean => {
     return true;
   }
   if (link.children) {
-    if (link.children) {
-      return link.children.some((child) => isChildActive(child, currentPath));
-    }
+    return link.children.some((child) => isChildActive(child, currentPath));
   }
   return false;
 };
