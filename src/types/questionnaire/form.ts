@@ -17,7 +17,7 @@ type RV<T extends string, V> = {
   coding?: Code;
   unit?: Code;
   type: T;
-  value: V | Code | number;
+  value: V;
 };
 export type ResponseValue =
   | RV<"string", string | undefined>
