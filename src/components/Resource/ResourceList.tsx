@@ -68,7 +68,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
     limit: 15,
     cacheBlacklist: ["title"],
   });
-  const { status, title, outgoing } = qParams;
+  const { status, title, incoming } = qParams;
 
   const isActive = !status || !COMPLETED.includes(status);
   const currentStatuses = isActive ? ACTIVE : COMPLETED;
@@ -87,7 +87,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
         title,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
-        ...(outgoing
+        ...(!incoming
           ? { origin_facility: facilityId }
           : { assigned_facility: facilityId }),
       },
@@ -170,7 +170,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 </Popover>
                 <div className="items-center">
                   <Tabs
-                    value={outgoing ? "outgoing" : "incoming"}
+                    value={incoming ? "incoming" : "outgoing"}
                     className="w-full"
                   >
                     <TabsList className="bg-transparent p-0 h-8">
@@ -179,7 +179,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                         onClick={() =>
                           updateQuery({
-                            outgoing: true,
+                            incoming: false,
                             title,
                           })
                         }
@@ -192,7 +192,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                         onClick={() =>
                           updateQuery({
-                            outgoing: false,
+                            incoming: true,
                             title,
                           })
                         }
