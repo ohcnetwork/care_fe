@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -13,9 +13,15 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { AnimatedWrapper } from "@/components/Common/AnimatedWrapper";
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
+
+import { useLocationManagement } from "@/hooks/useLocationManagement";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -28,22 +34,11 @@ import LocationMap from "./LocationMap";
 import LocationSheet from "./LocationSheet";
 import LocationView from "./LocationView";
 import { LocationCard } from "./components/LocationCard";
+import { LocationTable } from "./components/LocationTable";
 
 interface LocationSettingsProps {
   facilityId: string;
   locationId?: string;
-}
-
-function getParentChain(location: LocationListType): Set<string> {
-  const parentIds = new Set<string>();
-  let current = location.parent;
-
-  while (current) {
-    parentIds.add(current.id);
-    current = current.parent;
-  }
-
-  return parentIds;
 }
 
 export default function LocationSettings({
@@ -51,18 +46,10 @@ export default function LocationSettings({
   locationId,
 }: LocationSettingsProps) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useView("locations", "list");
   const [expandedLocations, setExpandedLocations] = useState<Set<string>>(
     new Set(),
   );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [locationToEdit, setLocationToEdit] = useState<LocationListType | null>(
-    null,
-  );
-  const ITEMS_PER_PAGE = 9;
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
@@ -75,38 +62,34 @@ export default function LocationSettings({
     queryKey: ["locations", facilityId, "all"],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode: "kind" },
-    }),
-  });
-
-  const { data: _locationOrgs } = useQuery({
-    queryKey: ["location", locationId, "organizations"],
-    queryFn: query(locationApi.getOrganizations, {
-      pathParams: { facility_id: facilityId, id: locationId as string },
-    }),
-    enabled: !!locationId,
-  });
-
-  const { data: childLocations, isLoading } = useQuery({
-    queryKey: [
-      "locations",
-      facilityId,
-      "children",
-      locationId,
-      currentPage,
-      searchQuery,
-    ],
-    queryFn: query.debounced(locationApi.list, {
-      pathParams: { facility_id: facilityId },
       queryParams: {
-        parent: locationId || "",
-        limit: ITEMS_PER_PAGE,
-        offset: (currentPage - 1) * ITEMS_PER_PAGE,
-        name: searchQuery || undefined,
-        mode: locationId ? undefined : "kind",
+        mode: "kind",
+        ordering: "sort_index",
       },
     }),
-    enabled: true,
+  });
+
+  const ITEMS_PER_PAGE = 9;
+
+  const {
+    page: currentPage,
+    setPage: setCurrentPage,
+    searchQuery,
+    setSearchQuery,
+    selectedLocation: locationToEdit,
+    isSheetOpen,
+    children: childLocations,
+    isLoading,
+    currentPageItems,
+    handleMove,
+    handleAddLocation,
+    handleEditLocation,
+    handleSheetClose,
+    isLastPage,
+  } = useLocationManagement({
+    facilityId,
+    parentId: locationId,
+    itemsPerPage: ITEMS_PER_PAGE,
   });
 
   const { data: mapLocations } = useQuery({
@@ -115,19 +98,22 @@ export default function LocationSettings({
       pathParams: { facility_id: facilityId },
       queryParams: {
         limit: 1000,
+        ordering: "sort_index",
       },
     }),
     enabled: activeTab === "map",
   });
 
+  // Reset page to 1 when locationId changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [locationId, setCurrentPage]);
+
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
-      navigate(`/facility/${facilityId}/settings/location/${location.id}`);
-      const parentIds = getParentChain(location);
-      parentIds.add(location.id);
-      setExpandedLocations(new Set([...expandedLocations, ...parentIds]));
+      navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
     },
-    [expandedLocations, facilityId],
+    [facilityId],
   );
 
   const handleToggleExpand = useCallback((locationId: string) => {
@@ -142,31 +128,15 @@ export default function LocationSettings({
     });
   }, []);
 
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchQuery(value);
-    setCurrentPage(1);
-  }, []);
+  const handleMoveUp = useCallback(
+    (location: LocationListType) => handleMove(location, "up"),
+    [handleMove],
+  );
 
-  const handleAddLocation = useCallback(() => {
-    setLocationToEdit(null);
-    setIsSheetOpen(true);
-  }, []);
-
-  const handleEditLocation = useCallback((location: LocationListType) => {
-    setLocationToEdit(location);
-    setIsSheetOpen(true);
-  }, []);
-
-  const handleSheetClose = useCallback(() => {
-    setIsSheetOpen(false);
-    setLocationToEdit(null);
-    queryClient.invalidateQueries({ queryKey: ["locations", facilityId] });
-    if (locationId) {
-      queryClient.invalidateQueries({
-        queryKey: ["location", facilityId, locationId],
-      });
-    }
-  }, [facilityId, queryClient, locationId]);
+  const handleMoveDown = useCallback(
+    (location: LocationListType) => handleMove(location, "down"),
+    [handleMove],
+  );
 
   return (
     <Page title={t("locations")} hideTitleOnPage className="p-0">
@@ -260,13 +230,13 @@ export default function LocationSettings({
                   />
                 ) : (
                   <>
-                    <div className="flex flex-col justify-between items-start gap-2 sm:gap-4">
+                    <div className="flex flex-col justify-between items-start gap-2 sm:gap-4 md:pt-4 md:px-4">
                       <div className="flex flex-col md:flex-row justify-between items-center w-full gap-4">
                         <Input
                           data-cy="location-search-input"
                           placeholder={t("search_by_name")}
-                          defaultValue={searchQuery}
-                          onChange={(e) => handleSearchChange(e.target.value)}
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
                           className="w-full lg:w-72"
                         />
                         <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
@@ -284,32 +254,73 @@ export default function LocationSettings({
                     </div>
 
                     <div className="space-y-4 overflow-hidden">
-                      <div
-                        className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4"
-                        data-cy="location-card-container"
-                      >
+                      {/* Desktop table view */}
+                      <div className="hidden lg:block md:px-4">
                         {isLoading ? (
-                          <CardGridSkeleton count={2} />
-                        ) : childLocations?.results?.length ? (
-                          childLocations.results.map(
-                            (childLocation: LocationListType) => (
-                              <LocationCard
-                                key={childLocation.id}
-                                location={childLocation}
-                                onEdit={handleEditLocation}
-                                onView={handleLocationSelect}
-                                facilityId={facilityId}
-                              />
-                            ),
-                          )
+                          <TableSkeleton count={5} />
+                        ) : currentPageItems?.length ? (
+                          <LocationTable
+                            locations={currentPageItems}
+                            onEdit={handleEditLocation}
+                            onView={handleLocationSelect}
+                            onMoveUp={handleMoveUp}
+                            onMoveDown={handleMoveDown}
+                            facilityId={facilityId}
+                            isFirstPage={currentPage === 1}
+                            isLastPage={isLastPage}
+                            currentPage={currentPage}
+                            setPage={setCurrentPage}
+                          />
                         ) : (
-                          <Card className="col-span-full">
+                          <Card>
                             <CardContent className="p-4 text-center text-gray-500">
                               {t("no_locations_found")}
                             </CardContent>
                           </Card>
                         )}
                       </div>
+
+                      {/* Mobile and tablet card view */}
+                      <div
+                        className="lg:hidden flex flex-col gap-4 sm:px-4"
+                        data-cy="location-card-container"
+                      >
+                        {isLoading ? (
+                          <CardGridSkeleton count={3} />
+                        ) : currentPageItems?.length ? (
+                          <div className="flex flex-col gap-4">
+                            {currentPageItems.map((childLocation, index) => (
+                              <AnimatedWrapper
+                                key={childLocation.id}
+                                keyValue={childLocation.id}
+                                data-testid={`location-card-${childLocation.id}`}
+                              >
+                                <LocationCard
+                                  location={childLocation}
+                                  onEdit={handleEditLocation}
+                                  onView={handleLocationSelect}
+                                  onMoveUp={handleMoveUp}
+                                  onMoveDown={handleMoveDown}
+                                  facilityId={facilityId}
+                                  index={index}
+                                  totalCount={currentPageItems.length}
+                                  isFirstPage={currentPage === 1}
+                                  isLastPage={isLastPage}
+                                  currentPage={currentPage}
+                                  setPage={setCurrentPage}
+                                />
+                              </AnimatedWrapper>
+                            ))}
+                          </div>
+                        ) : (
+                          <Card>
+                            <CardContent className="p-4 text-center text-gray-500">
+                              {t("no_locations_found")}
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+
                       {childLocations &&
                         childLocations.count > ITEMS_PER_PAGE && (
                           <div className="flex justify-center mt-2 sm:mt-4">

@@ -118,6 +118,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
             onValueChange={handleValueChange}
             disabled={disabled}
             className="flex flex-col gap-3"
+            value={currentValue}
           >
             {options.map((option: AnswerOption) => (
               <Label

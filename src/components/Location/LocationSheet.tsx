@@ -90,6 +90,7 @@ export function LocationSheet({
   const [bedsPage, setBedsPage] = useState(1);
   const [hasMoreLocations, setHasMoreLocations] = useState(true);
   const [hasMoreBeds, setHasMoreBeds] = useState(true);
+  const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const initialState = {
@@ -151,7 +152,7 @@ export function LocationSheet({
         queryParams: {
           limit: ITEMS_PER_PAGE,
           offset: (locationsPage - 1) * ITEMS_PER_PAGE,
-          search: searchTerm,
+          name: searchTerm,
           mode: "kind",
           parent: selectedLocation?.id,
           ...(!selectedLocation ? { mine: true } : {}),
@@ -169,6 +170,7 @@ export function LocationSheet({
       selectedLocation?.id,
       bedsPage,
       showAvailableOnly,
+      searchTerm,
     ],
     queryFn: async ({ signal }) => {
       const response = await query(locationApi.list, {
@@ -177,6 +179,7 @@ export function LocationSheet({
           limit: ITEMS_PER_PAGE,
           offset: (bedsPage - 1) * ITEMS_PER_PAGE,
           mode: "instance",
+          name: searchTerm,
           parent: selectedLocation?.id,
           available: showAvailableOnly ? "true" : undefined,
           ...(!selectedLocation ? { mine: true } : {}),
@@ -185,10 +188,11 @@ export function LocationSheet({
       })({ signal });
       return response;
     },
+    enabled: !!selectedLocation && !!facilityId,
   });
 
   useEffect(() => {
-    if (locationsData) {
+    if (locationsData && open) {
       if (locationsPage === 1) {
         setAllLocations(locationsData.results);
       } else {
@@ -196,7 +200,7 @@ export function LocationSheet({
       }
       setHasMoreLocations(locationsData.count > locationsPage * ITEMS_PER_PAGE);
     }
-  }, [locationsData, locationsPage]);
+  }, [locationsData, locationsPage, open]);
 
   useEffect(() => {
     if (bedsData) {
@@ -207,6 +211,7 @@ export function LocationSheet({
       }
       setHasMoreBeds(bedsData.count > bedsPage * ITEMS_PER_PAGE);
     }
+    setSelectedBed(null);
   }, [bedsData, bedsPage]);
 
   const handleLocationClick = (location: LocationList) => {
@@ -643,6 +648,7 @@ export function LocationSheet({
               >
                 <Button
                   variant="outline"
+                  disabled={!selectedBed}
                   onClick={() => {
                     setSheetState((prev) => ({
                       ...prev,
@@ -692,7 +698,7 @@ export function LocationSheet({
   };
 
   const { mutate: executeBatch, isPending } = useMutation({
-    mutationFn: mutate(routes.batchRequest),
+    mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
       toast.success(t("bed_assigned_successfully"));
       resetStates();
@@ -701,8 +707,9 @@ export function LocationSheet({
       });
     },
     onError: (error) => {
+      // Type cast to access the results property safely
       const errorData = error.cause as {
-        results: Array<{
+        results?: Array<{
           reference_id: string;
           status_code: number;
           data: {
@@ -712,27 +719,51 @@ export function LocationSheet({
               type?: string;
               loc?: string[];
             }>;
+            non_field_errors?: string[];
+            detail?: string;
           };
         }>;
       };
 
       if (errorData?.results) {
+        // Filter results for error status codes
         const failedResults = errorData.results.filter(
           (result) => result.status_code !== 200,
         );
 
+        // Process each failed result to extract error messages
+        let errorDisplayed = false;
         failedResults.forEach((result) => {
           const errors = result.data?.errors || [];
+          const nonFieldErrors = result.data?.non_field_errors || [];
+          const detailError = result.data?.detail;
+
+          // Display each error message
           errors.forEach((error) => {
             const message = error.msg || error.error || t("validation_failed");
             toast.error(message);
+            errorDisplayed = true;
           });
+
+          // Display non-field errors
+          nonFieldErrors.forEach((message) => {
+            toast.error(message);
+            errorDisplayed = true;
+          });
+
+          // Display detail error if present
+          if (detailError) {
+            toast.error(detailError);
+            errorDisplayed = true;
+          }
         });
 
-        if (failedResults.length === 0) {
+        // If no specific errors were found but we still had failures
+        if (failedResults.length > 0 && !errorDisplayed) {
           toast.error(t("error_updating_location"));
         }
       } else {
+        // Generic error if we couldn't parse the error response
         toast.error(t("error_updating_location"));
       }
     },
@@ -770,6 +801,7 @@ export function LocationSheet({
     <>
       <Sheet
         onOpenChange={(open) => {
+          setOpen(open);
           // Reset states when closing the sheet
           if (!open) {
             resetStates();
@@ -801,13 +833,13 @@ export function LocationSheet({
             </TabsList>
 
             <TabsContent value="assign" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-8rem)]">
+              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)] p-3 md:p-4">
                 {renderScreen()}
               </ScrollArea>
             </TabsContent>
 
             <TabsContent value="history" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-8rem)]">
+              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)]">
                 <LocationHistoryComponent history={history} />
               </ScrollArea>
             </TabsContent>

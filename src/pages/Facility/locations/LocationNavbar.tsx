@@ -46,6 +46,7 @@ export function LocationTreeNode({
       queryParams: {
         parent: location.id,
         mode: "kind",
+        ordering: "sort_index",
       },
     }),
     enabled: true,
@@ -87,7 +88,11 @@ export function LocationTreeNode({
         )}
         <div
           className="flex items-center flex-1 text-sm gap-2 w-0"
-          onClick={() => onSelect(location)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(location);
+            onToggleExpand(location.id);
+          }}
         >
           <Icon className="size-4" />
           <span className="truncate">{location.name}</span>
@@ -137,6 +142,7 @@ export default function LocationNavbar({
       queryParams: {
         mine: true,
         mode: "kind",
+        ordering: "sort_index",
       },
       pageSize: 100,
     }),

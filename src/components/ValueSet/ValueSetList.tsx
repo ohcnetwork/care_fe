@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   ArchiveIcon,
+  Eye,
   FileCheckIcon,
   HelpCircle,
   NotepadTextDashedIcon,
@@ -161,21 +162,28 @@ const RenderCard = ({
                   </p>
                 </div>
 
-                {!valueset.is_system_defined && (
-                  <div className="mt-4 flex justify-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        navigate(`/admin/valuesets/${valueset.slug}/edit`)
-                      }
-                      className="hover:bg-primary/5"
-                    >
-                      <Pencil className="size-4 mr-0" />
-                      {t("edit")}
-                    </Button>
-                  </div>
-                )}
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      navigate(`/admin/valuesets/${valueset.slug}/edit`)
+                    }
+                    className="hover:bg-primary/5"
+                  >
+                    {valueset.is_system_defined ? (
+                      <>
+                        <Eye className="size-4 mr-0" />
+                        {t("view")}
+                      </>
+                    ) : (
+                      <>
+                        <Pencil className="size-4 mr-0" />
+                        {t("edit")}
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -269,18 +277,25 @@ const RenderTable = ({
                   </div>
                 </TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
-                  {!valueset.is_system_defined && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        navigate(`/admin/valuesets/${valueset.slug}/edit`)
-                      }
-                    >
-                      <Pencil className="size-4 mr-0" />
-                      {t("edit")}
-                    </Button>
-                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      navigate(`/admin/valuesets/${valueset.slug}/edit`)
+                    }
+                  >
+                    {valueset.is_system_defined ? (
+                      <>
+                        <Eye className="size-4 mr-0" />
+                        {t("view")}
+                      </>
+                    ) : (
+                      <>
+                        <Pencil className="size-4 mr-0" />
+                        {t("edit")}
+                      </>
+                    )}
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
