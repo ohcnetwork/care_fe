@@ -59,12 +59,13 @@ export default function LocationSettings({
   });
 
   const { data: allLocations } = useQuery({
-    queryKey: ["locations", facilityId, "all"],
+    queryKey: ["locations", facilityId, "top"],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         mode: "kind",
         ordering: "sort_index",
+        parent: "",
       },
     }),
   });
@@ -175,22 +176,17 @@ export default function LocationSettings({
               <ScrollArea className="h-[calc(100vh-14rem)]">
                 <div className="p-4">
                   {allLocations?.results?.length ? (
-                    allLocations.results
-                      .filter(
-                        (loc) =>
-                          !loc.parent || Object.keys(loc.parent).length === 0,
-                      )
-                      .map((location) => (
-                        <LocationTreeNode
-                          key={location.id}
-                          location={location}
-                          facilityId={facilityId}
-                          selectedLocationId={locationId || null}
-                          expandedLocations={expandedLocations}
-                          onToggleExpand={handleToggleExpand}
-                          onSelect={handleLocationSelect}
-                        />
-                      ))
+                    allLocations.results.map((location) => (
+                      <LocationTreeNode
+                        key={location.id}
+                        location={location}
+                        facilityId={facilityId}
+                        selectedLocationId={locationId || null}
+                        expandedLocations={expandedLocations}
+                        onToggleExpand={handleToggleExpand}
+                        onSelect={handleLocationSelect}
+                      />
+                    ))
                   ) : (
                     <div className="p-4 text-sm text-gray-500">
                       {t("no_locations_available")}
