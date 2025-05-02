@@ -232,7 +232,11 @@ export default function SessionExpired() {
           {/* Breathing Text */}
           <div className="text-xs text-center uppercase font-medium text-gray-400 mt-1 h-4 transition">
             {t("SESSION_EXPIRED_BREATHE")}{" "}
-            <span className="block animate-fade">{t(breathState)}</span>
+            <span className="block animate-fade">
+              {breathState === "in"
+                ? t("SESSION_EXPIRED_BREATH_IN")
+                : t("SESSION_EXPIRED_BREATH_OUT")}
+            </span>
           </div>
         </div>
       </div>

@@ -208,6 +208,8 @@
   "SCHEDULE_EXCEPTION_TYPE__MODIFY_SCHEDULE": "Modify Schedule",
   "SCHEDULE_EXCEPTION_TYPE__UNAVAILABLE": "Unavailable",
   "SESSION_EXPIRED_BREATHE": "Breathe",
+  "SESSION_EXPIRED_BREATH_IN": "in",
+  "SESSION_EXPIRED_BREATH_OUT": "out",
   "SESSION_EXPIRED_LOGIN_AGAIN": "log in again",
   "SESSION_EXPIRED_MESSAGE": "It looks like your session timed out for a moment. Take a quick breather, then log in again to continue.",
   "SESSION_EXPIRED_WELCOME": "Welcome back!",
