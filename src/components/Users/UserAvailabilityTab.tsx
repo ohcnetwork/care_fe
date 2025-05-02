@@ -321,20 +321,22 @@ function DayDetailsPopover({
             year: "numeric",
           })}
         </p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            setQParams({
-              tab: "exceptions",
-              sheet: "add_exception",
-              valid_from: dateQueryString(date),
-              valid_to: dateQueryString(date),
-            })
-          }
-        >
-          {t("add_exception")}
-        </Button>
+        {!dayjs(date).isBefore(dayjs(), "day") && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setQParams({
+                tab: "exceptions",
+                sheet: "add_exception",
+                valid_from: dateQueryString(date),
+                valid_to: dateQueryString(date),
+              })
+            }
+          >
+            {t("add_exception")}
+          </Button>
+        )}
       </div>
 
       <ScrollArea className="max-h-[22rem] overflow-auto">

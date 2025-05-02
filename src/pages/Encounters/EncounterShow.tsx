@@ -91,7 +91,7 @@ export const EncounterShow = (props: Props) => {
         id: patientId,
       },
     }),
-    enabled: !!patientId,
+    enabled: !facilityIdFromProps && !!patientId,
   });
 
   const facilityId = facilityIdFromProps ?? encounterData?.facility.id;
@@ -133,13 +133,13 @@ export const EncounterShow = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, isPatientLoading]);
 
-  if (isLoading || !encounterData || !patient) {
+  if (isLoading || !encounterData || (!facilityIdFromProps && !patient)) {
     return <Loading />;
   }
 
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
-    patient: patient,
+    patient: patient ?? encounterData.patient,
   };
 
   if (!props.tab) {
