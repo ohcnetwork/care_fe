@@ -241,6 +241,7 @@ export function MedicationStatementQuestion({
       ],
       questionnaireResponse.question_id,
     );
+    setExpandedMedicationIndex(medications.length);
   };
 
   const handleRemoveMedication = (index: number) => {

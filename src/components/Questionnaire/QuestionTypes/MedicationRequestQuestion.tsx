@@ -283,15 +283,20 @@ export function MedicationRequestQuestion({
         } as MedicationRequest;
       }
     });
+    const newMedications: MedicationRequest[] = [
+      ...medications,
+      ...medicationRequests,
+    ];
     updateQuestionnaireResponseCB(
       [
         {
           type: "medication_request",
-          value: [...medications, ...medicationRequests],
+          value: newMedications,
         },
       ],
       questionnaireResponse.question_id,
     );
+    setExpandedMedicationIndex(medications.length);
   };
 
   const handleRemoveMedication = (index: number) => {
