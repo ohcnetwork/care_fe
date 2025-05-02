@@ -439,7 +439,7 @@ export function MedicationRequestQuestion({
                 render: (created_by) => formatName(created_by),
               },
             ],
-            queryKey: ["medication_requests", patientId, encounterId],
+            queryKey: ["medication_requests", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationRequestApi.list, {
                 pathParams: { patientId },
@@ -483,7 +483,7 @@ export function MedicationRequestQuestion({
                 render: (created_by) => formatName(created_by),
               },
             ],
-            queryKey: ["medication_statements", patientId, encounterId],
+            queryKey: ["medication_statements", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationStatementApi.list, {
                 pathParams: { patientId },

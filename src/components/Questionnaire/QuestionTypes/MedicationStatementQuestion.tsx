@@ -376,7 +376,7 @@ export function MedicationStatementQuestion({
                 render: (created_by) => formatName(created_by),
               },
             ],
-            queryKey: ["medication_requests", patientId, encounterId],
+            queryKey: ["medication_requests", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationRequestApi.list, {
                 pathParams: { patientId },
