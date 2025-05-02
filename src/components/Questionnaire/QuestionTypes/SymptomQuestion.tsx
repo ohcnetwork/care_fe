@@ -851,7 +851,7 @@ export function SymptomQuestion({
                 queryParams: {
                   offset,
                   limit,
-                  exclude_clinical_status: "entered_in_error",
+                  exclude_verification_status: "entered_in_error",
                   ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
