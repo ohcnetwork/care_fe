@@ -1,11 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import { useAuthContext } from "@/hooks/useAuthUser";
-import { useSessionTimer } from "@/hooks/useSessionTimer";
 
 // Define digitMaps outside the component to prevent recreation on each render
 const digitMaps: Record<string, number[][]> = {
@@ -102,136 +99,158 @@ const digitMaps: Record<string, number[][]> = {
   ],
 };
 
+// Define breath state type
+type BreathState = "in" | "out";
+
+type SegmentedDigitProps = {
+  digit: string;
+};
+
+// Extracted to a separate component for better memoization
+const SegmentedDigit = ({ digit }: SegmentedDigitProps) => {
+  const map = digitMaps[digit] || digitMaps["0"];
+
+  return (
+    <div className="inline-block mx-0.5">
+      {map.map((row, rowIndex) => (
+        <div key={rowIndex} className="flex">
+          {row.map((cell, cellIndex) => (
+            <div
+              key={cellIndex}
+              className={`size-1.5 m-px ${cell ? "bg-gray-400" : "bg-transparent"}`}
+            ></div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+type SegmentedTimeProps = {
+  timeStr: string;
+  scaleFactor: number;
+};
+
+// Extracted to a separate component for better memoization
+const SegmentedTime = ({ timeStr, scaleFactor }: SegmentedTimeProps) => (
+  <div
+    className="flex items-center justify-center transform origin-center"
+    style={{ transform: `scale(${scaleFactor})` }}
+  >
+    {timeStr.split("").map((char, index) => (
+      <div key={index}>
+        <SegmentedDigit digit={char} />
+      </div>
+    ))}
+  </div>
+);
+
 export default function SessionExpired() {
   const { signOut } = useAuthContext();
   const { t } = useTranslation();
+
+  // Timer state
+  const [seconds, setSeconds] = useState(0);
+  const [breathState, setBreathState] = useState<BreathState>("in");
+  const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
     toast.dismiss();
   }, []);
 
-  const { seconds, breathState, timeStr, scaleFactor, shouldShowTime } =
-    useSessionTimer();
+  // Timer logic (previously in useSessionTimer)
+  useEffect(() => {
+    const tick = () => {
+      const now = Date.now();
+      const elapsedMs = now - startTimeRef.current;
+      const elapsedSec = Math.floor(elapsedMs / 1000);
+      setSeconds(elapsedSec); // Positive count
+    };
 
-  const renderSegmentedDigit = (digit: string) => {
-    const map = digitMaps[digit] || digitMaps["0"];
+    const timer = setInterval(tick, 1000);
+    tick();
 
-    return (
-      <div className="inline-block mx-0.5">
-        {map.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex">
-            {row.map((cell, cellIndex) => (
-              <div
-                key={cellIndex}
-                className={`w-1.5 h-1.5 m-px ${
-                  cell ? "bg-gray-400" : "bg-transparent"
-                }`}
-              ></div>
-            ))}
-          </div>
-        ))}
-      </div>
-    );
+    const breathTimer = setInterval(() => {
+      setBreathState((prev) => (prev === "in" ? "out" : "in"));
+    }, 4000); // Sync with ripple cycle
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(breathTimer);
+    };
+  }, []);
+
+  // Format time string
+  const formatTime = (totalSeconds: number): string => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    let timeStr = "";
+    if (hours > 0) {
+      timeStr += `${String(hours).padStart(2, "0")}:`;
+    }
+    timeStr += `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    return timeStr;
   };
 
-  const renderSegmentedTime = (timeStr: string) => (
-    <div
-      className={cn("flex items-center justify-center transform origin-center")}
-      style={{ transform: `scale(${scaleFactor})` }}
-    >
-      {timeStr.split("").map((char, index) => (
-        <div key={index}>{renderSegmentedDigit(char)}</div>
-      ))}
-    </div>
-  );
+  // Calculate scale factor for time display
+  const getScaleFactor = (timeStr: string): number => {
+    const length = timeStr.length;
+    if (length <= 5) return 1;
+    if (length <= 8) return 0.75;
+    return 0.6;
+  };
+
+  const timeStr = formatTime(seconds);
+  const scaleFactor = getScaleFactor(timeStr);
+  const shouldShowTime = seconds > 0;
+
+  // No longer need these functions as they're now separate components
 
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center w-full h-screen bg-white",
-      )}
-    >
-      <div className="relative flex items-center justify-center w-72 h-72 md:w-96 md:h-96">
+    <div className="flex flex-col items-center justify-center w-full fixed inset-0 bg-white">
+      <div className="relative flex items-center justify-center size-72 md:size-96">
         {/* Ripples */}
-        <div
-          className={cn("absolute inset-0 flex items-center justify-center")}
-        >
-          <div
-            className={cn(
-              "absolute w-80 h-80 bg-emerald-400/20 rounded-full animate-ping-slow",
-            )}
-          ></div>
-          <div
-            className={cn(
-              "absolute w-64 h-64 bg-emerald-500/20 rounded-full animate-ping-medium",
-            )}
-          ></div>
-          <div
-            className={cn(
-              "absolute w-48 h-48 bg-emerald-600/20 rounded-full animate-ping-fast",
-            )}
-          ></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute size-80 bg-emerald-400/20 rounded-full animate-ping-slow"></div>
+          <div className="absolute size-64 bg-emerald-500/20 rounded-full animate-ping-medium"></div>
+          <div className="absolute size-48 bg-emerald-600/20 rounded-full animate-ping-fast"></div>
         </div>
 
         {/* Timer Display */}
-        <div
-          className={cn(
-            "absolute flex flex-col items-center justify-center w-40 h-40 p-4 bg-gray-50 rounded-full border border-white shadow-lg z-10",
-          )}
-        >
-          <div
-            className={cn(
-              "bg-gray-200 p-2 rounded-full shadow-inner mb-1 flex w-full items-center justify-center relative",
-            )}
-          >
-            <div className={cn("flex-shrink min-w-0 scale-65")}>
-              {seconds === 0
-                ? renderSegmentedTime("··:··")
-                : shouldShowTime
-                  ? renderSegmentedTime(timeStr)
-                  : null}
+        <div className="absolute flex flex-col items-center justify-center size-40 p-4 bg-gray-50 rounded-full border border-white shadow-lg z-10">
+          <div className="bg-gray-200 p-2 rounded-full shadow-inner mb-1 flex w-full items-center justify-center relative">
+            <div className="flex-shrink min-w-0 scale-65">
+              {seconds === 0 ? (
+                <SegmentedTime timeStr="··:··" scaleFactor={scaleFactor} />
+              ) : shouldShowTime ? (
+                <SegmentedTime timeStr={timeStr} scaleFactor={scaleFactor} />
+              ) : null}
             </div>
           </div>
 
           {/* Breathing Text */}
-          <div
-            className={cn(
-              "text-xs text-center uppercase font-medium text-gray-400 mt-1 h-4 transition",
-            )}
-          >
-            {t("Breathe")}{" "}
-            <span className={cn("block animate-fade")}>{t(breathState)}</span>
+          <div className="text-xs text-center uppercase font-medium text-gray-400 mt-1 h-4 transition">
+            {t("SESSION_EXPIRED_BREATHE")}{" "}
+            <span className="block animate-fade">{t(breathState)}</span>
           </div>
         </div>
       </div>
-      <div className={cn("max-w-lg mx-auto text-center px-4")}>
-        <h1 className={cn("mt-2 text-xl md:text-4xl text-gray-950 font-bold")}>
-          {t("Welcome back!")}
+      <div className="max-w-lg mx-auto text-center px-4">
+        <h1 className="mt-2 text-xl md:text-4xl text-gray-950 font-bold">
+          {t("SESSION_EXPIRED_WELCOME")}
         </h1>
-        <p
-          className={cn(
-            "max-w-md mx-auto px-2 text-sm md:text-base mt-2 text-gray-600",
-          )}
-        >
-          {t(
-            "It looks like your session timed out for a moment. Take a quick breather, then log in again to continue.",
-          )}
+        <p className="max-w-md mx-auto px-2 text-sm md:text-base mt-2 text-gray-600">
+          {t("SESSION_EXPIRED_MESSAGE")}
         </p>
         <button
           type="button"
           onClick={signOut}
-          className={cn(
-            "mt-6 transition duration-300 ease-in-out rounded-md select-none",
-            "bg-emerald-700 px-3.5 py-2.5 text-sm font-semibold text-white",
-            "shadow-sm hover:bg-emerald-600 focus-visible:outline-2",
-            "focus-visible:outline-offset-2 focus-visible:outline-emerald-800",
-          )}
+          className="mt-6 transition duration-300 ease-in-out rounded-md select-none bg-emerald-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
         >
-          {t("Log in again")}
+          {t("SESSION_EXPIRED_LOGIN_AGAIN")}
         </button>
       </div>
-
-      {/* Animations are now defined in the Tailwind config */}
     </div>
   );
 }

@@ -56,7 +56,6 @@ module.exports = {
       },
       scale: {
         25: "0.25",
-        65: "0.65", // Added for the scale-65 class used in the timer
         175: "1.75",
         200: "2",
       },
@@ -79,32 +78,9 @@ module.exports = {
           "0%,70%,100%": { opacity: "1" },
           "20%,50%": { opacity: "0" },
         },
-        "ping-slow": {
-          "0%": { transform: "scale(0.8)", opacity: "0.3" },
-          "50%": { transform: "scale(1)", opacity: "0.8" },
-          "100%": { transform: "scale(0.8)", opacity: "0.3" },
-        },
-        "ping-medium": {
-          "0%": { transform: "scale(0.75)", opacity: "0.3" },
-          "50%": { transform: "scale(1)", opacity: "0.7" },
-          "100%": { transform: "scale(0.75)", opacity: "0.3" },
-        },
-        "ping-fast": {
-          "0%": { transform: "scale(0.7)", opacity: "0.3" },
-          "50%": { transform: "scale(1)", opacity: "0.6" },
-          "100%": { transform: "scale(0.7)", opacity: "0.3" },
-        },
-        fade: {
-          "0%,100%": { opacity: "0.2" },
-          "50%": { opacity: "1" },
-        },
       },
       animation: {
         "caret-blink": "caret-blink 1.25s ease-out infinite",
-        "ping-slow": "ping-slow 8s ease-in-out infinite",
-        "ping-medium": "ping-medium 8s ease-in-out infinite",
-        "ping-fast": "ping-fast 8s ease-in-out infinite",
-        fade: "fade 4s ease-in-out infinite",
       },
     },
   },
