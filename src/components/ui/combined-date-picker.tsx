@@ -20,14 +20,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface CombinedDatePickerProps {
   value?: Date;
   onChange: (date: Date | undefined) => void;
-  disabled?: boolean;
   placeholder?: string;
   buttonClassName?: string;
   popoverAlign?: "start" | "center" | "end";
   defaultTab?: "absolute" | "relative";
   classes?: string;
   dateFormat?: string;
-  disabledDates?: (date: Date) => boolean;
+  disabled?: boolean | ((date: Date) => boolean);
 }
 
 export function CombinedDatePicker({
@@ -40,7 +39,6 @@ export function CombinedDatePicker({
   defaultTab = "absolute",
   classes,
   dateFormat = "PPP",
-  disabledDates,
 }: CombinedDatePickerProps) {
   const { t } = useTranslation();
 
@@ -71,7 +69,7 @@ export function CombinedDatePicker({
               classes,
               buttonClassName,
             )}
-            disabled={disabled}
+            disabled={typeof disabled === "boolean" ? disabled : false}
           >
             <CareIcon icon="l-calender" className="size-4" />
             {value ? format(value, dateFormat) : placeholder}
@@ -91,14 +89,14 @@ export function CombinedDatePicker({
                 mode="single"
                 selected={value}
                 onSelect={handleSelect}
-                disabled={disabledDates}
+                disabled={typeof disabled !== "boolean" ? disabled : undefined}
               />
             </TabsContent>
             <TabsContent value="relative" className="p-0">
               <RelativeDatePicker
                 value={value}
                 onDateChange={handleRelativeDateChange}
-                disabled={disabledDates}
+                disabled={typeof disabled !== "boolean" ? disabled : undefined}
               />
             </TabsContent>
           </Tabs>

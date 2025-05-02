@@ -525,7 +525,7 @@ export default function AppointmentsPage({
                             slot: null,
                           });
                         }}
-                        disabledDates={(date) =>
+                        disabled={(date) =>
                           qParams.date_to
                             ? dayjs(date).isAfter(dayjs(qParams.date_to), "day")
                             : false
@@ -552,7 +552,7 @@ export default function AppointmentsPage({
                             slot: null,
                           });
                         }}
-                        disabledDates={(date) =>
+                        disabled={(date) =>
                           qParams.date_from
                             ? dayjs(date).isBefore(
                                 dayjs(qParams.date_from),
