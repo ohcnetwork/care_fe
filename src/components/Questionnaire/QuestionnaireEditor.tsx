@@ -1277,7 +1277,7 @@ function QuestionEditor({
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex flex-col items-start">
                           <span>{type.name}</span>
-                          <span className="text-xs max-w-xs text-muted-foreground whitespace-normal">
+                          <span className="text-xs max-w-xs text-secondary-700 whitespace-normal">
                             {t(type.description)}
                           </span>
                         </div>
@@ -1461,7 +1461,7 @@ function QuestionEditor({
                 <h3 className="text-sm font-medium mb-2">
                   {t("group_layout_options")}
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-secondary-700 mb-4">
                   {t("choose_layout_style")}
                 </p>
                 <RadioGroup

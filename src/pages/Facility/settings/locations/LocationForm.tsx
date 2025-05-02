@@ -331,7 +331,7 @@ export default function LocationForm({
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel>{t("create_multiple_beds")}</FormLabel>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-secondary-700">
                     {t("create_multiple_beds_description")}
                   </p>
                 </div>
@@ -405,7 +405,7 @@ export default function LocationForm({
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>{t("customize_bed_names")}</FormLabel>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-secondary-700">
                         {t("customize_bed_names_description")}
                       </p>
                     </div>
@@ -466,7 +466,7 @@ export default function LocationForm({
               ) : (
                 <div className="rounded-md bg-muted p-4">
                   <h4 className="font-medium mb-2">{t("preview_bed_names")}</h4>
-                  <div className="text-sm text-muted-foreground flex flex-wrap gap-2">
+                  <div className="text-sm text-secondary-900 flex flex-wrap gap-2">
                     {bedFields.map((field) => (
                       <div
                         key={field.id}

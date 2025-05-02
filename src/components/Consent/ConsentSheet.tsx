@@ -114,7 +114,7 @@ export function ConsentSheet({
           <div className="container">
             <div className="flex justify-between items-center gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-700 size-4" />
                 <Input
                   placeholder={t("search_existing_consent")}
                   className="pl-10"
@@ -246,7 +246,7 @@ function ConsentCard({ consent }: ConsentCardProps) {
             </div>
 
             <div className="flex items-center gap-1.5 text-xs">
-              <Calendar className="size-3.5 text-muted-foreground" />
+              <Calendar className="size-3.5 text-secondary-700" />
               <p className="font-medium">
                 {formatDateTime(consent.date, "MMMM D, YYYY")}
               </p>
@@ -270,7 +270,7 @@ function ConsentCard({ consent }: ConsentCardProps) {
 
             <div className="flex items-center gap-1.5 text-secondary-700">
               <p>
-                <CalendarRange className="size-3.5 text-muted-foreground" />
+                <CalendarRange className="size-3.5 text-secondary-700" />
               </p>
               <p className="text-xs font-medium">
                 <span>

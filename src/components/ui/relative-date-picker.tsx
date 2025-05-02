@@ -182,7 +182,7 @@ export function RelativeDatePicker({
         <div className="text-xl font-bold mb-1 truncate">
           {format(resultDate, "MMM d, yyyy")}
         </div>
-        <div className="text-sm text-muted-foreground truncate">
+        <div className="text-sm text-secondary-800 truncate">
           {format(resultDate, "EEEE")}
         </div>
       </div>

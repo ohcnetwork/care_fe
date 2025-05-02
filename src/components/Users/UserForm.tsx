@@ -549,7 +549,7 @@ export default function UserForm({
                             <Lock className="size-4" />
                             {t("set_password_now")}
                           </Label>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-secondary-700">
                             {t("set_password_now_description")}
                           </p>
                         </div>
@@ -575,7 +575,7 @@ export default function UserForm({
                             <Mail className="size-4" />
                             {t("send_email_invitation")}
                           </Label>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-secondary-700">
                             {t("send_email_invitation_description")}
                           </p>
                         </div>
