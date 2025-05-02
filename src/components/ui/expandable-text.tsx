@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -27,11 +27,39 @@ function ExpandableTextContent({
 }: React.ComponentProps<"div">) {
   const contentRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+
+    const checkOverflow = () => {
+      // Temporarily remove line-clamp to check actual content height
+      const existing = content.style.getPropertyValue("-webkit-line-clamp");
+      content.style.setProperty("-webkit-line-clamp", "unset");
+      content.style.setProperty("height", "calc(var(--spacing) * 6)");
+
+      const hasOverflow = content.scrollHeight > content.offsetHeight;
+
+      // Reset the line-clamp and height
+      content.style.setProperty("-webkit-line-clamp", existing);
+      content.style.setProperty("height", "auto");
+
+      content.dataset.overflow = hasOverflow ? "true" : "false";
+    };
+
+    checkOverflow();
+
+    // Check on resize
+    const observer = new ResizeObserver(checkOverflow);
+    observer.observe(content);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
       ref={contentRef}
       className={cn(
-        "line-clamp-1 data-[expanded=true]:line-clamp-none",
+        "peer line-clamp-1 data-[expanded=true]:line-clamp-none",
         className,
       )}
       data-slot="expandable-text-content"
@@ -65,7 +93,7 @@ function ExpandableTextExpandButton({
       variant="secondary"
       size="xs"
       onClick={handleClick}
-      className={cn(className)}
+      className={cn("hidden peer-data-[overflow=true]:inline-flex", className)}
       data-slot="expandable-text-expand-button"
       {...props}
     >
