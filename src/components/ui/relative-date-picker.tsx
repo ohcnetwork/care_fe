@@ -42,10 +42,27 @@ const computeTimeUnits = (date?: Date): TimeUnitState => {
   const weeksDiff = differenceInWeeks(now, date);
   const monthsDiff = differenceInMonths(now, date);
   const yearsDiff = differenceInYears(now, date);
-  if (yearsDiff > 0) return { unit: "years", value: yearsDiff };
-  if (monthsDiff > 0) return { unit: "months", value: monthsDiff };
-  if (weeksDiff > 0) return { unit: "weeks", value: weeksDiff };
-  return { unit: "days", value: daysDiff };
+  if (yearsDiff > 0) {
+    return {
+      unit: "years",
+      value: yearsDiff,
+    };
+  } else if (monthsDiff > 0) {
+    return {
+      unit: "months",
+      value: monthsDiff,
+    };
+  } else if (weeksDiff > 0) {
+    return {
+      unit: "weeks",
+      value: weeksDiff,
+    };
+  } else {
+    return {
+      unit: "days",
+      value: daysDiff,
+    };
+  }
 };
 
 export function RelativeDatePicker({
