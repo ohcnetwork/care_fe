@@ -218,18 +218,23 @@ export function EncounterList({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[20rem] p-0 border-none"
+                    className="w-[20rem] p-3 border-none"
                     align="start"
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
-                    <SearchInput
-                      data-cy="encounter-search"
-                      options={searchOptions}
-                      onFieldChange={handleFieldChange}
-                      onSearch={handleSearch}
-                      className="w-full border border-gray-300 rounded-md"
-                      autoFocus
-                    />
+                    <div className="space-y-4">
+                      <h4 className="font-medium leading-none">
+                        {t("search_encounters")}
+                      </h4>
+                      <SearchInput
+                        data-cy="encounter-search"
+                        options={searchOptions}
+                        onFieldChange={handleFieldChange}
+                        onSearch={handleSearch}
+                        className="w-full border-none shadow-none"
+                        autoFocus
+                      />
+                    </div>
                   </PopoverContent>
                 </Popover>
 

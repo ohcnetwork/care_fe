@@ -139,33 +139,38 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[20rem] border-none"
+                    className="w-[20rem] p-3 border-none"
                     align="start"
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
-                    <SearchInput
-                      data-cy="resource-search"
-                      options={[
-                        {
-                          key: "title",
-                          type: "text",
-                          placeholder: t("search_by_resource_title"),
-                          value: title || "",
-                        },
-                      ]}
-                      onFieldChange={() =>
-                        updateQuery({
-                          title: undefined,
-                        })
-                      }
-                      onSearch={(key, value) =>
-                        updateQuery({
-                          [key]: value || undefined,
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-md shadow-none"
-                      autoFocus
-                    />
+                    <div className="space-y-4">
+                      <h4 className="font-medium leading-none">
+                        {t("search_resource")}
+                      </h4>
+                      <SearchInput
+                        data-cy="resource-search"
+                        options={[
+                          {
+                            key: "title",
+                            type: "text",
+                            placeholder: t("search_by_resource_title"),
+                            value: title || "",
+                          },
+                        ]}
+                        onFieldChange={() =>
+                          updateQuery({
+                            title: undefined,
+                          })
+                        }
+                        onSearch={(key, value) =>
+                          updateQuery({
+                            [key]: value || undefined,
+                          })
+                        }
+                        className="w-full border-none shadow-none"
+                        autoFocus
+                      />
+                    </div>
                   </PopoverContent>
                 </Popover>
                 <div className="items-center">
