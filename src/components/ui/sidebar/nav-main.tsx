@@ -55,7 +55,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
     <SidebarGroup>
       <SidebarMenu>
         {links
-          .filter((link) => link.visibility !== false && !link.hidden)
+          .filter((link) => link.visibility !== false)
           .map((link) => (
             <>
               {link.children ? (
@@ -173,8 +173,10 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
           className={cn(
             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
             {
-              "bg-white text-green-700 shadow": 
-                isChildActive(link, currentPath),
+              "bg-white text-green-700 shadow": isChildActive(
+                link,
+                currentPath,
+              ),
             },
           )}
         >

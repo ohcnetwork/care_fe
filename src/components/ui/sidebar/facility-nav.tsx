@@ -19,7 +19,6 @@ export interface NavigationLink {
   icon?: string;
   visibility?: boolean;
   children?: NavigationLink[];
-  hidden?: boolean;
 }
 
 interface FacilityNavProps {
@@ -69,9 +68,8 @@ function generateFacilityLinks(
           children: [
             patientId && encounterId
               ? {
-                  name: t("encounter_updates"),
+                  name: t("encounter"),
                   url: `${baseUrl}/patient/${patientId}/encounter/${encounterId}/updates`,
-                  hidden: true,
                 }
               : null,
           ].filter(Boolean) as NavigationLink[],
