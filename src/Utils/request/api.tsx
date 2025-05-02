@@ -14,11 +14,11 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
-import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
   Observation,
   ObservationAnalyzeResponse,
 } from "@/types/emr/observation";
+import { PartialPatientModel, Patient } from "@/types/emr/patient";
 import {
   BaseFacility,
   CreateFacility,
