@@ -75,7 +75,12 @@ export default function EncounterActions({
       organizations: encounter.organizations.map((org) => org.id),
       patient: encounter.patient.id,
       encounter_class: encounter.encounter_class,
-      period: encounter.period,
+      period: {
+        start: encounter.period.start,
+        end: encounter.period.end
+          ? encounter.period.end
+          : new Date().toISOString(),
+      },
       hospitalization: encounter.hospitalization,
       priority: encounter.priority,
       external_identifier: encounter.external_identifier,
