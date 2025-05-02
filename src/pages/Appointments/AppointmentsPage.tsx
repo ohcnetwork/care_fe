@@ -520,21 +520,16 @@ export default function AppointmentsPage({
                             : undefined
                         }
                         onChange={(date) => {
-                          if (
-                            qParams.date_to &&
-                            date &&
-                            dayjs(date).isAfter(dayjs(qParams.date_to), "day")
-                          ) {
-                            toast.error(
-                              t("start_date_cannot_be_after_end_date"),
-                            );
-                            return;
-                          }
                           updateQuery({
                             date_from: date ? dateQueryString(date) : null,
                             slot: null,
                           });
                         }}
+                        disabledDates={(date) =>
+                          qParams.date_to
+                            ? dayjs(date).isAfter(dayjs(qParams.date_to), "day")
+                            : false
+                        }
                       />
                     </div>
 
@@ -552,24 +547,19 @@ export default function AppointmentsPage({
                             : undefined
                         }
                         onChange={(date) => {
-                          if (
-                            qParams.date_from &&
-                            date &&
-                            dayjs(date).isBefore(
-                              dayjs(qParams.date_from),
-                              "day",
-                            )
-                          ) {
-                            toast.error(
-                              t("end_date_cannot_be_before_start_date"),
-                            );
-                            return;
-                          }
                           updateQuery({
                             date_to: date ? dateQueryString(date) : null,
                             slot: null,
                           });
                         }}
+                        disabledDates={(date) =>
+                          qParams.date_from
+                            ? dayjs(date).isBefore(
+                                dayjs(qParams.date_from),
+                                "day",
+                              )
+                            : false
+                        }
                       />
                     </div>
                   </div>

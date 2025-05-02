@@ -27,6 +27,7 @@ interface CombinedDatePickerProps {
   defaultTab?: "absolute" | "relative";
   classes?: string;
   dateFormat?: string;
+  disabledDates?: (date: Date) => boolean;
 }
 
 export function CombinedDatePicker({
@@ -39,6 +40,7 @@ export function CombinedDatePicker({
   defaultTab = "absolute",
   classes,
   dateFormat = "PPP",
+  disabledDates,
 }: CombinedDatePickerProps) {
   const { t } = useTranslation();
 
@@ -89,12 +91,14 @@ export function CombinedDatePicker({
                 mode="single"
                 selected={value}
                 onSelect={handleSelect}
+                disabled={disabledDates}
               />
             </TabsContent>
             <TabsContent value="relative" className="p-0">
               <RelativeDatePicker
                 value={value}
                 onDateChange={handleRelativeDateChange}
+                disabled={disabledDates}
               />
             </TabsContent>
           </Tabs>
