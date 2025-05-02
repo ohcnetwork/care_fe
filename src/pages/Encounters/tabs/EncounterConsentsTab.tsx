@@ -29,7 +29,7 @@ export const EmptyState = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-8 text-center">
+    <div className="flex min-h-[12.5rem] flex-col items-center justify-center gap-4 p-8 text-center">
       <div className="rounded-full bg-secondary/10 ">
         <CareIcon
           icon="l-file-exclamation-alt"
@@ -38,7 +38,7 @@ export const EmptyState = () => {
       </div>
       <div className="max-w-[300px] space-y-1">
         <h3 className="font-medium">{t("no_consent_found")}</h3>
-        <p className="text-sm text-gray-500 whitespace-nowrap break-words">
+        <p className="text-sm text-gray-500 whitespace-nowrap">
           {t("no_consent_description")}
         </p>
       </div>
@@ -85,7 +85,7 @@ function ConsentCard({
                       {totalAttachments > 1 && ", "}
                     </span>
                     {totalAttachments > 1 && (
-                      <span className="text-muted-foreground break-words">
+                      <span className="break-words">
                         +
                         {t("more_files_count", { count: totalAttachments - 1 })}
                       </span>
@@ -211,7 +211,7 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
     <div className="py-4">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4" />
           <Input
             placeholder={t("search_existing_consent")}
             className="pl-10 focus-visible:ring-1"
