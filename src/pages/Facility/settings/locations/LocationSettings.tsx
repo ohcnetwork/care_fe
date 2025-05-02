@@ -58,7 +58,7 @@ export default function LocationSettings({
     }),
   });
 
-  const { data: allLocations } = useQuery({
+  const { data: parentLocations } = useQuery({
     queryKey: ["locations", facilityId, "top"],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
@@ -175,8 +175,8 @@ export default function LocationSettings({
             <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block flex-shrink-0">
               <ScrollArea className="h-[calc(100vh-14rem)]">
                 <div className="p-4">
-                  {allLocations?.results?.length ? (
-                    allLocations.results.map((location) => (
+                  {parentLocations?.results?.length ? (
+                    parentLocations.results.map((location) => (
                       <LocationTreeNode
                         key={location.id}
                         location={location}
