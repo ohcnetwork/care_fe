@@ -590,6 +590,7 @@ export function DiagnosisQuestion({
                   offset,
                   limit,
                   exclude_verification_status: "entered_in_error",
+                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response;

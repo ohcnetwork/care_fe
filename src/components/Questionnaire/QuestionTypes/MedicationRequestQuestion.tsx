@@ -439,7 +439,7 @@ export function MedicationRequestQuestion({
                 render: (created_by) => formatName(created_by),
               },
             ],
-            queryKey: ["medication_requests", patientId],
+            queryKey: ["medication_requests", patientId, encounterId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationRequestApi.list, {
                 pathParams: { patientId },
@@ -448,6 +448,7 @@ export function MedicationRequestQuestion({
                   offset,
                   status:
                     "active,on-hold,draft,unknown,ended,completed,cancelled",
+                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response;
@@ -482,7 +483,7 @@ export function MedicationRequestQuestion({
                 render: (created_by) => formatName(created_by),
               },
             ],
-            queryKey: ["medication_statements", patientId],
+            queryKey: ["medication_statements", patientId, encounterId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationStatementApi.list, {
                 pathParams: { patientId },
@@ -491,6 +492,7 @@ export function MedicationRequestQuestion({
                   offset,
                   status:
                     "active,on_hold,completed,stopped,unknown,not_taken,intended",
+                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response;

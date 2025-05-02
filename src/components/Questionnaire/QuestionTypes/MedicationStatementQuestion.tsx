@@ -376,7 +376,7 @@ export function MedicationStatementQuestion({
                 render: (created_by) => formatName(created_by),
               },
             ],
-            queryKey: ["medication_requests", patientId],
+            queryKey: ["medication_requests", patientId, encounterId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationRequestApi.list, {
                 pathParams: { patientId },
@@ -385,6 +385,7 @@ export function MedicationStatementQuestion({
                   offset,
                   status:
                     "active,on-hold,draft,unknown,ended,completed,cancelled",
+                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response as PaginatedResponse<MedicationRequestRead>;
@@ -428,6 +429,7 @@ export function MedicationStatementQuestion({
                   offset,
                   status:
                     "active,on_hold,completed,stopped,unknown,not_taken,intended",
+                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response as PaginatedResponse<MedicationStatementRead>;
