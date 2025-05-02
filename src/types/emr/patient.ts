@@ -36,7 +36,6 @@ export interface Patient {
   updated_by: UserBareMinimum | null;
   permissions: string[];
   nationality?: string;
-  partial_id: string;
 }
 
 export interface PartialPatientModel {
