@@ -57,6 +57,11 @@ export default function AuthUserProvider({
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
+  useEffect(() => {
+    if (user?.username) window.CARE_USERNAME = user.username;
+    else window.CARE_USERNAME = undefined;
+  }, [user]);
+
   const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
 
   const tokenRefreshQuery = useQuery({

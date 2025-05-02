@@ -10,10 +10,12 @@ import "@/i18n";
 import "@/style/index.css";
 
 // Extend Window interface to include CARE_API_URL
+// and CARE_USERNAME for plugin access
 declare global {
   interface Window {
     CARE_API_URL: string;
     __CORE_ENV__: typeof careConfig;
+    CARE_USERNAME?: string;
   }
 }
 
