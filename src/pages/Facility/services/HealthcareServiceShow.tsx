@@ -8,7 +8,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
@@ -111,7 +111,7 @@ export default function HealthcareServiceShow({
 
         <div className="space-y-2">
           {isLoading ? (
-            <CardGridSkeleton count={3} />
+            <CardListSkeleton count={4} />
           ) : !service ? (
             <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
               <div className="rounded-full bg-primary/10 p-3 mb-4">

@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { EmptyState } from "@/components/definition-list/EmptyState";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -19,18 +20,6 @@ import { type HealthcareServiceReadSpec } from "@/types/healthcareService/health
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
-
-function EmptyState() {
-  const { t } = useTranslation();
-  return (
-    <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
-      <div className="rounded-full bg-primary/10 p-3 mb-4">
-        <CareIcon icon="l-folder-open" className="size-6 text-primary" />
-      </div>
-      <h3 className="text-lg font-semibold mb-1">{t("no_services_found")}</h3>
-    </Card>
-  );
-}
 
 function ServiceCard({
   service,
@@ -120,10 +109,14 @@ export default function FacilityServicesPage({
 
         {isLoading ? (
           <div className="space-y-2">
-            <CardGridSkeleton count={4} />
+            <CardListSkeleton count={4} />
           </div>
         ) : healthcareServices.length === 0 ? (
-          <EmptyState />
+          <EmptyState
+            icon="l-folder-open"
+            title={t("no_services_found")}
+            description={""}
+          />
         ) : (
           <div className="space-y-2">
             {healthcareServices.map((service) => (

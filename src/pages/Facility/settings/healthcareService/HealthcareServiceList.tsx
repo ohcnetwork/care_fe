@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 
@@ -10,7 +11,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import Page from "@/components/Common/Page";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { EmptyState } from "@/components/definition-list/EmptyState";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -19,19 +21,6 @@ import { type HealthcareServiceReadSpec } from "@/types/healthcareService/health
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
-
-function EmptyState() {
-  const { t } = useTranslation();
-  return (
-    <div className="flex h-[200px] items-center justify-center text-gray-500">
-      <div className="text-center">
-        <CareIcon icon="l-folder-open" className="mx-auto mb-2 size-8" />
-        <p>{t("no_healthcare_services_found")}</p>
-        <p className="text-sm">{t("adjust_healthcare_service_filters")}</p>
-      </div>
-    </div>
-  );
-}
 
 function ServiceCard({
   service,
@@ -45,52 +34,43 @@ function ServiceCard({
     `d-${name}` as DuoToneIconName;
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="mt-1 rounded-lg bg-primary/10 p-2">
-              <CareIcon
-                icon={
-                  service.styling_metadata?.careIcon
-                    ? getIconName(service.styling_metadata.careIcon)
-                    : "d-health-worker"
-                }
-                className="size-5 text-primary"
-              />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900">{service.name}</h3>
-              <p className="mt-1 line-clamp-2 text-sm text-gray-500">
-                {service.extra_details || t("no_extra_details")}
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-shrink-0 gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/healthcare_services/${service.id}`,
-                )
-              }
-            >
-              <CareIcon icon="l-eye" className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/healthcare_services/${service.id}/edit`,
-                )
-              }
-            >
-              <CareIcon icon="l-pen" className="size-4" />
-            </Button>
-          </div>
+    <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
+      <CardContent className="flex items-center gap-3 py-3 px-4">
+        <div className="relative size-10 rounded-sm flex p-4 items-center justify-center">
+          <ColoredIndicator
+            id={service.id}
+            className="absolute inset-0 rounded-sm opacity-20"
+          />
+          <CareIcon
+            icon={
+              service.styling_metadata?.careIcon
+                ? getIconName(service.styling_metadata.careIcon)
+                : "d-health-worker"
+            }
+            className="size-6 relative z-1"
+          />
         </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold truncate text-gray-900 text-base">
+            {service.name}
+          </h3>
+          <p className="mt-0.5 text-xs text-gray-500 truncate">
+            {service.extra_details || t("no_extra_details")}
+          </p>
+        </div>
+        <Button
+          onClick={() =>
+            navigate(
+              `/facility/${facilityId}/settings/healthcare_services/${service.id}`,
+            )
+          }
+          variant="outline"
+          size="sm"
+          className="px-3 text-xs whitespace-nowrap"
+        >
+          {t("view_details")}
+          <CareIcon icon="l-arrow-right" className="size-3" />
+        </Button>
       </CardContent>
     </Card>
   );
@@ -109,12 +89,12 @@ export default function HealthcareServiceList({
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["healthcareServices", qParams],
-    queryFn: query(healthcareServiceApi.listHealthcareService, {
+    queryFn: query.debounced(healthcareServiceApi.listHealthcareService, {
       pathParams: { facilityId },
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        search: qParams.search,
+        name: qParams.search,
       },
     }),
   });
@@ -122,47 +102,55 @@ export default function HealthcareServiceList({
   const healthcareServices = response?.results || [];
 
   return (
-    <Page title={t("healthcare_services")}>
+    <Page title={t("healthcare_services")} hideTitleOnPage>
       <div className="container mx-auto">
-        <div className="mb-6">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <p className="mt-1 text-sm text-gray-600">
-                {t("manage_healthcare_services")}
-              </p>
-            </div>
-            <Button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/healthcare_services/new`,
-                )
-              }
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              {t("add_healthcare_service")}
-            </Button>
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-700">
+              {t("healthcare_services")}
+            </h1>
+            <p className="mt-1 text-sm text-gray-600">
+              {t("manage_healthcare_services")}
+            </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-4">
-            <Input
-              placeholder={t("search_healthcare_services")}
-              value={qParams.search || ""}
-              onChange={(e) =>
-                updateQuery({ search: e.target.value || undefined })
-              }
-              className="max-w-xs"
-            />
-          </div>
+          <Button
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/settings/healthcare_services/new`,
+              )
+            }
+            className="w-full md:w-auto mt-2 md:mt-0"
+          >
+            <CareIcon icon="l-plus" className="mr-2" />
+            {t("add_healthcare_service")}
+          </Button>
+        </div>
+        <div className=" relative w-full md:w-auto mb-6">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <CareIcon icon="l-search" className="size-5" />
+          </span>
+          <Input
+            placeholder={t("search_healthcare_services")}
+            value={qParams.search || ""}
+            onChange={(e) =>
+              updateQuery({ search: e.target.value || undefined })
+            }
+            className="w-full md:w-[300px] pl-10"
+          />
         </div>
 
         {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            <CardGridSkeleton count={4} />
+          <div className="space-y-2">
+            <CardListSkeleton count={4} />
           </div>
         ) : healthcareServices.length === 0 ? (
-          <EmptyState />
+          <EmptyState
+            icon="l-folder-open"
+            title={t("no_healthcare_services_found")}
+            description={""}
+          />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
             {healthcareServices.map((service) => (
               <ServiceCard
                 key={service.id}
