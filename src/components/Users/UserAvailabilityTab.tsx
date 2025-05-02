@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { usePathParams, useQueryParams } from "raviger";
+import { ExternalLinkIcon } from "lucide-react";
+import { Link, usePathParams, useQueryParams } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -34,6 +35,7 @@ import {
   humanizeStrings,
 } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { useAvailabilityHeatmap } from "@/pages/Appointments/utils";
 import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
@@ -51,6 +53,7 @@ import {
   ScheduleTemplate,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { UserBase } from "@/types/user/user";
 
 type AvailabilityTabQueryParams = {
   tab?: "schedule" | "exceptions" | null;
@@ -181,6 +184,7 @@ export default function UserAvailabilityTab({
                 templates={templates}
                 unavailableExceptions={unavailableExceptions}
                 setQParams={setQParams}
+                user={user}
               />
             </Popover>
           );
@@ -264,13 +268,22 @@ function DayDetailsPopover({
   templates,
   unavailableExceptions,
   setQParams,
+  user,
 }: {
   date: Date;
   templates: ScheduleTemplate[];
   unavailableExceptions: ScheduleException[];
   setQParams: (params: AvailabilityTabQueryParams) => void;
+  user: UserBase;
 }) {
   const { t } = useTranslation();
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+  const { data: heatmapData } = useAvailabilityHeatmap({
+    facilityId: facilityId!,
+    userId: user.id,
+    month: date,
+  });
+  const bookedSlots = heatmapData?.[dateQueryString(date)]?.booked_slots ?? 0;
 
   return (
     <PopoverContent className="p-6" align="center" sideOffset={5}>
@@ -301,8 +314,27 @@ function DayDetailsPopover({
       </div>
 
       <ScrollArea className="max-h-[22rem] overflow-auto">
+        {bookedSlots > 0 && (
+          <>
+            <hr className="bg-gray-200 h-px my-3" />
+            <Link
+              className="flex items-center gap-2 text-sm text-gray-500 underline underline-offset-2"
+              href={`/facility/${facilityId}/appointments?practicioner=${user.username}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`}
+            >
+              <span className="text-sm text-gray-500">
+                {t("appointments_scheduled_for_day_link", {
+                  count: bookedSlots,
+                })}
+              </span>
+              <ExternalLinkIcon className="size-4" />
+            </Link>
+          </>
+        )}
+
+        <hr className="bg-gray-200 h-px my-3" />
+
         {templates.map((template) => (
-          <div key={template.id} className="border-t border-gray-200 pt-3 mt-3">
+          <div key={template.id}>
             <div className="flex items-center">
               <ColoredIndicator
                 className="mr-2 size-3 rounded"

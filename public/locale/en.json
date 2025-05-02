@@ -437,6 +437,8 @@
   "appointment_slot": "Appointment Slot",
   "appointment_type": "Appointment Type",
   "appointments": "Appointments",
+  "appointments_scheduled_for_day_link_one": "View {{count}} scheduled appointment",
+  "appointments_scheduled_for_day_link_other": "View {{count}} scheduled appointments",
   "approve": "Approve",
   "approved": "Approved",
   "approved_by_district_covid_control_room": "Approved by District COVID Control Room",
