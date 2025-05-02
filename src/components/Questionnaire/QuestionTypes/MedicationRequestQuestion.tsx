@@ -306,7 +306,7 @@ export function MedicationRequestQuestion({
   };
 
   const newMedicationSheetContent = (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 p-3">
       {newMedicationInSheet && (
         <MedicationRequestGridRow
           medication={newMedicationInSheet}
@@ -534,7 +534,7 @@ export function MedicationRequestQuestion({
                               </CardHeader>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
-                              <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
+                              <CardContent className="p-2 pt-2 space-y-3 rounded-lg bg-gray-50">
                                 <MedicationRequestGridRow
                                   medication={medication}
                                   disabled={disabled}
@@ -750,23 +750,25 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       )}
     >
       {/* Medicine Name */}
-      <div
-        className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm"
-        data-cy="medicine-name-view"
-      >
-        <span
-          className={cn(
-            "break-words line-clamp-2 hidden lg:block",
-            disabled &&
-              medication.status !== "entered_in_error" &&
-              "line-through",
-          )}
+      {desktopLayout && (
+        <div
+          className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm"
+          data-cy="medicine-name-view"
         >
-          {medication.medication?.display}
-        </span>
-      </div>
+          <span
+            className={cn(
+              "break-words line-clamp-2 hidden lg:block",
+              disabled &&
+                medication.status !== "entered_in_error" &&
+                "line-through",
+            )}
+          >
+            {medication.medication?.display}
+          </span>
+        </div>
+      )}
       {/* Dosage */}
-      <div className="lg:px-2 px-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 p-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -856,7 +858,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           ))}
       </div>
       {/* Frequency */}
-      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("frequency")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -916,7 +918,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Duration */}
-      <div className="lg:px-2 px-1 pb-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 p-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("duration")}
         </Label>
@@ -1019,7 +1021,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Instructions */}
       <div
-        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
         data-cy="instructions"
       >
         <Label className="mb-1.5 block text-sm lg:hidden">
@@ -1071,7 +1073,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Route */}
       <div
-        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
         data-cy="route"
       >
         <Label className="mb-1.5 block text-sm lg:hidden">{t("route")}</Label>
@@ -1085,7 +1087,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Site */}
       <div
-        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
         data-cy="site"
       >
         <Label className="mb-1.5 block text-sm lg:hidden">{t("site")}</Label>
@@ -1100,7 +1102,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Method */}
       <div
-        className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
         data-cy="method"
       >
         <Label className="mb-1.5 block text-sm lg:hidden">{t("method")}</Label>
@@ -1114,7 +1116,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Intent */}
-      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("intent")}</Label>
         <Select
           value={medication.intent}
@@ -1139,7 +1141,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </Select>
       </div>
       {/* Authored On */}
-      <div className="lg:px-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("authored_on")}
         </Label>
@@ -1158,7 +1160,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Notes */}
       <div
-        className="lg:px-2 px-1 py-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden"
+        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
         data-cy="notes"
       >
         <Label className="mb-1.5 block text-sm lg:hidden">{t("note")}</Label>
