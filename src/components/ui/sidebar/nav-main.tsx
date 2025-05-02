@@ -135,7 +135,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                     data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     <ActiveLink
-                      href={link.url || "/"}
+                      href={link.url}
                       activeClass="bg-white text-green-700 shadow-sm"
                       exactActiveClass="bg-white text-green-700 shadow-sm"
                     >
@@ -173,7 +173,8 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
           className={cn(
             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
             {
-              "bg-white text-green-700 shadow": isChildActive(link, currentPath),
+              "bg-white text-green-700 shadow": 
+                isChildActive(link, currentPath),
             },
           )}
         >
