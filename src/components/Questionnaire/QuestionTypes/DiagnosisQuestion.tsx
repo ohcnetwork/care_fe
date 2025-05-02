@@ -56,6 +56,7 @@ import {
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
+  DiagnosisClinicalStatus,
   DiagnosisRequest,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
@@ -113,8 +114,8 @@ function ClinicalStatusSelect({
   onValueChange,
   disabled,
 }: {
-  status: string;
-  onValueChange: (value: string) => void;
+  status: DiagnosisClinicalStatus;
+  onValueChange: (value: DiagnosisClinicalStatus) => void;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -205,7 +206,7 @@ function DiagnosisDetailsForm({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="grid grid-cols-1 gap-4">
+    <div className="flex flex-col gap-4">
       <div className="space-y-2">
         <Label className="text-sm">{t("date")}</Label>
         <DiagnosisDatePicker
@@ -222,7 +223,7 @@ function DiagnosisDetailsForm({
       <div className="space-y-2">
         <Label className="text-sm">{t("status")}</Label>
         <ClinicalStatusSelect
-          status={diagnosis.clinical_status || ""}
+          status={diagnosis.clinical_status || "active"}
           onValueChange={(value) =>
             onUpdate({
               clinical_status: value as DiagnosisRequest["clinical_status"],
