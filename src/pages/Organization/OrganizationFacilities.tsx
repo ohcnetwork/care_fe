@@ -94,7 +94,7 @@ export default function OrganizationFacilities({
                     [key]: value || undefined,
                   })
                 }
-                className="w-full max-w-sm border-none shadow-none"
+                className="w-full max-w-sm"
                 data-cy="search-facility"
               />
             </div>
