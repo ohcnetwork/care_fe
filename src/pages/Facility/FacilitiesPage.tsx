@@ -91,9 +91,9 @@ export function FacilitiesPage() {
           id="facility-search"
           options={[
             {
-              key: "facility_search_placeholder_text",
+              key: "name",
               type: "text",
-              placeholder: t("facility_search_placeholder_text"),
+              placeholder: t("search_by_facility_name"),
               value: qParams.name || "",
             },
           ]}

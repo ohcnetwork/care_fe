@@ -42,7 +42,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     {
       key: "name",
       type: "text" as const,
-      placeholder: t("search_by_name"),
+      placeholder: t("search_by_patient_name"),
       value: qParams.name || "",
     },
     {
