@@ -111,9 +111,7 @@ export class ResourcesCreation {
   }
 
   searchResource(title: string) {
-    cy.get('[data-cy="search-resource"]').click();
     cy.typeIntoField('[data-cy="resource-search"]', title);
-    cy.get('[data-cy="search-resource"]').click();
     return this;
   }
 
