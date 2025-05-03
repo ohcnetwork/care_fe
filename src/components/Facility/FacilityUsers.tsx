@@ -99,7 +99,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
               [key]: value || undefined,
             })
           }
-          className="w-full max-w-sm border-none shadow-none"
+          className="w-full max-w-sm"
         />
         <Tabs
           value={activeTab}

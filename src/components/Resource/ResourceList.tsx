@@ -109,9 +109,10 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
         <div className="border border-gray-200 rounded-lg">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                 <SearchInput
                   data-cy="resource-search"
+                  className="w-full sm:w-[12rem]"
                   options={[
                     {
                       key: "title",
@@ -120,34 +121,19 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       value: title || "",
                     },
                   ]}
-                  onFieldChange={() =>
-                    updateQuery({
-                      title: undefined,
-                    })
-                  }
+                  onFieldChange={() => updateQuery({ title: undefined })}
                   onSearch={(key, value) =>
-                    updateQuery({
-                      [key]: value || undefined,
-                    })
+                    updateQuery({ [key]: value || undefined })
                   }
-                  className="w-full border-none shadow-none"
                   autoFocus
                 />
-                <div className="items-center">
-                  <Tabs
-                    value={incoming ? "incoming" : "outgoing"}
-                    className="w-full"
-                  >
-                    <TabsList className="bg-transparent p-0 h-8">
+                <div className="w-full flex justify-center sm:justify-start sm:w-auto">
+                  <Tabs value={incoming ? "incoming" : "outgoing"}>
+                    <TabsList className="inline-flex bg-transparent p-0 h-8">
                       <TabsTrigger
                         value="outgoing"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            incoming: false,
-                            title,
-                          })
-                        }
+                        onClick={() => updateQuery({ incoming: false, title })}
                         data-cy="tab-outgoing"
                       >
                         {t("outgoing")}
@@ -155,12 +141,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       <TabsTrigger
                         value="incoming"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            incoming: true,
-                            title,
-                          })
-                        }
+                        onClick={() => updateQuery({ incoming: true, title })}
                         data-cy="tab-incoming"
                       >
                         {t("incoming")}
@@ -169,12 +150,8 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   </Tabs>
                 </div>
               </div>
-
-              <div className="items-center">
-                <Tabs
-                  value={isActive ? "active" : "completed"}
-                  className="w-full"
-                >
+              <div className="flex justify-center sm:justify-end w-full sm:w-auto">
+                <Tabs value={isActive ? "active" : "completed"}>
                   <TabsList className="bg-transparent p-0 h-8">
                     <TabsTrigger
                       value="active"

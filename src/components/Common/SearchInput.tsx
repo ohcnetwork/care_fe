@@ -262,7 +262,8 @@ export default function SearchInput({
   return (
     <div
       className={cn(
-        "border rounded-lg border-gray-200 bg-white shadow-sm",
+        !isSingleOption &&
+          "border rounded-lg border-gray-200 bg-white shadow-sm",
         className,
       )}
     >
