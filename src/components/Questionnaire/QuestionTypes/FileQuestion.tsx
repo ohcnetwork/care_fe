@@ -168,7 +168,19 @@ export function FilesQuestion(props: FilesQuestionProps) {
           <Button
             variant={"outline"}
             className="border border-secondary-300"
-            onClick={() => fileUpload.removeFile(index)}
+            onClick={() => {
+              fileUpload.removeFile(index);
+              updateQuestionnaireResponseCB(
+                [
+                  {
+                    type: "files",
+                    value: values.filter((_, i) => i !== index),
+                  },
+                ],
+                questionnaireResponse.question_id,
+                questionnaireResponse.note,
+              );
+            }}
           >
             <CareIcon icon="l-trash" className="size-4" />
           </Button>

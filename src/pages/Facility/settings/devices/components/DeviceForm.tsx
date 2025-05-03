@@ -127,7 +127,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     contact: [],
   };
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
@@ -204,7 +204,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
           <FormField
             control={form.control}
             name="registered_name"
