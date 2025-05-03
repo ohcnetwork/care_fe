@@ -106,7 +106,13 @@ async function extractAndCleanTranslations(options) {
   for (const localeFile of localeFiles) {
     const locale = path.basename(localeFile, ".json");
     const localeFilePath = path.join(localesPath, localeFile);
-    const translations = JSON.parse(fs.readFileSync(localeFilePath, "utf-8"));
+    let translations;
+    try {
+      translations = JSON.parse(fs.readFileSync(localeFilePath, "utf-8"));
+    } catch (error) {
+      console.error(`Error parsing ${localeFilePath}: ${error.message}`);
+      continue;
+    }
 
     const keys = Object.keys(translations);
     const cleanedTranslations = {};
@@ -118,11 +124,15 @@ async function extractAndCleanTranslations(options) {
         cleanedTranslations[key] = translations[key];
       }
     }
-
-    fs.writeFileSync(
-      localeFilePath,
-      JSON.stringify(cleanedTranslations, null, 2),
-    );
+    try {
+      fs.writeFileSync(
+        localeFilePath,
+        JSON.stringify(cleanedTranslations, null, 2),
+      );
+    } catch (error) {
+      console.error(`Error writing ${localeFilePath}: ${error.message}`);
+      continue;
+    }
     console.log(`Cleaned translations for ${locale}.`);
   }
 }
