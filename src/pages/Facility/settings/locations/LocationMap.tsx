@@ -512,7 +512,7 @@ function LocationMapContent({
   ]);
 
   return (
-    <div className="h-[600px] w-full bg-gray-50 rounded-lg border border-gray-200">
+    <div className="h-[calc(100vh-14rem)] w-full bg-gray-50 rounded-lg border border-gray-200">
       <ReactFlow
         nodes={nodes}
         edges={edges}

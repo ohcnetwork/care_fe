@@ -74,7 +74,7 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
@@ -211,6 +211,41 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     Record<string, string | undefined>
   >({});
 
+  const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
+    const errorData = (
+      error as {
+        cause?: { errors: { msg: string; loc?: (string | number)[] }[] };
+      }
+    )?.cause;
+
+    if (!errorData?.errors) {
+      toast.error(fallbackMessage);
+      return;
+    }
+
+    errorData.errors.forEach((er) => {
+      let fieldPath = er.loc?.join(" > ");
+      if (er.loc?.includes("questions")) {
+        const questionIndices: number[] = [];
+
+        for (let i = 0; i < er.loc.length; i++) {
+          if (er.loc[i] === "questions" && typeof er.loc[i + 1] === "number") {
+            questionIndices.push(Number(er.loc[i + 1]) + 1);
+          }
+        }
+
+        if (questionIndices.length > 0) {
+          fieldPath = `Question ${questionIndices.join(".")}`;
+        }
+      }
+
+      const message = fieldPath ? `Error in ${fieldPath}: ${er.msg}` : er.msg;
+      toast.error(message);
+    });
+
+    toast.error(fallbackMessage);
+  };
+
   const {
     data: initialQuestionnaire,
     isLoading,
@@ -271,28 +306,30 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   }, [availableTags, selectedTags, tagSearchQuery]);
 
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
-    mutationFn: mutate(questionnaireApi.create),
+    mutationFn: mutate(questionnaireApi.create, {
+      silent: true,
+    }),
     onSuccess: (data: QuestionnaireDetail) => {
-      toast.success("Questionnaire created successfully");
+      toast.success(t("questionnaire_created_successfully"));
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
       navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
-    onError: (_error) => {
-      toast.error("Failed to create questionnaire");
-    },
+    onError: (error) =>
+      handleOnErrors(error, t("failed_to_create_questionnaire")),
   });
 
   const { mutate: updateQuestionnaire, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.update, {
       pathParams: { id: id! },
+      silent: true,
     }),
-    onSuccess: () => {
-      toast.success("Questionnaire updated successfully");
+    onSuccess: (data: QuestionnaireDetail) => {
+      toast.success(t("questionnaire_updated_successfully"));
+      navigate(`/admin/questionnaire/${data.slug}/edit`);
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
-    onError: (_error) => {
-      toast.error("Failed to update questionnaire");
-    },
+    onError: (error) =>
+      handleOnErrors(error, t("failed_to_update_questionnaire")),
   });
 
   const { mutate: importQuestionnaire, isPending: isImporting } = useMutation({
@@ -664,15 +701,27 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   <button
                                     key={subQuestion.id}
                                     onClick={() => {
-                                      const element = document.getElementById(
-                                        `question-${subQuestion.id}`,
-                                      );
-                                      if (element) {
-                                        element.scrollIntoView();
+                                      if (!expandedQuestions.has(question.id)) {
                                         toggleQuestionExpanded(question.id);
+                                        setTimeout(() => {
+                                          const element =
+                                            document.getElementById(
+                                              `question-${subQuestion.id}`,
+                                            );
+                                          if (element) {
+                                            element.scrollIntoView();
+                                          }
+                                        }, 100);
+                                      } else {
+                                        const element = document.getElementById(
+                                          `question-${subQuestion.id}`,
+                                        );
+                                        if (element) {
+                                          element.scrollIntoView();
+                                        }
                                       }
                                     }}
-                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2"
+                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
                                   >
                                     <span className="font-medium text-gray-500">
                                       {index + 1}.{subIndex + 1}

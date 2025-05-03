@@ -169,7 +169,7 @@ export default function PatientRegistration(
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       nationality: "India",
@@ -179,6 +179,7 @@ export default function PatientRegistration(
       same_phone_number: false,
       same_address: true,
     },
+    mode: "onChange",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
@@ -225,6 +226,12 @@ export default function PatientRegistration(
         age: values.age_or_dob === "age" ? values.age : undefined,
         date_of_birth:
           values.age_or_dob === "dob" ? values.date_of_birth : undefined,
+        emergency_phone_number: values.same_phone_number
+          ? values.phone_number
+          : values.emergency_phone_number,
+        permanent_address: values.same_address
+          ? values.address
+          : values.permanent_address,
       });
       return;
     }
@@ -397,11 +404,12 @@ export default function PatientRegistration(
                       <PhoneInput
                         {...field}
                         onChange={(value) => {
-                          form.setValue("phone_number", value || "");
+                          field.onChange(value);
                           if (form.getValues("same_phone_number")) {
                             form.setValue(
                               "emergency_phone_number",
                               value || "",
+                              { shouldDirty: true },
                             );
                           }
                         }}
@@ -423,6 +431,13 @@ export default function PatientRegistration(
                                     form.setValue(
                                       "emergency_phone_number",
                                       form.watch("phone_number"),
+                                      { shouldValidate: true },
+                                    );
+                                  } else {
+                                    form.setValue(
+                                      "emergency_phone_number",
+                                      "",
+                                      { shouldValidate: true },
                                     );
                                   }
                                 }}
@@ -593,6 +608,7 @@ export default function PatientRegistration(
                                 e.target.value
                                   ? Number(e.target.value)
                                   : (null as unknown as number),
+                                { shouldDirty: true },
                               )
                             }
                             data-cy="age-input"
@@ -704,9 +720,12 @@ export default function PatientRegistration(
                       <Textarea
                         {...field}
                         onChange={(e) => {
-                          form.setValue("address", e.target.value);
+                          field.onChange(e);
                           if (form.getValues("same_address")) {
-                            form.setValue("permanent_address", e.target.value);
+                            form.setValue("permanent_address", e.target.value, {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            });
                           }
                         }}
                         data-cy="current-address-input"
@@ -727,6 +746,7 @@ export default function PatientRegistration(
                                     form.setValue(
                                       "permanent_address",
                                       form.getValues("address"),
+                                      { shouldValidate: true },
                                     );
                                   }
                                 }}
@@ -772,14 +792,12 @@ export default function PatientRegistration(
                       <Input
                         type="number"
                         {...field}
-                        onChange={(e) =>
-                          form.setValue(
-                            "pincode",
-                            e.target.value
-                              ? Number(e.target.value)
-                              : (undefined as unknown as number), // intentionally setting to undefined, when the value is empty to avoid 0 in the input field
-                          )
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value
+                            ? Number(e.target.value)
+                            : undefined;
+                          field.onChange(value);
+                        }}
                         data-cy="pincode-input"
                       />
                     </FormControl>
@@ -803,7 +821,9 @@ export default function PatientRegistration(
                           }))}
                           {...field}
                           onChange={(value) =>
-                            form.setValue("nationality", value)
+                            form.setValue("nationality", value, {
+                              shouldDirty: true,
+                            })
                           }
                           data-cy="nationality-input"
                         />
@@ -828,7 +848,10 @@ export default function PatientRegistration(
                             selected={selectedLevels}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
-                              form.setValue("geo_organization", value)
+                              form.setValue("geo_organization", value, {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              })
                             }
                           />
                         </FormControl>

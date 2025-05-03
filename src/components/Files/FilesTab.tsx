@@ -74,14 +74,13 @@ export const FilesTab = (props: FilesTabProps) => {
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
-  const {
-    canViewClinicalData,
-    canViewEncounter,
-    canWritePatient,
-    canWriteEncounter,
-  } = getPermissions(
+  const { canViewClinicalData, canWritePatient } = getPermissions(
     hasPermission,
-    encounter?.permissions ?? patient?.permissions ?? [],
+    patient?.permissions ?? [],
+  );
+  const { canViewEncounter, canWriteEncounter } = getPermissions(
+    hasPermission,
+    encounter?.permissions ?? [],
   );
   const canAccess =
     type === "encounter"

@@ -1,7 +1,7 @@
 import { CaretSortIcon, StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -53,6 +53,7 @@ interface Props {
   wrapTextForSmallScreen?: boolean;
   hideTrigger?: boolean;
   controlledOpen?: boolean;
+  title?: string;
 }
 
 const Item = ({
@@ -101,6 +102,7 @@ export default function ValueSetSelect({
   wrapTextForSmallScreen = false,
   hideTrigger = false,
   controlledOpen = false,
+  title,
 }: Props) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -109,6 +111,7 @@ export default function ValueSetSelect({
   const [activeTab, setActiveTab] = useState(0);
   const [isClearingFavourites, setIsClearingFavourites] = useState(false);
   const queryClient = useQueryClient();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
@@ -196,15 +199,19 @@ export default function ValueSetSelect({
     }
   }, [controlledOpen, internalOpen]);
 
+  useEffect(() => {
+    if (internalOpen && isMobile) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [internalOpen, isMobile]);
+
   const content = (
-    <Command filter={() => 1}>
-      <CommandInput
-        placeholder={t("value_set_search_placeholder")}
-        className="outline-hidden border-none ring-0 shadow-none"
-        onValueChange={setSearch}
-        autoFocus
-      />
-      <CommandList className="h-75 overflow-hidden">
+    <Command filter={() => 1} className="rounded-t-3xl">
+      <div className="py-3 px-3 border-b border-gray-200 flex justify-between items-center">
+        {title && <h3 className="text-base font-semibold">{title}</h3>}
         <Tabs
           value={activeTab.toString()}
           onValueChange={(value) => {
@@ -221,6 +228,15 @@ export default function ValueSetSelect({
             </TabsTrigger>
           </TabsList>
         </Tabs>
+      </div>
+      <CommandInput
+        ref={inputRef}
+        placeholder={t("value_set_search_placeholder")}
+        className="outline-hidden border-none ring-0 shadow-none"
+        onValueChange={setSearch}
+        autoFocus
+      />
+      <CommandList className="h-75 overflow-hidden">
         <CommandEmpty>
           {search.length < 3 ? (
             <p className="p-4 text-sm text-gray-500">
@@ -366,6 +382,45 @@ export default function ValueSetSelect({
     </AlertDialog>
   );
 
+  if (
+    isMobile &&
+    !hideTrigger &&
+    (system === "system-additional-instruction" ||
+      system === "system-route" ||
+      system === "system-body-site" ||
+      system === "system-administration-method")
+  ) {
+    return (
+      <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            onClick={() => setInternalOpen(true)}
+            className={cn(
+              "w-full justify-between",
+              wrapTextForSmallScreen
+                ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
+                : "truncate",
+              !value?.display && "text-gray-400",
+            )}
+            disabled={disabled}
+          >
+            <span>{value?.display || placeholder}</span>
+            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent
+          side="bottom"
+          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-3xl"
+        >
+          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
+          <div className="mt-6 h-full">{content}</div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
   if (isMobile && !hideTrigger) {
     return (
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
@@ -395,9 +450,9 @@ export default function ValueSetSelect({
         </SheetTrigger>
         <SheetContent
           side="bottom"
-          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
+          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-3xl"
         >
-          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
           <div className="mt-6 h-full">{content}</div>
         </SheetContent>
         {alert}
