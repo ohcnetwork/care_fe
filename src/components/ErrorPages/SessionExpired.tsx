@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
+
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 // Define digitMaps outside the component to prevent recreation on each render
@@ -231,11 +233,9 @@ export default function SessionExpired() {
 
           {/* Breathing Text */}
           <div className="text-xs text-center uppercase font-medium text-gray-400 mt-1 h-4 transition">
-            {t("SESSION_EXPIRED_BREATHE")}{" "}
+            {t("breathe")}{" "}
             <span className="block animate-fade">
-              {breathState === "in"
-                ? t("SESSION_EXPIRED_BREATH_IN")
-                : t("SESSION_EXPIRED_BREATH_OUT")}
+              {breathState === "in" ? t("in") : t("out")}
             </span>
           </div>
         </div>
@@ -247,13 +247,14 @@ export default function SessionExpired() {
         <p className="max-w-md mx-auto px-2 text-sm md:text-base mt-2 text-gray-600">
           {t("SESSION_EXPIRED_MESSAGE")}
         </p>
-        <button
+        <Button
           type="button"
+          variant="primary"
+          className="mt-6"
           onClick={signOut}
-          className="mt-6 transition duration-300 ease-in-out rounded-md select-none bg-emerald-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
         >
-          {t("SESSION_EXPIRED_LOGIN_AGAIN")}
-        </button>
+          {t("log_in_again")}
+        </Button>
       </div>
     </div>
   );
