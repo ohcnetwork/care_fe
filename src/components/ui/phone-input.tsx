@@ -50,7 +50,7 @@ function PhoneInput({
       flagComponent={FlagComponent}
       countrySelectComponent={CountrySelect}
       inputComponent={InputComponent}
-      defaultCountry={careConfig.defaultCountry}
+      defaultCountry={careConfig.defaultCountry.name}
       smartCaret={true}
       /**
        * Handles the onChange event.
