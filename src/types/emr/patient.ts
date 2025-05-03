@@ -102,7 +102,7 @@ export const validatePatient = (patient: PatientModel, useDob: boolean) => {
     "permanent_address",
   ];
 
-  if (patient.nationality === careConfig.defaultCountry.code) {
+  if (patient.nationality === careConfig.defaultCountry.name) {
     requiredFields.push("geo_organization");
   }
 
