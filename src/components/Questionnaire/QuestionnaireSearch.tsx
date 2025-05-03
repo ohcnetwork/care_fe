@@ -149,7 +149,7 @@ export function QuestionnaireSearch({
           side="bottom"
           className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
         >
-          <SheetTitle className="m-2">{t("questionnaire")}</SheetTitle>
+          <SheetTitle className="sr-only">{t("questionnaire")}</SheetTitle>
           <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
           <div className="mt-6 h-full">{content}</div>
         </SheetContent>
