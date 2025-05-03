@@ -61,6 +61,7 @@ export type MedicationStatementRequest = {
   effective_period?: Period;
   information_source: MedicationStatementInformationSourceType;
   note?: string;
+  created_by?: UserBareMinimum;
 };
 
 export type MedicationStatementRead = {
@@ -73,8 +74,8 @@ export type MedicationStatementRead = {
   encounter: string;
   information_source: MedicationStatementInformationSourceType;
   note?: string;
-  created_at: string;
-  modified_at: string;
+  created_date: string;
+  modified_date: string;
   created_by: UserBareMinimum;
   updated_by: UserBareMinimum;
 };
