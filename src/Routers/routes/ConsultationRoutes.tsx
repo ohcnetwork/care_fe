@@ -84,6 +84,10 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
+  "/organization/:organizationId/patient/:patientId/encounter/:encounterId/treatment_summary":
+    ({ encounterId, patientId }) => (
+      <TreatmentSummary encounterId={encounterId} patientId={patientId} />
+    ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (
       <EncounterQuestionnaire

@@ -6,6 +6,7 @@ on:
       - opened
       - reopened
       - assigned
+      - unassigned
       - closed
 
 jobs:
@@ -53,9 +54,14 @@ jobs:
 
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
           echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'TEAM_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .id' project_data.json) >> $GITHUB_ENV
           echo 'TRIAGE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Triage") | .id' project_data.json) >> $GITHUB_ENV
           echo 'IN_PROGRESS_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="In Progress") | .id' project_data.json) >> $GITHUB_ENV
           echo 'DONE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Done") | .id' project_data.json) >> $GITHUB_ENV
+
+          echo 'TEAM_CORE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Core") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'TEAM_INTERNS_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Interns") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'TEAM_COMMUNITY_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Community") | .id' project_data.json) >> $GITHUB_ENV
 
       - name: Add Issue to Project
         env:
@@ -111,6 +117,40 @@ jobs:
                 }
               }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f in_progress_value=${{ env.IN_PROGRESS_OPTION_ID }}
 
+          elif [[ "${{ github.event.action }}" == "unassigned" ]]; then
+            ASSIGNEES_COUNT=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }} --jq '.assignees | length')
+
+            if [[ $ASSIGNEES_COUNT -eq 0 ]]; then
+              gh api graphql -f query='
+                mutation($project: ID!, $item: ID!, $status_field: ID!, $triage_value: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $project
+                    itemId: $item
+                    fieldId: $status_field
+                    value: {
+                      singleSelectOptionId: $triage_value
+                    }
+                  }) {
+                    projectV2Item {
+                      id
+                    }
+                  }
+                }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f triage_value=${{ env.TRIAGE_OPTION_ID }}
+
+              gh api graphql -f query='
+                mutation($project: ID!, $item: ID!, $team_field: ID!) {
+                  clearProjectV2ItemFieldValue(input: {
+                    projectId: $project
+                    itemId: $item
+                    fieldId: $team_field
+                  }) {
+                    projectV2Item {
+                      id
+                    }
+                  }
+                }' -f project=$PROJECT_ID -f item=$ITEM_ID -f team_field=$TEAM_FIELD_ID
+            fi
+
           elif [[ "${{ github.event.action }}" == "closed" && "${{ github.event.issue.state_reason }}" == "completed" ]]; then
             gh api graphql -f query='
               mutation($project: ID!, $item: ID!, $status_field: ID!, $done_value: String!) {
@@ -141,3 +181,56 @@ jobs:
                 }
               }' -f project=$PROJECT_ID -f item=$ITEM_ID
           fi
+
+      - name: Check assignees roles and update Team
+        if: github.event.action == 'assigned' || github.event.action == 'unassigned'
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          ASSIGNEES=$(gh api repos/$REPO/issues/$ISSUE_NUMBER --jq '.assignees[].login')
+
+          FOUND_CORE=false
+          FOUND_INTERN=false
+          FOUND_CONTRIBUTOR=false
+
+          for ASSIGNEE in $ASSIGNEES; do
+            ASSIGNEE_DATA=$(curl -s "https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${ASSIGNEE}.md")
+
+            if echo "$ASSIGNEE_DATA" | grep -q "role: core"; then
+              FOUND_CORE=true
+              break
+            elif echo "$ASSIGNEE_DATA" | grep -q "role: intern"; then
+              FOUND_INTERN=true
+            elif echo "$ASSIGNEE_DATA" | grep -q "role: contributor"; then
+              FOUND_CONTRIBUTOR=true
+            fi
+          done
+
+          if [[ "$FOUND_CORE" == "true" ]]; then
+            TEAM_OPTION_ID=${{ env.TEAM_CORE_OPTION_ID }}
+            gh issue edit $ISSUE_NUMBER --remove-label "core" --repo $REPO || true
+          elif [[ "$FOUND_INTERN" == "true" ]]; then
+            TEAM_OPTION_ID=${{ env.TEAM_INTERNS_OPTION_ID }}
+          elif [[ "$FOUND_CONTRIBUTOR" == "true" ]]; then
+            TEAM_OPTION_ID=${{ env.TEAM_COMMUNITY_OPTION_ID }}
+          else
+            exit 0
+          fi
+
+          gh api graphql -f query='
+            mutation($project: ID!, $item: ID!, $team_field: ID!, $team_value: String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $team_field
+                value: {
+                  singleSelectOptionId: $team_value
+                }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f team_field=$TEAM_FIELD_ID -f team_value=$TEAM_OPTION_ID

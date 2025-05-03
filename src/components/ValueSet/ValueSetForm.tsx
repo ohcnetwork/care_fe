@@ -1,9 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
-import { useMutation } from "@tanstack/react-query";
+import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -30,15 +28,13 @@ import { Textarea } from "@/components/ui/textarea";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import mutate from "@/Utils/request/mutate";
 import {
   TERMINOLOGY_SYSTEMS,
   UpdateValuesetModel,
   ValuesetFormType,
-  ValuesetLookupResponse,
 } from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
 
+import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
 // Create a schema for form validation
@@ -63,49 +59,6 @@ function ConceptFields({
     name: `compose.${type}.${nestIndex}.concept`,
   });
 
-  const lookupMutation = useMutation({
-    mutationFn: mutate(valuesetApi.lookup, {
-      silent: true, // Suppress default error handling since we have custom handling
-    }),
-    onSuccess: (response: ValuesetLookupResponse) => {
-      if (response.metadata) {
-        const concepts = parentForm.getValues(
-          `compose.${type}.${nestIndex}.concept`,
-        );
-
-        const conceptIndex = concepts?.findIndex(
-          (concept) => concept.code === response.metadata.code,
-        );
-
-        if (conceptIndex != undefined && conceptIndex !== -1) {
-          parentForm.setValue(
-            `compose.${type}.${nestIndex}.concept.${conceptIndex}.display`,
-            response.metadata.display,
-            { shouldValidate: true },
-          );
-        }
-        toast.success("Code verified successfully");
-      }
-    },
-    onError: () => {
-      toast.error("Failed to verify code");
-    },
-  });
-
-  const handleVerify = async (index: number) => {
-    const system = parentForm.getValues(`compose.${type}.${nestIndex}.system`);
-    const code = parentForm.getValues(
-      `compose.${type}.${nestIndex}.concept.${index}.code`,
-    );
-
-    if (!system || !code) {
-      toast.error("Please select a system and enter a code first");
-      return;
-    }
-
-    lookupMutation.mutate({ system, code });
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -122,54 +75,12 @@ function ConceptFields({
       </div>
       {fields.map((field, index) => (
         <div key={field.id} className="flex gap-4 items-start">
-          <FormField
-            control={parentForm.control}
-            name={`compose.${type}.${nestIndex}.concept.${index}.code`}
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Code"
-                    onChange={(e) => {
-                      field.onChange(e);
-                      // Clear display and set isVerified to false when code changes
-                      parentForm.setValue(
-                        `compose.${type}.${nestIndex}.concept.${index}.display`,
-                        "",
-                        { shouldValidate: true },
-                      );
-                    }}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
+          <CodingField
+            system={parentForm.watch(`compose.${type}.${nestIndex}.system`)}
+            name={`compose.${type}.${nestIndex}.concept.${index}`}
+            form={parentForm}
+            className="flex-1"
           />
-          <FormField
-            control={parentForm.control}
-            name={`compose.${type}.${nestIndex}.concept.${index}.display`}
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Unverified"
-                    className={!field.value ? "text-gray-500" : undefined}
-                    readOnly
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => handleVerify(index)}
-            disabled={lookupMutation.isPending}
-          >
-            <UpdateIcon className="size-4" />
-          </Button>
           <Button
             type="button"
             variant="ghost"
@@ -187,13 +98,14 @@ function ConceptFields({
 function FilterFields({
   nestIndex,
   type,
+  parentForm,
 }: {
   nestIndex: number;
   type: "include" | "exclude";
+  parentForm: ReturnType<typeof useForm<ValuesetFormType>>;
 }) {
-  const form = useForm();
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
+    control: parentForm.control,
     name: `compose.${type}.${nestIndex}.filter`,
   });
 
@@ -214,7 +126,7 @@ function FilterFields({
       {fields.map((field, index) => (
         <div key={field.id} className="flex gap-4 items-start">
           <FormField
-            control={form.control}
+            control={parentForm.control}
             name={`compose.${type}.${nestIndex}.filter.${index}.property`}
             render={({ field }) => (
               <FormItem className="flex-1">
@@ -225,7 +137,7 @@ function FilterFields({
             )}
           />
           <FormField
-            control={form.control}
+            control={parentForm.control}
             name={`compose.${type}.${nestIndex}.filter.${index}.op`}
             render={({ field }) => (
               <FormItem className="flex-1">
@@ -236,7 +148,7 @@ function FilterFields({
             )}
           />
           <FormField
-            control={form.control}
+            control={parentForm.control}
             name={`compose.${type}.${nestIndex}.filter.${index}.value`}
             render={({ field }) => (
               <FormItem className="flex-1">
@@ -337,7 +249,7 @@ function RuleFields({
               </Button>
             </div>
             <ConceptFields nestIndex={index} type={type} parentForm={form} />
-            <FilterFields nestIndex={index} type={type} />
+            <FilterFields nestIndex={index} type={type} parentForm={form} />
           </div>
         ))}
       </CardContent>
@@ -358,9 +270,7 @@ export function ValueSetForm({
       .trim()
       .min(5, t("character_count_validation", { min: 5, max: 25 }))
       .max(25, t("character_count_validation", { min: 5, max: 25 }))
-      .regex(/^[-\w]+$/, {
-        message: t("slug_format_message"),
-      }),
+      .regex(/^[-\w]+$/, { message: t("slug_format_message") }),
     description: z.string(),
     status: z.enum(["active", "draft", "retired", "unknown"]),
     is_system_defined: z.boolean(),
@@ -369,12 +279,7 @@ export function ValueSetForm({
         z.object({
           system: z.string(),
           concept: z
-            .array(
-              z.object({
-                code: z.string(),
-                display: z.string(),
-              }),
-            )
+            .array(z.object({ code: z.string(), display: z.string() }))
             .optional(),
           filter: z
             .array(
@@ -391,12 +296,7 @@ export function ValueSetForm({
         z.object({
           system: z.string(),
           concept: z
-            .array(
-              z.object({
-                code: z.string(),
-                display: z.string(),
-              }),
-            )
+            .array(z.object({ code: z.string(), display: z.string() }))
             .optional(),
           filter: z
             .array(
