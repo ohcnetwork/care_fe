@@ -2,12 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,11 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -118,61 +110,29 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      data-cy="search-resource"
-                      variant="outline"
-                      size="sm"
-                      className={cn(
-                        "h-8 min-w-[120px] justify-start",
-                        title &&
-                          "bg-primary/10 text-primary hover:bg-primary/20",
-                      )}
-                    >
-                      <CareIcon icon="l-search" className="mr-2 size-4" />
-                      {title ? (
-                        <span className="truncate">{title}</span>
-                      ) : (
-                        t("search")
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-[20rem] p-3 border-none"
-                    align="start"
-                    onEscapeKeyDown={(event) => event.preventDefault()}
-                  >
-                    <div className="space-y-4">
-                      <h4 className="font-medium leading-none">
-                        {t("search_resource")}
-                      </h4>
-                      <SearchInput
-                        data-cy="resource-search"
-                        options={[
-                          {
-                            key: "title",
-                            type: "text",
-                            placeholder: t("search_by_resource_title"),
-                            value: title || "",
-                          },
-                        ]}
-                        onFieldChange={() =>
-                          updateQuery({
-                            title: undefined,
-                          })
-                        }
-                        onSearch={(key, value) =>
-                          updateQuery({
-                            [key]: value || undefined,
-                          })
-                        }
-                        className="w-full border-none shadow-none"
-                        autoFocus
-                      />
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <SearchInput
+                  data-cy="resource-search"
+                  options={[
+                    {
+                      key: "title",
+                      type: "text",
+                      placeholder: t("search_by_resource_title"),
+                      value: title || "",
+                    },
+                  ]}
+                  onFieldChange={() =>
+                    updateQuery({
+                      title: undefined,
+                    })
+                  }
+                  onSearch={(key, value) =>
+                    updateQuery({
+                      [key]: value || undefined,
+                    })
+                  }
+                  className="w-full border-none shadow-none"
+                  autoFocus
+                />
                 <div className="items-center">
                   <Tabs
                     value={incoming ? "incoming" : "outgoing"}
