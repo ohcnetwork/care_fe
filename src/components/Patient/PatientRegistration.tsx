@@ -75,6 +75,7 @@ export default function PatientRegistration(
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
+  const defaultCountry = careConfig.defaultCountry.name;
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
@@ -138,7 +139,7 @@ export default function PatientRegistration(
         })
         .refine(
           (data) =>
-            data.nationality === careConfig.defaultCountry.name
+            data.nationality === defaultCountry
               ? !!data.geo_organization
               : true,
           {
@@ -175,7 +176,7 @@ export default function PatientRegistration(
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nationality: careConfig.defaultCountry.name,
+      nationality: defaultCountry,
       phone_number: phone_number || "",
       emergency_phone_number: "",
       age_or_dob: "dob",
@@ -324,8 +325,7 @@ export default function PatientRegistration(
         address: patientQuery.data.address || "",
         permanent_address: patientQuery.data.permanent_address || "",
         pincode: patientQuery.data.pincode || undefined,
-        nationality:
-          patientQuery.data.nationality || careConfig.defaultCountry.name,
+        nationality: patientQuery.data.nationality || defaultCountry,
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
@@ -839,8 +839,7 @@ export default function PatientRegistration(
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {form.watch("nationality") ===
-                  careConfig.defaultCountry.name && (
+                {form.watch("nationality") === defaultCountry && (
                   <FormField
                     control={form.control}
                     name="geo_organization"
