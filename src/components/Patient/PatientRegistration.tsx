@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { InfoIcon } from "lucide-react";
@@ -137,7 +138,9 @@ export default function PatientRegistration(
         })
         .refine(
           (data) =>
-            data.nationality === "India" ? !!data.geo_organization : true,
+            data.nationality === careConfig.defaultCountry.name
+              ? !!data.geo_organization
+              : true,
           {
             message: t("geo_organization_required"),
             path: ["geo_organization"],
@@ -172,7 +175,7 @@ export default function PatientRegistration(
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nationality: "India",
+      nationality: careConfig.defaultCountry.name,
       phone_number: phone_number || "",
       emergency_phone_number: "",
       age_or_dob: "dob",
@@ -321,7 +324,8 @@ export default function PatientRegistration(
         address: patientQuery.data.address || "",
         permanent_address: patientQuery.data.permanent_address || "",
         pincode: patientQuery.data.pincode || undefined,
-        nationality: patientQuery.data.nationality || "India",
+        nationality:
+          patientQuery.data.nationality || careConfig.defaultCountry.name,
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
@@ -835,7 +839,8 @@ export default function PatientRegistration(
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {form.watch("nationality") === "India" && (
+                {form.watch("nationality") ===
+                  careConfig.defaultCountry.name && (
                   <FormField
                     control={form.control}
                     name="geo_organization"
