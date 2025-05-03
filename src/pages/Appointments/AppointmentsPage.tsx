@@ -507,10 +507,7 @@ export default function AppointmentsPage({
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <Label
-                        htmlFor="start-date"
-                        className="text-sm font-medium"
-                      >
+                      <Label className="text-sm font-medium">
                         {t("start_date")}
                       </Label>
                       <CombinedDatePicker
@@ -541,7 +538,7 @@ export default function AppointmentsPage({
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <Label htmlFor="end-date" className="text-sm font-medium">
+                      <Label className="text-sm font-medium">
                         {t("end_date")}
                       </Label>
                       <CombinedDatePicker
