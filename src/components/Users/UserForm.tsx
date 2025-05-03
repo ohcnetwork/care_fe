@@ -536,7 +536,7 @@ export default function UserForm({
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
-                      value={field.value}
+                      defaultValue={field.value}
                       className="space-y-3"
                     >
                       {/* Set password now option */}
@@ -545,7 +545,7 @@ export default function UserForm({
                           "flex items-start space-x-3 rounded-md border p-3 cursor-pointer transition-colors",
                           field.value === "immediate"
                             ? "bg-white border-primary"
-                            : "bg-transparent border-gray-200 hover:bg-gray-100",
+                            : "bg-transparent border-gray-200 ",
                         )}
                       >
                         <RadioGroupItem
@@ -553,13 +553,13 @@ export default function UserForm({
                           id="immediate"
                           className="mt-1"
                         />
-                        <div className="space-y-1.5 flex-1">
+                        <div className="space-y-1.5 ">
                           <Label
                             htmlFor="immediate"
-                            className="text-base font-medium cursor-pointer flex items-center gap-2"
+                            className="text-base font-medium cursor-pointer flex items-center "
                           >
                             <Lock className="size-4" />
-                            <span>{t("set_password_now")}</span>
+                            {t("set_password_now")}
                           </Label>
                           <p className="text-sm text-muted-foreground">
                             {t("set_password_now_description")}
@@ -573,7 +573,7 @@ export default function UserForm({
                           "flex items-start space-x-3 rounded-md border p-3 cursor-pointer transition-colors",
                           field.value === "email"
                             ? "bg-white border-primary"
-                            : "bg-transparent border-gray-200 hover:bg-gray-100",
+                            : "bg-transparent border-gray-200 ",
                         )}
                       >
                         <RadioGroupItem
@@ -581,13 +581,13 @@ export default function UserForm({
                           id="email"
                           className="mt-1"
                         />
-                        <div className="space-y-1.5 flex-1">
+                        <div className="space-y-1.5 ">
                           <Label
                             htmlFor="email"
-                            className="text-base font-medium cursor-pointer flex items-center gap-2"
+                            className="text-base font-medium cursor-pointer flex items-center "
                           >
                             <Mail className="size-4" />
-                            <span>{t("send_email_invitation")}</span>
+                            {t("send_email_invitation")}
                           </Label>
                           <p className="text-sm text-muted-foreground">
                             {t("send_email_invitation_description")}
