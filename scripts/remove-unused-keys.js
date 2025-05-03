@@ -97,6 +97,8 @@ async function extractAndCleanTranslations(options) {
     const files = glob.sync(`${locale}.json`, { cwd: localesPath });
     if (files.length > 0) {
       localeFiles.push(...files);
+    } else {
+      console.warn(`Warning: No locale file found for ${locale}`);
     }
   });
 
