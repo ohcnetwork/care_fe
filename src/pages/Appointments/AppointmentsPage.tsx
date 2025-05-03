@@ -507,12 +507,12 @@ export default function AppointmentsPage({
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label
+                      <Label
                         htmlFor="start-date"
-                        className="text-sm font-medium text-muted-foreground"
+                        className="text-sm font-medium"
                       >
                         {t("start_date")}
-                      </label>
+                      </Label>
                       <CombinedDatePicker
                         value={
                           qParams.date_from
@@ -541,12 +541,9 @@ export default function AppointmentsPage({
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label
-                        htmlFor="end-date"
-                        className="text-sm font-medium text-muted-foreground"
-                      >
+                      <Label htmlFor="end-date" className="text-sm font-medium">
                         {t("end_date")}
-                      </label>
+                      </Label>
                       <CombinedDatePicker
                         value={
                           qParams.date_to
