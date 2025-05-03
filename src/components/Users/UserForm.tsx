@@ -494,7 +494,10 @@ export default function UserForm({
                   </>
 
                   <div
-                    className={`pl ${isUsernameFieldFocused ? "hidden" : "block"}`}
+                    className={cn(
+                      "pl",
+                      isUsernameFieldFocused ? "hidden" : "block",
+                    )}
                   >
                     <FormMessage />
                   </div>
@@ -538,11 +541,12 @@ export default function UserForm({
                     >
                       {/* Set password now option */}
                       <div
-                        className={`flex items-start space-x-3 rounded-md border p-3 cursor-pointer transition-colors ${
+                        className={cn(
+                          "flex items-start space-x-3 rounded-md border p-3 cursor-pointer transition-colors",
                           field.value === "immediate"
                             ? "bg-white border-primary"
-                            : "bg-transparent border-gray-200 hover:bg-gray-100"
-                        }`}
+                            : "bg-transparent border-gray-200 hover:bg-gray-100",
+                        )}
                       >
                         <RadioGroupItem
                           value="immediate"
@@ -565,11 +569,12 @@ export default function UserForm({
 
                       {/* Send email invitation option */}
                       <div
-                        className={`flex items-start space-x-3 rounded-md border p-3 cursor-pointer transition-colors ${
+                        className={cn(
+                          "flex items-start space-x-3 rounded-md border p-3 cursor-pointer transition-colors",
                           field.value === "email"
                             ? "bg-white border-primary"
-                            : "bg-transparent border-gray-200 hover:bg-gray-100"
-                        }`}
+                            : "bg-transparent border-gray-200 hover:bg-gray-100",
+                        )}
                       >
                         <RadioGroupItem
                           value="email"
@@ -649,7 +654,10 @@ export default function UserForm({
                       </div>
 
                       <div
-                        className={`pl-2 ${isPasswordFieldFocused ? "hidden" : "block"}`}
+                        className={cn(
+                          "pl-2",
+                          isPasswordFieldFocused ? "hidden" : "block",
+                        )}
                       >
                         <FormMessage />
                       </div>
