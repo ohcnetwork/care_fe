@@ -596,7 +596,16 @@ export function MedicationStatementQuestion({
                             <CardContent className="p-2 pt-2 space-y-3 rounded-lg bg-gray-50">
                               <MedicationStatementGridRow
                                 medication={medication}
-                                disabled={disabled}
+                                disabled={
+                                  disabled ||
+                                  patientMedications?.results
+                                    .filter(
+                                      (result) =>
+                                        result.status === "entered_in_error",
+                                    )
+                                    .map((result) => result.id)
+                                    .includes(medication.id as string)
+                                }
                                 onUpdate={(updates) =>
                                   handleUpdateMedication(index, updates)
                                 }
@@ -717,8 +726,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       className={cn(
         "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         {
-          "opacity-40 pointer-events-none":
-            medication.status === "entered_in_error",
+          "opacity-40 pointer-events-none": disabled,
         },
       )}
     >
