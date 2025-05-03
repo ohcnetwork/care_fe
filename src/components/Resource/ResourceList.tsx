@@ -13,6 +13,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -185,7 +192,31 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
             <Separator />
 
             <div className="p-4 h-auto overflow-hidden">
-              <Tabs value={currentStatus} className="w-full">
+              <div className="block sm:hidden w-full">
+                <Select
+                  value={currentStatus}
+                  onValueChange={(value) =>
+                    updateQuery({
+                      status: value,
+                      title,
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("select_status")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currentStatuses.map((statusOption) => (
+                      <SelectItem key={statusOption} value={statusOption}>
+                        {t(`resource_status__${statusOption}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Desktop Tabs */}
+              <Tabs value={currentStatus} className="hidden sm:block w-full">
                 <TabsList className="bg-transparent p-0 h-auto flex-wrap justify-start gap-y-2 overflow-auto">
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger
