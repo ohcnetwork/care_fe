@@ -48,15 +48,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import {
+  Onset,
   SYMPTOM_CLINICAL_STATUS,
   SYMPTOM_SEVERITY,
+  SYMPTOM_VERIFICATION_STATUS,
   Symptom,
   SymptomRequest,
 } from "@/types/emr/symptom/symptom";
@@ -106,7 +109,10 @@ function convertToSymptomRequest(symptom: Symptom): SymptomRequest {
     recorded_date: symptom.recorded_date,
     note: symptom.note,
     category: symptom.category,
-    encounter: "", // This will be set when submitting the form
+    encounter: symptom.encounter,
+    created_date: symptom.created_date,
+    updated_date: symptom.updated_date,
+    created_by: symptom.created_by,
   };
 }
 
@@ -205,6 +211,14 @@ const SymptomRow = React.memo(function SymptomRow({
     (value: string) =>
       onUpdate(index, {
         severity: value as SymptomRequest["severity"],
+      }),
+    [index, onUpdate],
+  );
+
+  const handleVerificationStatusChange = useCallback(
+    (value: string) =>
+      onUpdate(index, {
+        verification_status: value as SymptomRequest["verification_status"],
       }),
     [index, onUpdate],
   );
@@ -367,6 +381,27 @@ const SymptomRow = React.memo(function SymptomRow({
                 </div>
                 <div>
                   <div className="block text-sm font-medium text-gray-500 mb-1">
+                    {t("verification_status")}
+                  </div>
+                  <Select
+                    value={symptom.verification_status}
+                    onValueChange={handleVerificationStatusChange}
+                    disabled={disabled}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SYMPTOM_VERIFICATION_STATUS.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {t(status)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <div className="block text-sm font-medium text-gray-500 mb-1">
                     {t("notes")}
                   </div>
                   <Input
@@ -448,6 +483,24 @@ const SymptomRow = React.memo(function SymptomRow({
             </SelectContent>
           </Select>
         </TableCell>
+        <TableCell>
+          <Select
+            value={symptom.verification_status}
+            onValueChange={handleVerificationStatusChange}
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-8 md:h-9">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SYMPTOM_VERIFICATION_STATUS.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </TableCell>
         <TableCell className="text-center">
           <SymptomActionsMenu
             symptom={symptom}
@@ -476,6 +529,27 @@ const SymptomRow = React.memo(function SymptomRow({
   );
 });
 
+function checkForDuplicateSymptom(
+  existingSymptoms: SymptomRequest[],
+  newSymptom: Pick<SymptomRequest, "code"> | Code,
+  t: (key: string) => string,
+) {
+  const codeToCheck = "code" in newSymptom ? newSymptom.code : newSymptom;
+  const codeValue =
+    typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
+
+  const isDuplicate = existingSymptoms.some(
+    (symptom) =>
+      symptom.code.code === codeValue &&
+      symptom.verification_status !== "entered_in_error",
+  );
+  if (isDuplicate) {
+    toast.warning(t("symptom_already_exist_warning"));
+    return true;
+  }
+  return false;
+}
+
 export function SymptomQuestion({
   patientId,
   questionnaireResponse,
@@ -497,7 +571,7 @@ export function SymptomQuestion({
   const isMobile = useBreakpoints({ default: true, md: false });
 
   const { data: patientSymptoms } = useQuery({
-    queryKey: ["symptoms", patientId],
+    queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
       queryParams: {
@@ -523,14 +597,7 @@ export function SymptomQuestion({
   }, [patientSymptoms]);
 
   const handleCodeSelect = (code: Code) => {
-    const isDuplicate = symptoms.some(
-      (symptom) =>
-        symptom.code.code === code.code &&
-        symptom.verification_status !== "entered_in_error",
-    );
-
-    if (isDuplicate) {
-      toast.warning(t("symptom_already_exist_warning"));
+    if (checkForDuplicateSymptom(symptoms, code, t)) {
       return;
     }
 
@@ -714,8 +781,88 @@ export function SymptomQuestion({
     </div>
   );
 
+  const handleAddHistoricalSymptoms = async (
+    selectedSymptoms: SymptomRequest[],
+  ) => {
+    // Filter out duplicates before adding
+    const nonDuplicateSymptoms = selectedSymptoms.filter(
+      (symptom) => !checkForDuplicateSymptom(symptoms, symptom, t),
+    );
+
+    if (nonDuplicateSymptoms.length === 0) {
+      return;
+    }
+
+    const newSymptoms = [
+      ...symptoms,
+      ...nonDuplicateSymptoms.map(({ id: _id, ...symptom }) => symptom),
+    ];
+    updateQuestionnaireResponseCB(
+      [{ type: "symptom", value: newSymptoms }],
+      questionnaireResponse.question_id,
+    );
+  };
+
   return (
     <div className="space-y-2">
+      <HistoricalRecordSelector<SymptomRequest>
+        structuredTypes={[
+          {
+            type: t("symptoms"),
+            displayFields: [
+              {
+                key: "code",
+                label: t("symptom"),
+                render: (code: Code) => code?.display || "",
+              },
+              {
+                key: "clinical_status",
+                label: t("status"),
+                render: (status: string) => t(status),
+              },
+              {
+                key: "onset",
+                label: t("onset_date"),
+                render: (onset: Onset) =>
+                  onset?.onset_datetime
+                    ? format(new Date(onset.onset_datetime), "dd-MM-yyyy")
+                    : "",
+              },
+              {
+                key: "severity",
+                label: t("severity"),
+                render: (severity: string) => t(severity),
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note: string | undefined) => note || "-",
+              },
+              {
+                key: "created_by",
+                label: t("recorded_by"),
+                render: (created_by) => formatName(created_by),
+              },
+            ],
+            queryKey: ["symptoms", patientId],
+            queryFn: async (limit: number, offset: number) => {
+              const response = await query(symptomApi.listSymptoms, {
+                pathParams: { patientId },
+                queryParams: {
+                  offset,
+                  limit,
+                  exclude_verification_status: "entered_in_error",
+                  ordering: "-created_date",
+                },
+              })({ signal: new AbortController().signal });
+              return response;
+            },
+            converter: convertToSymptomRequest,
+          },
+        ]}
+        buttonLabel={t("symptom_history")}
+        onAddSelected={handleAddHistoricalSymptoms}
+      />
       {symptoms.length > 0 && (
         <>
           {/* Desktop View - Table */}
@@ -729,6 +876,9 @@ export function SymptomQuestion({
                     <TableHead className="text-center">{t("status")}</TableHead>
                     <TableHead className="text-center">
                       {t("severity")}
+                    </TableHead>
+                    <TableHead className="text-center">
+                      {t("verification")}
                     </TableHead>
                     <TableHead className="text-center">{t("action")}</TableHead>
                   </TableRow>
