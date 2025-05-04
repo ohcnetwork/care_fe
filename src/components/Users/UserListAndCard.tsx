@@ -34,10 +34,13 @@ export const UserStatusIndicator = ({
   const authUser = useAuthUser();
   const isAuthUser = user.id === authUser.external_id;
   const { t } = useTranslation();
+  const tooltipTitle = user.last_login
+    ? `${new Date(user.last_login).toLocaleString()}`
+    : "";
 
   return (
     <span
-      title={`${new Date(user.last_login).toLocaleString()}`}
+      title={tooltipTitle}
       className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}
     >
       {isUserOnline(user) || isAuthUser ? (
