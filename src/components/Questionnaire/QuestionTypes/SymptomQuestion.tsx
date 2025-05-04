@@ -164,6 +164,32 @@ function SeveritySelect({
   );
 }
 
+function VerificationStatusSelect({
+  status,
+  onValueChange,
+  disabled,
+}: {
+  status: string;
+  onValueChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select value={status} onValueChange={onValueChange} disabled={disabled}>
+      <SelectTrigger className="h-8 md:h-9">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {SYMPTOM_VERIFICATION_STATUS.map((status) => (
+          <SelectItem key={status} value={status}>
+            {t(status)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
 function NotesInput({
   note,
   onChange,
@@ -364,6 +390,16 @@ const SymptomRow = React.memo(function SymptomRow({
         </div>
         <div>
           <div className="text-sm font-medium text-gray-700 mb-1">
+            {t("verification_status")}
+          </div>
+          <VerificationStatusSelect
+            status={symptom.verification_status}
+            onValueChange={handleVerificationStatusChange}
+            disabled={disabled}
+          />
+        </div>
+        <div>
+          <div className="text-sm font-medium text-gray-700 mb-1">
             {t("note")}
           </div>
           <NotesInput
@@ -502,22 +538,11 @@ const SymptomRow = React.memo(function SymptomRow({
                   <div className="block text-sm font-medium text-gray-500 mb-1">
                     {t("verification_status")}
                   </div>
-                  <Select
-                    value={symptom.verification_status}
+                  <VerificationStatusSelect
+                    status={symptom.verification_status}
                     onValueChange={handleVerificationStatusChange}
                     disabled={disabled}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SYMPTOM_VERIFICATION_STATUS.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {t(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
                 <div>
                   <div className="block text-sm font-medium  mb-1">
@@ -575,22 +600,11 @@ const SymptomRow = React.memo(function SymptomRow({
           />
         </TableCell>
         <TableCell>
-          <Select
-            value={symptom.verification_status}
+          <VerificationStatusSelect
+            status={symptom.verification_status}
             onValueChange={handleVerificationStatusChange}
             disabled={disabled}
-          >
-            <SelectTrigger className="h-8 md:h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SYMPTOM_VERIFICATION_STATUS.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {t(status)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </TableCell>
         <TableCell className="text-center">
           <SymptomActionsMenu
