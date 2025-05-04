@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
+import Count from "@/components/ui/count";
 
 interface EntityBadgeProps {
   title: string;
@@ -29,10 +30,9 @@ const EntityBadge: React.FC<EntityBadgeProps> = ({
       >
         {isFetching
           ? t("loading")
-          : t(customTranslation || "entity_count", {
-              count: count ?? 0,
-              ...translationParams,
-            })}
+          : customTranslation || (
+              <Count count={count ?? 0} entity={translationParams!.entity} />
+            )}
       </Badge>
     </div>
   );

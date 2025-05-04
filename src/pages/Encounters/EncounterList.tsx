@@ -9,6 +9,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Count from "@/components/ui/count";
 import {
   Popover,
   PopoverContent,
@@ -185,12 +186,11 @@ export function EncounterList({
           className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
           variant="outline"
         >
-          {isLoading
-            ? t("loading")
-            : t("entity_count", {
-                count: queryEncounters?.count ?? 0,
-                entity: "Encounter",
-              })}
+          {isLoading ? (
+            t("loading")
+          ) : (
+            <Count count={queryEncounters?.count ?? 0} entity="Encounter" />
+          )}
         </Badge>
       }
     >

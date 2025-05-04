@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Count from "@/components/ui/count";
 import {
   Popover,
   PopoverContent,
@@ -114,12 +115,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
           className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
           variant="outline"
         >
-          {isLoading
-            ? t("loading")
-            : t("entity_count", {
-                count: queryResources?.count ?? 0,
-                entity: "Resource",
-              })}
+          {isLoading ? (
+            t("loading")
+          ) : (
+            <Count count={queryResources?.count ?? 0} entity="Resource" />
+          )}
         </Badge>
       }
     >

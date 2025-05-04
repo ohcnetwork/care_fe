@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import Count from "@/components/ui/count";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -74,12 +75,11 @@ export default function FacilityUsers(props: { facilityId: string }) {
           className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
           variant="outline"
         >
-          {userListFetching
-            ? t("loading")
-            : t("entity_count", {
-                count: userListData?.count ?? 0,
-                entity: "User",
-              })}
+          {userListFetching ? (
+            t("loading")
+          ) : (
+            <Count count={userListData?.count ?? 0} entity="User" />
+          )}
         </Badge>
       }
     >
