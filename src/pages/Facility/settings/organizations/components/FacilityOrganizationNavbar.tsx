@@ -82,6 +82,7 @@ function OrganizationTreeNode({
               onToggleExpand(organization.id);
             }
           }}
+          data-cy="organization-tree-node"
           className="flex items-center flex-1 text-sm gap-2 cursor-pointer"
         >
           <span className="truncate">{organization.name}</span>
