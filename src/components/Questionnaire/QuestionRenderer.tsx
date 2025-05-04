@@ -70,18 +70,20 @@ export function QuestionRenderer({
             shouldBeFullWidth(question) ? "md:w-auto" : "max-w-4xl",
           )}
         >
-          <QuestionGroup
-            facilityId={facilityId}
-            question={question}
-            encounterId={encounterId}
-            questionnaireResponses={responses}
-            updateQuestionnaireResponseCB={onResponseChange}
-            errors={errors}
-            clearError={clearError}
-            disabled={disabled || isPreview}
-            activeGroupId={activeGroupId}
-            patientId={patientId}
-          />
+          <div className="m-2">
+            <QuestionGroup
+              facilityId={facilityId}
+              question={question}
+              encounterId={encounterId}
+              questionnaireResponses={responses}
+              updateQuestionnaireResponseCB={onResponseChange}
+              errors={errors}
+              clearError={clearError}
+              disabled={disabled || isPreview}
+              activeGroupId={activeGroupId}
+              patientId={patientId}
+            />
+          </div>
         </div>
       ))}
     </div>

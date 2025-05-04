@@ -21,6 +21,8 @@ export default function useQuestionnaireOptions(slug: string, enabled = true) {
     queryFn: query(questionnaireApi.list, {
       queryParams: {
         tag_slug: slug,
+        status: "active",
+        subject_type: "encounter",
       },
       silent: (res) => res.status === 404,
     }),
