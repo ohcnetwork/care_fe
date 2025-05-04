@@ -181,13 +181,6 @@ export default function CreateScheduleTemplateSheet({
     },
   });
 
-  // Track form submission to scroll to errors
-  useEffect(() => {
-    const subscription = form.watch(() => {});
-
-    return () => subscription.unsubscribe();
-  }, [form]);
-
   // Handle scrolling to first error field
   useEffect(() => {
     const handleErrorScroll = () => {
