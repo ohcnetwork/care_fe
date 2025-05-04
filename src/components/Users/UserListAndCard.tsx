@@ -38,9 +38,7 @@ export const UserStatusIndicator = ({
   return (
     <span
       title={
-        user.last_login
-          ? new Date(user.last_login).toLocaleString()
-          : undefined
+        user.last_login ? new Date(user.last_login).toLocaleString() : undefined
       }
       className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}
     >
