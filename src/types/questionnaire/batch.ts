@@ -21,7 +21,6 @@ export interface QuestionValidationError {
   type?: string;
   field_key?: string;
   index?: number;
-  required?: boolean;
 }
 
 export interface DetailedValidationError {
