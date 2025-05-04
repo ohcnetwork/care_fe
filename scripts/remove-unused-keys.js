@@ -69,7 +69,7 @@ async function extractAndCleanTranslations(options) {
 
     // To handle Trans component, transform the file into js and scan it for Trans component
     if (
-      content.includes("Trans") &&
+      content.includes("<Trans") &&
       (content.includes("react-i18next") || content.includes("i18next"))
     ) {
       let parsedContent = content;
