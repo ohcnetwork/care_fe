@@ -364,7 +364,7 @@ export default function QuestionnaireResponsesList({
     enabled: canAccess,
   });
   return (
-    <div className="mt-4 gap-4">
+    <div className="gap-4">
       <div className="max-w-full">
         {isLoading ? (
           <div className="grid gap-5">

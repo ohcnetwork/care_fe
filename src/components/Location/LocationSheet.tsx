@@ -698,7 +698,7 @@ export function LocationSheet({
   };
 
   const { mutate: executeBatch, isPending } = useMutation({
-    mutationFn: mutate(routes.batchRequest),
+    mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
       toast.success(t("bed_assigned_successfully"));
       resetStates();
@@ -707,8 +707,9 @@ export function LocationSheet({
       });
     },
     onError: (error) => {
+      // Type cast to access the results property safely
       const errorData = error.cause as {
-        results: Array<{
+        results?: Array<{
           reference_id: string;
           status_code: number;
           data: {
@@ -718,27 +719,51 @@ export function LocationSheet({
               type?: string;
               loc?: string[];
             }>;
+            non_field_errors?: string[];
+            detail?: string;
           };
         }>;
       };
 
       if (errorData?.results) {
+        // Filter results for error status codes
         const failedResults = errorData.results.filter(
           (result) => result.status_code !== 200,
         );
 
+        // Process each failed result to extract error messages
+        let errorDisplayed = false;
         failedResults.forEach((result) => {
           const errors = result.data?.errors || [];
+          const nonFieldErrors = result.data?.non_field_errors || [];
+          const detailError = result.data?.detail;
+
+          // Display each error message
           errors.forEach((error) => {
             const message = error.msg || error.error || t("validation_failed");
             toast.error(message);
+            errorDisplayed = true;
           });
+
+          // Display non-field errors
+          nonFieldErrors.forEach((message) => {
+            toast.error(message);
+            errorDisplayed = true;
+          });
+
+          // Display detail error if present
+          if (detailError) {
+            toast.error(detailError);
+            errorDisplayed = true;
+          }
         });
 
-        if (failedResults.length === 0) {
+        // If no specific errors were found but we still had failures
+        if (failedResults.length > 0 && !errorDisplayed) {
           toast.error(t("error_updating_location"));
         }
       } else {
+        // Generic error if we couldn't parse the error response
         toast.error(t("error_updating_location"));
       }
     },
