@@ -127,7 +127,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                 key={`${question.id}-${option.value.toString()}`}
               >
                 <Card
-                  className="shadow-none rounded-md border-1 border-gray-400 bg-gray-200 p-2 transition-all hover:bg-gray-50/90 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary-300 [&:has([data-state=checked])]:shadow-sm w-full"
+                  className="shadow-none rounded-md border-1 border-gray-400 bg-gray-50 p-2 transition-all hover:bg-gray-50/50 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary-300 [&:has([data-state=checked])]:shadow-sm w-full"
                   role="presentation"
                 >
                   <div className="flex flex-row items-center gap-2">
