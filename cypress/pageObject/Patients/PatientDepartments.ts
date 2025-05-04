@@ -47,6 +47,42 @@ export class PatientDepartments {
     cy.intercept("POST", "**/api/v1/facility/**").as("createOrganization");
     return this;
   }
+
+  interceptAssignUserRequest() {
+    cy.intercept("POST", "**/api/v1/facility/**").as("assignUser");
+    return this;
+  }
+
+  verifyAssignUserRequest() {
+    cy.wait("@assignUser").then((interception) => {
+      expect(interception.response?.statusCode).to.equal(200);
+    });
+    return this;
+  }
+
+  interceptUpdateRoleRequest() {
+    cy.intercept("PUT", "**/api/v1/facility/**").as("updateUserRole");
+    return this;
+  }
+
+  verifyUpdateRoleRequest() {
+    cy.wait("@updateUserRole").then((interception) => {
+      expect(interception.response?.statusCode).to.equal(200);
+    });
+    return this;
+  }
+
+  interceptRemoveUserRequest() {
+    cy.intercept("DELETE", "**/api/v1/facility/**").as("removeUser");
+    return this;
+  }
+
+  verifyRemoveUserRequest() {
+    cy.wait("@removeUser").then((interception) => {
+      expect(interception.response?.statusCode).to.equal(200);
+    });
+    return this;
+  }
   interceptUpdateRequest() {
     cy.intercept("PUT", "**/api/v1/facility/**").as("updateOrganization");
     return this;

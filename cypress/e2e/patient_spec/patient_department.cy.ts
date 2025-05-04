@@ -85,17 +85,23 @@ describe("Manage departments/teams association to an encounter", () => {
       .clickLinkUser()
       .selectAssignedUser(userName)
       .selectRoleOfUser(role)
+      .interceptAssignUserRequest()
       .clickAddUserToOrganization()
+      .verifyAssignUserRequest()
       .assertUserAddedSuccess()
       .searchUser(userName)
       .verifyUserRole(role)
       .clickEditRole()
       .selectRoleOfUserInEdit(updatedRole)
+      .interceptUpdateRoleRequest()
       .clickUpdateUserRole()
+      .verifyUpdateRoleRequest()
       .verifyUserRole(updatedRole)
       .clickEditRole()
+      .interceptRemoveUserRequest()
       .clickRemoveUser()
       .clickConfirmRemove()
+      .verifyRemoveUserRequest()
       .assertUserRemovalSuccess();
   });
 
