@@ -102,13 +102,11 @@ function CategorySelect({
   onValueChange,
   disabled,
   hasId,
-  desktopLayout,
 }: {
   category: AllergyCategory;
   onValueChange: (value: AllergyCategory) => void;
   disabled?: boolean;
   hasId: boolean;
-  desktopLayout: boolean;
 }) {
   return (
     <Select
@@ -116,20 +114,10 @@ function CategorySelect({
       onValueChange={onValueChange}
       disabled={disabled || hasId}
     >
-      <SelectTrigger
-        className={
-          desktopLayout
-            ? "h-8 w-[2rem] px-0 [&>svg]:hidden flex items-center justify-center"
-            : "h-9 w-full"
-        }
-      >
+      <SelectTrigger className="h-9 w-full lg:h-8 lg:w-[2rem] lg:px-0 lg:[&>svg]:hidden lg:flex lg:items-center lg:justify-center">
         <SelectValue
           placeholder="Cat"
-          className={
-            desktopLayout
-              ? "text-center h-full flex items-center justify-center m-0 p-0"
-              : ""
-          }
+          className="lg:text-center lg:h-full lg:flex lg:items-center lg:justify-center lg:m-0 lg:p-0"
         >
           {category && (
             <div className="flex items-center gap-2">
@@ -161,12 +149,10 @@ function CriticalitySelect({
   criticality,
   onValueChange,
   disabled,
-  desktopLayout,
 }: {
   criticality: string;
   onValueChange: (value: string) => void;
   disabled?: boolean;
-  desktopLayout: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -175,9 +161,7 @@ function CriticalitySelect({
       onValueChange={onValueChange}
       disabled={disabled}
     >
-      <SelectTrigger
-        className={desktopLayout ? "h-8 w-full px-1 text-sm" : "h-9 mt-1"}
-      >
+      <SelectTrigger className="h-9 mt-1 lg:h-8 lg:w-full lg:px-1 lg:text-sm lg:mt-0">
         <SelectValue placeholder={t("critical")} />
       </SelectTrigger>
       <SelectContent>
@@ -195,12 +179,10 @@ function StatusSelect({
   verificationStatus,
   onValueChange,
   disabled,
-  desktopLayout,
 }: {
   verificationStatus: string;
   onValueChange: (value: string) => void;
   disabled?: boolean;
-  desktopLayout: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -209,9 +191,7 @@ function StatusSelect({
       onValueChange={onValueChange}
       disabled={disabled}
     >
-      <SelectTrigger
-        className={desktopLayout ? "h-8 w-full px-1 text-sm" : "h-9 mt-1"}
-      >
+      <SelectTrigger className="h-9 mt-1 lg:h-8 lg:w-full lg:px-1 lg:text-sm lg:mt-0">
         <SelectValue placeholder={t("verify")} />
       </SelectTrigger>
       <SelectContent>
@@ -229,23 +209,17 @@ function OccurrencePicker({
   lastOccurrence,
   onChange,
   disabled,
-  desktopLayout,
 }: {
   lastOccurrence?: string;
   onChange: (date: Date | undefined) => void;
   disabled?: boolean;
-  desktopLayout: boolean;
 }) {
   return (
     <CombinedDatePicker
       value={lastOccurrence ? new Date(lastOccurrence) : undefined}
       onChange={onChange}
       disabled={disabled}
-      buttonClassName={
-        desktopLayout
-          ? "h-8 text-sm px-2 justify-start font-normal w-full"
-          : "h-9 mt-1"
-      }
+      buttonClassName="h-9 mt-1 lg:h-8 lg:text-sm lg:px-2 lg:justify-start lg:font-normal lg:w-full lg:mt-0"
     />
   );
 }
@@ -303,12 +277,10 @@ function NotesInput({
   note,
   onChange,
   disabled,
-  desktopLayout,
 }: {
   note?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
-  desktopLayout: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -318,7 +290,7 @@ function NotesInput({
       value={note ?? ""}
       onChange={onChange}
       disabled={disabled}
-      className={cn(desktopLayout ? "mt-0.5" : "mt-1")}
+      className="mt-1 lg:mt-0.5"
     />
   );
 }
@@ -355,7 +327,6 @@ const AllergyItem = ({
   onRemove,
 }: AllergyItemProps) => {
   const { t } = useTranslation();
-
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
 
@@ -378,7 +349,6 @@ const AllergyItem = ({
               }
               disabled={disabled}
               hasId={!!allergy.id}
-              desktopLayout={desktopLayout}
             />
           </TableCell>
           <TableCell className="font-medium py-1 pl-1">
@@ -389,7 +359,6 @@ const AllergyItem = ({
               criticality={allergy.criticality}
               onValueChange={(value) => onUpdate?.({ criticality: value })}
               disabled={disabled}
-              desktopLayout={desktopLayout}
             />
           </TableCell>
           <TableCell className="py-1 px-0.5">
@@ -401,7 +370,6 @@ const AllergyItem = ({
                 });
               }}
               disabled={disabled}
-              desktopLayout={desktopLayout}
             />
           </TableCell>
           <TableCell className="py-1 px-1">
@@ -413,7 +381,6 @@ const AllergyItem = ({
                 })
               }
               disabled={disabled}
-              desktopLayout={desktopLayout}
             />
           </TableCell>
           <TableCell className="py-1 px-0 flex justify-center items-center">
@@ -500,7 +467,6 @@ const AllergyItem = ({
                 note={allergy.note}
                 onChange={(e) => onUpdate?.({ note: e.target.value })}
                 disabled={disabled}
-                desktopLayout={desktopLayout}
               />
             </TableCell>
           </TableRow>
@@ -521,7 +487,6 @@ const AllergyItem = ({
           }
           disabled={disabled}
           hasId={!!allergy.id}
-          desktopLayout={desktopLayout}
         />
       </div>
 
@@ -531,7 +496,6 @@ const AllergyItem = ({
           criticality={allergy.criticality}
           onValueChange={(value) => onUpdate?.({ criticality: value })}
           disabled={disabled}
-          desktopLayout={desktopLayout}
         />
       </div>
 
@@ -545,7 +509,6 @@ const AllergyItem = ({
             });
           }}
           disabled={disabled}
-          desktopLayout={desktopLayout}
         />
       </div>
 
@@ -559,7 +522,6 @@ const AllergyItem = ({
             })
           }
           disabled={disabled}
-          desktopLayout={desktopLayout}
         />
       </div>
 
@@ -575,7 +537,6 @@ const AllergyItem = ({
           note={allergy.note}
           onChange={(e) => onUpdate?.({ note: e.target.value })}
           disabled={disabled}
-          desktopLayout={desktopLayout}
         />
       </div>
     </div>
