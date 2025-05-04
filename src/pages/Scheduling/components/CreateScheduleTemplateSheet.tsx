@@ -2,7 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useQueryParams } from "raviger";
-import { useForm } from "react-hook-form";
+import { useEffect, useRef } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Trans } from "react-i18next";
 import { toast } from "sonner";
@@ -69,6 +70,7 @@ export default function CreateScheduleTemplateSheet({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const formRef = useRef<HTMLFormElement>(null);
 
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
   const [qParams, _setQParams] = useQueryParams<QueryParams>();
@@ -179,6 +181,50 @@ export default function CreateScheduleTemplateSheet({
     },
   });
 
+  // Track form submission to scroll to errors
+  useEffect(() => {
+    const subscription = form.watch(() => {});
+
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  // Handle scrolling to first error field
+  useEffect(() => {
+    const handleErrorScroll = () => {
+      if (Object.keys(form.formState.errors).length > 0) {
+        const fieldNames = Object.keys(form.formState.errors);
+        if (fieldNames.length > 0) {
+          const firstErrorField = fieldNames[0];
+          const wrapperElementId = `${firstErrorField}-wrapper`;
+
+          setTimeout(() => {
+            let elementToScroll = document.getElementById(wrapperElementId);
+
+            if (!elementToScroll) {
+              elementToScroll = document.getElementById(
+                `error-${firstErrorField}`,
+              );
+            }
+            if (elementToScroll) {
+              elementToScroll.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }, 100);
+        }
+      }
+    };
+
+    if (form.formState.isSubmitted && !form.formState.isValid) {
+      handleErrorScroll();
+    }
+  }, [
+    form.formState.isSubmitted,
+    form.formState.errors,
+    form.formState.isValid,
+  ]);
+
   const { mutate: createTemplate, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.templates.create, {
       pathParams: { facility_id: facilityId },
@@ -287,7 +333,11 @@ export default function CreateScheduleTemplateSheet({
 
         <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+              ref={formRef}
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6"
+            >
               <FormField
                 control={form.control}
                 name="name"
@@ -302,44 +352,52 @@ export default function CreateScheduleTemplateSheet({
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage id={`error-name`} />
                   </FormItem>
                 )}
               />
 
               <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="valid_from"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={(date) => field.onChange(date)}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div id="valid_from-wrapper">
+                  <Controller
+                    control={form.control}
+                    name="valid_from"
+                    render={({ field, fieldState }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel aria-required>{t("valid_from")}</FormLabel>
+                        <DatePicker
+                          date={field.value}
+                          onChange={(date) => field.onChange(date)}
+                        />
+                        <FormMessage id={`error-valid_from`}>
+                          {fieldState.error?.message}
+                        </FormMessage>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="valid_to"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={(date) => field.onChange(date)}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div id="valid_to-wrapper">
+                  <Controller
+                    control={form.control}
+                    name="valid_to"
+                    render={({ field, fieldState }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel aria-required>{t("valid_to")}</FormLabel>
+                        <DatePicker
+                          date={field.value}
+                          onChange={(date) => field.onChange(date)}
+                        />
+                        <FormMessage id={`error-valid_to`}>
+                          {fieldState.error?.message}
+                        </FormMessage>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
-              <div>
+              <div id="weekdays-wrapper">
                 <FormLabel className="text-lg font-semibold">
                   {t("weekly_schedule")}
                 </FormLabel>
@@ -347,10 +405,10 @@ export default function CreateScheduleTemplateSheet({
                   {t("schedule_weekdays_description")}
                 </span>
                 <div className="py-2">
-                  <FormField
+                  <Controller
                     control={form.control}
                     name="weekdays"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <FormControl>
                           <WeekdayCheckbox
@@ -359,7 +417,9 @@ export default function CreateScheduleTemplateSheet({
                             format={weekdayFormat}
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage id={`error-weekdays`}>
+                          {fieldState.error?.message}
+                        </FormMessage>
                       </FormItem>
                     )}
                   />
@@ -371,6 +431,7 @@ export default function CreateScheduleTemplateSheet({
                   <div
                     key={index}
                     className="flex flex-col rounded-lg bg-white p-4 shadow-sm"
+                    id={`availability-${index}`}
                   >
                     <div className="flex items-center justify-between pb-6">
                       <div className="flex items-center gap-2">
@@ -401,10 +462,10 @@ export default function CreateScheduleTemplateSheet({
 
                     <div className="flex flex-col gap-x-6 gap-y-4">
                       <div className="items-stretch">
-                        <FormField
+                        <Controller
                           control={form.control}
                           name={`availabilities.${index}.name`}
-                          render={({ field }) => (
+                          render={({ field, fieldState }) => (
                             <FormItem className="col-span-2">
                               <FormLabel aria-required>
                                 {t("session_title")}
@@ -413,86 +474,56 @@ export default function CreateScheduleTemplateSheet({
                                 <Input
                                   placeholder={t("session_title_placeholder")}
                                   {...field}
+                                  id={`availabilities.${index}.name`}
                                 />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage
+                                id={`error-availabilities.${index}.name`}
+                              >
+                                {fieldState.error?.message}
+                              </FormMessage>
                             </FormItem>
                           )}
                         />
                       </div>
 
-                      {/* <FormField
-                        control={form.control}
-                        name={`availabilities.${index}.slot_type`}
-                        render={({ field }) => (
-                          <FormItem className="col-span-2 md:col-span-1">
-                            <FormLabel aria-required>{t("session_type")}</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue asChild>
-                                    <span>
-                                      {t(
-                                        `SCHEDULE_AVAILABILITY_TYPE__${field.value}`,
-                                      )}
-                                    </span>
-                                  </SelectValue>
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {["appointment", "open", "closed"].map(
-                                  (type) => (
-                                    <SelectItem key={type} value={type}>
-                                      <p>
-                                        {t(
-                                          `SCHEDULE_AVAILABILITY_TYPE__${type}`,
-                                        )}
-                                      </p>
-                                      <p className="text-xs text-gray-500">
-                                        {t(
-                                          `SCHEDULE_AVAILABILITY_TYPE_DESCRIPTION__${type}`,
-                                        )}
-                                      </p>
-                                    </SelectItem>
-                                  ),
-                                )}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      /> */}
                       <div className="flex flex-wrap">
-                        <FormField
-                          control={form.control}
-                          name={`availabilities.${index}.start_time`}
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col w-full">
-                              <FormLabel aria-required>
-                                {t("start_time")}
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="time"
-                                  {...field}
-                                  onChange={(e) => {
-                                    field.onChange(e);
-                                    updateSlotDuration(index);
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        <div
+                          id={`availability-${index}-start_time-wrapper`}
+                          className="flex flex-col w-full"
+                        >
+                          <Controller
+                            control={form.control}
+                            name={`availabilities.${index}.start_time`}
+                            render={({ field, fieldState }) => (
+                              <FormItem>
+                                <FormLabel aria-required>
+                                  {t("start_time")}
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="time"
+                                    {...field}
+                                    onChange={(e) => {
+                                      field.onChange(e);
+                                      updateSlotDuration(index);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage
+                                  id={`error-availabilities.${index}.start_time`}
+                                >
+                                  {fieldState.error?.message}
+                                </FormMessage>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
 
-                        <FormField
+                        <Controller
                           control={form.control}
                           name={`availabilities.${index}.end_time`}
-                          render={({ field }) => (
+                          render={({ field, fieldState }) => (
                             <FormItem className="flex flex-col w-full mt-2">
                               <FormLabel aria-required>
                                 {t("end_time")}
@@ -501,13 +532,18 @@ export default function CreateScheduleTemplateSheet({
                                 <Input
                                   type="time"
                                   {...field}
+                                  id={`availabilities.${index}.end_time`}
                                   onChange={(e) => {
                                     field.onChange(e);
                                     updateSlotDuration(index);
                                   }}
                                 />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage
+                                id={`error-availabilities.${index}.end_time`}
+                              >
+                                {fieldState.error?.message}
+                              </FormMessage>
                             </FormItem>
                           )}
                         />
@@ -579,10 +615,10 @@ export default function CreateScheduleTemplateSheet({
                               )}
                             </div>
 
-                            <FormField
+                            <Controller
                               control={form.control}
                               name={`availabilities.${index}.slot_size_in_minutes`}
-                              render={({ field }) => (
+                              render={({ field, fieldState }) => (
                                 <FormItem className="flex grow flex-col">
                                   <FormLabel
                                     aria-required
@@ -596,6 +632,7 @@ export default function CreateScheduleTemplateSheet({
                                       min={0}
                                       placeholder="e.g. 10"
                                       {...field}
+                                      id={`availabilities.${index}.slot_size_in_minutes`}
                                       value={field.value ?? ""}
                                       onChange={(e) => {
                                         field.onChange(e.target.valueAsNumber);
@@ -605,15 +642,19 @@ export default function CreateScheduleTemplateSheet({
                                       )}
                                     />
                                   </FormControl>
-                                  <FormMessage />
+                                  <FormMessage
+                                    id={`error-availabilities.${index}.slot_size_in_minutes`}
+                                  >
+                                    {fieldState.error?.message}
+                                  </FormMessage>
                                 </FormItem>
                               )}
                             />
 
-                            <FormField
+                            <Controller
                               control={form.control}
                               name={`availabilities.${index}.tokens_per_slot`}
-                              render={({ field }) => (
+                              render={({ field, fieldState }) => (
                                 <FormItem className="flex flex-col grow">
                                   <FormLabel
                                     aria-required
@@ -627,13 +668,18 @@ export default function CreateScheduleTemplateSheet({
                                       min={0}
                                       placeholder="e.g. 1"
                                       {...field}
+                                      id={`availabilities.${index}.tokens_per_slot`}
                                       value={field.value ?? ""}
                                       onChange={(e) =>
                                         field.onChange(e.target.valueAsNumber)
                                       }
                                     />
                                   </FormControl>
-                                  <FormMessage />
+                                  <FormMessage
+                                    id={`error-availabilities.${index}.tokens_per_slot`}
+                                  >
+                                    {fieldState.error?.message}
+                                  </FormMessage>
                                 </FormItem>
                               )}
                             />
@@ -646,10 +692,10 @@ export default function CreateScheduleTemplateSheet({
                     </div>
 
                     <div>
-                      <FormField
+                      <Controller
                         control={form.control}
                         name={`availabilities.${index}.reason`}
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                           <FormItem>
                             <FormLabel>{t("remarks")}</FormLabel>
                             <FormControl>
@@ -657,9 +703,14 @@ export default function CreateScheduleTemplateSheet({
                                 placeholder={t("remarks_placeholder")}
                                 className="resize-none"
                                 {...field}
+                                id={`availabilities.${index}.reason`}
                               />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage
+                              id={`error-availabilities.${index}.reason`}
+                            >
+                              {fieldState.error?.message}
+                            </FormMessage>
                           </FormItem>
                         )}
                       />
@@ -667,7 +718,7 @@ export default function CreateScheduleTemplateSheet({
                   </div>
                 ))}
                 {form.formState.errors.availabilities && (
-                  <FormMessage>
+                  <FormMessage id="error-availabilities">
                     {form.formState.errors.availabilities.root?.message}
                   </FormMessage>
                 )}
