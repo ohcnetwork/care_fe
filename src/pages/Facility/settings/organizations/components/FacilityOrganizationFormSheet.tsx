@@ -103,10 +103,13 @@ export default function FacilityOrganizationFormSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["facilityOrganization", "list", facilityId, parentId],
+        queryKey: ["list", facilityId, parentId],
       });
       queryClient.invalidateQueries({
         queryKey: ["getCurrentUser"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["facilityOrganization"],
       });
       toast.success(t("organization_created_successfully"));
       setOpen(false);
