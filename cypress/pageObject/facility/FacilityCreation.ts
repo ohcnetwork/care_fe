@@ -19,16 +19,6 @@ export class FacilityCreation {
     return this;
   }
 
-  // cy.get('[data-cy="organization-tree-node-parent"]')
-  //     .contains("Med-270")
-  //     .scrollIntoView()
-  //     .click();
-  //   cy.wait(2000);
-  //   cy.get('[data-cy="organization-tree-node-children"]')
-  //     .contains("Updated-Sub-Tech-233")
-  //     .scrollIntoView()
-  //     .should("be.visible");
-
   clickAddFacility() {
     cy.get('[data-cy="add-facility-button"]').should("be.visible").click();
   }
