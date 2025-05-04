@@ -68,18 +68,22 @@ describe("Manage departments/teams association to an encounter", () => {
   });
 
   it("Navigate to the facility's administration department and link a user to the facility", () => {
+    const userName = "devnurse3";
+    const role = "Nurse";
+    const departmentName = "Administration";
+
     patientDepartments
       .navigateToSettings()
       .navigateToDepartments()
-      .searchDepartmentTeam("Administration")
+      .searchDepartmentTeam(departmentName)
       .openDepartmentsTeamDetails()
       .clickUsersTab()
       .clickLinkUser()
-      .selectAssignedUser("devnurse3")
-      .selectRoleOfUser("Nurse")
+      .selectAssignedUser(userName)
+      .selectRoleOfUser(role)
       .clickAddUserToOrganization()
       .assertUserAddedSuccess()
-      .searchUser("devnurse3")
+      .searchUser(userName)
       .clickEditRole()
       .clickRemoveUser()
       .clickConfirmRemove()
@@ -87,6 +91,8 @@ describe("Manage departments/teams association to an encounter", () => {
   });
 
   it("Assign Department/Team to an Encounter and verify it", () => {
+    const linkDeptName = "Test Dept (DON'T DELETE IT)";
+
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
@@ -94,8 +100,8 @@ describe("Manage departments/teams association to an encounter", () => {
     patientDepartments
       .clickAddOrganization()
       .selectAllOrganizationsTab()
-      .selectOrganization(departmentName)
+      .selectOrganization(linkDeptName)
       .clickAddOrganizationToEncounterSubmit()
-      .verifyOrganizationAdded(departmentName);
+      .verifyOrganizationAdded(linkDeptName);
   });
 });
