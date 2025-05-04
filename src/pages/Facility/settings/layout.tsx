@@ -26,7 +26,7 @@ const getRoutes = (facilityId: string) => ({
     />
   ),
   "/locations": () => <LocationSettings facilityId={facilityId} />,
-  "/location/:id": ({ id }: { id: string }) => (
+  "/locations/:id": ({ id }: { id: string }) => (
     <LocationSettings facilityId={facilityId} locationId={id} />
   ),
   "/devices": () => <DevicesList facilityId={facilityId} />,

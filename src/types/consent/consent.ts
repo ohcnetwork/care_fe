@@ -54,6 +54,7 @@ export interface ConsentModel {
   decision: ConsentDecision;
   source_attachments: FileUploadModel[];
   verification_details: ConsentVerification[];
+  note?: string;
 }
 
 export type CreateConsentRequest = Omit<ConsentModel, "id" | "external_id">;

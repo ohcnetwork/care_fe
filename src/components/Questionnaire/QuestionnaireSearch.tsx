@@ -1,5 +1,6 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -31,9 +32,10 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface QuestionnaireSearchProps {
   placeholder?: string;
-  onSelect: (questionnaire: QuestionnaireDetail) => void;
+  onSelect?: (questionnaire: QuestionnaireDetail) => void;
   subjectType?: string;
   disabled?: boolean;
+  size?: "default" | "sm" | "xs" | "lg";
 }
 
 interface QuestionnaireListResponse {
@@ -43,7 +45,8 @@ interface QuestionnaireListResponse {
 
 export function QuestionnaireSearch({
   placeholder,
-  onSelect,
+  size = "default",
+  onSelect = (selected) => navigate(`questionnaire/${selected.slug}`),
   subjectType,
   disabled,
 }: QuestionnaireSearchProps) {
@@ -120,7 +123,6 @@ export function QuestionnaireSearch({
             data-cy="add-questionnaire-button"
             variant="outline"
             role="combobox"
-            className="w-full justify-between"
             disabled={disabled || isLoading}
           >
             {isLoading ? (
@@ -152,6 +154,7 @@ export function QuestionnaireSearch({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
+          size={size}
           data-cy="add-questionnaire-button"
           variant="outline"
           role="combobox"

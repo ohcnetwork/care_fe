@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -51,6 +51,7 @@ export default function EncounterActions({
     hasPermission,
     encounter.permissions,
   );
+  const organizationId = usePathParams("/organization/:organizationId/*");
   const canWrite =
     canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
 
@@ -74,7 +75,12 @@ export default function EncounterActions({
       organizations: encounter.organizations.map((org) => org.id),
       patient: encounter.patient.id,
       encounter_class: encounter.encounter_class,
-      period: encounter.period,
+      period: {
+        start: encounter.period.start,
+        end: encounter.period.end
+          ? encounter.period.end
+          : new Date().toISOString(),
+      },
       hospitalization: encounter.hospitalization,
       priority: encounter.priority,
       external_identifier: encounter.external_identifier,
@@ -93,7 +99,11 @@ export default function EncounterActions({
         <>
           <DropdownMenuItem asChild>
             <Link
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`}
+              href={
+                organizationId
+                  ? `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`
+                  : `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`
+              }
             >
               {t("treatment_summary")}
             </Link>
@@ -152,7 +162,11 @@ export default function EncounterActions({
           asChild
         >
           <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`}
+            href={
+              organizationId
+                ? `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`
+                : `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`
+            }
           >
             {t("treatment_summary")}
           </Link>

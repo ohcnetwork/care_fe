@@ -104,7 +104,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     enabled: !!id,
   });
 
-  const form = useForm<ResourceFormValues>({
+  const form = useForm({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
       status: "pending",
@@ -261,7 +261,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 items-start">
               <FormField
                 control={form.control}
                 name="assigned_facility"
@@ -498,7 +498,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 items-start">
               <FormField
                 control={form.control}
                 name="referring_facility_contact_name"

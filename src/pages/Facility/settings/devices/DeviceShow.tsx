@@ -197,7 +197,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                   <div className="mt-1 flex items-center gap-2">
                     {device.current_location ? (
                       <Link
-                        href={`/location/${device.current_location.id}`}
+                        href={`/locations/${device.current_location.id}`}
                         className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1 truncate"
                       >
                         {device.current_location.name}

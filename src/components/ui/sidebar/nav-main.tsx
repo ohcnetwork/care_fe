@@ -152,9 +152,12 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
       <PopoverTrigger asChild>
         <SidebarMenuButton
           tooltip={link.name}
-          className={cn("cursor-pointer", {
-            "bg-gray-100 text-green-700 shadow": isChildActive(link),
-          })}
+          className={cn(
+            "cursor-pointer hover:bg-gray-200 hover:text-green-700",
+            {
+              "bg-white text-green-700 shadow": isChildActive(link),
+            },
+          )}
         >
           {link.icon ? (
             <CareIcon icon={link.icon as IconName} />
@@ -163,7 +166,12 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
           )}
         </SidebarMenuButton>
       </PopoverTrigger>
-      <PopoverContent side="right" align="start" className="w-48 p-1">
+      <PopoverContent
+        side="right"
+        align="start"
+        className="w-48 p-1"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
         <div className="flex flex-col gap-1">
           {link.children?.map((subItem) => (
             <ActiveLink
