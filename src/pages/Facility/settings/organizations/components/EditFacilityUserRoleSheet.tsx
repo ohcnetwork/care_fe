@@ -187,7 +187,7 @@ export default function EditUserRoleSheet({
               {t("select_new_role")}
             </Label>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="h-12">
+              <SelectTrigger className="h-12" data-cy="select-updated-role">
                 <SelectValue placeholder={t("select_role")} />
               </SelectTrigger>
               <SelectContent className="w-[var(--radix-select-trigger-width)]">

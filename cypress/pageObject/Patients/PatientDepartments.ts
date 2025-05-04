@@ -140,6 +140,11 @@ export class PatientDepartments {
     return this;
   }
 
+  selectRoleOfUserInEdit(role: string) {
+    cy.clickAndSelectOption('[data-cy="select-updated-role"]', role);
+    return this;
+  }
+
   clickAddUserToOrganization() {
     cy.verifyAndClickElement(
       '[data-cy="add-user-to-organization"]',

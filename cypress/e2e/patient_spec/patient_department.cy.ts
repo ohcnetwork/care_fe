@@ -20,9 +20,8 @@ describe("Manage departments/teams association to an encounter", () => {
     facilityCreation.selectFacility("GHC Payyanur");
   });
 
-  const departmentName = generateDeptName();
-
   it("Create a new department/team and a sub-department/team, then verify that the search functionality works correctly on the dashboard", () => {
+    const departmentName = generateDeptName();
     const subDepartmentName = generateDeptName("Sub-");
     const description = generateRandomCharacter({
       charLimit: 50,
@@ -91,7 +90,7 @@ describe("Manage departments/teams association to an encounter", () => {
       .searchUser(userName)
       .verifyUserRole(role)
       .clickEditRole()
-      .selectRoleOfUser(updatedRole)
+      .selectRoleOfUserInEdit(updatedRole)
       .clickUpdateUserRole()
       .verifyUserRole(updatedRole)
       .clickEditRole()
