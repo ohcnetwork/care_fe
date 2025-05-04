@@ -654,7 +654,7 @@ export function SymptomQuestion({
   const [showSymptomSelection, setShowSymptomSelection] = useState(false);
   const [newSymptom, setNewSymptom] = useState<Partial<SymptomRequest>>({
     ...SYMPTOM_INITIAL_VALUE,
-    onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+    onset: { onset_datetime: dateQueryString(new Date()) },
   });
   const isMobile = useBreakpoints({ default: true, md: false });
 
@@ -692,7 +692,7 @@ export function SymptomQuestion({
 
     setNewSymptom({
       ...SYMPTOM_INITIAL_VALUE,
-      onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+      onset: { onset_datetime: dateQueryString(new Date()) },
       code,
     });
 
@@ -717,7 +717,7 @@ export function SymptomQuestion({
     setShowSymptomSelection(false);
     setNewSymptom({
       ...SYMPTOM_INITIAL_VALUE,
-      onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+      onset: { onset_datetime: dateQueryString(new Date()) },
     });
   };
 
