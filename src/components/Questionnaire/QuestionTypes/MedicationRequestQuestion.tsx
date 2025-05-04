@@ -42,7 +42,10 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
+import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { MultiValueSetSelect } from "@/components/Medicine/MultiValueSetSelect";
+import { formatDosage } from "@/components/Medicine/utils";
 import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -50,6 +53,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import {
   DoseRange,
   INACTIVE_MEDICATION_STATUSES,
@@ -58,10 +62,13 @@ import {
   MedicationRequest,
   MedicationRequestDosageInstruction,
   MedicationRequestIntent,
+  MedicationRequestRead,
   UCUM_TIME_UNITS,
   parseMedicationStringToRequest,
 } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { MedicationStatementRead } from "@/types/emr/medicationStatement";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
 import {
@@ -197,7 +204,7 @@ export function MedicationRequestQuestion({
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
 
   const { data: patientMedications } = useQuery({
-    queryKey: ["medication_requests", patientId],
+    queryKey: ["medication_requests", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -257,6 +264,39 @@ export function MedicationRequestQuestion({
   const handleConfirmMedicationInSheet = () => {
     if (!newMedicationInSheet) return;
     addNewMedication(newMedicationInSheet);
+  };
+
+  const handleAddHistoricalMedications = (
+    selected: (MedicationRequest | MedicationStatementRead)[],
+  ) => {
+    // Filter and convert MedicationStatement to MedicationRequest if needed
+    const medicationRequests = selected.map((record) => {
+      if ("dosage_instruction" in record) {
+        const { id: _id, ...request } = record as MedicationRequest;
+        return request;
+      } else {
+        const statement = record as MedicationStatementRead;
+        return {
+          ...parseMedicationStringToRequest(statement.medication),
+          authored_on: new Date().toISOString(),
+          note: statement.note,
+        } as MedicationRequest;
+      }
+    });
+    const newMedications: MedicationRequest[] = [
+      ...medications,
+      ...medicationRequests,
+    ];
+    updateQuestionnaireResponseCB(
+      [
+        {
+          type: "medication_request",
+          value: newMedications,
+        },
+      ],
+      questionnaireResponse.question_id,
+    );
+    setExpandedMedicationIndex(medications.length);
   };
 
   const handleRemoveMedication = (index: number) => {
@@ -360,7 +400,113 @@ export function MedicationRequestQuestion({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
+        structuredTypes={[
+          {
+            type: t("past_prescriptions"),
+            displayFields: [
+              {
+                key: "medication",
+                label: t("medicine"),
+                render: (med) => med?.display,
+              },
+              {
+                key: "dosage_instruction",
+                label: t("dosage"),
+                render: (instructions) => {
+                  const dosage = formatDosage(instructions[0]) || "";
 
+                  const frequency =
+                    getFrequencyDisplay(instructions[0]?.timing)?.meaning || "";
+
+                  const duration = instructions?.[0]?.timing?.repeat
+                    ?.bounds_duration
+                    ? `${instructions[0].timing.repeat.bounds_duration.value} ${instructions[0].timing.repeat.bounds_duration.unit}`
+                    : "";
+
+                  return `${dosage}\n${frequency}\n${duration}`;
+                },
+              },
+              {
+                key: "dosage_instruction",
+                label: t("instructions"),
+                render: (instructions) =>
+                  instructions?.[0]?.additional_instruction?.[0]?.display,
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note,
+              },
+              {
+                key: "created_by",
+                label: t("prescribed_by"),
+                render: (created_by) => formatName(created_by),
+              },
+            ],
+            queryKey: ["medication_requests", patientId],
+            queryFn: async (limit: number, offset: number) => {
+              const response = await query(medicationRequestApi.list, {
+                pathParams: { patientId },
+                queryParams: {
+                  limit,
+                  offset,
+                  status:
+                    "active,on-hold,draft,unknown,ended,completed,cancelled",
+                  ordering: "-created_date",
+                },
+              })({ signal: new AbortController().signal });
+              return response;
+            },
+          },
+          {
+            type: t("medication_statements"),
+            displayFields: [
+              {
+                key: "medication",
+                label: t("medicine"),
+                render: (med) => med?.display,
+              },
+              {
+                key: "dosage_text",
+                label: t("dosage"),
+                render: (dosage) => dosage,
+              },
+              {
+                key: "status",
+                label: t("status"),
+                render: (status) => t(status),
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note || "-",
+              },
+              {
+                key: "created_by",
+                label: t("prescribed_by"),
+                render: (created_by) => formatName(created_by),
+              },
+            ],
+            queryKey: ["medication_statements", patientId],
+            queryFn: async (limit: number, offset: number) => {
+              const response = await query(medicationStatementApi.list, {
+                pathParams: { patientId },
+                queryParams: {
+                  limit,
+                  offset,
+                  status:
+                    "active,on_hold,completed,stopped,unknown,not_taken,intended",
+                  ordering: "-created_date",
+                },
+              })({ signal: new AbortController().signal });
+              return response;
+            },
+          },
+        ]}
+        buttonLabel={t("medication_history")}
+        onAddSelected={handleAddHistoricalMedications}
+      />
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto">
           <div className="min-w-fit">
