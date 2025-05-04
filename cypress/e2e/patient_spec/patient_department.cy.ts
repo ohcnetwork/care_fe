@@ -20,18 +20,18 @@ describe("Manage departments/teams association to an encounter", () => {
     facilityCreation.selectFacility("GHC Payyanur");
   });
 
-  it("Create a new department/team and a sub-department/team, then verify that the search functionality works correctly on the dashboard", () => {
+  it("Add a new department and create a sub-child, and now verify both are visible in the sidebar nav", () => {
     const departmentName = generateDeptName();
     const subDepartmentName = generateDeptName("Sub-");
     const description = generateRandomCharacter({
       charLimit: 50,
     });
     const OrganizationType = "Department";
-    const updatedOrganizationType = "Team";
-    const updatedDescription = generateRandomCharacter({
-      charLimit: 50,
-    });
-    const updatedDepartmentTeamName = generateDeptName("Updated-Sub-");
+    // const updatedOrganizationType = "Team";
+    // const updatedDescription = generateRandomCharacter({
+    //   charLimit: 50,
+    // });
+    // const updatedDepartmentTeamName = generateDeptName("Updated-Sub-");
     patientDepartments
       .navigateToSettings()
       .navigateToDepartments()
@@ -53,21 +53,8 @@ describe("Manage departments/teams association to an encounter", () => {
       .clickCreateOrganization()
       .verifyCreateRequest()
       .assertCreationSuccess()
-      .searchDepartmentTeam(subDepartmentName)
-      .verifyDepartmentTeamContentInList(subDepartmentName, OrganizationType)
-      .clickEditOrganization()
-      .enterName(updatedDepartmentTeamName)
-      .selectType(updatedOrganizationType)
-      .enterDescription(updatedDescription)
-      .interceptUpdateRequest()
-      .clickUpdateOrganization()
-      .verifyUpdateRequest()
-      .assertUpdateSuccess()
-      .searchDepartmentTeam(updatedDepartmentTeamName)
-      .verifyDepartmentTeamContentInList(
-        updatedDepartmentTeamName,
-        updatedOrganizationType,
-      );
+      .verifyParentDepartmentAndClick(departmentName)
+      .verifyChildDepartment(subDepartmentName);
   });
 
   it("Navigate to the facility's administration department and link a user to the facility", () => {

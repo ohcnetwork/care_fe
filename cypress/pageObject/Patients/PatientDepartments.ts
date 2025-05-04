@@ -125,6 +125,23 @@ export class PatientDepartments {
     return this;
   }
 
+  verifyParentDepartmentAndClick(departmentName: string) {
+    cy.get('[data-cy="organization-tree-node-parent"]')
+      .contains(departmentName)
+      .scrollIntoView()
+      .click();
+    cy.wait(2000);
+    return this;
+  }
+
+  verifyChildDepartment(departmentName: string) {
+    cy.get('[data-cy="organization-tree-node-children"]')
+      .contains(departmentName)
+      .scrollIntoView()
+      .should("be.visible");
+    return this;
+  }
+
   searchDepartmentTeam(departmentName: string) {
     cy.typeIntoField('[data-cy="search-department-team"]', departmentName, {
       clearBeforeTyping: true,
