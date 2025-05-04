@@ -159,8 +159,18 @@ export class PatientDepartments {
     return this;
   }
 
+  verifyUserRole(role: string) {
+    cy.verifyContentPresence('[data-cy="user-role"]', [role]);
+    return this;
+  }
+
   clickEditRole() {
     cy.verifyAndClickElement('[data-cy="edit-user-role"]', "Edit Role");
+    return this;
+  }
+
+  clickUpdateUserRole() {
+    cy.verifyAndClickElement('[data-cy="update-user-role"]', "Update Role");
     return this;
   }
 
@@ -187,12 +197,19 @@ export class PatientDepartments {
   }
 
   selectOrganization(organization: string) {
-    cy.typeAndSelectOption('[data-cy="facility-organization"]', organization);
+    cy.typeAndSelectOption(
+      '[data-cy="facility-organization"]',
+      organization,
+      false,
+    );
     return this;
   }
 
   clickAddOrganizationToEncounterSubmit() {
-    cy.verifyAndClickElement("[data-cy=add-organization]", "Add Organizations");
+    cy.verifyAndClickElement(
+      '[data-cy="add-organization"]',
+      "Add Organizations",
+    );
     return this;
   }
 

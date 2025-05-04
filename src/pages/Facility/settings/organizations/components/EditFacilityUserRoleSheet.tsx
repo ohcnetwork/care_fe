@@ -212,6 +212,7 @@ export default function EditUserRoleSheet({
               className="w-full"
               onClick={handleUpdateRole}
               disabled={selectedRole === userRole.role.id}
+              data-cy="update-user-role"
             >
               {t("update_role")}
             </Button>

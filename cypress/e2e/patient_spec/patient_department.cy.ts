@@ -1,7 +1,11 @@
 import { PatientDepartments } from "@/pageObject/Patients/PatientDepartments";
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
-import { generateDeptName, generateRandomCharacter } from "@/utils/commonUtils";
+import {
+  generateDeptName,
+  generateName,
+  generateRandomCharacter,
+} from "@/utils/commonUtils";
 import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
@@ -70,6 +74,7 @@ describe("Manage departments/teams association to an encounter", () => {
   it("Navigate to the facility's administration department and link a user to the facility", () => {
     const userName = "devnurse3";
     const role = "Nurse";
+    const updatedRole = "Doctor";
     const departmentName = "Administration";
 
     patientDepartments
@@ -84,6 +89,11 @@ describe("Manage departments/teams association to an encounter", () => {
       .clickAddUserToOrganization()
       .assertUserAddedSuccess()
       .searchUser(userName)
+      .verifyUserRole(role)
+      .clickEditRole()
+      .selectRoleOfUser(updatedRole)
+      .clickUpdateUserRole()
+      .verifyUserRole(updatedRole)
       .clickEditRole()
       .clickRemoveUser()
       .clickConfirmRemove()
@@ -92,10 +102,12 @@ describe("Manage departments/teams association to an encounter", () => {
 
   it("Assign Department/Team to an Encounter and verify it", () => {
     const linkDeptName = "Test Dept (DON'T DELETE IT)";
+    const patientName = generateName(true);
 
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
+      .searchEncounter(patientName)
       .openFirstEncounterDetails();
     patientDepartments
       .clickAddOrganization()
