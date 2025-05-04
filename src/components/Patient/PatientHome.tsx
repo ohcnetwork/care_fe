@@ -135,7 +135,7 @@ export const PatientHome = (props: {
         </div>
 
         <div
-          className="sticky top-0 z-10 mt-4 w-full border-b border-gray-200 bg-gray-50"
+          className="sticky top-0 z-9 mt-4 w-full border-b border-gray-200 bg-gray-50"
           role="navigation"
         >
           <div className="overflow-x-auto pb-3">

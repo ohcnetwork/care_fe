@@ -81,7 +81,11 @@ export class PatientCreation {
   }
 
   clickSearchPatients() {
-    cy.get('[data-sidebar="content"]').contains("Search Patients").click();
+    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
+    cy.verifyAndClickElement(
+      '[data-cy="nav-search-patients"]',
+      "Search Patients",
+    );
     return this;
   }
 
