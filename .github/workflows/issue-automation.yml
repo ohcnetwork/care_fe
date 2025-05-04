@@ -55,6 +55,7 @@ jobs:
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
           echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .id' project_data.json) >> $GITHUB_ENV
           echo 'TEAM_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .id' project_data.json) >> $GITHUB_ENV
+
           echo 'TRIAGE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Triage") | .id' project_data.json) >> $GITHUB_ENV
           echo 'IN_PROGRESS_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="In Progress") | .id' project_data.json) >> $GITHUB_ENV
           echo 'DONE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Done") | .id' project_data.json) >> $GITHUB_ENV
@@ -168,9 +169,8 @@ jobs:
                 }
               }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f done_value=${{ env.DONE_OPTION_ID }}
 
-          elif [[ "${{ github.event.action }}" == "closed" && \
-                  ("${{ github.event.issue.state_reason }}" == "not_planned" || \
-                   "${{ github.event.issue.state_reason }}" == "duplicate") ]]; then
+          elif [[ "${{ github.event.issue.state_reason }}" == "not_planned" || \
+                 "${{ github.event.issue.state_reason }}" == "duplicate" ]]; then
             gh api graphql -f query='
               mutation($project: ID!, $item: ID!) {
                 deleteProjectV2Item(input: {
