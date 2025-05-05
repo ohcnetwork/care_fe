@@ -36,6 +36,8 @@ import {
 import { REPORT_TEMPLATE_TYPE } from "@/types/reportTemplate/reportTemplate";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
 
+import { ReportBuilderPreview } from "./ReportBuilderPreview";
+
 interface ReportBuilderProps {
   facilityId: string;
   patientId: string;
@@ -186,6 +188,19 @@ export default function ReportBuilder({
 
   const onSubmit = useCallback(
     (data: ReportTemplateFormData) => {
+      data = {
+        ...data,
+        config: {
+          ...data.config,
+          layout: {
+            ...data.config.layout,
+            text: {
+              ...data.config.layout.text,
+              size: data.config.layout.text.size + "pt",
+            },
+          },
+        },
+      };
       if (reportTemplateId) {
         updateReportTemplate(data);
       } else {
@@ -200,78 +215,83 @@ export default function ReportBuilder({
   }, []);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="flex justify-end space-x-2">
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    disabled={!!reportTemplateId}
-                  >
-                    <FormItem>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a template type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {REPORT_TEMPLATE_TYPE.map((type) => (
-                          <SelectItem key={type.id} value={type.id}>
-                            {type.value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </FormItem>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="button" variant="outline" onClick={handleExport}>
-            {t("export")}
-          </Button>
-          <Button type="submit">{t("REPORT_BUILDER_SAVE_TEMPLATE")}</Button>
+    <div className="max-w-9xl mx-auto">
+      <Form {...form}>
+        <div className="grid grid-cols-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="flex justify-end space-x-2">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        disabled={!!reportTemplateId}
+                      >
+                        <FormItem>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a template type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {REPORT_TEMPLATE_TYPE.map((type) => (
+                              <SelectItem key={type.id} value={type.id}>
+                                {type.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </FormItem>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="button" variant="outline" onClick={handleExport}>
+                {t("export")}
+              </Button>
+              <Button type="submit">{t("REPORT_BUILDER_SAVE_TEMPLATE")}</Button>
+            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("REPORT_BUILDER_TITLE")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="layout">
+                      {t("REPORT_BUILDER_LAYOUT")}
+                    </TabsTrigger>
+                    <TabsTrigger value="header">
+                      {t("REPORT_BUILDER_HEADER")}
+                    </TabsTrigger>
+                    <TabsTrigger value="sections">
+                      {t("REPORT_BUILDER_SECTIONS")}
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="layout">
+                    <LayoutBuilder form={form} />
+                  </TabsContent>
+                  <TabsContent value="header">
+                    <HeaderBuilder form={form} />
+                  </TabsContent>
+                  <TabsContent value="sections">
+                    <SectionBuilder form={form} facilityId={facilityId} />
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </form>
+          <ReportBuilderPreview form={form} />
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("REPORT_BUILDER_TITLE")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="layout">
-                  {t("REPORT_BUILDER_LAYOUT")}
-                </TabsTrigger>
-                <TabsTrigger value="header">
-                  {t("REPORT_BUILDER_HEADER")}
-                </TabsTrigger>
-                <TabsTrigger value="sections">
-                  {t("REPORT_BUILDER_SECTIONS")}
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="layout">
-                <LayoutBuilder form={form} />
-              </TabsContent>
-              <TabsContent value="header">
-                <HeaderBuilder form={form} />
-              </TabsContent>
-              <TabsContent value="sections">
-                <SectionBuilder form={form} facilityId={facilityId} />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </form>
-    </Form>
+      </Form>
+    </div>
   );
 }

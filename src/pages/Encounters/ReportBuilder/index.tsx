@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -53,17 +54,45 @@ export default function ReportBuilderSheet({
                 className="flex items-center justify-between gap-2 rounded-md bg-gray-100 p-3"
               >
                 {reportTemplate.type.toString()}
-                <Button variant="outline" size="sm" className="w-1/3" asChild>
-                  <Link
-                    href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${reportTemplate.id}`}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    asChild
                   >
-                    {t("generate_report")}
-                  </Link>
-                </Button>
+                    <Link
+                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${reportTemplate.id}`}
+                    >
+                      {t("edit_template")}
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    asChild
+                  >
+                    <Link
+                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${reportTemplate.id}`}
+                    >
+                      {t("generate_report")}
+                    </Link>
+                  </Button>
+                </div>
               </Card>
             ))}
           </div>
         </div>
+        <SheetFooter className="mt-4">
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/new`}
+            >
+              {t("create_new_report")}
+            </Link>
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

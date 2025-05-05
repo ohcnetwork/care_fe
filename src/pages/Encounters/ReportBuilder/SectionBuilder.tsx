@@ -224,13 +224,11 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
         control={control}
         name={`config.sections.${index}`}
         render={({ field }) => {
-          if (isTable) return <></>;
-
           return (
             <FormItem>
               <FormLabel>{t("REPORT_BUILDER_DISPLAY_STYLE")}</FormLabel>
               <Select
-                disabled={!isEnabled}
+                disabled={!isEnabled || isTable}
                 value={field.value?.options?.style || "list"}
                 onValueChange={(value) =>
                   field.onChange({

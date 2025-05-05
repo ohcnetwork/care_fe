@@ -1,5 +1,5 @@
 import { Trash2Icon } from "lucide-react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Control,
   Controller,
@@ -8,11 +8,8 @@ import {
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -107,7 +104,13 @@ const TextElement = React.memo(function TextElement({
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_SIZE")}</FormLabel>
-            <Input {...field} type="text" placeholder="10pt" />
+            <Input
+              {...field}
+              type="number"
+              placeholder="10"
+              pattern="\d*"
+              inputMode="numeric"
+            />
             <FormMessage />
           </FormItem>
         )}
@@ -392,65 +395,63 @@ interface HeaderRowProps {
   onRemoveRow: (rowIndex: number) => void;
   onAddElement: (rowIndex: number, type: string) => void;
   onRemoveElement: (rowIndex: number, elementIndex: number) => void;
-  activeElement: number | null;
-  setActiveElement: (elementIndex: number | null) => void;
+  activeElement: number;
+  setActiveElement: (elementIndex: number) => void;
 }
 
 const RowButtons = ({
   rowIndex,
   size = "sm",
   handleAddElement,
-  onRemoveRow,
 }: {
   rowIndex: number;
   size?: "sm" | "xs" | "default" | "lg" | "icon";
   handleAddElement: (rowIndex: number, type: string) => void;
-  onRemoveRow: (rowIndex: number) => void;
 }) => {
   const { t } = useTranslation();
   return (
-    <>
+    <div className="flex flex-row items-center rounded-lg border overflow-clip">
       <Button
         type="button"
         size={size}
-        variant="outline"
+        variant="ghost"
         onClick={() => handleAddElement(rowIndex, "text")}
+        className="flex flex-col items-center gap-1 px-5 py-8 rounded-none border-r border-gray-200 bg-green-50 text-green-900 hover:bg-green-200/80 hover:text-green-900"
       >
+        <CareIcon icon="l-text" className="w-4 h-4" />
         {t("REPORT_BUILDER_ADD_TEXT")}
       </Button>
       <Button
         type="button"
         size={size}
-        variant="outline"
+        variant="ghost"
         onClick={() => handleAddElement(rowIndex, "image")}
+        className="flex flex-col items-center gap-1 px-5 py-8 rounded-none border-r border-gray-200 bg-green-50 text-green-900 hover:bg-green-200/80 hover:text-green-900"
       >
+        <CareIcon icon="l-image-v" className="w-4 h-4" />
         {t("REPORT_BUILDER_ADD_IMAGE")}
       </Button>
       <Button
         type="button"
         size={size}
-        variant="outline"
+        variant="ghost"
         onClick={() => handleAddElement(rowIndex, "rule")}
+        className="flex flex-col items-center gap-1 px-5 py-8 rounded-none border-r border-gray-200 bg-green-50 text-green-900 hover:bg-green-200/80 hover:text-green-900"
       >
+        <CareIcon icon="l-minus" className="w-4 h-4" />
         {t("REPORT_BUILDER_ADD_RULE")}
       </Button>
       <Button
         type="button"
         size={size}
-        variant="outline"
+        variant="ghost"
         onClick={() => handleAddElement(rowIndex, "datetime")}
+        className="flex flex-col items-center gap-1 px-4 py-8 rounded-none bg-green-50 text-green-900 hover:bg-green-200/80 hover:text-green-900"
       >
+        <CareIcon icon="l-calender" className="w-4 h-4" />
         {t("REPORT_BUILDER_ADD_DATETIME")}
       </Button>
-      <Button
-        type="button"
-        size={size}
-        variant="destructive"
-        onClick={() => onRemoveRow(rowIndex)}
-      >
-        <CareIcon icon="l-trash" className="w-4 h-4" />
-      </Button>
-    </>
+    </div>
   );
 };
 
@@ -468,9 +469,9 @@ const HeaderRow = React.memo(function HeaderRow({
 
   const toggleElement = useCallback(
     (index: number) => {
-      setActiveElement(activeElement === index ? null : index);
+      setActiveElement(index);
     },
-    [activeElement, setActiveElement],
+    [setActiveElement],
   );
 
   const handleAddElement = useCallback(
@@ -497,11 +498,11 @@ const HeaderRow = React.memo(function HeaderRow({
 
   if (row.length === 0) {
     return (
-      <div className="border rounded-lg p-4 bg-gray-100 flex justify-center items-center gap-2">
+      <div className="border rounded-lg p-4 bg-gray-50 flex justify-center items-center gap-2">
         <RowButtons
+          size="lg"
           rowIndex={rowIndex}
           handleAddElement={handleAddElement}
-          onRemoveRow={onRemoveRow}
         />
       </div>
     );
@@ -509,64 +510,59 @@ const HeaderRow = React.memo(function HeaderRow({
 
   return (
     <div className="border rounded-lg p-2">
-      <div className="flex justify-end items-center gap-2">
-        <RowButtons
-          rowIndex={rowIndex}
-          handleAddElement={handleAddElement}
-          onRemoveRow={onRemoveRow}
-        />
-      </div>
-
       {/* Element Tabs */}
-      <div className="flex gap-4 p-3">
-        {row.length > 0 &&
-          row.map((element, elementIndex) => (
-            <Badge
-              key={elementIndex}
-              variant={activeElement === elementIndex ? "outline" : "secondary"}
-              className={cn(
-                "flex items-center gap-2",
-                activeElement === elementIndex ? " scale-105" : "",
-              )}
-            >
-              <Button
-                variant="ghost"
-                type="button"
-                key={elementIndex}
-                className={`flex items-center gap-2 p-0 rounded-md hover:bg-transparent`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleElement(elementIndex);
-                }}
+      <div className="p-3 flex justify-between">
+        <div className="flex justify-start">
+          {row.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Select
+                value={activeElement.toString()}
+                onValueChange={(value) => toggleElement(parseInt(value, 10))}
               >
-                <CareIcon
-                  icon={getElementIcon(element.type)}
-                  className="w-4 h-4"
-                />
-                <span
-                  className={cn(
-                    activeElement === elementIndex
-                      ? "font-semibold text-base"
-                      : "text-sm",
-                  )}
-                >
-                  {t(`REPORT_BUILDER_${element.type.toUpperCase()}`)}
-                </span>
-              </Button>
+                <SelectTrigger className="bg-green-100">
+                  <SelectValue placeholder={t("REPORT_BUILDER_ADD_ELEMENT")}>
+                    <CareIcon
+                      icon={getElementIcon(row[activeElement].type)}
+                      className="w-4 h-4 text-green-900"
+                    />
+                    <span className="text-sm text-green-900">
+                      {t(
+                        `REPORT_BUILDER_${row[activeElement].type.toUpperCase()}`,
+                      )}
+                    </span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {row.map((element, elementIndex) => (
+                    <SelectItem
+                      key={elementIndex}
+                      value={elementIndex.toString()}
+                    >
+                      {t(`REPORT_BUILDER_${element.type.toUpperCase()}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button
                 type="button"
-                size="xs"
-                variant="ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemoveElement(rowIndex, elementIndex);
-                }}
-                className="hover:bg-transparent hover:text-red-400"
+                variant="secondary"
+                onClick={() => onRemoveElement(rowIndex, activeElement)}
               >
+                <span className="text-sm">{t("remove")}</span>
                 <Trash2Icon className="w-3 h-3" />
               </Button>
-            </Badge>
-          ))}
+            </div>
+          )}
+        </div>
+        <Button
+          type="button"
+          size={"sm"}
+          variant="destructive"
+          onClick={() => onRemoveRow(rowIndex)}
+        >
+          <Trash2Icon className="w-3 h-3" />
+          <span className="text-sm">{t("remove_row")}</span>
+        </Button>
       </div>
 
       {/* Element Content */}
@@ -580,6 +576,14 @@ const HeaderRow = React.memo(function HeaderRow({
           />
         </div>
       )}
+
+      <div className="mt-6 mb-4 flex justify-center items-center">
+        <RowButtons
+          size="default"
+          rowIndex={rowIndex}
+          handleAddElement={handleAddElement}
+        />
+      </div>
     </div>
   );
 });
@@ -594,11 +598,19 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
     control: form.control,
     name: "config.header.rows",
   });
-  const [activeElements, setActiveElements] = useState<
-    Record<number, number | null>
-  >({});
+  const [activeElements, setActiveElements] = useState<Record<number, number>>(
+    {},
+  );
 
   const rows = form.watch("config.header.rows");
+
+  useEffect(() => {
+    if (Object.keys(activeElements).length === 0) {
+      setActiveElements(
+        rows.reduce((acc, _, index) => ({ ...acc, [index]: 0 }), {}),
+      );
+    }
+  }, [rows, activeElements]);
 
   const handleAddRow = useCallback(() => {
     append([
@@ -682,6 +694,12 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
       const updatedRow = [...currentRow];
       updatedRow.splice(elementIndex, 1);
       update(rowIndex, updatedRow);
+      if (updatedRow.length !== 0) {
+        setActiveElements((prev) => ({
+          ...prev,
+          [rowIndex]: elementIndex > 0 ? elementIndex - 1 : elementIndex,
+        }));
+      }
     },
     [form, update],
   );
@@ -692,21 +710,22 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
         <CardTitle>{t("REPORT_BUILDER_HEADER")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
-        {fields.map((field, rowIndex) => (
-          <HeaderRow
-            key={field.id}
-            rowIndex={rowIndex}
-            row={rows[rowIndex] || []}
-            form={form}
-            onRemoveRow={handleRemoveRow}
-            onAddElement={handleAddElement}
-            onRemoveElement={handleRemoveElement}
-            activeElement={activeElements[rowIndex]}
-            setActiveElement={(index: number | null) =>
-              setActiveElements((prev) => ({ ...prev, [rowIndex]: index }))
-            }
-          />
-        ))}
+        {Object.keys(activeElements).length > 0 &&
+          fields.map((field, rowIndex) => (
+            <HeaderRow
+              key={field.id}
+              rowIndex={rowIndex}
+              row={rows[rowIndex] || []}
+              form={form}
+              onRemoveRow={handleRemoveRow}
+              onAddElement={handleAddElement}
+              onRemoveElement={handleRemoveElement}
+              activeElement={activeElements[rowIndex]}
+              setActiveElement={(index: number) =>
+                setActiveElements((prev) => ({ ...prev, [rowIndex]: index }))
+              }
+            />
+          ))}
         <Button type="button" onClick={handleAddRow} className="mt-4">
           {t("REPORT_BUILDER_ADD_ROW")}
         </Button>
