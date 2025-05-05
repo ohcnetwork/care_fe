@@ -75,7 +75,11 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
+<<<<<<< HEAD
   const { goBack } = useAppHistory();
+=======
+  const { history, goBack } = useAppHistory();
+>>>>>>> bc6abdeee (used useAppHistory)
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -107,13 +111,20 @@ export const FacilityHome = ({ facilityId }: Props) => {
         queryKey: ["facility", facilityId],
       });
 
+<<<<<<< HEAD
       const prevPath = document.referrer;
       const orgMatch = prevPath.match(/\/org\/([^/]+)\/facilities/);
+=======
+      if (history.length > 1) {
+        const prevPath = history[1];
+        const orgMatch = prevPath.match(/\/org\/([^/]+)\/facilities/);
+>>>>>>> bc6abdeee (used useAppHistory)
 
-      if (orgMatch && orgMatch[1]) {
-        navigate(`/org/${orgMatch[1]}/facilities`);
-      } else {
-        navigate("/");
+        if (orgMatch && orgMatch[1]) {
+          navigate(`/org/${orgMatch[1]}/facilities`);
+        } else {
+          goBack("/");
+        }
       }
     },
   });
