@@ -656,24 +656,28 @@ export function MedicationStatementQuestion({
           onConfirm={handleConfirmMedication}
           placeholder={addMedicationPlaceholder}
         >
-          {
-            <div className="space-y-4 p-3">
+          <div className="space-y-4 p-3">
+            {newMedicationInSheet && (
               <MedicationStatementGridRow
-                medication={newMedicationInSheet!}
+                medication={newMedicationInSheet}
                 disabled={disabled}
                 onUpdate={(updates) => {
-                  setNewMedicationInSheet((prev) => ({
-                    ...prev!,
-                    ...updates,
-                  }));
+                  setNewMedicationInSheet((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          ...updates,
+                        }
+                      : null,
+                  );
                 }}
                 onRemove={() => {}}
                 index={-1}
                 questionId={question.id}
                 errors={errors}
               />
-            </div>
-          }
+            )}
+          </div>
         </EntitySelectionSheet>
       )}
     </div>
