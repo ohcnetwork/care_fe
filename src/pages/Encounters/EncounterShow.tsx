@@ -19,6 +19,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { EncounterConsentsTab } from "@/pages/Encounters/tabs/EncounterConsentsTab";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
@@ -41,6 +42,7 @@ const defaultTabs = {
   files: EncounterFilesTab,
   notes: EncounterNotesTab,
   devices: EncounterDevicesTab,
+  consents: EncounterConsentsTab,
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
   // pressure_sore: EncounterPressureSoreTab,
