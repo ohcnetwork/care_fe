@@ -44,14 +44,17 @@ jobs:
       - name: Start care docker containers 🐳
         run: |
           cd care
-          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
-          echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
-          make docker_config_file=docker-compose.pre-built.yaml up 
-          python manage.py load_fixtures
+          # Set up environment variables
+          echo "DISABLE_RATELIMIT=True" > docker/.prebuilt.env
+          echo "CORS_ALLOWED_ORIGINS=[\"http://localhost:4000\"]" >> docker/.prebuilt.env
+          echo "JWKS_BASE64=${{ secrets.JWKS_BASE64 }}" >> docker/.prebuilt.env
+
+          # Start containers
+          docker-compose -f docker-compose.pre-built.yaml up -d
+
+          # Load fixtures
+          docker-compose -f docker-compose.pre-built.yaml exec web python manage.py load_fixtures
           cd ..
-        env:
-          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
       - name: Wait for care to be up ♻
         uses: nick-fields/retry@v2
@@ -124,14 +127,17 @@ jobs:
       - name: Start care docker containers 🐳
         run: |
           cd care
-          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
-          echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
-          make docker_config_file=docker-compose.pre-built.yaml up 
-          python manage.py load_fixtures
+          # Set up environment variables
+          echo "DISABLE_RATELIMIT=True" > docker/.prebuilt.env
+          echo "CORS_ALLOWED_ORIGINS=[\"http://localhost:4000\"]" >> docker/.prebuilt.env
+          echo "JWKS_BASE64=${{ secrets.JWKS_BASE64 }}" >> docker/.prebuilt.env
+
+          # Start containers
+          docker-compose -f docker-compose.pre-built.yaml up -d
+
+          # Load fixtures
+          docker-compose -f docker-compose.pre-built.yaml exec web python manage.py load_fixtures
           cd ..
-        env:
-          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
       - name: Wait for care to be up ♻
         uses: nick-fields/retry@v2
