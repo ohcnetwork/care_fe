@@ -850,17 +850,23 @@ export function AllergyQuestion({
           placeholder={addAllergyPlaceholder}
         >
           <div className="space-y-4 p-3">
-            <AllergyItem
-              allergy={newAllergyInSheet!}
-              disabled={disabled}
-              onUpdate={(updates) => {
-                setNewAllergyInSheet((prev) => ({
-                  ...prev!,
-                  ...updates,
-                }));
-              }}
-              onRemove={() => {}}
-            />
+            {newAllergyInSheet && (
+              <AllergyItem
+                allergy={newAllergyInSheet}
+                disabled={disabled}
+                onUpdate={(updates) => {
+                  setNewAllergyInSheet((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          ...updates,
+                        }
+                      : null,
+                  );
+                }}
+                onRemove={() => {}}
+              />
+            )}
           </div>
         </EntitySelectionSheet>
       ) : (
