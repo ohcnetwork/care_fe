@@ -225,7 +225,7 @@ const AvatarEditModal = ({
 
   return (
     <Dialog open={open} onOpenChange={closeModal}>
-      <DialogContent className="md:max-w-4xl">
+      <DialogContent className="md:max-w-4xl max-h-screen overflow-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
           <DialogDescription className="sr-only">
@@ -238,7 +238,7 @@ const AvatarEditModal = ({
               <>
                 {preview || imageUrl ? (
                   <>
-                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
+                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center rounded-lg border border-secondary-200">
                       <img
                         src={
                           preview && preview.startsWith("blob:")

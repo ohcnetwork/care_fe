@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -23,8 +23,8 @@ import query from "@/Utils/request/query";
 import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 
-const CommentSection = (props: { id: string }) => {
-  const { id } = props;
+const CommentSection = ({ id }: { id: string }) => {
+  const { t } = useTranslation();
   const [commentBox, setCommentBox] = useState("");
   const queryClient = useQueryClient();
 

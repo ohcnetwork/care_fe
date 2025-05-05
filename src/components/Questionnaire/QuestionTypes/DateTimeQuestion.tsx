@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -38,6 +38,8 @@ export function DateTimeQuestion({
   clearError,
   classes,
 }: DateTimeQuestionProps) {
+  const { t } = useTranslation();
+
   const currentValue = questionnaireResponse.values[0]?.value
     ? new Date(questionnaireResponse.values[0].value as string)
     : undefined;

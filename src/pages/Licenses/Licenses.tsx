@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CopyIcon } from "lucide-react";
@@ -16,8 +17,8 @@ import { getPackageUrl } from "@/pages/Licenses/utils";
 import { LicensesSbom } from "@/types/license";
 
 const sbomUrlMap = {
-  frontend: "/sbom/care_fe-sbom.json",
-  backend: "/sbom/care-sbom.json",
+  frontend: `${careConfig.sbomBaseUrl}/care_fe/sbom.json`,
+  backend: `${careConfig.sbomBaseUrl}/care/sbom.json`,
 };
 
 export const LicensesPage = () => {

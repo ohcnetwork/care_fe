@@ -37,7 +37,7 @@ export interface AllergyIntoleranceRequest {
   id?: string;
   clinical_status: AllergyClinicalStatus;
   verification_status: AllergyVerificationStatus;
-  category: string;
+  category: AllergyCategory;
   criticality: string;
   code: Code;
   last_occurrence?: string;

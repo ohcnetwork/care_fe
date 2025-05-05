@@ -21,6 +21,7 @@ declare global {
       clickAndSelectOption(
         element: string,
         reference: string,
+        options?: { position?: "first" | "last" },
       ): Chainable<Element>;
       verifyAndClickElement(
         element: string,
@@ -42,6 +43,7 @@ declare global {
           clearBeforeTyping?: boolean;
           skipVerification?: boolean;
           delay?: number;
+          position?: "first" | "last";
         },
       ): Chainable<Element>;
     }

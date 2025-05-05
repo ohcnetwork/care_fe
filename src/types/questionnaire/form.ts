@@ -34,7 +34,8 @@ export type ResponseValue =
   | RV<"encounter", EncounterEditRequest[]>
   | RV<"appointment", CreateAppointmentQuestion[]>
   | RV<"time_of_death", string[]>
-  | RV<"files", FileUploadQuestion[]>;
+  | RV<"files", FileUploadQuestion[]>
+  | RV<"time", string | undefined>;
 
 export interface QuestionnaireResponse {
   question_id: string;

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -77,7 +76,12 @@ function OrganizationTreeNode({
           <span className="w-6" />
         )}
         <div
-          onClick={() => onSelect(organization)}
+          onClick={() => {
+            onSelect(organization);
+            if (organization.has_children) {
+              onToggleExpand(organization.id);
+            }
+          }}
           className="flex items-center flex-1 text-sm gap-2 cursor-pointer"
         >
           <span className="truncate">{organization.name}</span>
@@ -118,8 +122,6 @@ export default function FacilityOrganizationNavbar({
   onToggleExpand,
   onOrganizationSelect,
 }: FacilityOrganizationNavbarProps) {
-  const { t } = useTranslation();
-
   const { data: allOrganizations, isLoading: isLoadingOrganizations } =
     useQuery<{
       results: FacilityOrganization[];
@@ -138,12 +140,9 @@ export default function FacilityOrganizationNavbar({
   const topLevelOrganizations = allOrganizations?.results || [];
 
   return (
-    <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block min-h-[calc(100vh-10rem)] pt-2">
-      <div className="p-4">
-        <h2 className="text-lg font-semibold">{t("departments_or_teams")}</h2>
-      </div>
-      <ScrollArea>
-        <div className="p-2">
+    <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block">
+      <ScrollArea className="h-[calc(100vh-14rem)]">
+        <div className="p-4">
           {isLoadingOrganizations ? (
             <div className="p-4">
               <Skeleton className="h-8 w-full" />

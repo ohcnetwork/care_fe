@@ -124,13 +124,13 @@ export const QuestionGroup = memo(function QuestionGroup({
     <div
       data-cy="group_styling"
       className={cn(
-        "sm:space-y-4 sm:rounded-lg",
+        "sm:rounded-lg bg-gray-100 md:bg-transparent",
         isActive && "ring-2 ring-primary",
         question.styling_metadata?.classes && question.styling_metadata.classes,
       )}
     >
       {question.text && (
-        <div className="space-y-1 px-2 bg-gray-100 md:bg-transparent">
+        <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
           <QuestionLabel
             question={question}
             groupLabel
@@ -144,7 +144,7 @@ export const QuestionGroup = memo(function QuestionGroup({
       <div
         data-cy="group_container_styling"
         className={cn(
-          "gap-2",
+          "gap-1",
           question.styling_metadata?.containerClasses &&
             question.styling_metadata.containerClasses,
         )}

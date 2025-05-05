@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useState } from "react";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
@@ -48,6 +47,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import roleApi from "@/types/emr/role/roleApi";
 import { UserBase } from "@/types/user/user";
 
 import { PatientProps } from ".";
@@ -57,6 +57,7 @@ interface AddUserSheetProps {
 }
 
 function AddUserSheet({ patientId }: AddUserSheetProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserBase>();
@@ -64,7 +65,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
-    queryFn: query(routes.role.list),
+    queryFn: query(roleApi.listRoles),
     enabled: open,
   });
 
@@ -190,7 +191,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                   <SelectTrigger data-cy="patient-user-role-select">
                     <SelectValue placeholder={t("select_role")} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
                     {roles?.results?.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
                         <div className="flex flex-col">
@@ -223,9 +224,10 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   );
 }
 
-export const PatientUsers = (props: PatientProps) => {
-  const { patientData } = props;
+export const PatientUsers = ({ patientData }: PatientProps) => {
   const patientId = patientData.id;
+
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
@@ -345,7 +347,10 @@ export const PatientUsers = (props: PatientProps) => {
             <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
               <div className="text-sm">
                 <div className="text-gray-500">{t("phone_number")}</div>
-                <div className="font-medium">{user.phone_number}</div>
+                <div className="font-medium">
+                  {user.phone_number &&
+                    formatPhoneNumberIntl(user.phone_number)}
+                </div>
               </div>
               <div className="text-sm">
                 <div className="text-gray-500">{t("user_type")}</div>

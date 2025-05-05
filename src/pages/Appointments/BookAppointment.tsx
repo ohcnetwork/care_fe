@@ -125,7 +125,7 @@ export default function BookAppointment(props: Props) {
 
           <div
             className={cn(
-              "grid grid-cols-1 md:grid-cols-2 gap-12",
+              "grid grid-cols-1 lg:grid-cols-2 gap-12",
               !resourceId && "opacity-50 pointer-events-none",
             )}
           >

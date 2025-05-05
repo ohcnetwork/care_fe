@@ -24,7 +24,7 @@ interface LocationTreeNodeProps {
   facilityId: string;
 }
 
-function LocationTreeNode({
+export function LocationTreeNode({
   location,
   selectedLocationId,
   onSelect,
@@ -33,7 +33,6 @@ function LocationTreeNode({
   level = 0,
   facilityId,
 }: LocationTreeNodeProps) {
-  const hasChildren = location.has_children;
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = location.id === selectedLocationId;
   const Icon =
@@ -42,16 +41,18 @@ function LocationTreeNode({
   // Query for this node's children
   const { data: children, isLoading } = useQuery({
     queryKey: ["locations", facilityId, "children", location.id, "kind"],
-    queryFn: query.paginated(locationApi.list, {
+    queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: location.id,
         mode: "kind",
+        ordering: "sort_index",
       },
-      pageSize: 100,
     }),
-    enabled: isExpanded,
+    enabled: true,
   });
+
+  const hasChildren = children?.results && children.results.length > 0;
 
   return (
     <div className="space-y-1">
@@ -62,7 +63,11 @@ function LocationTreeNode({
         )}
         style={{ paddingLeft: `${level}rem` }}
       >
-        {hasChildren ? (
+        {isLoading ? (
+          <Button variant="ghost" size="icon" className="size-6">
+            <div className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+          </Button>
+        ) : hasChildren ? (
           <Button
             variant="ghost"
             size="icon"
@@ -72,9 +77,7 @@ function LocationTreeNode({
               onToggleExpand(location.id);
             }}
           >
-            {isLoading ? (
-              <div className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
-            ) : isExpanded ? (
+            {isExpanded ? (
               <ChevronDown className="size-4" />
             ) : (
               <ChevronRight className="size-4" />
@@ -84,8 +87,12 @@ function LocationTreeNode({
           <span className="w-6" />
         )}
         <div
-          className="flex items-center flex-1 text-sm gap-2"
-          onClick={() => onSelect(location)}
+          className="flex items-center flex-1 text-sm gap-2 w-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(location);
+            onToggleExpand(location.id);
+          }}
         >
           <Icon className="size-4" />
           <span className="truncate">{location.name}</span>
@@ -135,6 +142,7 @@ export default function LocationNavbar({
       queryParams: {
         mine: true,
         mode: "kind",
+        ordering: "sort_index",
       },
       pageSize: 100,
     }),

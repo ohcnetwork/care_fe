@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useState } from "react";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -64,6 +63,7 @@ export default function useFileManager(
 ): FileManagerResult {
   const { type: fileType, onArchive, onEdit, uploadedFiles } = options;
 
+  const { t } = useTranslation();
   const [file_state, setFileState] = useState<StateInterface>({
     open: false,
     isImage: false,

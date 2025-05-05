@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   CartesianGrid,
   Legend,
@@ -106,6 +107,8 @@ export const ObservationVisualizer = ({
   gridCols = 2,
   canAccess,
 }: ObservationVisualizerProps) => {
+  const { t } = useTranslation();
+
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
 
@@ -241,10 +244,16 @@ export const ObservationVisualizer = ({
             <h3 className="text-sm font-medium">{group.title}</h3>
           </div>
           <Tabs defaultValue="graph" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="graph">Graph</TabsTrigger>
-              <TabsTrigger value="data">Recent Data</TabsTrigger>
-              <TabsTrigger value="history">Full History</TabsTrigger>
+            <TabsList className="flex w-full">
+              <TabsTrigger className="flex-1" value="graph">
+                {t("graph")}
+              </TabsTrigger>
+              <TabsTrigger className="flex-1" value="data">
+                {t("recent_data")}
+              </TabsTrigger>
+              <TabsTrigger className="flex-1" value="history">
+                {t("full_history")}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="graph">

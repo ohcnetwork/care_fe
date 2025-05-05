@@ -5,15 +5,9 @@ import {
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -21,14 +15,14 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Command, CommandDrawer, CommandList } from "@/components/ui/command";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
+import { Command, CommandList } from "@/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,33 +33,35 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { RelativeDatePicker } from "@/components/ui/relative-date-picker";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import {
-  ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
-  DIAGNOSIS_CATEGORY,
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
   DiagnosisRequest,
+  Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { Code } from "@/types/questionnaire/code";
@@ -113,8 +109,32 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     category: diagnosis.category,
     note: diagnosis.note,
     encounter: diagnosis.encounter,
+    created_by: diagnosis.created_by,
+    created_date: diagnosis.created_date,
     dirty: false,
   };
+}
+
+function checkForDuplicateDiagnosis(
+  existingDiagnoses: DiagnosisRequest[],
+  newDiagnosis: Pick<DiagnosisRequest, "code"> | Code,
+  t: (key: string) => string,
+) {
+  const codeToCheck = "code" in newDiagnosis ? newDiagnosis.code : newDiagnosis;
+  const codeValue =
+    typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
+
+  const isDuplicate = existingDiagnoses.some(
+    (diagnosis) =>
+      diagnosis.code.code === codeValue &&
+      diagnosis.verification_status !== "entered_in_error",
+  );
+
+  if (isDuplicate) {
+    toast.warning(t("diagnosis_already_exist_warning"));
+    return true;
+  }
+  return false;
 }
 
 export function DiagnosisQuestion({
@@ -124,6 +144,8 @@ export function DiagnosisQuestion({
   updateQuestionnaireResponseCB,
   disabled,
 }: DiagnosisQuestionProps) {
+  const { t } = useTranslation();
+
   const isPreview = patientId === "preview";
   const [selectedCategory, setSelectedCategory] = useState<
     DiagnosisRequest["category"]
@@ -134,29 +156,13 @@ export function DiagnosisQuestion({
     ...DIAGNOSIS_INITIAL_VALUE,
     onset: { onset_datetime: new Date().toISOString().split("T")[0] },
   });
-  const [activeTab, setActiveTab] = useState<"absolute" | "relative">(
-    "absolute",
-  );
   const isMobile = useBreakpoints({ default: true, md: false });
 
-  // Sort diagnoses: chronic conditions first, then by date
+  // Sort diagnoses by date
   const sortedDiagnoses = useMemo(() => {
     const diagnoses =
       (questionnaireResponse.values?.[0]?.value as DiagnosisRequest[]) || [];
     return [...diagnoses].sort((a, b) => {
-      // First sort by category (chronic conditions first)
-      if (
-        a.category === "chronic_condition" &&
-        b.category !== "chronic_condition"
-      )
-        return -1;
-      if (
-        a.category !== "chronic_condition" &&
-        b.category === "chronic_condition"
-      )
-        return 1;
-
-      // Then sort by date within each category
       const dateA = a.onset?.onset_datetime
         ? new Date(a.onset.onset_datetime)
         : new Date();
@@ -168,27 +174,13 @@ export function DiagnosisQuestion({
   }, [questionnaireResponse.values]);
 
   const { data: patientDiagnoses } = useQuery({
-    queryKey: ["diagnoses", patientId],
+    queryKey: ["diagnoses", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
         limit: 100,
-        category: "encounter_diagnosis",
-        exclude_verification_status: "entered_in_error",
-      },
-    }),
-    enabled: !isPreview,
-  });
-
-  const { data: patientChronicConditions } = useQuery({
-    queryKey: ["chronic_condition", patientId],
-    queryFn: query(diagnosisApi.listDiagnosis, {
-      pathParams: { patientId },
-      queryParams: {
-        category: "chronic_condition",
-        limit: 100,
-        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+        category: "encounter_diagnosis,chronic_condition",
         exclude_verification_status: "entered_in_error",
       },
     }),
@@ -196,21 +188,18 @@ export function DiagnosisQuestion({
   });
 
   useEffect(() => {
-    if (patientDiagnoses?.results && patientChronicConditions?.results) {
+    if (patientDiagnoses?.results) {
       updateQuestionnaireResponseCB(
         [
           {
             type: "diagnosis",
-            value: [
-              ...patientChronicConditions.results,
-              ...patientDiagnoses.results,
-            ].map(convertToDiagnosisRequest),
+            value: patientDiagnoses.results.map(convertToDiagnosisRequest),
           },
         ],
         questionnaireResponse.question_id,
       );
     }
-  }, [patientDiagnoses, patientChronicConditions]);
+  }, [patientDiagnoses]);
 
   const handleCodeSelect = (code: Code) => {
     setSelectedCode(code);
@@ -221,14 +210,7 @@ export function DiagnosisQuestion({
   const handleCategoryConfirm = () => {
     if (!selectedCode) return;
 
-    const isDuplicate = sortedDiagnoses.some(
-      (diagnosis) =>
-        diagnosis.code.code === selectedCode.code &&
-        diagnosis.verification_status !== "entered_in_error",
-    );
-
-    if (isDuplicate) {
-      toast.warning(t("diagnosis_already_exist_warning"));
+    if (checkForDuplicateDiagnosis(sortedDiagnoses, selectedCode, t)) {
       return;
     }
 
@@ -266,7 +248,11 @@ export function DiagnosisQuestion({
       // For existing records, update verification status to entered_in_error
       const newDiagnoses = sortedDiagnoses.map((d, i) =>
         i === index
-          ? { ...d, verification_status: "entered_in_error" as const }
+          ? {
+              ...d,
+              verification_status: "entered_in_error" as const,
+              dirty: true,
+            }
           : d,
       ) as DiagnosisRequest[];
       updateQuestionnaireResponseCB(
@@ -327,84 +313,52 @@ export function DiagnosisQuestion({
     });
   };
 
+  const handleAddHistoricalDiagnoses = async (
+    selectedDiagnoses: DiagnosisRequest[],
+  ) => {
+    // Filter out duplicates before adding
+    const nonDuplicateDiagnoses = selectedDiagnoses.filter(
+      (diagnosis) => !checkForDuplicateDiagnosis(sortedDiagnoses, diagnosis, t),
+    );
+
+    if (nonDuplicateDiagnoses.length === 0) {
+      return;
+    }
+
+    const newDiagnoses = [
+      ...sortedDiagnoses,
+      ...nonDuplicateDiagnoses.map(({ id: _id, ...diagnosis }) => ({
+        ...diagnosis,
+        dirty: true,
+      })),
+    ];
+    updateQuestionnaireResponseCB(
+      [{ type: "diagnosis", value: newDiagnoses }],
+      questionnaireResponse.question_id,
+    );
+  };
+
   const diagnosisDetailsContent = (
     <div className="space-y-4 p-4">
-      <CategorySelector
-        categories={DIAGNOSIS_CATEGORY}
-        selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
-      />
-
       <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
           <Label className="text-sm">{t("date")}</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-8 md:h-9 w-full justify-start font-normal"
-                disabled={disabled || !!newDiagnosis.id}
-              >
-                {newDiagnosis.onset?.onset_datetime ? (
-                  new Date(
-                    newDiagnosis.onset.onset_datetime,
-                  ).toLocaleDateString()
-                ) : (
-                  <span className="text-muted-foreground">
-                    {t("select_date")}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-auto" align="start">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) =>
-                  setActiveTab(v as "absolute" | "relative")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="absolute">
-                    {t("absolute_date")}
-                  </TabsTrigger>
-                  <TabsTrigger value="relative">
-                    {t("relative_date")}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="absolute" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      newDiagnosis.onset?.onset_datetime
-                        ? new Date(newDiagnosis.onset.onset_datetime)
-                        : undefined
-                    }
-                    onSelect={(date: Date | undefined) => {
-                      setNewDiagnosis((prev) => ({
-                        ...prev,
-                        onset: { onset_datetime: dateQueryString(date) },
-                      }));
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="relative" className="p-0">
-                  <RelativeDatePicker
-                    value={
-                      newDiagnosis.onset?.onset_datetime
-                        ? new Date(newDiagnosis.onset.onset_datetime)
-                        : undefined
-                    }
-                    onDateChange={(date) =>
-                      setNewDiagnosis((prev) => ({
-                        ...prev,
-                        onset: { onset_datetime: dateQueryString(date) },
-                      }))
-                    }
-                  />
-                </TabsContent>
-              </Tabs>
-            </PopoverContent>
-          </Popover>
+          <CombinedDatePicker
+            value={
+              newDiagnosis.onset?.onset_datetime
+                ? new Date(newDiagnosis.onset.onset_datetime)
+                : undefined
+            }
+            onChange={(date) =>
+              setNewDiagnosis((prev) => ({
+                ...prev,
+                onset: { onset_datetime: dateQueryString(date) },
+              }))
+            }
+            dateFormat="P"
+            disabled={disabled || !!newDiagnosis.id}
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+          />
         </div>
         <div className="space-y-2">
           <Label className="text-sm">{t("status")}</Label>
@@ -482,7 +436,7 @@ export function DiagnosisQuestion({
       </div>
 
       <div className="flex justify-between space-x-2">
-        <Button variant="outline" onClick={handleBackToValueSet}>
+        <Button type="button" variant="outline" onClick={handleBackToValueSet}>
           {t("cancel")}
         </Button>
         <Button onClick={handleCategoryConfirm}>{t("add_diagnosis")}</Button>
@@ -495,7 +449,7 @@ export function DiagnosisQuestion({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {selectedCode && (
-            <Label className="text-sm font-medium">
+            <Label className="text-md font-medium">
               {selectedCode.display}
             </Label>
           )}
@@ -504,82 +458,25 @@ export function DiagnosisQuestion({
           {t("cancel")}
         </Button>
       </div>
-      <CategorySelector
-        categories={DIAGNOSIS_CATEGORY}
-        selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
-        gridCols="grid-cols-1 md:grid-cols-2"
-      />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label className="text-sm">{t("date")}</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-9 w-full justify-start font-normal"
-                disabled={disabled}
-              >
-                {newDiagnosis.onset?.onset_datetime ? (
-                  new Date(
-                    newDiagnosis.onset.onset_datetime,
-                  ).toLocaleDateString()
-                ) : (
-                  <span className="text-muted-foreground">
-                    {t("select_date")}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-auto" align="start">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) =>
-                  setActiveTab(v as "absolute" | "relative")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="absolute">
-                    {t("absolute_date")}
-                  </TabsTrigger>
-                  <TabsTrigger value="relative">
-                    {t("relative_date")}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="absolute" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      newDiagnosis.onset?.onset_datetime
-                        ? new Date(newDiagnosis.onset.onset_datetime)
-                        : undefined
-                    }
-                    onSelect={(date: Date | undefined) => {
-                      setNewDiagnosis((prev) => ({
-                        ...prev,
-                        onset: { onset_datetime: dateQueryString(date) },
-                      }));
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="relative" className="p-0">
-                  <RelativeDatePicker
-                    value={
-                      newDiagnosis.onset?.onset_datetime
-                        ? new Date(newDiagnosis.onset.onset_datetime)
-                        : undefined
-                    }
-                    onDateChange={(date) =>
-                      setNewDiagnosis((prev) => ({
-                        ...prev,
-                        onset: { onset_datetime: dateQueryString(date) },
-                      }))
-                    }
-                  />
-                </TabsContent>
-              </Tabs>
-            </PopoverContent>
-          </Popover>
+          <CombinedDatePicker
+            value={
+              newDiagnosis.onset?.onset_datetime
+                ? new Date(newDiagnosis.onset.onset_datetime)
+                : undefined
+            }
+            onChange={(date) =>
+              setNewDiagnosis((prev) => ({
+                ...prev,
+                onset: { onset_datetime: dateQueryString(date) },
+              }))
+            }
+            dateFormat="P"
+            disabled={disabled}
+            buttonClassName="h-9 w-full justify-start font-normal"
+          />
         </div>
         <div className="space-y-2">
           <Label className="text-sm">{t("status")}</Label>
@@ -650,16 +547,103 @@ export function DiagnosisQuestion({
 
   return (
     <div className="space-y-4">
+      <HistoricalRecordSelector<DiagnosisRequest>
+        structuredTypes={[
+          {
+            type: t("diagnoses"),
+            converter: convertToDiagnosisRequest,
+            displayFields: [
+              {
+                key: "code",
+                label: t("diagnosis"),
+                render: (code: Code) => code?.display || "-",
+              },
+              {
+                key: "clinical_status",
+                label: t("status"),
+                render: (status: string) => t(status),
+              },
+              {
+                key: "onset",
+                label: t("onset_date"),
+                render: (onset: Onset) =>
+                  onset?.onset_datetime
+                    ? format(new Date(onset.onset_datetime), "dd-MM-yyyy")
+                    : "",
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note: string | undefined) => note || "-",
+              },
+              {
+                key: "created_by",
+                label: t("recorded_by"),
+                render: (created_by) => formatName(created_by),
+              },
+            ],
+            queryKey: ["diagnoses_and_chronic_conditions", patientId],
+            queryFn: async (limit: number, offset: number) => {
+              const response = await query(diagnosisApi.listDiagnosis, {
+                pathParams: { patientId },
+                queryParams: {
+                  offset,
+                  limit,
+                  exclude_verification_status: "entered_in_error",
+                  ordering: "-created_date",
+                  category: "encounter_diagnosis,chronic_condition",
+                },
+              })({ signal: new AbortController().signal });
+              return response;
+            },
+          },
+        ]}
+        buttonLabel={t("diagnosis_history")}
+        onAddSelected={handleAddHistoricalDiagnoses}
+      />
       {sortedDiagnoses.length > 0 && (
         <div className="md:rounded-lg md:border">
-          <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
-            <div className="col-span-5">{t("diagnosis")}</div>
-            <div className="col-span-2 text-center">{t("date")}</div>
-            <div className="col-span-2 text-center">{t("status")}</div>
-            <div className="col-span-2 text-center">{t("verification")}</div>
-            <div className="col-span-1 text-center">{t("action")}</div>
-          </div>
-          <div className="md:divide-y md:divide-gray-200">
+          {/* Desktop View - Table */}
+          {!isMobile && (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50">
+                  <TableHead className="w-[30%]">{t("diagnosis")}</TableHead>
+                  <TableHead className="w-[15%] text-center">
+                    {t("date")}
+                  </TableHead>
+                  <TableHead className="w-[15%] text-center">
+                    {t("status")}
+                  </TableHead>
+                  <TableHead className="w-[15%] text-center">
+                    {t("verification")}
+                  </TableHead>
+                  <TableHead className="w-[5%] text-center">
+                    {t("action")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedDiagnoses.map((diagnosis, index) => (
+                  <DiagnosisTableRow
+                    key={
+                      diagnosis.id ||
+                      `diagnosis-${diagnosis.code.code}-${index}`
+                    }
+                    diagnosis={diagnosis}
+                    disabled={disabled}
+                    onUpdate={(updates) =>
+                      handleUpdateDiagnosis(index, updates)
+                    }
+                    onRemove={() => handleRemoveDiagnosis(index)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          )}
+
+          {/* Mobile View */}
+          <div className="md:hidden">
             {sortedDiagnoses.map((diagnosis, index) => (
               <DiagnosisItem
                 key={
@@ -669,8 +653,6 @@ export function DiagnosisQuestion({
                 disabled={disabled}
                 onUpdate={(updates) => handleUpdateDiagnosis(index, updates)}
                 onRemove={() => handleRemoveDiagnosis(index)}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
               />
             ))}
           </div>
@@ -685,7 +667,7 @@ export function DiagnosisQuestion({
             onSelect={handleCodeSelect}
             disabled={disabled}
           />
-          <CommandDrawer
+          <Sheet
             open={showCategorySelection}
             onOpenChange={setShowCategorySelection}
           >
@@ -702,12 +684,20 @@ export function DiagnosisQuestion({
                       className="h-8 w-8"
                       onClick={handleBackToValueSet}
                     >
-                      <CareIcon icon="l-times" className="h-5 w-5" />
+                      <CareIcon icon="l-times" className="size-5" />
                     </Button>
                   </div>
-                  <CommandList className="max-h-[100vh] overflow-y-auto pb-1">
-                    {diagnosisDetailsContent}
-                  </CommandList>
+                  <SheetContent
+                    side="bottom"
+                    className="h-[80vh] px-0 pt-2 pb-0 rounded-t-lg"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+                    <div className="mt-6 h-full">
+                      <CommandList className="max-h-[calc(80vh-2rem)] overflow-y-auto">
+                        {diagnosisDetailsContent}
+                      </CommandList>
+                    </div>
+                  </SheetContent>
                 </>
               ) : (
                 <>
@@ -721,23 +711,31 @@ export function DiagnosisQuestion({
                       className="h-8 w-8"
                       onClick={handleCloseDrawer}
                     >
-                      <CareIcon icon="l-times" className="h-5 w-5" />
+                      <CareIcon icon="l-times" className="size-5" />
                     </Button>
                   </div>
-                  <CommandList className="max-h-[70vh] overflow-y-auto pb-8">
-                    <ValueSetSelect
-                      system="system-condition-code"
-                      placeholder={t("add_another_diagnosis")}
-                      onSelect={handleCodeSelect}
-                      disabled={disabled}
-                      hideTrigger={true}
-                      controlledOpen={true}
-                    />
-                  </CommandList>
+                  <SheetContent
+                    side="bottom"
+                    className="h-[80vh] px-0 pt-2 pb-0 rounded-t-lg"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+                    <div className="mt-6 h-full">
+                      <CommandList className="max-h-[calc(80vh-2rem)] overflow-y-auto">
+                        <ValueSetSelect
+                          system="system-condition-code"
+                          placeholder={t("add_another_diagnosis")}
+                          onSelect={handleCodeSelect}
+                          disabled={disabled}
+                          hideTrigger={true}
+                          controlledOpen={true}
+                        />
+                      </CommandList>
+                    </div>
+                  </SheetContent>
                 </>
               )}
             </Command>
-          </CommandDrawer>
+          </Sheet>
         </>
       ) : showCategorySelection ? (
         desktopDiagnosisContent
@@ -758,225 +756,110 @@ interface DiagnosisItemProps {
   disabled?: boolean;
   onUpdate?: (diagnosis: Partial<DiagnosisRequest>) => void;
   onRemove?: () => void;
-  activeTab: "absolute" | "relative";
-  setActiveTab: Dispatch<SetStateAction<"absolute" | "relative">>;
 }
 
-const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
+const DiagnosisTableRow = ({
   diagnosis,
   disabled,
   onUpdate,
   onRemove,
-  activeTab,
-  setActiveTab,
-}) => {
+}: DiagnosisItemProps) => {
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
-  const [isOpen, setIsOpen] = useState(
-    Boolean(diagnosis.dirty) || !diagnosis.id,
-  );
-
+  const { t } = useTranslation();
   return (
-    <div
-      className={cn("group hover:bg-gray-50", {
-        "opacity-40 pointer-events-none":
-          diagnosis.verification_status === "entered_in_error",
-        "bg-yellow-50/50": diagnosis.category === "chronic_condition",
-      })}
-    >
-      {/* Desktop View */}
-      <div className="hidden md:grid md:grid-cols-12 md:items-center md:gap-4 py-1 px-2 hover:bg-gray-50">
-        <div className="flex items-center justify-between md:col-span-5">
+    <>
+      <TableRow
+        className={cn(
+          diagnosis.verification_status === "entered_in_error" &&
+            "opacity-40 pointer-events-none",
+        )}
+      >
+        <TableCell className="py-1">
           <div className="flex items-center space-x-2 min-w-0">
             <div
-              className="font-medium text-sm truncate flex-1"
+              className="font-medium text-sm truncate max-w-[12rem]"
               title={diagnosis.code.display}
             >
               {diagnosis.code.display}
             </div>
-            <div
-              className={cn(
-                "text-xs px-2 py-0.5 rounded-full shrink-0",
-                diagnosis.category === "chronic_condition"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-gray-100 text-gray-700",
-              )}
-            >
+            <div className="text-xs px-2 py-0.5 rounded-full shrink-0 bg-gray-100 text-gray-700">
               {t(`Diagnosis_${diagnosis.category}__title`)}
             </div>
           </div>
-          <div className="md:hidden shrink-0">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={disabled}
-                  className="size-8"
-                >
-                  <DotsVerticalIcon className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
-                  <Pencil2Icon className="size-4 mr-2" />
-                  {showNotes ? t("hide_notes") : t("add_notes")}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={onRemove}
-                >
-                  <MinusCircledIcon className="size-4 mr-2" />
-                  {t("remove_diagnosis")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-2 md:col-span-6 md:grid-cols-3 md:gap-4">
-          <div className="col-span-2 md:col-span-1">
-            <Label className="text-xs text-gray-500 md:hidden">
-              {t("date")}
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="h-8 md:h-9 w-full justify-start font-normal"
-                  disabled={disabled || !!diagnosis.id}
-                >
-                  {diagnosis.onset?.onset_datetime ? (
-                    new Date(
-                      diagnosis.onset.onset_datetime,
-                    ).toLocaleDateString()
-                  ) : (
-                    <span className="text-muted-foreground">
-                      {t("select_date")}
-                    </span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0 w-auto" align="start">
-                <Tabs
-                  value={activeTab}
-                  onValueChange={(v) =>
-                    setActiveTab(v as "absolute" | "relative")
-                  }
-                >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="absolute">
-                      {t("absolute_date")}
-                    </TabsTrigger>
-                    <TabsTrigger value="relative">
-                      {t("relative_date")}
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="absolute" className="p-0">
-                    <Calendar
-                      mode="single"
-                      selected={
-                        diagnosis.onset?.onset_datetime
-                          ? new Date(diagnosis.onset.onset_datetime)
-                          : undefined
-                      }
-                      onSelect={(date: Date | undefined) => {
-                        onUpdate?.({
-                          onset: { onset_datetime: dateQueryString(date) },
-                        });
-                      }}
-                    />
-                  </TabsContent>
-                  <TabsContent value="relative" className="p-0">
-                    <RelativeDatePicker
-                      value={
-                        diagnosis.onset?.onset_datetime
-                          ? new Date(diagnosis.onset.onset_datetime)
-                          : undefined
-                      }
-                      onDateChange={(date) =>
-                        onUpdate?.({
-                          onset: { onset_datetime: dateQueryString(date) },
-                        })
-                      }
-                    />
-                  </TabsContent>
-                </Tabs>
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500 md:hidden">
-              {t("status")}
-            </Label>
-            <Select
-              value={diagnosis.clinical_status}
-              onValueChange={(value) =>
-                onUpdate?.({
-                  clinical_status: value as DiagnosisRequest["clinical_status"],
-                })
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger className="h-8 md:h-9">
-                <SelectValue
-                  placeholder={
-                    <span className="text-gray-500">
-                      {t("diagnosis_status_placeholder")}
-                    </span>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
-                  <SelectItem
-                    key={status}
-                    value={status}
-                    className="capitalize"
-                  >
-                    {t(status)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500 md:hidden">
-              {t("verification")}
-            </Label>
-            <Select
-              value={diagnosis.verification_status}
-              onValueChange={(value) =>
-                onUpdate?.({
-                  verification_status:
-                    value as DiagnosisRequest["verification_status"],
-                })
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger className="h-8 md:h-9">
-                <SelectValue
-                  placeholder={
-                    <span className="text-gray-500">
-                      {t("diagnosis_verification_placeholder")}
-                    </span>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
-                  <SelectItem
-                    key={status}
-                    value={status}
-                    className="capitalize"
-                  >
-                    {t(status)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="hidden md:block md:col-span-1">
+        </TableCell>
+        <TableCell className="py-1">
+          <CombinedDatePicker
+            value={
+              diagnosis.onset?.onset_datetime
+                ? new Date(diagnosis.onset.onset_datetime)
+                : undefined
+            }
+            onChange={(date) =>
+              onUpdate?.({ onset: { onset_datetime: dateQueryString(date) } })
+            }
+            dateFormat="P"
+            disabled={disabled || !!diagnosis.id}
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+          />
+        </TableCell>
+        <TableCell className="py-1">
+          <Select
+            value={diagnosis.clinical_status}
+            onValueChange={(value) =>
+              onUpdate?.({
+                clinical_status: value as DiagnosisRequest["clinical_status"],
+              })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-8 md:h-9">
+              <SelectValue
+                placeholder={
+                  <span className="text-gray-500">
+                    {t("diagnosis_status_placeholder")}
+                  </span>
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
+                <SelectItem key={status} value={status} className="capitalize">
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </TableCell>
+        <TableCell className="py-1">
+          <Select
+            value={diagnosis.verification_status}
+            onValueChange={(value) =>
+              onUpdate?.({
+                verification_status:
+                  value as DiagnosisRequest["verification_status"],
+              })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-8 md:h-9">
+              <SelectValue
+                placeholder={
+                  <span className="text-gray-500">
+                    {t("diagnosis_verification_placeholder")}
+                  </span>
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
+                <SelectItem key={status} value={status} className="capitalize">
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </TableCell>
+        <TableCell className="py-1 text-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -991,7 +874,11 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
                 <Pencil2Icon className="size-4 mr-2" />
-                {showNotes ? t("hide_notes") : t("add_notes")}
+                {showNotes
+                  ? t("hide_notes")
+                  : diagnosis.note
+                    ? t("show_notes")
+                    : t("add_notes")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -1003,313 +890,230 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-      </div>
-
-      {/* Mobile View - Card Layout */}
-      <div className="md:hidden rounded-lg">
-        <Card
-          className={cn("mb-2 rounded-lg", {
-            "border border-primary-500": isOpen,
-            "border-0 shadow-none": !isOpen,
-          })}
-        >
-          <Collapsible
-            open={isOpen}
-            onOpenChange={setIsOpen}
-            key={diagnosis.id || `diagnosis-${diagnosis.code.code}`}
-          >
-            <CollapsibleTrigger asChild>
-              <CardHeader
-                className={cn(
-                  "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
-                  {
-                    "bg-gray-200 border border-gray-300": !isOpen,
-                  },
-                )}
-              >
-                <div className="flex flex-col space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-start gap-1">
-                        <CardTitle
-                          className="text-base text-gray-950 break-words"
-                          title={diagnosis.code.display}
-                        >
-                          <span className="mr-2">{diagnosis.code.display}</span>
-                          <div
-                            className={cn(
-                              "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
-                              diagnosis.category === "chronic_condition"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-gray-100 text-gray-700",
-                            )}
-                          >
-                            {t(`Diagnosis_${diagnosis.category}__title`)}
-                          </div>
-                        </CardTitle>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 ml-2 shrink-0">
-                      {isOpen && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={
-                            disabled ||
-                            diagnosis.verification_status === "entered_in_error"
-                          }
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onRemove?.();
-                          }}
-                          className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
-                        >
-                          <MinusCircledIcon className="h-5 w-5" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 border border-gray-400 bg-white shadow p-4"
-                      >
-                        {isOpen ? (
-                          <ChevronsDownUp className="h-5 w-5" />
-                        ) : (
-                          <ChevronsUpDown className="h-5 w-5" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                  {!isOpen && (
-                    <div className="text-sm text-gray-500">
-                      {t("diagnosed_on")}{" "}
-                      {diagnosis.onset?.onset_datetime
-                        ? format(
-                            new Date(diagnosis.onset.onset_datetime),
-                            "MMMM d, yyyy",
-                          )
-                        : ""}
-                      {" · "}
-                      {t(diagnosis.clinical_status)}
-                      {" · "}
-                      {t(diagnosis.verification_status)}
-                    </div>
-                  )}
-                </div>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
-                <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
-                    {t("diagnosis")} {t("date")}
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="h-8 md:h-9 w-full justify-start font-normal"
-                        disabled={disabled || !!diagnosis.id}
-                      >
-                        {diagnosis.onset?.onset_datetime ? (
-                          new Date(
-                            diagnosis.onset.onset_datetime,
-                          ).toLocaleDateString()
-                        ) : (
-                          <span className="text-muted-foreground">
-                            {t("select_date")}
-                          </span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0 w-auto" align="start">
-                      <Tabs
-                        value={activeTab}
-                        onValueChange={(v) =>
-                          setActiveTab(v as "absolute" | "relative")
-                        }
-                      >
-                        <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="absolute">
-                            {t("absolute_date")}
-                          </TabsTrigger>
-                          <TabsTrigger value="relative">
-                            {t("relative_date")}
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="absolute" className="p-0">
-                          <Calendar
-                            mode="single"
-                            selected={
-                              diagnosis.onset?.onset_datetime
-                                ? new Date(diagnosis.onset.onset_datetime)
-                                : undefined
-                            }
-                            onSelect={(date: Date | undefined) => {
-                              onUpdate?.({
-                                onset: {
-                                  onset_datetime: dateQueryString(date),
-                                },
-                              });
-                            }}
-                          />
-                        </TabsContent>
-                        <TabsContent value="relative" className="p-0">
-                          <RelativeDatePicker
-                            value={
-                              diagnosis.onset?.onset_datetime
-                                ? new Date(diagnosis.onset.onset_datetime)
-                                : undefined
-                            }
-                            onDateChange={(date) =>
-                              onUpdate?.({
-                                onset: {
-                                  onset_datetime: dateQueryString(date),
-                                },
-                              })
-                            }
-                          />
-                        </TabsContent>
-                      </Tabs>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
-                    {t("status")}
-                  </div>
-                  <Select
-                    value={diagnosis.clinical_status}
-                    onValueChange={(value) =>
-                      onUpdate?.({
-                        clinical_status:
-                          value as DiagnosisRequest["clinical_status"],
-                      })
-                    }
-                    disabled={disabled}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
-                        <SelectItem
-                          key={status}
-                          value={status}
-                          className="capitalize"
-                        >
-                          {t(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
-                    {t("verification")}
-                  </div>
-                  <Select
-                    value={diagnosis.verification_status}
-                    onValueChange={(value) =>
-                      onUpdate?.({
-                        verification_status:
-                          value as DiagnosisRequest["verification_status"],
-                      })
-                    }
-                    disabled={disabled}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
-                        <SelectItem
-                          key={status}
-                          value={status}
-                          className="capitalize"
-                        >
-                          {t(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
-                    {t("notes")}
-                  </div>
-                  <Input
-                    type="text"
-                    placeholder={t("add_notes_about_diagnosis")}
-                    value={diagnosis.note || ""}
-                    onChange={(e) => onUpdate?.({ note: e.target.value })}
-                    disabled={disabled}
-                  />
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
-      </div>
-
-      {/* Notes for Desktop */}
+        </TableCell>
+      </TableRow>
       {showNotes && (
-        <div className="hidden md:block px-3 pb-3">
-          <Input
-            type="text"
-            placeholder={t("add_notes_about_diagnosis")}
-            value={diagnosis.note || ""}
-            onChange={(e) => onUpdate?.({ note: e.target.value })}
-            disabled={disabled}
-          />
-        </div>
+        <TableRow>
+          <TableCell colSpan={5} className="px-4 py-2">
+            <Input
+              type="text"
+              placeholder={t("add_notes_about_diagnosis")}
+              value={diagnosis.note || ""}
+              onChange={(e) => onUpdate?.({ note: e.target.value })}
+              disabled={disabled}
+            />
+          </TableCell>
+        </TableRow>
       )}
-    </div>
+    </>
   );
 };
 
-function CategorySelector({
-  categories,
-  selectedCategory,
-  onCategorySelect,
-  gridCols = "grid-cols-1",
-}: {
-  categories: readonly string[];
-  selectedCategory: DiagnosisRequest["category"];
-  onCategorySelect: Dispatch<SetStateAction<DiagnosisRequest["category"]>>;
-  gridCols?: string;
-}) {
+// Keep the original DiagnosisItem component for mobile view
+const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
+  diagnosis,
+  disabled,
+  onUpdate,
+  onRemove,
+}) => {
+  const [isOpen, setIsOpen] = useState(
+    Boolean(diagnosis.dirty) || !diagnosis.id,
+  );
+  const { t } = useTranslation();
   return (
-    <div className={`grid ${gridCols} gap-4`}>
-      {categories.map((category) => (
-        <div
-          key={category}
-          className={cn(
-            "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
-            selectedCategory === category
-              ? "border-primary bg-primary/5"
-              : "border-border hover:border-primary/50",
-          )}
-          onClick={() =>
-            onCategorySelect(category as DiagnosisRequest["category"])
-          }
+    <div
+      className={cn("group hover:bg-gray-50", {
+        "opacity-40 pointer-events-none":
+          diagnosis.verification_status === "entered_in_error",
+      })}
+    >
+      {/* Mobile View - Card Layout */}
+      <Card
+        className={cn("mb-2 rounded-lg", {
+          "border border-primary-500": isOpen,
+          "border-0 shadow-none": !isOpen,
+        })}
+      >
+        <Collapsible
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          key={diagnosis.id || `diagnosis-${diagnosis.code.code}`}
         >
-          <div className="flex items-center space-x-2">
-            <div className="flex-1">
-              <div className="font-medium">
-                {t(`Diagnosis_${category}__title`)}
+          <CollapsibleTrigger asChild>
+            <CardHeader
+              className={cn(
+                "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
+                {
+                  "bg-gray-200 border border-gray-300": !isOpen,
+                },
+              )}
+            >
+              <div className="flex flex-col space-y-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-start gap-1">
+                      <CardTitle
+                        className="text-base text-gray-950 break-words"
+                        title={diagnosis.code.display}
+                      >
+                        <span className="mr-2">{diagnosis.code.display}</span>
+                        <div
+                          className={cn(
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-700",
+                          )}
+                        >
+                          {t(`Diagnosis_${diagnosis.category}__title`)}
+                        </div>
+                      </CardTitle>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 ml-2 shrink-0">
+                    {isOpen && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={
+                          disabled ||
+                          diagnosis.verification_status === "entered_in_error"
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemove?.();
+                        }}
+                        className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
+                      >
+                        <MinusCircledIcon className="h-5 w-5" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10 border border-gray-400 bg-white shadow p-4"
+                    >
+                      {isOpen ? (
+                        <ChevronsDownUp className="h-5 w-5" />
+                      ) : (
+                        <ChevronsUpDown className="h-5 w-5" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                {!isOpen && (
+                  <div className="text-sm text-gray-500">
+                    {t("diagnosed_on")}{" "}
+                    {diagnosis.onset?.onset_datetime
+                      ? format(
+                          new Date(diagnosis.onset.onset_datetime),
+                          "MMMM d, yyyy",
+                        )
+                      : ""}
+                    {" · "}
+                    {t(diagnosis.clinical_status)}
+                    {" · "}
+                    {t(diagnosis.verification_status)}
+                  </div>
+                )}
               </div>
-              <div className="flex-1 text-sm text-muted-foreground">
-                {t(`Diagnosis_${category}__description`)}
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
+              <div>
+                <div className="block text-sm font-medium text-gray-500 mb-1">
+                  {t("diagnosis")} {t("date")}
+                </div>
+                <CombinedDatePicker
+                  value={
+                    diagnosis.onset?.onset_datetime
+                      ? new Date(diagnosis.onset.onset_datetime)
+                      : undefined
+                  }
+                  onChange={(date) =>
+                    onUpdate?.({
+                      onset: { onset_datetime: dateQueryString(date) },
+                    })
+                  }
+                  dateFormat="P"
+                  disabled={disabled || !!diagnosis.id}
+                  buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+                />
               </div>
-            </div>
-            {selectedCategory === category && (
-              <div className="h-4 w-4 rounded-full bg-primary" />
-            )}
-          </div>
-        </div>
-      ))}
+              <div>
+                <div className="block text-sm font-medium text-gray-500 mb-1">
+                  {t("status")}
+                </div>
+                <Select
+                  value={diagnosis.clinical_status}
+                  onValueChange={(value) =>
+                    onUpdate?.({
+                      clinical_status:
+                        value as DiagnosisRequest["clinical_status"],
+                    })
+                  }
+                  disabled={disabled}
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
+                      <SelectItem
+                        key={status}
+                        value={status}
+                        className="capitalize"
+                      >
+                        {t(status)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <div className="block text-sm font-medium text-gray-500 mb-1">
+                  {t("verification")}
+                </div>
+                <Select
+                  value={diagnosis.verification_status}
+                  onValueChange={(value) =>
+                    onUpdate?.({
+                      verification_status:
+                        value as DiagnosisRequest["verification_status"],
+                    })
+                  }
+                  disabled={disabled}
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
+                      <SelectItem
+                        key={status}
+                        value={status}
+                        className="capitalize"
+                      >
+                        {t(status)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <div className="block text-sm font-medium text-gray-500 mb-1">
+                  {t("notes")}
+                </div>
+                <Input
+                  type="text"
+                  placeholder={t("add_notes_about_diagnosis")}
+                  value={diagnosis.note || ""}
+                  onChange={(e) => onUpdate?.({ note: e.target.value })}
+                  disabled={disabled}
+                />
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
     </div>
   );
-}
+};

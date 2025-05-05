@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSetAtom } from "jotai";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 
@@ -16,6 +17,7 @@ import routes, {
 } from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { userAtom } from "@/atoms/user-atom";
 import authApi from "@/types/auth/authApi";
 import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
 
@@ -57,6 +59,10 @@ export default function AuthUserProvider({
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
+  const setUser = useSetAtom(userAtom);
+  useEffect(() => {
+    setUser(user);
+  }, [user, setUser]);
   const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
 
   const tokenRefreshQuery = useQuery({

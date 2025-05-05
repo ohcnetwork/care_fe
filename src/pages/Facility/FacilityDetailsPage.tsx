@@ -12,14 +12,12 @@ import { Avatar } from "@/components/Common/Avatar";
 import { LoginHeader } from "@/components/Common/LoginHeader";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 import { FacilityModel } from "@/components/Facility/models";
-import { UserAssignedModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
@@ -42,9 +40,7 @@ export function FacilityDetailsPage({ id }: Props) {
     limit: 18,
   });
 
-  const { data: docResponse, error: docError } = useQuery<
-    PaginatedResponse<UserAssignedModel>
-  >({
+  const { data: docResponse, error: docError } = useQuery({
     queryKey: [routes.getScheduleAbleFacilityUsers, id],
     queryFn: query(routes.getScheduleAbleFacilityUsers, {
       pathParams: { facility_id: id },

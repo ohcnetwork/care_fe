@@ -9,6 +9,11 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  ExpandableText,
+  ExpandableTextContent,
+  ExpandableTextExpandButton,
+} from "@/components/ui/expandable-text";
+import {
   Table,
   TableBody,
   TableCell,
@@ -71,9 +76,7 @@ export default function DeviceServiceHistory({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>{t("service_history")}</CardTitle>
-        </div>
+        <CardTitle>{t("service_history")}</CardTitle>
         <AddServiceHistorySheet
           facilityId={facilityId}
           deviceId={deviceId}
@@ -106,10 +109,17 @@ export default function DeviceServiceHistory({
                       <TableCell className="font-medium">
                         {format(new Date(service.serviced_on), "PPP")}
                       </TableCell>
-                      <TableCell className="max-w-md truncate">
-                        {service.note}
+                      <TableCell className="max-w-md whitespace-normal">
+                        <ExpandableText>
+                          <ExpandableTextContent>
+                            {service.note}
+                          </ExpandableTextContent>
+                          <ExpandableTextExpandButton>
+                            {t("read_more")}
+                          </ExpandableTextExpandButton>
+                        </ExpandableText>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right ">
                         <EditServiceHistorySheet
                           facilityId={facilityId}
                           deviceId={deviceId}

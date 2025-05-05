@@ -6,13 +6,13 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Loading from "@/components/Common/Loading";
-import { UserModel } from "@/components/Users/models";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import { UserBase } from "@/types/user/user";
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
   const { appointmentId } = props;
@@ -21,7 +21,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
 
-  const userData: UserModel = JSON.parse(localStorage.getItem("user") ?? "{}");
+  const userData: UserBase = JSON.parse(localStorage.getItem("user") ?? "{}");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["appointment", tokenData.phoneNumber],

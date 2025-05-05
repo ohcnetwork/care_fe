@@ -79,10 +79,10 @@ export default function UserForm({
             .string()
             .min(4, t("field_required"))
             .max(16, t("username_not_valid"))
-            .regex(/^[a-z0-9._-]*$/, t("username_not_valid"))
+            .regex(/^[a-z0-9_-]*$/, t("username_not_valid"))
             .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_not_valid"))
             .refine(
-              (val) => !val.match(/(?:[._-]{2,})/),
+              (val) => !val.match(/(?:[_-]{2,})/),
               t("username_not_valid"),
             ),
       password_setup_method: z.enum(["immediate", "email"]).optional(),
@@ -138,7 +138,7 @@ export default function UserForm({
 
   type UserFormValues = z.infer<typeof userFormSchema>;
 
-  const form = useForm<UserFormValues>({
+  const form = useForm({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       user_type: "nurse",
@@ -304,6 +304,14 @@ export default function UserForm({
     setSelectedLevels(levels);
   }, [org, organizationId]);
 
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (isEditMode && userData && "geo_organization" in userData) {
+      levels.push(userData.geo_organization as Organization);
+      setSelectedLevels(levels);
+    }
+  }, [org, userData, isEditMode]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -313,7 +321,7 @@ export default function UserForm({
             name="user_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("user_type")}</FormLabel>
+                <FormLabel aria-required>{t("user_type")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -339,7 +347,7 @@ export default function UserForm({
           />
         )}
 
-        <div className="md:flex gap-2 grid grid-cols-2">
+        <div className="md:flex gap-2 grid grid-cols-2 items-start">
           <FormField
             control={form.control}
             name="prefix"
@@ -368,7 +376,7 @@ export default function UserForm({
             name="first_name"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel required>{t("first_name")}</FormLabel>
+                <FormLabel aria-required>{t("first_name")}</FormLabel>
                 <FormControl>
                   <Input
                     data-cy="first-name-input"
@@ -385,7 +393,7 @@ export default function UserForm({
             name="last_name"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel required>{t("last_name")}</FormLabel>
+                <FormLabel aria-required>{t("last_name")}</FormLabel>
                 <FormControl>
                   <Input
                     data-cy="last-name-input"
@@ -422,7 +430,7 @@ export default function UserForm({
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("username")}</FormLabel>
+                  <FormLabel aria-required>{t("username")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
@@ -492,7 +500,7 @@ export default function UserForm({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("email")}</FormLabel>
+                    <FormLabel aria-required>{t("email")}</FormLabel>
                     <FormControl>
                       <Input
                         data-cy="email-input"
@@ -538,7 +546,7 @@ export default function UserForm({
                             htmlFor="immediate"
                             className="text-base font-medium cursor-pointer flex items-center"
                           >
-                            <Lock className="size-4 mr-2" />
+                            <Lock className="size-4" />
                             {t("set_password_now")}
                           </Label>
                           <p className="text-sm text-muted-foreground">
@@ -564,7 +572,7 @@ export default function UserForm({
                             htmlFor="email"
                             className="text-base font-medium cursor-pointer flex items-center"
                           >
-                            <Mail className="size-4 mr-2" />
+                            <Mail className="size-4" />
                             {t("send_email_invitation")}
                           </Label>
                           <p className="text-sm text-muted-foreground">
@@ -580,13 +588,13 @@ export default function UserForm({
             />
 
             {form.watch("password_setup_method") === "immediate" && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
                 <FormField
                   control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>{t("password")}</FormLabel>
+                      <FormLabel aria-required>{t("password")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <PasswordInput
@@ -638,7 +646,9 @@ export default function UserForm({
                   name="c_password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>{t("confirm_password")}</FormLabel>
+                      <FormLabel aria-required>
+                        {t("confirm_password")}
+                      </FormLabel>
                       <FormControl>
                         <PasswordInput
                           data-cy="confirm-password-input"
@@ -655,13 +665,13 @@ export default function UserForm({
           </>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
           <FormField
             control={form.control}
             name="phone_number"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("phone_number")}</FormLabel>
+                <FormLabel aria-required>{t("phone_number")}</FormLabel>
                 <FormControl>
                   <PhoneInput
                     data-cy="phone-number-input"
@@ -679,7 +689,7 @@ export default function UserForm({
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("gender")}</FormLabel>
+                <FormLabel aria-required>{t("gender")}</FormLabel>
                 <Select
                   {...field}
                   onValueChange={field.onChange}
@@ -772,28 +782,28 @@ export default function UserForm({
             </div>
           </>
         )} */}
-        {!isEditMode && (
-          <FormField
-            control={form.control}
-            name="geo_organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <GovtOrganizationSelector
-                    {...field}
-                    value={form.watch("geo_organization")}
-                    selected={selectedLevels}
-                    onChange={(value) =>
-                      form.setValue("geo_organization", value)
-                    }
-                    required={false}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="geo_organization"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <GovtOrganizationSelector
+                  {...field}
+                  value={form.watch("geo_organization")}
+                  selected={selectedLevels}
+                  onChange={(value) =>
+                    form.setValue("geo_organization", value, {
+                      shouldDirty: true,
+                    })
+                  }
+                  required={false}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button
           type="submit"

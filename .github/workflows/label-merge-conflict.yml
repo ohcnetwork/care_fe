@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: prince-chrismc/label-merge-conflicts-action@v3
         with:
-          conflict_label_name: "merge conflict"
+          conflict_label_name: "Merge Conflict"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           max_retries: 5
           wait_ms: 15000

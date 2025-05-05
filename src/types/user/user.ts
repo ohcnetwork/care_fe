@@ -16,6 +16,7 @@ export type UserBase = {
   suffix: string | null;
   prefix: string | null;
   mfa_enabled: boolean;
+  deleted: boolean;
 };
 
 export type CreateUserModel = {

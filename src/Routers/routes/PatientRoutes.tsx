@@ -9,6 +9,7 @@ import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import VerifyPatient from "@/pages/Patients/VerifyPatient";
 
@@ -36,6 +37,15 @@ const PatientRoutes: AppRoutes = {
       locationId={locationId}
     />
   ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId":
+    ({ facilityId, patientId, encounterId, consentId }) => (
+      <ConsentDetailPage
+        facilityId={facilityId}
+        patientId={patientId}
+        encounterId={encounterId}
+        consentId={consentId}
+      />
+    ),
   "/facility/:facilityId/patients/verify": ({ facilityId }) => (
     <VerifyPatient facilityId={facilityId} />
   ),

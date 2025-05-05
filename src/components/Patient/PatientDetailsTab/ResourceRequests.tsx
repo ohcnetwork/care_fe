@@ -66,7 +66,11 @@ export const ResourceRequests = (props: PatientProps) => {
           {t("resource_requests")}
         </h2>
         {facilityId && (
-          <Button variant="outline_primary" asChild>
+          <Button
+            variant="outline_primary"
+            asChild
+            data-cy="create-request-button"
+          >
             <Link
               href={`/facility/${facilityId}/resource/new?related_patient=${patientData.id}`}
             >
@@ -78,7 +82,7 @@ export const ResourceRequests = (props: PatientProps) => {
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white">
-        <Table>
+        <Table data-cy="resource-requests-table">
           <TableHeader>
             <TableRow>
               <TableHead>{t("resource_type")}</TableHead>
@@ -97,15 +101,15 @@ export const ResourceRequests = (props: PatientProps) => {
                 </TableCell>
               </TableRow>
             ) : resourceRequests?.results?.length ? (
-              resourceRequests.results.map((request) => (
-                <TableRow key={request.id}>
+              resourceRequests.results.map((request, index) => (
+                <TableRow key={index}>
                   <TableCell className="font-medium">
                     {RESOURCE_CATEGORY_CHOICES.find(
                       (item) => item.id === request.category,
                     )?.text || "--"}
                   </TableCell>
                   <TableCell>{request.title}</TableCell>
-                  <TableCell>{getStatusBadge(request.status)}</TableCell>
+                  <TableCell>{getStatusBadge(t(request.status))}</TableCell>
                   <TableCell>{formatDateTime(request.created_date)}</TableCell>
                   <TableCell>{formatDateTime(request.modified_date)}</TableCell>
                   <TableCell className="text-right">

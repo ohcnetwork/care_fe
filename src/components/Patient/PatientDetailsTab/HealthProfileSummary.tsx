@@ -1,5 +1,5 @@
-import { t } from "i18next";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
@@ -15,9 +15,13 @@ import { usePermissions } from "@/context/PermissionContext";
 
 import { PatientProps } from ".";
 
-export const HealthProfileSummary = (props: PatientProps) => {
-  const { facilityId, patientData } = props;
+export const HealthProfileSummary = ({
+  facilityId,
+  patientData,
+}: PatientProps) => {
   const patientId = patientData.id;
+
+  const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const { canViewClinicalData } = getPermissions(
     hasPermission,

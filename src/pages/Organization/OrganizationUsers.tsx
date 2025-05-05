@@ -1,26 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { Avatar } from "@/components/Common/Avatar";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
-import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
+import { UserCard } from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -177,76 +171,24 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                   </Card>
                 ) : (
                   users?.results?.map((userRole) => (
-                    <Card key={userRole.id} className="h-full">
-                      <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
-                        <div className="flex items-start gap-3">
-                          <Avatar
-                            name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                            imageUrl={userRole.user.profile_picture_url}
-                            className="size-12 sm:size-14 text-xl sm:text-2xl shrink-0"
+                    <UserCard
+                      key={userRole.user.id}
+                      user={userRole.user}
+                      roleName={userRole.role.name}
+                      actions={
+                        canManageOrganizationUsers && (
+                          <EditUserRoleSheet
+                            organizationId={id}
+                            userRole={userRole}
+                            trigger={
+                              <Button variant="outline" size="sm">
+                                <span>{t("edit_role")}</span>
+                              </Button>
+                            }
                           />
-
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-start justify-between">
-                                <h1 className="text-base font-bold break-words pr-2">
-                                  {formatName(userRole.user)}
-                                </h1>
-                                <span className="text-sm text-gray-500">
-                                  <UserStatusIndicator user={userRole.user} />
-                                </span>
-                              </div>
-                              <span className="text-sm text-gray-500 mr-2 break-words">
-                                {userRole.user.username}
-                              </span>
-                            </div>
-                            <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
-                              <div>
-                                <div className="text-gray-500">{t("role")}</div>
-                                <div className="font-medium truncate">
-                                  {userRole.role.name ?? "-"}
-                                </div>
-                              </div>
-                              <div>
-                                <div className="text-gray-500">
-                                  {t("phone_number")}
-                                </div>
-                                <div className="font-medium truncate">
-                                  {userRole.user.phone_number
-                                    ? formatPhoneNumberIntl(
-                                        userRole.user.phone_number,
-                                      )
-                                    : "-"}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
-                          {canManageOrganizationUsers && (
-                            <EditUserRoleSheet
-                              organizationId={id}
-                              userRole={userRole}
-                              trigger={
-                                <Button variant="outline" size="sm">
-                                  <span>{t("edit_role")}</span>
-                                </Button>
-                              }
-                            />
-                          )}
-                          <Button asChild variant="outline" size="sm">
-                            <Link href={`/users/${userRole.user.username}`}>
-                              <CareIcon
-                                icon="l-arrow-up-right"
-                                className="text-lg mr-1"
-                              />
-                              <span>{t("see_details")}</span>
-                            </Link>
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        )
+                      }
+                    />
                   ))
                 )}
               </div>

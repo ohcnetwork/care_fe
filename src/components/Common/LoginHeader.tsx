@@ -42,7 +42,7 @@ export const LoginHeader = () => {
             className="text-sm font-medium hover:bg-gray-100 px-6"
             onClick={() => navigate("/patient/home")}
           >
-            {t("dashboard")}
+            {t("home")}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

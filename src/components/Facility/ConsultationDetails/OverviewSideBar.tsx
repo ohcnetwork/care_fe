@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -14,6 +14,7 @@ interface Props {
 }
 
 export default function SideOverview(props: Props) {
+  const { t } = useTranslation();
   return (
     <div className="mt-4 flex w-full h-auto flex-col gap-4 text-sm">
       <Tabs defaultValue="quick_access" className="w-full">

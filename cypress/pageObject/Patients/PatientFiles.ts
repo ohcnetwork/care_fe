@@ -114,11 +114,6 @@ export class PatientFiles {
     return this;
   }
 
-  verifyMultipleFileUploadSuccess(message: string) {
-    cy.verifyNotification(message);
-    return this;
-  }
-
   clickRecordAudioButton() {
     cy.get('[data-cy="record-audio-button"]').click();
     return this;
@@ -159,7 +154,11 @@ export class PatientFiles {
   }
 
   clickFileDetailsButton() {
-    cy.get(`[data-cy="file-options-button"]`).first().click({ force: true });
+    cy.get(`[data-cy="file-options-button"]`)
+      .filter(":visible")
+      .first()
+      .should("be.enabled")
+      .click();
     return this;
   }
 
@@ -209,29 +208,17 @@ export class PatientFiles {
 
   filterActiveFiles() {
     this.interceptFilterRequest();
+    cy.wait(200);
     cy.verifyAndClickElement('[data-cy="files-filter-button"]', "Filter");
     cy.verifyAndClickElement('[data-cy="active-files-button"]', "Active Files");
     this.verifyFilterApiCall();
+    cy.wait(100);
     return this;
   }
 
   closeFilePreview() {
-    cy.verifyAndClickElement("[data-cy='file-preview-close']", "Close");
-    return this;
-  }
-
-  openCamera() {
-    cy.get('[data-cy="open-camera-button"]').click();
-    return this;
-  }
-
-  captureImage() {
-    cy.verifyAndClickElement('[data-cy="capture-button"]', "Capture");
-    return this;
-  }
-
-  clickSubmit() {
-    cy.verifyAndClickElement('[data-cy="capture-submit-button"]', "Submit");
+    cy.get('[data-cy="file-preview-download"]').should("be.visible");
+    cy.contains("button", "Close").click();
     return this;
   }
 

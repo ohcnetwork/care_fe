@@ -1,5 +1,3 @@
-"use client";
-
 import {
   differenceInDays,
   differenceInMonths,
@@ -11,7 +9,7 @@ import {
   subWeeks,
   subYears,
 } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 
@@ -77,7 +75,6 @@ export function RelativeDatePicker({
 }: RelativeDatePickerProps) {
   const [selected, setSelected] = useState(() => {
     const initialState = computeTimeUnits(value);
-    console.log(initialState);
     return {
       unit: initialState.unit,
       value: initialState.value,
@@ -86,6 +83,21 @@ export function RelativeDatePicker({
   const [resultDate, setResultDate] = useState<Date>(new Date());
 
   const timeUnits: TimeUnit[] = ["days", "weeks", "months", "years"];
+
+  const maxValue = useMemo(() => {
+    switch (selected.unit) {
+      case "days":
+        return 31;
+      case "weeks":
+        return 12;
+      case "months":
+        return 36;
+      case "years":
+        return 60;
+      default:
+        return 31;
+    }
+  }, [selected.unit]);
 
   // Update result date when value or unit changes
   useEffect(() => {
@@ -111,7 +123,14 @@ export function RelativeDatePicker({
 
     setResultDate(newDate);
     onDateChange(newDate);
-  }, [selected, onDateChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
+
+  useEffect(() => {
+    if (selected.value > maxValue) {
+      setSelected((prev) => ({ ...prev, value: maxValue }));
+    }
+  }, [selected.unit, maxValue]);
 
   const handleUnitChange = (newUnit: TimeUnit) => {
     setSelected((prev) => ({ ...prev, unit: newUnit }));
@@ -137,11 +156,13 @@ export function RelativeDatePicker({
               <SelectValue placeholder="Select a number" />
             </SelectTrigger>
             <SelectContent>
-              {Array.from({ length: 31 }, (_, i) => i + 1).map((timeUnit) => (
-                <SelectItem key={timeUnit} value={timeUnit.toString()}>
-                  {timeUnit}
-                </SelectItem>
-              ))}
+              {Array.from({ length: maxValue }, (_, i) => i + 1).map(
+                (timeUnit) => (
+                  <SelectItem key={timeUnit} value={timeUnit.toString()}>
+                    {timeUnit}
+                  </SelectItem>
+                ),
+              )}
             </SelectContent>
           </Select>
           {timeUnits.map((timeUnit) => (

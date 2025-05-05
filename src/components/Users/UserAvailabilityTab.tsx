@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { ExternalLinkIcon } from "lucide-react";
 import { Link, usePathParams, useQueryParams } from "raviger";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -34,6 +35,7 @@ import {
   humanizeStrings,
 } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { useAvailabilityHeatmap } from "@/pages/Appointments/utils";
 import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
@@ -46,13 +48,12 @@ import {
   isDateInRange,
 } from "@/pages/Scheduling/utils";
 import {
-  Appointment,
-  AppointmentNonCancelledStatuses,
   AvailabilityDateTime,
   ScheduleException,
   ScheduleTemplate,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { UserBase } from "@/types/user/user";
 
 type AvailabilityTabQueryParams = {
   tab?: "schedule" | "exceptions" | null;
@@ -92,36 +93,6 @@ export default function UserAvailabilityTab({
     enabled: !!facilityId && canViewSchedule,
   });
 
-  const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
-  const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
-  const appointmentsPageLink = `/facility/${facilityId}/appointments/?practitioner=${user.username}&limit=15`;
-
-  const { data: appoinmentsData } = useQuery({
-    queryKey: ["appointments", facilityId, user.id, monthStart],
-    queryFn: query(scheduleApis.appointments.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        limit: 100,
-        user: user.id,
-        date_from: dateQueryString(monthStart),
-        date_to: dateQueryString(monthEnd),
-      },
-    }),
-  });
-
-  const appoinments = appoinmentsData?.results.filter((appointment) =>
-    AppointmentNonCancelledStatuses.includes(appointment.status),
-  );
-
-  const getAppointmentsForDate = useCallback(
-    (date: Date) => {
-      return appoinments?.filter((appointment) =>
-        dayjs(appointment.token_slot.start_datetime).isSame(dayjs(date), "day"),
-      );
-    },
-    [appoinments],
-  );
-
   const { data: isSchedulableResource } = useIsUserSchedulableResource(
     facilityId,
     user.id,
@@ -139,7 +110,6 @@ export default function UserAvailabilityTab({
         onMonthChange={setMonth}
         renderDay={(date: Date) => {
           const isToday = date.toDateString() === new Date().toDateString();
-          const currentDayAppointments = getAppointmentsForDate(date) ?? [];
 
           // TODO: handle for "Closed" schedule type once we have it...
           const templates = templatesQuery.data?.results.filter(
@@ -214,8 +184,7 @@ export default function UserAvailabilityTab({
                 templates={templates}
                 unavailableExceptions={unavailableExceptions}
                 setQParams={setQParams}
-                currentDayAppointments={currentDayAppointments}
-                appointmentsPageLink={appointmentsPageLink}
+                user={user}
               />
             </Popover>
           );
@@ -299,17 +268,22 @@ function DayDetailsPopover({
   templates,
   unavailableExceptions,
   setQParams,
-  currentDayAppointments,
-  appointmentsPageLink,
+  user,
 }: {
   date: Date;
   templates: ScheduleTemplate[];
   unavailableExceptions: ScheduleException[];
   setQParams: (params: AvailabilityTabQueryParams) => void;
-  currentDayAppointments: Appointment[];
-  appointmentsPageLink: string;
+  user: UserBase;
 }) {
   const { t } = useTranslation();
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+  const { data: heatmapData } = useAvailabilityHeatmap({
+    facilityId: facilityId!,
+    userId: user.id,
+    month: date,
+  });
+  const bookedSlots = heatmapData?.[dateQueryString(date)]?.booked_slots ?? 0;
 
   return (
     <PopoverContent className="p-6" align="center" sideOffset={5}>
@@ -321,25 +295,46 @@ function DayDetailsPopover({
             year: "numeric",
           })}
         </p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            setQParams({
-              tab: "exceptions",
-              sheet: "add_exception",
-              valid_from: dateQueryString(date),
-              valid_to: dateQueryString(date),
-            })
-          }
-        >
-          {t("add_exception")}
-        </Button>
+        {!dayjs(date).isBefore(dayjs(), "day") && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setQParams({
+                tab: "exceptions",
+                sheet: "add_exception",
+                valid_from: dateQueryString(date),
+                valid_to: dateQueryString(date),
+              })
+            }
+          >
+            {t("add_exception")}
+          </Button>
+        )}
       </div>
 
       <ScrollArea className="max-h-[22rem] overflow-auto">
+        {bookedSlots > 0 && (
+          <>
+            <hr className="bg-gray-200 h-px my-3" />
+            <Link
+              className="flex items-center gap-2 text-sm text-gray-500 underline underline-offset-2"
+              href={`/facility/${facilityId}/appointments?practitioner=${user.username}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`}
+            >
+              <span className="text-sm text-gray-500">
+                {t("appointments_scheduled_for_day_link", {
+                  count: bookedSlots,
+                })}
+              </span>
+              <ExternalLinkIcon className="size-4" />
+            </Link>
+          </>
+        )}
+
+        <hr className="bg-gray-200 h-px my-3" />
+
         {templates.map((template) => (
-          <div key={template.id} className="border-t border-gray-200 pt-3 mt-3">
+          <div key={template.id}>
             <div className="flex items-center">
               <ColoredIndicator
                 className="mr-2 size-3 rounded"
@@ -349,47 +344,14 @@ function DayDetailsPopover({
             </div>
 
             <div className="pl-5 py-2 space-y-4">
-              {template.availabilities.map((availability) => {
-                const currentDate = dayjs(date);
-                const availabilityDay = availability.availability.find(
-                  (a) => a.day_of_week + 1 === currentDate.get("day"),
-                );
-                const startTime = dayjs(
-                  `${currentDate.format("YYYY-MM-DD")} ${availabilityDay?.start_time}`,
-                  "YYYY-MM-DD HH:mm:ss",
-                );
-                const endTime = dayjs(
-                  `${currentDate.format("YYYY-MM-DD")} ${availabilityDay?.end_time}`,
-                  "YYYY-MM-DD HH:mm:ss",
-                );
-                let appointmentsInAvailability: Appointment[] = [];
-                if (
-                  currentDayAppointments.length > 0 &&
-                  startTime.isValid() &&
-                  endTime.isValid()
-                ) {
-                  appointmentsInAvailability = currentDayAppointments.filter(
-                    (appointment) =>
-                      dayjs(appointment.token_slot.start_datetime).isBetween(
-                        startTime,
-                        endTime,
-                        "minutes",
-                        "[]",
-                      ),
-                  );
-                }
-
-                return (
-                  <ScheduleTemplateAvailabilityItem
-                    key={availability.id}
-                    availability={availability}
-                    unavailableExceptions={unavailableExceptions}
-                    date={date}
-                    appointments={appointmentsInAvailability}
-                    appointmentsPageLink={appointmentsPageLink}
-                  />
-                );
-              })}
+              {template.availabilities.map((availability) => (
+                <ScheduleTemplateAvailabilityItem
+                  key={availability.id}
+                  availability={availability}
+                  unavailableExceptions={unavailableExceptions}
+                  date={date}
+                />
+              ))}
             </div>
           </div>
         ))}
@@ -425,16 +387,13 @@ function ScheduleTemplateAvailabilityItem({
   availability,
   unavailableExceptions,
   date,
-  appointments,
-  appointmentsPageLink,
 }: {
   availability: ScheduleTemplate["availabilities"][0];
   unavailableExceptions: ScheduleException[];
   date: Date;
-  appointments: Appointment[];
-  appointmentsPageLink: string;
 }) {
   const { t } = useTranslation();
+
   if (availability.slot_type !== "appointment") {
     return (
       <div key={availability.id}>
@@ -522,11 +481,6 @@ function ScheduleTemplateAvailabilityItem({
           )}
         </p>
       )}
-      {appointments.length > 0 && (
-        <p className="text-sm text-gray-600">
-          {formatAppointmentsNote(appointments, appointmentsPageLink, date)}
-        </p>
-      )}
     </div>
   );
 }
@@ -548,32 +502,4 @@ export const formatAvailabilityTime = (
   const startTime = availability[0].start_time;
   const endTime = availability[0].end_time;
   return `${formatTimeShort(startTime)} - ${formatTimeShort(endTime)}`;
-};
-
-export const formatAppointmentsNote = (
-  appointments: Appointment[],
-  appointmentsPageLink: string,
-  date: Date,
-) => {
-  const link = `${appointmentsPageLink}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`;
-  return (
-    <Trans
-      i18nKey={
-        dayjs(date).isBefore(dayjs())
-          ? "appointments_note_past"
-          : "appointments_note"
-      }
-      values={{ count: appointments.length }}
-      components={{
-        a: (
-          <Link
-            href={link}
-            target="_blank"
-            rel="noreferrer"
-            className="underline"
-          />
-        ),
-      }}
-    />
-  );
 };

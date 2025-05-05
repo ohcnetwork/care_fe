@@ -1,7 +1,7 @@
 import { format } from "date-fns";
-import { t } from "i18next";
 import * as React from "react";
 import { DateRange } from "react-day-picker";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,8 @@ export function DateRangePicker({
   onChange,
   className,
 }: DateRangePickerProps) {
+  const { t } = useTranslation();
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>

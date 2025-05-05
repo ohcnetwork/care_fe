@@ -162,7 +162,7 @@ describe("Patient Creation and modification", () => {
     it("Search patient with phone number and create a new encounter", () => {
       const patientDetail = {
         name: "Jumanji - Dont Change Name",
-        phone: "8744582225",
+        phone: "87445 82225",
       };
       facilityCreation.selectFacility("GHC Payyanur");
       patientCreation

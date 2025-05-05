@@ -59,7 +59,7 @@ export default function ServiceHistoryForm({
 
   type FormValues = z.infer<typeof formSchema>;
 
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       note: "",
@@ -130,7 +130,7 @@ export default function ServiceHistoryForm({
           name="serviced_on"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel required>{t("service_date")}</FormLabel>
+              <FormLabel aria-required>{t("service_date")}</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -168,7 +168,7 @@ export default function ServiceHistoryForm({
           name="note"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>{t("service_notes")}</FormLabel>
+              <FormLabel aria-required>{t("service_notes")}</FormLabel>
               <FormControl>
                 <Textarea
                   data-cy="service-notes-input"
@@ -182,7 +182,11 @@ export default function ServiceHistoryForm({
           )}
         />
         <div className="flex justify-end space-x-2 pt-4">
-          <Button type="submit" disabled={isPending} data-cy="submit-button">
+          <Button
+            type="submit"
+            disabled={!form.formState.isDirty || isPending}
+            data-cy="submit-button"
+          >
             {isPending
               ? isEditMode
                 ? t("updating")

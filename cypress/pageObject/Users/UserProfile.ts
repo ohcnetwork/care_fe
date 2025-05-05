@@ -1,6 +1,6 @@
 export class UserProfile {
   openUserMenu() {
-    cy.get('[data-cy="user-menu-dropdown"]').click();
+    cy.get('[data-cy="user-menu-dropdown"]').click({ force: true });
     return this;
   }
 

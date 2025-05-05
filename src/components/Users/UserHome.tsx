@@ -28,7 +28,7 @@ export interface UserHomeProps {
   facilityId?: string;
 }
 export interface TabChildProp {
-  body: (childProps: userChildProps) => JSX.Element | undefined;
+  body: (childProps: userChildProps) => React.ReactNode | undefined;
   hidden?: boolean;
 }
 
@@ -106,7 +106,6 @@ export default function UserHome(props: UserHomeProps) {
     <>
       <Page
         title={formatName(userData) || userData.username || t("manage_user")}
-        focusOnLoad={true}
         hideTitleOnPage
       >
         {

@@ -3,6 +3,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import {
   FacilityOrganization,
   FacilityOrganizationCreate,
+  FacilityOrganizationEdit,
   FacilityOrganizationResponse,
 } from "@/types/facilityOrganization/facilityOrganization";
 import { OrganizationUserRole } from "@/types/organization/organization";
@@ -28,6 +29,12 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<FacilityOrganization>(),
     TBody: Type<FacilityOrganizationCreate>(),
+  },
+  update: {
+    path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/",
+    method: HttpMethod.PUT,
+    TRes: Type<FacilityOrganization>(),
+    TBody: Type<FacilityOrganizationEdit>(),
   },
   listUsers: {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",

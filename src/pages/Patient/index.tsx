@@ -121,26 +121,34 @@ function PatientIndex() {
               setAppointmentDialogOpen(true);
             }}
           >
-            <span className="bg-linear-to-b from-white/15 to-transparent"></span>
             <span>{t("view_details")}</span>
           </Button>
         </CardHeader>
+
         <CardContent className="mt-2 pt-2 px-6 pb-3">
-          <div className="flex flex-col md:flex-row gap-2 justify-between">
-            <div className="flex flex-row md:flex-col gap-2 md:gap-0">
-              <span className="text-xs font-medium">{t("location")}: </span>
-              <span className="text-sm">{"Facility Location"}</span>
+          <div className="flex flex-col md:flex-row gap-4 justify-between">
+            <div className="flex flex-row gap-3 justify-between md:flex-row md:flex-grow md:mr-6">
+              <div className="flex flex-col gap-0 items-start md:flex-grow md:mr-4">
+                <span className="text-xs font-medium">{t("location")}: </span>
+                <span className="text-sm">
+                  <Link href={`/facility/${appointment.facility.id}`}>
+                    <span className="text-sm underline underline-offset-2 hover:cursor-pointer">
+                      {appointment.facility?.name}
+                    </span>
+                  </Link>
+                </span>
+              </div>
+              <div className="flex flex-col gap-0 items-start md:flex-none">
+                <span className="text-xs font-medium">{t("status")}: </span>
+                <span>{getStatusChip(appointment.status)}</span>
+              </div>
             </div>
-            <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start">
-              <span className="text-xs font-medium">{t("status")}: </span>
-              <span>{getStatusChip(appointment.status)}</span>
-            </div>
-            <div className="flex flex-row gap-3 justify-between">
-              <div className="flex flex-row md:flex-col gap-2 md:gap-0">
+            <div className="flex flex-row gap-3 justify-between md:flex-none">
+              <div className="flex flex-col gap-0 items-start">
                 <span className="text-xs font-medium">{t("date")}: </span>
                 <span className="text-sm">{appointmentDate}</span>
               </div>
-              <div className="flex flex-row md:flex-col gap-2 md:gap-0">
+              <div className="flex flex-col gap-0 items-start">
                 <span className="text-xs font-medium">{t("time_slot")}: </span>
                 <span className="text-sm">{appointmentTimeSlot}</span>
               </div>
@@ -185,7 +193,6 @@ function PatientIndex() {
           <span className="text-xl font-bold">{t("appointments")}</span>
           <Button variant="primary_gradient" className="sticky right-0" asChild>
             <Link href="/facilities">
-              <span className="bg-linear-to-b from-white/15 to-transparent"></span>
               <span>{t("book_appointment")}</span>
             </Link>
           </Button>

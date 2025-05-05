@@ -15,6 +15,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { z } from "zod";
 
+import { careConsoleArt } from "./plugins/careConsoleArt";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 
 const pdfWorkerPath = path.join(
@@ -169,6 +170,7 @@ export default defineConfig(({ mode }) => {
       ),
     },
     plugins: [
+      careConsoleArt(),
       tailwindcss(),
       federation({
         name: "core",

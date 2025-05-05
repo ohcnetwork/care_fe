@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -82,6 +82,8 @@ function ValidationErrorDisplay({
   questionnaireForms,
   serverErrors,
 }: ValidationErrorDisplayProps) {
+  const { t } = useTranslation();
+
   const hasErrors =
     questionnaireForms.some((form) => form.errors.length > 0) ||
     (serverErrors?.length ?? 0) > 0;
@@ -181,10 +183,7 @@ function ValidationErrorDisplay({
                       `[data-question-id="${structuredQuestion.questionId}"]`,
                     );
                     if (element) {
-                      element.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                      });
+                      element.scrollIntoView({ block: "center" });
                       element.classList.add(
                         "ring-2",
                         "ring-red-500",
@@ -246,10 +245,7 @@ function ValidationErrorDisplay({
                             `[data-question-id="${error.question_id}"]`,
                           );
                           if (element) {
-                            element.scrollIntoView({
-                              behavior: "smooth",
-                              block: "center",
-                            });
+                            element.scrollIntoView({ block: "center" });
                             element.classList.add(
                               "ring-2",
                               "ring-red-500",
@@ -317,6 +313,8 @@ export function QuestionnaireForm({
   onCancel,
   facilityId,
 }: QuestionnaireFormProps) {
+  const { t } = useTranslation();
+
   const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
@@ -606,7 +604,7 @@ export function QuestionnaireForm({
         const element = document.querySelector(
           `[data-question-id="${firstErrorId}"]`,
         );
-        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+        element?.scrollIntoView({ block: "center" });
       });
       return;
     }
@@ -643,11 +641,13 @@ export function QuestionnaireForm({
 
     // Then, add questionnaire submission requests
     formsWithValidation.forEach((form) => {
-      const nonStructuredResponses = form.responses.filter(
-        (response) => !response.structured_type,
+      const validResponses = form.responses.filter(
+        (response) =>
+          !response.structured_type &&
+          response.values.length > 0 &&
+          response.values?.[0]?.value !== "",
       );
-
-      if (nonStructuredResponses.length > 0) {
+      if (validResponses.length > 0) {
         requests.push({
           url: `/api/v1/questionnaire/${form.questionnaire.slug}/submit/`,
           method: "POST",
@@ -656,41 +656,35 @@ export function QuestionnaireForm({
             resource_id: encounterId ? encounterId : patientId,
             encounter: encounterId,
             patient: patientId,
-            results: nonStructuredResponses
-              .filter(
-                (response) =>
-                  response.values.length > 0 && !response.structured_type,
-              )
-              .map((response) => ({
-                question_id: response.question_id,
-                values: response.values.map((value) => {
-                  if (value.type === "dateTime" && value.value) {
-                    return {
-                      ...value,
-                      value: value.value.toISOString(),
-                    };
-                  }
-                  if (value.unit) {
-                    return {
-                      value: value.value?.toString(),
-                      unit: value.unit,
-                      coding: value.coding,
-                    };
-                  }
-                  if (value.coding) {
-                    return { coding: value.coding };
-                  }
-                  return { value: String(value.value) };
-                }),
-                note: response.note,
-                body_site: response.body_site,
-                method: response.method,
-              })),
+            results: validResponses.map((response) => ({
+              question_id: response.question_id,
+              values: response.values.map((value) => {
+                if (value.type === "dateTime" && value.value) {
+                  return {
+                    ...value,
+                    value: value.value.toISOString(),
+                  };
+                }
+                if (value.unit) {
+                  return {
+                    value: value.value?.toString(),
+                    unit: value.unit,
+                    coding: value.coding,
+                  };
+                }
+                if (value.coding) {
+                  return { coding: value.coding };
+                }
+                return { value: String(value.value) };
+              }),
+              note: response.note,
+              body_site: response.body_site,
+              method: response.method,
+            })),
           },
         });
       }
     });
-
     submitBatch({ requests });
   };
 
@@ -709,7 +703,7 @@ export function QuestionnaireForm({
     }
 
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      element.scrollIntoView({ block: "start" });
     }
   };
 
@@ -851,7 +845,7 @@ export function QuestionnaireForm({
           <>
             <div
               key={`${questionnaireForms.length}`}
-              className="flex gap-4 items-center m-4 max-w-4xl"
+              className="flex gap-4 items-center max-w-4xl px-2"
             >
               <QuestionnaireSearch
                 subjectType={subjectType}

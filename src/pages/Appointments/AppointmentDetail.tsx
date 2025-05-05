@@ -16,6 +16,7 @@ import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -83,7 +84,7 @@ export default function AppointmentDetail(props: Props) {
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
-  const { data: facilityData } = useQuery({
+  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
     queryKey: ["facility", props.facilityId],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: {
@@ -95,7 +96,7 @@ export default function AppointmentDetail(props: Props) {
   const { canViewAppointments, canUpdateAppointment, canCreateAppointment } =
     getPermissions(hasPermission, facilityData?.permissions ?? []);
 
-  const appointmentQuery = useQuery({
+  const { data: appointment } = useQuery({
     queryKey: ["appointment", props.appointmentId],
     queryFn: query(scheduleApis.appointments.retrieve, {
       pathParams: {
@@ -117,12 +118,12 @@ export default function AppointmentDetail(props: Props) {
   };
 
   useEffect(() => {
-    if (!canViewAppointments) {
+    if (!canViewAppointments && !isFacilityLoading) {
       toast.error(t("no_permission_to_view_page"));
       goBack(`/facility/${props.facilityId}/overview`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments]);
+  }, [canViewAppointments, isFacilityLoading]);
 
   const { mutate: updateAppointment, isPending } = useMutation<
     Appointment,
@@ -145,8 +146,6 @@ export default function AppointmentDetail(props: Props) {
     },
   });
 
-  const appointment = appointmentQuery.data;
-
   if (!facilityData || !appointment) {
     return <Loading />;
   }
@@ -163,14 +162,14 @@ export default function AppointmentDetail(props: Props) {
           )}
         >
           <AppointmentDetails
-            appointment={appointmentQuery.data}
+            appointment={appointment}
             facility={facilityData}
           />
           <div className="mt-3">
             <div id="section-to-print" className="print:w-[400px] print:pt-4">
               <div id="appointment-token-card" className="bg-gray-50 md:p-4">
                 <AppointmentTokenCard
-                  appointment={appointmentQuery.data}
+                  appointment={appointment}
                   facility={facilityData}
                 />
               </div>
@@ -336,7 +335,7 @@ const AppointmentDetails = ({
                   href={`tel:${appointment.patient.phone_number}`}
                   className="text-primary hover:underline"
                 >
-                  {appointment.patient.phone_number}
+                  {formatPhoneNumberIntl(appointment.patient.phone_number)}
                 </a>
               </p>
               <p className="text-gray-600">
@@ -346,7 +345,9 @@ const AppointmentDetails = ({
                     href={`tel:${appointment.patient.emergency_phone_number}`}
                     className="text-primary hover:underline"
                   >
-                    {appointment.patient.emergency_phone_number}
+                    {formatPhoneNumberIntl(
+                      appointment.patient.emergency_phone_number,
+                    )}
                   </a>
                 )}
               </p>

@@ -143,6 +143,7 @@ export default function ResourceDetails({
               onClick={() =>
                 navigate(`/facility/${facilityId}/resource/${id}/update`)
               }
+              data-cy="update-status-button"
             >
               <CareIcon icon="l-pen" className="mr-2 size-4" />
               {t("update_status")}

@@ -1,5 +1,5 @@
-import { t } from "i18next";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Sheet,
@@ -19,6 +19,8 @@ interface Props {
 }
 
 export default function EditFacilitySheet({ facilityId, trigger }: Props) {
+  const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
 
   return (

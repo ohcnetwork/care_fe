@@ -27,6 +27,18 @@
     "username": "development-doc2",
     "password": "Test@123"
   },
+  "devdoctor3": {
+    "username": "devdoctor3",
+    "password": "Test@123"
+  },
+  "devdoctor4": {
+    "username": "dev-doctor4",
+    "password": "Test@123"
+  },
+  "devnurse3": {
+    "username": "devnurse3",
+    "password": "Test@123"
+  },
   "devadmin": {
     "username": "development-adm",
     "password": "Test@123"
@@ -39,12 +51,16 @@
     "username": "devnurse2",
     "password": "Test@123"
   },
-  "devnurse3": {
-    "username": "devnurse3",
+  "devnurse4": {
+    "username": "devnurse4",
     "password": "Test@123"
   },
   "test-human": {
     "username": "test-human",
+    "password": "Test@123"
+  },
+  "devdevices": {
+    "username": "devdevices",
     "password": "Test@123"
   }
 }

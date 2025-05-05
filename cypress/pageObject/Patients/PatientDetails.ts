@@ -5,7 +5,9 @@ export class PatientDetails {
   }
 
   clickAssignUserButton() {
+    cy.intercept("GET", "**/api/v1/users/**").as("getUsers");
     cy.verifyAndClickElement('[data-cy="assign-user-button"]', "Assign User");
+    cy.wait("@getUsers").its("response.statusCode").should("eq", 200);
     return this;
   }
 
@@ -56,6 +58,27 @@ export class PatientDetails {
 
   verifyUserRemovalSuccess() {
     cy.verifyNotification("User removed successfully");
+    return this;
+  }
+
+  clickResourcesTab() {
+    cy.verifyAndClickElement('[data-cy="tab-resource_requests"]', "Requests");
+    return this;
+  }
+
+  clickCreateRequestButton() {
+    cy.verifyAndClickElement(
+      '[data-cy="create-request-button"]',
+      "Create Request",
+    );
+  }
+  saveCurrentUrl() {
+    cy.saveCurrentUrl();
+    return this;
+  }
+
+  navigateToSavedUrl() {
+    cy.navigateToSavedUrl();
     return this;
   }
 }

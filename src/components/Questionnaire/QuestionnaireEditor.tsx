@@ -1,5 +1,5 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import {
   ChevronDown,
   ChevronUp,
@@ -10,8 +10,10 @@ import {
 } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
@@ -28,12 +30,27 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -57,7 +74,7 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
@@ -174,6 +191,7 @@ function LayoutOptionCard({
 
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set(),
@@ -182,7 +200,51 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
+  const [orgError, setOrgError] = useState<string | undefined>();
+  const [importUrl, setImportUrl] = useState("");
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importedData, setImportedData] = useState<QuestionnaireDetail | null>(
+    null,
+  );
   const queryClient = useQueryClient();
+  const [structuredTypeErrors, setStructuredTypeErrors] = useState<
+    Record<string, string | undefined>
+  >({});
+
+  const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
+    const errorData = (
+      error as {
+        cause?: { errors: { msg: string; loc?: (string | number)[] }[] };
+      }
+    )?.cause;
+
+    if (!errorData?.errors) {
+      toast.error(fallbackMessage);
+      return;
+    }
+
+    errorData.errors.forEach((er) => {
+      let fieldPath = er.loc?.join(" > ");
+      if (er.loc?.includes("questions")) {
+        const questionIndices: number[] = [];
+
+        for (let i = 0; i < er.loc.length; i++) {
+          if (er.loc[i] === "questions" && typeof er.loc[i + 1] === "number") {
+            questionIndices.push(Number(er.loc[i + 1]) + 1);
+          }
+        }
+
+        if (questionIndices.length > 0) {
+          fieldPath = `Question ${questionIndices.join(".")}`;
+        }
+      }
+
+      const message = fieldPath ? `Error in ${fieldPath}: ${er.msg}` : er.msg;
+      toast.error(message);
+    });
+
+    toast.error(fallbackMessage);
+  };
 
   const {
     data: initialQuestionnaire,
@@ -244,28 +306,60 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   }, [availableTags, selectedTags, tagSearchQuery]);
 
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
-    mutationFn: mutate(questionnaireApi.create),
+    mutationFn: mutate(questionnaireApi.create, {
+      silent: true,
+    }),
     onSuccess: (data: QuestionnaireDetail) => {
-      toast.success("Questionnaire created successfully");
+      toast.success(t("questionnaire_created_successfully"));
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
       navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
-    onError: (_error) => {
-      toast.error("Failed to create questionnaire");
-    },
+    onError: (error) =>
+      handleOnErrors(error, t("failed_to_create_questionnaire")),
   });
 
   const { mutate: updateQuestionnaire, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.update, {
       pathParams: { id: id! },
+      silent: true,
     }),
-    onSuccess: () => {
-      toast.success("Questionnaire updated successfully");
+    onSuccess: (data: QuestionnaireDetail) => {
+      toast.success(t("questionnaire_updated_successfully"));
+      navigate(`/admin/questionnaire/${data.slug}/edit`);
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
-    onError: (_error) => {
-      toast.error("Failed to update questionnaire");
+    onError: (error) =>
+      handleOnErrors(error, t("failed_to_update_questionnaire")),
+  });
+
+  const { mutate: importQuestionnaire, isPending: isImporting } = useMutation({
+    mutationFn: async (url: string) => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch questionnaire");
+      return response.json();
     },
+    onSuccess: (data) => {
+      setImportedData(data);
+      toast.success(t("questionnaire_imported_successfully"));
+    },
+    onError: () => {
+      toast.error(t("failed_to_import_questionnaire"));
+    },
+  });
+
+  const urlSchema = z.string().url(t("please enter a valid url"));
+
+  const QuestionnaireFormPartialSchema = z.object({
+    title: z.string().trim().min(1, t("field_required")),
+    slug: z
+      .string()
+      .trim()
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 }))
+      .regex(/^[-\w]+$/, {
+        message: t("slug_format_message"),
+      }),
+    description: z.string().optional(),
   });
 
   const [questionnaire, setQuestionnaire] =
@@ -286,21 +380,35 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       return null;
     });
 
+  const form = useForm({
+    resolver: zodResolver(QuestionnaireFormPartialSchema),
+    defaultValues: {
+      title: questionnaire?.title ?? "",
+      slug: questionnaire?.slug ?? "",
+      description: questionnaire?.description ?? "",
+    },
+    mode: "onChange",
+  });
+
   useEffect(() => {
     if (initialQuestionnaire) {
       setQuestionnaire(initialQuestionnaire);
+      form.reset({
+        title: initialQuestionnaire.title || "",
+        slug: initialQuestionnaire.slug || "",
+        description: initialQuestionnaire.description || "",
+      });
     }
   }, [initialQuestionnaire]);
 
   if (id && isLoading) return <Loading />;
+
   if (error) {
     return (
       <Alert variant="destructive">
         <CareIcon icon="l-exclamation-circle" className="size-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Failed to load questionnaire. Please try again later.
-        </AlertDescription>
+        <AlertTitle>{t("error")}</AlertTitle>
+        <AlertDescription>{t("questionniare_load_error")}</AlertDescription>
       </Alert>
     );
   }
@@ -308,7 +416,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     return (
       <Alert>
         <CareIcon icon="l-info-circle" className="size-4" />
-        <AlertTitle>Not Found</AlertTitle>
+        <AlertTitle>{t("not_found")}</AlertTitle>
         <AlertDescription>
           {t("no_requested_questionnaires_found")}
         </AlertDescription>
@@ -318,12 +426,63 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const updateQuestionnaireField = (
     field: keyof QuestionnaireDetail,
-    value: any,
+    value: unknown,
   ) => {
     setQuestionnaire((prev) => (prev ? { ...prev, [field]: value } : null));
   };
+  const handleValidatedChange = (
+    field: keyof typeof questionnaire,
+    value: string | undefined,
+  ) => {
+    updateQuestionnaireField(field, value);
+    form.setValue(field as "title" | "description" | "slug", value, {
+      shouldValidate: true,
+    });
+  };
 
-  const handleSave = () => {
+  const validateOrganizations = (): boolean => {
+    if (id) {
+      if (!organizations?.results || organizations.results.length === 0) {
+        setOrgError(t("organization_selection_required"));
+        return false;
+      }
+      return true;
+    }
+    if (selectedOrgs.length === 0) {
+      setOrgError(t("organization_selection_required"));
+      return false;
+    }
+    setOrgError(undefined);
+    return true;
+  };
+
+  const validateStructuredType = (): boolean => {
+    let hasError = false;
+    const updatedErrors: Record<string, string | undefined> = {};
+
+    questionnaire.questions.forEach((q) => {
+      if (q.type === "structured" && !q.structured_type) {
+        updatedErrors[q.id] = t("field_required");
+        hasError = true;
+      } else {
+        updatedErrors[q.id] = undefined;
+      }
+    });
+
+    setStructuredTypeErrors(updatedErrors);
+
+    return !hasError;
+  };
+
+  const handleSave = async () => {
+    const isValid = await form.trigger();
+    const hasOrganizations = validateOrganizations();
+    const hasValidStructuredType = validateStructuredType();
+
+    if (!isValid || !hasOrganizations || !hasValidStructuredType) {
+      return;
+    }
+
     if (id) {
       updateQuestionnaire(questionnaire);
     } else {
@@ -337,6 +496,71 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const handleCancel = () => {
     navigate("/admin/questionnaire");
+  };
+
+  const handleDownload = () => {
+    const dataStr = JSON.stringify(questionnaire, null, 2);
+    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
+    const exportFileDefaultName = `${questionnaire.slug || "questionnaire"}.json`;
+
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const handleImport = async () => {
+    if (!importUrl) {
+      toast.error(t("url_required"));
+      return;
+    }
+
+    try {
+      urlSchema.parse(importUrl);
+      importQuestionnaire(importUrl);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      }
+    }
+  };
+
+  const handleImportConfirm = () => {
+    if (!importedData) return;
+
+    // Map only the necessary fields, ignoring id, created_by, tags etc.
+    const mappedData: Partial<QuestionnaireDetail> = {
+      title: importedData.title,
+      description: importedData.description,
+      status: "draft",
+      version: "1.0",
+      subject_type: importedData.subject_type || "patient",
+      questions:
+        importedData.questions?.map((q: Question) => ({
+          ...q,
+          id: crypto.randomUUID(), // Generate new IDs for questions
+          questions: q.questions?.map((sq: Question) => ({
+            ...sq,
+            id: crypto.randomUUID(), // Generate new IDs for sub-questions
+          })),
+        })) || [],
+      slug: importedData.slug,
+    };
+
+    setQuestionnaire({
+      ...questionnaire,
+      ...mappedData,
+    } as QuestionnaireDetail);
+    form.reset({
+      title: mappedData.title || "",
+      slug: mappedData.slug || "",
+      description: mappedData.description || "",
+    });
+
+    setShowImportDialog(false);
+    setImportUrl("");
+    setImportedData(null);
+    toast.success(t("questionnaire_imported_successfully"));
   };
 
   const toggleQuestionExpanded = (questionId: string) => {
@@ -353,12 +577,20 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const handleToggleOrganization = (orgId: string) => {
     const newOrg = availableOrganizations?.results.find((o) => o.id === orgId);
-    const newAdded = newOrg ? [...selectedOrgs, newOrg] : selectedOrgs;
-    setSelectedOrgs((current) =>
-      current.some((o) => o.id === orgId)
+    setSelectedOrgs((current) => {
+      const newSelection = current.some((o) => o.id === orgId)
         ? current.filter((o) => o.id !== orgId)
-        : newAdded,
-    );
+        : newOrg
+          ? [...current, newOrg]
+          : current;
+
+      // Clear error if at least one organization is selected
+      if (newSelection.length > 0) {
+        setOrgError(undefined);
+      }
+
+      return newSelection;
+    });
   };
 
   const handleToggleTag = (tagId: string) => {
@@ -377,7 +609,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">
             {id
@@ -387,9 +619,21 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <p className="text-sm text-gray-500">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleCancel}>
+          <Button type="button" variant="outline" onClick={handleCancel}>
             {t("cancel")}
           </Button>
+          {id && (
+            <Button variant="outline" onClick={handleDownload}>
+              <CareIcon icon="l-import" className="mr-1 size-4" />
+              {t("download")}
+            </Button>
+          )}
+          {!id && (
+            <Button variant="outline" onClick={() => setShowImportDialog(true)}>
+              <CareIcon icon="l-import" className="mr-1 size-4" />
+              {t("import_from_url")}
+            </Button>
+          )}
           <Button onClick={handleSave} disabled={isCreating || isUpdating}>
             <CareIcon icon="l-save" className="mr-2 size-4" />
             {id ? t("save") : t("create")}
@@ -403,11 +647,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       >
         <TabsList className="mb-4">
           <TabsTrigger value="edit">
-            <ViewIcon className="size-4 mr-2" />
+            <ViewIcon className="size-4" />
             {t("edit_form")}
           </TabsTrigger>
           <TabsTrigger value="preview">
-            <SquarePenIcon className="size-4 mr-2" />
+            <SquarePenIcon className="size-4" />
             {t("form_preview")}
           </TabsTrigger>
         </TabsList>
@@ -433,7 +677,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 `question-${question.id}`,
                               );
                               if (element) {
-                                element.scrollIntoView({ behavior: "smooth" });
+                                element.scrollIntoView();
                                 toggleQuestionExpanded(question.id);
                               }
                             }}
@@ -447,7 +691,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               {index + 1}.
                             </span>
                             <span className="flex-1 truncate">
-                              {question.text || "Untitled Question"}
+                              {question.text || t("untitled_question")}
                             </span>
                           </button>
                           {hasSubQuestions && question.questions && (
@@ -457,17 +701,27 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   <button
                                     key={subQuestion.id}
                                     onClick={() => {
-                                      const element = document.getElementById(
-                                        `question-${subQuestion.id}`,
-                                      );
-                                      if (element) {
-                                        element.scrollIntoView({
-                                          behavior: "smooth",
-                                        });
+                                      if (!expandedQuestions.has(question.id)) {
                                         toggleQuestionExpanded(question.id);
+                                        setTimeout(() => {
+                                          const element =
+                                            document.getElementById(
+                                              `question-${subQuestion.id}`,
+                                            );
+                                          if (element) {
+                                            element.scrollIntoView();
+                                          }
+                                        }, 100);
+                                      } else {
+                                        const element = document.getElementById(
+                                          `question-${subQuestion.id}`,
+                                        );
+                                        if (element) {
+                                          element.scrollIntoView();
+                                        }
                                       }
                                     }}
-                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2"
+                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
                                   >
                                     <span className="font-medium text-gray-500">
                                       {index + 1}.{subIndex + 1}
@@ -499,6 +753,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     setSearchQuery: setOrgSearchQuery,
                     available: availableOrganizations,
                     isLoading: isLoadingAvailableOrganizations,
+                    error: orgError,
+                    setError: setOrgError,
                   }}
                   tags={questionnaire.tags}
                   tagSelection={{
@@ -520,43 +776,74 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   <CardTitle>{t("basic_info")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">{t("title")}</Label>
-                    <Input
-                      id="title"
-                      value={questionnaire.title}
-                      onChange={(e) =>
-                        updateQuestionnaireField("title", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="slug">{t("slug")}</Label>
-                    <Input
-                      id="slug"
-                      value={questionnaire.slug}
-                      onChange={(e) =>
-                        updateQuestionnaireField("slug", e.target.value)
-                      }
-                      placeholder="unique-identifier-for-questionnaire"
-                      className="font-mono"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      A unique URL-friendly identifier for this questionnaire
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="desc">{t("description")}</Label>
-                    <Textarea
-                      id="desc"
-                      value={questionnaire.description || ""}
-                      onChange={(e) =>
-                        updateQuestionnaireField("description", e.target.value)
-                      }
-                    />
-                  </div>
+                  <Form {...form}>
+                    <form className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("title")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t("enter_title")}
+                                {...field}
+                                onChange={(e) =>
+                                  handleValidatedChange("title", e.target.value)
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="slug"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("slug")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="unique-identifier-for-questionnaire"
+                                {...field}
+                                onChange={(e) =>
+                                  handleValidatedChange("slug", e.target.value)
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                            <p className="text-sm text-gray-500 mt-1">
+                              A unique URL-friendly identifier for this
+                              questionnaire
+                            </p>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("description")}</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder={t("enter_description")}
+                                {...field}
+                                onChange={(e) =>
+                                  handleValidatedChange(
+                                    "description",
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </form>
+                  </Form>
                 </CardContent>
               </Card>
 
@@ -565,8 +852,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   <div>
                     <CardTitle>
                       <p className="text-sm text-gray-700 font-medium mt-1">
-                        {questionnaire.questions?.length || 0} {t("question")}
-                        {questionnaire.questions?.length !== 1 ? "s" : ""}
+                        {(questionnaire.questions?.length || 0) > 1
+                          ? t("questions")
+                          : t("question")}
                       </p>
                     </CardTitle>
                   </div>
@@ -651,6 +939,15 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           }}
                           isFirst={index === 0}
                           isLast={index === questionnaire.questions.length - 1}
+                          structuredTypeError={
+                            structuredTypeErrors[question.id]
+                          }
+                          setStructuredTypeError={(error) => {
+                            setStructuredTypeErrors((prev) => ({
+                              ...prev,
+                              [question.id]: error,
+                            }));
+                          }}
                         />
                       </div>
                     ))}
@@ -671,6 +968,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   setSearchQuery: setOrgSearchQuery,
                   available: availableOrganizations,
                   isLoading: isLoadingAvailableOrganizations,
+                  error: orgError,
+                  setError: setOrgError,
                 }}
                 tags={questionnaire.tags}
                 tagSelection={{
@@ -687,7 +986,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </div>
           <DebugPreview
             data={questionnaire}
-            title="Questionnaire"
+            title={t("questionnaire")}
             className="mt-4"
           />
         </TabsContent>
@@ -709,6 +1008,56 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </Card>
         </TabsContent>
       </Tabs>
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("import_questionnaire")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t("questionnaire_json_url")}</Label>
+              <Input
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                placeholder={t("questionnaire_json_url_placeholder")}
+              />
+            </div>
+            {importedData && (
+              <div className="space-y-2">
+                <Label>{t("preview")}</Label>
+                <div className="p-4 border rounded-lg">
+                  <p className="font-medium">{importedData.title}</p>
+                  <p className="text-sm text-gray-500">
+                    {importedData.description}
+                  </p>
+                  <p className="text-sm mt-2">
+                    {t("questions_count")} :{" "}
+                    {importedData.questions?.length || 0}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowImportDialog(false)}
+            >
+              {t("cancel")}
+            </Button>
+            {!importedData ? (
+              <Button
+                onClick={handleImport}
+                disabled={!importUrl || isImporting}
+              >
+                {isImporting ? t("importing") : t("import")}
+              </Button>
+            ) : (
+              <Button onClick={handleImportConfirm}>{t("import_form")}</Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -726,6 +1075,8 @@ interface QuestionEditorProps {
   onMoveDown?: () => void;
   isFirst?: boolean;
   isLast?: boolean;
+  structuredTypeError?: string;
+  setStructuredTypeError?: (error: string | undefined) => void;
 }
 
 function QuestionEditor({
@@ -741,6 +1092,8 @@ function QuestionEditor({
   isFirst,
   isLast,
   index,
+  structuredTypeError,
+  setStructuredTypeError,
 }: QuestionEditorProps) {
   const { t } = useTranslation();
   const {
@@ -804,7 +1157,7 @@ function QuestionEditor({
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
             <div className="font-semibold text-left">
-              {index + 1}. {text || "Untitled Question"}
+              {index + 1}. {text || t("untitled_question")}
             </div>
             <div className="flex gap-2 mt-1">
               <Badge variant="secondary">{type}</Badge>
@@ -871,18 +1224,18 @@ function QuestionEditor({
         <div className="p-2 pt-0 space-y-4 mt-2">
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label>Question Text</Label>
+              <Label>{t("question_text")}</Label>
               <Input
                 value={text}
                 onChange={(e) => updateField("text", e.target.value)}
               />
             </div>
             <div className="flex-1">
-              <Label>Link ID</Label>
+              <Label>{t("link_id")}</Label>
               <Input
                 value={question.link_id}
                 onChange={(e) => updateField("link_id", e.target.value)}
-                placeholder="Unique identifier for this question"
+                placeholder={t("link_id_placeholder")}
               />
             </div>
           </div>
@@ -892,7 +1245,7 @@ function QuestionEditor({
             <Textarea
               value={question.description || ""}
               onChange={(e) => updateField("description", e.target.value)}
-              placeholder="Additional context or instructions for this question"
+              placeholder={t("question_description_placeholder")}
               className="h-20"
             />
           </div>
@@ -912,14 +1265,14 @@ function QuestionEditor({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select question type">
+                    <SelectValue placeholder={t("question_type_placeholder")}>
                       {
                         SUPPORTED_QUESTION_TYPES.find((t) => t.value === type)
                           ?.name
                       }
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex flex-col items-start">
@@ -938,13 +1291,18 @@ function QuestionEditor({
                 <div>
                   <Label>{t("structured_type")}</Label>
                   <Select
-                    value={structured_type ?? "allergy_intolerance"}
-                    onValueChange={(val: StructuredQuestionType) =>
-                      updateField("structured_type", val)
-                    }
+                    value={structured_type || ""}
+                    onValueChange={(val: StructuredQuestionType) => {
+                      updateField("structured_type", val);
+                      if (setStructuredTypeError) {
+                        setStructuredTypeError(undefined);
+                      }
+                    }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select structured type" />
+                      <SelectValue
+                        placeholder={t("question_structured_type_placeholder")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {STRUCTURED_QUESTIONS.map((type) => (
@@ -954,11 +1312,16 @@ function QuestionEditor({
                       ))}
                     </SelectContent>
                   </Select>
+                  {structuredTypeError && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {structuredTypeError}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
 
-            {type !== "structured" && type !== "group" && (
+            {type !== "structured" && (
               <CodingEditor
                 code={code}
                 onChange={(newCode) => updateField("code", newCode)}
@@ -968,10 +1331,11 @@ function QuestionEditor({
 
           <div className="space-y-6">
             <div className="border rounded-lg border-gray-200 bg-gray-100 p-4">
-              <h3 className="text-sm font-medium mb-2">Question Settings</h3>
+              <h3 className="text-sm font-medium mb-2">
+                {t("question_settings")}
+              </h3>
               <p className="text-sm text-gray-500 mb-4">
-                Configure the basic behavior: mark as required, allow multiple
-                entries, or set as read only.
+                {t("question_settings_description")}
               </p>
               <div className="">
                 <div className="flex flex-wrap gap-4">
@@ -1004,7 +1368,7 @@ function QuestionEditor({
                       id={`read_only-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`read_only-${getQuestionPath()}`}>
-                      Read Only
+                      {t("read_only")}
                     </Label>
                   </div>
                 </div>
@@ -1013,11 +1377,10 @@ function QuestionEditor({
 
             <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">
-                Data Collection Details
+                {t("data_collection_details")}
               </h3>
               <p className="text-sm text-gray-500 mb-4">
-                Specify key collection info: time, performer, body site, and
-                method.
+                {t("data_collection_details_description")}
               </p>
               <div className="">
                 <div className="flex flex-wrap gap-4">
@@ -1096,7 +1459,7 @@ function QuestionEditor({
             <div className="space-y-4">
               <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
                 <h3 className="text-sm font-medium mb-2">
-                  Group Layout Options
+                  {t("group_layout_options")}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   {t("choose_layout_style")}
@@ -1139,10 +1502,10 @@ function QuestionEditor({
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <div>
                         <CardTitle className="text-base font-medium">
-                          Answer Options
+                          {t("answer_options")}
                         </CardTitle>
                         <p className="text-sm text-gray-500">
-                          Define possible answers for this question
+                          {t("answer_options_description")}
                         </p>
                       </div>
                       <Select
@@ -1153,7 +1516,9 @@ function QuestionEditor({
                           updateField(
                             "answer_value_set",
                             val === "custom" ? undefined : "valueset",
-                            { answer_option: [] },
+                            {
+                              answer_option: [],
+                            },
                           )
                         }
                       >
@@ -1177,11 +1542,10 @@ function QuestionEditor({
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div>
                       <CardTitle className="text-base font-medium">
-                        Quantity
+                        {t("quantity")}
                       </CardTitle>
                       <p className="text-sm text-gray-500">
-                        Select the valueset of options for this quantity
-                        question
+                        {t("quantity_question_description")}
                       </p>
                     </div>
                   </CardHeader>
@@ -1293,9 +1657,7 @@ function QuestionEditor({
             <div className="bg-gray-100 rounded-lg p-1">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-gray-950 font-semibold">
-                  {question.questions?.length || 0} Sub-Question
-                  {question.questions?.length !== 1 ? "s " : " "}
-                  (for the "{text}" Group)
+                  {t("sub_questions_for_group", { group: text })}
                 </Label>
                 <Button
                   variant="ghost"
@@ -1380,11 +1742,11 @@ function QuestionEditor({
           )}
 
           <div className="space-y-4">
-            <Label>Enable When Conditions</Label>
+            <Label>{t("enable_when_conditions")}</Label>
             <div className="space-y-2">
               {(question.enable_when || []).length > 0 && (
                 <div>
-                  <Label className="text-xs">Enable Behavior</Label>
+                  <Label className="text-xs">{t("enable_behavior")}</Label>
                   <Select
                     value={question.enable_behavior ?? "all"}
                     onValueChange={(val: "all" | "any") =>
@@ -1396,10 +1758,10 @@ function QuestionEditor({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">
-                        All conditions must be met
+                        {t("enable_when__all")}
                       </SelectItem>
                       <SelectItem value="any">
-                        Any condition must be met
+                        {t("enable_when__any")}
                       </SelectItem>
                     </SelectContent>
                   </Select>

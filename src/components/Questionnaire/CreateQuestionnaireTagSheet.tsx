@@ -67,7 +67,7 @@ export default function CreateQuestionnaireTagSheet({
       <SheetTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 size-4" />
             {t("create_tag")}
           </Button>
         )}
@@ -105,7 +105,7 @@ export default function CreateQuestionnaireTagSheet({
             >
               {isCreating ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" />
                   {t("creating")}
                 </>
               ) : (

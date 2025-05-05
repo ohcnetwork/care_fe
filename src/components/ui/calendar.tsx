@@ -1,5 +1,3 @@
-"use client";
-
 import { differenceInCalendarDays } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
@@ -396,7 +394,7 @@ function CaptionLabel({
   return (
     <Button
       className="h-7 w-full truncate text-sm font-medium"
-      variant="ghost"
+      variant="outline"
       size="sm"
       onClick={() => setNavView((prev) => (prev === "days" ? "years" : "days"))}
     >

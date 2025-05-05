@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -26,6 +28,8 @@ export function BooleanQuestion({
   disabled,
   clearError,
 }: BooleanQuestionProps) {
+  const { t } = useTranslation();
+
   return (
     <RadioGroup
       value={questionnaireResponse.values[0]?.value?.toString()}
@@ -45,22 +49,22 @@ export function BooleanQuestion({
       disabled={disabled}
     >
       <div className="flex items-center space-x-6">
-        <div className="flex items-center space-x-2">
+        <div className="flex">
           <RadioGroupItem value="true" id={`${question.id}-true`} />
           <Label
             htmlFor={`${question.id}-true`}
             className="text-sm font-normal"
           >
-            True
+            {t("yes")}
           </Label>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex">
           <RadioGroupItem value="false" id={`${question.id}-false`} />
           <Label
             htmlFor={`${question.id}-false`}
             className="text-sm font-normal"
           >
-            False
+            {t("no")}
           </Label>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -48,6 +49,9 @@ const DeviceEncounterHistory = ({ facilityId, deviceId, trigger }: Props) => {
           <SheetTitle className="text-xl font-semibold">
             {t("device_encounter_history")}
           </SheetTitle>
+          <SheetDescription>
+            {t("device_encounter_history_description")}
+          </SheetDescription>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
           <div>

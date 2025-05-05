@@ -1,9 +1,7 @@
-"use client";
-
 import { useMutation } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Search } from "lucide-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -55,6 +53,8 @@ const MedicineListItem = ({
   onAdministrationChange,
   isValid,
 }: MedicineListItemProps) => {
+  const { t } = useTranslation();
+
   const medicationDisplay = medicine.medication?.display;
 
   return (
@@ -109,6 +109,8 @@ export function MedicineAdminSheet({
   patientId,
   encounterId,
 }: Props) {
+  const { t } = useTranslation();
+
   const [selectedMedicines, setSelectedMedicines] = useState<Set<string>>(
     new Set(),
   );
