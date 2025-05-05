@@ -37,7 +37,9 @@ export const UserStatusIndicator = ({
 
   return (
     <span
-      title={`${new Date(user.last_login).toLocaleString()}`}
+      title={
+        user.last_login ? new Date(user.last_login).toLocaleString() : undefined
+      }
       className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}
     >
       {isUserOnline(user) || isAuthUser ? (
