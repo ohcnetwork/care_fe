@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
-// Define digitMaps outside the component to prevent recreation on each render
 const digitMaps: Record<string, number[][]> = {
   "0": [
     [1, 1, 1],
@@ -101,17 +102,8 @@ const digitMaps: Record<string, number[][]> = {
   ],
 };
 
-// Define breath state type
-type BreathState = "in" | "out";
-
-type SegmentedDigitProps = {
-  digit: string;
-};
-
-// Extracted to a separate component for better memoization
-const SegmentedDigit = ({ digit }: SegmentedDigitProps) => {
+const SegmentedDigit = ({ digit }: { digit: string }) => {
   const map = digitMaps[digit] || digitMaps["0"];
-
   return (
     <div className="inline-block mx-0.5">
       {map.map((row, rowIndex) => (
@@ -119,7 +111,10 @@ const SegmentedDigit = ({ digit }: SegmentedDigitProps) => {
           {row.map((cell, cellIndex) => (
             <div
               key={cellIndex}
-              className={`size-1.5 m-px ${cell ? "bg-gray-400" : "bg-transparent"}`}
+              className={cn(
+                "size-1.5 m-px",
+                cell ? "bg-gray-400" : "bg-transparent",
+              )}
             ></div>
           ))}
         </div>
@@ -133,7 +128,6 @@ type SegmentedTimeProps = {
   scaleFactor: number;
 };
 
-// Extracted to a separate component for better memoization
 const SegmentedTime = ({ timeStr, scaleFactor }: SegmentedTimeProps) => (
   <div
     className="flex items-center justify-center transform origin-center"
@@ -151,16 +145,14 @@ export default function SessionExpired() {
   const { signOut } = useAuthContext();
   const { t } = useTranslation();
 
-  // Timer state
   const [seconds, setSeconds] = useState(0);
-  const [breathState, setBreathState] = useState<BreathState>("in");
+  const [breathState, setBreathState] = useState<"in" | "out">("in");
   const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
     toast.dismiss();
   }, []);
 
-  // Timer logic (previously in useSessionTimer)
   useEffect(() => {
     const tick = () => {
       const now = Date.now();
@@ -174,7 +166,7 @@ export default function SessionExpired() {
 
     const breathTimer = setInterval(() => {
       setBreathState((prev) => (prev === "in" ? "out" : "in"));
-    }, 4000); // Sync with ripple cycle
+    }, 4000);
 
     return () => {
       clearInterval(timer);
@@ -195,7 +187,6 @@ export default function SessionExpired() {
     return timeStr;
   };
 
-  // Calculate scale factor for time display
   const getScaleFactor = (timeStr: string): number => {
     const length = timeStr.length;
     if (length <= 5) return 1;
@@ -206,8 +197,6 @@ export default function SessionExpired() {
   const timeStr = formatTime(seconds);
   const scaleFactor = getScaleFactor(timeStr);
   const shouldShowTime = seconds > 0;
-
-  // No longer need these functions as they're now separate components
 
   return (
     <div className="flex flex-col items-center justify-center w-full fixed inset-0 bg-white">
@@ -242,10 +231,10 @@ export default function SessionExpired() {
       </div>
       <div className="max-w-lg mx-auto text-center px-4">
         <h1 className="mt-2 text-xl md:text-4xl text-gray-950 font-bold">
-          {t("SESSION_EXPIRED_WELCOME")}
+          {t("welcome_back")}
         </h1>
         <p className="max-w-md mx-auto px-2 text-sm md:text-base mt-2 text-gray-600">
-          {t("SESSION_EXPIRED_MESSAGE")}
+          {t("session_expired_message")}
         </p>
         <Button
           type="button"
