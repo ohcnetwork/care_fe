@@ -98,6 +98,7 @@
     "i18next-http-backend": "^3.0.1",
     "i18next-resources-to-backend": "^1.2.1",
     "input-otp": "^1.4.2",
+    "jotai": "^2.12.3",
     "jspdf": "^3.0.0",
     "libphonenumber-js": "^1.11.18",
     "lucide-react": "^0.503.0",
