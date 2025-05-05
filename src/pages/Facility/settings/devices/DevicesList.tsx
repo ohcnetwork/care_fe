@@ -140,7 +140,7 @@ export default function DevicesList({ facilityId }: Props) {
     queryKey: ["locations", facilityId, "all"],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode: "kind" },
+      queryParams: { mode: "kind", parent: "" },
     }),
   });
 
@@ -189,26 +189,21 @@ export default function DevicesList({ facilityId }: Props) {
             </SheetHeader>
             <div className="space-y-4 pt-2 max-h-[calc(80vh-80px)] overflow-auto">
               {allLocations?.results?.length
-                ? allLocations.results
-                    .filter(
-                      (loc) =>
-                        !loc.parent || Object.keys(loc.parent).length === 0,
-                    )
-                    .map((location) => (
-                      <LocationTreeNode
-                        key={location.id}
-                        showAllForms={true}
-                        location={location}
-                        facilityId={facilityId}
-                        selectedLocationId={qParams.locationId || null}
-                        expandedLocations={expandedLocations}
-                        onToggleExpand={handleToggleExpand}
-                        onSelect={(loc) => {
-                          handleLocationSelect(loc);
-                          setShowLocationFilter(false);
-                        }}
-                      />
-                    ))
+                ? allLocations.results.map((location) => (
+                    <LocationTreeNode
+                      key={location.id}
+                      showAllForms={true}
+                      location={location}
+                      facilityId={facilityId}
+                      selectedLocationId={qParams.locationId || null}
+                      expandedLocations={expandedLocations}
+                      onToggleExpand={handleToggleExpand}
+                      onSelect={(loc) => {
+                        handleLocationSelect(loc);
+                        setShowLocationFilter(false);
+                      }}
+                    />
+                  ))
                 : t("no_locations_available")}
             </div>
           </SheetContent>
