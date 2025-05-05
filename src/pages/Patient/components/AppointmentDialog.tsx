@@ -1,10 +1,24 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +54,7 @@ function AppointmentDialog({
   const queryClient = useQueryClient();
   const patient = usePatientContext();
   const tokenData = patient?.tokenData;
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const handleRescheduleAppointment = (appointment: Appointment) => {
     navigate(
       `/facility/${appointment.facility.id}/appointments/${appointment.user.id}/reschedule/${appointment.id}`,
@@ -63,64 +78,109 @@ function AppointmentDialog({
   if (!appointment) return <></>;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0">
-        <DialogHeader className="p-3">
-          <DialogDescription className="mb-4">
-            {t("appointment_details")}
-          </DialogDescription>
-          <div className="flex flex-row justify-between">
-            <div className="space-y-1">
-              <Label className="text-xs">{t("practitioner")}</Label>
-              <p className="text-base font-semibold">
-                {formatName(appointment.user)}
-              </p>
-              <p className="text-sm font-semibold text-gray-600">
-                {formatAppointmentSlotTime(appointment)}
-              </p>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="p-0">
+          <DialogHeader className="p-3">
+            <DialogDescription className="mb-4">
+              {t("appointment_details")}
+            </DialogDescription>
+            <div className="flex flex-row justify-between">
+              <div className="space-y-1">
+                <Label className="text-xs">{t("practitioner")}</Label>
+                <p className="text-base font-semibold">
+                  {formatName(appointment.user)}
+                </p>
+                <p className="text-sm font-semibold text-gray-600">
+                  {formatAppointmentSlotTime(appointment)}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">{t("patient_name")}</Label>
+                <p className="font-semibold text-base">
+                  {appointment.patient.name}
+                </p>
+                <p className="text-sm text-gray-600 font-medium">
+                  {formatPatientAge(appointment.patient as any, true)},{" "}
+                  {t(`GENDER__${appointment.patient.gender}`)}
+                </p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs">{t("patient_name")}</Label>
-              <p className="font-semibold text-base">
-                {appointment.patient.name}
-              </p>
-              <p className="text-sm text-gray-600 font-medium">
-                {formatPatientAge(appointment.patient as any, true)},{" "}
-                {t(`GENDER__${appointment.patient.gender}`)}
-              </p>
-            </div>
-          </div>
-        </DialogHeader>
-        <DialogFooter className="flex flex-row sm:justify-between items-center bg-blue-200 m-0 w-full p-3 rounded-b-lg">
-          <span className="text-sm font-semibold text-blue-700">
-            {t(appointment.status)}
-          </span>
-          {!AppointmentFinalStatuses.includes(appointment.status) && (
-            <span className="flex flex-row gap-2">
-              <Button
-                variant="destructive"
-                type="button"
-                disabled={isPending}
-                onClick={() => {
-                  cancelAppointment({
-                    appointment: appointment.id,
-                    patient: appointment.patient.id,
-                  });
-                }}
-              >
-                <span>{t("cancel")}</span>
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => handleRescheduleAppointment(appointment)}
-              >
-                <span>{t("reschedule")}</span>
-              </Button>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row sm:justify-between items-center bg-blue-200 m-0 w-full p-3 rounded-b-lg">
+            <span className="text-sm font-semibold text-blue-700">
+              {t(appointment.status)}
             </span>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            {!AppointmentFinalStatuses.includes(appointment.status) && (
+              <span className="flex flex-row gap-2">
+                <AlertDialog
+                  open={isCancelDialogOpen}
+                  onOpenChange={(open) => setIsCancelDialogOpen(open)}
+                >
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => setIsCancelDialogOpen(true)}
+                    >
+                      <span>{t("cancel")}</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        <Alert variant="destructive" className="mt-4">
+                          <AlertTitle>{t("warning")}</AlertTitle>
+                          <AlertDescription>
+                            {t(
+                              "this_will_permanently_cancel_the_appointment_and_cannot_be_undone",
+                              {
+                                date: formatAppointmentSlotTime(appointment),
+                                practitioner: formatName(appointment.user),
+                                facility: appointment.facility.name,
+                              },
+                            )}
+                          </AlertDescription>
+                        </Alert>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel
+                        onClick={() => setIsCancelDialogOpen(false)}
+                      >
+                        {t("cancel")}
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        className={cn(
+                          buttonVariants({ variant: "destructive" }),
+                        )}
+                        onClick={() => {
+                          cancelAppointment({
+                            appointment: appointment.id,
+                            patient: appointment.patient.id,
+                          });
+                          setIsCancelDialogOpen(false);
+                        }}
+                      >
+                        {t("confirm")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleRescheduleAppointment(appointment)}
+                >
+                  <span>{t("reschedule")}</span>
+                </Button>
+              </span>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

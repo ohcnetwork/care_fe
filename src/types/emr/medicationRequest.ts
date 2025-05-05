@@ -174,6 +174,7 @@ export interface MedicationRequest {
   dosage_instruction: MedicationRequestDosageInstruction[];
   note?: string;
   authored_on: string;
+  created_by?: UserBareMinimum;
 }
 
 export interface MedicationRequestRead {

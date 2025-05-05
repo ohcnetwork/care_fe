@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +29,7 @@ interface LocationCardWrapperProps {
   editingState: EditingState;
   setEditingState: React.Dispatch<React.SetStateAction<EditingState>>;
   handleCancelEdit: () => void;
-  handleConfirmEdit: (location: LocationHistory) => Promise<void>;
+  handleConfirmEdit: (location: LocationHistory) => void;
   isPending: boolean;
   showBackButton?: boolean;
   title?: string;
@@ -64,6 +65,22 @@ export function LocationCardWrapper({
       }));
     }
   }, [isEditing, editingState.timeConfig.status]);
+
+  const validateDates = () => {
+    if (!editingState.timeConfig.end) return true;
+
+    if (editingState.timeConfig.end < editingState.timeConfig.start) {
+      toast.error(t("end_time_before_start_error"));
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleConfirm = () => {
+    if (!validateDates()) return;
+    handleConfirmEdit(locationHistory);
+  };
 
   return (
     <div className="space-y-4">
@@ -168,7 +185,7 @@ export function LocationCardWrapper({
               <Button
                 data-cy="location-card-wrapper-save-button"
                 variant="primary"
-                onClick={() => handleConfirmEdit(locationHistory)}
+                onClick={handleConfirm}
                 disabled={isPending}
               >
                 {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
