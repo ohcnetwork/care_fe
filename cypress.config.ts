@@ -40,7 +40,7 @@ export default defineConfig({
     experimentalMemoryManagement: true,
   },
   env: {
-    API_URL: process.env.CYPRESS_API_URL,
+    API_URL: process.env.CYPRESS_API_URL ?? "http://localhost:9000",
     ENABLE_HCX: process.env.REACT_ENABLE_HCX ?? false,
   },
 });
