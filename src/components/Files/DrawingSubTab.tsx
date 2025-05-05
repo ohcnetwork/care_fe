@@ -1,6 +1,7 @@
 import { exportToSvg } from "@excalidraw/excalidraw";
 import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
 import { useQuery } from "@tanstack/react-query";
+import { SearchIcon } from "lucide-react";
 import { navigate, usePathParams } from "raviger";
 import { memo, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,7 +15,7 @@ import { Input } from "@/components/ui/input";
 
 import Loading from "@/components/Common/Loading";
 
-import useFilters from "@/hooks/useFilters";
+import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -30,6 +31,8 @@ export interface DrawingsTabProps {
   patient?: Patient;
   encounter?: Encounter;
   patientId?: string;
+  qParams: any;
+  updateQuery: (params: FilterState) => void;
 }
 
 interface ExcalidrawPreviewProps {
@@ -125,17 +128,22 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
 
 ExcalidrawPreview.displayName = "ExcalidrawPreview";
 
-export const DrawingTab = (props: DrawingsTabProps) => {
+export const DrawingPage = ({
+  type,
+  qParams,
+  updateQuery,
+  patientId,
+  patient,
+  encounter,
+}: DrawingsTabProps) => {
   const { t } = useTranslation();
-  const { type, patient, encounter, patientId } = props;
   const { hasPermission } = usePermissions();
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+  const { Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["name"],
   });
-
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: query(routes.patient.getPatient, {
@@ -184,16 +192,19 @@ export const DrawingTab = (props: DrawingsTabProps) => {
   });
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-4 gap-2">
-        <Input
-          id="search-by-name"
-          name="name"
-          placeholder={t("search_drawings")}
-          value={qParams.name}
-          onChange={(e) => updateQuery({ name: e.target.value })}
-          className="w-full sm:w-1/3"
-        />
+    <div className="p-4 -ml-4 -mt-2">
+      <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
+        <div className="relative flex-1 min-w-72 max-w-96">
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
+          <Input
+            id="search-by-name"
+            name="name"
+            placeholder={t("search_drawings")}
+            value={qParams.name || ""}
+            onChange={(e) => updateQuery({ name: e.target.value })}
+            className="pl-10"
+          />
+        </div>
         {canEdit && (
           <Button variant="white" onClick={() => navigate("drawings/new")}>
             <CareIcon icon="l-pen" />
@@ -227,6 +238,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
                     <div className="h-60 md:h-40 w-full bg-gray-50">
                       <ExcalidrawPreview
                         elements={drawing.object_value.elements}
+                        key={drawing.modified_date}
                       />
                     </div>
                     <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-center p-2">

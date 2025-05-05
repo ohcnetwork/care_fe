@@ -59,7 +59,7 @@ export class PatientFiles {
   }
 
   fillSingleFileName(fileName: string) {
-    cy.get("input").type(fileName);
+    cy.get('[data-cy="filename-input"]').type(fileName);
     return this;
   }
 

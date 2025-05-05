@@ -27,7 +27,6 @@ import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
-import { EncounterDrawingsTab } from "./tabs/EncounterDrawingsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 
 export interface EncounterTabProps {
@@ -42,7 +41,6 @@ const defaultTabs = {
   files: EncounterFilesTab,
   notes: EncounterNotesTab,
   devices: EncounterDevicesTab,
-  drawings: EncounterDrawingsTab,
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
   // pressure_sore: EncounterPressureSoreTab,
