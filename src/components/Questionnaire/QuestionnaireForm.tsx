@@ -281,14 +281,14 @@ const STRUCTURED_TYPE_VALIDATORS = {
   appointment: (
     response: ResponseValue | undefined,
     questionId: string,
-    required: boolean,
+    required?: boolean,
   ) => {
     const appointmentData =
       (response?.value as CreateAppointmentQuestion[]) || [];
     return validateAppointmentQuestion(
       appointmentData[0],
       questionId,
-      required,
+      required ?? false,
     );
   },
   medication_statement: (
@@ -586,32 +586,25 @@ export function QuestionnaireForm({
 
         if (q.type === "structured" && q.structured_type) {
           const response = form.responses.find((r) => r.question_id === q.id);
-          if (q.structured_type === "appointment") {
-            const appointmentValidator = STRUCTURED_TYPE_VALIDATORS.appointment;
-            const appointmentValidationErrors = appointmentValidator(
-              response?.values?.[0],
-              q.id,
-              q.required ?? false,
-            );
-            errors.push(...appointmentValidationErrors);
-            if (appointmentValidationErrors.length > 0) {
-              firstErrorId = firstErrorId ? firstErrorId : q.id;
-            }
-          } else {
-            const validator =
-              STRUCTURED_TYPE_VALIDATORS[
-                q.structured_type as Exclude<
-                  keyof typeof STRUCTURED_TYPE_VALIDATORS,
-                  "appointment"
-                >
-              ];
+          const validator =
+            STRUCTURED_TYPE_VALIDATORS[
+              q.structured_type as keyof typeof STRUCTURED_TYPE_VALIDATORS
+            ];
 
-            if (validator) {
-              const validationErrors = validator(response?.values?.[0], q.id);
-              errors.push(...validationErrors);
-              if (validationErrors.length > 0) {
-                firstErrorId = firstErrorId ? firstErrorId : q.id;
-              }
+          if (validator) {
+            let validationErrors: QuestionValidationError[] = [];
+            if (q.structured_type === "appointment") {
+              validationErrors = validator(
+                response?.values?.[0],
+                q.id,
+                q.required ?? false,
+              );
+            } else {
+              validationErrors = validator(response?.values?.[0], q.id);
+            }
+            errors.push(...validationErrors);
+            if (validationErrors.length > 0) {
+              firstErrorId = firstErrorId ? firstErrorId : q.id;
             }
           }
         }

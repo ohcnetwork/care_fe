@@ -34,8 +34,6 @@ import {
 } from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
-import { FieldError } from "./FieldError";
-
 interface AppointmentQuestionProps {
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
@@ -226,11 +224,6 @@ export function AppointmentQuestion({
               </div>
             </SheetContent>
           </Sheet>
-          <FieldError
-            fieldKey={APPOINTMENT_FIELDS.SLOT.key}
-            questionId={question.id}
-            errors={errors}
-          />
         </div>
       </div>
     </div>
