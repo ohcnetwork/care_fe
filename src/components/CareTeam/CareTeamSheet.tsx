@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,7 +14,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,11 +36,10 @@ import UserSelector from "@/components/Common/UserSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import careTeamApi from "@/types/careTeam/careTeamApi";
 import { Encounter } from "@/types/emr/encounter";
-import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { Code } from "@/types/questionnaire/code";
 import { UserBase } from "@/types/user/user";
 
@@ -86,14 +84,6 @@ export function CareTeamSheet({
       setMemberToRemove(undefined);
     }
   }, [open]);
-
-  const { data } = useQuery({
-    queryKey: ["organizations", encounter.facility.id],
-    queryFn: query(facilityOrganizationApi.list, {
-      pathParams: { facilityId: encounter.facility.id },
-    }),
-  });
-  const organizations = data?.results || [];
 
   const { mutate: saveCareTeam, isPending } = useMutation({
     mutationFn: mutate(careTeamApi.setCareTeam, {
@@ -214,20 +204,16 @@ export function CareTeamSheet({
 
         <ScrollArea className="h-full my-6 pb-12 pr-6">
           <div className="space-y-6">
+            <FacilityOrganizationSelector
+              singleSelection={true}
+              onChange={(value: string[] | null) =>
+                setSelectedOrganization(value ? value[0] : "")
+              }
+              facilityId={encounter.facility.id}
+            />
             <div className="flex flex-col gap-3">
-              <Autocomplete
-                options={organizations.map((org) => {
-                  return {
-                    label: org.name,
-                    value: org.id,
-                  };
-                })}
-                value={selectedOrganization}
-                onChange={(value: string) => setSelectedOrganization(value)}
-                placeholder={t("select_organization_placeholder")}
-              />
               {canWrite && (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-4">
                   {selectedOrganization && (
                     <div className="flex flex-col">
                       <UserSelector
