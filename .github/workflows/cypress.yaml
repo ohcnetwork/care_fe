@@ -5,6 +5,15 @@ on:
     branches:
       - develop
       - staging
+    paths:
+      - "src/**"
+      - "cypress/**"
+      - "package.json"
+      - "package-lock.json"
+      - "cypress.config.ts"
+      - "plugins/**"
+      - "public/**"
+      - ".github/workflows/cypress.yaml"
   workflow_dispatch:
 
 jobs:
