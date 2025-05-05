@@ -45,11 +45,4 @@ export default defineConfig({
     API_URL: process.env.REACT_CARE_API_URL,
     ENABLE_HCX: process.env.REACT_ENABLE_HCX ?? false,
   },
-
-  component: {
-    devServer: {
-      framework: "react",
-      bundler: "vite",
-    },
-  },
 });
