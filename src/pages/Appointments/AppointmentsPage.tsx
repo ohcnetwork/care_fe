@@ -553,7 +553,7 @@ export default function AppointmentsPage({
                             slot: null,
                           });
                         }}
-                        disabled={(date) =>
+                        blockDate={(date) =>
                           qParams.date_from
                             ? dayjs(date).isBefore(
                                 dayjs(qParams.date_from),

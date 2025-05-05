@@ -26,7 +26,8 @@ interface CombinedDatePickerProps {
   defaultTab?: "absolute" | "relative";
   classes?: string;
   dateFormat?: string;
-  disabled?: boolean | ((date: Date) => boolean);
+  disabled?: boolean;
+  blockDate?: (date: Date) => boolean;
 }
 
 export function CombinedDatePicker({
@@ -39,6 +40,7 @@ export function CombinedDatePicker({
   defaultTab = "absolute",
   classes,
   dateFormat = "PPP",
+  blockDate,
 }: CombinedDatePickerProps) {
   const { t } = useTranslation();
 
@@ -69,7 +71,7 @@ export function CombinedDatePicker({
               classes,
               buttonClassName,
             )}
-            disabled={typeof disabled === "boolean" ? disabled : false}
+            disabled={disabled}
           >
             <CareIcon icon="l-calender" className="size-4" />
             {value ? format(value, dateFormat) : placeholder}
@@ -89,14 +91,14 @@ export function CombinedDatePicker({
                 mode="single"
                 selected={value}
                 onSelect={handleSelect}
-                disabled={typeof disabled !== "boolean" ? disabled : undefined}
+                disabled={blockDate}
               />
             </TabsContent>
             <TabsContent value="relative" className="p-0">
               <RelativeDatePicker
                 value={value}
                 onDateChange={handleRelativeDateChange}
-                disabled={typeof disabled !== "boolean" ? disabled : undefined}
+                disabled={blockDate}
               />
             </TabsContent>
           </Tabs>

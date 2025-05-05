@@ -10,6 +10,7 @@ import {
   subYears,
 } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -32,6 +33,20 @@ interface RelativeDatePickerProps {
   value?: Date;
   disabled?: (date: Date) => boolean;
 }
+
+const computeDate = (unit: TimeUnit, value: number) => {
+  const now = new Date();
+  switch (unit) {
+    case "days":
+      return subDays(now, value);
+    case "weeks":
+      return subWeeks(now, value);
+    case "months":
+      return subMonths(now, value);
+    case "years":
+      return subYears(now, value);
+  }
+};
 
 const computeTimeUnits = (date?: Date): TimeUnitState => {
   const now = new Date();
@@ -90,121 +105,23 @@ export function RelativeDatePicker({
     }
   }, [selected.unit]);
 
-  // Map of disabled values per unit
-  const disabledValuesByUnit = useMemo(() => {
-    const now = new Date();
-    const map: Record<TimeUnit, Set<number>> = {
-      days: new Set(),
-      weeks: new Set(),
-      months: new Set(),
-      years: new Set(),
-    };
-    if (!disabled) return map;
-
-    for (const unit of timeUnits) {
-      const limit =
-        unit === "days"
-          ? 31
-          : unit === "weeks"
-            ? 12
-            : unit === "months"
-              ? 36
-              : 60;
-      for (let i = 1; i <= limit; i++) {
-        let date: Date;
-        switch (unit) {
-          case "days":
-            date = subDays(now, i);
-            break;
-          case "weeks":
-            date = subWeeks(now, i);
-            break;
-          case "months":
-            date = subMonths(now, i);
-            break;
-          case "years":
-            date = subYears(now, i);
-            break;
-          default:
-            date = now;
-        }
-        if (disabled(date)) map[unit].add(i);
-      }
-    }
-    return map;
-  }, [disabled, timeUnits]);
-
-  // Units where ALL values are disabled
-  const fullyDisabledUnits = useMemo(() => {
-    return timeUnits.filter((unit) => {
-      const limit =
-        unit === "days"
-          ? 31
-          : unit === "weeks"
-            ? 12
-            : unit === "months"
-              ? 36
-              : 60;
-      return disabledValuesByUnit[unit].size === limit;
-    });
-  }, [disabledValuesByUnit, timeUnits]);
-
-  const allDisabled = fullyDisabledUnits.length === timeUnits.length;
-
-  // Auto-switch unit if selected unit becomes fully disabled
-  useEffect(() => {
-    if (fullyDisabledUnits.includes(selected.unit)) {
-      const nextAvailable = timeUnits.find(
-        (u) => !fullyDisabledUnits.includes(u),
-      );
-      if (nextAvailable) {
-        setSelected({ unit: nextAvailable, value: 1 });
-      }
-    }
-  }, [fullyDisabledUnits, selected.unit, timeUnits]);
-
-  // Validate current value for selected unit
-  useEffect(() => {
-    const disabledSet = disabledValuesByUnit[selected.unit];
-    if (disabledSet.has(selected.value)) {
-      const validValue = Array.from({ length: maxValue }, (_, i) => i + 1).find(
-        (v) => !disabledSet.has(v),
-      );
-      if (validValue !== undefined) {
-        setSelected((prev) => ({ ...prev, value: validValue }));
-      }
-    }
-  }, [selected.unit, selected.value, disabledValuesByUnit, maxValue]);
+  const validateDate = (unit: TimeUnit, value: number) => {
+    const selectedDate = computeDate(unit, value);
+    const isDisabled = disabled?.(selectedDate) ?? false;
+    return !isDisabled;
+  };
 
   // Update result date
   useEffect(() => {
-    const now = new Date();
-    let newDate: Date;
-    switch (selected.unit) {
-      case "days":
-        newDate = subDays(now, selected.value);
-        break;
-      case "weeks":
-        newDate = subWeeks(now, selected.value);
-        break;
-      case "months":
-        newDate = subMonths(now, selected.value);
-        break;
-      case "years":
-        newDate = subYears(now, selected.value);
-        break;
-      default:
-        newDate = now;
-    }
-    setResultDate(newDate);
-    onDateChange(newDate);
+    setResultDate(computeDate(selected.unit, selected.value));
+    onDateChange(computeDate(selected.unit, selected.value));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
   const handleUnitChange = (newUnit: TimeUnit) => {
-    if (!fullyDisabledUnits.includes(newUnit)) {
+    if (validateDate(newUnit, 1)) {
       setSelected((prev) => ({ ...prev, unit: newUnit, value: 1 }));
-    }
+    } else toast.error("Please select a valid date");
   };
 
   return (
@@ -215,21 +132,22 @@ export function RelativeDatePicker({
             value={selected.value.toString()}
             onValueChange={(value) => {
               const numValue = Number.parseInt(value) || 0;
-              if (!disabledValuesByUnit[selected.unit].has(numValue)) {
+              if (validateDate(selected.unit, numValue)) {
                 setSelected((prev) => ({
                   ...prev,
                   value: numValue,
                 }));
               }
             }}
-            disabled={allDisabled || fullyDisabledUnits.includes(selected.unit)}
+            disabled={!validateDate(selected.unit, selected.value)}
           >
             <SelectTrigger className="col-span-2">
               <SelectValue placeholder="Select a number" />
             </SelectTrigger>
             <SelectContent>
               {Array.from({ length: maxValue }, (_, i) => i + 1).map((num) => {
-                const isDisabled = disabledValuesByUnit[selected.unit].has(num);
+                const isDisabled =
+                  disabled?.(computeDate(selected.unit, num)) ?? false;
                 return (
                   <SelectItem
                     key={num}
@@ -251,9 +169,7 @@ export function RelativeDatePicker({
               onClick={() => handleUnitChange(unit)}
               variant={selected.unit === unit ? "default" : "outline"}
               className={
-                fullyDisabledUnits.includes(unit)
-                  ? "opacity-50 pointer-events-none"
-                  : ""
+                !validateDate(unit, 1) ? "opacity-50 pointer-events-none" : ""
               }
             >
               {unit.charAt(0).toUpperCase() + unit.slice(1)}
