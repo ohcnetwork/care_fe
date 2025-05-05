@@ -345,7 +345,7 @@ export default function CreateScheduleTemplateSheet({
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage id={`error-name`} />
+                    <FormMessage id="error-name" />
                   </FormItem>
                 )}
               />
@@ -362,7 +362,7 @@ export default function CreateScheduleTemplateSheet({
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
                         />
-                        <FormMessage id={`error-valid_from`}>
+                        <FormMessage id="error-valid_from">
                           {fieldState.error?.message}
                         </FormMessage>
                       </FormItem>
@@ -381,7 +381,7 @@ export default function CreateScheduleTemplateSheet({
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
                         />
-                        <FormMessage id={`error-valid_to`}>
+                        <FormMessage id="error-valid_to">
                           {fieldState.error?.message}
                         </FormMessage>
                       </FormItem>
@@ -410,7 +410,7 @@ export default function CreateScheduleTemplateSheet({
                             format={weekdayFormat}
                           />
                         </FormControl>
-                        <FormMessage id={`error-weekdays`}>
+                        <FormMessage id="error-weekdays">
                           {fieldState.error?.message}
                         </FormMessage>
                       </FormItem>
