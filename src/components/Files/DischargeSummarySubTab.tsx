@@ -50,6 +50,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
@@ -153,8 +154,6 @@ export const DischargeTab = ({
   const getFileType = (file: FileUploadModel) => {
     return fileManager.getFileType(file);
   };
-
-  if (filesLoading) return <Loading />;
 
   const icons: Record<keyof typeof FILE_EXTENSIONS | "UNKNOWN", IconName> = {
     AUDIO: "l-volume",
@@ -420,7 +419,7 @@ export const DischargeTab = ({
                   <div>
                     <div className="text-gray-500">{t("shared_by")}</div>
                     <div className="font-medium">
-                      {file.uploaded_by?.username}
+                      {file.uploaded_by ? formatName(file.uploaded_by) : ""}
                     </div>
                   </div>
                 </div>
@@ -528,7 +527,7 @@ export const DischargeTab = ({
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
                   >
-                    {file.uploaded_by?.username}
+                    {file.uploaded_by ? formatName(file.uploaded_by) : ""}
                   </TableCell>
                   <TableCell
                     className={cn(
@@ -637,12 +636,16 @@ export const DischargeTab = ({
       <RenderTable />
       <RenderCard />
       <div className="flex">
-        <PaginationComponent
-          cPage={qParams.page ?? 1}
-          defaultPerPage={qParams.limit}
-          data={{ totalCount: files?.count ?? 0 }}
-          onChange={(page) => updateQuery({ page })}
-        />
+        {filesLoading ? (
+          <Loading />
+        ) : (
+          <PaginationComponent
+            cPage={qParams.page ?? 1}
+            defaultPerPage={qParams.limit}
+            data={{ totalCount: files?.count ?? 0 }}
+            onChange={(page) => updateQuery({ page })}
+          />
+        )}
       </div>
     </div>
   );
