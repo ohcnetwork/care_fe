@@ -573,7 +573,11 @@ const AppointmentActions = ({
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="outline" size="lg">
+          <Button
+            variant="outline"
+            size="lg"
+            disabled={appointment.status === "in_consultation"}
+          >
             <BanIcon className="size-4 mr-2" />
             {t("cancel_appointment")}
           </Button>
