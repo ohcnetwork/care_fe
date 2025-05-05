@@ -10,6 +10,7 @@ import {
   subYears,
 } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +86,7 @@ export function RelativeDatePicker({
   value,
   disabled,
 }: RelativeDatePickerProps) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState(() => computeTimeUnits(value));
   const [resultDate, setResultDate] = useState<Date>(value || new Date());
 
@@ -121,7 +123,7 @@ export function RelativeDatePicker({
   const handleUnitChange = (newUnit: TimeUnit) => {
     if (validateDate(newUnit, 1)) {
       setSelected((prev) => ({ ...prev, unit: newUnit, value: 1 }));
-    } else toast.error("Please select a valid date");
+    } else toast.error(t("select_valid_date"));
   };
 
   return (
@@ -153,9 +155,7 @@ export function RelativeDatePicker({
                     key={num}
                     value={num.toString()}
                     disabled={isDisabled}
-                    className={
-                      isDisabled ? "text-muted-foreground opacity-50" : ""
-                    }
+                    className={isDisabled ? "opacity-50" : ""}
                   >
                     {num}
                   </SelectItem>
@@ -182,9 +182,7 @@ export function RelativeDatePicker({
         <div className="text-xl font-bold mb-1 truncate">
           {format(resultDate, "MMM d, yyyy")}
         </div>
-        <div className="text-sm text-muted-foreground truncate">
-          {format(resultDate, "EEEE")}
-        </div>
+        <div className="text-sm truncate">{format(resultDate, "EEEE")}</div>
       </div>
     </div>
   );
