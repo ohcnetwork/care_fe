@@ -54,6 +54,7 @@ export default function FileUploadDialog({
       urls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [fileUpload.files]);
+
   return (
     <Dialog
       open={open}
@@ -69,7 +70,7 @@ export default function FileUploadDialog({
             {fileUpload.files.length > 1 ? t("upload_files") : t("upload_file")}
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-6 pr-5 max-h-[70vh] overflow-y-auto">
+        <div className="space-y-6 pr-5 max-h-[70vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {isPdf ? (
             <>
               {fileUpload.files.map((file, index) => (
@@ -199,7 +200,7 @@ export default function FileUploadDialog({
                     }}
                     className="border border-gray-300 focus:border-gray-400 rounded-md px-3 py-1.5 w-full"
                   />
-                  {!fileUpload.fileNames[index] && fileUpload.error && (
+                  {fileUpload.error && (
                     <p className="mt-2 text-sm text-red-600">
                       {fileUpload.error}
                     </p>
