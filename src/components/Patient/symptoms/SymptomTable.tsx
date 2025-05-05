@@ -113,7 +113,7 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
               {symptom.onset?.onset_datetime ? (
                 <RelativeDateTooltip
                   date={symptom.onset.onset_datetime}
-                  format="since"
+                  formatType="since"
                 />
               ) : (
                 "-"
