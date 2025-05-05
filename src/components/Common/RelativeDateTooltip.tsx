@@ -24,7 +24,7 @@ export default function RelativeDateTooltip({
   const { t } = useTranslation();
   if (!date) return null;
 
-  const dateObj = new Date(date);
+  const dateObj = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
 
   if (!isValid(dateObj)) {
@@ -46,10 +46,14 @@ export default function RelativeDateTooltip({
     ? format(dateObj, "PPpp")
     : format(dateObj, "PP");
 
+  const datetimeAttr = dateObj.toISOString();
+
   if (isDateToday && !hasTime) {
     return (
       <TooltipComponent content={tooltipContent}>
-        <span className={className}>{t("today")}</span>
+        <time dateTime={datetimeAttr} className={className}>
+          {t("today")}
+        </time>
       </TooltipComponent>
     );
   }
@@ -68,7 +72,9 @@ export default function RelativeDateTooltip({
 
   return (
     <TooltipComponent content={tooltipContent}>
-      <span className={className}>{label}</span>
+      <time dateTime={datetimeAttr} className={className}>
+        {label}
+      </time>
     </TooltipComponent>
   );
 }
