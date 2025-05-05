@@ -1,6 +1,7 @@
 import { UserCreation } from "@/pageObject/Users/UserCreation";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 import {
+  generateEmailDomain,
   generateName,
   generatePhoneNumber,
   generateUsername,
@@ -67,7 +68,7 @@ describe("User Creation", () => {
         username,
         password: defaultPassword,
         confirmPassword: defaultPassword,
-        email: `${username}@test.com`,
+        email: `${username}@${generateEmailDomain()}`,
         phoneNumber: generatePhoneNumber(),
         userType: "Doctor",
         gender: "Male",
