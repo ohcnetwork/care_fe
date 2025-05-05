@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -120,9 +122,10 @@ export default function ErrorPage({
       >
         {/* Background glow animation */}
         <div
-          className={`absolute inset-0 z-0 rounded-xl bg-yellow-100 blur-3xl pointer-events-none transition-all duration-700 scale-100 ${
-            isHovering ? "opacity-50 scale-100" : "opacity-0 scale-90"
-          }`}
+          className={cn(
+            "absolute inset-0 z-0 rounded-xl bg-yellow-100 blur-3xl pointer-events-none transition-all duration-700 scale-100",
+            isHovering ? "opacity-50 scale-100" : "opacity-0 scale-90",
+          )}
           aria-hidden="true"
         />
 
