@@ -17,58 +17,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup-backend:
-    if: github.repository == 'ohcnetwork/care_fe'
-    permissions: write-all
-    runs-on: ubuntu-latest
-    env:
-      REACT_CARE_API_URL: http://localhost:9000
-    steps:
-      - name: Checkout Frontend 📥
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set backend branch
-        id: backend-branch
-        run: echo "branch=develop" >> $GITHUB_OUTPUT
-
-      - name: Checkout care 📥
-        uses: actions/checkout@v4
-        with:
-          repository: ohcnetwork/care
-          path: care
-          ref: ${{ steps.backend-branch.outputs.branch }}
-          fetch-depth: 0
-
-      - name: Start care docker containers 🐳
-        run: |
-          cd care
-          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
-          echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
-          make docker_config_file=docker-compose.local.yaml up 
-          make docker_config_file=docker-compose.local.yaml load_fixtures
-          cd ..
-        env:
-          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
-
-      - name: Wait for care to be up ♻
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: 1
-          max_attempts: 5
-          command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
-          on_retry_command: sleep 5
-
-      - name: Save backend state
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-state
-          path: care
-          retention-days: 1
-          compression-level: 9
-
   install:
     if: github.repository == 'ohcnetwork/care_fe'
     permissions: write-all
