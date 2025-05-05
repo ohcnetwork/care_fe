@@ -5,7 +5,9 @@ export class PatientDetails {
   }
 
   clickAssignUserButton() {
+    cy.intercept("GET", "**/api/v1/users/**").as("getUsers");
     cy.verifyAndClickElement('[data-cy="assign-user-button"]', "Assign User");
+    cy.wait("@getUsers").its("response.statusCode").should("eq", 200);
     return this;
   }
 

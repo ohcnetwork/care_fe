@@ -6,7 +6,7 @@ export const EncounterDrawingsTab = (props: EncounterTabProps) => {
   return (
     <DrawingTab
       type="encounter"
-      patientId={props.patient.id}
+      patient={props.patient}
       encounter={props.encounter}
     />
   );

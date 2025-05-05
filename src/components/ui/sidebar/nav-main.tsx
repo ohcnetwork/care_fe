@@ -61,6 +61,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton
+                          data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                           tooltip={link.name}
                           className="cursor-pointer hover:bg-gray-200 hover:text-green-700"
                         >
@@ -84,6 +85,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                             <SidebarMenuSubItem key={subItem.name}>
                               <SidebarMenuSubButton
                                 asChild
+                                data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
                                 className={
                                   "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                                 }
@@ -150,9 +152,12 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
       <PopoverTrigger asChild>
         <SidebarMenuButton
           tooltip={link.name}
-          className={cn("cursor-pointer", {
-            "bg-gray-100 text-green-700 shadow": isChildActive(link),
-          })}
+          className={cn(
+            "cursor-pointer hover:bg-gray-200 hover:text-green-700",
+            {
+              "bg-white text-green-700 shadow": isChildActive(link),
+            },
+          )}
         >
           {link.icon ? (
             <CareIcon icon={link.icon as IconName} />
@@ -161,7 +166,12 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
           )}
         </SidebarMenuButton>
       </PopoverTrigger>
-      <PopoverContent side="right" align="start" className="w-48 p-1">
+      <PopoverContent
+        side="right"
+        align="start"
+        className="w-48 p-1"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
         <div className="flex flex-col gap-1">
           {link.children?.map((subItem) => (
             <ActiveLink
