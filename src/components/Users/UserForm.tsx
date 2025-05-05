@@ -138,7 +138,7 @@ export default function UserForm({
 
   type UserFormValues = z.infer<typeof userFormSchema>;
 
-  const form = useForm<UserFormValues>({
+  const form = useForm({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       user_type: "nurse",
@@ -347,7 +347,7 @@ export default function UserForm({
           />
         )}
 
-        <div className="md:flex gap-2 grid grid-cols-2">
+        <div className="md:flex gap-2 grid grid-cols-2 items-start">
           <FormField
             control={form.control}
             name="prefix"
@@ -588,7 +588,7 @@ export default function UserForm({
             />
 
             {form.watch("password_setup_method") === "immediate" && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
                 <FormField
                   control={form.control}
                   name="password"
@@ -665,7 +665,7 @@ export default function UserForm({
           </>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
           <FormField
             control={form.control}
             name="phone_number"

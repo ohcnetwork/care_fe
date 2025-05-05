@@ -1,48 +1,68 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { Building, X } from "lucide-react";
-import { useState } from "react";
+import { Building, ChevronDown, ChevronRight, Loader2, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
+
 import query from "@/Utils/request/query";
-import {
-  FacilityOrganization,
-  FacilityOrganizationResponse,
-} from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface FacilityOrganizationSelectorProps {
-  value?: string | null;
-  onChange: (value: string | null) => void;
+  value?: string[] | null;
+  onChange: (value: string[] | null) => void;
   facilityId: string;
-}
-
-interface AutoCompleteOption {
-  label: string;
-  value: string;
-  hasChildren?: boolean;
+  currentOrganizations?: FacilityOrganization[];
+  singleSelection?: boolean;
 }
 
 export default function FacilityOrganizationSelector(
   props: FacilityOrganizationSelectorProps,
 ) {
   const { t } = useTranslation();
-  const { onChange, facilityId } = props;
-  const [selectedLevels, setSelectedLevels] = useState<FacilityOrganization[]>(
-    [],
-  );
-  const [selectedOrganization, setSelectedOrganization] =
+  const {
+    onChange,
+    facilityId,
+    currentOrganizations,
+    singleSelection = false,
+  } = props;
+
+  const [selectedOrganizations, setSelectedOrganizations] = useState<
+    FacilityOrganization[]
+  >([]);
+  const [currentSelection, setCurrentSelection] =
     useState<FacilityOrganization | null>(null);
+  const [navigationLevels, setNavigationLevels] = useState<
+    FacilityOrganization[]
+  >([]);
   const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
   const [showAllOrgs, setShowAllOrgs] = useState(false);
-
-  const { data: rootOrganizations } = useQuery<FacilityOrganizationResponse>({
+  const [open, setOpen] = useState(false);
+  const isMobile = useBreakpoints({ default: true, sm: false });
+  const { data: rootOrganizations, isLoading: isLoadingRoot } = useQuery({
     queryKey: ["organizations-root", facilityOrgSearch, showAllOrgs],
     queryFn: query.debounced(
       showAllOrgs
@@ -59,7 +79,7 @@ export default function FacilityOrganizationSelector(
   });
 
   const organizationQueries = useQueries({
-    queries: selectedLevels.map((level, _index) => ({
+    queries: navigationLevels.map((level) => ({
       queryKey: ["organizations", level.id, facilityOrgSearch],
       queryFn: query.debounced(facilityOrganizationApi.list, {
         pathParams: { facilityId },
@@ -72,108 +92,212 @@ export default function FacilityOrganizationSelector(
     })),
   });
 
-  const handleLevelChange = (value: string, level: number) => {
-    let orgList: FacilityOrganization[] | undefined;
-
-    if (level === 0) {
-      orgList = rootOrganizations?.results;
-    } else if (level - 1 < organizationQueries.length) {
-      orgList = organizationQueries[level - 1].data?.results;
-    }
-
-    const selectedOrg = orgList?.find((org) => org.id === value);
-    if (!selectedOrg) return;
-    const newLevels = selectedLevels.slice(0, level);
-    newLevels.push(selectedOrg);
-    setSelectedLevels(newLevels);
-    setSelectedOrganization(selectedOrg);
-    onChange(selectedOrg.id);
-  };
-
-  const getOrganizationOptions = (
-    orgs?: FacilityOrganization[],
-  ): AutoCompleteOption[] => {
-    if (!orgs) return [];
-    return orgs.map((org) => ({
-      label: org.name + (org.has_children ? " →" : ""),
-      value: org.id,
-      hasChildren: org.has_children,
-    }));
-  };
-
-  const handleEdit = (level: number) => {
-    const newLevels = selectedLevels.slice(0, level);
-    setSelectedLevels(newLevels);
-    if (newLevels.length > 0) {
-      const lastOrg = newLevels[newLevels.length - 1];
-      setSelectedOrganization(lastOrg);
-      onChange(lastOrg.id);
+  const handleSelect = (org: FacilityOrganization) => {
+    if (org.has_children) {
+      setNavigationLevels([...navigationLevels, org]);
+      setCurrentSelection(org);
     } else {
-      setSelectedOrganization(null);
-      onChange(null);
+      setCurrentSelection(org);
+      handleConfirmSelection(org);
     }
+    setFacilityOrgSearch("");
   };
 
-  const handleRemoveOrganization = () => {
-    setSelectedLevels([]);
-    setSelectedOrganization(null);
-    onChange(null);
+  const handleConfirmSelection = (org: FacilityOrganization) => {
+    const newSelection = [...selectedOrganizations, org];
+    setSelectedOrganizations(newSelection);
+    onChange(newSelection.map((org) => org.id));
+    setCurrentSelection(null);
+    setNavigationLevels([]);
+    setOpen(false);
+  };
+
+  const handleRemoveOrganization = (index: number) => {
+    const newSelection = selectedOrganizations.filter((_, i) => i !== index);
+    setSelectedOrganizations(newSelection);
+    onChange(
+      newSelection.length > 0 ? newSelection.map((org) => org.id) : null,
+    );
   };
 
   const handleOrganizationViewChange = (value: string) => {
     setShowAllOrgs(value === "all");
-    setSelectedLevels([]);
-    setSelectedOrganization(null);
+    setSelectedOrganizations([]);
+    setCurrentSelection(null);
+    setNavigationLevels([]);
     onChange(null);
   };
 
-  const renderOrganizationLevel = (level: number) => {
-    let orgList: FacilityOrganization[] | undefined;
-
-    if (level === 0) {
-      orgList = rootOrganizations?.results;
-    } else if (level - 1 < organizationQueries.length) {
-      orgList = organizationQueries[level - 1].data?.results;
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setNavigationLevels([]);
+      setFacilityOrgSearch("");
     }
+  };
 
-    const getDropdownLabel = () => {
-      if (level < selectedLevels.length) {
-        return selectedLevels[level].name;
-      }
-      return level === 0 ? t("select_department") : t("select_sub_department");
-    };
+  const getCurrentLevelOrganizations = () => {
+    if (navigationLevels.length === 0) {
+      return rootOrganizations?.results || [];
+    }
+    const lastQuery = organizationQueries[navigationLevels.length - 1];
+    return lastQuery?.data?.results || [];
+  };
 
+  const renderNavigationPath = () => {
     return (
-      <div className="group flex items-center gap-1.5">
-        {level > 0 && (
-          <CareIcon
-            icon="l-arrow-right"
-            className="h-3.5 w-3.5 text-gray-400 shrink-0"
-          />
-        )}
-        <div className="flex-1 flex items-center gap-2">
-          <div className="flex-1">
-            <Autocomplete
-              data-cy="facility-organization"
-              value={selectedLevels[level]?.id}
-              options={getOrganizationOptions(orgList)}
-              onChange={(value) => handleLevelChange(value, level)}
-              placeholder={getDropdownLabel()}
-              onSearch={(value) => setFacilityOrgSearch(value)}
-            />
-          </div>
-          {level > 0 && level < selectedLevels.length && (
-            <div
-              className="cursor-pointer p-1 hover:bg-gray-100 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => handleEdit(level)}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Clear button */}
+        <button
+          type="button"
+          onClick={() => setNavigationLevels([])}
+          className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
+        >
+          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+        </button>
+        {navigationLevels.map((org, index) => (
+          <div key={org.id} className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setNavigationLevels(navigationLevels.slice(0, index + 1));
+                setFacilityOrgSearch("");
+              }}
+              className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
             >
-              <CareIcon icon="l-pen" className="size-4 text-gray-500" />
-            </div>
-          )}
-        </div>
+              {org.name}
+            </button>
+            <ChevronRight className="h-3 w-3 text-gray-400 flex-shrink-0" />
+          </div>
+        ))}
       </div>
     );
   };
+
+  const renderOrganizationPopover = (className?: string) => {
+    return (
+      <Command className={className}>
+        <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
+          <span className="font-semibold text-base text-gray-900">
+            {t("select_department")}
+          </span>
+          <span className="text-sm text-gray-500 mt-0.5">
+            {t("select_department_description")}
+          </span>
+        </div>
+        <div className="flex items-center px-3 py-2 border-b sticky top-[48px] bg-white z-10">
+          {navigationLevels.length > 0 ? (
+            renderNavigationPath()
+          ) : (
+            <span className="text-sm text-gray-500">
+              {t("select_from_list")}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center border-b px-3 sticky top-[96px] bg-white z-10">
+          <CommandInput
+            placeholder={t("search_organizations")}
+            onValueChange={setFacilityOrgSearch}
+            value={facilityOrgSearch}
+            className="border-none focus:ring-0"
+          />
+        </div>
+        <CommandList
+          className="max-h-[calc(100vh-30rem)]"
+          onWheel={(e) => e.stopPropagation()}
+        >
+          <CommandEmpty>
+            {isLoadingRoot ||
+            organizationQueries[navigationLevels.length - 1]?.isLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                <span className="ml-2 text-sm text-gray-500">
+                  {t("loading_organizations")}
+                </span>
+              </div>
+            ) : (
+              t("no_organizations_found")
+            )}
+          </CommandEmpty>
+          <CommandGroup>
+            {!(
+              isLoadingRoot ||
+              organizationQueries[navigationLevels.length - 1]?.isLoading
+            ) &&
+              getCurrentLevelOrganizations().map((org) => {
+                const isSelected = currentSelection?.id === org.id;
+                return (
+                  <CommandItem
+                    key={org.id}
+                    value={org.name}
+                    onSelect={() => handleSelect(org)}
+                    className={cn(
+                      "flex items-center justify-between",
+                      isSelected && "bg-sky-50/50",
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <span>{org.name}</span>
+                      {isSelected && (
+                        <CareIcon
+                          icon="l-check"
+                          className="ml-2 h-4 w-4 text-sky-600"
+                        />
+                      )}
+                    </div>
+                    {org.has_children && (
+                      <ChevronRight className="h-4 w-4 opacity-50" />
+                    )}
+                  </CommandItem>
+                );
+              })}
+          </CommandGroup>
+        </CommandList>
+        {currentSelection && (
+          <div className="md:m-0 m-2 flex items-center justify-between px-3 py-2  bg-sky-50/50 border-sky-200 rounded-md ">
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-500 mb-0.5">
+                {t("selected")}
+              </span>
+              <span className="font-medium text-sm text-sky-900">
+                {currentSelection.name}
+              </span>
+            </div>
+            {currentSelection.has_children && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-2"
+                onClick={() => handleConfirmSelection(currentSelection)}
+                disabled={isDisabled}
+                data-cy="confirm-organization"
+              >
+                {isDisabled ? (
+                  <>
+                    <span>{t("already_selected")}</span>
+                    <CareIcon icon="l-multiply" className="h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    <span>{t("confirm")}</span>
+                    <CareIcon icon="l-check" className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        )}
+      </Command>
+    );
+  };
+
+  const isDisabled = useMemo(() => {
+    return (
+      selectedOrganizations.some((org) => org.id === currentSelection?.id) ||
+      (!!currentOrganizations &&
+        currentOrganizations.some((org) => org.id === currentSelection?.id))
+    );
+  }, [currentSelection, currentOrganizations, selectedOrganizations]);
 
   return (
     <div className="space-y-4">
@@ -198,37 +322,86 @@ export default function FacilityOrganizationSelector(
       </Tabs>
 
       <div className="space-y-3">
-        {selectedOrganization && (
-          <div className="flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5">
-            <Building className="size-4 text-sky-600 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm text-sky-900 truncate">
-                {selectedOrganization.name}
-              </p>
-              {selectedOrganization.has_children && (
-                <p className="text-xs text-sky-600">
-                  {t("has_sub_departments")}
-                </p>
-              )}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="size-8 p-0 text-gray-500 hover:text-gray-900"
-              onClick={handleRemoveOrganization}
-            >
-              <X className="size-4" />
-              <span className="sr-only">{t("remove_organization")}</span>
-            </Button>
+        <div className="space-y-3">
+          <div className="flex flex-col gap-2">
+            {selectedOrganizations.map((org, index) => (
+              <div
+                key={index}
+                className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5"
+              >
+                <Building className="size-4 text-sky-600 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm text-sky-900 truncate">
+                    {org.name}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="size-8 p-0 text-gray-500 hover:text-gray-900"
+                  onClick={() => handleRemoveOrganization(index)}
+                >
+                  <X className="size-4" />
+                  <span className="sr-only">{t("remove_organization")}</span>
+                </Button>
+              </div>
+            ))}
+            {(!singleSelection ||
+              (singleSelection && selectedOrganizations.length < 1)) &&
+              (isMobile ? (
+                <>
+                  <Sheet open={open} onOpenChange={setOpen}>
+                    <SheetTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-full justify-between border-dashed"
+                        data-cy="facility-organization"
+                        onClick={() => setOpen(true)}
+                        type="button" // Prevents unintended form submission
+                      >
+                        <span className="truncate text-gray-500">
+                          {currentSelection
+                            ? currentSelection.name
+                            : t("select_department")}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent className="p-0" side="bottom">
+                      {renderOrganizationPopover("mb-12")}
+                    </SheetContent>
+                  </Sheet>
+                </>
+              ) : (
+                <Popover open={open} onOpenChange={handleOpenChange}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full justify-between border-dashed"
+                      data-cy="facility-organization"
+                    >
+                      <span className="truncate text-gray-500">
+                        {currentSelection
+                          ? currentSelection.name
+                          : t("select_department")}
+                      </span>
+                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    sideOffset={4}
+                    className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
+                  >
+                    {renderOrganizationPopover()}
+                  </PopoverContent>
+                </Popover>
+              ))}
           </div>
-        )}
-        <div className="space-y-1.5">
-          {selectedLevels.map((org, index) => (
-            <div key={org.id}>{renderOrganizationLevel(index)}</div>
-          ))}
-          {(!selectedLevels.length ||
-            selectedLevels[selectedLevels.length - 1]?.has_children) &&
-            renderOrganizationLevel(selectedLevels.length)}
         </div>
       </div>
     </div>

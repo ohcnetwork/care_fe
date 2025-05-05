@@ -11,8 +11,6 @@ export class PatientLocation {
   private selectors = {
     locationForm: '[data-cy="location-form-options"]',
     addChildLocationButton: '[data-cy="add-child-location-button"]',
-    sidebarContent: '[data-sidebar="content"]',
-    locationTab: '[data-cy="settings-locations-tab"]',
     nameInput: '[data-cy="location-name-input"]',
     bedCountsSelect: '[data-cy="bed-counts-select"]',
     locationDescription: '[data-cy="location-description"]',
@@ -28,20 +26,23 @@ export class PatientLocation {
     completeBedStayButton: '[data-cy="complete-bed-stay-button"]',
     locationCard: '[data-cy="location-card-container"]',
     locationSearchInput: '[data-cy="location-search-input"]',
-    viewDetailsLocationButton: '[data-cy="view-details-location-button"]',
+    viewDetailsLocationButton: '[data-cy="view-location-row"]',
     locationChildSearchInput: '[data-cy="location-child-search-input"]',
     deleteLocationButton: '[data-cy="delete-location-button"]',
     removeLocationButton: '[data-cy="remove-location-button"]',
     showAvailableBeds: "#available-only",
   };
 
-  openFirstExistingLocation() {
-    cy.get(this.selectors.viewDetailsLocationButton).first().click();
+  openFirstExistingLocation(locationName: string) {
+    cy.verifyAndClickElement(
+      this.selectors.viewDetailsLocationButton,
+      locationName,
+    );
     return this;
   }
 
   clickFirstDeleteLocationButton() {
-    cy.get(this.selectors.deleteLocationButton).first().click();
+    cy.get(this.selectors.deleteLocationButton).first().click({ force: true });
     cy.verifyAndClickElement(this.selectors.removeLocationButton, "Remove");
     return this;
   }
@@ -64,12 +65,15 @@ export class PatientLocation {
   }
 
   searchLocation(locationName: string) {
-    cy.typeIntoField(this.selectors.locationSearchInput, locationName);
+    cy.typeIntoField(this.selectors.locationSearchInput, locationName, {
+      skipVerification: true,
+    });
     return this;
   }
 
   searchChildLocation(locationName: string) {
     cy.typeIntoField(this.selectors.locationChildSearchInput, locationName, {
+      skipVerification: true,
       clearBeforeTyping: true,
     });
     return this;
@@ -77,12 +81,12 @@ export class PatientLocation {
 
   // Navigation
   navigateToSettings() {
-    cy.verifyAndClickElement(this.selectors.sidebarContent, "Settings");
+    cy.verifyAndClickElement('[data-cy="nav-settings"]', "Settings");
     return this;
   }
 
   clickLocationTab() {
-    cy.verifyAndClickElement(this.selectors.locationTab, "Location");
+    cy.verifyAndClickElement('[data-cy="nav-locations"]', "Location");
     return this;
   }
 
@@ -102,7 +106,10 @@ export class PatientLocation {
   }
 
   enterLocationName(name: string, clearBeforeTyping: boolean = false) {
-    cy.typeIntoField(this.selectors.nameInput, name, { clearBeforeTyping });
+    cy.typeIntoField(this.selectors.nameInput, name, {
+      clearBeforeTyping,
+      skipVerification: true,
+    });
     return this;
   }
 

@@ -30,7 +30,7 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
           : "border-blue-200 bg-blue-50",
       )}
     >
-      <div className="flex justify-between items-start">
+      <div className="flex flex-wrap justify-between items-start">
         <div className="space-y-2">
           {/* Parent locations */}
           {location.parent?.parent && (
@@ -88,10 +88,10 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
           >
             {t(status)}
           </Badge>
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-center sm:justify-end">
             <div className="flex flex-row text-xs text-gray-500 gap-4">
               <div className="flex flex-col">
-                <span className="text-xs font-medium ">{t("start_time")}</span>
+                <span className="text-xs font-medium">{t("start_time")}</span>
                 <div className="flex items-center gap-1">
                   <Clock className="size-3" />
                   <span className="font-semibold">

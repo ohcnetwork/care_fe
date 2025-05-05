@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
-import { Link } from "raviger";
+import { Link, usePathParams } from "raviger";
 import React, { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -394,6 +394,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   canWrite,
 }) => {
   const { t } = useTranslation();
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityIdExists = !!subpathMatch?.facilityId;
 
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -839,17 +841,19 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             {t("administer_medicine")}
           </Button>
         )}
-        <Button
-          variant="outline"
-          disabled={!activeMedications?.results?.length}
-          size="sm"
-          className="text-gray-950 hover:text-gray-700 h-9"
-        >
-          <Link href={`medicines/administrations/print`}>
-            <CareIcon icon="l-print" className="mr-2" />
-            {t("print")}
-          </Link>
-        </Button>
+        {facilityIdExists && (
+          <Button
+            variant="outline"
+            disabled={!activeMedications?.results?.length}
+            size="sm"
+            className="text-gray-950 hover:text-gray-700 h-9"
+          >
+            <Link href={`medicines/administrations/print`}>
+              <CareIcon icon="l-print" className="mr-2" />
+              {t("print")}
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="mt-4">{content}</div>
