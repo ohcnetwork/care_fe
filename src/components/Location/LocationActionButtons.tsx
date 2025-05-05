@@ -38,7 +38,7 @@ export function LocationActionButtons({
   type ActionButton = {
     label: string;
     onClick: () => void;
-    variant: "outline" | "primary" | "link";
+    variant: "outline" | "primary" | "link" | "destructive";
     className?: string;
     "data-cy"?: string;
   };
@@ -46,10 +46,10 @@ export function LocationActionButtons({
   const buttons: ActionButton[] = [];
 
   buttons.push({
-    label: t("cancel_plan"),
+    label: status === "planned" ? t("cancel_plan") : t("mark_as_error"),
     onClick: onCancel,
-    variant: "link",
-    className: "underline underline-offset-2",
+    variant: "destructive",
+    className: "",
     "data-cy": "cancel-bed-plan-button",
   });
 

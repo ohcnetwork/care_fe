@@ -393,8 +393,8 @@ export function LocationSheet({
     setShowDeleteDialog(true);
     setSheetState((prev) => ({
       ...prev,
-      screen: "modify",
-      action: "cancel",
+      screen: "assign",
+      action: "new",
       timeConfig: {
         start: new Date(locationToCancel.start_datetime),
         end: new Date(),
