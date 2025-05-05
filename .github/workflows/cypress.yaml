@@ -21,6 +21,8 @@ jobs:
     if: github.repository == 'ohcnetwork/care_fe'
     permissions: write-all
     runs-on: ubuntu-latest
+    env:
+      REACT_CARE_API_URL: http://localhost:9000
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
@@ -45,8 +47,6 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     needs: install
-    env:
-      CYPRESS_API_URL: http://localhost:9000
     strategy:
       fail-fast: false
       matrix:
