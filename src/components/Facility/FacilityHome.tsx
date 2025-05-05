@@ -2,6 +2,7 @@ import careConfig from "@careConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { Hospital, Trash2 } from "lucide-react";
+import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -75,11 +76,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-<<<<<<< HEAD
-  const { goBack } = useAppHistory();
-=======
   const { history, goBack } = useAppHistory();
->>>>>>> bc6abdeee (used useAppHistory)
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -111,20 +108,16 @@ export const FacilityHome = ({ facilityId }: Props) => {
         queryKey: ["facility", facilityId],
       });
 
-<<<<<<< HEAD
-      const prevPath = document.referrer;
-      const orgMatch = prevPath.match(/\/org\/([^/]+)\/facilities/);
-=======
       if (history.length > 1) {
+        console.log(history[1]);
         const prevPath = history[1];
-        const orgMatch = prevPath.match(/\/org\/([^/]+)\/facilities/);
->>>>>>> bc6abdeee (used useAppHistory)
-
-        if (orgMatch && orgMatch[1]) {
-          navigate(`/org/${orgMatch[1]}/facilities`);
+        if (prevPath.startsWith("/facility/")) {
+          navigate("/");
         } else {
           goBack("/");
         }
+      } else {
+        navigate("/");
       }
     },
   });
