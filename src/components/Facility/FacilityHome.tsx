@@ -107,7 +107,14 @@ export const FacilityHome = ({ facilityId }: Props) => {
         queryKey: ["facility", facilityId],
       });
 
-      goBack("/");
+      const prevPath = document.referrer;
+      const orgMatch = prevPath.match(/\/org\/([^/]+)\/facilities/);
+
+      if (orgMatch && orgMatch[1]) {
+        navigate(`/org/${orgMatch[1]}/facilities`);
+      } else {
+        navigate("/");
+      }
     },
   });
 
