@@ -260,6 +260,7 @@ export class PatientEncounter {
     ]);
 
     if (notes) {
+      cy.get('[data-cy="diagnosis-see-note"]').last().scrollIntoView();
       cy.get('[data-cy="diagnosis-see-note"]').last().click();
       cy.get('[data-cy="diagnosis-note"]').last().should("contain", notes);
     }
