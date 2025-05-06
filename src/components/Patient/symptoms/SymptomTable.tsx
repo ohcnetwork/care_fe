@@ -33,7 +33,10 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
   const { t } = useTranslation();
 
   return (
-    <Table className="border-separate border-spacing-y-0.5">
+    <Table
+      className="border-separate border-spacing-y-0.5"
+      data-cy="symptoms-table"
+    >
       <TableHeader>
         <TableRow className="rounded-md overflow-hidden bg-gray-100">
           <TableHead className="first:rounded-l-md h-auto  py-1 px-2  text-gray-600">

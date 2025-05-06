@@ -83,7 +83,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
-      .clickEditAllergy()
+      .clickAddAllergy()
       .addAllergy(createAllergyDetails);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyAllergy(createAllergyDetails);
@@ -116,7 +116,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
-      .clickEditSymptoms()
+      .clickAddSymptoms()
       .addSymptoms(createSymptomsDetails);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifySymptom(createSymptomsDetails);
@@ -149,7 +149,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
-      .clickEditDiagnosis()
+      .clickAddDiagnosis()
       .addDiagnosis(createDiagnosisDetails);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyDiagnoses(createDiagnosisDetails);

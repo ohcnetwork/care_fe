@@ -46,6 +46,11 @@ export class PatientEncounter {
     return this;
   }
 
+  clickAddAllergy() {
+    cy.verifyAndClickElement('[data-cy="add-allergies"]', "Add Allergy");
+    return this;
+  }
+
   addAllergy(details: AllergyDetails) {
     const { allergyName } = details;
     cy.get('[data-cy="add-allergy"]').scrollIntoView();
@@ -71,18 +76,21 @@ export class PatientEncounter {
         skipVerification: true,
       });
     }
+    return this;
   }
 
   deleteAllergy() {
     cy.clickAndSelectOption('[data-cy="allergy-status"]', "Entered in Error", {
       position: "first",
     });
+    return this;
   }
 
   verifyAllergyDelete(name: string) {
     cy.get('[data-cy="allergies-table"]').then(($el) => {
       cy.wrap($el).should("not.contain", name);
     });
+    return this;
   }
 
   verifyAllergy(details: AllergyDetails) {
@@ -103,6 +111,11 @@ export class PatientEncounter {
 
   clickEditSymptoms() {
     cy.verifyAndClickElement('[data-cy="edit-symptoms"]', "Edit");
+    return this;
+  }
+
+  clickAddSymptoms() {
+    cy.verifyAndClickElement('[data-cy="add-symptoms"]', "Add Symptoms");
     return this;
   }
 
@@ -135,12 +148,14 @@ export class PatientEncounter {
         skipVerification: true,
       });
     }
+    return this;
   }
 
   deleteSymptom() {
     cy.get('[data-cy="symptom-options"]').last().scrollIntoView();
     cy.get('[data-cy="symptom-options"]').last().click();
     cy.get('[data-cy="remove-symptom"]').click();
+    return this;
   }
 
   verifySymptomDelete(name: string) {
@@ -148,6 +163,7 @@ export class PatientEncounter {
     cy.get('[data-cy="symptoms-table"]').then(($el) => {
       cy.wrap($el).should("not.contain", name);
     });
+    return this;
   }
 
   verifySymptom(details: SymptomDetails) {
@@ -169,6 +185,11 @@ export class PatientEncounter {
 
   clickEditDiagnosis() {
     cy.verifyAndClickElement('[data-cy="edit-diagnoses"]', "Edit");
+    return this;
+  }
+
+  clickAddDiagnosis() {
+    cy.verifyAndClickElement('[data-cy="add-diagnoses"]', "Add Diagnosis");
     return this;
   }
 
@@ -206,6 +227,7 @@ export class PatientEncounter {
         skipVerification: true,
       });
     }
+    return this;
   }
 
   deleteDiagnosis() {
@@ -217,12 +239,15 @@ export class PatientEncounter {
         position: "last",
       },
     );
+
+    return this;
   }
 
   verifyDiagnosisDelete(name: string) {
     cy.get('[data-cy="diagnoses-table"]').then(($el) => {
       cy.wrap($el).should("not.contain", name);
     });
+    return this;
   }
 
   verifyDiagnoses(details: DiagnosisDetails) {

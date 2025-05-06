@@ -22,14 +22,17 @@ const actionLinks = [
   {
     href: "questionnaire/allergy_intolerance",
     label: "Add Allergy",
+    cy: "add-allergies",
   },
   {
     href: "questionnaire/diagnosis",
     label: "Add Diagnosis",
+    cy: "add-diagnoses",
   },
   {
     href: "questionnaire/symptom",
     label: "Add Symptoms",
+    cy: "add-symptoms",
   },
 ];
 
@@ -68,6 +71,7 @@ export const EncounterOverviewTab = ({
                       asChild
                       key={link.href}
                       className="[&_svg]:size-3"
+                      data-cy={link.cy}
                     >
                       <Link
                         key={link.href}

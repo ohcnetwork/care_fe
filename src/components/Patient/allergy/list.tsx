@@ -203,7 +203,10 @@ export function AllergyList({
       className={className}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
     >
-      <Table className="border-separate border-spacing-y-0.5">
+      <Table
+        className="border-separate border-spacing-y-0.5"
+        data-cy="allergies-table"
+      >
         <TableHeader>
           <TableRow className="rounded-md overflow-hidden bg-gray-100">
             <TableHead className="first:rounded-l-md h-auto py-1 pl-1 pr-0 text-gray-600"></TableHead>
@@ -266,4 +269,3 @@ export function AllergyList({
     </EncounterAccordionLayout>
   );
 }
-
