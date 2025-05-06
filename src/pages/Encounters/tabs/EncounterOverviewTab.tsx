@@ -100,7 +100,7 @@ export const EncounterOverviewTab = ({
           <EncounterOverviewDevices encounter={encounter} />
 
           {/* Allergies Section */}
-          <div>
+          <div data-cy="allergies-table">
             <AllergyList
               patientId={patient.id}
               encounterId={encounter.id}
@@ -110,7 +110,7 @@ export const EncounterOverviewTab = ({
           </div>
 
           {/* Symptoms Section */}
-          <div>
+          <div data-cy="symptoms-table">
             <SymptomsList
               patientId={patient.id}
               encounterId={encounter.id}
@@ -119,7 +119,7 @@ export const EncounterOverviewTab = ({
           </div>
 
           {/* Diagnoses Section */}
-          <div>
+          <div data-cy="diagnoses-table">
             <DiagnosisList
               patientId={patient.id}
               encounterId={encounter.id}
