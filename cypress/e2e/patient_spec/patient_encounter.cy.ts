@@ -19,7 +19,7 @@ describe("Patient Encounter Questionnaire", () => {
     const characterMaxLimit = generateRandomCharacter({
       charLimit: 510,
     });
-    facilityCreation.selectFacility("GHC Payyanur");
+    facilityCreation.selectFirstRandomFacility();
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
@@ -41,7 +41,7 @@ describe("Patient Encounter Questionnaire", () => {
       pco2: "120",
       po2: "80",
     };
-    facilityCreation.selectFacility("GHC Payyanur");
+    facilityCreation.selectFirstRandomFacility();
 
     // Chain the methods instead of multiple separate calls
     patientEncounter

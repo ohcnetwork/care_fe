@@ -27,7 +27,7 @@ describe("Patient Prescription Management", () => {
       notes: "testing notes",
     };
 
-    facilityCreation.selectFacility("Rout PLC");
+    facilityCreation.selectFirstRandomFacility();
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()

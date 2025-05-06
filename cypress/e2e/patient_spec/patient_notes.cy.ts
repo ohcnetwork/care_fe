@@ -15,7 +15,7 @@ describe("Encounter Notes", () => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
     cy.loginByApi("doctor");
     cy.visit("/");
-    facilityCreation.selectFacility("Rout PLC");
+    facilityCreation.selectFirstRandomFacility();
     // Step 1: Navigate to encounter
     patientEncounter
       .navigateToEncounters()

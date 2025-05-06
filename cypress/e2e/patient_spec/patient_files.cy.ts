@@ -14,7 +14,7 @@ describe("Patient Files", () => {
     cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
     cy.loginByApi("doctor");
     cy.visit("/");
-    facilityCreation.selectFacility("Rout PLC");
+    facilityCreation.selectFirstRandomFacility();
 
     patientEncounter
       .navigateToEncounters()

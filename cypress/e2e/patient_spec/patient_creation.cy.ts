@@ -100,7 +100,7 @@ describe("Patient Creation and modification", () => {
 
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
-      facilityCreation.selectFacility("Rout PLC");
+      facilityCreation.selectFirstRandomFacility();
       patientCreation
         .clickSearchPatients()
         .clickCreateNewPatient()
@@ -135,7 +135,7 @@ describe("Patient Creation and modification", () => {
       address: generateAddress(true),
     };
 
-    facilityCreation.selectFacility("Rout PLC");
+    facilityCreation.selectFirstRandomFacility();
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()
@@ -161,7 +161,7 @@ describe("Patient Creation and modification", () => {
         name: "Daksh",
         phone: "80590 16870",
       };
-      facilityCreation.selectFacility("Rout PLC");
+      facilityCreation.selectFirstRandomFacility();
       patientCreation
         .clickSearchPatients()
         .searchPatient(patientDetail.phone)

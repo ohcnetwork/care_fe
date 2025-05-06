@@ -13,7 +13,7 @@ describe("Manage locations association to an encounter", () => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
     cy.loginByApi("facility_admin");
     cy.visit("/");
-    facilityCreation.selectFacility("Rout PLC");
+    facilityCreation.selectFirstRandomFacility();
   });
 
   it("should create and delete a room location", () => {

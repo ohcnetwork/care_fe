@@ -17,7 +17,7 @@ describe("Patient Management", () => {
   it("Assign users to a patient", () => {
     const userName = "Volunteer User";
     const userRole = "Nurse";
-    facilityCreation.selectFacility("Rout PLC");
+    facilityCreation.selectFirstRandomFacility();
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()

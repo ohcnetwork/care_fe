@@ -16,7 +16,7 @@ describe("Facility Devices Management", () => {
   it("Create a new device and verify modification and delete it", () => {
     const deviceName = generateDeviceName();
     const newDeviceName = generateDeviceName();
-    facilityCreation.selectFacility("Rout PLC");
+    facilityCreation.selectFirstRandomFacility();
     facilityDevices
       .navigateToFacilitySettings()
       .navigateToFacilityDevices()

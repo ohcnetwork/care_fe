@@ -37,7 +37,7 @@ describe("Resources Management", () => {
   });
 
   it("Create a new resource request and verify it on Resources Board and Patient Detail Page", () => {
-    facilityCreation.selectFacility(testData.sourceFacility);
+    facilityCreation.selectFirstRandomFacility();
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
