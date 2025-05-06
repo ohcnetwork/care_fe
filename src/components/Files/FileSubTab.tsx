@@ -99,7 +99,7 @@ export const FilesPage = ({
     refetch,
   } = useQuery({
     queryKey: ["files", type, associatingId, qParams],
-    queryFn: query(routes.viewUpload, {
+    queryFn: query.debounced(routes.viewUpload, {
       queryParams: {
         file_type: type,
         associating_id: associatingId,
