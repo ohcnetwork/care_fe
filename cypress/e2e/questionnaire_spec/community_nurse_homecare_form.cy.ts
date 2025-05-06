@@ -88,7 +88,7 @@ const patientPrescription = new PatientPrescription();
 describe("Community Nurse Homecare Form Tests", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("devdoctor7");
+    cy.loginByApi("devnurse6");
     cy.visit("/");
 
     facilityCreation.selectFirstRandomFacility();
