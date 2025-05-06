@@ -136,7 +136,7 @@ export default function DevicesList({ facilityId }: Props) {
     }),
   });
 
-  const { data: allLocations } = useQuery({
+  const { data: parentLocations } = useQuery({
     queryKey: ["locations", facilityId, "all"],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
@@ -155,24 +155,19 @@ export default function DevicesList({ facilityId }: Props) {
                   {t("locations")}
                 </h3>
               </div>
-              {allLocations?.results?.length
-                ? allLocations.results
-                    .filter(
-                      (loc) =>
-                        !loc.parent || Object.keys(loc.parent).length === 0,
-                    )
-                    .map((location) => (
-                      <LocationTreeNode
-                        showAllForms={true}
-                        key={location.id}
-                        location={location}
-                        facilityId={facilityId}
-                        selectedLocationId={qParams.locationId || null}
-                        expandedLocations={expandedLocations}
-                        onToggleExpand={handleToggleExpand}
-                        onSelect={handleLocationSelect}
-                      />
-                    ))
+              {parentLocations?.results?.length
+                ? parentLocations.results.map((location) => (
+                    <LocationTreeNode
+                      showAllForms={true}
+                      key={location.id}
+                      location={location}
+                      facilityId={facilityId}
+                      selectedLocationId={qParams.locationId || null}
+                      expandedLocations={expandedLocations}
+                      onToggleExpand={handleToggleExpand}
+                      onSelect={handleLocationSelect}
+                    />
+                  ))
                 : t("no_locations_available")}
             </CardContent>
           </Card>
@@ -188,8 +183,8 @@ export default function DevicesList({ facilityId }: Props) {
               <SheetTitle>{t("locations")}</SheetTitle>
             </SheetHeader>
             <div className="space-y-4 pt-2 max-h-[calc(80vh-80px)] overflow-auto">
-              {allLocations?.results?.length
-                ? allLocations.results.map((location) => (
+              {parentLocations?.results?.length
+                ? parentLocations.results.map((location) => (
                     <LocationTreeNode
                       key={location.id}
                       showAllForms={true}
