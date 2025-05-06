@@ -261,11 +261,25 @@ export function AccountShow({
         }
         className="mt-8"
       >
-        <TabsList>
-          <TabsTrigger value="invoices">{t("invoices")}</TabsTrigger>
-          <TabsTrigger value="charge_items">{t("charge_items")}</TabsTrigger>
-          <TabsTrigger value="payments">{t("payments")}</TabsTrigger>
-        </TabsList>
+        <div className="flex flex-row justify-between items-center">
+          <TabsList>
+            <TabsTrigger value="invoices">{t("invoices")}</TabsTrigger>
+            <TabsTrigger value="charge_items">{t("charge_items")}</TabsTrigger>
+            <TabsTrigger value="payments">{t("payments")}</TabsTrigger>
+          </TabsList>
+
+          <Button
+            variant="outline"
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
+              )
+            }
+          >
+            <CareIcon icon="l-plus" className="mr-2 size-4" />
+            {t("create_invoice")}
+          </Button>
+        </div>
 
         <TabsContent value="charge_items" className="mt-4">
           <ChargeItemsTable facilityId={facilityId} accountId={accountId} />
@@ -292,17 +306,6 @@ export function AccountShow({
                       {t("view_payments")}
                     </Link>
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                      )
-                    }
-                  >
-                    <CareIcon icon="l-plus" className="mr-2 size-4" />
-                    {t("create_invoice")}
-                  </Button>
                 </div>
               )}
             </CardHeader>
@@ -313,13 +316,6 @@ export function AccountShow({
         </TabsContent>
 
         <TabsContent value="payments" className="mt-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">{t("payment_history")}</h2>
-            <Button onClick={() => setIsPaymentSheetOpen(true)}>
-              <CareIcon icon="l-plus" className="mr-2 size-4" />
-              {t("record_payment")}
-            </Button>
-          </div>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
@@ -330,6 +326,10 @@ export function AccountShow({
                     : t("view_and_manage_payments")}
                 </p>
               </div>
+              <Button onClick={() => setIsPaymentSheetOpen(true)}>
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
+                {t("record_payment")}
+              </Button>
             </CardHeader>
             <CardContent>
               <PaymentsData facilityId={facilityId} accountId={accountId} />

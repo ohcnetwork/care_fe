@@ -1,7 +1,4 @@
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
-
-import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
 
@@ -31,17 +28,6 @@ export function InvoiceList({
                   : t("view_and_manage_invoices")}
               </p>
             </div>
-            {accountId && (
-              <Button
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                  )
-                }
-              >
-                {t("create_invoice")}
-              </Button>
-            )}
           </div>
           <InvoicesData
             facilityId={facilityId}

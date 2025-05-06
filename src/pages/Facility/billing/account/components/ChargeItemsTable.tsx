@@ -19,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MonetaryValue } from "@/components/ui/monetary-value";
 import {
   Table,
   TableBody,
@@ -110,14 +111,22 @@ function PriceComponentRow({
             className="text-xs text-muted-foreground"
           >
             <TableCell></TableCell>
-            <TableCell>{label}</TableCell>
             <TableCell>
-              {component.amount !== undefined && component.amount !== null
-                ? formatCurrency(component.amount)
-                : formatPercentage(component.factor)}
+              {component.code && `${component.code.display} `}({label})
+            </TableCell>
+            <TableCell>
+              {component.amount !== undefined && component.amount !== null ? (
+                <MonetaryValue value={component.amount} />
+              ) : (
+                formatPercentage(component.factor)
+              )}
             </TableCell>
             <TableCell></TableCell>
-            <TableCell>{formatCurrency(value)}</TableCell>
+            <TableCell>
+              {component.monetory_component_type ===
+                MonetoryComponentType.discount && `-`}
+              <MonetaryValue value={value} />
+            </TableCell>
             <TableCell></TableCell>
           </TableRow>
         );
@@ -145,12 +154,12 @@ export function ChargeItemsTable({
   });
 
   const { data: chargeItems, isLoading } = useQuery({
-    queryKey: ["chargeItems", accountId, qParams.charge_item_status],
+    queryKey: ["chargeItems", qParams, accountId],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
         account: accountId,
-        status: qParams.charge_item_status,
+        status: qParams.charge_item_status ?? ChargeItemStatus.planned,
       },
     }),
   }) as { data: { results: ChargeItemRead[] } | undefined; isLoading: boolean };
@@ -190,7 +199,7 @@ export function ChargeItemsTable({
         </div>
       </CardHeader>
       <Tabs
-        defaultValue={ChargeItemStatus.planned}
+        value={qParams.charge_item_status ?? ChargeItemStatus.planned}
         onValueChange={(value) => updateQuery({ charge_item_status: value })}
         className="mx-4 mb-4"
       >

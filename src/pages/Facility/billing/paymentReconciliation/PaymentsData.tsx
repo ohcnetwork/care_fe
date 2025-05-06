@@ -100,15 +100,16 @@ export default function PaymentsData({
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["payments", qParams, accountId],
-    queryFn: query(paymentReconciliationApi.listInvoice, {
+    queryFn: query(paymentReconciliationApi.listPaymentReconciliation, {
       pathParams: { facilityId },
       queryParams: {
         account: accountId,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         search: qParams.search,
-        status: qParams.status,
-        reconciliation_type: qParams.type,
+        status: qParams.status ?? PaymentReconciliationStatus.active,
+        reconciliation_type:
+          qParams.reconciliation_type ?? PaymentReconciliationType.payment,
       },
     }),
   });
@@ -125,7 +126,7 @@ export default function PaymentsData({
       />
       <div className="flex flex-row justify-between items-center gap-2 my-4">
         <Tabs
-          defaultValue={PaymentReconciliationStatus.draft}
+          defaultValue={qParams.status ?? PaymentReconciliationStatus.active}
           onValueChange={(value) => updateQuery({ status: value })}
         >
           <TabsList>
@@ -137,8 +138,10 @@ export default function PaymentsData({
           </TabsList>
         </Tabs>
         <Tabs
-          defaultValue={PaymentReconciliationType.payment}
-          onValueChange={(value) => updateQuery({ type: value })}
+          defaultValue={
+            qParams.reconciliation_type ?? PaymentReconciliationType.payment
+          }
+          onValueChange={(value) => updateQuery({ reconciliation_type: value })}
         >
           <TabsList>
             {Object.values(PaymentReconciliationType).map((type) => (

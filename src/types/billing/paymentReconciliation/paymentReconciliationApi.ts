@@ -8,7 +8,7 @@ import {
 } from "./paymentReconciliation";
 
 export default {
-  listInvoice: {
+  listPaymentReconciliation: {
     path: "/api/v1/facility/{facilityId}/payment_reconciliation/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<PaymentReconciliationBase>>(),
