@@ -59,7 +59,7 @@ export default function ServiceHistoryForm({
 
   type FormValues = z.infer<typeof formSchema>;
 
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       note: "",
@@ -182,7 +182,11 @@ export default function ServiceHistoryForm({
           )}
         />
         <div className="flex justify-end space-x-2 pt-4">
-          <Button type="submit" disabled={isPending} data-cy="submit-button">
+          <Button
+            type="submit"
+            disabled={!form.formState.isDirty || isPending}
+            data-cy="submit-button"
+          >
             {isPending
               ? isEditMode
                 ? t("updating")

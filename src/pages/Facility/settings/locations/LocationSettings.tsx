@@ -41,18 +41,6 @@ interface LocationSettingsProps {
   locationId?: string;
 }
 
-function getParentChain(location: LocationListType): Set<string> {
-  const parentIds = new Set<string>();
-  let current = location.parent;
-
-  while (current) {
-    parentIds.add(current.id);
-    current = current.parent;
-  }
-
-  return parentIds;
-}
-
 export default function LocationSettings({
   facilityId,
   locationId,
@@ -70,13 +58,14 @@ export default function LocationSettings({
     }),
   });
 
-  const { data: allLocations } = useQuery({
-    queryKey: ["locations", facilityId, "all"],
+  const { data: parentLocations } = useQuery({
+    queryKey: ["locations", facilityId, "top"],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         mode: "kind",
         ordering: "sort_index",
+        parent: "",
       },
     }),
   });
@@ -124,11 +113,8 @@ export default function LocationSettings({
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
       navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
-      const parentIds = getParentChain(location);
-      parentIds.add(location.id);
-      setExpandedLocations(new Set([...expandedLocations, ...parentIds]));
     },
-    [expandedLocations, facilityId],
+    [facilityId],
   );
 
   const handleToggleExpand = useCallback((locationId: string) => {
@@ -189,23 +175,18 @@ export default function LocationSettings({
             <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block flex-shrink-0">
               <ScrollArea className="h-[calc(100vh-14rem)]">
                 <div className="p-4">
-                  {allLocations?.results?.length ? (
-                    allLocations.results
-                      .filter(
-                        (loc) =>
-                          !loc.parent || Object.keys(loc.parent).length === 0,
-                      )
-                      .map((location) => (
-                        <LocationTreeNode
-                          key={location.id}
-                          location={location}
-                          facilityId={facilityId}
-                          selectedLocationId={locationId || null}
-                          expandedLocations={expandedLocations}
-                          onToggleExpand={handleToggleExpand}
-                          onSelect={handleLocationSelect}
-                        />
-                      ))
+                  {parentLocations?.results?.length ? (
+                    parentLocations.results.map((location) => (
+                      <LocationTreeNode
+                        key={location.id}
+                        location={location}
+                        facilityId={facilityId}
+                        selectedLocationId={locationId || null}
+                        expandedLocations={expandedLocations}
+                        onToggleExpand={handleToggleExpand}
+                        onSelect={handleLocationSelect}
+                      />
+                    ))
                   ) : (
                     <div className="p-4 text-sm text-gray-500">
                       {t("no_locations_available")}

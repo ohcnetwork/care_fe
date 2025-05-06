@@ -127,7 +127,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     contact: [],
   };
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues,
   });

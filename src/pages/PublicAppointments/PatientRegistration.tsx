@@ -108,10 +108,9 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       }
     });
 
-  type PatientFormData = z.infer<typeof patientSchema>;
   const formResolver = zodResolver(patientSchema);
 
-  const form = useForm<PatientFormData>({
+  const form = useForm({
     resolver: formResolver,
     defaultValues: {
       name: "",

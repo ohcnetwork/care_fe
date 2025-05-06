@@ -49,17 +49,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import {
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
   DiagnosisRequest,
+  Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { Code } from "@/types/questionnaire/code";
@@ -107,8 +109,32 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     category: diagnosis.category,
     note: diagnosis.note,
     encounter: diagnosis.encounter,
+    created_by: diagnosis.created_by,
+    created_date: diagnosis.created_date,
     dirty: false,
   };
+}
+
+function checkForDuplicateDiagnosis(
+  existingDiagnoses: DiagnosisRequest[],
+  newDiagnosis: Pick<DiagnosisRequest, "code"> | Code,
+  t: (key: string) => string,
+) {
+  const codeToCheck = "code" in newDiagnosis ? newDiagnosis.code : newDiagnosis;
+  const codeValue =
+    typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
+
+  const isDuplicate = existingDiagnoses.some(
+    (diagnosis) =>
+      diagnosis.code.code === codeValue &&
+      diagnosis.verification_status !== "entered_in_error",
+  );
+
+  if (isDuplicate) {
+    toast.warning(t("diagnosis_already_exist_warning"));
+    return true;
+  }
+  return false;
 }
 
 export function DiagnosisQuestion({
@@ -148,7 +174,7 @@ export function DiagnosisQuestion({
   }, [questionnaireResponse.values]);
 
   const { data: patientDiagnoses } = useQuery({
-    queryKey: ["diagnoses", patientId],
+    queryKey: ["diagnoses", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
@@ -184,14 +210,7 @@ export function DiagnosisQuestion({
   const handleCategoryConfirm = () => {
     if (!selectedCode) return;
 
-    const isDuplicate = sortedDiagnoses.some(
-      (diagnosis) =>
-        diagnosis.code.code === selectedCode.code &&
-        diagnosis.verification_status !== "entered_in_error",
-    );
-
-    if (isDuplicate) {
-      toast.warning(t("diagnosis_already_exist_warning"));
+    if (checkForDuplicateDiagnosis(sortedDiagnoses, selectedCode, t)) {
       return;
     }
 
@@ -292,6 +311,31 @@ export function DiagnosisQuestion({
         onset_datetime: new Date().toISOString().split("T")[0],
       },
     });
+  };
+
+  const handleAddHistoricalDiagnoses = async (
+    selectedDiagnoses: DiagnosisRequest[],
+  ) => {
+    // Filter out duplicates before adding
+    const nonDuplicateDiagnoses = selectedDiagnoses.filter(
+      (diagnosis) => !checkForDuplicateDiagnosis(sortedDiagnoses, diagnosis, t),
+    );
+
+    if (nonDuplicateDiagnoses.length === 0) {
+      return;
+    }
+
+    const newDiagnoses = [
+      ...sortedDiagnoses,
+      ...nonDuplicateDiagnoses.map(({ id: _id, ...diagnosis }) => ({
+        ...diagnosis,
+        dirty: true,
+      })),
+    ];
+    updateQuestionnaireResponseCB(
+      [{ type: "diagnosis", value: newDiagnoses }],
+      questionnaireResponse.question_id,
+    );
   };
 
   const diagnosisDetailsContent = (
@@ -503,6 +547,60 @@ export function DiagnosisQuestion({
 
   return (
     <div className="space-y-4">
+      <HistoricalRecordSelector<DiagnosisRequest>
+        structuredTypes={[
+          {
+            type: t("diagnoses"),
+            converter: convertToDiagnosisRequest,
+            displayFields: [
+              {
+                key: "code",
+                label: t("diagnosis"),
+                render: (code: Code) => code?.display || "-",
+              },
+              {
+                key: "clinical_status",
+                label: t("status"),
+                render: (status: string) => t(status),
+              },
+              {
+                key: "onset",
+                label: t("onset_date"),
+                render: (onset: Onset) =>
+                  onset?.onset_datetime
+                    ? format(new Date(onset.onset_datetime), "dd-MM-yyyy")
+                    : "",
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note: string | undefined) => note || "-",
+              },
+              {
+                key: "created_by",
+                label: t("recorded_by"),
+                render: (created_by) => formatName(created_by),
+              },
+            ],
+            queryKey: ["diagnoses_and_chronic_conditions", patientId],
+            queryFn: async (limit: number, offset: number) => {
+              const response = await query(diagnosisApi.listDiagnosis, {
+                pathParams: { patientId },
+                queryParams: {
+                  offset,
+                  limit,
+                  exclude_verification_status: "entered_in_error",
+                  ordering: "-created_date",
+                  category: "encounter_diagnosis,chronic_condition",
+                },
+              })({ signal: new AbortController().signal });
+              return response;
+            },
+          },
+        ]}
+        buttonLabel={t("diagnosis_history")}
+        onAddSelected={handleAddHistoricalDiagnoses}
+      />
       {sortedDiagnoses.length > 0 && (
         <div className="md:rounded-lg md:border">
           {/* Desktop View - Table */}

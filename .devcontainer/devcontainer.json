@@ -17,8 +17,7 @@
       "extensions": [
         "esbenp.prettier-vscode",
         "bradlc.vscode-tailwindcss",
-        "yoavbls.pretty-ts-errors",
-        "chenglou92.rescript-vscode"
+        "yoavbls.pretty-ts-errors"
       ]
     }
   },
@@ -26,7 +25,7 @@
     "cpus": 4
   },
   "waitFor": "onCreateCommand",
-  "postCreateCommand": "npm run install-all",
+  "postCreateCommand": "npm install",
   "postAttachCommand": {
     "server": "npm run dev"
   },
