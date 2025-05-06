@@ -1,8 +1,10 @@
-import { Barcode, Droplet, TestTube } from "lucide-react";
+import "@fontsource/libre-barcode-128-text";
+import { Droplet, TestTube } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -59,47 +61,51 @@ export function BarcodeScanSuccessDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-[95%] rounded-md p-8">
         <div className="flex items-center gap-2 mb-4">
-          <span className="inline-flex items-center px-3 py-1 rounded-full border border-green-500 text-green-700 bg-green-50 text-sm font-medium">
-            Success
-          </span>
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-500 rounded-full"
+          >
+            {t("success")}
+          </Badge>
           <span className="text-primary-800 font-semibold text-lg">
             {t("barcode_scanned_successfully")}
           </span>
         </div>
         <div className="mb-4">
-          <div className="text-gray-600 font-medium mb-1">
+          <div className="text-gray-600 font-medium text-sm mb-1">
             {t("barcode_number")}:
           </div>
-          <div className="flex items-center gap-2 uppercase">
-            <Barcode className="size-6 text-gray-700 " />
-            {barcode}
+          <div className="flex flex-col gap-2">
+            <div className="font-['Libre_Barcode_128_Text'] text-4xl text-gray-800">
+              {barcode}
+            </div>
           </div>
         </div>
         <div className="flex gap-8 mb-6">
           <div>
-            <div className="text-gray-600 font-medium mb-1">{t("tube")}:</div>
+            <div className="text-gray-600 font-medium mb-1 text-sm">
+              {t("tube")}:
+            </div>
             <div className="flex items-center gap-2">
               <TestTube className={`size-5 ${tubeColor}`} />
-              <span className="font-medium text-gray-800 capitalize">
+              <span className="font-medium text-gray-700 capitalize">
                 {cap}
               </span>
             </div>
           </div>
           <div>
-            <div className="text-gray-600 font-medium mb-1">
+            <div className="text-gray-600 font-medium text-sm mb-1">
               {t("specimen")}:
             </div>
             <div className="flex items-center gap-2">
               <Droplet className="size-5 text-red-500" />
-              <span className="font-medium text-gray-800">{specimen}</span>
+              <span className="font-medium text-gray-700">{specimen}</span>
             </div>
           </div>
         </div>
-        <Button
-          className="w-full text-base font-semibold bg-green-700 hover:bg-green-800"
-          onClick={onContinue}
-        >
-          Continue <CareIcon icon="l-arrow-right" className="size-5 ml-2" />
+        <Button className="w-full" onClick={onContinue}>
+          {t("continue")}
+          <CareIcon icon="l-arrow-right" className="size-5 ml-2" />
         </Button>
       </DialogContent>
     </Dialog>

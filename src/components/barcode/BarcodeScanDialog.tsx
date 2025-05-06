@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import BarcodeScanner, { BarcodeFormat } from "react-qr-barcode-scanner";
 import { toast } from "sonner";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -167,13 +169,18 @@ export function BarcodeScanDialog({
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  {t("barcode_number")}
+                  {t("barcode_number")}:
                 </label>
                 <Input
                   id="barcode-input"
                   placeholder={t("enter_barcode_number")}
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value.trim())}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !loading) {
+                      handleContinue();
+                    }
+                  }}
                   className={`mt-1 text-base transition-all ${
                     inputHighlighted ? "ring-2 ring-primary/30" : ""
                   }`}
@@ -182,11 +189,12 @@ export function BarcodeScanDialog({
               </div>
 
               <Button
-                className="w-full text-base font-semibold h-11"
+                className="w-full"
                 disabled={!barcode.trim() || loading}
                 onClick={() => handleContinue()}
               >
                 {loading ? t("searching") : t("continue")}
+                <CareIcon icon="l-arrow-right" className="size-5 ml-2" />
               </Button>
             </div>
           </div>

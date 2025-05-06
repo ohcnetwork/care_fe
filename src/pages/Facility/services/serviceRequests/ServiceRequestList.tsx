@@ -336,7 +336,18 @@ export default function ServiceRequestList({
 
   return (
     <Page title={t("service_requests")} hideTitleOnPage>
-      <div className="flex justify-end items-center gap-4 mb-4">
+      <div className="flex justify-between items-center gap-4 mb-4">
+        <Button
+          variant="outline"
+          onClick={() =>
+            navigate(`/facility/${facilityId}/services/${serviceId}`)
+          }
+          className="gap-2"
+          size="sm"
+        >
+          <CareIcon icon="l-arrow-left" className="size-4" />
+          {t("back")}
+        </Button>
         <Button
           variant="primary"
           size="sm"
@@ -345,25 +356,14 @@ export default function ServiceRequestList({
           <ScanBarcode className="size-4" />
           {t("scan_barcode")}
         </Button>
-        <BarcodeScanDialog
-          open={isBarcodeOpen}
-          onOpenChange={setBarcodeOpen}
-          facilityId={facilityId}
-          serviceId={serviceId}
-          locationId={locationId}
-        />
       </div>
-      <Button
-        variant="outline"
-        onClick={() =>
-          navigate(`/facility/${facilityId}/services/${serviceId}`)
-        }
-        className="gap-2"
-        size="sm"
-      >
-        <CareIcon icon="l-arrow-left" className="size-4" />
-        {t("back")}
-      </Button>
+      <BarcodeScanDialog
+        open={isBarcodeOpen}
+        onOpenChange={setBarcodeOpen}
+        facilityId={facilityId}
+        serviceId={serviceId}
+        locationId={locationId}
+      />
       <div className="container mx-auto py-8">
         <div className="mb-8">
           <div className="mb-4">
