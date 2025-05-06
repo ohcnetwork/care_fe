@@ -209,7 +209,7 @@ export class PatientCreation {
   selectState(state: string) {
     cy.get(this.selectors.stateSelect).then(($el) => {
       if ($el.val() !== state) {
-        cy.typeAndSelectOption(this.selectors.stateSelect, state);
+        cy.clickAndSelectOption(this.selectors.stateSelect, state);
       }
     });
     return this;

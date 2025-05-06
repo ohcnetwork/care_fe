@@ -75,7 +75,7 @@ describe("Patient Files", () => {
       .saveCurrentUrl();
 
     userProfile.openUserMenu().clickUserLogout();
-    cy.loginByApi("devnurse2");
+    cy.loginByApi("nurse");
     patientFiles
       .navigateToSavedUrl()
       .clickFirstFileViewButton()
