@@ -26,4 +26,9 @@ export default {
     TRes: Type<PaginatedResponse<SpecimenRead>>(),
     TBody: Type<SpecimenBase>(),
   },
+  getSpecimen: {
+    path: "/api/v1/facility/{facilityId}/specimen/{specimenId}/",
+    method: HttpMethod.GET,
+    TRes: Type<SpecimenRead>(),
+  },
 };

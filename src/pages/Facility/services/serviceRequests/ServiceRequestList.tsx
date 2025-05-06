@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { ScanBarcode, X } from "lucide-react";
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -29,6 +30,7 @@ import {
   CardGridSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
+import BarcodeScanDialog from "@/components/barcode/BarcodeScanDialog";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -94,11 +96,25 @@ function ServiceRequestCard({
       <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
+            <div className="mb-2">
+              <div className="font-semibold text-gray-900">
+                {request.encounter.patient.name}
+              </div>
+              <div className="text-xs text-gray-500">
+                {request.encounter.patient.id}
+              </div>
+            </div>
             <div className="mb-2 flex items-center gap-2">
-              <Badge className={STATUS_COLORS[request.status]}>
+              <Badge
+                variant="outline"
+                className={STATUS_COLORS[request.status]}
+              >
                 {t(request.status)}
               </Badge>
-              <Badge className={PRIORITY_COLORS[request.priority]}>
+              <Badge
+                variant="outline"
+                className={PRIORITY_COLORS[request.priority]}
+              >
                 {t(request.priority)}
               </Badge>
             </div>
@@ -149,39 +165,45 @@ function ServiceRequestTable({
       <Table>
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-gray-200">
-            <TableHead>{t("title")}</TableHead>
+            <TableHead>{t("patient_name")}</TableHead>
+            <TableHead>{t("service_type")}</TableHead>
             <TableHead>{t("status")}</TableHead>
             <TableHead>{t("priority")}</TableHead>
-            <TableHead>{t("occurrence")}</TableHead>
-            <TableHead>{t("notes")}</TableHead>
             <TableHead>{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
           {requests.map((request) => (
             <TableRow key={request.id} className="divide-x divide-gray-200">
-              <TableCell className="border-r font-medium">
-                {request.title}
+              <TableCell className="font-medium">
+                <div className="font-semibold text-gray-900">
+                  {request.encounter.patient.name}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {request.encounter.patient.id}
+                </div>
               </TableCell>
-              <TableCell className="border-r">
-                <Badge className={STATUS_COLORS[request.status]}>
+              <TableCell>{request.title}</TableCell>
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className={STATUS_COLORS[request.status]}
+                >
                   {t(request.status)}
                 </Badge>
               </TableCell>
-              <TableCell className="border-r">
-                <Badge className={PRIORITY_COLORS[request.priority]}>
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className={PRIORITY_COLORS[request.priority]}
+                >
                   {t(request.priority)}
                 </Badge>
-              </TableCell>
-              <TableCell className="border-r">
-                {request.occurance || t("no_occurrence_set")}
-              </TableCell>
-              <TableCell className="border-r max-w-[200px] truncate">
-                {request.note || t("no_notes")}
               </TableCell>
               <TableCell className="text-left">
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/services/${serviceId}/requests/locations/${locationId}/service_requests/${request.id}`,
@@ -274,6 +296,7 @@ export default function ServiceRequestList({
     limit: 14,
     disableCache: true,
   });
+  const [isBarcodeOpen, setBarcodeOpen] = useState(false);
 
   const { data: location } = useQuery({
     queryKey: ["location", facilityId, locationId],
@@ -313,6 +336,23 @@ export default function ServiceRequestList({
 
   return (
     <Page title={t("service_requests")} hideTitleOnPage>
+      <div className="flex justify-end items-center gap-4 mb-4">
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setBarcodeOpen(true)}
+        >
+          <ScanBarcode className="size-4" />
+          {t("scan_barcode")}
+        </Button>
+        <BarcodeScanDialog
+          open={isBarcodeOpen}
+          onOpenChange={setBarcodeOpen}
+          facilityId={facilityId}
+          serviceId={serviceId}
+          locationId={locationId}
+        />
+      </div>
       <Button
         variant="outline"
         onClick={() =>
