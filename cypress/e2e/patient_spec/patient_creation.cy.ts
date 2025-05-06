@@ -29,7 +29,6 @@ beforeEach(() => {
 describe("Patient Creation and modification", () => {
   const basePatientData: Partial<PatientFormData> = {
     pincode: "682001",
-    state: "Maha",
     sameAsPermanentAddress: true,
     hasEmergencyContact: false,
   };
