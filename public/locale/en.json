@@ -741,7 +741,7 @@
   "confirm_unavailability": "Confirm Unavailability",
   "confirmed": "Confirmed",
   "consent": "Consent",
-  "consent_after_end": "Consent date cannot be after end date",
+  "consent_after_start": "Consent date cannot be greater start date",
   "consent_attachments": "Consent Attachments",
   "consent_category__acd": "Advance Directive",
   "consent_category__acd_description": "Consent given in anticipation of a potential need for medical treatment",
