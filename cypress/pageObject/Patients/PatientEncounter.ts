@@ -102,6 +102,7 @@ export class PatientEncounter {
     ]);
 
     if (notes) {
+      cy.get('[data-cy="allergy-see-note"]').first().scrollIntoView();
       cy.get('[data-cy="allergy-see-note"]').first().click();
       cy.get('[data-cy="allergy-note"]').first().should("contain", notes);
     }
