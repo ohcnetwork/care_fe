@@ -38,18 +38,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
+import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
+import { formatDosage } from "@/components/Medicine/utils";
 import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
+import {
+  MEDICATION_REQUEST_TIMING_OPTIONS,
+  MedicationRequest,
+  MedicationRequestRead,
+} from "@/types/emr/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import {
   MEDICATION_STATEMENT_STATUS,
   MedicationStatementInformationSourceType,
   MedicationStatementRequest,
   MedicationStatementStatus,
 } from "@/types/emr/medicationStatement";
+import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
@@ -148,7 +160,7 @@ export function MedicationStatementQuestion({
       ?.value as MedicationStatementRequest[]) || [];
 
   const { data: patientMedications } = useQuery({
-    queryKey: ["medication_statements", patientId],
+    queryKey: ["medication_statements", patientId, encounterId],
     queryFn: query(medicationStatementApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -199,6 +211,37 @@ export function MedicationStatementQuestion({
   const handleConfirmMedication = () => {
     if (!newMedicationInSheet) return;
     addNewMedication(newMedicationInSheet);
+  };
+
+  const handleAddHistoricalMedications = (
+    selected: (MedicationRequest | MedicationStatementRequest)[],
+  ) => {
+    const newMedications = selected.map((record) => {
+      if ("dosage_instruction" in record) {
+        // Convert MedicationRequest to MedicationStatementRequest
+        const request = record as MedicationRequest;
+        return {
+          ...MEDICATION_STATEMENT_INITIAL_VALUE,
+          medication: request.medication,
+          note: request.note,
+        } as MedicationStatementRequest;
+      } else {
+        // For MedicationStatementRequest, exclude the id
+        const { id: _id, ...statement } = record as MedicationStatementRequest;
+        return statement;
+      }
+    });
+
+    updateQuestionnaireResponseCB(
+      [
+        {
+          type: "medication_statement",
+          value: [...medications, ...newMedications],
+        },
+      ],
+      questionnaireResponse.question_id,
+    );
+    setExpandedMedicationIndex(medications.length);
   };
 
   const handleRemoveMedication = (index: number) => {
@@ -278,6 +321,125 @@ export function MedicationStatementQuestion({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
+        structuredTypes={[
+          {
+            type: t("past_prescriptions"),
+            displayFields: [
+              {
+                key: "medication",
+                label: t("medicine"),
+                render: (med) => med?.display,
+              },
+              {
+                key: "dosage_instruction",
+                label: t("dosage"),
+                render: (instructions) => {
+                  const dosage = formatDosage(instructions[0]) || "";
+
+                  const frequency =
+                    getFrequencyDisplay(instructions[0]?.timing)?.meaning || "";
+
+                  const duration = instructions?.[0]?.timing?.repeat
+                    ?.bounds_duration
+                    ? `${instructions[0].timing.repeat.bounds_duration.value} ${instructions[0].timing.repeat.bounds_duration.unit}`
+                    : "";
+
+                  return `${dosage}\n${frequency}\n${duration}`;
+                },
+              },
+              {
+                key: "dosage_instruction",
+                label: t("frequency"),
+                render: (instructions) => {
+                  const timing = instructions?.[0]?.timing;
+                  const option = reverseFrequencyOption(timing);
+                  return option
+                    ? MEDICATION_REQUEST_TIMING_OPTIONS[option].display
+                    : "";
+                },
+              },
+              {
+                key: "dosage_instruction",
+                label: t("instructions"),
+                render: (instructions) =>
+                  instructions?.[0]?.additional_instruction?.[0]?.display,
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note || "-",
+              },
+              {
+                key: "created_by",
+                label: t("prescribed_by"),
+                render: (created_by) => formatName(created_by),
+              },
+            ],
+            queryKey: ["medication_requests", patientId],
+            queryFn: async (limit: number, offset: number) => {
+              const response = await query(medicationRequestApi.list, {
+                pathParams: { patientId },
+                queryParams: {
+                  limit,
+                  offset,
+                  status:
+                    "active,on-hold,draft,unknown,ended,completed,cancelled",
+                  ordering: "-created_date",
+                },
+              })({ signal: new AbortController().signal });
+              return response as PaginatedResponse<MedicationRequestRead>;
+            },
+          },
+          {
+            type: t("medication_statements"),
+            displayFields: [
+              {
+                key: "medication",
+                label: t("medicine"),
+                render: (med) => med?.display,
+              },
+              {
+                key: "dosage_text",
+                label: t("dosage"),
+                render: (dosage) => dosage,
+              },
+              {
+                key: "status",
+                label: t("status"),
+                render: (status) => t(status),
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note || "-",
+              },
+              {
+                key: "created_by",
+                label: t("prescribed_by"),
+                render: (created_by) => formatName(created_by),
+              },
+            ],
+            queryKey: ["medication_statements", patientId],
+            queryFn: async (limit: number, offset: number) => {
+              const response = await query(medicationStatementApi.list, {
+                pathParams: { patientId },
+                queryParams: {
+                  limit,
+                  offset,
+                  status:
+                    "active,on_hold,completed,stopped,unknown,not_taken,intended",
+                  ordering: "-created_date",
+                },
+              })({ signal: new AbortController().signal });
+              return response as PaginatedResponse<MedicationStatementRead>;
+            },
+          },
+        ]}
+        buttonLabel={t("medication_history")}
+        onAddSelected={handleAddHistoricalMedications}
+      />
 
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto">
@@ -762,4 +924,14 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       )}
     </div>
   );
+};
+
+// Helper function to find the frequency option from timing
+const reverseFrequencyOption = (
+  timing?: MedicationRequest["dosage_instruction"][0]["timing"],
+) => {
+  if (!timing?.code?.code) return undefined;
+  return Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
+    ([_, option]) => option.timing.code?.code === timing.code?.code,
+  )?.[0];
 };
