@@ -29,10 +29,7 @@ beforeEach(() => {
 describe("Patient Creation and modification", () => {
   const basePatientData: Partial<PatientFormData> = {
     pincode: "682001",
-    state: "Kerala",
-    district: "Ernakulam",
-    localBody: "Aluva",
-    ward: "4",
+    state: "Maharashtra",
     sameAsPermanentAddress: true,
     hasEmergencyContact: false,
   };
@@ -103,7 +100,7 @@ describe("Patient Creation and modification", () => {
 
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
-      facilityCreation.selectFacility("GHC Payyanur");
+      facilityCreation.selectFacility("Rout PLC");
       patientCreation
         .clickSearchPatients()
         .clickCreateNewPatient()
@@ -138,7 +135,7 @@ describe("Patient Creation and modification", () => {
       address: generateAddress(true),
     };
 
-    facilityCreation.selectFacility("GHC Payyanur");
+    facilityCreation.selectFacility("Rout PLC");
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()
@@ -161,16 +158,16 @@ describe("Patient Creation and modification", () => {
   describe("Patient Search and Encounter Creation", () => {
     it("Search patient with phone number and create a new encounter", () => {
       const patientDetail = {
-        name: "Jumanji - Dont Change Name",
-        phone: "87445 82225",
+        name: "Daksh",
+        phone: "80590 16870",
       };
-      facilityCreation.selectFacility("GHC Payyanur");
+      facilityCreation.selectFacility("Rout PLC");
       patientCreation
         .clickSearchPatients()
         .searchPatient(patientDetail.phone)
         .verifySearchResults(patientDetail)
         .selectPatientFromResults(patientDetail.name)
-        .enterYearOfBirth("1999")
+        .enterYearOfBirth("1926")
         .clickVerifyButton();
 
       patientVerify

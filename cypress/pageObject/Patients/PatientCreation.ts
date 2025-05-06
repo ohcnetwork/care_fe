@@ -21,10 +21,7 @@ export interface PatientFormData {
   hasEmergencyContact?: boolean; // false by default
   emergencyPhoneNumber?: string;
   pincode: string;
-  localBody: string;
-  ward: string;
   state: string;
-  district: string;
 }
 
 export class PatientCreation {
@@ -48,12 +45,9 @@ export class PatientCreation {
     emergencyContactCheckbox: '[data-cy="same-phone-number-checkbox"]',
     emergencyPhoneInput: '[data-cy="patient-emergency-phone-input"]',
     pincodeInput: '[data-cy="pincode-input"]',
-    localBodySelect: '[data-cy="select-local_body"]',
-    wardSelect: '[data-cy="select-ward"]',
     submitButton: '[data-cy="submit-button"]',
     samePhoneNumberCheckbox: '[data-cy="same-phone-number-checkbox"]',
     stateSelect: '[data-cy="select-state"]',
-    districtSelect: '[data-cy="select-district"]',
     yearOfBirthInput: '[data-cy="year-of-birth-input"]',
     verifyButton: '[data-cy="confirm-verification-button"]',
   };
@@ -176,22 +170,7 @@ export class PatientCreation {
       cy.get(this.selectors.emergencyContactCheckbox).click();
     }
 
-    this.enterPincode(data.pincode)
-      .selectState(data.state)
-      .selectDistrict(data.district)
-      .selectLocalBody(data.localBody)
-      .selectWard(data.ward);
-
-    return this;
-  }
-
-  selectLocalBody(localBody: string) {
-    cy.typeAndSelectOption(this.selectors.localBodySelect, localBody, false);
-    return this;
-  }
-
-  selectWard(ward: string) {
-    cy.typeAndSelectOption(this.selectors.wardSelect, ward);
+    this.enterPincode(data.pincode).selectState(data.state);
     return this;
   }
 
@@ -231,15 +210,6 @@ export class PatientCreation {
     cy.get(this.selectors.stateSelect).then(($el) => {
       if ($el.val() !== state) {
         cy.typeAndSelectOption(this.selectors.stateSelect, state);
-      }
-    });
-    return this;
-  }
-
-  selectDistrict(district: string) {
-    cy.get(this.selectors.districtSelect).then(($el) => {
-      if ($el.val() !== district) {
-        cy.typeAndSelectOption(this.selectors.districtSelect, district);
       }
     });
     return this;

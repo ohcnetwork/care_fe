@@ -32,7 +32,7 @@ describe("Resources Management", () => {
   };
 
   beforeEach(() => {
-    cy.loginByApi("devnurse4");
+    cy.loginByApi("nurse");
     cy.visit("/");
   });
 

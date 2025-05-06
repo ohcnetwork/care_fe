@@ -11,9 +11,9 @@ describe("Manage locations association to an encounter", () => {
 
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("devdoctor3");
+    cy.loginByApi("facility_admin");
     cy.visit("/");
-    facilityCreation.selectFacility("GHC Payyanur");
+    facilityCreation.selectFacility("Rout PLC");
   });
 
   it("should create and delete a room location", () => {
