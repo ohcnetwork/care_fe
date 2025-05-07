@@ -93,11 +93,11 @@ const consentFormSchema = (isEdit: boolean) =>
         });
       }
 
-      if (data.period.start && data.date > data.period.start) {
+      if (data.period.start && data.period.start < data.date) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: t("consent_after_start"),
-          path: ["date"],
+          message: t("from_date_before_consent"),
+          path: ["period.start"],
         });
       }
     });
