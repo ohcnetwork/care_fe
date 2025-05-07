@@ -360,7 +360,7 @@ export function LocationSheet({
       timeConfig,
     });
   };
-  const deleteMutation = useMutation({
+  const { mutate: unlinkLocation } = useMutation({
     mutationFn: ({ location, id }: { location: string; id: string }) => {
       return mutate(locationApi.deleteAssociation, {
         pathParams: {
@@ -371,11 +371,15 @@ export function LocationSheet({
       })({ encounter: encounter.id, status: "completed" });
     },
     onSuccess: () => {
-      toast.success(t("location_deleted_successfully"));
+      if (locationStatus === "active") {
+        toast.success(t("bed_active_removed_due_to_error"));
+      } else {
+        toast.success(t("bed_planned_cancelled"));
+      }
       queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
     },
     onError: () => {
-      toast.error(t("error_deleting_location"));
+      toast.error(t("error_removing_bed_assignment"));
     },
   });
   const handleCancelPlan = (status: "active" | "planned") => {
@@ -404,8 +408,7 @@ export function LocationSheet({
   };
   const confirmDeletePlan = () => {
     if (!locationToDelete) return;
-
-    deleteMutation.mutate({
+    unlinkLocation({
       location: locationToDelete.location,
       id: locationToDelete.id,
     });
@@ -925,7 +928,9 @@ export function LocationSheet({
           <AlertDialogHeader>
             <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("are_you_sure_cancel_plan", { status: locationStatus })}
+              {locationStatus === "active"
+                ? t("are_you_sure_mark_as_error")
+                : t("are_you_sure_cancel_plan")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
