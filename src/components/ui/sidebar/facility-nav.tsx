@@ -19,6 +19,7 @@ export interface NavigationLink {
   icon?: string;
   visibility?: boolean;
   children?: NavigationLink[];
+  hidden?: boolean;
 }
 
 interface FacilityNavProps {
@@ -51,7 +52,7 @@ function generateFacilityLinks(
     },
     {
       name: t("patients"),
-      url: `${baseUrl}/patients`,
+      url: `${baseUrl}/patient/${patientId}`,
       icon: "d-patient",
       visibility:
         permissions.canCreateAppointment ||
@@ -121,7 +122,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const currentPath = usePath();
 
   const pathMatch = currentPath?.match(
-    /\/facility\/[^/]+\/patient\/([^/]+)\/encounter\/([^/]+)\//,
+    /\/facility\/[^/]+\/patient\/([^/]+)(?:\/encounter\/([^/]+))?/,
   );
   const patientId = pathMatch?.[1];
   const encounterId = pathMatch?.[2];

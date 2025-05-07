@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { ChevronRight } from "lucide-react";
 import { ActiveLink } from "raviger";
 import { useState } from "react";
@@ -74,7 +75,15 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                           isActive={isChildActive(link, currentPath)}
                           className={cn(
                             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
-                            "group-data-[state=closed]/collapsible:data-[active=true]:bg-white group-data-[state=closed]/collapsible:data-[active=true]:text-green-700 group-data-[state=closed]/collapsible:data-[active=true]:shadow",
+                            {
+                              "group-data-collapsible:data-[active=true]:bg-white group-data-collapsible:data-[active=true]:text-green-700 group-collapsible:data-[active=true]:shadow":
+                                link.name == t("patients") &&
+                                /^\/facility\/[^/]+\/patient\/[^/]+$/.test(
+                                  currentPath,
+                                ),
+                              "group-data-[state=closed]/collapsible:data-[active=true]:bg-white group-data-[state=closed]/collapsible:data-[active=true]:text-green-700 group-data-[state=closed]/collapsible:data-[active=true]:shadow":
+                                true,
+                            },
                           )}
                         >
                           {link.icon ? (
