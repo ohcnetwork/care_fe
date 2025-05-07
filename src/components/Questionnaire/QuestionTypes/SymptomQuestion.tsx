@@ -535,7 +535,7 @@ const SymptomRow = React.memo(function SymptomRow({
                   />
                 </div>
                 <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
+                  <div className="block text-sm font-medium mb-1">
                     {t("verification_status")}
                   </div>
                   <VerificationStatusSelect
