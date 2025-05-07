@@ -556,7 +556,7 @@ export default function AppointmentsPage({
       </div>
 
       {activeTab === "board" ? (
-        <ScrollArea className="w-[calc(100vw-8rem)]">
+        <ScrollArea className="md:w-[calc(100vw-8rem)]">
           <div className="flex w-max space-x-4">
             {(
               [
