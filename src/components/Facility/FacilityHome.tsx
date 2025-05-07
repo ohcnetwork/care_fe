@@ -109,7 +109,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
       });
 
       if (history.length > 1) {
-        console.log(history[1]);
         const prevPath = history[1];
         if (prevPath.startsWith("/facility/")) {
           navigate("/");
