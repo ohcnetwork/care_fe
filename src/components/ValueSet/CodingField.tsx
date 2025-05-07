@@ -1,6 +1,5 @@
 import { CheckIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -28,23 +27,23 @@ export const CodingField = ({
   className,
 }: CodingFieldProps) => {
   const { t } = useTranslation();
-  const [isVerified, setIsVerified] = useState(false);
-
-  const lookupMutation = useMutation({
+  const {
+    mutate: lookup,
+    isSuccess: isVerified,
+    isPending: isLookupPending,
+    reset: resetVerified,
+  } = useMutation({
     mutationFn: mutate(valuesetApi.lookup, { silent: true }),
     onSuccess: (response: ValuesetLookupResponse) => {
       if (response.metadata) {
         form.setValue(`${name}.display`, response.metadata.display, {
           shouldValidate: true,
         });
-        setIsVerified(true);
-
         toast.success(t("code_verified_successfully"));
       }
     },
     onError: () => {
-      setIsVerified(false);
-
+      resetVerified();
       toast.error(t("failed_to_verify_code"));
     },
   });
@@ -57,14 +56,13 @@ export const CodingField = ({
       return;
     }
 
-    lookupMutation.mutate({ system, code });
+    lookup({ system, code });
   };
 
   const handleCodeChange = () => {
-    setIsVerified(false);
+    resetVerified();
     form.setValue(`${name}.display`, "", { shouldValidate: true });
   };
-
   return (
     <div className={cn("flex gap-4 items-start", className)}>
       <FormField
@@ -94,7 +92,7 @@ export const CodingField = ({
               <Input
                 {...field}
                 placeholder={t("unverified")}
-                className={cn(!field.value ? "text-gray-500" : undefined)}
+                className={!field.value ? "text-gray-500" : ""}
                 readOnly
               />
             </FormControl>
@@ -105,22 +103,19 @@ export const CodingField = ({
         type="button"
         variant="outline"
         size="icon"
-        onClick={handleVerify}
-        disabled={lookupMutation.isPending}
-        className={cn(
+        onClick={isVerified ? undefined : handleVerify}
+        disabled={isLookupPending || isVerified}
+        className={
           isVerified
             ? "bg-transparent border-none shadow-none hover:bg-transparent hover:border-none hover:shadow-none"
-            : "hover:border-gray-400 hover:bg-gray-100",
-        )}
+            : "hover:border-gray-400 hover:bg-gray-100"
+        }
       >
         {isVerified ? (
-          <CheckIcon className="size-4 text-green-500 transition-colors duration-300" />
+          <CheckIcon className="size-4 text-green-600 transition-colors duration-300" />
         ) : (
           <UpdateIcon
-            className={cn(
-              "size-4 transition-colors duration-300",
-              lookupMutation.isPending && "animate-spin",
-            )}
+            className={cn("size-4", isLookupPending && "animate-spin")}
           />
         )}
       </Button>
