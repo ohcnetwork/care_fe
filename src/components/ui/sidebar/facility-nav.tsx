@@ -69,7 +69,7 @@ function generateFacilityLinks(
             patientId && encounterId
               ? {
                   name: t("encounter"),
-                  url: `${baseUrl}/patient/${patientId}/encounter/${encounterId}/updates`,
+                  url: `${baseUrl}/patient/${patientId}/encounter/${encounterId}`,
                 }
               : null,
           ].filter(Boolean) as NavigationLink[],
@@ -121,7 +121,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const currentPath = usePath();
 
   const pathMatch = currentPath?.match(
-    /\/facility\/[^/]+\/patient\/([^/]+)\/encounter\/([^/]+)\/updates/,
+    /\/facility\/[^/]+\/patient\/([^/]+)\/encounter\/([^/]+)\//,
   );
   const patientId = pathMatch?.[1];
   const encounterId = pathMatch?.[2];
