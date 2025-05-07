@@ -29,7 +29,7 @@ function LocationNode({ locationData, children }: LocationNodeProps) {
     <div className="flex flex-col gap-1">
       <div className="flex items-center text-sm font-semibold">
         <Link
-          href={`/location/${location.id}`}
+          href={`/locations/${location.id}`}
           className="flex items-center gap-1"
         >
           {location.name}

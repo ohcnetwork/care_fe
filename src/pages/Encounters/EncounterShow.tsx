@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -8,6 +10,7 @@ import PageHeadTitle from "@/components/Common/PageHeadTitle";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
@@ -16,6 +19,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { EncounterConsentsTab } from "@/pages/Encounters/tabs/EncounterConsentsTab";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
@@ -40,6 +44,7 @@ const defaultTabs = {
   notes: EncounterNotesTab,
   devices: EncounterDevicesTab,
   drawings: EncounterDrawingsTab,
+  consents: EncounterConsentsTab,
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
   // pressure_sore: EncounterPressureSoreTab,
@@ -53,15 +58,43 @@ interface Props {
 }
 
 export const EncounterShow = (props: Props) => {
-  const { encounterId, patientId, facilityId } = props;
+  const { encounterId, patientId, facilityId: facilityIdFromProps } = props;
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const pluginTabs = useCareAppEncounterTabs();
+  const { goBack } = useAppHistory();
 
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
     ...defaultTabs,
     ...pluginTabs,
   };
+
+  const { data: encounterData, isLoading } = useQuery({
+    queryKey: ["encounter", encounterId],
+    queryFn: query(routes.encounter.get, {
+      pathParams: { id: encounterId },
+      queryParams: facilityIdFromProps
+        ? {
+            facility: facilityIdFromProps,
+          }
+        : {
+            patient: patientId,
+          },
+    }),
+    enabled: !!encounterId,
+  });
+
+  const { data: patient, isLoading: isPatientLoading } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.patient.getPatient, {
+      pathParams: {
+        id: patientId,
+      },
+    }),
+    enabled: !facilityIdFromProps && !!patientId,
+  });
+
+  const facilityId = facilityIdFromProps ?? encounterData?.facility.id;
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
@@ -71,37 +104,42 @@ export const EncounterShow = (props: Props) => {
     enabled: !!facilityId,
   });
 
-  const { canListEncounters, canWriteEncounter } = getPermissions(
+  const { canViewEncounter } = getPermissions(
+    hasPermission,
+    encounterData?.permissions ?? [],
+  );
+
+  const { canViewClinicalData } = getPermissions(
+    hasPermission,
+    patient?.permissions ?? [],
+  );
+
+  const { canWriteEncounter } = getPermissions(
     hasPermission,
     facilityData?.permissions ?? [],
   );
 
-  const { data: encounterData, isLoading } = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(routes.encounter.get, {
-      pathParams: { id: encounterId },
-      queryParams: facilityId
-        ? {
-            facility: facilityId,
-          }
-        : {
-            patient: patientId,
-          },
-    }),
-    enabled: !!encounterId && canListEncounters,
-  });
+  const canAccess = canViewClinicalData || canViewEncounter;
 
   const canWrite =
     canWriteEncounter &&
     !inactiveEncounterStatus.includes(encounterData?.status ?? "");
 
-  if (isLoading || !encounterData) {
+  useEffect(() => {
+    if (!isLoading && !isPatientLoading && !canAccess) {
+      toast.error(t("permission_denied_encounter"));
+      goBack("/");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, isPatientLoading]);
+
+  if (isLoading || !encounterData || (!facilityIdFromProps && !patient)) {
     return <Loading />;
   }
 
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
-    patient: encounterData.patient,
+    patient: patient ?? encounterData.patient,
   };
 
   if (!props.tab) {

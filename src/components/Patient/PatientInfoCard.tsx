@@ -6,10 +6,9 @@ import {
   CircleDashed,
   Clock,
   Droplet,
-  SignatureIcon,
   UserRound,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -31,7 +30,6 @@ import {
 
 import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { Avatar } from "@/components/Common/Avatar";
-import { ConsentSheet } from "@/components/Consent/ConsentSheet";
 import EncounterActions from "@/components/Encounter/EncounterActions";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
@@ -58,6 +56,8 @@ export interface PatientInfoCardProps {
 
 export default function PatientInfoCard(props: PatientInfoCardProps) {
   const { patient, encounter, canWrite, disableButtons = false } = props;
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityIdExists = !!subpathMatch?.facilityId;
   const { t } = useTranslation();
 
   return (
@@ -195,7 +195,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         >
                           {completedEncounterStatus.includes(
                             props.encounter.status,
-                          ) ? (
+                          ) || props.encounter.status === "discharged" ? (
                             <CircleCheck
                               className="size-4 text-green-300"
                               fill="green"
@@ -444,26 +444,17 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     <></>
                   )}
                   <Badge variant="outline">
-                    <ConsentSheet
-                      patientId={props.encounter.patient.id}
-                      encounterId={props.encounter.id}
-                      trigger={
-                        <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
-                          <SignatureIcon className="size-4 text-green-600" />
-                          {t("manage_consents")}
-                        </div>
-                      }
-                    />
-                  </Badge>
-                  <Badge variant="outline">
                     <CareTeamSheet
                       encounter={encounter}
                       trigger={
                         <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
                           <UserRound className="size-4 text-green-600" />
-                          {t("manage_care_team")}
+                          {canWrite
+                            ? t("manage_care_team")
+                            : t("view_care_team")}
                         </div>
                       }
+                      canWrite={canWrite}
                     />
                   </Badge>
                 </div>
@@ -488,7 +479,8 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="primary">
-                    {inactiveEncounterStatus.includes(encounter.status)
+                    {inactiveEncounterStatus.includes(encounter.status) ||
+                    !facilityIdExists
                       ? t("actions")
                       : t("update")}
                     <ChevronDown className="ml-2 size-4" />
