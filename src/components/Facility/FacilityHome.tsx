@@ -34,6 +34,7 @@ import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
@@ -75,6 +76,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
+  const { history, goBack } = useAppHistory();
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -105,7 +107,17 @@ export const FacilityHome = ({ facilityId }: Props) => {
       queryClient.invalidateQueries({
         queryKey: ["facility", facilityId],
       });
-      navigate("/");
+
+      if (history.length > 1) {
+        const prevPath = history[1];
+        if (prevPath.startsWith("/facility/")) {
+          navigate("/");
+        } else {
+          goBack("/");
+        }
+      } else {
+        navigate("/");
+      }
     },
   });
 
