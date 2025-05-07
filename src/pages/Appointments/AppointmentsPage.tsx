@@ -11,6 +11,7 @@ import {
   isYesterday,
   subDays,
 } from "date-fns";
+import dayjs from "dayjs";
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect } from "react";
@@ -23,6 +24,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import {
   Command,
   CommandEmpty,
@@ -32,7 +34,6 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -505,25 +506,63 @@ export default function AppointmentsPage({
                       </Button>
                     </div>
 
-                    <DateRangePicker
-                      date={{
-                        from: qParams.date_from
-                          ? new Date(qParams.date_from)
-                          : undefined,
-                        to: qParams.date_to
-                          ? new Date(qParams.date_to)
-                          : undefined,
-                      }}
-                      onChange={(date) =>
-                        updateQuery({
-                          date_from: date?.from
-                            ? dateQueryString(date.from)
-                            : null,
-                          date_to: date?.to ? dateQueryString(date?.to) : null,
-                          slot: null,
-                        })
-                      }
-                    />
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-sm font-medium">
+                        {t("start_date")}
+                      </Label>
+                      <CombinedDatePicker
+                        value={
+                          qParams.date_from
+                            ? new Date(qParams.date_from)
+                            : undefined
+                        }
+                        onChange={(date) => {
+                          if (qParams.date_to && date) {
+                            if (
+                              dayjs(date).isAfter(dayjs(qParams.date_to), "day")
+                            ) {
+                              updateQuery({
+                                date_from: date ? dateQueryString(date) : null,
+                                date_to: null,
+                                slot: null,
+                              });
+                              return;
+                            }
+                          }
+                          updateQuery({
+                            date_from: date ? dateQueryString(date) : null,
+                            slot: null,
+                          });
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-sm font-medium">
+                        {t("end_date")}
+                      </Label>
+                      <CombinedDatePicker
+                        value={
+                          qParams.date_to
+                            ? new Date(qParams.date_to)
+                            : undefined
+                        }
+                        onChange={(date) => {
+                          updateQuery({
+                            date_to: date ? dateQueryString(date) : null,
+                            slot: null,
+                          });
+                        }}
+                        blockDate={(date) =>
+                          qParams.date_from
+                            ? dayjs(date).isBefore(
+                                dayjs(qParams.date_from),
+                                "day",
+                              )
+                            : false
+                        }
+                      />
+                    </div>
                   </div>
                 </PopoverContent>
               </Popover>
