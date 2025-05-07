@@ -11,6 +11,9 @@
   ],
   "automergeStrategy": "squash",
   "automergeType": "pr",
+  "schedule": [
+    "* 0-3 * * 1"
+  ],
   "packageRules": [
     {
       "groupName": "all dependencies (minor, patch)",

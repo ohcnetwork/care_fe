@@ -23,6 +23,7 @@ export type ScribeComponentType = React.FC<{
 
 export type PatientHomeActionsComponentType = React.FC<{
   patient: Patient;
+  facilityId?: string;
   className?: string;
 }>;
 
@@ -47,6 +48,7 @@ export type FacilityHomeActionsComponentType = React.FC<{
 
 export type PatientRegistrationFormComponentType = React.FC<{
   form: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  facilityId?: string;
   patientId?: string;
 }>;
 

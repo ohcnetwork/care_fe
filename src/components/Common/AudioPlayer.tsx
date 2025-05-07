@@ -69,7 +69,8 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
       audio.removeEventListener("ended", () => setIsPlaying(false));
       audio.remove();
     };
-  }, [src, handleLoadedMetadata, handleDurationChange, handleTimeUpdate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
 
   const togglePlay = useCallback(() => {
     if (audioRef.current) {

@@ -249,15 +249,25 @@ export function QuestionInput({
                 data-question-id={question.id}
               >
                 {index === 0 && (
-                  <QuestionLabel
-                    question={question}
-                    isSubQuestion={isSubQuestion}
-                  />
+                  <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
+                    <QuestionLabel
+                      question={question}
+                      isSubQuestion={isSubQuestion}
+                    />
+                    {question.description && (
+                      <p className="text-sm text-gray-500">
+                        {question.description}
+                      </p>
+                    )}
+                  </div>
                 )}
                 <div
                   className={cn("w-full", {
-                    "flex flex-col md:flex-row": !question.structured_type,
-                    "flex-col": question.repeats || question.type === "text",
+                    "flex flex-col md:flex-row":
+                      !question.structured_type && question.type !== "choice",
+                    "flex flex-col gap-2": question.type === "choice",
+                    "flex-col gap-1":
+                      question.repeats || question.type === "text",
                   })}
                 >
                   <div className="flex-1 min-w-0">
@@ -268,7 +278,10 @@ export function QuestionInput({
                     <NotesInput
                       className={cn("w-min", {
                         "bg-white border md:rounded-l-none md:-ml-2 mt-2 md:mt-0":
-                          !(question.type === "text"),
+                          !(
+                            question.type === "text" ||
+                            question.type === "choice"
+                          ),
                         "mt-2": question.type === "text",
                       })}
                       questionnaireResponse={questionnaireResponse}

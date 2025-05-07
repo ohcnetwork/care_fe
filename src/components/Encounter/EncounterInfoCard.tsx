@@ -62,7 +62,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
       data-status={encounter.status}
       key={props.encounter.id}
       className={cn(
-        "hover:shadow-lg transition-shadow group md:flex md:flex-col",
+        "hover:shadow-lg transition-shadow group md:flex md:flex-col h-full",
         hideBorder && "border-none shadow-none",
       )}
     >

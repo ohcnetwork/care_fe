@@ -6,13 +6,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -55,19 +49,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import {
-  ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
-  DIAGNOSIS_CATEGORY,
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
   DiagnosisRequest,
+  Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { Code } from "@/types/questionnaire/code";
@@ -115,8 +109,32 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     category: diagnosis.category,
     note: diagnosis.note,
     encounter: diagnosis.encounter,
+    created_by: diagnosis.created_by,
+    created_date: diagnosis.created_date,
     dirty: false,
   };
+}
+
+function checkForDuplicateDiagnosis(
+  existingDiagnoses: DiagnosisRequest[],
+  newDiagnosis: Pick<DiagnosisRequest, "code"> | Code,
+  t: (key: string) => string,
+) {
+  const codeToCheck = "code" in newDiagnosis ? newDiagnosis.code : newDiagnosis;
+  const codeValue =
+    typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
+
+  const isDuplicate = existingDiagnoses.some(
+    (diagnosis) =>
+      diagnosis.code.code === codeValue &&
+      diagnosis.verification_status !== "entered_in_error",
+  );
+
+  if (isDuplicate) {
+    toast.warning(t("diagnosis_already_exist_warning"));
+    return true;
+  }
+  return false;
 }
 
 export function DiagnosisQuestion({
@@ -140,24 +158,11 @@ export function DiagnosisQuestion({
   });
   const isMobile = useBreakpoints({ default: true, md: false });
 
-  // Sort diagnoses: chronic conditions first, then by date
+  // Sort diagnoses by date
   const sortedDiagnoses = useMemo(() => {
     const diagnoses =
       (questionnaireResponse.values?.[0]?.value as DiagnosisRequest[]) || [];
     return [...diagnoses].sort((a, b) => {
-      // First sort by category (chronic conditions first)
-      if (
-        a.category === "chronic_condition" &&
-        b.category !== "chronic_condition"
-      )
-        return -1;
-      if (
-        a.category !== "chronic_condition" &&
-        b.category === "chronic_condition"
-      )
-        return 1;
-
-      // Then sort by date within each category
       const dateA = a.onset?.onset_datetime
         ? new Date(a.onset.onset_datetime)
         : new Date();
@@ -169,27 +174,13 @@ export function DiagnosisQuestion({
   }, [questionnaireResponse.values]);
 
   const { data: patientDiagnoses } = useQuery({
-    queryKey: ["diagnoses", patientId],
+    queryKey: ["diagnoses", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
         limit: 100,
-        category: "encounter_diagnosis",
-        exclude_verification_status: "entered_in_error",
-      },
-    }),
-    enabled: !isPreview,
-  });
-
-  const { data: patientChronicConditions } = useQuery({
-    queryKey: ["chronic_condition", patientId],
-    queryFn: query(diagnosisApi.listDiagnosis, {
-      pathParams: { patientId },
-      queryParams: {
-        category: "chronic_condition",
-        limit: 100,
-        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+        category: "encounter_diagnosis,chronic_condition",
         exclude_verification_status: "entered_in_error",
       },
     }),
@@ -197,21 +188,18 @@ export function DiagnosisQuestion({
   });
 
   useEffect(() => {
-    if (patientDiagnoses?.results && patientChronicConditions?.results) {
+    if (patientDiagnoses?.results) {
       updateQuestionnaireResponseCB(
         [
           {
             type: "diagnosis",
-            value: [
-              ...patientChronicConditions.results,
-              ...patientDiagnoses.results,
-            ].map(convertToDiagnosisRequest),
+            value: patientDiagnoses.results.map(convertToDiagnosisRequest),
           },
         ],
         questionnaireResponse.question_id,
       );
     }
-  }, [patientDiagnoses, patientChronicConditions]);
+  }, [patientDiagnoses]);
 
   const handleCodeSelect = (code: Code) => {
     setSelectedCode(code);
@@ -222,14 +210,7 @@ export function DiagnosisQuestion({
   const handleCategoryConfirm = () => {
     if (!selectedCode) return;
 
-    const isDuplicate = sortedDiagnoses.some(
-      (diagnosis) =>
-        diagnosis.code.code === selectedCode.code &&
-        diagnosis.verification_status !== "entered_in_error",
-    );
-
-    if (isDuplicate) {
-      toast.warning(t("diagnosis_already_exist_warning"));
+    if (checkForDuplicateDiagnosis(sortedDiagnoses, selectedCode, t)) {
       return;
     }
 
@@ -267,7 +248,11 @@ export function DiagnosisQuestion({
       // For existing records, update verification status to entered_in_error
       const newDiagnoses = sortedDiagnoses.map((d, i) =>
         i === index
-          ? { ...d, verification_status: "entered_in_error" as const }
+          ? {
+              ...d,
+              verification_status: "entered_in_error" as const,
+              dirty: true,
+            }
           : d,
       ) as DiagnosisRequest[];
       updateQuestionnaireResponseCB(
@@ -328,14 +313,33 @@ export function DiagnosisQuestion({
     });
   };
 
+  const handleAddHistoricalDiagnoses = async (
+    selectedDiagnoses: DiagnosisRequest[],
+  ) => {
+    // Filter out duplicates before adding
+    const nonDuplicateDiagnoses = selectedDiagnoses.filter(
+      (diagnosis) => !checkForDuplicateDiagnosis(sortedDiagnoses, diagnosis, t),
+    );
+
+    if (nonDuplicateDiagnoses.length === 0) {
+      return;
+    }
+
+    const newDiagnoses = [
+      ...sortedDiagnoses,
+      ...nonDuplicateDiagnoses.map(({ id: _id, ...diagnosis }) => ({
+        ...diagnosis,
+        dirty: true,
+      })),
+    ];
+    updateQuestionnaireResponseCB(
+      [{ type: "diagnosis", value: newDiagnoses }],
+      questionnaireResponse.question_id,
+    );
+  };
+
   const diagnosisDetailsContent = (
     <div className="space-y-4 p-4">
-      <CategorySelector
-        categories={DIAGNOSIS_CATEGORY}
-        selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
-      />
-
       <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
           <Label className="text-sm">{t("date")}</Label>
@@ -445,7 +449,7 @@ export function DiagnosisQuestion({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {selectedCode && (
-            <Label className="text-sm font-medium">
+            <Label className="text-md font-medium">
               {selectedCode.display}
             </Label>
           )}
@@ -454,12 +458,6 @@ export function DiagnosisQuestion({
           {t("cancel")}
         </Button>
       </div>
-      <CategorySelector
-        categories={DIAGNOSIS_CATEGORY}
-        selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
-        gridCols="grid-cols-1 md:grid-cols-2"
-      />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label className="text-sm">{t("date")}</Label>
@@ -549,6 +547,60 @@ export function DiagnosisQuestion({
 
   return (
     <div className="space-y-4">
+      <HistoricalRecordSelector<DiagnosisRequest>
+        structuredTypes={[
+          {
+            type: t("diagnoses"),
+            converter: convertToDiagnosisRequest,
+            displayFields: [
+              {
+                key: "code",
+                label: t("diagnosis"),
+                render: (code: Code) => code?.display || "-",
+              },
+              {
+                key: "clinical_status",
+                label: t("status"),
+                render: (status: string) => t(status),
+              },
+              {
+                key: "onset",
+                label: t("onset_date"),
+                render: (onset: Onset) =>
+                  onset?.onset_datetime
+                    ? format(new Date(onset.onset_datetime), "dd-MM-yyyy")
+                    : "",
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note: string | undefined) => note || "-",
+              },
+              {
+                key: "created_by",
+                label: t("recorded_by"),
+                render: (created_by) => formatName(created_by),
+              },
+            ],
+            queryKey: ["diagnoses_and_chronic_conditions", patientId],
+            queryFn: async (limit: number, offset: number) => {
+              const response = await query(diagnosisApi.listDiagnosis, {
+                pathParams: { patientId },
+                queryParams: {
+                  offset,
+                  limit,
+                  exclude_verification_status: "entered_in_error",
+                  ordering: "-created_date",
+                  category: "encounter_diagnosis,chronic_condition",
+                },
+              })({ signal: new AbortController().signal });
+              return response;
+            },
+          },
+        ]}
+        buttonLabel={t("diagnosis_history")}
+        onAddSelected={handleAddHistoricalDiagnoses}
+      />
       {sortedDiagnoses.length > 0 && (
         <div className="md:rounded-lg md:border">
           {/* Desktop View - Table */}
@@ -720,7 +772,6 @@ const DiagnosisTableRow = ({
         className={cn(
           diagnosis.verification_status === "entered_in_error" &&
             "opacity-40 pointer-events-none",
-          diagnosis.category === "chronic_condition" && "bg-yellow-50/50",
         )}
       >
         <TableCell className="py-1">
@@ -731,14 +782,7 @@ const DiagnosisTableRow = ({
             >
               {diagnosis.code.display}
             </div>
-            <div
-              className={cn(
-                "text-xs px-2 py-0.5 rounded-full shrink-0",
-                diagnosis.category === "chronic_condition"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-gray-100 text-gray-700",
-              )}
-            >
+            <div className="text-xs px-2 py-0.5 rounded-full shrink-0 bg-gray-100 text-gray-700">
               {t(`Diagnosis_${diagnosis.category}__title`)}
             </div>
           </div>
@@ -881,7 +925,6 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
       className={cn("group hover:bg-gray-50", {
         "opacity-40 pointer-events-none":
           diagnosis.verification_status === "entered_in_error",
-        "bg-yellow-50/50": diagnosis.category === "chronic_condition",
       })}
     >
       {/* Mobile View - Card Layout */}
@@ -916,10 +959,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                         <span className="mr-2">{diagnosis.code.display}</span>
                         <div
                           className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
-                            diagnosis.category === "chronic_condition"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-gray-100 text-gray-700",
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-700",
                           )}
                         >
                           {t(`Diagnosis_${diagnosis.category}__title`)}
@@ -1077,50 +1117,3 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
     </div>
   );
 };
-
-function CategorySelector({
-  categories,
-  selectedCategory,
-  onCategorySelect,
-  gridCols = "grid-cols-1",
-}: {
-  categories: readonly string[];
-  selectedCategory: DiagnosisRequest["category"];
-  onCategorySelect: Dispatch<SetStateAction<DiagnosisRequest["category"]>>;
-  gridCols?: string;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <div className={cn("grid gap-4", gridCols)}>
-      {categories.map((category) => (
-        <div
-          key={category}
-          className={cn(
-            "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
-            selectedCategory === category
-              ? "border-primary bg-primary/5"
-              : "border-border hover:border-primary/50",
-          )}
-          onClick={() =>
-            onCategorySelect(category as DiagnosisRequest["category"])
-          }
-        >
-          <div className="flex items-center space-x-2">
-            <div className="flex-1">
-              <div className="font-medium">
-                {t(`Diagnosis_${category}__title`)}
-              </div>
-              <div className="flex-1 text-sm text-muted-foreground">
-                {t(`Diagnosis_${category}__description`)}
-              </div>
-            </div>
-            {selectedCategory === category && (
-              <div className="size-4 rounded-full bg-primary" />
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}

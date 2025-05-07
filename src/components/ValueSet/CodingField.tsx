@@ -44,6 +44,7 @@ export const CodingField = ({
     },
     onError: () => {
       resetVerified();
+
       toast.error(t("failed_to_verify_code"));
     },
   });
