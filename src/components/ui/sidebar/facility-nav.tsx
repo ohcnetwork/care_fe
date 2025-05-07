@@ -19,7 +19,6 @@ export interface NavigationLink {
   icon?: string;
   visibility?: boolean;
   children?: NavigationLink[];
-  hidden?: boolean;
 }
 
 interface FacilityNavProps {
