@@ -47,18 +47,23 @@ const queryClient = new QueryClient({
   }),
 });
 
+const ScrollToTop = () => {
+  useLocationChange(() => {
+    window.scrollTo(0, 0);
+  });
+
+  return null;
+};
+
 const App = () => {
   useEffect(() => {
     displayCareConsoleArt();
   }, []);
 
-  useLocationChange(() => {
-    window.scrollTo(0, 0);
-  });
-
   return (
     <>
       <QueryClientProvider client={queryClient}>
+        <ScrollToTop />
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
             <PluginEngine>
