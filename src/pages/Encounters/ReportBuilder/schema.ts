@@ -12,6 +12,7 @@ import {
 // Zod schema for the report template configuration
 export const reportTemplateSchema = z.object({
   id: z.string().optional(),
+  slug: z.string(),
   type: z.enum(
     REPORT_TEMPLATE_TYPE.map((type) => type.id) as [
       ReportTemplateType,
@@ -75,68 +76,71 @@ export const reportTemplateSchema = z.object({
     }),
     header: z.object({
       rows: z.array(
-        z.array(
-          z.discriminatedUnion("type", [
-            z.object({
-              type: z.literal("text"),
-              text: z.string(),
-              size: z.string(),
-              weight: z.number(),
-              align: z
-                .enum(
-                  HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
-                    HeaderAlignment,
-                    ...HeaderAlignment[],
-                  ],
-                )
-                .optional(),
-            }),
-            z.object({
-              type: z.literal("image"),
-              file_name: z.string(),
-              url: z.string().url(),
-              width: z.string(),
-              align: z
-                .enum(
-                  HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
-                    HeaderAlignment,
-                    ...HeaderAlignment[],
-                  ],
-                )
-                .optional(),
-            }),
-            z.object({
-              type: z.literal("rule"),
-              length: z.string(),
-              stroke: z.string(),
-              align: z
-                .enum(
-                  HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
-                    HeaderAlignment,
-                    ...HeaderAlignment[],
-                  ],
-                )
-                .optional(),
-            }),
-            z.object({
-              type: z.literal("datetime"),
-              label: z.string(),
-              format: z.string(),
-              style: z.object({
-                fill: z.string().optional(),
-                weight: z.number().optional(),
+        z.object({
+          size_ratio: z.array(z.number()).optional(),
+          columns: z.array(
+            z.discriminatedUnion("type", [
+              z.object({
+                type: z.literal("text"),
+                text: z.string(),
+                size: z.string(),
+                weight: z.number(),
+                align: z
+                  .enum(
+                    HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                      HeaderAlignment,
+                      ...HeaderAlignment[],
+                    ],
+                  )
+                  .optional(),
               }),
-              align: z
-                .enum(
-                  HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
-                    HeaderAlignment,
-                    ...HeaderAlignment[],
-                  ],
-                )
-                .optional(),
-            }),
-          ]),
-        ),
+              z.object({
+                type: z.literal("image"),
+                file_name: z.string(),
+                url: z.string().url(),
+                width: z.string(),
+                align: z
+                  .enum(
+                    HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                      HeaderAlignment,
+                      ...HeaderAlignment[],
+                    ],
+                  )
+                  .optional(),
+              }),
+              z.object({
+                type: z.literal("rule"),
+                length: z.string(),
+                stroke: z.string(),
+                align: z
+                  .enum(
+                    HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                      HeaderAlignment,
+                      ...HeaderAlignment[],
+                    ],
+                  )
+                  .optional(),
+              }),
+              z.object({
+                type: z.literal("datetime"),
+                label: z.string(),
+                format: z.string(),
+                style: z.object({
+                  fill: z.string().optional(),
+                  weight: z.number().optional(),
+                }),
+                align: z
+                  .enum(
+                    HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                      HeaderAlignment,
+                      ...HeaderAlignment[],
+                    ],
+                  )
+                  .optional(),
+              }),
+            ]),
+          ),
+        }),
       ),
     }),
     sections: z.array(

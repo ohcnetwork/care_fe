@@ -2,9 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useNavigate } from "raviger";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +17,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -23,6 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -48,6 +53,7 @@ interface ReportBuilderProps {
 // Default template configuration
 const defaultTemplate: ReportTemplateFormData = {
   type: "discharge_summary",
+  slug: "default-template",
   config: {
     layout: {
       page_size: "a4",
@@ -67,56 +73,71 @@ const defaultTemplate: ReportTemplateFormData = {
     },
     header: {
       rows: [
-        [
-          {
-            type: "text",
-            text: "Central Diagnostic Laboratory",
-            size: "24pt",
-            weight: 400,
-            align: "center",
-          },
-        ],
-        [
-          {
-            type: "rule",
-            length: "100%",
-            stroke: "mygray",
-          },
-        ],
-        [
-          {
-            type: "text",
-            text: "Patient Discharge Summary",
-            size: "15pt",
-            weight: 400,
-          },
-          {
-            type: "image",
-            file_name: "care-black-logo.png",
-            url: "https://en.wikipedia.org/static/images/icons/wikipedia.png",
-            width: "20%",
-            align: "right",
-          },
-        ],
-        [
-          {
-            type: "datetime",
-            label: "Created on",
-            format: "[day]/[month]/[year]",
-            style: {
-              fill: "mygray",
-              weight: 500,
+        {
+          size_ratio: [1],
+          columns: [
+            {
+              type: "text",
+              text: "Care Lab",
+              size: "24pt",
+              weight: 400,
+              align: "center",
             },
-            align: "right",
-          },
-        ],
-        [
-          {
-            type: "rule",
-            length: "100%",
-            stroke: "mygray",
-          },
-        ],
+          ],
+        },
+        {
+          size_ratio: [1],
+          columns: [
+            {
+              type: "rule",
+              length: "100%",
+              stroke: "mygray",
+            },
+          ],
+        },
+        {
+          size_ratio: [4, 2],
+          columns: [
+            {
+              type: "text",
+              text: "Patient Discharge Summary",
+              size: "15pt",
+              weight: 400,
+            },
+            {
+              type: "image",
+              file_name: "care-black-logo.svg",
+              url: "https://raw.githubusercontent.com/ohcnetwork/care/refs/heads/develop/care/static/images/logos/black-logo.svg",
+              width: "40%",
+              align: "right",
+            },
+          ],
+        },
+        {
+          size_ratio: [1],
+          columns: [
+            {
+              type: "datetime",
+              label: "Created on",
+              format: "[day]/[month]/[year]",
+              style: {
+                fill: "mygray",
+                weight: 500,
+              },
+              align: "left",
+            },
+          ],
+        },
+        {
+          size_ratio: [1],
+          columns: [
+            {
+              type: "rule",
+              length: "100%",
+              stroke: "mygray",
+            },
+          ],
+        },
       ],
     },
     sections: [
@@ -142,6 +163,19 @@ const defaultTemplate: ReportTemplateFormData = {
           style: "list",
         },
       },
+      {
+        source: "custom_section",
+        is_table: false,
+        enabled: true,
+        options: {
+          title: "Emergency Contacts",
+          style: "list",
+          fields: [
+            { label: "Primary Contact", value: "+91-9876543210" },
+            { label: "Ambulance", value: "102" },
+          ],
+        },
+      },
     ],
   },
 };
@@ -149,11 +183,14 @@ const defaultTemplate: ReportTemplateFormData = {
 export default function ReportBuilder({
   facilityId,
   reportTemplateId,
+  encounterId,
+  patientId,
 }: ReportBuilderProps) {
   const [activeTab, setActiveTab] = useState("layout");
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  const { data: templateSchema } = useQuery({
+  const { data: templateSchema, isLoading: isTemplateLoading } = useQuery({
     queryKey: ["report-template", reportTemplateId],
     queryFn: query(reportTemplateApi.get, {
       pathParams: {
@@ -170,6 +207,12 @@ export default function ReportBuilder({
         facility_external_id: facilityId,
       },
     }),
+    onSuccess: () => {
+      toast.success(t("REPORT_BUILDER_TEMPLATE_SAVED"));
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+      );
+    },
   });
 
   const { mutate: updateReportTemplate } = useMutation({
@@ -179,15 +222,35 @@ export default function ReportBuilder({
         id: reportTemplateId,
       },
     }),
+    onSuccess: () => {
+      toast.success(t("REPORT_BUILDER_TEMPLATE_UPDATED"));
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+      );
+    },
   });
 
   const form = useForm<ReportTemplateFormData>({
     resolver: zodResolver(reportTemplateSchema),
-    defaultValues: templateSchema ?? defaultTemplate,
+    defaultValues: defaultTemplate,
   });
 
+  useEffect(() => {
+    if (templateSchema) {
+      form.reset(templateSchema);
+    }
+  }, [templateSchema, form]);
+
   const onSubmit = useCallback(
-    (data: ReportTemplateFormData) => {
+    async (data: ReportTemplateFormData) => {
+      const isValid = await form.trigger();
+      const currentErrors = form.formState.errors;
+      if (!isValid) {
+        const firstError = Object.values(currentErrors)[0];
+        console.log(firstError);
+        return;
+      }
+
       data = {
         ...data,
         config: {
@@ -204,21 +267,32 @@ export default function ReportBuilder({
       if (reportTemplateId) {
         updateReportTemplate(data);
       } else {
+        console.log(data);
         createReportTemplate(data);
       }
     },
-    [reportTemplateId, updateReportTemplate, createReportTemplate],
+    [reportTemplateId, updateReportTemplate, createReportTemplate, form],
   );
 
   const handleExport = useCallback(() => {
     console.log("");
   }, []);
 
+  if (reportTemplateId && isTemplateLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="max-w-9xl mx-auto">
       <Form {...form}>
         <div className="grid grid-cols-2">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSubmit(form.getValues());
+            }}
+            className="space-y-6"
+          >
             <div className="flex justify-end space-x-2">
               <FormField
                 control={form.control}
@@ -227,6 +301,7 @@ export default function ReportBuilder({
                   <FormItem>
                     <FormControl>
                       <Select
+                        value={field.value}
                         onValueChange={field.onChange}
                         disabled={!!reportTemplateId}
                       >
@@ -245,6 +320,18 @@ export default function ReportBuilder({
                           </SelectContent>
                         </FormItem>
                       </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="slug"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

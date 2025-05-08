@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -13,6 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
 
@@ -39,6 +40,14 @@ export default function ReportBuilderSheet({
     }),
   });
 
+  const { mutate: generateReport } = useMutation({
+    mutationFn: mutate(reportTemplateApi.generateReport, {
+      pathParams: {
+        facility_external_id: facilityId,
+      },
+    }),
+  });
+
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
@@ -53,7 +62,12 @@ export default function ReportBuilderSheet({
                 key={reportTemplate.id}
                 className="flex items-center justify-between gap-2 rounded-md bg-gray-100 p-3"
               >
-                {reportTemplate.type.toString()}
+                <div className="flex flex-col">
+                  <span>{reportTemplate.slug}</span>
+                  <span className="text-sm text-gray-500">
+                    {reportTemplate.type.toString()}
+                  </span>
+                </div>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
@@ -71,13 +85,16 @@ export default function ReportBuilderSheet({
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    asChild
+                    onClick={() =>
+                      generateReport({
+                        render_format: "typst",
+                        type: reportTemplate.type,
+                        slug: reportTemplate.slug,
+                        patient_external_id: patientId,
+                      })
+                    }
                   >
-                    <Link
-                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${reportTemplate.id}`}
-                    >
-                      {t("generate_report")}
-                    </Link>
+                    {t("generate_report")}
                   </Button>
                 </div>
               </Card>

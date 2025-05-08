@@ -238,8 +238,13 @@ export type HeaderElementType =
   | RuleElement
   | DateTimeElement;
 
-interface HeaderConfig {
-  rows: Array<Array<HeaderElementType>>;
+export interface HeaderRow {
+  size_ratio?: number[];
+  columns: HeaderElementType[];
+}
+
+export interface HeaderConfig {
+  rows: HeaderRow[];
 }
 
 export const FONT_WEIGHT_OPTIONS = [
@@ -255,7 +260,7 @@ interface LabelValueField {
   value: string;
 }
 
-interface SectionOptions {
+export interface SectionOptions {
   title?: string;
   fields?: string[] | Array<LabelValueField>;
   columns?: string[];
@@ -265,7 +270,7 @@ interface SectionOptions {
   rows?: Array<Array<string>>;
 }
 
-interface SectionConfig {
+export interface SectionConfig {
   source: string;
   is_table: boolean;
   enabled: boolean;
@@ -288,15 +293,23 @@ export type ReportTemplateType = (typeof REPORT_TEMPLATE_TYPE)[number]["id"];
 export interface ReportTemplateBase {
   id?: string;
   config: ReportConfig;
+  slug: string;
   type: ReportTemplateType;
 }
 
 export type ReportTemplateCreate = Omit<ReportTemplateBase, "id">;
 
-export type ReportTemplateUpdate = Omit<ReportTemplateCreate, "type">;
+export type ReportTemplateUpdate = Omit<ReportTemplateCreate, "type" | "slug">;
 
 export interface ReportTemplateModel extends ReportTemplateBase {
   facility: FacilityModel;
   created_by: UserBase;
   updated_by: UserBase;
+}
+
+export interface ReportTemplateGenerate {
+  render_format: "typst";
+  type: ReportTemplateType;
+  slug: string;
+  patient_external_id?: string;
 }

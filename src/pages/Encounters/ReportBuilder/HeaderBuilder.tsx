@@ -46,7 +46,7 @@ const AlignmentInput = ({
   return (
     <Controller
       control={control}
-      name={`config.header.rows.${rowIndex}.${elementIndex}.align`}
+      name={`config.header.rows.${rowIndex}.columns.${elementIndex}.align`}
       render={({ field }) => (
         <FormItem>
           <FormLabel>{t("REPORT_BUILDER_ALIGNMENT")}</FormLabel>
@@ -73,6 +73,41 @@ const AlignmentInput = ({
   );
 };
 
+const SizeRatioInput = ({
+  control,
+  rowIndex,
+  elementIndex,
+}: {
+  control: Control<ReportTemplateFormData>;
+  rowIndex: number;
+  elementIndex: number;
+}) => {
+  const { t } = useTranslation();
+  return (
+    <Controller
+      control={control}
+      name={`config.header.rows.${rowIndex}.size_ratio.${elementIndex}`}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{t("REPORT_BUILDER_SIZE_RATIO")}</FormLabel>
+          <Input
+            {...field}
+            type="number"
+            placeholder="1"
+            pattern="\d*"
+            inputMode="numeric"
+            onChange={(e) => {
+              const value = parseInt(e.target.value, 10);
+              field.onChange(value);
+            }}
+          />
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+};
+
 const TextElement = React.memo(function TextElement({
   rowIndex,
   elementIndex,
@@ -87,7 +122,7 @@ const TextElement = React.memo(function TextElement({
     <div className="grid grid-cols-2 gap-2 items-start">
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.text`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.text`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_TEXT")}</FormLabel>
@@ -100,7 +135,7 @@ const TextElement = React.memo(function TextElement({
       />
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.size`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.size`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_SIZE")}</FormLabel>
@@ -117,7 +152,7 @@ const TextElement = React.memo(function TextElement({
       />
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.weight`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.weight`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_WEIGHT")}</FormLabel>
@@ -141,6 +176,11 @@ const TextElement = React.memo(function TextElement({
         )}
       />
       <AlignmentInput
+        control={control}
+        rowIndex={rowIndex}
+        elementIndex={elementIndex}
+      />
+      <SizeRatioInput
         control={control}
         rowIndex={rowIndex}
         elementIndex={elementIndex}
@@ -163,7 +203,7 @@ const ImageElement = React.memo(function ImageElement({
     <div className="grid grid-cols-2 gap-2 items-start">
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.file_name`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.file_name`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_FILE_NAME")}</FormLabel>
@@ -176,7 +216,7 @@ const ImageElement = React.memo(function ImageElement({
       />
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.url`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.url`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_URL")}</FormLabel>
@@ -189,7 +229,7 @@ const ImageElement = React.memo(function ImageElement({
       />
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.width`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.width`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_WIDTH")}</FormLabel>
@@ -201,6 +241,11 @@ const ImageElement = React.memo(function ImageElement({
         )}
       />
       <AlignmentInput
+        control={control}
+        rowIndex={rowIndex}
+        elementIndex={elementIndex}
+      />
+      <SizeRatioInput
         control={control}
         rowIndex={rowIndex}
         elementIndex={elementIndex}
@@ -223,7 +268,7 @@ const RuleElement = React.memo(function RuleElement({
     <div className="grid grid-cols-2 gap-2 items-start">
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.length`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.length`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_LENGTH")}</FormLabel>
@@ -236,7 +281,7 @@ const RuleElement = React.memo(function RuleElement({
       />
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.stroke`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.stroke`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_STROKE")}</FormLabel>
@@ -246,6 +291,11 @@ const RuleElement = React.memo(function RuleElement({
         )}
       />
       <AlignmentInput
+        control={control}
+        rowIndex={rowIndex}
+        elementIndex={elementIndex}
+      />
+      <SizeRatioInput
         control={control}
         rowIndex={rowIndex}
         elementIndex={elementIndex}
@@ -268,7 +318,7 @@ const DateTimeElement = React.memo(function DateTimeElement({
     <div className="grid grid-cols-2 gap-2 items-start">
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.label`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.label`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_LABEL")}</FormLabel>
@@ -281,7 +331,7 @@ const DateTimeElement = React.memo(function DateTimeElement({
       />
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.format`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.format`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_FORMAT")}</FormLabel>
@@ -294,7 +344,7 @@ const DateTimeElement = React.memo(function DateTimeElement({
       />
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.style.fill`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.style.fill`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_FILL_COLOR")}</FormLabel>
@@ -307,7 +357,7 @@ const DateTimeElement = React.memo(function DateTimeElement({
       />
       <Controller
         control={control}
-        name={`config.header.rows.${rowIndex}.${elementIndex}.style.weight`}
+        name={`config.header.rows.${rowIndex}.columns.${elementIndex}.style.weight`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_WEIGHT")}</FormLabel>
@@ -335,17 +385,22 @@ const DateTimeElement = React.memo(function DateTimeElement({
         rowIndex={rowIndex}
         elementIndex={elementIndex}
       />
+      <SizeRatioInput
+        control={control}
+        rowIndex={rowIndex}
+        elementIndex={elementIndex}
+      />
     </div>
   );
 });
 
 const HeaderElement = React.memo(function HeaderElement({
-  rowIndex,
+  columnIndex: rowIndex,
   elementIndex,
   control,
   type,
 }: {
-  rowIndex: number;
+  columnIndex: number;
   elementIndex: number;
   control: Control<ReportTemplateFormData>;
   type: string;
@@ -389,8 +444,8 @@ const HeaderElement = React.memo(function HeaderElement({
 });
 
 interface HeaderRowProps {
-  rowIndex: number;
-  row: HeaderElementType[];
+  columnIndex: number;
+  column: HeaderElementType[];
   form: UseFormReturn<ReportTemplateFormData>;
   onRemoveRow: (rowIndex: number) => void;
   onAddElement: (rowIndex: number, type: string) => void;
@@ -400,11 +455,11 @@ interface HeaderRowProps {
 }
 
 const RowButtons = ({
-  rowIndex,
+  columnIndex: rowIndex,
   size = "sm",
   handleAddElement,
 }: {
-  rowIndex: number;
+  columnIndex: number;
   size?: "sm" | "xs" | "default" | "lg" | "icon";
   handleAddElement: (rowIndex: number, type: string) => void;
 }) => {
@@ -456,8 +511,8 @@ const RowButtons = ({
 };
 
 const HeaderRow = React.memo(function HeaderRow({
-  rowIndex,
-  row,
+  columnIndex: columnIndex,
+  column: column,
   form,
   onRemoveRow,
   onAddElement,
@@ -496,12 +551,12 @@ const HeaderRow = React.memo(function HeaderRow({
     }
   };
 
-  if (row.length === 0) {
+  if (column.length === 0) {
     return (
       <div className="border rounded-lg p-4 bg-gray-50 flex justify-center items-center gap-2">
         <RowButtons
           size="lg"
-          rowIndex={rowIndex}
+          columnIndex={columnIndex}
           handleAddElement={handleAddElement}
         />
       </div>
@@ -513,7 +568,7 @@ const HeaderRow = React.memo(function HeaderRow({
       {/* Element Tabs */}
       <div className="p-3 flex justify-between">
         <div className="flex justify-start">
-          {row.length > 0 && (
+          {column.length > 0 && (
             <div className="flex items-center gap-2">
               <Select
                 value={activeElement.toString()}
@@ -522,18 +577,18 @@ const HeaderRow = React.memo(function HeaderRow({
                 <SelectTrigger className="bg-green-100">
                   <SelectValue placeholder={t("REPORT_BUILDER_ADD_ELEMENT")}>
                     <CareIcon
-                      icon={getElementIcon(row[activeElement].type)}
+                      icon={getElementIcon(column[activeElement].type)}
                       className="w-4 h-4 text-green-900"
                     />
                     <span className="text-sm text-green-900">
                       {t(
-                        `REPORT_BUILDER_${row[activeElement].type.toUpperCase()}`,
+                        `REPORT_BUILDER_${column[activeElement].type.toUpperCase()}`,
                       )}
                     </span>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {row.map((element, elementIndex) => (
+                  {column.map((element, elementIndex) => (
                     <SelectItem
                       key={elementIndex}
                       value={elementIndex.toString()}
@@ -546,7 +601,7 @@ const HeaderRow = React.memo(function HeaderRow({
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => onRemoveElement(rowIndex, activeElement)}
+                onClick={() => onRemoveElement(columnIndex, activeElement)}
               >
                 <span className="text-sm">{t("remove")}</span>
                 <Trash2Icon className="w-3 h-3" />
@@ -558,7 +613,7 @@ const HeaderRow = React.memo(function HeaderRow({
           type="button"
           size={"sm"}
           variant="destructive"
-          onClick={() => onRemoveRow(rowIndex)}
+          onClick={() => onRemoveRow(columnIndex)}
         >
           <Trash2Icon className="w-3 h-3" />
           <span className="text-sm">{t("remove_row")}</span>
@@ -566,13 +621,13 @@ const HeaderRow = React.memo(function HeaderRow({
       </div>
 
       {/* Element Content */}
-      {activeElement !== null && row[activeElement] && (
+      {activeElement !== null && column[activeElement] && (
         <div className="p-4">
           <HeaderElement
-            rowIndex={rowIndex}
+            columnIndex={columnIndex}
             elementIndex={activeElement}
             control={form.control}
-            type={row[activeElement].type}
+            type={column[activeElement].type}
           />
         </div>
       )}
@@ -580,7 +635,7 @@ const HeaderRow = React.memo(function HeaderRow({
       <div className="mt-6 mb-4 flex justify-center items-center">
         <RowButtons
           size="default"
-          rowIndex={rowIndex}
+          columnIndex={columnIndex}
           handleAddElement={handleAddElement}
         />
       </div>
@@ -613,29 +668,49 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
   }, [rows, activeElements]);
 
   const handleAddRow = useCallback(() => {
+    const rowLength = rows.length;
     append([
       {
-        type: "text",
-        text: t("REPORT_BUILDER_NEW_TEXT"),
-        size: "medium",
-        weight: 400,
-        align: "left",
+        size_ratio: [1],
+        columns: [
+          {
+            type: "text",
+            text: t("REPORT_BUILDER_NEW_TEXT"),
+            size: "medium",
+            weight: 400,
+            align: "left",
+          },
+        ],
       },
     ]);
-  }, [append, t]);
+    setActiveElements((prev) => ({ ...prev, [rowLength]: 0 }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [append, rows.length]);
 
   const handleRemoveRow = useCallback(
     (rowIndex: number) => {
+      const newActiveElements = { ...activeElements };
+      delete newActiveElements[rowIndex];
       remove(rowIndex);
+      console.log("activeElements", activeElements);
+      console.log("newActiveElements", newActiveElements);
+      setActiveElements(newActiveElements);
     },
-    [remove],
+    [remove, activeElements],
   );
 
   const handleAddElement = useCallback(
     (rowIndex: number, type: string) => {
-      const currentRow = form.getValues(`config.header.rows.${rowIndex}`) || [];
-      const updatedRow = [...currentRow];
-      const newElementIndex = updatedRow.length;
+      const currentColumn =
+        form.getValues(`config.header.rows.${rowIndex}.columns`) || [];
+      const currentSizeRatio =
+        form.getValues(`config.header.rows.${rowIndex}.size_ratio`) || [];
+      const updatedColumn = [...currentColumn];
+      const newElementIndex = updatedColumn.length;
+      const newSizeRatio = Array.from(
+        { length: currentSizeRatio.length + 1 },
+        () => 1,
+      );
 
       let newElement: any;
       switch (type) {
@@ -681,7 +756,11 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
           throw new Error(`Unsupported element type: ${type}`);
       }
 
-      updatedRow.push(newElement);
+      updatedColumn.push(newElement);
+      const updatedRow = {
+        size_ratio: newSizeRatio,
+        columns: updatedColumn,
+      };
       update(rowIndex, updatedRow);
       setActiveElements((prev) => ({ ...prev, [rowIndex]: newElementIndex }));
     },
@@ -691,10 +770,16 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
   const handleRemoveElement = useCallback(
     (rowIndex: number, elementIndex: number) => {
       const currentRow = form.getValues(`config.header.rows.${rowIndex}`);
-      const updatedRow = [...currentRow];
-      updatedRow.splice(elementIndex, 1);
+      const currentColumn =
+        form.getValues(`config.header.rows.${rowIndex}.columns`) || [];
+      const updatedRow = {
+        size_ratio: currentRow.size_ratio?.filter(
+          (_, index) => index !== elementIndex,
+        ),
+        columns: currentColumn.filter((_, index) => index !== elementIndex),
+      };
       update(rowIndex, updatedRow);
-      if (updatedRow.length !== 0) {
+      if (updatedRow.columns.length !== 0) {
         setActiveElements((prev) => ({
           ...prev,
           [rowIndex]: elementIndex > 0 ? elementIndex - 1 : elementIndex,
@@ -714,8 +799,8 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
           fields.map((field, rowIndex) => (
             <HeaderRow
               key={field.id}
-              rowIndex={rowIndex}
-              row={rows[rowIndex] || []}
+              columnIndex={rowIndex}
+              column={rows[rowIndex]?.columns || []}
               form={form}
               onRemoveRow={handleRemoveRow}
               onAddElement={handleAddElement}

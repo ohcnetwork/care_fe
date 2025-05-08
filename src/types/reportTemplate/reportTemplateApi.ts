@@ -3,6 +3,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 
 import {
   ReportTemplateCreate,
+  ReportTemplateGenerate,
   ReportTemplateModel,
   ReportTemplateUpdate,
 } from "./reportTemplate";
@@ -37,6 +38,12 @@ export default {
   getAvailableSections: {
     path: "/api/v1/facility/{facility_external_id}/report_template/get_available_section_source/",
     method: HttpMethod.GET,
+    TRes: Type<string[]>(),
+  },
+  generateReport: {
+    path: "/api/v1/facility/{facility_external_id}/report_template/display_report/",
+    method: HttpMethod.POST,
+    TBody: Type<ReportTemplateGenerate>(),
     TRes: Type<string[]>(),
   },
 };

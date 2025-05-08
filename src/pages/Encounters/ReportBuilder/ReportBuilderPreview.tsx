@@ -5,40 +5,15 @@ import { UseFormReturn, useWatch } from "react-hook-form";
 import {
   FONT_OPTIONS,
   FONT_SIZES,
+  HeaderAlignment,
+  HeaderRow,
+  SectionConfig,
 } from "@/types/reportTemplate/reportTemplate";
 
 import { ReportTemplateFormData } from "./schema";
 
 interface ReportBuilderPreviewProps {
   form: UseFormReturn<ReportTemplateFormData>;
-}
-
-interface HeaderElement {
-  type: "text" | "image" | "rule" | "datetime";
-  align?: "left" | "center" | "right";
-  text?: string;
-  size?: string;
-  weight?: number;
-  file_name?: string;
-  width?: string;
-  length?: string;
-  format?: string;
-}
-
-interface Section {
-  data_source: string;
-  options: {
-    text?: string;
-    rows?: string[][];
-    style?: "text" | "list";
-    title?: string;
-    fields?: string[] | { value: string; label: string }[];
-    columns?: string[];
-    filters?: Record<string, any>;
-  };
-  enabled: boolean;
-  source: string;
-  is_table?: boolean;
 }
 
 export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
@@ -58,13 +33,13 @@ export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
   const headerRows = useWatch({
     control: form.control,
     name: "config.header.rows",
-  }) as HeaderElement[][];
+  }) as HeaderRow[];
 
   // Get sections
   const sections = useWatch({
     control: form.control,
     name: "config.sections",
-  }) as Section[];
+  }) as SectionConfig[];
 
   // Get page numbering settings
   const pageNumbering = useWatch({
@@ -91,7 +66,7 @@ export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
         }}
       >
         {/* Header Preview */}
-        <div className="p-4">
+        <div className="flex flex-col gap-2 p-4">
           {headerRows.map((row, rowIndex) => (
             <HeaderRowPreview key={rowIndex} row={row} />
           ))}
@@ -101,7 +76,7 @@ export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
         <div className="p-4">
           {sections.map((section, index) => (
             <div key={index} className="border rounded-lg p-4 mb-4">
-              <h3 className="font-semibold">{section.data_source}</h3>
+              <h3 className="font-semibold">{section.source}</h3>
             </div>
           ))}
         </div>
@@ -120,30 +95,46 @@ export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
 const HeaderRowPreview = React.memo(function HeaderRowPreview({
   row,
 }: {
-  row: HeaderElement[];
+  row: HeaderRow;
 }) {
+  const rowSizeRatio = row.size_ratio || [1];
+  const totalSizeRatio = rowSizeRatio.reduce((acc, size) => acc + size, 0);
+  const convertedSizePercent = rowSizeRatio.map(
+    (size) => (size / totalSizeRatio) * 100,
+  );
+
   // Group elements by alignment
-  const elementsByAlignment = row.reduce(
-    (acc, element) => {
-      const align = element.align || "left";
-      if (!acc[align]) acc[align] = [];
-      acc[align].push(element);
+  const elementsByAlignment = row.columns.reduce(
+    (acc, element, index) => {
+      acc[index] = {
+        align: element.align || "left",
+        size: convertedSizePercent[index],
+        elements: [...(acc[index]?.elements || []), element],
+      };
       return acc;
     },
-    {} as Record<string, HeaderElement[]>,
+    {} as Record<
+      string,
+      {
+        align: HeaderAlignment;
+        size: number;
+        elements: HeaderRow["columns"];
+      }
+    >,
   );
 
   return (
-    <div className="flex flex-col gap-2">
-      {Object.entries(elementsByAlignment).map(([align, elements]) => (
-        <div
-          key={align}
-          className={`flex ${align === "center" ? "justify-center" : align === "right" ? "justify-end" : ""}`}
-        >
-          {elements.map((element, index) => (
-            <HeaderElementPreview key={index} element={element} />
+    <div className="flex flex-row gap-2 justify-between">
+      {Object.entries(elementsByAlignment).map(([_, item]) => (
+        <>
+          {item.elements.map((element, index) => (
+            <HeaderElementPreview
+              key={index}
+              element={element}
+              itemSize={item.size}
+            />
           ))}
-        </div>
+        </>
       ))}
     </div>
   );
@@ -151,8 +142,10 @@ const HeaderRowPreview = React.memo(function HeaderRowPreview({
 
 const HeaderElementPreview = React.memo(function HeaderElementPreview({
   element,
+  itemSize,
 }: {
-  element: HeaderElement;
+  element: HeaderRow["columns"][number];
+  itemSize: number;
 }) {
   switch (element.type) {
     case "text":
@@ -162,6 +155,7 @@ const HeaderElementPreview = React.memo(function HeaderElementPreview({
           style={{
             fontSize: element.size + "pt",
             fontWeight: element.weight,
+            width: itemSize + "%",
           }}
         >
           {element.text}
@@ -171,16 +165,20 @@ const HeaderElementPreview = React.memo(function HeaderElementPreview({
       return (
         <div
           className="flex items-center gap-2 border rounded p-1"
-          style={{ width: element.width }}
+          style={{ width: itemSize + "%" }}
         >
           <ImageIcon className="w-4 h-4" />
           <span className="text-xs truncate">{element.file_name}</span>
         </div>
       );
     case "rule":
-      return <div className="border-t" style={{ width: element.length }} />;
+      return <div className="border-t" style={{ width: itemSize + "%" }} />;
     case "datetime":
-      return <span className="whitespace-nowrap">{element.format}</span>;
+      return (
+        <span className="whitespace-nowrap" style={{ width: itemSize + "%" }}>
+          {element.format}
+        </span>
+      );
     default:
       return null;
   }
