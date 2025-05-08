@@ -36,6 +36,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import PageTitle from "@/components/Common/PageTitle";
 import {
@@ -233,14 +234,15 @@ export default function DevicesList({ facilityId }: Props) {
                 </Button>
 
                 {qParams.locationId && (
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => updateQuery({ locationId: undefined })}
-                    title={t("clear_location_filter")}
-                  >
-                    <XIcon className="size-4" />
-                  </Button>
+                  <TooltipComponent content={t("clear_location_filter")}>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => updateQuery({ locationId: undefined })}
+                    >
+                      <XIcon className="size-4" />
+                    </Button>
+                  </TooltipComponent>
                 )}
               </div>
 
