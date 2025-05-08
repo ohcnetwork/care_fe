@@ -70,7 +70,7 @@ export function QuestionRenderer({
             shouldBeFullWidth(question) ? "md:w-auto" : "max-w-4xl",
           )}
         >
-          <div className="m-2">
+          <div className="lg:m-2">
             <QuestionGroup
               facilityId={facilityId}
               question={question}

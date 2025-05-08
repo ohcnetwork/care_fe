@@ -81,14 +81,6 @@ const consentFormSchema = (isEdit: boolean) =>
     .superRefine((data, ctx) => {
       if (isEdit) return;
 
-      if (data.period.end && data.date > data.period.end) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: t("consent_after_end"),
-          path: ["date"],
-        });
-      }
-
       if (
         data.period.start &&
         data.period.end &&
@@ -97,6 +89,14 @@ const consentFormSchema = (isEdit: boolean) =>
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("valid_from_after_valid_untill"),
+          path: ["period.start"],
+        });
+      }
+
+      if (data.period.start && data.period.start < data.date) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("consent_period_start_before_consent_date_validation"),
           path: ["period.start"],
         });
       }
