@@ -68,7 +68,9 @@ export const useAvailabilityHeatmap = ({
 
   // start from today if the month is current or past
   const fromDate = dateQueryString(max([start, startOfToday()]));
-  const toDate = dateQueryString(end);
+
+  // ensure toDate is not before fromDate
+  const toDate = dateQueryString(max([fromDate, end]));
 
   let queryFn = query(scheduleApis.slots.availabilityStats, {
     pathParams: { facility_id: facilityId },

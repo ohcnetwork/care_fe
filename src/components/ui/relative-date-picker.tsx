@@ -10,16 +10,17 @@ import {
   subYears,
 } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
-
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./select";
+} from "@/components/ui/select";
 
 type TimeUnit = "days" | "weeks" | "months" | "years";
 
@@ -31,16 +32,27 @@ interface TimeUnitState {
 interface RelativeDatePickerProps {
   onDateChange: (date: Date) => void;
   value?: Date;
+  disabled?: (date: Date) => boolean;
 }
+
+const computeDate = (unit: TimeUnit, value: number) => {
+  const now = new Date();
+  switch (unit) {
+    case "days":
+      return subDays(now, value);
+    case "weeks":
+      return subWeeks(now, value);
+    case "months":
+      return subMonths(now, value);
+    case "years":
+      return subYears(now, value);
+  }
+};
 
 const computeTimeUnits = (date?: Date): TimeUnitState => {
   const now = new Date();
-  console.log(date);
   if (!date) {
-    return {
-      unit: "days",
-      value: 1,
-    };
+    return { unit: "days", value: 1 };
   }
   const daysDiff = differenceInDays(now, date);
   const weeksDiff = differenceInWeeks(now, date);
@@ -72,15 +84,11 @@ const computeTimeUnits = (date?: Date): TimeUnitState => {
 export function RelativeDatePicker({
   onDateChange,
   value,
+  disabled,
 }: RelativeDatePickerProps) {
-  const [selected, setSelected] = useState(() => {
-    const initialState = computeTimeUnits(value);
-    return {
-      unit: initialState.unit,
-      value: initialState.value,
-    };
-  });
-  const [resultDate, setResultDate] = useState<Date>(new Date());
+  const { t } = useTranslation();
+  const [selected, setSelected] = useState(() => computeTimeUnits(value));
+  const [resultDate, setResultDate] = useState<Date>(value || new Date());
 
   const timeUnits: TimeUnit[] = ["days", "weeks", "months", "years"];
 
@@ -99,92 +107,82 @@ export function RelativeDatePicker({
     }
   }, [selected.unit]);
 
-  // Update result date when value or unit changes
+  const validateDate = (unit: TimeUnit, value: number) => {
+    const selectedDate = computeDate(unit, value);
+    const isDisabled = disabled?.(selectedDate) ?? false;
+    return !isDisabled;
+  };
+
+  // Update result date
   useEffect(() => {
-    const now = new Date();
-    let newDate: Date;
-
-    switch (selected.unit) {
-      case "days":
-        newDate = subDays(now, selected.value);
-        break;
-      case "weeks":
-        newDate = subWeeks(now, selected.value);
-        break;
-      case "months":
-        newDate = subMonths(now, selected.value);
-        break;
-      case "years":
-        newDate = subYears(now, selected.value);
-        break;
-      default:
-        newDate = now;
-    }
-
-    setResultDate(newDate);
-    onDateChange(newDate);
+    setResultDate(computeDate(selected.unit, selected.value));
+    onDateChange(computeDate(selected.unit, selected.value));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  useEffect(() => {
-    if (selected.value > maxValue) {
-      setSelected((prev) => ({ ...prev, value: maxValue }));
-    }
-  }, [selected.unit, maxValue]);
-
   const handleUnitChange = (newUnit: TimeUnit) => {
-    setSelected((prev) => ({ ...prev, unit: newUnit }));
+    if (validateDate(newUnit, 1)) {
+      setSelected((prev) => ({ ...prev, unit: newUnit, value: 1 }));
+    } else toast.error(t("select_valid_date"));
   };
 
   return (
     <div className="flex flex-col h-[200px]">
-      {/* Input and Unit Selection */}
       <div className="flex flex-col gap-2 p-2 items-center border-b border-gray-200">
-        <div className="w-full h-full"></div>
-
         <div className="grid grid-cols-2 gap-2">
           <Select
             value={selected.value.toString()}
-            onValueChange={(value) =>
-              setSelected((prev) => ({
-                ...prev,
-                value: Number.parseInt(value) || 0,
-              }))
-            }
+            onValueChange={(value) => {
+              const numValue = Number.parseInt(value) || 0;
+              if (validateDate(selected.unit, numValue)) {
+                setSelected((prev) => ({
+                  ...prev,
+                  value: numValue,
+                }));
+              }
+            }}
+            disabled={!validateDate(selected.unit, selected.value)}
           >
             <SelectTrigger className="col-span-2">
               <SelectValue placeholder="Select a number" />
             </SelectTrigger>
             <SelectContent>
-              {Array.from({ length: maxValue }, (_, i) => i + 1).map(
-                (timeUnit) => (
-                  <SelectItem key={timeUnit} value={timeUnit.toString()}>
-                    {timeUnit}
+              {Array.from({ length: maxValue }, (_, i) => i + 1).map((num) => {
+                const isDisabled =
+                  disabled?.(computeDate(selected.unit, num)) ?? false;
+                return (
+                  <SelectItem
+                    key={num}
+                    value={num.toString()}
+                    disabled={isDisabled}
+                    className={isDisabled ? "opacity-50" : ""}
+                  >
+                    {num}
                   </SelectItem>
-                ),
-              )}
+                );
+              })}
             </SelectContent>
           </Select>
-          {timeUnits.map((timeUnit) => (
+          {timeUnits.map((unit) => (
             <Badge
-              key={timeUnit}
-              onClick={() => handleUnitChange(timeUnit)}
-              variant={selected.unit === timeUnit ? "default" : "outline"}
+              key={unit}
+              onClick={() => handleUnitChange(unit)}
+              variant={selected.unit === unit ? "default" : "outline"}
+              className={
+                !validateDate(unit, 1) ? "opacity-50 pointer-events-none" : ""
+              }
             >
-              {timeUnit.charAt(0).toUpperCase() + timeUnit.slice(1)}
+              {unit.charAt(0).toUpperCase() + unit.slice(1)}
             </Badge>
           ))}
         </div>
       </div>
 
-      {/* Date Preview */}
       <div className="flex-1 p-4 flex flex-col justify-center overflow-hidden">
         <div className="text-xl font-bold mb-1 truncate">
           {format(resultDate, "MMM d, yyyy")}
         </div>
-        <div className="text-sm text-muted-foreground truncate">
-          {format(resultDate, "EEEE")}
-        </div>
+        <div className="text-sm truncate">{format(resultDate, "EEEE")}</div>
       </div>
     </div>
   );

@@ -138,7 +138,7 @@ export default function UserForm({
 
   type UserFormValues = z.infer<typeof userFormSchema>;
 
-  const form = useForm<UserFormValues>({
+  const form = useForm({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       user_type: "nurse",

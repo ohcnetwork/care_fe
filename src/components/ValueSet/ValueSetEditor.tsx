@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
@@ -22,6 +23,7 @@ interface ValueSetEditorProps {
 export function ValueSetEditor({ slug }: ValueSetEditorProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   // Fetch existing valueset if we're editing
   const { data: existingValueset, isLoading } = useQuery({
     queryKey: ["valueset", slug],
@@ -68,7 +70,11 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">
-        {slug ? "Edit ValueSet" : "Create New ValueSet"}
+        {slug
+          ? existingValueset?.is_system_defined
+            ? t("preview_value_set")
+            : t("edit_value_set")
+          : t("create_new_value_set")}
       </h1>
 
       {slug && isLoading ? (
@@ -78,6 +84,7 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
           initialData={existingValueset}
           onSubmit={handleSubmit}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
+          isSystemDefined={existingValueset?.is_system_defined}
         />
       )}
     </div>
