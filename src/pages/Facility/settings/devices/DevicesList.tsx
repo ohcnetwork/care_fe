@@ -49,7 +49,7 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
-import DeviceTable from "@/pages/Facility/settings/devices/components/DeviceCard";
+import DeviceTable from "@/pages/Facility/settings/devices/components/DeviceTable";
 import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import deviceApi from "@/types/device/deviceApi";
 import { LocationList as LocationListType } from "@/types/location/location";
