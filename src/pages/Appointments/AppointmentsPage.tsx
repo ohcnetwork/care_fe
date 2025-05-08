@@ -560,8 +560,10 @@ export default function AppointmentsPage({
       {activeTab === "board" ? (
         <ScrollArea
           className={cn(
-            `transition-all duration-200 ease-${isSidebarOpen ? "out" : "in"}`,
-            `md:w-[calc(100vw-${isSidebarOpen ? "21.5" : "8"}rem)]`,
+            "transition-all duration-200",
+            isSidebarOpen
+              ? "ease-out md:w-[calc(100vw-21.5rem)]"
+              : "ease-in md:w-[calc(100vw-8rem)]",
           )}
         >
           <div className="flex w-max space-x-4">
