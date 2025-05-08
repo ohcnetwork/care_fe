@@ -73,12 +73,19 @@ export default function ServiceRequestShow({
     });
 
   const { mutate: createSpecimen } = useMutation({
-    mutationFn: mutate(specimenApi.createSpecimenFromDefinition, {
-      pathParams: {
-        facilityId,
-        serviceRequestId,
-      },
-    }),
+    mutationFn: async (variables: SpecimenFromDefinitionCreate) => {
+      const response = await mutate(specimenApi.createSpecimenFromDefinition, {
+        pathParams: {
+          facilityId,
+          serviceRequestId,
+        },
+      })(variables);
+
+      if (!response?.results?.length) {
+        throw new Error("No specimen created");
+      }
+      return response.results[0];
+    },
     onSuccess: () => {
       toast.success("Specimen collected successfully");
       queryClient.invalidateQueries({
@@ -86,7 +93,7 @@ export default function ServiceRequestShow({
       });
       setSelectedSpecimenDefinition(null);
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(
         `Failed to collect specimen: ${err.message || "Unknown error"}`,
       );
@@ -222,6 +229,8 @@ export default function ServiceRequestShow({
                   specimenDefinition={selectedSpecimenDefinition}
                   onSubmit={handleAddSpecimen}
                   onCancel={() => setSelectedSpecimenDefinition(null)}
+                  facilityId={facilityId}
+                  serviceRequestId={serviceRequestId}
                 />
               </CardContent>
             </Card>

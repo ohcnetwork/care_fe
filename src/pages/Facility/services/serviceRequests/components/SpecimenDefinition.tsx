@@ -21,12 +21,16 @@ interface SpecimenDefinitionProps {
   onAddSpecimen: (specimen: SpecimenFromDefinitionCreate) => void;
   onRemoveSpecimen: (specimenId: string) => void;
   specimens: SpecimenRead[];
+  facilityId: string;
+  serviceRequestId: string;
 }
 
 export function SpecimenDefinition({
   specimenDefinition,
   onAddSpecimen,
   specimens,
+  facilityId,
+  serviceRequestId,
 }: SpecimenDefinitionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -89,6 +93,8 @@ export function SpecimenDefinition({
                   specimenDefinition={specimenDefinition}
                   onSubmit={handleCreateSpecimen}
                   onCancel={() => setShowForm(false)}
+                  facilityId={facilityId}
+                  serviceRequestId={serviceRequestId}
                 />
               </>
             )}
