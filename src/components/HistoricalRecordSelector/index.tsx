@@ -347,7 +347,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
       }}
     >
       <SheetTrigger asChild>
-        <div className="flex items-center justify-end">
+        <div className="flex max-w-4xl justify-end">
           <Button
             variant="outline"
             data-cy="view-history"
