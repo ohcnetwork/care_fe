@@ -48,11 +48,8 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
-import { getParentChain } from "@/pages/Facility/locations/Utils";
-import {
-  DeviceCard,
-  DeviceTable,
-} from "@/pages/Facility/settings/devices/components/DevicesRender";
+import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
+import DeviceTable from "@/pages/Facility/settings/devices/components/DeviceCard";
 import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import deviceApi from "@/types/device/deviceApi";
 import { LocationList as LocationListType } from "@/types/location/location";
@@ -97,11 +94,7 @@ export default function DevicesList({ facilityId }: Props) {
     (location: LocationListType) => {
       updateQuery({ locationId: location.id });
 
-      const parentChain = getParentChain(location);
-      const parentIds = parentChain.map((loc) => loc.id);
-      parentIds.push(location.id);
-
-      setExpandedLocations(new Set([...expandedLocations, ...parentIds]));
+      setExpandedLocations(new Set([...expandedLocations, location.id]));
     },
     [expandedLocations, updateQuery],
   );
