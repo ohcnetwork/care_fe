@@ -346,8 +346,8 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
         }
       }}
     >
-      <SheetTrigger asChild>
-        <div className="flex max-w-4xl justify-end">
+      <div className="flex items-center max-w-4xl justify-end">
+        <SheetTrigger asChild>
           <Button
             variant="outline"
             data-cy="view-history"
@@ -356,8 +356,8 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
             <Clock className="size-4" />
             <span className="font-semibold">{buttonLabel}</span>
           </Button>
-        </div>
-      </SheetTrigger>
+        </SheetTrigger>
+      </div>
       <SheetContent className="w-full sm:max-w-3xl p-0 overflow-y-auto">
         <div className="flex flex-col gap-2 p-2">
           <SheetHeader className="p-0">
