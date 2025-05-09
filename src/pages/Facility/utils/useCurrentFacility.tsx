@@ -15,6 +15,8 @@ const extractFacilityId = (path: string) => {
 };
 
 /**
+ * Avoids fetching the facility data on all places the current facility is needed.
+ *
  * @returns The current facility in context.
  */
 export default function useCurrentFacility() {

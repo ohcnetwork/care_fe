@@ -1,7 +1,7 @@
 import { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 
-import { NavMain } from "@/components/ui/sidebar/nav-main";
+import { NavMain, NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 import { UserFacilityModel } from "@/components/Users/models";
 
@@ -9,14 +9,6 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-
-export interface NavigationLink {
-  name: string;
-  url: string;
-  icon?: string;
-  visibility?: boolean;
-  children?: NavigationLink[];
-}
 
 interface FacilityNavProps {
   selectedFacility: UserFacilityModel | null;
@@ -80,7 +72,7 @@ function generateFacilityLinks(
     { name: t("users"), url: `${baseUrl}/users`, icon: "d-people" },
     {
       name: t("billing"),
-      url: `${baseUrl}/billing/`,
+      url: `${baseUrl}/billing`,
       icon: "d-notice-board",
       children: [
         {
@@ -132,7 +124,7 @@ function generateFacilityLinks(
         },
         {
           name: t("billing"),
-          url: `${baseUrl}/settings/billing`,
+          url: `${baseUrl}/settings/billing/discounts`,
         },
         {
           name: t("charge_item_definitions"),

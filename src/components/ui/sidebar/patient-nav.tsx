@@ -1,18 +1,12 @@
 import { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 
-import { NavMain } from "@/components/ui/sidebar/nav-main";
+import { NavMain, NavigationLink } from "@/components/ui/sidebar/nav-main";
 import { PatientSwitcher } from "@/components/ui/sidebar/patient-switcher";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { Patient } from "@/types/emr/newPatient";
-
-interface NavigationLink {
-  name: string;
-  url: string;
-  icon?: string;
-}
 
 function generatePatientLinks(
   selectedUser: Patient | null,

@@ -17,8 +17,8 @@ x : Done
 - [-] Lets have a list like styling for the discount codes as their would be a lot of these options. - Rithvik
 - [-] We should also show instance level tax components in the billing page - Rithvik
 - [-] Add support for information components in chargeDef and Charge Item. - Rithvik
-- [ ] Consider disabling onWheelChange for input[type=number] fields.
-- [ ] When Creating charge item in questionnaire we should allow users to pick discount and tax and quantitiy. 
+- [-] Consider disabling onWheelChange for input[type=number] fields. - [hold till @bodhi confirms]
+- [-] When Creating charge item in questionnaire we should allow users to pick discount and tax and quantitiy. - Amjith
 
 ## Labs
 

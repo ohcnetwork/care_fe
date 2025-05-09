@@ -8,10 +8,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { DiscountMonetaryComponentForm } from "@/pages/Facility/settings/billing/discount/DiscountMonetaryComponentForm";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
 import { Code } from "@/types/questionnaire/code";
-
-import { DiscountMonetaryComponentForm } from "./DiscountMonetaryComponentForm";
 
 export function CreateDiscountMonetaryComponentPopover(props: {
   onSubmit: (data: MonetaryComponentRead) => void;

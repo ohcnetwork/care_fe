@@ -1,13 +1,7 @@
 import { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 
-import { NavMain } from "@/components/ui/sidebar/nav-main";
-
-interface NavigationLink {
-  name: string;
-  url: string;
-  icon?: string;
-}
+import { NavMain, NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 function generateAdminLinks(t: TFunction) {
   const baseUrl = "/admin";

@@ -2,7 +2,7 @@ import { useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
-import { BillingSettings } from "@/pages/Facility/settings/billing/BillingSettings";
+import { BillingSettingsLayout } from "@/pages/Facility/settings/billing/layout";
 import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
 import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
 import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
@@ -118,7 +118,7 @@ const getRoutes = (facilityId: string) => ({
   "/healthcare_services/:id/edit": ({ id }: { id: string }) => (
     <HealthcareServiceForm facilityId={facilityId} healthcareServiceId={id} />
   ),
-  "/billing": () => <BillingSettings facilityId={facilityId} />,
+  "/billing*": () => <BillingSettingsLayout />,
   "/charge_item_definitions": () => (
     <ChargeItemDefinitionsList facilityId={facilityId} />
   ),

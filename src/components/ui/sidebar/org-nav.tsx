@@ -1,12 +1,6 @@
-import { NavMain } from "@/components/ui/sidebar/nav-main";
+import { NavMain, NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 import { Organization } from "@/types/organization/organization";
-
-interface NavigationLink {
-  name: string;
-  url: string;
-  icon?: string;
-}
 
 interface OrgNavProps {
   organizations: Organization[];

@@ -1,6 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import { ActiveLink } from "raviger";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -29,13 +29,19 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { NavigationLink } from "./facility-nav";
-
 const isChildActive = (link: NavigationLink) => {
   if (!link.children) return false;
   const currentPath = window.location.pathname;
   return link.children.some((child) => currentPath.startsWith(child.url));
 };
+
+export interface NavigationLink {
+  name: string;
+  url: string;
+  icon?: IconName;
+  visibility?: boolean;
+  children?: NavigationLink[];
+}
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
@@ -47,13 +53,12 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
         {links
           .filter((link) => link.visibility !== false)
           .map((link) => (
-            <>
+            <Fragment key={link.name}>
               {link.children ? (
                 isCollapsed ? (
-                  <PopoverMenu key={link.name} link={link} />
+                  <PopoverMenu link={link} />
                 ) : (
                   <Collapsible
-                    key={link.name}
                     asChild
                     defaultOpen={isChildActive(link)}
                     className="group/collapsible"
@@ -107,7 +112,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   </Collapsible>
                 )
               ) : (
-                <SidebarMenuItem key={link.name}>
+                <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
                     tooltip={link.name}
@@ -137,7 +142,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
-            </>
+            </Fragment>
           ))}
       </SidebarMenu>
     </SidebarGroup>

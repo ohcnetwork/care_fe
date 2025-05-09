@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TrashIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,43 +19,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 
 import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
 import { FacilityData } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 
-import { CreateDiscountMonetaryComponentPopover } from "./CreateDiscountMonetaryComponentPopover";
-import { EditDiscountMonetaryPopover } from "./EditDiscountMonetaryPopover";
+import { CreateDiscountMonetaryComponentPopover } from "./discount/CreateDiscountMonetaryComponentPopover";
+import { EditDiscountMonetaryPopover } from "./discount/EditDiscountMonetaryPopover";
 
-export function BillingSettings({ facilityId }: { facilityId: string }) {
+export function DiscountComponentSettings() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const [componentToDelete, setComponentToDelete] = useState<number>();
 
-  const { data: facility, isLoading } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: { id: facilityId },
-    }),
-  });
+  const facility = useCurrentFacility();
 
   const { mutate: updateMonetaryComponents, isPending: _isPending } =
     useMutation({
       mutationFn: mutate(facilityApi.updateMonetaryComponents, {
-        pathParams: { facilityId },
+        pathParams: { facilityId: facility?.id ?? "" },
       }),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["facility", facilityId] });
+        queryClient.invalidateQueries({ queryKey: ["facility", facility?.id] });
         toast.success(t("billing.components_updated"));
       },
     });
 
-  if (!facility || isLoading) {
+  if (!facility) {
     return <Loading />;
   }
 
@@ -107,10 +100,7 @@ export function BillingSettings({ facilityId }: { facilityId: string }) {
   };
 
   return (
-    <Page title={t("billing.settings_title")}>
-      <span>{t("billing.settings_description")}</span>
-      <hr className="my-4" />
-
+    <>
       <div className="grid gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -179,7 +169,7 @@ export function BillingSettings({ facilityId }: { facilityId: string }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Page>
+    </>
   );
 }
 
