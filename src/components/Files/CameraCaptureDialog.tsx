@@ -40,12 +40,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const [previewImage, setPreviewImage] = useState(null);
   const webRef = useRef<any>(null);
 
-  const videoConstraints = {
-    width: { ideal: 4096 },
-    height: { ideal: 2160 },
-    facingMode: cameraFacingMode,
-  };
-
   useEffect(() => {
     if (!open) return;
 
@@ -103,7 +97,12 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       onCapture(myFile, `capture.${extension}`);
     });
   };
-
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+    }
+  };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md gap-0">
@@ -140,9 +139,11 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                   screenshotFormat="image/jpeg"
                   ref={webRef}
                   videoConstraints={{
-                    deviceId: selectedDeviceId,
-                    ...videoConstraints,
-                    facingMode: cameraFacingMode,
+                    width: { ideal: 4096 },
+                    height: { ideal: 2160 },
+                    ...(selectedDeviceId
+                      ? { deviceId: { exact: selectedDeviceId } }
+                      : { facingMode: cameraFacingMode }),
                   }}
                 />
               </div>
@@ -190,6 +191,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                     variant="primary"
                     onClick={() => {
                       setPreviewImage(null);
+                      stopCamera();
                       onOpenChange(false);
                       setPreview?.(false);
                     }}
@@ -207,6 +209,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
               onClick={() => {
                 setPreviewImage(null);
                 onResetCapture();
+                stopCamera();
                 onOpenChange(false);
               }}
               className="m-2"
@@ -253,6 +256,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       onClick={() => {
                         onOpenChange(false);
                         setPreviewImage(null);
+                        stopCamera();
                         setPreview?.(false);
                       }}
                     >
@@ -268,6 +272,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
               onClick={() => {
                 setPreviewImage(null);
                 onResetCapture();
+                stopCamera();
                 onOpenChange(false);
                 setPreview?.(false);
               }}

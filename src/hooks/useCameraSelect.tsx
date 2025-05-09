@@ -53,7 +53,7 @@ const useCameraSelect = ({ onChange }: UseCameraSelectOptions = {}) => {
       );
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preferredDeviceId]);
+  }, [devices, preferredDeviceId]);
 
   const handleValueChange = (value: string) => {
     setSelectedDeviceId(value);

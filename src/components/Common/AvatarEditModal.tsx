@@ -405,8 +405,11 @@ const AvatarEditModal = ({
                         width={constraint.width}
                         ref={webRef}
                         videoConstraints={{
-                          deviceId: selectedDeviceId,
-                          ...constraint,
+                          width: constraint.width,
+                          height: constraint.height,
+                          ...(selectedDeviceId
+                            ? { deviceId: { exact: selectedDeviceId } }
+                            : { facingMode: constraint.facingMode }),
                         }}
                         onUserMediaError={async () => {
                           const requestValue = await requestPermission("user");
