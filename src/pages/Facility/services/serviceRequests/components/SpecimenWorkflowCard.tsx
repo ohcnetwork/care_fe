@@ -356,12 +356,17 @@ export function SpecimenWorkflowCard({
                             <DropdownMenuItem
                               className="text-red-600 focus:text-red-600 focus:bg-red-50"
                               onSelect={(e) => e.preventDefault()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               {t("discard")}
                             </DropdownMenuItem>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <AlertDialogHeader>
                               <AlertDialogTitle>
                                 {t("are_you_sure")}

@@ -24,11 +24,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   MonetaryComponentRead,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
-import { Code, CodeSchema } from "@/types/questionnaire/code";
+import { CodeSchema } from "@/types/questionnaire/code";
 
 const formSchema = z
   .object({
@@ -56,20 +57,22 @@ const formSchema = z
 interface DiscountMonetaryComponentFormProps {
   defaultValues?: MonetaryComponentRead;
   onSubmit: (data: MonetaryComponentRead) => void;
-  systemCodes: Code[];
-  facilityCodes: Code[];
 }
 
 export function DiscountMonetaryComponentForm({
   defaultValues,
   onSubmit,
-  systemCodes,
-  facilityCodes,
 }: DiscountMonetaryComponentFormProps) {
   const { t } = useTranslation();
   const [valueType, setValueType] = useState<"factor" | "amount">(
     defaultValues?.factor != null ? "factor" : "amount",
   );
+
+  const facility = useCurrentFacility();
+  const discountCodes = [
+    ...(facility?.instance_discount_codes || []),
+    ...(facility?.discount_codes || []),
+  ];
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -91,16 +94,6 @@ export function DiscountMonetaryComponentForm({
     }
   };
 
-  const isExistingCode = (code: Code) => {
-    return (
-      (systemCodes.find((c) => c.code === code.code) ??
-        facilityCodes.find((c) => c.code === code.code)) != null
-    );
-  };
-
-  const currentCode = form.watch("code");
-  const isCustomCode = currentCode != null && !isExistingCode(currentCode);
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -109,7 +102,7 @@ export function DiscountMonetaryComponentForm({
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("billing.component_title")}</FormLabel>
+              <FormLabel>{t("name")}</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -119,7 +112,7 @@ export function DiscountMonetaryComponentForm({
         />
 
         <FormItem>
-          <FormLabel>{t("billing.value")}</FormLabel>
+          <FormLabel>{t("discount_factor_or_amount")}</FormLabel>
           <div className="flex gap-1">
             <div className="flex-2">
               {valueType === "factor" ? (
@@ -188,15 +181,15 @@ export function DiscountMonetaryComponentForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="factor">{t("billing.factor")}</SelectItem>
-                <SelectItem value="amount">{t("billing.amount")}</SelectItem>
+                <SelectItem value="factor">{t("factor")}</SelectItem>
+                <SelectItem value="amount">{t("amount")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <FormDescription>
             {valueType === "factor"
-              ? t("billing.factor_range_description")
-              : t("billing.amount_min_description")}
+              ? t("discount_factor_range_description")
+              : t("discount_amount_range_description")}
           </FormDescription>
           <FormMessage />
         </FormItem>
@@ -207,11 +200,11 @@ export function DiscountMonetaryComponentForm({
             name="code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("billing.component_code")}</FormLabel>
+                <FormLabel>{t("discount_code")}</FormLabel>
                 <FormControl>
                   <Autocomplete
-                    options={[...systemCodes, ...facilityCodes].map((code) => ({
-                      label: code.display,
+                    options={discountCodes.map((code) => ({
+                      label: `${code.display} (${code.code})`,
                       value: code.code,
                     }))}
                     value={field.value?.code ?? ""}
@@ -220,26 +213,11 @@ export function DiscountMonetaryComponentForm({
                         form.setValue("code", null);
                         return;
                       }
-
-                      // Check if the code is already in the system or facility codes
-                      const existingCode =
-                        systemCodes.find((code) => code.code === value) ??
-                        facilityCodes.find((code) => code.code === value);
-
-                      if (existingCode) {
-                        form.setValue("code", existingCode);
-                        return;
-                      }
-
-                      // If the code is not in the system or facility codes, it's a custom code
-                      form.setValue("code", {
-                        code: value,
-                        display: "",
-                        system: "http://ohc.network/codes/monetary/discount",
-                      });
+                      form.setValue(
+                        "code",
+                        discountCodes.find((code) => code.code === value),
+                      );
                     }}
-                    noOptionsMessage={`Create a new code for '${form.getValues("code.code")}'`}
-                    freeInput
                     className="w-full"
                   />
                 </FormControl>
@@ -247,29 +225,11 @@ export function DiscountMonetaryComponentForm({
               </FormItem>
             )}
           />
-
-          {isCustomCode && (
-            <FormField
-              control={form.control}
-              name="code.display"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Display label for the code"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
         </div>
 
         <div className="pt-2">
           <Button type="submit" className="w-full">
-            {isCustomCode ? t("save_and_create_discount_code") : t("save")}
+            {t("save")}
           </Button>
         </div>
       </form>

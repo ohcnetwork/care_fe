@@ -16,7 +16,7 @@ import {
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
-import { DiscountComponentSettings } from "@/pages/Facility/settings/billing/BillingSettings";
+import { DiscountComponentSettings } from "@/pages/Facility/settings/billing/discount/DiscountComponentSettings";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
 const routes = {
