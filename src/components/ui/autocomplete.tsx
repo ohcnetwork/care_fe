@@ -212,12 +212,17 @@ export default function Autocomplete({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between", className)}
+          className={cn("min-w-0 justify-between", className)}
           disabled={disabled}
           data-cy={dataCy}
           onClick={() => setOpen(!open)}
         >
-          <span className={cn("truncate", !selectedOption && "text-gray-500")}>
+          <span
+            className={cn(
+              inputValue && "truncate",
+              !selectedOption && "text-gray-500",
+            )}
+          >
             {displayText}
           </span>
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
