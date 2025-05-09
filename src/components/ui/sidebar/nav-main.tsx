@@ -76,7 +76,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
                             {
                               "group-data-collapsible:data-[active=true]:bg-white group-data-collapsible:data-[active=true]:text-green-700 group-collapsible:data-[active=true]:shadow":
-                                link.name == "patients" &&
+                                link.name == "Patients" &&
                                 /^\/facility\/[^/]+\/patient\/[^/]+$/.test(
                                   currentPath,
                                 ),
