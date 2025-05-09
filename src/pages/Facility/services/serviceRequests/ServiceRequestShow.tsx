@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -43,6 +44,7 @@ export default function ServiceRequestShow({
   locationId,
   serviceId,
 }: ServiceRequestShowProps) {
+  const { t } = useTranslation();
   const [selectedSpecimenDefinition, setSelectedSpecimenDefinition] =
     useState<SpecimenDefinitionRead | null>(null);
 
@@ -72,31 +74,29 @@ export default function ServiceRequestShow({
       enabled: !!activityDefinitionId,
     });
 
-  const { mutate: createSpecimen } = useMutation({
-    mutationFn: async (variables: SpecimenFromDefinitionCreate) => {
-      const response = await mutate(specimenApi.createSpecimenFromDefinition, {
-        pathParams: {
-          facilityId,
-          serviceRequestId,
-        },
-      })(variables);
-
+  const { mutate: createSpecimen } = useMutation<
+    { results?: Array<any> },
+    Error,
+    SpecimenFromDefinitionCreate
+  >({
+    mutationFn: mutate(specimenApi.createSpecimenFromDefinition, {
+      pathParams: {
+        facilityId,
+        serviceRequestId,
+      },
+    }),
+    onSuccess: (response) => {
       if (!response?.results?.length) {
-        throw new Error("No specimen created");
+        return;
       }
-      return response.results[0];
-    },
-    onSuccess: () => {
-      toast.success("Specimen collected successfully");
+      toast.success(t("specimen_collect_success"));
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", serviceRequestId],
       });
       setSelectedSpecimenDefinition(null);
     },
-    onError: (err: Error) => {
-      toast.error(
-        `Failed to collect specimen: ${err.message || "Unknown error"}`,
-      );
+    onError: () => {
+      toast.error(t("specimen_collect_error"));
     },
   });
 
@@ -119,11 +119,7 @@ export default function ServiceRequestShow({
   }
 
   if (!request || !activityDefinition) {
-    return (
-      <div className="p-4">
-        Error loading service request or activity definition details.
-      </div>
-    );
+    return <div className="p-4">{t("error_loading_sq_or_ad")}</div>;
   }
 
   const specimenRequirements = activityDefinition.specimen_requirements ?? [];
@@ -178,7 +174,7 @@ export default function ServiceRequestShow({
           />
           {specimenRequirements.length > 0 && !selectedSpecimenDefinition && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold">Specimens</h2>
+              <h2 className="text-xl font-semibold">{t("specimens")}</h2>
               {specimenRequirements.map((requirement) => {
                 const allMatchingForThisDefId = request.specimens.filter(
                   (spec) => spec.specimen_definition?.id === requirement.id,
@@ -238,7 +234,7 @@ export default function ServiceRequestShow({
 
           {observationRequirements.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Test Results</h2>
+              <h2 className="text-xl font-semibold">{t("test_results")}</h2>
               {(!diagnosticReports.length ||
                 diagnosticReports[0]?.status !==
                   DiagnosticReportStatus.final) && (

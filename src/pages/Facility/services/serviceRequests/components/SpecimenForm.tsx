@@ -85,75 +85,57 @@ export function SpecimenForm({
     },
   });
 
-  const { mutate: createDraftSpecimen } = useMutation({
-    mutationFn: async (variables: SpecimenFromDefinitionCreate) => {
-      try {
-        const response = await mutate(
-          specimenApi.createSpecimenFromDefinition,
-          {
-            pathParams: {
-              facilityId,
-              serviceRequestId,
-            },
-          },
-        )(variables);
-
-        if ("results" in response) {
-          if (!response.results?.length) {
-            throw new Error("No specimen created in paginated response");
-          }
-          return response.results[0];
-        }
-
-        if (!response) {
-          throw new Error("No specimen created in direct response");
-        }
-
-        return response;
-      } catch (error) {
-        console.error("Create Draft Specimen Error:", error);
-        throw error;
+  const { mutate: createDraftSpecimen } = useMutation<
+    SpecimenRead | { results: SpecimenRead[] },
+    Error,
+    SpecimenFromDefinitionCreate
+  >({
+    mutationFn: mutate(specimenApi.createSpecimenFromDefinition, {
+      pathParams: {
+        facilityId,
+        serviceRequestId,
+      },
+    }),
+    onSuccess: (response) => {
+      if ("results" in response && response.results?.length) {
+        setDraftSpecimen(response.results[0]);
+        setIsCreatingDraft(false);
+      } else if (!("results" in response)) {
+        setDraftSpecimen(response);
+        setIsCreatingDraft(false);
       }
     },
-    onSuccess: (response: SpecimenRead) => {
-      setDraftSpecimen(response);
+    onError: () => {
       setIsCreatingDraft(false);
-    },
-    onError: (err: Error) => {
-      setIsCreatingDraft(false);
-      toast.error(
-        `Failed to create draft specimen: ${err.message || "Unknown error"}`,
-      );
+      toast.error(t("specimen_draft_create_error"));
     },
   });
 
-  const { mutate: updateSpecimen } = useMutation({
-    mutationFn: async (variables: SpecimenRead) => {
-      try {
-        const response = await mutate(specimenApi.updateSpecimen, {
-          pathParams: {
-            facilityId,
-            specimenId: variables.id,
-          },
-        })(variables);
-
-        return response;
-      } catch (error) {
-        console.error("Update Specimen Error:", error);
-        throw error;
+  const { mutate: updateSpecimen } = useMutation<
+    SpecimenRead | { results: SpecimenRead[] },
+    Error,
+    SpecimenRead
+  >({
+    mutationFn: mutate(specimenApi.updateSpecimen, {
+      pathParams: {
+        facilityId,
+        specimenId: draftSpecimen?.id || "",
+      },
+    }),
+    onSuccess: (response) => {
+      if (
+        ("results" in response && response.results?.length) ||
+        !("results" in response)
+      ) {
+        toast.success(t("specimen_update_success"));
+        onCancel();
+        queryClient.invalidateQueries({
+          queryKey: ["serviceRequest", serviceRequestId],
+        });
       }
     },
-    onSuccess: () => {
-      toast.success("Specimen updated successfully");
-      onCancel();
-      queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", serviceRequestId],
-      });
-    },
-    onError: (err: Error) => {
-      toast.error(
-        `Failed to update specimen: ${err.message || "Unknown error"}`,
-      );
+    onError: () => {
+      toast.error(t("specimen_update_error"));
     },
   });
 
@@ -189,7 +171,7 @@ export function SpecimenForm({
   }, [currentUserId, specimenDefinition.id, isCreatingDraft, draftSpecimen]);
 
   const handleScanBarcode = () => {
-    toast.info("Barcode scanning to be implemented");
+    toast.info(t("specimen_qrcode_scan_info"));
   };
 
   const handleCollectionChange = (field: keyof CollectionSpec, value: any) => {
@@ -225,12 +207,12 @@ export function SpecimenForm({
 
     // Ensure collector ID is available before submitting
     if (!currentUserId) {
-      toast.error("Collector information not available. Please try again.");
+      toast.error(t("specimen_collector_unavailable"));
       return;
     }
 
     if (!draftSpecimen) {
-      toast.error("Draft specimen not created. Please try again.");
+      toast.error(t("specimen_draft_missing"));
       return;
     }
 
@@ -284,7 +266,7 @@ export function SpecimenForm({
       <form className="space-y-8" onSubmit={handleSubmit}>
         <div>
           <div className="font-medium text-lg mb-2">
-            {t("sample_identification")}
+            {t("specimen_identification")}
           </div>
           <Tabs
             value={identifierMode}
@@ -297,7 +279,7 @@ export function SpecimenForm({
                 className="flex-1 flex items-center justify-center gap-2"
               >
                 <QrCode className="h-4 w-4" />
-                {t("generate_barcode")}
+                {t("generate_qr")}
               </TabsTrigger>
               <TabsTrigger
                 value="scan"
@@ -337,8 +319,8 @@ export function SpecimenForm({
                   <QrCode className="h-8 w-8 mx-auto mb-2 text-gray-500" />
                   <p className="text-sm text-gray-500">
                     {isCreatingDraft
-                      ? t("generating_barcode")
-                      : t("generate_failed")}
+                      ? t("generating_qr")
+                      : t("generate_qr_failed")}
                   </p>
                 </div>
               )}
@@ -350,7 +332,7 @@ export function SpecimenForm({
                   onChange={(e) =>
                     handleSpecimenChange("accession_identifier", e.target.value)
                   }
-                  placeholder={t("scan_placeholder")}
+                  placeholder={t("specimen_scan_placeholder")}
                 />
                 <Button
                   type="button"
@@ -365,7 +347,7 @@ export function SpecimenForm({
         </div>
         <div className="space-y-4">
           <div className="font-medium text-lg mb-2">
-            {t("collection_information")}
+            {t("specimen_collection_info")}
           </div>
           <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
