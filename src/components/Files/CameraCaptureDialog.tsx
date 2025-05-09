@@ -77,14 +77,22 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     const backCamera = videoInputs.some((device) =>
       device.label.toLowerCase().includes("back"),
     );
+
     if (!isLaptopScreen && backCamera) {
-      setCameraFacingMode((prevMode) =>
-        prevMode === "environment" ? "user" : "environment",
-      );
+      setCameraFacingMode((prevMode) => {
+        const newMode = prevMode === "environment" ? "user" : "environment";
+        setSelectedDeviceId((prevDeviceId) => {
+          const newDevice = videoInputs.find((device) =>
+            device.label.toLowerCase().includes(newMode),
+          );
+          return newDevice ? newDevice.deviceId : prevDeviceId;
+        });
+        return newMode;
+      });
     } else {
       toast.warning(t("switch_camera_is_not_available"));
     }
-  }, []);
+  }, [isLaptopScreen, t, setCameraFacingMode, setSelectedDeviceId]);
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());

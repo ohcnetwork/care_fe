@@ -23,6 +23,7 @@ import {
 
 import CameraMenu from "@/components/Common/CameraSelect";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
@@ -82,15 +83,36 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
+  const isLaptopScreen = useBreakpoints({ lg: true, default: false });
+  const [_, setCameraFacingMode] = useState(
+    isLaptopScreen ? "user" : "environment",
+  );
   const { requestPermission } = useMediaDevicePermission();
 
-  const handleSwitchCamera = useCallback(() => {
-    setConstraint((prev) => {
-      return prev.facingMode === "user"
-        ? VideoConstraints.environment
-        : VideoConstraints.user;
-    });
-  }, []);
+  const handleSwitchCamera = useCallback(async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoInputs = devices.filter(
+      (device) => device.kind === "videoinput",
+    );
+    const backCamera = videoInputs.some((device) =>
+      device.label.toLowerCase().includes("back"),
+    );
+
+    if (!isLaptopScreen && backCamera) {
+      setCameraFacingMode((prevMode) => {
+        const newMode = prevMode === "environment" ? "user" : "environment";
+        setSelectedDeviceId((prevDeviceId) => {
+          const newDevice = videoInputs.find((device) =>
+            device.label.toLowerCase().includes(newMode),
+          );
+          return newDevice ? newDevice.deviceId : prevDeviceId;
+        });
+        return newMode;
+      });
+    } else {
+      toast.warning(t("switch_camera_is_not_available"));
+    }
+  }, [isLaptopScreen, t, setCameraFacingMode, setSelectedDeviceId]);
 
   const captureImage = () => {
     if (webRef.current) {
