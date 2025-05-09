@@ -116,8 +116,6 @@ export default function Autocomplete({
         placeholder={inputPlaceholder}
         disabled={disabled}
         onValueChange={handleInputChange}
-        // Control the input when freeInput is true.
-        {...(freeInput ? { value: inputValue } : {})}
         className="outline-hidden border-none ring-0 shadow-none"
         autoFocus
       />
