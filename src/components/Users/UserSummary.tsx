@@ -26,6 +26,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import { formatName } from "@/Utils/utils";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 
 export default function UserSummaryTab({
@@ -101,7 +102,7 @@ export default function UserSummaryTab({
       {showDeleteDialog && (
         <UserDeleteDialog
           show={showDeleteDialog}
-          name={userData.username}
+          name={formatName(userData)}
           handleOk={handleSubmit}
           handleCancel={() => {
             setShowDeleteDialog(false);

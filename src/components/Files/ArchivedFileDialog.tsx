@@ -58,7 +58,8 @@ export default function ArchivedFileDialog({
           </div>
           <div className="flex flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
             <span>
-              {t("archived_by")}: {file.archived_by?.username}
+              {t("archived_by")}: {file.archived_by?.first_name}{" "}
+              {file.archived_by?.last_name}
             </span>
             <span>
               {t("archived_at")}:{" "}

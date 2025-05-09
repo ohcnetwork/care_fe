@@ -478,7 +478,8 @@ export const FilesTab = (props: FilesTabProps) => {
                   <div>
                     <div className="text-gray-500">{t("shared_by")}</div>
                     <div className="font-medium">
-                      {file.uploaded_by?.username}
+                      {file.uploaded_by?.first_name}{" "}
+                      {file.uploaded_by?.last_name}
                     </div>
                   </div>
                 </div>
@@ -587,7 +588,7 @@ export const FilesTab = (props: FilesTabProps) => {
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
                   >
-                    {file.uploaded_by?.username}
+                    {file.uploaded_by?.first_name} {file.uploaded_by?.last_name}
                   </TableCell>
                   <TableCell
                     className={cn(

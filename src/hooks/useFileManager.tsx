@@ -367,7 +367,10 @@ export default function useFileManager(
               },
               {
                 label: "Uploaded By",
-                content: archiveDialogueOpen?.uploaded_by?.username,
+                content:
+                  archiveDialogueOpen?.uploaded_by?.first_name +
+                  " " +
+                  archiveDialogueOpen?.uploaded_by?.last_name,
                 icon: "l-user",
               },
               {
@@ -382,7 +385,10 @@ export default function useFileManager(
               },
               {
                 label: "Archived By",
-                content: archiveDialogueOpen?.archived_by?.username,
+                content:
+                  archiveDialogueOpen?.archived_by?.first_name +
+                  " " +
+                  archiveDialogueOpen?.archived_by?.last_name,
                 icon: "l-user",
               },
               {
