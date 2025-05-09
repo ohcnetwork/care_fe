@@ -1,6 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,6 +17,7 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { ReportTemplateType } from "@/types/reportTemplate/reportTemplate";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
 
 interface ReportBuilderSheetProps {
@@ -22,6 +25,7 @@ interface ReportBuilderSheetProps {
   encounterId: string;
   patientId: string;
   trigger: React.ReactNode;
+  onSuccess?: () => void;
 }
 
 export default function ReportBuilderSheet({
@@ -29,8 +33,10 @@ export default function ReportBuilderSheet({
   encounterId,
   patientId,
   trigger,
+  onSuccess,
 }: ReportBuilderSheetProps) {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
   const { data: reportTemplateData } = useQuery({
     queryKey: ["report-templates", facilityId],
     queryFn: query(reportTemplateApi.list, {
@@ -38,6 +44,7 @@ export default function ReportBuilderSheet({
         facility_external_id: facilityId,
       },
     }),
+    enabled: open,
   });
 
   const { mutate: generateReport } = useMutation({
@@ -48,8 +55,25 @@ export default function ReportBuilderSheet({
     }),
   });
 
+  const handleGenerateReport = (reportTemplate: {
+    type: ReportTemplateType;
+    slug: string;
+  }) => {
+    generateReport({
+      render_format: "typst",
+      type: reportTemplate.type,
+      slug: reportTemplate.slug,
+      patient_external_id: patientId,
+    });
+    toast.success(
+      t("REPORT_BUILDER_WILL_BE_GENERATED", {
+        reportSlug: reportTemplate.slug,
+      }),
+    );
+    onSuccess?.();
+  };
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg">
         <SheetHeader>
@@ -85,14 +109,7 @@ export default function ReportBuilderSheet({
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    onClick={() =>
-                      generateReport({
-                        render_format: "typst",
-                        type: reportTemplate.type,
-                        slug: reportTemplate.slug,
-                        patient_external_id: patientId,
-                      })
-                    }
+                    onClick={() => handleGenerateReport(reportTemplate)}
                   >
                     {t("generate_report")}
                   </Button>

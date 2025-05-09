@@ -77,7 +77,7 @@ export const reportTemplateSchema = z.object({
     header: z.object({
       rows: z.array(
         z.object({
-          size_ratio: z.array(z.number()).optional(),
+          size_ratio: z.array(z.number().default(1)).optional(),
           columns: z.array(
             z.discriminatedUnion("type", [
               z.object({

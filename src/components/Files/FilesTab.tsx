@@ -50,6 +50,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
+import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
@@ -57,12 +58,13 @@ export interface FilesTabProps {
   type: "encounter" | "patient";
   encounter?: Encounter;
   patient?: Patient;
+  facilityId?: string;
 }
 
 export const FilesTab = (props: FilesTabProps) => {
   const { t } = useTranslation();
 
-  const { patient, type, encounter } = props;
+  const { patient, type, encounter, facilityId } = props;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
   });
@@ -699,6 +701,27 @@ export const FilesTab = (props: FilesTabProps) => {
               </Button>
             </>
           )}
+          <ReportBuilderSheet
+            facilityId={facilityId || ""}
+            patientId={patient?.id || encounter?.patient.id || ""}
+            encounterId={encounter?.id || ""}
+            trigger={
+              <Button variant="primary" asChild>
+                <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer">
+                  <CareIcon
+                    icon="l-file-export"
+                    className="size-4 text-green-600"
+                  />
+                  {t("report_builder")}
+                </div>
+              </Button>
+            }
+            onSuccess={async () => {
+              await queryClient.invalidateQueries({
+                queryKey: ["files"],
+              });
+            }}
+          />
           <FileUploadButtons />
         </div>
         <FilterBadges />

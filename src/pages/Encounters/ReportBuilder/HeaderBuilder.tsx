@@ -29,6 +29,7 @@ import {
 
 import { ReportTemplateFormData } from "@/pages/Encounters/ReportBuilder/schema";
 import {
+  FONT_SIZES,
   FONT_WEIGHT_OPTIONS,
   HeaderElementType,
 } from "@/types/reportTemplate/reportTemplate";
@@ -92,12 +93,13 @@ const SizeRatioInput = ({
           <FormLabel>{t("REPORT_BUILDER_SIZE_RATIO")}</FormLabel>
           <Input
             {...field}
+            value={field.value ?? 1}
             type="number"
             placeholder="1"
             pattern="\d*"
             inputMode="numeric"
             onChange={(e) => {
-              const value = parseInt(e.target.value, 10);
+              const value = e.target.value ? parseInt(e.target.value, 10) : 1;
               field.onChange(value);
             }}
           />
@@ -139,13 +141,21 @@ const TextElement = React.memo(function TextElement({
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_SIZE")}</FormLabel>
-            <Input
-              {...field}
-              type="number"
-              placeholder="10"
-              pattern="\d*"
-              inputMode="numeric"
-            />
+            <Select
+              value={field.value}
+              onValueChange={(value) => field.onChange(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("REPORT_BUILDER_SELECT_SIZE")} />
+              </SelectTrigger>
+              <SelectContent>
+                {FONT_SIZES.map((option) => (
+                  <SelectItem key={option.id} value={option.value}>
+                    {option.value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
@@ -271,9 +281,12 @@ const RuleElement = React.memo(function RuleElement({
         name={`config.header.rows.${rowIndex}.columns.${elementIndex}.length`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{t("REPORT_BUILDER_LENGTH")}</FormLabel>
+            <FormLabel className="flex items-center gap-1">
+              {t("REPORT_BUILDER_LENGTH")}
+              <span className="text-xs text-gray-500">({t("percent")})</span>
+            </FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} type="number" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -405,10 +418,12 @@ const HeaderElement = React.memo(function HeaderElement({
   control: Control<ReportTemplateFormData>;
   type: string;
 }) {
+  const elementKey = `${rowIndex}-${elementIndex}-${type}`;
   switch (type) {
     case "text":
       return (
         <TextElement
+          key={elementKey}
           rowIndex={rowIndex}
           elementIndex={elementIndex}
           control={control}
@@ -417,6 +432,7 @@ const HeaderElement = React.memo(function HeaderElement({
     case "image":
       return (
         <ImageElement
+          key={elementKey}
           rowIndex={rowIndex}
           elementIndex={elementIndex}
           control={control}
@@ -425,6 +441,7 @@ const HeaderElement = React.memo(function HeaderElement({
     case "rule":
       return (
         <RuleElement
+          key={elementKey}
           rowIndex={rowIndex}
           elementIndex={elementIndex}
           control={control}
@@ -433,6 +450,7 @@ const HeaderElement = React.memo(function HeaderElement({
     case "datetime":
       return (
         <DateTimeElement
+          key={elementKey}
           rowIndex={rowIndex}
           elementIndex={elementIndex}
           control={control}
@@ -571,8 +589,8 @@ const HeaderRow = React.memo(function HeaderRow({
           {column.length > 0 && (
             <div className="flex items-center gap-2">
               <Select
-                value={activeElement.toString()}
-                onValueChange={(value) => toggleElement(parseInt(value, 10))}
+                value={`${activeElement}`}
+                onValueChange={(value) => toggleElement(Number(value))}
               >
                 <SelectTrigger className="bg-green-100">
                   <SelectValue placeholder={t("REPORT_BUILDER_ADD_ELEMENT")}>
@@ -581,6 +599,8 @@ const HeaderRow = React.memo(function HeaderRow({
                       className="w-4 h-4 text-green-900"
                     />
                     <span className="text-sm text-green-900">
+                      {activeElement}
+                      {". "}
                       {t(
                         `REPORT_BUILDER_${column[activeElement].type.toUpperCase()}`,
                       )}
@@ -689,11 +709,17 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
 
   const handleRemoveRow = useCallback(
     (rowIndex: number) => {
-      const newActiveElements = { ...activeElements };
-      delete newActiveElements[rowIndex];
+      const currentActiveElements = { ...activeElements };
+      delete currentActiveElements[rowIndex];
+      const newActiveElements: Record<number, number> = {};
+      Object.entries(currentActiveElements).forEach(([oldIndex, value]) => {
+        const newIndex =
+          Number(oldIndex) > rowIndex
+            ? Number(oldIndex) - 1 // Decrease index for rows after the removed one
+            : Number(oldIndex); // Keep same index for rows before the removed one
+        newActiveElements[newIndex] = value;
+      });
       remove(rowIndex);
-      console.log("activeElements", activeElements);
-      console.log("newActiveElements", newActiveElements);
       setActiveElements(newActiveElements);
     },
     [remove, activeElements],

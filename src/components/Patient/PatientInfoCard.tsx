@@ -40,7 +40,6 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder";
 import {
   Encounter,
   completedEncounterStatus,
@@ -470,22 +469,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         </div>
                       }
                       canWrite={canWrite}
-                    />
-                  </Badge>
-                  <Badge variant="outline">
-                    <ReportBuilderSheet
-                      facilityId={props.encounter.facility.id}
-                      patientId={props.encounter.patient.id}
-                      encounterId={props.encounter.id}
-                      trigger={
-                        <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
-                          <CareIcon
-                            icon="l-file-export"
-                            className="size-4 text-green-600"
-                          />
-                          {t("report_builder")}
-                        </div>
-                      }
                     />
                   </Badge>
                 </div>

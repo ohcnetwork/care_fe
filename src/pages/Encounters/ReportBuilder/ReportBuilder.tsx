@@ -210,7 +210,7 @@ export default function ReportBuilder({
     onSuccess: () => {
       toast.success(t("REPORT_BUILDER_TEMPLATE_SAVED"));
       navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/files`,
       );
     },
   });
@@ -225,7 +225,7 @@ export default function ReportBuilder({
     onSuccess: () => {
       toast.success(t("REPORT_BUILDER_TEMPLATE_UPDATED"));
       navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/files`,
       );
     },
   });
@@ -255,12 +255,15 @@ export default function ReportBuilder({
         ...data,
         config: {
           ...data.config,
-          layout: {
-            ...data.config.layout,
-            text: {
-              ...data.config.layout.text,
-              size: data.config.layout.text.size + "pt",
-            },
+          header: {
+            ...data.config.header,
+            rows: data.config.header.rows.map((row) => ({
+              ...row,
+              size_ratio:
+                row.size_ratio && row.size_ratio.length > 0
+                  ? row.size_ratio.map((ratio) => ratio ?? 1)
+                  : Array(row.columns.length).fill(1),
+            })),
           },
         },
       };
