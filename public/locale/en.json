@@ -3261,6 +3261,7 @@
   "specimen": "Specimen",
   "specimen_collect_error": "Failed to collect specimen",
   "specimen_collect_success": "Specimen collected successfully",
+  "specimen_collected": "Specimen Collected",
   "specimen_collection_info": "Collection Information",
   "specimen_collector_unavailable": "Collector information not available. Please try again.",
   "specimen_definition": "Specimen Definition",

@@ -8,6 +8,7 @@ import { Code } from "@/types/questionnaire/code";
 import { UserBase } from "@/types/user/user";
 
 export enum SpecimenStatus {
+  draft = "draft",
   available = "available",
   unavailable = "unavailable",
   unsatisfactory = "unsatisfactory",
