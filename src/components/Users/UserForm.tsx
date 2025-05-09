@@ -347,7 +347,7 @@ export default function UserForm({
           />
         )}
 
-        <div className="md:flex gap-2 grid grid-cols-2 items-start">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 items-start">
           <FormField
             control={form.control}
             name="prefix"
@@ -363,7 +363,6 @@ export default function UserForm({
                   value={field.value || ""}
                   onChange={field.onChange}
                   noOptionsMessage=""
-                  className="md:w-28"
                   placeholder={t("select_or_type")}
                   inputPlaceholder={t("select_or_type")}
                 />
