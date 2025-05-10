@@ -169,7 +169,9 @@ export function RelativeDatePicker({
               onClick={() => handleUnitChange(unit)}
               variant={selected.unit === unit ? "default" : "outline"}
               className={
-                !validateDate(unit, 1) ? "opacity-50 pointer-events-none" : ""
+                !validateDate(unit, 1)
+                  ? "opacity-50 pointer-events-none"
+                  : "cursor-pointer"
               }
             >
               {unit.charAt(0).toUpperCase() + unit.slice(1)}
