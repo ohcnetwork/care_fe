@@ -79,7 +79,7 @@ function ConsentCard({
             variant="destructive"
             className="flex gap-1 items-center text-xs uppercase"
           >
-            {t("encounter_consent_validity_badge_exp")}
+            {t("expired")}
           </Badge>
         )}
       </div>
