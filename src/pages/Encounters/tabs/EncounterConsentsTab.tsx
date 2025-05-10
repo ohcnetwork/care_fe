@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { isPast } from "date-fns";
 import { List, Search } from "lucide-react";
 import { useNavigate, usePathParams } from "raviger";
 import { useState } from "react";
@@ -62,13 +63,6 @@ function ConsentCard({
   const primaryAttachment = consent.source_attachments[0];
   const totalAttachments = consent.source_attachments.length;
 
-  const isConsentExpired = (endDate: Date | undefined) => {
-    if (!endDate) return false;
-    const curr_date = new Date();
-    const end_date = new Date(endDate);
-    return curr_date > end_date;
-  };
-
   return (
     <Card className="overflow-hidden transition-all h-full flex flex-col">
       <div className="flex flex-wrap gap-2">
@@ -80,7 +74,7 @@ function ConsentCard({
             {t(`consent_category__${consent.category}`)}
           </h3>
         </Badge>
-        {isConsentExpired(consent.period.end) && (
+        {consent.period.end && isPast(consent.period.end) && (
           <Badge
             variant="destructive"
             className="flex gap-1 items-center text-xs uppercase"
