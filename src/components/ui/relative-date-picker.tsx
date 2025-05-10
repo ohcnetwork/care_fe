@@ -177,7 +177,7 @@ export function RelativeDatePicker({
         </div>
       </div>
 
-      <div className="flex-1 p-4 flex flex-col justify-start">
+      <div className="p-4 flex flex-col justify-center">
         <div className="text-xl font-bold mb-1 truncate">
           {format(resultDate, "MMM d, yyyy")}
         </div>
