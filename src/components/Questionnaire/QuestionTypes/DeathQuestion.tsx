@@ -25,6 +25,11 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
   const values = (questionnaireResponse.values?.[0]?.value as string[]) || [];
 
   const handleUpdate = (updates: string) => {
+    const selectedDate = new Date(updates);
+    const now = new Date();
+    if (selectedDate > now) {
+      return;
+    }
     updateQuestionnaireResponseCB(
       [
         {
@@ -45,6 +50,7 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
           ? format(new Date(values[0]), "yyyy-MM-dd'T'HH:mm")
           : undefined
       }
+      max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
       onChange={(e) => handleUpdate(e.target.value || "")}
       disabled={props.disabled}
     />
