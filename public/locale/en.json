@@ -1171,7 +1171,7 @@
   "encounter_class_description__imp": "Patient is admitted to the hospital",
   "encounter_class_description__obsenc": "Patient is under observation",
   "encounter_class_description__vr": "Virtual/telehealth consultation",
-  "encounter_consent_validity_badge_exp": "Consent Expired",
+  "expired": "Expired",
   "encounter_created": "Encounter created successfully",
   "encounter_date": "Encounter Date",
   "encounter_date_field_label__A": "Date & Time of Admission to the Facility",
