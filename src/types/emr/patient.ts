@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { t } from "i18next";
 
 import {
@@ -101,7 +102,7 @@ export const validatePatient = (patient: PatientModel, useDob: boolean) => {
     "permanent_address",
   ];
 
-  if (patient.nationality === "India") {
+  if (patient.nationality === careConfig.defaultCountry.name) {
     requiredFields.push("geo_organization");
   }
 

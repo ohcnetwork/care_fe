@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { isPast } from "date-fns";
 import { List, Search } from "lucide-react";
 import { useNavigate, usePathParams } from "raviger";
 import { useState } from "react";
@@ -64,14 +65,24 @@ function ConsentCard({
 
   return (
     <Card className="overflow-hidden transition-all h-full flex flex-col">
-      <Badge
-        variant="outline"
-        className="w-fit justify-center border-b border-gray-300 rounded-b-md rounded-t-none px-2.5 py-1 text-center ml-3 bg-indigo-100 text-indigo-900"
-      >
-        <h3 className="font-semibold text-xs text-gray-900 uppercase">
-          {t(`consent_category__${consent.category}`)}
-        </h3>
-      </Badge>
+      <div className="flex flex-wrap gap-2">
+        <Badge
+          variant="outline"
+          className="w-fit justify-center border-b border-gray-300 rounded-b-md rounded-t-none px-2.5 py-1 text-center ml-3 bg-indigo-100 text-indigo-900"
+        >
+          <h3 className="font-semibold text-xs text-gray-900 uppercase">
+            {t(`consent_category__${consent.category}`)}
+          </h3>
+        </Badge>
+        {consent.period.end && isPast(consent.period.end) && (
+          <Badge
+            variant="destructive"
+            className="flex gap-1 items-center text-xs uppercase"
+          >
+            {t("expired")}
+          </Badge>
+        )}
+      </div>
 
       <CardContent className="flex-1 flex flex-col justify-between p-4 gap-4">
         <div className="flex flex-col gap-3">
