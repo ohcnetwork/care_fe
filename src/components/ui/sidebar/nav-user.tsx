@@ -188,13 +188,7 @@ export function PatientNavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              data-cy="user-menu-logout"
-              onClick={() => {
-                signOut();
-                navigate("/login");
-              }}
-            >
+            <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
               <LogOut />
               {t("logout")}
             </DropdownMenuItem>
