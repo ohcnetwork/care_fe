@@ -102,7 +102,13 @@ export function FacilityNavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
+            <DropdownMenuItem
+              data-cy="user-menu-logout"
+              onClick={() => {
+                signOut();
+                navigate("/login");
+              }}
+            >
               <LogOut />
               {t("logout")}
             </DropdownMenuItem>
