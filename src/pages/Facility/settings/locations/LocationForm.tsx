@@ -464,7 +464,7 @@ export default function LocationForm({
                   </div>
                 </div>
               ) : (
-                <div className="rounded-md bg-muted p-4">
+                <div className="rounded-md p-4">
                   <h4 className="font-medium mb-2">{t("preview_bed_names")}</h4>
                   <div className="text-sm text-gray-700 flex flex-wrap gap-2">
                     {bedFields.map((field) => (
