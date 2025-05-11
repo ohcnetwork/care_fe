@@ -169,13 +169,14 @@ function AppointmentDialog({
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleRescheduleAppointment(appointment)}
-                  disabled={appointment.status === "in_consultation"}
-                >
-                  <span>{t("reschedule")}</span>
-                </Button>
+                {appointment.status !== "in_consultation" && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleRescheduleAppointment(appointment)}
+                  >
+                    <span>{t("reschedule")}</span>
+                  </Button>
+                )}
               </span>
             )}
           </DialogFooter>
