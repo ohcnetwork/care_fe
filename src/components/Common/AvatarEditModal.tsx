@@ -84,9 +84,7 @@ const AvatarEditModal = ({
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const isLaptopScreen = useBreakpoints({ lg: true, default: false });
-  const [_, setCameraFacingMode] = useState(
-    isLaptopScreen ? "user" : "environment",
-  );
+  const [_, setCameraFacingMode] = useState("user");
   const { requestPermission } = useMediaDevicePermission();
 
   const handleSwitchCamera = useCallback(async () => {
@@ -97,16 +95,31 @@ const AvatarEditModal = ({
     const backCamera = videoInputs.some((device) =>
       device.label.toLowerCase().includes("back"),
     );
+    const frontCamera = videoInputs.some((device) =>
+      device.label.toLowerCase().includes("front"),
+    );
 
-    if (!isLaptopScreen && backCamera) {
+    if (!isLaptopScreen) {
       setCameraFacingMode((prevMode) => {
         const newMode = prevMode === "environment" ? "user" : "environment";
-        setSelectedDeviceId((prevDeviceId) => {
-          const newDevice = videoInputs.find((device) =>
-            device.label.toLowerCase().includes(newMode),
-          );
-          return newDevice ? newDevice.deviceId : prevDeviceId;
-        });
+
+        if (prevMode === "user" && backCamera) {
+          setSelectedDeviceId((prevDeviceId) => {
+            const newDevice = videoInputs.find((device) =>
+              device.label.toLowerCase().includes(newMode),
+            );
+            return newDevice ? newDevice.deviceId : prevDeviceId;
+          });
+        }
+        if (newMode === "user" && frontCamera) {
+          setSelectedDeviceId((prevDeviceId) => {
+            const newDevice = videoInputs.find((device) =>
+              device.label.toLowerCase().includes(newMode),
+            );
+            return newDevice ? newDevice.deviceId : prevDeviceId;
+          });
+        }
+
         return newMode;
       });
     } else {
