@@ -36,7 +36,6 @@ export class CommunityQuestionnaireForm {
       text: '[data-cy="text-input-question-input"]',
       number: '[data-cy="number-question-input"]',
       choice: '[data-cy="choice-question-input"]',
-      radioItem: '[data-cy="radio-group-question-item"]',
     },
 
     // Symptom Selectors
@@ -120,12 +119,13 @@ export class CommunityQuestionnaireForm {
           );
           break;
         case "radio":
-          cy.get(`${baseSelector}`)
-            .find('[data-cy="radio-group-question-item"]')
-            .parent()
-            .contains(value)
-            .closest("label")
-            .click();
+          {
+            const radioValue = value.toUpperCase().replace(/\s+/g, "_");
+            cy.verifyAndClickElement(
+              `${baseSelector} [data-cy="radio-group-question-item-${radioValue}"]`,
+              value,
+            );
+          }
           break;
 
         default:

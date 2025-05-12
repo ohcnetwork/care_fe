@@ -41,6 +41,7 @@ interface QuestionnaireSearchProps {
   subjectType?: string;
   disabled?: boolean;
   size?: "default" | "sm" | "xs" | "lg";
+  "data-cy"?: string;
 }
 
 interface QuestionnaireListResponse {
@@ -54,6 +55,7 @@ export function QuestionnaireSearch({
   onSelect = (selected) => navigate(`questionnaire/${selected.slug}`),
   subjectType,
   disabled,
+  "data-cy": dataCy,
 }: QuestionnaireSearchProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -125,7 +127,7 @@ export function QuestionnaireSearch({
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button
-            data-cy="add-questionnaire-button"
+            data-cy={dataCy}
             variant="outline"
             role="combobox"
             disabled={disabled || isLoading}
@@ -162,7 +164,7 @@ export function QuestionnaireSearch({
       <PopoverTrigger asChild>
         <Button
           size={size}
-          data-cy="add-questionnaire-button"
+          data-cy={dataCy}
           variant="outline"
           role="combobox"
           className="w-full justify-between"

@@ -1,7 +1,6 @@
 import { Plus } from "lucide-react";
-import { Link, usePathParams } from "raviger";
-
-// import { Link, navigate } from "raviger";
+import { usePathParams } from "raviger";
+import { Link, navigate } from "raviger";
 
 import { Button } from "@/components/ui/button";
 
@@ -10,8 +9,7 @@ import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetail
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
-
-// import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
+import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -84,12 +82,13 @@ export const EncounterOverviewTab = ({
                 })}
               </div>
               <div className=" md:block hidden">
-                {/* <QuestionnaireSearch
+                <QuestionnaireSearch
+                  data-cy="add-questionnaire-button-overview"
                   size="sm"
                   onSelect={(selected) =>
                     navigate(`questionnaire/${selected.slug}`)
                   }
-                /> */}
+                />
               </div>
             </div>
           )}

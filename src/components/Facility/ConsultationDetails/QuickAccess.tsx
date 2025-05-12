@@ -55,6 +55,7 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
             ))}
           </div>
           <QuestionnaireSearch
+            data-cy="add-questionnaire-button"
             placeholder={t("questionnaire")}
             subjectType="encounter"
           />
