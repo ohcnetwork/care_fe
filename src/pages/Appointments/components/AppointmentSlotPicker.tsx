@@ -152,6 +152,7 @@ export function AppointmentSlotPicker({
 
     return (
       <button
+        data-cy="slots-available-calendar-date"
         disabled={isBeforeToday || isFullyBooked}
         onClick={() => {
           setSelectedDate(date);

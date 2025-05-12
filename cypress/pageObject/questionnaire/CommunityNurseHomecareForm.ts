@@ -80,6 +80,7 @@ export class CommunityQuestionnaireForm {
       reasonForVisit: '[data-cy="reason-for-visit"]',
       practitioner: '[data-cy="select-practitioner"]',
       appointmentSlot: '[data-cy="select-appointment-slot"]',
+      appointmentDate: '[data-cy="slots-available-calendar-date"]',
       appointmentButton: '[data-cy="appointment-slot-button"]',
     },
   };
@@ -278,6 +279,12 @@ export class CommunityQuestionnaireForm {
       `${this.selectors.appointment.nextVisit} ${this.selectors.appointment.appointmentSlot}`,
       this.placeholders.appointmentSlot,
     );
+
+    cy.get(this.selectors.appointment.appointmentDate)
+      .not("[disabled]")
+      .first()
+      .should("be.visible")
+      .click();
 
     cy.get(this.selectors.appointment.appointmentButton)
       .not("[disabled]")
