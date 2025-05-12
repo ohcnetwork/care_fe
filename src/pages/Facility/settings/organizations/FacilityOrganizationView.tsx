@@ -53,7 +53,7 @@ function OrganizationCard({
                   variant="primary"
                   className=" border border-transparent text-indigo-800 bg-indigo-100 px-2 py-1"
                 >
-                  {t(`org-type-${org.org_type}`)}
+                  {t(`facility_organization_type__${org.org_type}`)}
                 </Badge>
               </div>
             </div>
