@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, GripVertical, Plus, X } from "lucide-react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Control,
-  Controller,
   UseFormReturn,
   useFieldArray,
   useWatch,
@@ -14,7 +13,13 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -28,6 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import query from "@/Utils/request/query";
 import { ReportTemplateFormData } from "@/pages/Encounters/ReportBuilder/schema";
+import { SECTION_DISPLAY_NAMES } from "@/types/reportTemplate/reportTemplate";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
 
 interface SectionBuilderProps {
@@ -35,113 +41,16 @@ interface SectionBuilderProps {
   facilityId: string;
 }
 
-const SECTION_DISPLAY_NAMES: Record<string, string> = {
-  diagnosis: "REPORT_BUILDER_SECTION_DIAGNOSIS",
-  symptom: "REPORT_BUILDER_SECTION_SYMPTOM",
-  allergy_intolerance: "REPORT_BUILDER_SECTION_ALLERGY",
-  observation: "REPORT_BUILDER_SECTION_OBSERVATION",
-  medication_request: "REPORT_BUILDER_SECTION_MEDICATION",
-  patient_info: "REPORT_BUILDER_SECTION_PATIENT_INFO",
-  care_team: "REPORT_BUILDER_SECTION_CARE_TEAM",
-  file_upload: "REPORT_BUILDER_SECTION_FILE_UPLOAD",
-  encounter: "REPORT_BUILDER_SECTION_ENCOUNTER",
-  discharge_summary_advice: "REPORT_BUILDER_SECTION_DISCHARGE_ADVICE",
-  custom_section: "REPORT_BUILDER_SECTION_CUSTOM",
-};
-
-const SectionFields = React.memo(function SectionFields({
-  control,
-  index,
-}: {
-  control: Control<ReportTemplateFormData>;
-  index: number;
-}) {
-  const { t } = useTranslation();
-  const isEnabled = useWatch({
-    control,
-    name: `config.sections.${index}.enabled`,
-  });
-  return (
-    <div className="space-y-4">
-      <Controller
-        control={control}
-        name={`config.sections.${index}.options.fields`}
-        render={({ field: { value = [], onChange } }) => {
-          const fields = (Array.isArray(value) ? value : []).map((field) =>
-            typeof field === "string" ? { label: field, value: field } : field,
-          ) as Array<{ label: string; value: string }>;
-
-          return (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm font-medium">
-                  {t("REPORT_BUILDER_FIELDS")}
-                </h4>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={!isEnabled}
-                  onClick={() =>
-                    onChange([...fields, { label: "", value: "" }])
-                  }
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("REPORT_BUILDER_ADD_FIELD")}
-                </Button>
-              </div>
-
-              {fields.map((fieldValue, fieldIndex) => (
-                <div
-                  key={fieldIndex}
-                  className="flex items-center space-x-2 mb-2"
-                >
-                  <Input
-                    value={fieldValue.value}
-                    disabled={!isEnabled}
-                    onChange={(e) => {
-                      const newFields = [...fields];
-                      newFields[fieldIndex] = {
-                        ...fieldValue,
-                        value: e.target.value,
-                      };
-                      onChange(newFields);
-                    }}
-                  />
-                  {isEnabled && (
-                    <Button
-                      variant="ghost"
-                      type="button"
-                      size="icon"
-                      disabled={!isEnabled}
-                      onClick={() => {
-                        const newFields = [...fields];
-                        newFields.splice(fieldIndex, 1);
-                        onChange(newFields);
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          );
-        }}
-      />
-    </div>
-  );
-});
-
-const SectionBasicSettings = React.memo(function SectionBasicSettings({
+const SectionFieldsAndColumns = React.memo(function SectionFieldsAndColumns({
   control,
   index,
   availableSections,
 }: {
   control: Control<ReportTemplateFormData>;
   index: number;
-  availableSections?: string[];
+  availableSections?: Record<string, string[]>;
 }) {
+  const [selectedField, setSelectedField] = useState<string>("");
   const { t } = useTranslation();
   const isEnabled = useWatch({
     control,
@@ -153,17 +62,209 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
     name: `config.sections.${index}.is_table`,
   });
 
+  const section = useWatch({
+    control,
+    name: `config.sections.${index}.source`,
+  });
+  const availableFieldsAndColumns = availableSections?.[section];
+
   return (
-    <div className="grid md:grid-cols-2 gap-4">
-      <Controller
+    <div className="space-y-4">
+      {isTable ? (
+        <FormField
+          control={control}
+          name={`config.sections.${index}.options.columns`}
+          render={({ field: { value = [], onChange } }) => {
+            const columns = Array.isArray(value) ? value : [];
+            return (
+              <div>
+                <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
+                  <Select
+                    value={selectedField}
+                    onValueChange={setSelectedField}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t("REPORT_BUILDER_SELECT_COLUMN")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableFieldsAndColumns?.map((field) => (
+                        <SelectItem key={field} value={field}>
+                          {t(field)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto"
+                    disabled={!selectedField}
+                    onClick={() => onChange([...columns, selectedField])}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("REPORT_BUILDER_ADD_COLUMN")}
+                  </Button>
+                </div>
+
+                {columns.map((column, columnIndex) => (
+                  <div
+                    key={columnIndex}
+                    className="flex space-x-2 mb-2 border rounded-md p-2 items-center justify-between"
+                  >
+                    <span>{t(column)}</span>
+                    {isEnabled && (
+                      <Button
+                        variant="link"
+                        type="button"
+                        size="icon"
+                        disabled={!isEnabled}
+                        onClick={() => {
+                          const newColumns = [...columns];
+                          newColumns.splice(columnIndex, 1);
+                          onChange(newColumns);
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          }}
+        />
+      ) : (
+        <FormField
+          control={control}
+          name={`config.sections.${index}.options.fields`}
+          render={({ field: { value = [], onChange } }) => {
+            const fields = (Array.isArray(value) ? value : []).map((field) =>
+              typeof field === "string"
+                ? { label: field, value: field }
+                : field,
+            ) as Array<{ label: string; value: string }>;
+
+            return (
+              <div>
+                <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
+                  <Select
+                    value={selectedField}
+                    onValueChange={setSelectedField}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t("REPORT_BUILDER_SELECT_FIELD")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableFieldsAndColumns?.map((field) => (
+                        <SelectItem key={field} value={field}>
+                          {t(field)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto"
+                    disabled={!selectedField}
+                    onClick={() =>
+                      onChange([
+                        ...fields,
+                        { label: selectedField, value: selectedField },
+                      ])
+                    }
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("REPORT_BUILDER_ADD_FIELD")}
+                  </Button>
+                </div>
+
+                {fields.map((fieldValue, fieldIndex) => (
+                  <div
+                    key={fieldIndex}
+                    className="flex space-x-2 mb-2 border rounded-md p-2 items-center justify-between"
+                  >
+                    <span>{t(fieldValue.label)}</span>
+                    {isEnabled && (
+                      <Button
+                        variant="link"
+                        type="button"
+                        size="icon"
+                        disabled={!isEnabled}
+                        onClick={() => {
+                          const newFields = [...fields];
+                          newFields.splice(fieldIndex, 1);
+                          onChange(newFields);
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          }}
+        />
+      )}
+    </div>
+  );
+});
+
+const SectionBasicSettings = React.memo(function SectionBasicSettings({
+  form,
+  control,
+  index,
+  availableSections,
+}: {
+  form: UseFormReturn<ReportTemplateFormData>;
+  control: Control<ReportTemplateFormData>;
+  index: number;
+  availableSections?: Record<string, string[]>;
+}) {
+  const [selectedDataSource, setSelectedDataSource] = useState<string>("");
+  const { t } = useTranslation();
+  const isEnabled = useWatch({
+    control,
+    name: `config.sections.${index}.enabled`,
+  });
+
+  const isTable = useWatch({
+    control,
+    name: `config.sections.${index}.is_table`,
+  });
+
+  useEffect(() => {
+    if (form.getValues(`config.sections.${index}.source`)) {
+      setSelectedDataSource(form.getValues(`config.sections.${index}.source`));
+    }
+  }, [form, index]);
+
+  const handleDataSourceChange = (value: string, field: any) => {
+    setSelectedDataSource(value);
+    field.onChange(value);
+    form.setValue(`config.sections.${index}.options.fields`, []);
+  };
+
+  const availableSectionSources = Object.keys(availableSections || {});
+
+  return (
+    <div className="grid md:grid-cols-2 gap-4 items-center">
+      <FormField
         control={control}
         name={`config.sections.${index}.source`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_DATA_SOURCE")}</FormLabel>
             <Select
-              value={field.value}
-              onValueChange={field.onChange}
+              value={selectedDataSource}
+              onValueChange={(value) => handleDataSourceChange(value, field)}
               disabled={!isEnabled}
             >
               <FormControl>
@@ -174,18 +275,19 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {availableSections?.map((section: string) => (
+                {availableSectionSources.map((section: string) => (
                   <SelectItem key={section} value={section}>
                     {t(SECTION_DISPLAY_NAMES[section] || section)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <FormMessage />
           </FormItem>
         )}
       />
 
-      <Controller
+      <FormField
         control={control}
         name={`config.sections.${index}.options.title`}
         render={({ field }) => (
@@ -199,11 +301,12 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
                 placeholder={t("REPORT_BUILDER_ENTER_SECTION_TITLE")}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
 
-      <Controller
+      <FormField
         control={control}
         name={`config.sections.${index}.is_table`}
         render={({ field }) => (
@@ -216,11 +319,12 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
                 disabled={!isEnabled}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
 
-      <Controller
+      <FormField
         control={control}
         name={`config.sections.${index}`}
         render={({ field }) => {
@@ -253,6 +357,7 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
                   </SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
             </FormItem>
           );
         }}
@@ -264,6 +369,7 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
 const SectionItem = React.memo(function SectionItem({
   index,
   field,
+  form,
   control,
   activeTab,
   onTabChange,
@@ -274,13 +380,14 @@ const SectionItem = React.memo(function SectionItem({
 }: {
   index: number;
   field: any;
+  form: UseFormReturn<ReportTemplateFormData>;
   control: Control<ReportTemplateFormData>;
   activeTab: string;
   onTabChange: (index: number, value: string) => void;
   onMoveUp: (index: number) => void;
   onMoveDown: (index: number) => void;
   onRemove: (index: number) => void;
-  availableSections?: string[];
+  availableSections?: Record<string, string[]>;
 }) {
   const { t } = useTranslation();
   const values = useWatch({ control, name: "config.sections" });
@@ -288,8 +395,8 @@ const SectionItem = React.memo(function SectionItem({
     <Card>
       <CardContent className="pt-6">
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="ghost"
@@ -307,8 +414,8 @@ const SectionItem = React.memo(function SectionItem({
               </h3>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Controller
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <FormField
                 control={control}
                 name={`config.sections.${index}.enabled`}
                 render={({ field: enabledField }) => (
@@ -359,19 +466,19 @@ const SectionItem = React.memo(function SectionItem({
           <Tabs
             value={activeTab}
             onValueChange={(value) => onTabChange(index, value)}
-            className="w-full"
           >
-            <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="basic">
+            <TabsList className="overflow-x-auto w-full">
+              <TabsTrigger value="basic" className="w-full">
                 {t("REPORT_BUILDER_BASIC_SETTINGS")}
               </TabsTrigger>
-              <TabsTrigger value="fields">
+              <TabsTrigger value="fields" className="w-full">
                 {t("REPORT_BUILDER_FIELDS_COLUMNS")}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4 mt-4">
               <SectionBasicSettings
+                form={form}
                 control={control}
                 index={index}
                 availableSections={availableSections}
@@ -379,7 +486,11 @@ const SectionItem = React.memo(function SectionItem({
             </TabsContent>
 
             <TabsContent value="fields" className="space-y-4 mt-4">
-              <SectionFields control={control} index={index} />
+              <SectionFieldsAndColumns
+                control={control}
+                index={index}
+                availableSections={availableSections}
+              />
             </TabsContent>
           </Tabs>
         </div>
@@ -390,7 +501,6 @@ const SectionItem = React.memo(function SectionItem({
 
 export const SectionBuilder = React.memo(function SectionBuilder({
   form,
-  facilityId,
 }: SectionBuilderProps) {
   const { t } = useTranslation();
   const { fields, append, remove, move } = useFieldArray({
@@ -402,11 +512,7 @@ export const SectionBuilder = React.memo(function SectionBuilder({
 
   const { data: availableSections } = useQuery({
     queryKey: ["availableSections"],
-    queryFn: query(reportTemplateApi.getAvailableSections, {
-      pathParams: {
-        facility_external_id: facilityId,
-      },
-    }),
+    queryFn: query(reportTemplateApi.getAvailableSections),
   });
 
   const addSection = useCallback(() => {
@@ -463,14 +569,19 @@ export const SectionBuilder = React.memo(function SectionBuilder({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col sm:flex-row items-center justify-between">
         <div>
           <CardTitle>{t("REPORT_BUILDER_SECTIONS")}</CardTitle>
           <p className="text-sm text-muted-foreground">
             {t("REPORT_BUILDER_SECTIONS_DESCRIPTION")}
           </p>
         </div>
-        <Button type="button" onClick={addSection} size="sm">
+        <Button
+          type="button"
+          onClick={addSection}
+          size="sm"
+          className="w-full sm:w-auto"
+        >
           <Plus className="h-4 w-4 mr-2" />
           {t("REPORT_BUILDER_ADD_SECTION")}
         </Button>
@@ -481,6 +592,7 @@ export const SectionBuilder = React.memo(function SectionBuilder({
             key={field.id}
             index={index}
             field={field}
+            form={form}
             control={form.control}
             activeTab={activeTabs[index] || "basic"}
             onTabChange={handleTabChange}

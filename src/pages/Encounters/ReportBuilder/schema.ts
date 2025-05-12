@@ -77,7 +77,7 @@ export const reportTemplateSchema = z.object({
     header: z.object({
       rows: z.array(
         z.object({
-          size_ratio: z.array(z.number().default(1)).optional(),
+          size_ratio: z.array(z.number()).default([1]).optional(),
           columns: z.array(
             z.discriminatedUnion("type", [
               z.object({
@@ -146,7 +146,7 @@ export const reportTemplateSchema = z.object({
     sections: z.array(
       z
         .object({
-          source: z.string(),
+          source: z.string().min(1, "Field is required"),
           is_table: z.boolean(),
           enabled: z.boolean(),
           options: z.object({

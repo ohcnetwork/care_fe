@@ -297,19 +297,38 @@ export interface ReportTemplateBase {
   type: ReportTemplateType;
 }
 
-export type ReportTemplateCreate = Omit<ReportTemplateBase, "id">;
+export type ReportTemplateCreate = Omit<ReportTemplateBase, "id"> & {
+  facility?: string;
+  derived_from_url?: string;
+};
 
-export type ReportTemplateUpdate = Omit<ReportTemplateCreate, "type" | "slug">;
+export type ReportTemplateUpdate = Pick<ReportTemplateBase, "config">;
 
 export interface ReportTemplateModel extends ReportTemplateBase {
   facility: FacilityModel;
   created_by: UserBase;
   updated_by: UserBase;
+  derived_from_url?: string;
 }
 
 export interface ReportTemplateGenerate {
-  render_format: "typst";
+  render_format?: "typst";
   type: ReportTemplateType;
   slug: string;
   patient_external_id?: string;
+  facility?: string;
 }
+
+export const SECTION_DISPLAY_NAMES: Record<string, string> = {
+  diagnosis: "REPORT_BUILDER_SECTION_DIAGNOSIS",
+  symptom: "REPORT_BUILDER_SECTION_SYMPTOM",
+  allergy_intolerance: "REPORT_BUILDER_SECTION_ALLERGY",
+  observation: "REPORT_BUILDER_SECTION_OBSERVATION",
+  medication_request: "REPORT_BUILDER_SECTION_MEDICATION",
+  patient_info: "REPORT_BUILDER_SECTION_PATIENT_INFO",
+  care_team: "REPORT_BUILDER_SECTION_CARE_TEAM",
+  file_upload: "REPORT_BUILDER_SECTION_FILE_UPLOAD",
+  encounter: "REPORT_BUILDER_SECTION_ENCOUNTER",
+  discharge_summary_advice: "REPORT_BUILDER_SECTION_DISCHARGE_ADVICE",
+  custom_section: "REPORT_BUILDER_SECTION_CUSTOM",
+} as const;

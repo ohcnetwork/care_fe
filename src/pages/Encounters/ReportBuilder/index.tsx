@@ -40,19 +40,15 @@ export default function ReportBuilderSheet({
   const { data: reportTemplateData } = useQuery({
     queryKey: ["report-templates", facilityId],
     queryFn: query(reportTemplateApi.list, {
-      pathParams: {
-        facility_external_id: facilityId,
+      queryParams: {
+        facility: facilityId,
       },
     }),
     enabled: open,
   });
 
   const { mutate: generateReport } = useMutation({
-    mutationFn: mutate(reportTemplateApi.generateReport, {
-      pathParams: {
-        facility_external_id: facilityId,
-      },
-    }),
+    mutationFn: mutate(reportTemplateApi.generateReport),
   });
 
   const handleGenerateReport = (reportTemplate: {
@@ -64,6 +60,7 @@ export default function ReportBuilderSheet({
       type: reportTemplate.type,
       slug: reportTemplate.slug,
       patient_external_id: patientId,
+      facility: facilityId,
     });
     toast.success(
       t("REPORT_BUILDER_WILL_BE_GENERATED", {

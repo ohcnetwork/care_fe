@@ -180,6 +180,57 @@ const defaultTemplate: ReportTemplateFormData = {
   },
 };
 
+interface ErrorEntry {
+  path: string;
+  section: string;
+  message: string;
+}
+
+function collectErrors(
+  errors: any,
+  parentPath: string[] = [],
+  section: string | null = null,
+): ErrorEntry[] {
+  if (!errors) return [];
+
+  // If this is a leaf error node with a message
+  if (typeof errors.message === "string") {
+    // Find the top-level section (layout, header, sections)
+    const topSection =
+      section ||
+      parentPath.find((p) => ["layout", "header", "sections"].includes(p)) ||
+      "";
+    return [
+      {
+        path: parentPath.join("."),
+        section: topSection,
+        message: errors.message,
+      },
+    ];
+  }
+
+  // If this is an array, recurse into each element
+  if (Array.isArray(errors)) {
+    return errors.flatMap((err, idx) =>
+      collectErrors(err, [...parentPath, `[${idx}]`], section),
+    );
+  }
+
+  // If this is an object, recurse into each property
+  if (typeof errors === "object") {
+    return Object.entries(errors).flatMap(([key, value]) =>
+      collectErrors(
+        value,
+        [...parentPath, key],
+        section ||
+          (["layout", "header", "sections"].includes(key) ? key : null),
+      ),
+    );
+  }
+
+  return [];
+}
+
 export default function ReportBuilder({
   facilityId,
   reportTemplateId,
@@ -194,19 +245,17 @@ export default function ReportBuilder({
     queryKey: ["report-template", reportTemplateId],
     queryFn: query(reportTemplateApi.get, {
       pathParams: {
-        facility_external_id: facilityId,
         id: reportTemplateId,
+      },
+      queryParams: {
+        facility: facilityId,
       },
     }),
     enabled: !!reportTemplateId,
   });
 
   const { mutate: createReportTemplate } = useMutation({
-    mutationFn: mutate(reportTemplateApi.create, {
-      pathParams: {
-        facility_external_id: facilityId,
-      },
-    }),
+    mutationFn: mutate(reportTemplateApi.create),
     onSuccess: () => {
       toast.success(t("REPORT_BUILDER_TEMPLATE_SAVED"));
       navigate(
@@ -218,7 +267,6 @@ export default function ReportBuilder({
   const { mutate: updateReportTemplate } = useMutation({
     mutationFn: mutate(reportTemplateApi.update, {
       pathParams: {
-        facility_external_id: facilityId,
         id: reportTemplateId,
       },
     }),
@@ -237,17 +285,32 @@ export default function ReportBuilder({
 
   useEffect(() => {
     if (templateSchema) {
-      form.reset(templateSchema);
+      form.reset({
+        ...templateSchema,
+        config: {
+          ...templateSchema.config,
+          header: {
+            ...templateSchema.config.header,
+            rows: templateSchema.config.header.rows.map((row) => ({
+              ...row,
+              size_ratio: row.size_ratio ?? Array(row.columns.length).fill(1),
+              columns: row.columns.map((column) => ({
+                ...column,
+                ...(column.type === "rule" && {
+                  length: column.length.split("%")[0],
+                }),
+              })),
+            })),
+          },
+        },
+      });
     }
   }, [templateSchema, form]);
 
   const onSubmit = useCallback(
     async (data: ReportTemplateFormData) => {
       const isValid = await form.trigger();
-      const currentErrors = form.formState.errors;
       if (!isValid) {
-        const firstError = Object.values(currentErrors)[0];
-        console.log(firstError);
         return;
       }
 
@@ -263,19 +326,29 @@ export default function ReportBuilder({
                 row.size_ratio && row.size_ratio.length > 0
                   ? row.size_ratio.map((ratio) => ratio ?? 1)
                   : Array(row.columns.length).fill(1),
+              columns: row.columns.map((column) => ({
+                ...column,
+                ...(column.type === "rule" && {
+                  length: column.length + "%",
+                }),
+              })),
             })),
           },
         },
       };
       if (reportTemplateId) {
-        updateReportTemplate(data);
+        updateReportTemplate({ config: data.config });
       } else {
-        console.log(data);
-        createReportTemplate(data);
+        createReportTemplate({
+          ...data,
+          facility: facilityId,
+        });
       }
     },
     [reportTemplateId, updateReportTemplate, createReportTemplate, form],
   );
+
+  console.log(form.formState.errors);
 
   const handleExport = useCallback(() => {
     console.log("");
@@ -285,10 +358,18 @@ export default function ReportBuilder({
     return <Loading />;
   }
 
+  const errorEntries = collectErrors(form.formState.errors);
+  const hasHeaderErrors = errorEntries.some((e) => e.section === "header");
+  const hasLayoutErrors = errorEntries.some((e) => e.section === "layout");
+  const hasSectionsErrors = errorEntries.some((e) => e.section === "sections");
+
+  console.log(form.formState.errors);
+  console.log(form.getValues());
+
   return (
     <div className="max-w-9xl mx-auto">
       <Form {...form}>
-        <div className="grid grid-cols-2">
+        <div>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -296,12 +377,12 @@ export default function ReportBuilder({
             }}
             className="space-y-6"
           >
-            <div className="flex justify-end space-x-2">
+            <div className="flex flex-col sm:flex-row gap-2 justify-end items-center">
               <FormField
                 control={form.control}
                 name="type"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormControl>
                       <Select
                         value={field.value}
@@ -332,7 +413,7 @@ export default function ReportBuilder({
                 control={form.control}
                 name="slug"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -340,46 +421,71 @@ export default function ReportBuilder({
                   </FormItem>
                 )}
               />
-              <Button type="button" variant="outline" onClick={handleExport}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleExport}
+                className="w-full sm:w-auto"
+              >
                 {t("export")}
               </Button>
-              <Button type="submit">{t("REPORT_BUILDER_SAVE_TEMPLATE")}</Button>
+              <Button type="submit" className="w-full sm:w-auto">
+                {t("REPORT_BUILDER_SAVE_TEMPLATE")}
+              </Button>
             </div>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("REPORT_BUILDER_TITLE")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs
-                  value={activeTab}
-                  onValueChange={setActiveTab}
-                  className="w-full"
-                >
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="layout">
-                      {t("REPORT_BUILDER_LAYOUT")}
-                    </TabsTrigger>
-                    <TabsTrigger value="header">
-                      {t("REPORT_BUILDER_HEADER")}
-                    </TabsTrigger>
-                    <TabsTrigger value="sections">
-                      {t("REPORT_BUILDER_SECTIONS")}
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="layout">
-                    <LayoutBuilder form={form} />
-                  </TabsContent>
-                  <TabsContent value="header">
-                    <HeaderBuilder form={form} />
-                  </TabsContent>
-                  <TabsContent value="sections">
-                    <SectionBuilder form={form} facilityId={facilityId} />
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("REPORT_BUILDER_TITLE")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Tabs
+                    value={activeTab}
+                    onValueChange={setActiveTab}
+                    className="w-full"
+                  >
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="layout">
+                        {t("REPORT_BUILDER_LAYOUT")}
+                      </TabsTrigger>
+                      <TabsTrigger value="header">
+                        {t("REPORT_BUILDER_HEADER")}
+                      </TabsTrigger>
+                      <TabsTrigger value="sections">
+                        {t("REPORT_BUILDER_SECTIONS")}
+                      </TabsTrigger>
+                    </TabsList>
+                    {hasLayoutErrors && (
+                      <span className="text-red-500 bg-red-100 p-2 rounded-md text-sm">
+                        {t("REPORT_BUILDER_LAYOUT_ERROR")}
+                      </span>
+                    )}
+                    {hasHeaderErrors && (
+                      <span className="text-red-500 bg-red-100 p-2 rounded-md text-sm">
+                        {t("REPORT_BUILDER_HEADER_ERROR")}
+                      </span>
+                    )}
+                    {hasSectionsErrors && (
+                      <span className="text-red-500 bg-red-100 p-2 rounded-md text-sm">
+                        {t("REPORT_BUILDER_SECTIONS_ERROR")}
+                      </span>
+                    )}
+                    <TabsContent value="layout">
+                      <LayoutBuilder form={form} />
+                    </TabsContent>
+                    <TabsContent value="header">
+                      <HeaderBuilder form={form} />
+                    </TabsContent>
+                    <TabsContent value="sections">
+                      <SectionBuilder form={form} facilityId={facilityId} />
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+              <ReportBuilderPreview form={form} />
+            </div>
           </form>
-          <ReportBuilderPreview form={form} />
         </div>
       </Form>
     </div>
