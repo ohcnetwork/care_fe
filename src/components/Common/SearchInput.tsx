@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -146,13 +140,9 @@ export default function SearchInput({
   autoFocus = false,
   ...props
 }: SearchInputProps) {
-  const initialOptionIndex = useMemo(
-    () =>
-      Math.max(
-        options.findIndex((option) => option.value !== ""),
-        0,
-      ),
-    [options],
+  const initialOptionIndex = Math.max(
+    options.findIndex((option) => option.value !== ""),
+    0,
   );
   const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] =
@@ -179,9 +169,8 @@ export default function SearchInput({
     [onSearch],
   );
 
-  const unselectedOptions = useMemo(
-    () => options.filter((option) => option.key !== selectedOption.key),
-    [options, selectedOption],
+  const unselectedOptions = options.filter(
+    (option) => option.key !== selectedOption.key,
   );
 
   useEffect(() => {
@@ -236,21 +225,18 @@ export default function SearchInput({
     }
   }, [searchValue]);
 
-  const renderInput = useMemo(
-    () => (
-      <SearchInputFieldRenderer
-        selectedOption={selectedOption}
-        searchValue={searchValue}
-        setSearchValue={setSearchValue}
-        inputRef={inputRef}
-        inputClassName={inputClassName}
-        autoFocus={autoFocus}
-        isSingleOption={isSingleOption}
-        open={open}
-        {...props}
-      />
-    ),
-    [selectedOption, searchValue, inputClassName, open],
+  const renderInput = (
+    <SearchInputFieldRenderer
+      selectedOption={selectedOption}
+      searchValue={searchValue}
+      setSearchValue={setSearchValue}
+      inputRef={inputRef}
+      inputClassName={inputClassName}
+      autoFocus={autoFocus}
+      isSingleOption={isSingleOption}
+      open={open}
+      {...props}
+    />
   );
 
   useEffect(() => {

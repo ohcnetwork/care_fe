@@ -140,7 +140,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       <TabsTrigger
                         value="outgoing"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() => updateQuery({ incoming: false, title })}
+                        onClick={() => updateQuery({ incoming: false })}
                         data-cy="tab-outgoing"
                       >
                         {t("outgoing")}
@@ -148,7 +148,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       <TabsTrigger
                         value="incoming"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() => updateQuery({ incoming: true, title })}
+                        onClick={() => updateQuery({ incoming: true })}
                         data-cy="tab-incoming"
                       >
                         {t("incoming")}
@@ -163,24 +163,14 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <TabsTrigger
                       value="active"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          status: "pending",
-                          title,
-                        })
-                      }
+                      onClick={() => updateQuery({ status: "pending" })}
                     >
                       {t("active")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="completed"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          status: "completed",
-                          title,
-                        })
-                      }
+                      onClick={() => updateQuery({ status: "completed" })}
                     >
                       {t("completed")}
                     </TabsTrigger>
@@ -195,12 +185,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               <div className="block sm:hidden w-full">
                 <Select
                   value={currentStatus}
-                  onValueChange={(value) =>
-                    updateQuery({
-                      status: value,
-                      title,
-                    })
-                  }
+                  onValueChange={(value) => updateQuery({ status: value })}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder={t("select_status")} />
@@ -224,12 +209,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       value={statusOption}
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                       data-cy={`tab-${statusOption}`}
-                      onClick={() =>
-                        updateQuery({
-                          status: statusOption,
-                          title,
-                        })
-                      }
+                      onClick={() => updateQuery({ status: statusOption })}
                     >
                       <CareIcon
                         icon={
