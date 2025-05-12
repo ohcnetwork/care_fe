@@ -31,7 +31,6 @@ import {
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
-import PaginationComponent from "@/components/Common/Pagination";
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
@@ -39,7 +38,7 @@ import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
-import { FilterState } from "@/hooks/useFilters";
+import useFilters from "@/hooks/useFilters";
 
 import {
   BACKEND_ALLOWED_EXTENSIONS,
@@ -55,16 +54,12 @@ import { formatName } from "@/Utils/utils";
 interface DischargeTabProps {
   type: "encounter" | "patient";
   encounterId: string;
-  qParams: any;
-  updateQuery: (params: FilterState) => void;
   canEdit: boolean | undefined;
 }
 
 export const DischargeTab = ({
   type,
   encounterId,
-  qParams,
-  updateQuery,
   canEdit,
 }: DischargeTabProps) => {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
@@ -75,6 +70,9 @@ export const DischargeTab = ({
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const queryClient = useQueryClient();
+  const { qParams, updateQuery, Pagination } = useFilters({
+    limit: 15,
+  });
 
   const { mutate: generateDischargeSummary, isPending: isGenerating } =
     useMutation<{ detail: string }, HTTPError>({
@@ -587,7 +585,7 @@ export const DischargeTab = ({
         type={type}
       />
       <div className="flex flex-wrap items-center gap-2 -mt-2">
-        <div className="relative flex-1 min-w-72 max-w-96">
+        <div className="relative flex-1 min-w-72 max-w-96 ml-2">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
             id="search-by-filename"
@@ -604,7 +602,7 @@ export const DischargeTab = ({
           <FilterButton />
           <Button
             variant="outline_primary"
-            className="min-w-[100px] sm:min-w-[120px]"
+            className="min-w-24 sm:min-w-28"
             onClick={async () => {
               await queryClient.invalidateQueries({
                 queryKey: ["discharge_files"],
@@ -618,7 +616,7 @@ export const DischargeTab = ({
 
           <Button
             variant="primary"
-            className="min-w-[100px] sm:min-w-[120px]"
+            className="min-w-24 sm:min-w-28"
             onClick={() => generateDischargeSummary()}
             disabled={isGenerating}
           >
@@ -639,12 +637,7 @@ export const DischargeTab = ({
         {filesLoading ? (
           <Loading />
         ) : (
-          <PaginationComponent
-            cPage={qParams.page ?? 1}
-            defaultPerPage={qParams.limit}
-            data={{ totalCount: files?.count ?? 0 }}
-            onChange={(page) => updateQuery({ page })}
-          />
+          <Pagination totalCount={files?.count || 0} />
         )}
       </div>
     </div>

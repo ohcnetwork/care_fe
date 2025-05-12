@@ -1,12 +1,11 @@
 import { t } from "i18next";
+import { useQueryParams } from "raviger";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { DischargeTab } from "@/components/Files/DischargeSummarySubTab";
 import { DrawingPage } from "@/components/Files/DrawingSubTab";
 import { FilesPage } from "@/components/Files/FileSubTab";
-
-import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -20,11 +19,16 @@ interface FilesTabsProps {
   patient?: Patient;
 }
 
+type QueryParams = {
+  file: "all" | "discharge_summary" | "drawings";
+};
+
+const allowedTabs = ["all", "discharge_summary", "drawings"] as const;
+type TabType = (typeof allowedTabs)[number];
+
 export const FilesTab = (props: FilesTabsProps) => {
   const { patient, type, encounter } = props;
-  const { qParams, updateQuery } = useFilters({
-    limit: 14,
-  });
+  const [qParams, setQParams] = useQueryParams<QueryParams>();
 
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
@@ -35,6 +39,10 @@ export const FilesTab = (props: FilesTabsProps) => {
     hasPermission,
     encounter?.permissions ?? [],
   );
+
+  const tabValue: TabType = allowedTabs.includes(qParams.file)
+    ? qParams.file
+    : "all";
 
   const canWriteCurrentEncounter =
     canWriteEncounter &&
@@ -53,15 +61,10 @@ export const FilesTab = (props: FilesTabsProps) => {
   return (
     <div className="space-y-4">
       <Tabs
-        value={qParams.file || "all"}
-        onValueChange={(value) =>
-          updateQuery({
-            file: value,
-            is_archived: undefined,
-            page: undefined,
-            name: undefined,
-          })
-        }
+        value={tabValue}
+        onValueChange={(value) => {
+          setQParams({ file: value as TabType });
+        }}
       >
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
           <TabsTrigger
@@ -91,8 +94,6 @@ export const FilesTab = (props: FilesTabsProps) => {
             type={type}
             encounter={encounter}
             patient={patient}
-            qParams={qParams}
-            updateQuery={updateQuery}
             associatingId={associatingId}
             canEdit={canEdit}
           />
@@ -103,8 +104,6 @@ export const FilesTab = (props: FilesTabsProps) => {
             <DischargeTab
               type={type}
               encounterId={encounter?.id || ""}
-              qParams={qParams}
-              updateQuery={updateQuery}
               canEdit={canEdit}
             />
           </TabsContent>
@@ -117,8 +116,6 @@ export const FilesTab = (props: FilesTabsProps) => {
               {...(props.type === "patient"
                 ? { patientId: props.patient?.id }
                 : { encounter: props.encounter })}
-              qParams={qParams}
-              updateQuery={updateQuery}
             />
           </div>
         </TabsContent>

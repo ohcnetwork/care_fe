@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 
 import Loading from "@/components/Common/Loading";
 
-import useFilters, { FilterState } from "@/hooks/useFilters";
+import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -31,8 +31,6 @@ export interface DrawingsTabProps {
   patient?: Patient;
   encounter?: Encounter;
   patientId?: string;
-  qParams: any;
-  updateQuery: (params: FilterState) => void;
 }
 
 interface ExcalidrawPreviewProps {
@@ -130,8 +128,6 @@ ExcalidrawPreview.displayName = "ExcalidrawPreview";
 
 export const DrawingPage = ({
   type,
-  qParams,
-  updateQuery,
   patientId,
   patient,
   encounter,
@@ -140,7 +136,7 @@ export const DrawingPage = ({
   const { hasPermission } = usePermissions();
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
-  const { Pagination, resultsPerPage } = useFilters({
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["name"],
   });
@@ -194,11 +190,10 @@ export const DrawingPage = ({
   return (
     <div className="p-4 -ml-4 -mt-2">
       <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
-        <div className="relative flex-1 min-w-72 max-w-96">
+        <div className="relative flex-1 min-w-72 max-w-96 ml-2">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
             id="search-by-name"
-            name="name"
             placeholder={t("search_drawings")}
             value={qParams.name || ""}
             onChange={(e) => updateQuery({ name: e.target.value })}
@@ -225,7 +220,7 @@ export const DrawingPage = ({
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 ml-1">
               {data?.results.map((drawing) => (
                 <Card
                   key={drawing.id}
