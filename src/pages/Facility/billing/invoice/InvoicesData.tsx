@@ -72,7 +72,7 @@ export default function InvoicesData({
           limit: resultsPerPage,
           offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
           search: qParams.search,
-          status: qParams.status ?? InvoiceStatus.issued,
+          status: qParams.status,
         },
       },
     ),
@@ -90,11 +90,14 @@ export default function InvoicesData({
           className="max-w-xs"
         />
         <Tabs
-          defaultValue={qParams.status ?? InvoiceStatus.issued}
-          onValueChange={(value) => updateQuery({ status: value })}
+          defaultValue={qParams.status ?? "all"}
+          onValueChange={(value) =>
+            updateQuery({ status: value === "all" ? undefined : value })
+          }
           className="mx-4 mb-4"
         >
           <TabsList>
+            <TabsTrigger value="all">{t("all")}</TabsTrigger>
             {Object.values(InvoiceStatus).map((status) => (
               <TabsTrigger key={status} value={status}>
                 {t(statusMap[status].label)}

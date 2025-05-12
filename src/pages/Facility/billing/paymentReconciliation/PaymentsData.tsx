@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Link } from "raviger";
-import React from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -100,9 +99,8 @@ export default function PaymentsData({
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         search: qParams.search,
-        status: qParams.status ?? PaymentReconciliationStatus.active,
-        reconciliation_type:
-          qParams.reconciliation_type ?? PaymentReconciliationType.payment,
+        status: qParams.status,
+        reconciliation_type: qParams.reconciliation_type,
       },
     }),
   });
@@ -119,10 +117,13 @@ export default function PaymentsData({
       />
       <div className="flex flex-row justify-between items-center gap-2 my-4">
         <Tabs
-          defaultValue={qParams.status ?? PaymentReconciliationStatus.active}
-          onValueChange={(value) => updateQuery({ status: value })}
+          defaultValue={qParams.status ?? "all"}
+          onValueChange={(value) =>
+            updateQuery({ status: value === "all" ? undefined : value })
+          }
         >
           <TabsList>
+            <TabsTrigger value="all">{t("all")}</TabsTrigger>
             {Object.values(PaymentReconciliationStatus).map((status) => (
               <TabsTrigger key={status} value={status}>
                 {t(statusMap[status].label)}
@@ -131,12 +132,15 @@ export default function PaymentsData({
           </TabsList>
         </Tabs>
         <Tabs
-          defaultValue={
-            qParams.reconciliation_type ?? PaymentReconciliationType.payment
+          defaultValue={qParams.reconciliation_type ?? "all"}
+          onValueChange={(value) =>
+            updateQuery({
+              reconciliation_type: value === "all" ? undefined : value,
+            })
           }
-          onValueChange={(value) => updateQuery({ reconciliation_type: value })}
         >
           <TabsList>
+            <TabsTrigger value="all">{t("all")}</TabsTrigger>
             {Object.values(PaymentReconciliationType).map((type) => (
               <TabsTrigger key={type} value={type}>
                 {t(typeMap[type])}
