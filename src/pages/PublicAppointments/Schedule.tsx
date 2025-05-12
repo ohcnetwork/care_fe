@@ -334,11 +334,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   if (appointmentId && appointment) {
                     handleRescheduleAppointment(appointment);
                   } else {
-                    localStorage.setItem(
-                      "selectedSlot",
-                      JSON.stringify(selectedSlot),
-                    );
-                    localStorage.setItem("reason", reason);
                     navigate(
                       `/facility/${facilityId}/appointments/${staffId}/patient-select`,
                     );
