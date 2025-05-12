@@ -363,6 +363,7 @@ export default function UserForm({
                   value={field.value || ""}
                   onChange={field.onChange}
                   noOptionsMessage=""
+                  className="min-w-0"
                   placeholder={t("select_or_type")}
                   inputPlaceholder={t("select_or_type")}
                 />

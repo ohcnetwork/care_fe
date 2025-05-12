@@ -212,7 +212,7 @@ export default function Autocomplete({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("min-w-0 justify-between", className)}
+          className={cn("w-full justify-between", className)}
           disabled={disabled}
           data-cy={dataCy}
           onClick={() => setOpen(!open)}
