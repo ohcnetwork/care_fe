@@ -278,37 +278,43 @@ function ValidationErrorDisplay({
 }
 
 const STRUCTURED_TYPE_VALIDATORS = {
-  appointment: (
-    response: ResponseValue | undefined,
-    questionId: string,
-    required?: boolean,
-  ) => {
+  appointment: (args: {
+    response: ResponseValue | undefined;
+    questionId: string;
+    required?: boolean;
+  }) => {
     const appointmentData =
-      (response?.value as CreateAppointmentQuestion[]) || [];
+      (args.response?.value as CreateAppointmentQuestion[]) || [];
     return validateAppointmentQuestion(
       appointmentData[0],
-      questionId,
-      required ?? false,
+      args.questionId,
+      args.required ?? false,
     );
   },
-  medication_statement: (
-    response: ResponseValue | undefined,
-    questionId: string,
-  ) => {
+  medication_statement: (args: {
+    response: ResponseValue | undefined;
+    questionId: string;
+    required?: boolean;
+  }) => {
     const medicationData =
-      (response?.value as MedicationStatementRequest[]) || [];
-    return validateMedicationStatementQuestion(medicationData, questionId);
+      (args.response?.value as MedicationStatementRequest[]) || [];
+    return validateMedicationStatementQuestion(medicationData, args.questionId);
   },
-  medication_request: (
-    response: ResponseValue | undefined,
-    questionId: string,
-  ) => {
-    const medicationData = (response?.value as MedicationRequest[]) || [];
-    return validateMedicationRequestQuestion(medicationData, questionId);
+  medication_request: (args: {
+    response: ResponseValue | undefined;
+    questionId: string;
+    required?: boolean;
+  }) => {
+    const medicationData = (args.response?.value as MedicationRequest[]) || [];
+    return validateMedicationRequestQuestion(medicationData, args.questionId);
   },
-  files: (response: ResponseValue | undefined, quesitonId: string) => {
-    const files = (response?.value as FileUploadQuestion[]) || [];
-    return validateFileUploadQuestion(files, quesitonId);
+  files: (args: {
+    response: ResponseValue | undefined;
+    questionId: string;
+    required?: boolean;
+  }) => {
+    const files = (args.response?.value as FileUploadQuestion[]) || [];
+    return validateFileUploadQuestion(files, args.questionId);
   },
 } as const;
 
@@ -593,15 +599,12 @@ export function QuestionnaireForm({
 
           if (validator) {
             let validationErrors: QuestionValidationError[] = [];
-            if (q.structured_type === "appointment") {
-              validationErrors = validator(
-                response?.values?.[0],
-                q.id,
-                q.required ?? false,
-              );
-            } else {
-              validationErrors = validator(response?.values?.[0], q.id);
-            }
+            let args = {
+              response: response?.values?.[0],
+              questionId: q.id,
+              required: q.required,
+            };
+            validationErrors = validator(args);
             errors.push(...validationErrors);
             if (validationErrors.length > 0) {
               firstErrorId = firstErrorId ? firstErrorId : q.id;
