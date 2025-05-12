@@ -36,7 +36,7 @@ export class CommunityQuestionnaireForm {
       text: '[data-cy="text-input-question-input"]',
       number: '[data-cy="number-question-input"]',
       choice: '[data-cy="choice-question-input"]',
-      choiceItem: '[data-cy="choice-question-item"]',
+      radioItem: '[data-cy="radio-group-question-item"]',
     },
 
     // Symptom Selectors
@@ -118,6 +118,14 @@ export class CommunityQuestionnaireForm {
             `${baseSelector} ${this.selectors.input.choice}`,
             value,
           );
+          break;
+        case "radio":
+          cy.get(`${baseSelector}`)
+            .find('[data-cy="radio-group-question-item"]')
+            .parent()
+            .contains(value)
+            .closest("label")
+            .click();
           break;
 
         default:

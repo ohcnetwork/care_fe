@@ -492,7 +492,6 @@ function ResponseCard({
     </Card>
   ) : (
     <EncounterAccordionLayout
-      data-cy={`questionnaire-response-card-${item.id}`}
       title={isStructured && structuredType ? structuredType : title}
       actionButton={<PrintButton item={item} />}
     >
@@ -553,7 +552,11 @@ export default function QuestionnaireResponsesList({
               <ul className="grid gap-4">
                 {questionnarieResponses?.results?.map(
                   (item: QuestionnaireResponse) => (
-                    <li key={item.id} className="w-full">
+                    <li
+                      key={item.id}
+                      data-cy={`questionnaire-response-card-${item.id}`}
+                      className="w-full"
+                    >
                       <ResponseCard
                         key={item.id}
                         item={item}

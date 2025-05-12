@@ -8,7 +8,8 @@ import { getRandomMedicineName } from "@/utils/commonUtils";
 import { viewPort } from "@/utils/viewPort";
 
 const QUESTIONNAIRE_NAME = "Community Nurse Homecare Form";
-const PRACTITIONER = "caresuperadmin";
+const PRACTITIONER = "Mr. Bodhish Thomas Sr.";
+
 const MEDICINE_NAME = getRandomMedicineName();
 
 const ENCOUNTER_TYPE = "Observation";
@@ -18,38 +19,38 @@ const ORGANIZATION_NAME = "Administration";
 
 const testData = {
   mandatoryFields: [
-    { linkId: "7.1", value: "Anal Canal", inputType: "choice" },
-    { linkId: "7.2", value: "Diarrhea", inputType: "choice" },
+    { linkId: "7.1", value: "Anal Canal", inputType: "radio" },
+    { linkId: "7.2", value: "Diarrhea", inputType: "radio" },
     {
       linkId: "15.1",
       value: "Provide care to the patient",
       inputType: "textarea",
     },
     { linkId: "15.2", value: "Weekly", inputType: "choice" },
-    { linkId: "21.1", value: "No", inputType: "choice" },
+    { linkId: "21.1", value: "No", inputType: "radio" },
   ],
   allFields: [
     { linkId: "1", value: "Home Care Team Alpha", inputType: "textarea" },
     { linkId: "3", value: "Independently active", inputType: "choice" },
-    { linkId: "6", value: "Satisfactory", inputType: "choice" },
-    { linkId: "7.1", value: "Anal Canal", inputType: "choice" },
-    { linkId: "7.2", value: "No Difficulty", inputType: "choice" },
-    { linkId: "8.1", value: "No Issues", inputType: "choice" },
+    { linkId: "6", value: "Satisfactory", inputType: "radio" },
+    { linkId: "7.1", value: "Anal Canal", inputType: "radio" },
+    { linkId: "7.2", value: "No Difficulty", inputType: "radio" },
+    { linkId: "8.1", value: "No Issues", inputType: "radio" },
     { linkId: "8.2", value: "Normal", inputType: "choice" },
     { linkId: "8.2.1", value: "No Issues", inputType: "choice" },
     { linkId: "4.1", value: "Oral", inputType: "choice" },
-    { linkId: "4.3", value: "Satisfactory", inputType: "choice" },
+    { linkId: "4.3", value: "Satisfactory", inputType: "radio" },
     { linkId: "11.1.1", value: "120", inputType: "number" },
     { linkId: "11.1.2", value: "80", inputType: "number" },
     { linkId: "11.2", value: "72", inputType: "number" },
     { linkId: "11.3", value: "98", inputType: "number" },
     { linkId: "11.4", value: "100", inputType: "number" },
-    { linkId: "11.5", value: "No Pain", inputType: "choice" },
+    { linkId: "11.5", value: "No Pain", inputType: "radio" },
     { linkId: "16", value: "Oral Care", inputType: "choice" },
     { linkId: "17", value: "Hospital Bed", inputType: "choice" },
     { linkId: "15.1", value: "Comprehensive care plan", inputType: "textarea" },
     { linkId: "15.2", value: "Weekly", inputType: "choice" },
-    { linkId: "21.1", value: "No", inputType: "choice" },
+    { linkId: "21.1", value: "No", inputType: "radio" },
   ],
   symptom: {
     symptom: "Chronic",
@@ -88,7 +89,7 @@ const patientPrescription = new PatientPrescription();
 describe("Community Nurse Homecare Form Tests", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("devnurse6");
+    cy.loginByApi("doctor");
     cy.visit("/");
 
     facilityCreation.selectFirstRandomFacility();
@@ -109,6 +110,11 @@ describe("Community Nurse Homecare Form Tests", () => {
   });
 
   it("should successfully submit the form with all fields filled", () => {
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails();
+
     patientEncounter.addQuestionnaire(QUESTIONNAIRE_NAME);
 
     communityForm.fillQuestionnaireFields(testData.allFields);

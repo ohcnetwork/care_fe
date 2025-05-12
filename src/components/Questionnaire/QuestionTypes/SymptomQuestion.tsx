@@ -124,7 +124,7 @@ function StatusSelect({
   const { t } = useTranslation();
   return (
     <Select value={status} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className="h-8 md:h-9">
+      <SelectTrigger data-cy="symptom-status" className="h-8 md:h-9">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -150,7 +150,7 @@ function SeveritySelect({
   const { t } = useTranslation();
   return (
     <Select value={severity} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className="h-8 md:h-9">
+      <SelectTrigger data-cy="symptom-severity" className="h-8 md:h-9">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -202,6 +202,7 @@ function NotesInput({
   const { t } = useTranslation();
   return (
     <Input
+      data-cy="symptom-notes"
       type="text"
       placeholder={t("additional_notes")}
       value={note || ""}
@@ -942,12 +943,14 @@ export function SymptomQuestion({
           </div>
         </EntitySelectionSheet>
       ) : (
-        <ValueSetSelect
-          system="system-condition-code"
-          placeholder={addSymptomPlaceholder}
-          onSelect={handleCodeSelect}
-          disabled={disabled}
-        />
+        <div className="max-w-4xl" data-cy="add-symptom">
+          <ValueSetSelect
+            system="system-condition-code"
+            placeholder={addSymptomPlaceholder}
+            onSelect={handleCodeSelect}
+            disabled={disabled}
+          />
+        </div>
       )}
     </div>
   );
