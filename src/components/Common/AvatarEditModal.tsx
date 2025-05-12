@@ -18,6 +18,8 @@ import "react-image-crop/dist/ReactCrop.css";
 import Webcam from "react-webcam";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -92,21 +94,19 @@ function getResizedCanvas(
   maxWidth: number,
   maxHeight: number,
 ) {
-  const MAX_WIDTH = maxWidth;
-  const MAX_HEIGHT = maxHeight;
   let width = canvas.width;
   let height = canvas.height;
 
   // Only resize if the image is larger than the maximum dimensions
   if (width > height) {
-    if (width > MAX_WIDTH) {
-      height = Math.round((height * MAX_WIDTH) / width);
-      width = MAX_WIDTH;
+    if (width > maxWidth) {
+      height = Math.round((height * maxWidth) / width);
+      width = maxWidth;
     }
   } else {
-    if (height > MAX_HEIGHT) {
-      width = Math.round((width * MAX_HEIGHT) / height);
-      height = MAX_HEIGHT;
+    if (height > maxHeight) {
+      width = Math.round((width * maxHeight) / height);
+      height = maxHeight;
     }
   }
 
@@ -158,10 +158,7 @@ const AvatarEditModal = ({
   const [isCropping, setIsCropping] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [_imageDimensions, setImageDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
+
   const [imageError, setImageError] = useState<string | null>(null);
 
   const handleSwitchCamera = useCallback(() => {
@@ -283,7 +280,6 @@ const AvatarEditModal = ({
   // Handle image load to set initial crop
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    setImageDimensions({ width, height });
 
     // Initialize with a centered 1:1 crop
     setCrop(centerAspectCrop(width, height, 1));
@@ -538,35 +534,42 @@ const AvatarEditModal = ({
                     onDragOver={onDragOver}
                     onDragLeave={onDragLeave}
                     onDrop={onDrop}
-                    className={`mt-8 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6 ${
+                    className={cn(
+                      "mt-8 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6",
                       isDragging
                         ? "border-primary-800 bg-primary-100"
                         : dragProps.dragOver
                           ? "border-primary-500"
-                          : "border-secondary-500"
-                    } ${dragProps.fileDropError !== "" ? "border-red-500" : ""}`}
+                          : "border-secondary-500",
+                      dragProps.fileDropError !== "" && "border-red-500",
+                    )}
                   >
                     <svg
                       stroke="currentColor"
                       fill="none"
                       viewBox="0 0 48 48"
                       aria-hidden="true"
-                      className={`size-12 stroke-[2px] ${
+                      className={cn(
+                        "size-12 stroke-[2px]",
                         isDragging
                           ? "text-green-500"
                           : dragProps.dragOver
                             ? "text-primary-500"
-                            : "text-secondary-600"
-                      } ${dragProps.fileDropError !== "" ? "text-red-500" : "text-secondary-600"}`}
+                            : "text-secondary-600",
+                        dragProps.fileDropError !== "" && "text-red-500",
+                      )}
                     >
                       <path d="M28 8H12a4 4 0 0 0-4 4v20m32-12v8m0 0v8a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-4m32-4-3.172-3.172a4 4 0 0 0-5.656 0L28 28M8 32l9.172-9.172a4 4 0 0 1 5.656 0L28 28m0 0 4 4m4-24h8m-4-4v8m-12 4h.02" />
                     </svg>
                     <p
-                      className={`text-sm ${dragProps.dragOver ? "text-primary-500" : "text-secondary-700"} ${
-                        dragProps.fileDropError !== ""
+                      className={cn(
+                        "text-sm text-center",
+                        dragProps.fileDropError
                           ? "text-red-500"
-                          : "text-secondary-700"
-                      } text-center`}
+                          : dragProps.dragOver
+                            ? "text-primary-500"
+                            : "text-secondary-700",
+                      )}
                     >
                       {dragProps.fileDropError !== ""
                         ? dragProps.fileDropError
