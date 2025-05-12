@@ -112,6 +112,13 @@ export default function ValueSetSelect({
   const [isClearingFavourites, setIsClearingFavourites] = useState(false);
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
+  const showAsSheetSystems = [
+    "system-additional-instruction",
+    "system-route",
+    "system-body-site",
+    "system-administration-method",
+    "system-as-needed-reason",
+  ];
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
@@ -382,15 +389,7 @@ export default function ValueSetSelect({
     </AlertDialog>
   );
 
-  if (
-    isMobile &&
-    !hideTrigger &&
-    (system === "system-additional-instruction" ||
-      system === "system-route" ||
-      system === "system-body-site" ||
-      system === "system-administration-method" ||
-      system === "system-as-needed-reason")
-  ) {
+  if (isMobile && !hideTrigger && showAsSheetSystems.includes(system)) {
     return (
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
