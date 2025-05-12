@@ -14,18 +14,16 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import {
-  getAvailabilityStatusColor,
-  getStatusColor,
+  DeviceAvailabilityStatusBadge,
+  DeviceStatusBadge,
 } from "@/pages/Facility/settings/devices/Utils";
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { DeviceList } from "@/types/device/device";
-import { Encounter } from "@/types/emr/encounter";
 
 interface Props {
   devices: DeviceList[];
-  encounter?: Encounter;
 }
-export default function DeviceCard({ devices, encounter }: Props) {
+export default function DeviceCard({ devices }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -57,18 +55,15 @@ export default function DeviceCard({ devices, encounter }: Props) {
 
           <CardContent className="flex flex-col flex-1 justify-between px-4 pb-4 pt-2 space-y-2">
             <div className="flex flex-wrap gap-2">
-              <Badge
-                variant="secondary"
-                className={`text-xs px-2 py-0.5 ${getStatusColor(device.status)}`}
-              >
-                {t(`device_status_${device.status}`)}
-              </Badge>
-              <Badge
-                variant="secondary"
-                className={`text-xs px-2 py-0.5 ${getAvailabilityStatusColor(device.availability_status)}`}
-              >
-                {t(`device_availability_status_${device.availability_status}`)}
-              </Badge>
+              <DeviceStatusBadge
+                status={device.status}
+                className="text-xs px-2 py-0.5"
+              />
+              <DeviceAvailabilityStatusBadge
+                status={device.availability_status}
+                className="text-xs px-2 py-0.5"
+              />
+
               {device.care_type && (
                 <Badge
                   variant="secondary"
@@ -85,11 +80,6 @@ export default function DeviceCard({ devices, encounter }: Props) {
               <Button variant="link" asChild className="p-0 text-sm text-black">
                 <Link
                   href={`/devices/${device.id}`}
-                  basePath={
-                    encounter
-                      ? `/facility/${encounter.facility.id}/settings`
-                      : ""
-                  }
                   className="flex items-center gap-1 hover:underline"
                 >
                   {t("view_details")} <ArrowRightIcon className="size-4" />

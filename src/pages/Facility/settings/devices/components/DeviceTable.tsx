@@ -14,19 +14,17 @@ import {
 } from "@/components/ui/table";
 
 import {
-  getAvailabilityStatusColor,
-  getStatusColor,
+  DeviceAvailabilityStatusBadge,
+  DeviceStatusBadge,
 } from "@/pages/Facility/settings/devices/Utils";
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { DeviceList } from "@/types/device/device";
-import { Encounter } from "@/types/emr/encounter";
 
 interface Props {
   devices: DeviceList[];
-  encounter?: Encounter;
 }
 
-export default function DeviceTable({ devices, encounter }: Props) {
+export default function DeviceTable({ devices }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -59,22 +57,10 @@ export default function DeviceTable({ devices, encounter }: Props) {
               </TableCell>
               <TableCell className="text-center">
                 <div className="flex flex-col gap-2 sm:flex-row justify-center">
-                  <Badge
-                    variant="secondary"
-                    className={getStatusColor(device.status)}
-                  >
-                    {t(`device_status_${device.status}`)}
-                  </Badge>
-                  <Badge
-                    variant="secondary"
-                    className={getAvailabilityStatusColor(
-                      device.availability_status,
-                    )}
-                  >
-                    {t(
-                      `device_availability_status_${device.availability_status}`,
-                    )}
-                  </Badge>
+                  <DeviceStatusBadge status={device.status} />
+                  <DeviceAvailabilityStatusBadge
+                    status={device.availability_status}
+                  />
                 </div>
               </TableCell>
               <TableCell className="text-center">
@@ -93,11 +79,6 @@ export default function DeviceTable({ devices, encounter }: Props) {
                 <Button variant="link" asChild className="p-0">
                   <Link
                     href={`/devices/${device.id}`}
-                    basePath={
-                      encounter
-                        ? `/facility/${encounter.facility.id}/settings`
-                        : ""
-                    }
                     className="text-sm font-semibold text-black hover:underline flex items-center gap-1 justify-center"
                   >
                     {t("view_details")} <ArrowRightIcon className="size-4" />
