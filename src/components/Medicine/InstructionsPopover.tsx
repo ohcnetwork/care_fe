@@ -102,19 +102,12 @@ function InstructionContentSection({
   );
 }
 
-export default function InstructionsPopover({
-  currentInstructions,
-  removeInstruction,
-  addInstruction,
-  isReadOnly = false,
-  disabled = false,
-}: InstructionsPopoverProps) {
+const TriggerButton = (
+  currentInstructions: Code[],
+  disabledButton: boolean,
+) => {
   const { t } = useTranslation();
-  const isMobile = useBreakpoints({ default: true, sm: false });
-  const disabledButton =
-    (isReadOnly || disabled) && currentInstructions.length <= 1;
-
-  const TriggerButton = (
+  return (
     <Button
       variant="outline"
       data-cy="instructions"
@@ -132,11 +125,45 @@ export default function InstructionsPopover({
       <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
     </Button>
   );
+};
+
+export default function InstructionsPopover({
+  currentInstructions,
+  removeInstruction,
+  addInstruction,
+  isReadOnly = false,
+  disabled = false,
+}: InstructionsPopoverProps) {
+  const { t } = useTranslation();
+  const isMobile = useBreakpoints({ default: true, sm: false });
+  const disabledButton =
+    (isReadOnly || disabled) && currentInstructions.length <= 1;
+
+  // const TriggerButton = (
+  //   <Button
+  //     variant="outline"
+  //     data-cy="instructions"
+  //     className="w-full justify-between"
+  //     disabled={disabledButton}
+  //   >
+  //     <span className="truncate block max-w-full">
+  //       {currentInstructions.length === 0
+  //         ? t("no_instructions_selected")
+  //         : currentInstructions
+  //             .map((i) => i.display)
+  //             .filter(Boolean)
+  //             .join(", ")}
+  //     </span>
+  //     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+  //   </Button>
+  // );
 
   if (isMobile) {
     return (
       <Sheet>
-        <SheetTrigger asChild>{TriggerButton}</SheetTrigger>
+        <SheetTrigger asChild>
+          {TriggerButton(currentInstructions, disabledButton)}
+        </SheetTrigger>
         <SheetContent side="bottom" className="p-4">
           <SheetHeader className="mb-2">
             {t("additional_instructions")}
@@ -155,7 +182,9 @@ export default function InstructionsPopover({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>{TriggerButton}</PopoverTrigger>
+      <PopoverTrigger asChild>
+        {TriggerButton(currentInstructions, disabledButton)}
+      </PopoverTrigger>
       <PopoverContent
         side="bottom"
         align="start"
