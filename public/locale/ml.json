@@ -229,6 +229,7 @@
   "SYSTEM__govt_org_type__default": "സംസ്ഥാനം",
   "SYSTEM__govt_org_type__district": "ജില്ല",
   "SYSTEM__govt_org_type__grama_panchayat": "ഗ്രാമപഞ്ചായത്ത്",
+  "SYSTEM__govt_org_type__local_body": "തദ്ദേശഭരണ സ്ഥാപനം",
   "SYSTEM__govt_org_type__other_local_body": "തദ്ദേശഭരണ സ്ഥാപനം",
   "SYSTEM__govt_org_type__municipality": "മുനിസിപ്പാലിറ്റി",
   "SYSTEM__govt_org_type__state": "സംസ്ഥാനം",
