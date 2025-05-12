@@ -1,5 +1,4 @@
 import { ChevronDown, X } from "lucide-react";
-import type * as React from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -31,38 +30,24 @@ interface InstructionsPopoverProps {
   disabled?: boolean;
 }
 
-export default function InstructionsPopover({
+interface InstructionContentSectionProps {
+  currentInstructions: Code[];
+  isReadOnly: boolean;
+  disabled: boolean;
+  removeInstruction: (code: string) => void;
+  addInstruction: (instruction: Code) => void;
+}
+
+function InstructionContentSection({
   currentInstructions,
+  isReadOnly,
+  disabled,
   removeInstruction,
   addInstruction,
-  isReadOnly = false,
-  disabled = false,
-}: InstructionsPopoverProps) {
+}: InstructionContentSectionProps) {
   const { t } = useTranslation();
-  const isMobile = useBreakpoints({ default: true, sm: false });
-  const disabledButton =
-    (isReadOnly || disabled) && currentInstructions.length <= 1;
 
-  const TriggerButton = (
-    <Button
-      variant="outline"
-      data-cy="instructions"
-      className="w-full justify-between"
-      disabled={disabledButton}
-    >
-      <span className="truncate block max-w-full">
-        {currentInstructions.length === 0
-          ? t("no_instructions_selected")
-          : currentInstructions
-              .map((i) => i.display)
-              .filter(Boolean)
-              .join(", ")}
-      </span>
-      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-    </Button>
-  );
-
-  const InstructionContent = (
+  return (
     <div className="space-y-4">
       {currentInstructions.length > 0 && (
         <ScrollArea className="max-h-60">
@@ -115,6 +100,38 @@ export default function InstructionsPopover({
       )}
     </div>
   );
+}
+
+export default function InstructionsPopover({
+  currentInstructions,
+  removeInstruction,
+  addInstruction,
+  isReadOnly = false,
+  disabled = false,
+}: InstructionsPopoverProps) {
+  const { t } = useTranslation();
+  const isMobile = useBreakpoints({ default: true, sm: false });
+  const disabledButton =
+    (isReadOnly || disabled) && currentInstructions.length <= 1;
+
+  const TriggerButton = (
+    <Button
+      variant="outline"
+      data-cy="instructions"
+      className="w-full justify-between"
+      disabled={disabledButton}
+    >
+      <span className="truncate block max-w-full">
+        {currentInstructions.length === 0
+          ? t("no_instructions_selected")
+          : currentInstructions
+              .map((i) => i.display)
+              .filter(Boolean)
+              .join(", ")}
+      </span>
+      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+    </Button>
+  );
 
   if (isMobile) {
     return (
@@ -124,7 +141,13 @@ export default function InstructionsPopover({
           <SheetHeader className="mb-2">
             {t("additional_instructions")}
           </SheetHeader>
-          {InstructionContent}
+          <InstructionContentSection
+            currentInstructions={currentInstructions}
+            isReadOnly={isReadOnly}
+            disabled={disabled}
+            removeInstruction={removeInstruction}
+            addInstruction={addInstruction}
+          />
         </SheetContent>
       </Sheet>
     );
@@ -134,10 +157,17 @@ export default function InstructionsPopover({
     <Popover>
       <PopoverTrigger asChild>{TriggerButton}</PopoverTrigger>
       <PopoverContent
-        className="w-[var(--radix-popover-trigger-width)] p-4"
+        side="bottom"
         align="start"
+        className="w-96 absolute mt-2"
       >
-        {InstructionContent}
+        <InstructionContentSection
+          currentInstructions={currentInstructions}
+          isReadOnly={isReadOnly}
+          disabled={disabled}
+          removeInstruction={removeInstruction}
+          addInstruction={addInstruction}
+        />
       </PopoverContent>
     </Popover>
   );
