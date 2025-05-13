@@ -15,7 +15,7 @@ describe("Patient Management", () => {
   });
 
   it("Assign users to a patient", () => {
-    const userName = "Volunteer User";
+    const userName = "Admin User";
     const userRole = "Nurse";
     facilityCreation.selectFirstRandomFacility();
     patientEncounter

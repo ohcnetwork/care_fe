@@ -11,8 +11,28 @@ const patientPrescription = new PatientPrescription();
 describe("Patient Encounter Questionnaire", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("devnurse");
+    cy.loginByApi("nurse");
     cy.visit("/");
+  });
+
+  it("Create a new ABG questionnaire and verify the values", () => {
+    const respiratorySupportValues = {
+      "etco2-(mmhg)": "120",
+    };
+    facilityCreation.selectFirstRandomFacility();
+
+    // Chain the methods instead of multiple separate calls
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails()
+      .clickUpdateEncounter()
+      .addQuestionnaire("Respiratory Support")
+      .fillQuestionnaire(respiratorySupportValues);
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifyOverviewValues(
+      Object.values(respiratorySupportValues),
+    );
   });
 
   it("verify the 500 character limit in input field", () => {
@@ -25,33 +45,14 @@ describe("Patient Encounter Questionnaire", () => {
       .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
       .clickUpdateEncounter()
-      .addQuestionnaire("Question Type")
+      .addQuestionnaire("Feedback Form")
       .fillQuestionnaire({
-        text: characterMaxLimit,
+        "any-suggestions-for-improvement": characterMaxLimit,
       });
     patientPrescription.clickSubmitQuestionnaire();
     cy.verifyNotification("Failed to submit questionnaire");
     cy.verifyErrorMessages([
       { label: "Text", message: "Text too long. Max allowed size is 500" },
     ]);
-  });
-
-  it("Create a new ABG questionnaire and verify the values", () => {
-    const abgValues = {
-      pco2: "120",
-      po2: "80",
-    };
-    facilityCreation.selectFirstRandomFacility();
-
-    // Chain the methods instead of multiple separate calls
-    patientEncounter
-      .navigateToEncounters()
-      .clickInProgressEncounterFilter()
-      .openFirstEncounterDetails()
-      .clickUpdateEncounter()
-      .addQuestionnaire("Arterial Blood Gas")
-      .fillQuestionnaire(abgValues);
-    patientPrescription.submitQuestionnaire();
-    patientEncounter.verifyOverviewValues(Object.values(abgValues));
   });
 });
