@@ -65,8 +65,8 @@ const consentFormSchema = (isEdit: boolean) =>
       status: z.enum(CONSENT_STATUSES).default("active"),
       date: z.date(),
       period: z.object({
-        start: z.date().optional(),
-        end: z.date().optional(),
+        start: z.date().nullable().optional(),
+        end: z.date().nullable().optional(),
       }),
       note: z.string().optional(),
       fileEntries: z
@@ -253,14 +253,14 @@ export default function ConsentFormSheet({
         ? {
             start: existingConsent!.period.start
               ? new Date(existingConsent!.period.start)
-              : undefined,
+              : null,
             end: existingConsent!.period.end
               ? new Date(existingConsent!.period.end)
-              : undefined,
+              : null,
           }
         : {
-            start: values.period.start,
-            end: values.period.end,
+            start: values.period.start ?? null,
+            end: values.period.end ?? null,
           },
       encounter: encounterId,
       source_attachments: [],
