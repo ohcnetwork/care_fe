@@ -59,7 +59,7 @@ function PatientCard({
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="flex justify-between">
-          <span className="text-sm text-muted-foreground font-medium">
+          <span className="text-sm text-gray-700 font-medium">
             {t("date_of_birth_age")}:
           </span>
           <span className="text-sm font-semibold">
@@ -67,9 +67,7 @@ function PatientCard({
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-sm text-muted-foreground font-medium">
-            {t("sex")}:
-          </span>
+          <span className="text-sm text-gray-700 font-medium">{t("sex")}:</span>
           <span className="text-sm font-semibold">
             {t(`GENDER__${patient.gender}`)}
           </span>

@@ -12,6 +12,76 @@
 
 @config '../../tailwind.config.js';
 
+/* Custom animations for the SessionExpired component */
+@keyframes ping-slow {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+}
+
+@keyframes ping-medium {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(0.75);
+    opacity: 0.3;
+  }
+}
+
+@keyframes ping-fast {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(0.7);
+    opacity: 0.3;
+  }
+}
+@keyframes fade {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-ping-slow {
+  animation: ping-slow 8s ease-in-out infinite;
+}
+
+.animate-ping-medium {
+  animation: ping-medium 8s ease-in-out infinite;
+}
+
+.animate-ping-fast {
+  animation: ping-fast 8s ease-in-out infinite;
+}
+.animate-fade {
+  animation: fade 4s ease-in-out infinite;
+}
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
