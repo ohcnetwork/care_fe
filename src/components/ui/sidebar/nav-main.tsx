@@ -4,8 +4,6 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
-
 import {
   Collapsible,
   CollapsibleContent,
@@ -86,7 +84,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                           )}
                         >
                           {link.icon ? (
-                            <CareIcon icon={link.icon as IconName} />
+                            link.icon
                           ) : (
                             <Avatar
                               name={link.name}
@@ -146,7 +144,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       exactActiveClass="bg-white text-green-700 shadow-sm"
                     >
                       {link.icon ? (
-                        <CareIcon icon={link.icon as IconName} />
+                        link.icon
                       ) : (
                         <Avatar
                           name={link.name}
@@ -187,7 +185,7 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
           )}
         >
           {link.icon ? (
-            <CareIcon icon={link.icon as IconName} />
+            link.icon
           ) : (
             <Avatar name={link.name} className="size-6 -m-1 rounded-sm" />
           )}
