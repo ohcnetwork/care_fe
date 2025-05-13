@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { t } from "i18next";
 import { Edit, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -11,7 +12,6 @@ import * as z from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -80,7 +80,6 @@ const consentFormSchema = (isEdit: boolean) =>
     })
     .superRefine((data, ctx) => {
       if (isEdit) return;
-
       if (
         data.period.start &&
         data.period.end &&
@@ -327,9 +326,21 @@ export default function ConsentFormSheet({
                       <FormLabel aria-required>
                         {t("consent_given_on")}
                       </FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={field.onChange}
+                      <Input
+                        type="datetime-local"
+                        {...field}
+                        value={
+                          field.value
+                            ? format(
+                                new Date(field.value),
+                                "yyyy-MM-dd'T'HH:mm",
+                              )
+                            : undefined
+                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value ? new Date(value) : undefined);
+                        }}
                       />
                       <FormMessage />
                     </FormItem>
@@ -343,9 +354,21 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_from")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={field.onChange}
+                        <Input
+                          type="datetime-local"
+                          {...field}
+                          value={
+                            field.value
+                              ? format(
+                                  new Date(field.value),
+                                  "yyyy-MM-dd'T'HH:mm",
+                                )
+                              : undefined
+                          }
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value ? new Date(value) : undefined);
+                          }}
                         />
                         <FormMessage />
                       </FormItem>
@@ -358,9 +381,21 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_until")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={field.onChange}
+                        <Input
+                          type="datetime-local"
+                          {...field}
+                          value={
+                            field.value
+                              ? format(
+                                  new Date(field.value),
+                                  "yyyy-MM-dd'T'HH:mm",
+                                )
+                              : undefined
+                          }
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value ? new Date(value) : undefined);
+                          }}
                         />
                         <FormMessage />
                       </FormItem>
