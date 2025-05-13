@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { isPast } from "date-fns";
+import { format } from "date-fns";
 import { List, Search } from "lucide-react";
 import { useNavigate, usePathParams } from "raviger";
 import { useState } from "react";
@@ -138,25 +139,37 @@ function ConsentCard({
 
         <div className="flex justify-between items-start w-full gap-4 text-sm">
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-gray-500">{t("consent_date")}</span>
-            <p className="font-medium">
+            <span className="text-xs text-gray-500">
+              {t("consent_given_on")}
+            </span>
+            <p className="font-medium text-xs">
               {formatDateTime(consent.date, "MMM D, YYYY")}
+              <br />
+              {format(consent.date, "h:mm a")}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500">{t("valid_period")}</span>
-            <p className="font-medium text-right">
-              <span>
-                {consent.period.start
-                  ? formatDateTime(consent.period.start, "MMM DD")
-                  : t("NA")}
-              </span>
-              {" - "}
-              <span>
-                {consent.period.end
-                  ? formatDateTime(consent.period.end, "MMM DD, YYYY")
-                  : t("NA")}
-              </span>
+            <p className="font-medium text-right text-xs">
+              {consent.period.start ? (
+                <>
+                  <span>
+                    {format(new Date(consent.period.start), "MMMM d, yyyy")}{" "}
+                    {format(new Date(consent.period.start), "h:mm a")} {" - "}
+                  </span>
+                  <br />
+                  <span>
+                    {consent.period.end
+                      ? `${format(new Date(consent.period.end), "MMMM d, yyyy")} ${format(
+                          new Date(consent.period.end),
+                          "h:mm a",
+                        )}`
+                      : t("na")}
+                  </span>
+                </>
+              ) : (
+                <span>{t("na")}</span>
+              )}
             </p>
           </div>
         </div>
