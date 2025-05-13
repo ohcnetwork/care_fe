@@ -338,7 +338,8 @@ export default function ConsentFormSheet({
                             : undefined
                         }
                         onChange={(e) => {
-                          field.onChange(e.target.valueAsDate);
+                          const value = e.target.value;
+                          field.onChange(value ? new Date(value) : undefined);
                         }}
                       />
                       <FormMessage />
@@ -365,7 +366,8 @@ export default function ConsentFormSheet({
                               : undefined
                           }
                           onChange={(e) => {
-                            field.onChange(e.target.valueAsDate);
+                            const value = e.target.value;
+                            field.onChange(value ? new Date(value) : undefined);
                           }}
                         />
                         <FormMessage />
@@ -391,7 +393,8 @@ export default function ConsentFormSheet({
                               : undefined
                           }
                           onChange={(e) => {
-                            field.onChange(e.target.valueAsDate);
+                            const value = e.target.value;
+                            field.onChange(value ? new Date(value) : undefined);
                           }}
                         />
                         <FormMessage />
