@@ -139,7 +139,7 @@ export default function ConsentFormSheet({
       date: new Date(),
       period: {
         start: new Date(),
-        end: undefined,
+        end: null,
       },
       note: "",
       fileEntries: [],
@@ -223,10 +223,10 @@ export default function ConsentFormSheet({
         period: {
           start: existingConsent!.period.start
             ? new Date(existingConsent!.period.start)
-            : undefined,
+            : null,
           end: existingConsent!.period.end
             ? new Date(existingConsent!.period.end)
-            : undefined,
+            : null,
         },
         note: existingConsent!.note || "",
         fileEntries: [],
@@ -339,7 +339,7 @@ export default function ConsentFormSheet({
                         }
                         onChange={(e) => {
                           const value = e.target.value;
-                          field.onChange(value ? new Date(value) : undefined);
+                          field.onChange(value ? new Date(value) : null);
                         }}
                       />
                       <FormMessage />
@@ -367,7 +367,7 @@ export default function ConsentFormSheet({
                           }
                           onChange={(e) => {
                             const value = e.target.value;
-                            field.onChange(value ? new Date(value) : undefined);
+                            field.onChange(value ? new Date(value) : null);
                           }}
                         />
                         <FormMessage />
@@ -394,7 +394,7 @@ export default function ConsentFormSheet({
                           }
                           onChange={(e) => {
                             const value = e.target.value;
-                            field.onChange(value ? new Date(value) : undefined);
+                            field.onChange(value ? new Date(value) : null);
                           }}
                         />
                         <FormMessage />
