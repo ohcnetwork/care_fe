@@ -56,6 +56,19 @@ export default function UserSelector({
   const [search, setSearch] = useState("");
   const { ref, inView } = useInView();
 
+  const getPathParams = () => {
+    if (!facilityId) return undefined;
+    return organizationId
+      ? { facilityId, organizationId }
+      : { facility_id: facilityId };
+  };
+
+  const getQueryParams = (pageParam: number) => ({
+    limit: String(PAGE_LIMIT),
+    offset: String(pageParam),
+    search_text: search,
+  });
+
   const {
     data: usersList,
     fetchNextPage,
@@ -72,16 +85,8 @@ export default function UserSelector({
             : routes.facility.getUsers
           : UserApi.list,
         {
-          pathParams: facilityId
-            ? organizationId
-              ? { facilityId, organizationId }
-              : { facility_id: facilityId }
-            : undefined,
-          queryParams: {
-            limit: String(PAGE_LIMIT),
-            offset: String(pageParam),
-            search_text: search,
-          },
+          pathParams: getPathParams(),
+          queryParams: getQueryParams(pageParam),
         },
       )({ signal: new AbortController().signal });
       return response;

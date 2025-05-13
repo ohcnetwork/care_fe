@@ -133,6 +133,11 @@ export function CareTeamSheet({
     setSelectedRole(null);
   };
 
+  const handleOrganizationChange = (value: string[] | null) => {
+    setSelectedOrganization(value ? value[0] : "");
+    setSelectedUser(undefined);
+  };
+
   const confirmRemoveMember = (member: UserBase) => {
     setMemberToRemove(member);
   };
@@ -206,9 +211,7 @@ export function CareTeamSheet({
           <div className="space-y-6">
             <FacilityOrganizationSelector
               singleSelection={true}
-              onChange={(value: string[] | null) =>
-                setSelectedOrganization(value ? value[0] : "")
-              }
+              onChange={handleOrganizationChange}
               facilityId={encounter.facility.id}
             />
             <div className="flex flex-col gap-3">
