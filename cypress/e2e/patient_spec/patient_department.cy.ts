@@ -15,9 +15,9 @@ const patientEncounter = new PatientEncounter();
 describe("Manage departments/teams association to an encounter", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("devdepartment");
+    cy.loginByApi("facility_admin");
     cy.visit("/");
-    facilityCreation.selectFacility("GHC Payyanur");
+    facilityCreation.selectFirstRandomFacility();
   });
 
   it("Add a new department and create a sub-child, and now verify both are visible in the sidebar nav", () => {
