@@ -59,7 +59,7 @@ jobs:
 
       - name: Set backend branch
         id: backend-branch
-        run: echo "branch=develop" >> $GITHUB_OUTPUT
+        run: echo "branch=sainak/fix/fixture-encounter" >> $GITHUB_OUTPUT
 
       - name: Checkout care 📥
         uses: actions/checkout@v4

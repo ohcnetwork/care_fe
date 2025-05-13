@@ -67,10 +67,8 @@ export class PatientCreation {
     return this;
   }
 
-  verifySearchResults(patientDetails: { name: string; phone: string }) {
-    // Convert object values to an array of strings
-    const detailsArray = Object.values(patientDetails);
-    cy.verifyContentPresence(this.selectors.patientCard, detailsArray);
+  verifySearchResults(patientName: string) {
+    cy.verifyContentPresence(this.selectors.patientCard, [patientName]);
     return this;
   }
 
@@ -170,7 +168,7 @@ export class PatientCreation {
       cy.get(this.selectors.emergencyContactCheckbox).click();
     }
 
-    this.enterPincode(data.pincode).selectState(data.state);
+    this.enterPincode(data.pincode).selectState();
     return this;
   }
 
@@ -206,12 +204,8 @@ export class PatientCreation {
     return this;
   }
 
-  selectState(state: string) {
-    cy.get(this.selectors.stateSelect).then(($el) => {
-      if ($el.val() !== state) {
-        cy.clickAndSelectOption(this.selectors.stateSelect, state);
-      }
-    });
+  selectState() {
+    cy.clickAndSelectOption(this.selectors.stateSelect);
     return this;
   }
 

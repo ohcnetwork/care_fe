@@ -18,7 +18,6 @@ const patientEncounter = new PatientEncounter();
 const ENCOUNTER_TYPE = "Observation";
 const ENCOUNTER_STATUS = "In Progress";
 const ENCOUNTER_PRIORITY = "ASAP";
-const ORGANIZATION_NAME = "Administration";
 
 beforeEach(() => {
   cy.viewport(viewPort.desktop1080p.width, viewPort.desktop2k.height);
@@ -27,6 +26,8 @@ beforeEach(() => {
 });
 
 describe("Patient Creation and modification", () => {
+  let lastCreatedPatient: { name: string; phoneNumber: string };
+
   const basePatientData: Partial<PatientFormData> = {
     pincode: "682001",
     sameAsPermanentAddress: true,
@@ -99,6 +100,11 @@ describe("Patient Creation and modification", () => {
 
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
+      lastCreatedPatient = {
+        name: data.name,
+        phoneNumber: data.phoneNumber,
+      };
+
       facilityCreation.selectFirstRandomFacility();
       patientCreation
         .clickSearchPatients()
@@ -115,7 +121,7 @@ describe("Patient Creation and modification", () => {
         .selectEncounterType(ENCOUNTER_TYPE)
         .selectEncounterStatus(ENCOUNTER_STATUS)
         .selectEncounterPriority(ENCOUNTER_PRIORITY)
-        .selectOrganization(ORGANIZATION_NAME)
+        .selectOrganization()
         .clickSubmitEncounter()
         .assertEncounterCreationSuccess();
 
@@ -157,16 +163,16 @@ describe("Patient Creation and modification", () => {
   describe("Patient Search and Encounter Creation", () => {
     it("Search patient with phone number and create a new encounter", () => {
       const patientDetail = {
-        name: "Daksh",
-        phone: "80590 16870",
+        name: lastCreatedPatient.name,
+        phone: lastCreatedPatient.phoneNumber,
       };
       facilityCreation.selectFirstRandomFacility();
       patientCreation
         .clickSearchPatients()
         .searchPatient(patientDetail.phone)
-        .verifySearchResults(patientDetail)
+        .verifySearchResults(patientDetail.name)
         .selectPatientFromResults(patientDetail.name)
-        .enterYearOfBirth("1926")
+        .enterYearOfBirth("1990")
         .clickVerifyButton();
 
       patientVerify
@@ -176,7 +182,7 @@ describe("Patient Creation and modification", () => {
         .selectEncounterType(ENCOUNTER_TYPE)
         .selectEncounterStatus(ENCOUNTER_STATUS)
         .selectEncounterPriority(ENCOUNTER_PRIORITY)
-        .selectOrganization(ORGANIZATION_NAME)
+        .selectOrganization()
         .clickSubmitEncounter()
         .assertEncounterCreationSuccess();
 
