@@ -164,9 +164,7 @@ export default function UserSelector({
                 </CommandItem>
               ))}
               {isFetchingNextPage && (
-                <div className="text-center text-sm text-muted py-2">
-                  {t("loading")}
-                </div>
+                <div className="text-center text-sm py-2">{t("loading")}</div>
               )}
             </CommandGroup>
           </CommandList>
