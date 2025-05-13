@@ -9,14 +9,14 @@ describe("Facility Devices Management", () => {
 
   beforeEach(() => {
     cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
-    cy.loginByApi("devdevices");
+    cy.loginByApi("facility_admin");
     cy.visit("/");
   });
 
   it("Create a new device and verify modification and delete it", () => {
     const deviceName = generateDeviceName();
     const newDeviceName = generateDeviceName();
-    facilityCreation.selectFacility("GHC Payyanur");
+    facilityCreation.selectFirstRandomFacility();
     facilityDevices
       .navigateToFacilitySettings()
       .navigateToFacilityDevices()

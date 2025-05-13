@@ -13,7 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -164,21 +164,20 @@ export function RelativeDatePicker({
             </SelectContent>
           </Select>
           {timeUnits.map((unit) => (
-            <Badge
+            <Button
               key={unit}
               onClick={() => handleUnitChange(unit)}
               variant={selected.unit === unit ? "default" : "outline"}
-              className={
-                !validateDate(unit, 1) ? "opacity-50 pointer-events-none" : ""
-              }
+              size="sm"
+              disabled={!validateDate(unit, 1)}
             >
               {unit.charAt(0).toUpperCase() + unit.slice(1)}
-            </Badge>
+            </Button>
           ))}
         </div>
       </div>
 
-      <div className="flex-1 p-4 flex flex-col justify-center overflow-hidden">
+      <div className="p-4 flex flex-col justify-center">
         <div className="text-xl font-bold mb-1 truncate">
           {format(resultDate, "MMM d, yyyy")}
         </div>

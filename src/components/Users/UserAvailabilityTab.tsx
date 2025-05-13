@@ -179,13 +179,15 @@ export default function UserAvailabilityTab({
                   <div />
                 </div>
               </PopoverTrigger>
-              <DayDetailsPopover
-                date={date}
-                templates={templates}
-                unavailableExceptions={unavailableExceptions}
-                setQParams={setQParams}
-                user={user}
-              />
+              {isSchedulableResource && (
+                <DayDetailsPopover
+                  date={date}
+                  templates={templates}
+                  unavailableExceptions={unavailableExceptions}
+                  setQParams={setQParams}
+                  user={user}
+                />
+              )}
             </Popover>
           );
         }}
