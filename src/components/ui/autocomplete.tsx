@@ -116,8 +116,6 @@ export default function Autocomplete({
         placeholder={inputPlaceholder}
         disabled={disabled}
         onValueChange={handleInputChange}
-        // Control the input when freeInput is true.
-        {...(freeInput ? { value: inputValue } : {})}
         className="outline-hidden border-none ring-0 shadow-none"
         autoFocus
       />
@@ -219,7 +217,12 @@ export default function Autocomplete({
           data-cy={dataCy}
           onClick={() => setOpen(!open)}
         >
-          <span className={cn("truncate", !selectedOption && "text-gray-500")}>
+          <span
+            className={cn(
+              inputValue && "truncate",
+              !selectedOption && "text-gray-500",
+            )}
+          >
             {displayText}
           </span>
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />

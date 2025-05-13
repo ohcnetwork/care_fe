@@ -8,11 +8,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { Patient } from "@/types/emr/newPatient";
 
-interface NavigationLink {
-  name: string;
-  url: string;
-  icon?: string;
-}
+import { NavigationLink } from "./facility-nav";
 
 function generatePatientLinks(
   selectedUser: Patient | null,

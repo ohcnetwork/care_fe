@@ -211,7 +211,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                             {patientList.results.map((patient) => (
                               <TableRow
                                 key={patient.id}
-                                className="cursor-pointer hover:bg-muted/50"
+                                className="cursor-pointer"
                                 onClick={() => handlePatientSelect(patient)}
                               >
                                 <TableCell className="font-medium">

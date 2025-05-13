@@ -448,7 +448,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                 <h3 className="text-sm font-medium">
                   {t("delete_this_device")}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-700">
                   {t("delete_device_description")}
                 </p>
               </div>
