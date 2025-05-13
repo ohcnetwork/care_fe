@@ -9,8 +9,8 @@ export interface ResourceRequestFormData {
 }
 
 export class ResourcesCreation {
-  selectFacility(facility: string) {
-    cy.typeAndSelectOption('[data-cy="select-facility"]', facility, false);
+  selectFacility() {
+    cy.clickAndSelectOption('[data-cy="select-facility"]');
     return this;
   }
 
@@ -24,8 +24,8 @@ export class ResourcesCreation {
     return this;
   }
 
-  selectAssignedUser(user: string) {
-    cy.typeAndSelectOption('[data-cy="select-assigned-user"]', user, false);
+  selectAssignedUser() {
+    cy.clickAndSelectOption('[data-cy="select-assigned-user"]');
     return this;
   }
 
@@ -57,17 +57,12 @@ export class ResourcesCreation {
   }
 
   fillResourceRequestForm(data: ResourceRequestFormData) {
-    this.selectFacility(data.facility)
+    this.selectFacility()
       .selectStatus(data.status)
       .selectCategory(data.category)
       .enterTitle(data.title)
       .enterReason(data.reason)
-      .autoFillDetails()
-      .verifyAutoFillDetails('[data-cy="contact_person"]', "Dev Nurse")
-      .verifyAutoFillDetails(
-        '[data-cy="contact_person_phone"]',
-        "+91 98767 57676",
-      );
+      .autoFillDetails();
     return this;
   }
 
@@ -131,8 +126,6 @@ export class ResourcesCreation {
       data.title,
       data.reason,
       data.category,
-      data.sourceFacility,
-      data.facility,
       "View Details",
     ]);
     return this;

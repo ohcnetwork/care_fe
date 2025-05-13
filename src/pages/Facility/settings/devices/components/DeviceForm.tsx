@@ -127,7 +127,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     contact: [],
   };
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
@@ -459,7 +459,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           </div>
 
           {fields.length === 0 && (
-            <div className="py-4 text-center text-sm text-muted-foreground">
+            <div className="py-4 text-center text-sm text-gray-700">
               {t("no_contact_points_added")}
             </div>
           )}

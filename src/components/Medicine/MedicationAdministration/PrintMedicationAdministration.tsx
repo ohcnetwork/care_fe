@@ -53,6 +53,7 @@ export const PrintMedicationAdministration = (props: {
       pathParams: { patientId: patientId },
       queryParams: {
         encounter: encounterId,
+        status: "completed",
       },
       pageSize: 1000,
     }),

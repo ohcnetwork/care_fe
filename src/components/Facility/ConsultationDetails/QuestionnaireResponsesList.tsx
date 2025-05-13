@@ -275,10 +275,7 @@ function ResponseCard({
     <EncounterAccordionLayout
       title={isStructured && structuredType ? structuredType : title}
       actionButton={isPrintPreview ? null : <PrintButton item={item} />}
-      className={cn(
-        "transition-colors hover:bg-muted/50",
-        isPrintPreview && "shadow-none",
-      )}
+      className={cn(isPrintPreview && "shadow-none")}
     >
       {item.questionnaire && (
         <div className="px-2 space-y-4">
@@ -364,7 +361,7 @@ export default function QuestionnaireResponsesList({
     enabled: canAccess,
   });
   return (
-    <div className="mt-4 gap-4">
+    <div className="gap-4">
       <div className="max-w-full">
         {isLoading ? (
           <div className="grid gap-5">
