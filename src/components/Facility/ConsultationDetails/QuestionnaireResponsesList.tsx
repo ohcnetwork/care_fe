@@ -271,7 +271,7 @@ function ResponseCard({
       ? properCase(structuredType.replace(/_/g, " "))
       : item.questionnaire?.title || "";
 
-  const Content = (
+  const content = (
     <div className="px-2 space-y-4">
       {item.questionnaire?.questions.map((question: Question) => {
         if (question.type === "structured") return null;
@@ -329,14 +329,14 @@ function ResponseCard({
       <CardHeader>
         <CardTitle className="text-base font-semibold">{title}</CardTitle>
       </CardHeader>
-      <CardContent>{Content}</CardContent>
+      <CardContent>{content}</CardContent>
     </Card>
   ) : (
     <EncounterAccordionLayout
       title={isStructured && structuredType ? structuredType : title}
       actionButton={<PrintButton item={item} />}
     >
-      {Content}
+      {content}
     </EncounterAccordionLayout>
   );
 }
