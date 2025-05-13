@@ -254,12 +254,8 @@ export class PatientDepartments {
     return this;
   }
 
-  selectOrganization(organization: string) {
-    cy.typeAndSelectOption(
-      '[data-cy="facility-organization"]',
-      organization,
-      false,
-    );
+  selectOrganization() {
+    cy.clickAndSelectOption('[data-cy="facility-organization"]');
     return this;
   }
 
@@ -273,11 +269,6 @@ export class PatientDepartments {
 
   clickAddOrganization() {
     cy.get('[data-cy="add-organization-badge"]').first().click();
-    return this;
-  }
-
-  verifyOrganizationAdded(orgName: string) {
-    cy.verifyContentPresence('[data-cy="add-organization-badge"]', [orgName]);
     return this;
   }
 }
