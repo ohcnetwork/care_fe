@@ -40,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSidebar } from "@/components/ui/sidebar";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
@@ -200,6 +201,7 @@ export function MedicationRequestQuestion({
   const { t } = useTranslation();
 
   const isPreview = patientId === "preview";
+  const { open: isSidebarOpen } = useSidebar();
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
 
@@ -508,7 +510,12 @@ export function MedicationRequestQuestion({
         onAddSelected={handleAddHistoricalMedications}
       />
       {medications.length > 0 && (
-        <div className="md:overflow-x-auto w-auto">
+        <div
+          className={cn(
+            "md:overflow-x-auto",
+            isSidebarOpen ? "w-[calc(100vw-44rem)]" : "w-[calc(100vw-30rem)]",
+          )}
+        >
           <div className="min-w-fit">
             <div
               className={cn(
