@@ -196,7 +196,7 @@ Cypress.Commands.add(
     const inputField = cy.get(selector);
 
     if (clearBeforeTyping) {
-      inputField.clear();
+      inputField.click().clear();
     }
 
     // Handle click based on position
