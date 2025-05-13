@@ -12,8 +12,6 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,7 +20,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
-import { Command, CommandList } from "@/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,7 +35,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -49,6 +45,7 @@ import {
 } from "@/components/ui/table";
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
+import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -90,6 +87,129 @@ const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
   category: "problem_list_item",
   onset: { onset_datetime: new Date().toISOString().split("T")[0] },
 };
+
+function DatePickerField({
+  onsetDatetime,
+  onChange,
+  disabled,
+  isSymptomInSheet,
+  hasId,
+}: {
+  onsetDatetime?: string;
+  onChange: (date: Date | undefined) => void;
+  disabled?: boolean;
+  isSymptomInSheet: boolean;
+  hasId: boolean;
+}) {
+  return (
+    <CombinedDatePicker
+      value={onsetDatetime ? new Date(onsetDatetime) : undefined}
+      onChange={onChange}
+      disabled={disabled || (!isSymptomInSheet && hasId)}
+      dateFormat="P"
+      buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+    />
+  );
+}
+
+function StatusSelect({
+  status,
+  onValueChange,
+  disabled,
+}: {
+  status: string;
+  onValueChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select value={status} onValueChange={onValueChange} disabled={disabled}>
+      <SelectTrigger className="h-8 md:h-9">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {SYMPTOM_CLINICAL_STATUS.map((status) => (
+          <SelectItem key={status} value={status}>
+            {t(status)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function SeveritySelect({
+  severity,
+  onValueChange,
+  disabled,
+}: {
+  severity: string;
+  onValueChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select value={severity} onValueChange={onValueChange} disabled={disabled}>
+      <SelectTrigger className="h-8 md:h-9">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {SYMPTOM_SEVERITY.map((severity) => (
+          <SelectItem key={severity} value={severity}>
+            {t(severity)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function VerificationStatusSelect({
+  status,
+  onValueChange,
+  disabled,
+}: {
+  status: string;
+  onValueChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select value={status} onValueChange={onValueChange} disabled={disabled}>
+      <SelectTrigger className="h-8 md:h-9">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {SYMPTOM_VERIFICATION_STATUS.map((status) => (
+          <SelectItem key={status} value={status}>
+            {t(status)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function NotesInput({
+  note,
+  onChange,
+  disabled,
+}: {
+  note?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Input
+      type="text"
+      placeholder={t("additional_notes")}
+      value={note || ""}
+      onChange={onChange}
+      disabled={disabled}
+    />
+  );
+}
 
 function convertToSymptomRequest(symptom: Symptom): SymptomRequest {
   return {
@@ -191,6 +311,8 @@ const SymptomRow = React.memo(function SymptomRow({
   const [isOpen, setIsOpen] = useState(!symptom.id);
   const isMobile = useBreakpoints({ default: true, md: false });
 
+  const isSymptomInSheet = index === -1;
+
   const handleDateChange = useCallback(
     (date: Date | undefined) =>
       onUpdate(index, {
@@ -231,6 +353,65 @@ const SymptomRow = React.memo(function SymptomRow({
 
   const handleRemove = useCallback(() => onRemove(index), [index, onRemove]);
 
+  if (isSymptomInSheet) {
+    return (
+      <div className="space-y-3">
+        <div>
+          <div className="text-sm font-medium text-gray-700 mb-1">
+            {t("onset_date")}
+          </div>
+          <DatePickerField
+            onsetDatetime={symptom.onset?.onset_datetime}
+            onChange={handleDateChange}
+            disabled={disabled}
+            isSymptomInSheet={isSymptomInSheet}
+            hasId={!!symptom.id}
+          />
+        </div>
+        <div>
+          <div className="text-sm font-medium text-gray-700 mb-1">
+            {t("status")}
+          </div>
+          <StatusSelect
+            status={symptom.clinical_status}
+            onValueChange={handleStatusChange}
+            disabled={disabled}
+          />
+        </div>
+        <div>
+          <div className="text-sm font-medium text-gray-700 mb-1">
+            {t("severity")}
+          </div>
+          <SeveritySelect
+            severity={symptom.severity}
+            onValueChange={handleSeverityChange}
+            disabled={disabled}
+          />
+        </div>
+        <div>
+          <div className="text-sm font-medium text-gray-700 mb-1">
+            {t("verification_status")}
+          </div>
+          <VerificationStatusSelect
+            status={symptom.verification_status}
+            onValueChange={handleVerificationStatusChange}
+            disabled={disabled}
+          />
+        </div>
+        <div>
+          <div className="text-sm font-medium text-gray-700 mb-1">
+            {t("note")}
+          </div>
+          <NotesInput
+            note={symptom.note}
+            onChange={handleNotesChange}
+            disabled={disabled}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // For mobile view - Card Layout
   if (isMobile) {
     return (
@@ -241,10 +422,10 @@ const SymptomRow = React.memo(function SymptomRow({
         })}
       >
         <Card
-          className={cn("mb-2 rounded-lg", {
-            "border border-primary-500": isOpen,
-            "border-0 shadow-none": !isOpen,
-          })}
+          className={cn(
+            "mb-2 rounded-lg border-0 shadow-none",
+            isOpen && "border border-primary-500",
+          )}
         >
           <Collapsible
             open={isOpen}
@@ -322,92 +503,53 @@ const SymptomRow = React.memo(function SymptomRow({
             <CollapsibleContent>
               <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
                 <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
+                  <div className="block text-sm font-medium  mb-1">
                     {t("onset_date")}
                   </div>
-                  <CombinedDatePicker
-                    value={
-                      symptom.onset?.onset_datetime
-                        ? new Date(symptom.onset.onset_datetime)
-                        : undefined
-                    }
+                  <DatePickerField
+                    onsetDatetime={symptom.onset?.onset_datetime}
                     onChange={handleDateChange}
-                    disabled={disabled || !!symptom.id}
-                    buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
-                    dateFormat="P"
+                    disabled={disabled}
+                    isSymptomInSheet={isSymptomInSheet}
+                    hasId={!!symptom.id}
                   />
                 </div>
                 <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
+                  <div className="block text-sm font-medium mb-1">
                     {t("status")}
                   </div>
-                  <Select
-                    value={symptom.clinical_status}
+                  <StatusSelect
+                    status={symptom.clinical_status}
                     onValueChange={handleStatusChange}
                     disabled={disabled}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SYMPTOM_CLINICAL_STATUS.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {t(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
                 <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
+                  <div className="block text-sm font-medium  mb-1">
                     {t("severity")}
                   </div>
-                  <Select
-                    value={symptom.severity}
+                  <SeveritySelect
+                    severity={symptom.severity}
                     onValueChange={handleSeverityChange}
                     disabled={disabled}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SYMPTOM_SEVERITY.map((severity) => (
-                        <SelectItem key={severity} value={severity}>
-                          {t(severity)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
                 <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
+                  <div className="block text-sm font-medium mb-1">
                     {t("verification_status")}
                   </div>
-                  <Select
-                    value={symptom.verification_status}
+                  <VerificationStatusSelect
+                    status={symptom.verification_status}
                     onValueChange={handleVerificationStatusChange}
                     disabled={disabled}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SYMPTOM_VERIFICATION_STATUS.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {t(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
                 <div>
-                  <div className="block text-sm font-medium text-gray-500 mb-1">
-                    {t("notes")}
+                  <div className="block text-sm font-medium  mb-1">
+                    {t("note")}
                   </div>
-                  <Input
-                    type="text"
-                    placeholder={t("add_notes_about_symptom")}
-                    value={symptom.note || ""}
+                  <NotesInput
+                    note={symptom.note}
                     onChange={handleNotesChange}
                     disabled={disabled}
                   />
@@ -435,71 +577,34 @@ const SymptomRow = React.memo(function SymptomRow({
           </div>
         </TableCell>
         <TableCell>
-          <CombinedDatePicker
-            value={
-              symptom.onset?.onset_datetime
-                ? new Date(symptom.onset.onset_datetime)
-                : undefined
-            }
+          <DatePickerField
+            onsetDatetime={symptom.onset?.onset_datetime}
             onChange={handleDateChange}
-            disabled={disabled || !!symptom.id}
-            dateFormat="P"
-            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
+            disabled={disabled}
+            isSymptomInSheet={isSymptomInSheet}
+            hasId={!!symptom.id}
           />
         </TableCell>
         <TableCell>
-          <Select
-            value={symptom.clinical_status}
+          <StatusSelect
+            status={symptom.clinical_status}
             onValueChange={handleStatusChange}
             disabled={disabled}
-          >
-            <SelectTrigger className="h-8 md:h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SYMPTOM_CLINICAL_STATUS.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {t(status)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </TableCell>
         <TableCell>
-          <Select
-            value={symptom.severity}
+          <SeveritySelect
+            severity={symptom.severity}
             onValueChange={handleSeverityChange}
             disabled={disabled}
-          >
-            <SelectTrigger className="h-8 md:h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SYMPTOM_SEVERITY.map((severity) => (
-                <SelectItem key={severity} value={severity}>
-                  {t(severity)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </TableCell>
         <TableCell>
-          <Select
-            value={symptom.verification_status}
+          <VerificationStatusSelect
+            status={symptom.verification_status}
             onValueChange={handleVerificationStatusChange}
             disabled={disabled}
-          >
-            <SelectTrigger className="h-8 md:h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SYMPTOM_VERIFICATION_STATUS.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {t(status)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </TableCell>
         <TableCell className="text-center">
           <SymptomActionsMenu
@@ -515,10 +620,8 @@ const SymptomRow = React.memo(function SymptomRow({
       {showNotes && (
         <TableRow>
           <TableCell colSpan={5} className="px-3 pb-3">
-            <Input
-              type="text"
-              placeholder={t("add_notes_about_symptom")}
-              value={symptom.note || ""}
+            <NotesInput
+              note={symptom.note}
               onChange={handleNotesChange}
               disabled={disabled}
             />
@@ -563,10 +666,9 @@ export function SymptomQuestion({
   const symptoms =
     (questionnaireResponse.values?.[0]?.value as SymptomRequest[]) || [];
   const [showSymptomSelection, setShowSymptomSelection] = useState(false);
-  const [selectedCode, setSelectedCode] = useState<Code | null>(null);
   const [newSymptom, setNewSymptom] = useState<Partial<SymptomRequest>>({
     ...SYMPTOM_INITIAL_VALUE,
-    onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+    onset: { onset_datetime: dateQueryString(new Date()) },
   });
   const isMobile = useBreakpoints({ default: true, md: false });
 
@@ -598,11 +700,15 @@ export function SymptomQuestion({
 
   const handleCodeSelect = (code: Code) => {
     if (checkForDuplicateSymptom(symptoms, code, t)) {
+      setShowSymptomSelection(false);
       return;
     }
 
-    setSelectedCode(code);
-    setNewSymptom((prev) => ({ ...prev, code }));
+    setNewSymptom({
+      ...SYMPTOM_INITIAL_VALUE,
+      onset: { onset_datetime: dateQueryString(new Date()) },
+      code,
+    });
 
     if (isMobile) {
       setShowSymptomSelection(true);
@@ -622,30 +728,16 @@ export function SymptomQuestion({
       questionnaireResponse.question_id,
     );
 
-    setSelectedCode(null);
     setShowSymptomSelection(false);
     setNewSymptom({
       ...SYMPTOM_INITIAL_VALUE,
-      onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+      onset: { onset_datetime: dateQueryString(new Date()) },
     });
   };
 
   const handleConfirmSymptom = () => {
-    if (!selectedCode) return;
-    addNewSymptom(selectedCode);
-  };
-
-  const handleCloseDrawer = () => {
-    setShowSymptomSelection(false);
-    handleBackToValueSet();
-  };
-
-  const handleBackToValueSet = () => {
-    setSelectedCode(null);
-    setNewSymptom({
-      ...SYMPTOM_INITIAL_VALUE,
-      onset: { onset_datetime: new Date().toISOString().split("T")[0] },
-    });
+    if (!newSymptom.code) return;
+    addNewSymptom(newSymptom.code);
   };
 
   const handleRemoveSymptom = (index: number) => {
@@ -684,103 +776,6 @@ export function SymptomQuestion({
     );
   };
 
-  const symptomDetailsContent = (
-    <div className="space-y-4 p-4">
-      <div className="grid grid-cols-1 gap-4">
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-gray-700">
-            {t("onset_date")}
-          </div>
-          <CombinedDatePicker
-            value={
-              newSymptom.onset?.onset_datetime
-                ? new Date(newSymptom.onset.onset_datetime)
-                : undefined
-            }
-            onChange={(date) => {
-              setNewSymptom((prev) => ({
-                ...prev,
-                onset: { onset_datetime: dateQueryString(date) },
-              }));
-            }}
-            disabled={disabled || !!newSymptom.id}
-            dateFormat="P"
-            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
-          />
-        </div>
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-gray-700">{t("status")}</div>
-          <Select
-            value={newSymptom.clinical_status}
-            onValueChange={(value) =>
-              setNewSymptom((prev) => ({
-                ...prev,
-                clinical_status: value as SymptomRequest["clinical_status"],
-              }))
-            }
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SYMPTOM_CLINICAL_STATUS.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {t(status)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-gray-700">
-            {t("severity")}
-          </div>
-          <Select
-            value={newSymptom.severity}
-            onValueChange={(value) =>
-              setNewSymptom((prev) => ({
-                ...prev,
-                severity: value as SymptomRequest["severity"],
-              }))
-            }
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SYMPTOM_SEVERITY.map((severity) => (
-                <SelectItem key={severity} value={severity}>
-                  {t(severity)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-gray-700">{t("notes")}</div>
-          <Input
-            type="text"
-            placeholder={t("add_notes_about_symptom")}
-            value={newSymptom.note || ""}
-            onChange={(e) =>
-              setNewSymptom((prev) => ({
-                ...prev,
-                note: e.target.value,
-              }))
-            }
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-between space-x-2">
-        <Button type="button" variant="outline" onClick={handleBackToValueSet}>
-          {t("cancel")}
-        </Button>
-        <Button onClick={handleConfirmSymptom}>{t("add_symptom")}</Button>
-      </div>
-    </div>
-  );
-
   const handleAddHistoricalSymptoms = async (
     selectedSymptoms: SymptomRequest[],
   ) => {
@@ -802,6 +797,10 @@ export function SymptomQuestion({
       questionnaireResponse.question_id,
     );
   };
+
+  const addSymptomPlaceholder = t("add_symptom", {
+    count: symptoms.length + 1,
+  });
 
   return (
     <div className="space-y-2">
@@ -919,88 +918,33 @@ export function SymptomQuestion({
         </>
       )}
 
-      {isMobile && showSymptomSelection ? (
-        <>
-          <ValueSetSelect
-            system="system-condition-code"
-            placeholder={t("add_another_symptom")}
-            onSelect={handleCodeSelect}
-            disabled={disabled}
-          />
-          <Sheet
-            open={showSymptomSelection}
-            onOpenChange={setShowSymptomSelection}
-          >
-            <Command className="px-0">
-              {selectedCode ? (
-                <>
-                  <div className="py-3 px-4 border-b border-gray-200 flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">
-                      {selectedCode.display}
-                    </h3>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8"
-                      onClick={handleBackToValueSet}
-                    >
-                      <CareIcon icon="l-times" className="size-5" />
-                    </Button>
-                  </div>
-                  <SheetContent
-                    side="bottom"
-                    className="px-0 pt-2 pb-0 rounded-t-lg"
-                  >
-                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
-                    <div className="mt-6 h-full">
-                      <CommandList className="max-h-[calc(80vh-2rem)] overflow-y-auto">
-                        {symptomDetailsContent}
-                      </CommandList>
-                    </div>
-                  </SheetContent>
-                </>
-              ) : (
-                <>
-                  <div className="py-3 px-4 border-b border-gray-200 flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">
-                      {t("select_symptom")}
-                    </h3>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8"
-                      onClick={handleCloseDrawer}
-                    >
-                      <CareIcon icon="l-times" className="size-5" />
-                    </Button>
-                  </div>
-                  <SheetContent
-                    side="bottom"
-                    className=" px-0 pt-2 pb-0 rounded-t-lg"
-                  >
-                    <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
-                    <div className="mt-6 h-full">
-                      <CommandList className="overflow-y-auto">
-                        <ValueSetSelect
-                          system="system-condition-code"
-                          placeholder={t("search_symptom")}
-                          onSelect={handleCodeSelect}
-                          disabled={disabled}
-                          hideTrigger={true}
-                          controlledOpen={true}
-                        />
-                      </CommandList>
-                    </div>
-                  </SheetContent>
-                </>
-              )}
-            </Command>
-          </Sheet>
-        </>
+      {isMobile ? (
+        <EntitySelectionSheet
+          open={showSymptomSelection}
+          onOpenChange={setShowSymptomSelection}
+          system="system-condition-code"
+          entityType="symptom"
+          disabled={disabled}
+          onEntitySelected={handleCodeSelect}
+          onConfirm={handleConfirmSymptom}
+          placeholder={addSymptomPlaceholder}
+        >
+          <div className="space-y-4 p-3">
+            <SymptomRow
+              symptom={newSymptom as SymptomRequest}
+              index={-1}
+              disabled={disabled}
+              onUpdate={(_, updates) => {
+                setNewSymptom((prev) => ({ ...prev, ...updates }));
+              }}
+              onRemove={() => {}}
+            />
+          </div>
+        </EntitySelectionSheet>
       ) : (
         <ValueSetSelect
           system="system-condition-code"
-          placeholder={t("add_another_symptom")}
+          placeholder={addSymptomPlaceholder}
           onSelect={handleCodeSelect}
           disabled={disabled}
         />

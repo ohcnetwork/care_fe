@@ -91,7 +91,7 @@ function Calendar({
   );
   const _weekdaysClassName = cn("flex flex-row", props.weekdaysClassName);
   const _weekdayClassName = cn(
-    "w-8 text-sm font-normal text-muted-foreground",
+    "w-8 text-sm font-normal text-gray-700",
     props.weekdayClassName,
   );
   const _monthClassName = cn("w-full", props.monthClassName);
@@ -155,11 +155,11 @@ function Calendar({
     props.todayClassName,
   );
   const _outsideClassName = cn(
-    "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+    "day-outside text-gray-500 opacity-50 aria-selected:bg-accent/50 aria-selected:text-gray-700 aria-selected:opacity-30",
     props.outsideClassName,
   );
   const _disabledClassName = cn(
-    "text-muted-foreground opacity-50",
+    "text-gray-500 opacity-50",
     props.disabledClassName,
   );
   const _hiddenClassName = cn("invisible flex-1", props.hiddenClassName);
