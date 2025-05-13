@@ -21,6 +21,8 @@ jobs:
     if: github.repository == 'ohcnetwork/care_fe'
     permissions: write-all
     runs-on: ubuntu-latest
+    env:
+      REACT_CARE_API_URL: http://localhost:9000
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
@@ -45,8 +47,6 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     needs: install
-    env:
-      REACT_CARE_API_URL: https://careapi.ohc.network
     strategy:
       fail-fast: false
       matrix:
@@ -54,6 +54,30 @@ jobs:
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set backend branch
+        id: backend-branch
+        run: echo "branch=develop" >> $GITHUB_OUTPUT
+
+      - name: Checkout care 📥
+        uses: actions/checkout@v4
+        with:
+          repository: ohcnetwork/care
+          path: care
+          ref: ${{ steps.backend-branch.outputs.branch }}
+          fetch-depth: 0
+
+      - name: Start care docker containers 🐳
+        run: |
+          cd care
+          echo DISABLE_RATELIMIT=True >> docker/.local.env
+          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
+          make docker_config_file=docker-compose.local.yaml up load-fixtures
+          cd ..
+        env:
+          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
       - name: Determine PR Origin
         id: pr_origin
@@ -65,6 +89,7 @@ jobs:
         with:
           name: build
           path: build
+          merge-multiple: true
 
       # For non-forked PRs
       - name: "UI Tests - Chrome (Non-forked)"
@@ -79,6 +104,7 @@ jobs:
           parallel: true
           group: "UI - Chrome"
           config-file: cypress.config.ts
+          install-command: npm ci
         env:
           CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -100,6 +126,7 @@ jobs:
           browser: chrome
           record: false
           parallel: false
+          install-command: npm ci
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -116,6 +143,7 @@ jobs:
         with:
           name: cypress-screenshots-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.containers }}
           path: cypress/screenshots
+          compression-level: 9
 
       - name: Upload cypress videos 📹
         uses: actions/upload-artifact@v4
@@ -123,6 +151,7 @@ jobs:
         with:
           name: cypress-videos-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.containers }}
           path: cypress/videos
+          compression-level: 9
 
   cleanup:
     if: always() && github.repository == 'ohcnetwork/care_fe'
