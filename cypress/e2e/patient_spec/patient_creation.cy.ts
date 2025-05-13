@@ -18,7 +18,6 @@ const patientEncounter = new PatientEncounter();
 const ENCOUNTER_TYPE = "Observation";
 const ENCOUNTER_STATUS = "In Progress";
 const ENCOUNTER_PRIORITY = "ASAP";
-const ORGANIZATION_NAME = "Administration";
 
 beforeEach(() => {
   cy.viewport(viewPort.desktop1080p.width, viewPort.desktop2k.height);
@@ -27,12 +26,10 @@ beforeEach(() => {
 });
 
 describe("Patient Creation and modification", () => {
+  let lastCreatedPatient: { name: string; phoneNumber: string };
+
   const basePatientData: Partial<PatientFormData> = {
     pincode: "682001",
-    state: "Kerala",
-    district: "Ernakulam",
-    localBody: "Aluva",
-    ward: "4",
     sameAsPermanentAddress: true,
     hasEmergencyContact: false,
   };
@@ -103,7 +100,12 @@ describe("Patient Creation and modification", () => {
 
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
-      facilityCreation.selectFacility("GHC Payyanur");
+      lastCreatedPatient = {
+        name: data.name,
+        phoneNumber: data.phoneNumber,
+      };
+
+      facilityCreation.selectFirstRandomFacility();
       patientCreation
         .clickSearchPatients()
         .clickCreateNewPatient()
@@ -119,7 +121,7 @@ describe("Patient Creation and modification", () => {
         .selectEncounterType(ENCOUNTER_TYPE)
         .selectEncounterStatus(ENCOUNTER_STATUS)
         .selectEncounterPriority(ENCOUNTER_PRIORITY)
-        .selectOrganization(ORGANIZATION_NAME)
+        .selectOrganization()
         .clickSubmitEncounter()
         .assertEncounterCreationSuccess();
 
@@ -138,7 +140,7 @@ describe("Patient Creation and modification", () => {
       address: generateAddress(true),
     };
 
-    facilityCreation.selectFacility("GHC Payyanur");
+    facilityCreation.selectFirstRandomFacility();
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()
@@ -161,16 +163,16 @@ describe("Patient Creation and modification", () => {
   describe("Patient Search and Encounter Creation", () => {
     it("Search patient with phone number and create a new encounter", () => {
       const patientDetail = {
-        name: "Jumanji - Dont Change Name",
-        phone: "87445 82225",
+        name: lastCreatedPatient.name,
+        phone: lastCreatedPatient.phoneNumber,
       };
-      facilityCreation.selectFacility("GHC Payyanur");
+      facilityCreation.selectFirstRandomFacility();
       patientCreation
         .clickSearchPatients()
         .searchPatient(patientDetail.phone)
-        .verifySearchResults(patientDetail)
+        .verifySearchResults(patientDetail.name)
         .selectPatientFromResults(patientDetail.name)
-        .enterYearOfBirth("1999")
+        .enterYearOfBirth("1990")
         .clickVerifyButton();
 
       patientVerify
@@ -180,7 +182,7 @@ describe("Patient Creation and modification", () => {
         .selectEncounterType(ENCOUNTER_TYPE)
         .selectEncounterStatus(ENCOUNTER_STATUS)
         .selectEncounterPriority(ENCOUNTER_PRIORITY)
-        .selectOrganization(ORGANIZATION_NAME)
+        .selectOrganization()
         .clickSubmitEncounter()
         .assertEncounterCreationSuccess();
 

@@ -49,6 +49,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSidebar } from "@/components/ui/sidebar";
 import {
   Table,
   TableBody,
@@ -267,6 +268,7 @@ export default function AppointmentsPage({
   });
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
+  const { open: isSidebarOpen } = useSidebar();
 
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
@@ -595,7 +597,14 @@ export default function AppointmentsPage({
       </div>
 
       {activeTab === "board" ? (
-        <ScrollArea>
+        <ScrollArea
+          className={cn(
+            "transition-all duration-200",
+            isSidebarOpen
+              ? "ease-out md:w-[calc(100vw-21.5rem)]"
+              : "ease-in md:w-[calc(100vw-8rem)]",
+          )}
+        >
           <div className="flex w-max space-x-4">
             {(
               [

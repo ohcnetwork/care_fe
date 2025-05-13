@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { isPast } from "date-fns";
+import { format } from "date-fns";
 import { List, Search } from "lucide-react";
 import { useNavigate, usePathParams } from "raviger";
 import { useState } from "react";
@@ -64,14 +66,24 @@ function ConsentCard({
 
   return (
     <Card className="overflow-hidden transition-all h-full flex flex-col">
-      <Badge
-        variant="outline"
-        className="w-fit justify-center border-b border-gray-300 rounded-b-md rounded-t-none px-2.5 py-1 text-center ml-3 bg-indigo-100 text-indigo-900"
-      >
-        <h3 className="font-semibold text-xs text-gray-900 uppercase">
-          {t(`consent_category__${consent.category}`)}
-        </h3>
-      </Badge>
+      <div className="flex flex-wrap gap-2">
+        <Badge
+          variant="outline"
+          className="w-fit justify-center border-b border-gray-300 rounded-b-md rounded-t-none px-2.5 py-1 text-center ml-3 bg-indigo-100 text-indigo-900"
+        >
+          <h3 className="font-semibold text-xs text-gray-900 uppercase">
+            {t(`consent_category__${consent.category}`)}
+          </h3>
+        </Badge>
+        {consent.period.end && isPast(consent.period.end) && (
+          <Badge
+            variant="destructive"
+            className="flex gap-1 items-center text-xs uppercase"
+          >
+            {t("expired")}
+          </Badge>
+        )}
+      </div>
 
       <CardContent className="flex-1 flex flex-col justify-between p-4 gap-4">
         <div className="flex flex-col gap-3">
@@ -127,25 +139,37 @@ function ConsentCard({
 
         <div className="flex justify-between items-start w-full gap-4 text-sm">
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-gray-500">{t("consent_date")}</span>
-            <p className="font-medium">
+            <span className="text-xs text-gray-500">
+              {t("consent_given_on")}
+            </span>
+            <p className="font-medium text-xs">
               {formatDateTime(consent.date, "MMM D, YYYY")}
+              <br />
+              {format(consent.date, "h:mm a")}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500">{t("valid_period")}</span>
-            <p className="font-medium text-right">
-              <span>
-                {consent.period.start
-                  ? formatDateTime(consent.period.start, "MMM DD")
-                  : t("NA")}
-              </span>
-              {" - "}
-              <span>
-                {consent.period.end
-                  ? formatDateTime(consent.period.end, "MMM DD, YYYY")
-                  : t("NA")}
-              </span>
+            <p className="font-medium text-right text-xs">
+              {consent.period.start ? (
+                <>
+                  <span>
+                    {format(new Date(consent.period.start), "MMMM d, yyyy")}{" "}
+                    {format(new Date(consent.period.start), "h:mm a")} {" - "}
+                  </span>
+                  <br />
+                  <span>
+                    {consent.period.end
+                      ? `${format(new Date(consent.period.end), "MMMM d, yyyy")} ${format(
+                          new Date(consent.period.end),
+                          "h:mm a",
+                        )}`
+                      : t("na")}
+                  </span>
+                </>
+              ) : (
+                <span>{t("na")}</span>
+              )}
             </p>
           </div>
         </div>

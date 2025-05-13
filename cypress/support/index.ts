@@ -20,7 +20,7 @@ declare global {
       ): Chainable<Element>;
       clickAndSelectOption(
         element: string,
-        reference: string,
+        reference?: string,
         options?: { position?: "first" | "last" },
       ): Chainable<Element>;
       verifyAndClickElement(
