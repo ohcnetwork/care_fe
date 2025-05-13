@@ -19,7 +19,7 @@ import { Separator } from "@/components/ui/separator";
 
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
+import { QuestionnaireResponseItem } from "@/components/Questionnaire/QuestionnaireResponseItem";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
@@ -272,7 +272,7 @@ function ResponseCard({
       : item.questionnaire?.title || "";
 
   return (
-    <EncounterAccordionLayout
+    <QuestionnaireResponseItem
       title={isStructured && structuredType ? structuredType : title}
       actionButton={isPrintPreview ? null : <PrintButton item={item} />}
       className={cn(isPrintPreview && "shadow-none")}
@@ -328,7 +328,7 @@ function ResponseCard({
           </div>
         </div>
       )}
-    </EncounterAccordionLayout>
+    </QuestionnaireResponseItem>
   );
 }
 
