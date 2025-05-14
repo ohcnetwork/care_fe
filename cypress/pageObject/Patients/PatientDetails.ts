@@ -35,6 +35,7 @@ export class PatientDetails {
 
   verifyUserAssignmentSuccess() {
     cy.verifyNotification("User added to patient successfully");
+    cy.wait(1000);
     return this;
   }
 
