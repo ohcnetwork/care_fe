@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
