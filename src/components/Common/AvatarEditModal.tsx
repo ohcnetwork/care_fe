@@ -123,6 +123,8 @@ const AvatarEditModal = ({
     setPreview(undefined);
     setIsProcessing(false);
     setSelectedFile(undefined);
+    setIsCameraOpen(false);
+    setPreviewImage(null);
     onOpenChange(false);
   };
 
