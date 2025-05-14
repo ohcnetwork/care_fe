@@ -257,24 +257,12 @@ function PrintButton({ item }: { item: QuestionnaireResponse }) {
   );
 }
 
-function ResponseCard({
-  item,
-  isPrintPreview,
-}: {
-  item: QuestionnaireResponse;
-  isPrintPreview?: boolean;
-}) {
-  const isStructured = !item.questionnaire;
-  const structuredType = Object.keys(item.structured_responses || {})[0];
-  const title =
-    isStructured && structuredType
-      ? properCase(structuredType.replace(/_/g, " "))
-      : item.questionnaire?.title || "";
-
-  const content = (
+function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
+  return (
     <div className="px-2 space-y-4">
       {item.questionnaire?.questions.map((question: Question) => {
         if (question.type === "structured") return null;
+
         if (question.type === "group") {
           return (
             <QuestionGroup
@@ -323,20 +311,37 @@ function ResponseCard({
       </div>
     </div>
   );
+}
+
+function ResponseCard({
+  item,
+  isPrintPreview,
+}: {
+  item: QuestionnaireResponse;
+  isPrintPreview?: boolean;
+}) {
+  const isStructured = !item.questionnaire;
+  const structuredType = Object.keys(item.structured_responses || {})[0];
+  const title =
+    isStructured && structuredType
+      ? properCase(structuredType.replace(/_/g, " "))
+      : item.questionnaire?.title || "";
 
   return isPrintPreview ? (
-    <Card className="shadow-none rounded-lg border border-gray-200">
+    <Card className="shadow-none rounded-xl border border-gray-200">
       <CardHeader>
         <CardTitle className="text-base font-semibold">{title}</CardTitle>
       </CardHeader>
-      <CardContent>{content}</CardContent>
+      <CardContent>
+        <ResponseCardContent item={item} />
+      </CardContent>
     </Card>
   ) : (
     <EncounterAccordionLayout
       title={isStructured && structuredType ? structuredType : title}
       actionButton={<PrintButton item={item} />}
     >
-      {content}
+      <ResponseCardContent item={item} />
     </EncounterAccordionLayout>
   );
 }
