@@ -25,7 +25,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -40,6 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
@@ -994,13 +994,16 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               </PopoverContent>
             </Popover>
           ) : (
-            <Dialog open={showDosageDialog} onOpenChange={setShowDosageDialog}>
-              <DialogContent>
+            <Sheet open={showDosageDialog} onOpenChange={setShowDosageDialog}>
+              <SheetContent
+                className="h-[90dvh] pt-2 pb-0 sm:max-w-md sm:mx-auto"
+                side="bottom"
+              >
                 <DosageDialog
                   dosageRange={dosageInstruction.dose_and_rate.dose_range}
                 />
-              </DialogContent>
-            </Dialog>
+              </SheetContent>
+            </Sheet>
           ))}
       </div>
       {/* Frequency */}
