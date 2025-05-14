@@ -12,6 +12,7 @@ export class PatientDetails {
   }
 
   selectUserToAssign(username: string) {
+    cy.wait(1000);
     cy.typeAndSelectOption(
       '[data-cy="patient-user-selector-container"]',
       username,
