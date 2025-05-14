@@ -26,6 +26,8 @@ interface ImportMetaEnv {
   readonly REACT_ALLOWED_LOCALES?: string;
   readonly REACT_ENABLED_APPS?: string;
 
+  readonly REACT_APP_MAX_IMAGE_SIZE: number;
+
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;
   readonly REACT_SENTRY_ENVIRONMENT?: string;

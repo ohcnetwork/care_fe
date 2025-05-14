@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import DOMPurify from "dompurify";
 import type React from "react";
 import {
@@ -265,8 +266,8 @@ const AvatarEditModal = ({
       return;
     }
 
-    // Check file size (1MB = 1048576 bytes)
-    if (file.size > 1048576) {
+    // Default 1MB = 1048576 bytes
+    if (file.size > careConfig.maxImageSize) {
       toast.warning(t("image_too_large"));
       setImageError(t("image_too_large"));
       return;
@@ -409,8 +410,8 @@ const AvatarEditModal = ({
     if (!isImageFile(droppedFile))
       return dragProps.setFileDropError("Please drop an image file to upload!");
 
-    // Check file size (1MB = 1048576 bytes)
-    if (droppedFile.size > 1048576) {
+    // Default 1MB = 1048576 bytes
+    if (droppedFile.size > careConfig.maxImageSize) {
       toast.warning(t("image_too_large"));
       setImageError(t("image_too_large"));
       return;
