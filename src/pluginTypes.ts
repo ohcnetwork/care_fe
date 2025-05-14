@@ -4,7 +4,7 @@ import { UseFormReturn } from "react-hook-form";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { DeviceDetail } from "@/types/device/device";
 import { Encounter } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 import { UserBase } from "@/types/user/user";
 
 import { AppRoutes } from "./Routers/AppRouter";

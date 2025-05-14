@@ -56,7 +56,7 @@ import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { PatientModel } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
 interface PatientRegistrationPageProps {
@@ -189,7 +189,7 @@ export default function PatientRegistration(
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
     mutationFn: mutate(routes.addPatient),
-    onSuccess: (resp: PatientModel) => {
+    onSuccess: (resp: Patient) => {
       toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
       navigate(`/facility/${facilityId}/patients/verify`, {

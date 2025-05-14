@@ -4,8 +4,7 @@ import { toPng } from "html-to-image";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
-import { Patient } from "@/types/emr/newPatient";
-import { PatientModel } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -122,10 +121,7 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   };
 };
 
-export const formatPatientAge = (
-  obj: PatientModel | Patient,
-  abbreviated = false,
-) => {
+export const formatPatientAge = (obj: Patient, abbreviated = false) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
