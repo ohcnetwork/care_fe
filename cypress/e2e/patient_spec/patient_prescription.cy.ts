@@ -1,7 +1,7 @@
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { PatientPrescription } from "@/pageObject/Patients/PatientPrescription";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
-import { generateName, getRandomMedicineName } from "@/utils/commonUtils";
+import { getRandomMedicineName } from "@/utils/commonUtils";
 import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
@@ -11,7 +11,7 @@ const patientPrescription = new PatientPrescription();
 describe("Patient Prescription Management", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("test-human");
+    cy.loginByApi("nurse");
     cy.visit("/");
   });
 
@@ -27,11 +27,9 @@ describe("Patient Prescription Management", () => {
       notes: "testing notes",
     };
 
-    facilityCreation.selectFacility("GHC Payyanur");
-    const patientName = generateName(true);
+    facilityCreation.selectFirstRandomFacility();
     patientEncounter
       .navigateToEncounters()
-      .searchEncounter(patientName)
       .clickInProgressEncounterFilter()
       .openFirstEncounterDetails();
     patientPrescription
