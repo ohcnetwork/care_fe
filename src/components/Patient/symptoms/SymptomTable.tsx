@@ -111,10 +111,7 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
             </TableCell>
             <TableCell className="whitespace-nowrap text-center">
               {symptom.onset?.onset_datetime ? (
-                <RelativeDateTooltip
-                  date={symptom.onset.onset_datetime}
-                  formatType="since"
-                />
+                <RelativeDateTooltip date={symptom.onset.onset_datetime} />
               ) : (
                 "-"
               )}

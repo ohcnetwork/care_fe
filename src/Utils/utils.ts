@@ -32,11 +32,16 @@ export const formatTimeShort = (time: Time) => {
   return format(new Date(`1970-01-01T${time}`), "h:mm a").replace(":00", "");
 };
 
-export const relativeDate = (date: DateLike, withoutSuffix = false) => {
+export const relativeDate = (date: DateLike, withOutSuffix = false): string => {
   const obj = dayjs(date);
-  return `${obj.fromNow(withoutSuffix)}${
-    withoutSuffix ? " ago " : ""
-  } at ${obj.format(TIME_FORMAT)}`;
+
+  const relative = obj.fromNow(withOutSuffix);
+
+  const hasTime = obj.hour() !== 0 || obj.minute() !== 0 || obj.second() !== 0;
+
+  const time = hasTime ? ` at ${obj.format(TIME_FORMAT)}` : "";
+
+  return `${relative}${time}`;
 };
 
 export const formatName = (
