@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { InfoIcon } from "lucide-react";
@@ -74,6 +75,7 @@ export default function PatientRegistration(
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
+  const defaultCountry = careConfig.defaultCountry.name;
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
@@ -137,7 +139,9 @@ export default function PatientRegistration(
         })
         .refine(
           (data) =>
-            data.nationality === "India" ? !!data.geo_organization : true,
+            data.nationality === defaultCountry
+              ? !!data.geo_organization
+              : true,
           {
             message: t("geo_organization_required"),
             path: ["geo_organization"],
@@ -169,16 +173,17 @@ export default function PatientRegistration(
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nationality: "India",
+      nationality: defaultCountry,
       phone_number: phone_number || "",
       emergency_phone_number: "",
       age_or_dob: "dob",
       same_phone_number: false,
       same_address: true,
     },
+    mode: "onChange",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
@@ -320,7 +325,7 @@ export default function PatientRegistration(
         address: patientQuery.data.address || "",
         permanent_address: patientQuery.data.permanent_address || "",
         pincode: patientQuery.data.pincode || undefined,
-        nationality: patientQuery.data.nationality || "India",
+        nationality: patientQuery.data.nationality || defaultCountry,
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
@@ -403,9 +408,7 @@ export default function PatientRegistration(
                       <PhoneInput
                         {...field}
                         onChange={(value) => {
-                          form.setValue("phone_number", value || "", {
-                            shouldDirty: true,
-                          });
+                          field.onChange(value);
                           if (form.getValues("same_phone_number")) {
                             form.setValue(
                               "emergency_phone_number",
@@ -432,6 +435,13 @@ export default function PatientRegistration(
                                     form.setValue(
                                       "emergency_phone_number",
                                       form.watch("phone_number"),
+                                      { shouldValidate: true },
+                                    );
+                                  } else {
+                                    form.setValue(
+                                      "emergency_phone_number",
+                                      "",
+                                      { shouldValidate: true },
                                     );
                                   }
                                 }}
@@ -714,12 +724,11 @@ export default function PatientRegistration(
                       <Textarea
                         {...field}
                         onChange={(e) => {
-                          form.setValue("address", e.target.value, {
-                            shouldDirty: true,
-                          });
+                          field.onChange(e);
                           if (form.getValues("same_address")) {
                             form.setValue("permanent_address", e.target.value, {
                               shouldDirty: true,
+                              shouldValidate: true,
                             });
                           }
                         }}
@@ -741,6 +750,7 @@ export default function PatientRegistration(
                                     form.setValue(
                                       "permanent_address",
                                       form.getValues("address"),
+                                      { shouldValidate: true },
                                     );
                                   }
                                 }}
@@ -786,15 +796,12 @@ export default function PatientRegistration(
                       <Input
                         type="number"
                         {...field}
-                        onChange={(e) =>
-                          form.setValue(
-                            "pincode",
-                            e.target.value
-                              ? Number(e.target.value)
-                              : (undefined as unknown as number),
-                            { shouldDirty: true },
-                          )
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value
+                            ? Number(e.target.value)
+                            : undefined;
+                          field.onChange(value);
+                        }}
                         data-cy="pincode-input"
                       />
                     </FormControl>
@@ -832,7 +839,7 @@ export default function PatientRegistration(
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {form.watch("nationality") === "India" && (
+                {form.watch("nationality") === defaultCountry && (
                   <FormField
                     control={form.control}
                     name="geo_organization"
@@ -847,6 +854,7 @@ export default function PatientRegistration(
                             onChange={(value) =>
                               form.setValue("geo_organization", value, {
                                 shouldDirty: true,
+                                shouldValidate: true,
                               })
                             }
                           />
