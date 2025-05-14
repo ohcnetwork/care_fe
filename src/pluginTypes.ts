@@ -104,6 +104,7 @@ export type PluginManifest = {
   routes?: AppRoutes;
   extends?: readonly SupportedPluginExtensions[];
   navItems?: NavigationLink[];
+  userNavItems?: NavigationLink[];
   components?: PluginComponentMap;
   encounterTabs?: Record<string, LazyComponent<React.FC<EncounterTabProps>>>;
   devices?: readonly PluginDeviceManifest[];
