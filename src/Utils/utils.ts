@@ -32,6 +32,13 @@ export const formatTimeShort = (time: Time) => {
   return format(new Date(`1970-01-01T${time}`), "h:mm a").replace(":00", "");
 };
 
+export const relativeDate = (date: DateLike, withoutSuffix = false) => {
+  const obj = dayjs(date);
+  return `${obj.fromNow(withoutSuffix)}${
+    withoutSuffix ? " ago " : ""
+  } at ${obj.format(TIME_FORMAT)}`;
+};
+
 export const formatName = (
   user: {
     first_name: string;
@@ -53,6 +60,10 @@ export const formatName = (
       .filter(Boolean)
       .join(" ") || user.username
   );
+};
+
+export const relativeTime = (time?: DateLike) => {
+  return `${dayjs(time).fromNow()}`;
 };
 
 export const dateQueryString = (date: DateLike) => {
