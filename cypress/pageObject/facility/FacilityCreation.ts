@@ -12,8 +12,11 @@ export class FacilityCreation {
     cy.verifyAndClickElement('[data-cy="org-nav-facilities"]', "Facilities");
   }
 
-  selectFacility(facilityName: string) {
-    cy.verifyAndClickElement("[data-cy='facilities-panel-list']", facilityName);
+  selectFirstRandomFacility() {
+    cy.verifyAndClickElement(
+      "[data-cy='facilities-panel-list']",
+      "View facility details",
+    );
     cy.get("[data-sidebar='rail']").click();
     cy.wait(1000);
     return this;
