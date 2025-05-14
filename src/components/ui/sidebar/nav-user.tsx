@@ -22,10 +22,13 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
+import { useCareApps } from "@/hooks/useCareApps";
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { formatName } from "@/Utils/utils";
+
+import { NavigationLink } from "./facility-nav";
 
 export function FacilityNavUser({
   selectedFacilityId,
@@ -36,6 +39,10 @@ export function FacilityNavUser({
   const user = useAuthUser();
   const { isMobile, open } = useSidebar();
   const { signOut } = useAuthContext();
+  const careApps = useCareApps();
+  const pluginNavItems = careApps
+    .filter((c) => !!c.userNavItems)
+    .flatMap((c) => c.userNavItems) as NavigationLink[];
 
   return (
     <SidebarMenu>
@@ -100,6 +107,20 @@ export function FacilityNavUser({
                 <BadgeCheck />
                 {t("profile")}
               </DropdownMenuItem>
+              {pluginNavItems.map((item) => (
+                <DropdownMenuItem
+                  key={item.name}
+                  data-cy={`user-menu-${item.name}`}
+                  onClick={() => {
+                    navigate(
+                      `/facility/${selectedFacilityId}/users/${user.username}/${item.url}`,
+                    );
+                  }}
+                >
+                  {item.icon}
+                  {t(item.name)}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
