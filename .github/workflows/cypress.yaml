@@ -130,12 +130,13 @@ jobs:
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_OPTIONS: --max_old_space_size=4096
+          NODE_OPTIONS: --max_old_space_size=6144
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
           DEBUG: "cypress-split,find-cypress-specs"
+          CYPRESS_CHROME_ARGS: "--disable-dev-shm-usage --no-sandbox --disable-gpu --disable-software-rasterizer"
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
