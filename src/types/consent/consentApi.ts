@@ -38,7 +38,11 @@ export default {
     method: HttpMethod.POST,
     path: "/api/v1/patient/{patientId}/consent/{id}/add_verification/",
     TRes: Type<ConsentModel>(),
-    TBody: Type<{ verification_type: VerificationType }>(),
+    TBody: Type<{
+      verification_type: VerificationType;
+      verified: boolean;
+      note?: string;
+    }>(),
   },
   removeVerification: {
     method: HttpMethod.POST,

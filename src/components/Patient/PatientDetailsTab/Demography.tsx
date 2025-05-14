@@ -267,7 +267,7 @@ export const Demography = (props: PatientProps) => {
                       </Button>
                     )}
                   </div>
-                  <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
+                  <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 md:gap-y-8">
                     {subtab.details.map((detail, j) =>
                       detail &&
                       typeof detail === "object" &&
