@@ -4,8 +4,6 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
-
 import {
   Collapsible,
   CollapsibleContent,
@@ -66,7 +64,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                           className="cursor-pointer hover:bg-gray-200 hover:text-green-700"
                         >
                           {link.icon ? (
-                            <CareIcon icon={link.icon as IconName} />
+                            link.icon
                           ) : (
                             <Avatar
                               name={link.name}
@@ -122,7 +120,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       exactActiveClass="bg-white text-green-700 shadow-sm"
                     >
                       {link.icon ? (
-                        <CareIcon icon={link.icon as IconName} />
+                        link.icon
                       ) : (
                         <Avatar
                           name={link.name}
@@ -152,18 +150,26 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
       <PopoverTrigger asChild>
         <SidebarMenuButton
           tooltip={link.name}
-          className={cn("cursor-pointer", {
-            "bg-gray-100 text-green-700 shadow": isChildActive(link),
-          })}
+          className={cn(
+            "cursor-pointer hover:bg-gray-200 hover:text-green-700",
+            {
+              "bg-white text-green-700 shadow": isChildActive(link),
+            },
+          )}
         >
           {link.icon ? (
-            <CareIcon icon={link.icon as IconName} />
+            link.icon
           ) : (
             <Avatar name={link.name} className="size-6 -m-1 rounded-sm" />
           )}
         </SidebarMenuButton>
       </PopoverTrigger>
-      <PopoverContent side="right" align="start" className="w-48 p-1">
+      <PopoverContent
+        side="right"
+        align="start"
+        className="w-48 p-1"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
         <div className="flex flex-col gap-1">
           {link.children?.map((subItem) => (
             <ActiveLink

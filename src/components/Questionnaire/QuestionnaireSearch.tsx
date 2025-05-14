@@ -20,7 +20,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -139,10 +144,12 @@ export function QuestionnaireSearch({
             <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
         </SheetTrigger>
+
         <SheetContent
           side="bottom"
           className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
         >
+          <SheetTitle className="sr-only">{t("questionnaire")}</SheetTitle>
           <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
           <div className="mt-6 h-full">{content}</div>
         </SheetContent>

@@ -1,6 +1,8 @@
 import { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { NavMain } from "@/components/ui/sidebar/nav-main";
 import { PatientSwitcher } from "@/components/ui/sidebar/patient-switcher";
 
@@ -8,11 +10,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { Patient } from "@/types/emr/newPatient";
 
-interface NavigationLink {
-  name: string;
-  url: string;
-  icon?: string;
-}
+import { NavigationLink } from "./facility-nav";
 
 function generatePatientLinks(
   selectedUser: Patient | null,
@@ -36,11 +34,15 @@ function generatePatientLinks(
   }
 
   return [
-    { name: t("appointments"), url: "/patient/home", icon: "d-calendar" },
+    {
+      name: t("appointments"),
+      url: "/patient/home",
+      icon: <CareIcon icon="d-calendar" />,
+    },
     {
       name: t("nearby_facilities"),
       url: `/nearby_facilities/?${queryParams.toString()}`,
-      icon: "d-hospital",
+      icon: <CareIcon icon="d-hospital" />,
     },
   ];
 }

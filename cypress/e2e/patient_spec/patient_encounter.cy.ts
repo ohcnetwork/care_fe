@@ -11,37 +11,15 @@ const patientPrescription = new PatientPrescription();
 describe("Patient Encounter Questionnaire", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("devnurse");
+    cy.loginByApi("nurse");
     cy.visit("/");
   });
 
-  it("verify the 500 character limit in input field", () => {
-    const characterMaxLimit = generateRandomCharacter({
-      charLimit: 510,
-    });
-    facilityCreation.selectFacility("GHC Payyanur");
-    patientEncounter
-      .navigateToEncounters()
-      .clickInProgressEncounterFilter()
-      .openFirstEncounterDetails()
-      .clickUpdateEncounter()
-      .addQuestionnaire("Question Type")
-      .fillQuestionnaire({
-        text: characterMaxLimit,
-      });
-    patientPrescription.clickSubmitQuestionnaire();
-    cy.verifyNotification("Failed to submit questionnaire");
-    cy.verifyErrorMessages([
-      { label: "Text", message: "Text too long. Max allowed size is 500" },
-    ]);
-  });
-
   it("Create a new ABG questionnaire and verify the values", () => {
-    const abgValues = {
-      pco2: "120",
-      po2: "80",
+    const respiratorySupportValues = {
+      "etco2-(mmhg)": "120",
     };
-    facilityCreation.selectFacility("GHC Payyanur");
+    facilityCreation.selectFirstRandomFacility();
 
     // Chain the methods instead of multiple separate calls
     patientEncounter
@@ -49,9 +27,32 @@ describe("Patient Encounter Questionnaire", () => {
       .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
       .clickUpdateEncounter()
-      .addQuestionnaire("Arterial Blood Gas")
-      .fillQuestionnaire(abgValues);
+      .addQuestionnaire("Respiratory Support")
+      .fillQuestionnaire(respiratorySupportValues);
     patientPrescription.submitQuestionnaire();
-    patientEncounter.verifyOverviewValues(Object.values(abgValues));
+    patientEncounter.verifyOverviewValues(
+      Object.values(respiratorySupportValues),
+    );
+  });
+
+  it("verify the 500 character limit in input field", () => {
+    const characterMaxLimit = generateRandomCharacter({
+      charLimit: 510,
+    });
+    facilityCreation.selectFirstRandomFacility();
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails()
+      .clickUpdateEncounter()
+      .addQuestionnaire("Feedback Form")
+      .fillQuestionnaire({
+        "any-suggestions-for-improvement": characterMaxLimit,
+      });
+    patientPrescription.clickSubmitQuestionnaire();
+    cy.verifyNotification("Failed to submit questionnaire");
+    cy.verifyErrorMessages([
+      { label: "Text", message: "Text too long. Max allowed size is 500" },
+    ]);
   });
 });

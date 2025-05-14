@@ -56,7 +56,7 @@ export default function PatientLogin({
   const { t } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState("");
-  const OTPForm = useForm<z.infer<typeof FormSchema>>({
+  const OTPForm = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       pin: "",
