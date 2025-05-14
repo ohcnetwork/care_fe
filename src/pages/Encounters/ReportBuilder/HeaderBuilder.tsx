@@ -25,6 +25,7 @@ import {
 
 import { ReportTemplateFormData } from "@/pages/Encounters/ReportBuilder/schema";
 import {
+  DateFormats,
   FONT_SIZES,
   FONT_WEIGHT_OPTIONS,
   HeaderElementType,
@@ -238,7 +239,10 @@ const ImageElement = React.memo(function ImageElement({
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_WIDTH")}</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <div className="relative flex items-center">
+                <Input {...field} />
+                <span className="absolute right-3 text-xs">%</span>
+              </div>
             </FormControl>
             <FormMessage>{fieldState.error?.message}</FormMessage>
           </FormItem>
@@ -275,12 +279,12 @@ const RuleElement = React.memo(function RuleElement({
         name={`config.header.rows.${rowIndex}.columns.${elementIndex}.length`}
         render={({ field, fieldState }) => (
           <FormItem>
-            <FormLabel className="flex items-center gap-1">
-              {t("REPORT_BUILDER_LENGTH")}
-              <span className="text-xs text-gray-500">({t("percent")})</span>
-            </FormLabel>
+            <FormLabel>{t("REPORT_BUILDER_LENGTH")}</FormLabel>
             <FormControl>
-              <Input {...field} type="number" value={field.value} />
+              <div className="relative flex items-center">
+                <Input {...field} type="number" value={field.value} />
+                <span className="absolute right-10 text-xs">%</span>
+              </div>
             </FormControl>
             <FormMessage>{fieldState.error?.message}</FormMessage>
           </FormItem>
@@ -343,7 +347,20 @@ const DateTimeElement = React.memo(function DateTimeElement({
           <FormItem>
             <FormLabel>{t("REPORT_BUILDER_FORMAT")}</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={t("REPORT_BUILDER_SELECT_FORMAT")}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(DateFormats).map(([key, value]) => (
+                    <SelectItem key={key} value={value}>
+                      {key}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </FormControl>
             <FormMessage>{fieldState.error?.message}</FormMessage>
           </FormItem>
@@ -732,7 +749,7 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
         () => 1,
       );
 
-      let newElement: any;
+      let newElement: HeaderElementType;
       switch (type) {
         case "text":
           newElement = {

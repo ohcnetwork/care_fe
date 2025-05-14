@@ -1,6 +1,9 @@
+import dayjs from "dayjs";
 import React from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import {
   Table,
@@ -11,6 +14,7 @@ import {
 } from "@/components/ui/table";
 
 import {
+  DateFormats,
   FONT_OPTIONS,
   FONT_SIZES,
   HeaderAlignment,
@@ -114,7 +118,7 @@ export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
     FONT_SIZES.find((size) => size.id.toString() === fontSize)?.value || "12pt";
 
   return (
-    <div className="w-full overflow-auto sticky top-0 h-screen">
+    <div className="w-full overflow-auto sticky top-0">
       <div
         className="bg-white shadow-lg mx-auto h-full flex flex-col gap-2 border"
         style={{
@@ -158,12 +162,8 @@ const HeaderRowPreview = React.memo(function HeaderRowPreview({
   row: HeaderRow;
 }) {
   const rowSizeRatio = row.size_ratio || [1];
-  const totalSizeRatio = rowSizeRatio.reduce((acc, size) => acc + size, 0);
-  const convertedSizePercent = rowSizeRatio.map(
-    (size) => (size / totalSizeRatio) * 100,
-  );
+  const convertedSizePercent = rowSizeRatio.map((size) => size);
 
-  // Group elements by alignment
   const elementsByAlignment = row.columns.reduce(
     (acc, element, index) => {
       acc[index] = {
@@ -184,17 +184,13 @@ const HeaderRowPreview = React.memo(function HeaderRowPreview({
   );
 
   return (
-    <div className="flex flex-row gap-2 justify-between">
-      {Object.entries(elementsByAlignment).map(([_, item]) => (
-        <>
+    <div className="flex flex-row w-full min-w-0">
+      {Object.entries(elementsByAlignment).map(([key, item]) => (
+        <div key={key} className="flex min-w-0" style={{ flexGrow: item.size }}>
           {item.elements.map((element, index) => (
-            <HeaderElementPreview
-              key={index}
-              element={element}
-              itemSize={item.size}
-            />
+            <HeaderElementPreview key={index} element={element} />
           ))}
-        </>
+        </div>
       ))}
     </div>
   );
@@ -202,52 +198,97 @@ const HeaderRowPreview = React.memo(function HeaderRowPreview({
 
 const HeaderElementPreview = React.memo(function HeaderElementPreview({
   element,
-  itemSize,
 }: {
   element: HeaderRow["columns"][number];
-  itemSize: number;
 }) {
   switch (element.type) {
     case "text":
       return (
         <span
-          className="whitespace-nowrap"
+          className={cn(
+            "flex w-full items-center px-1",
+            element.align === "left" && "justify-start",
+            element.align === "right" && "justify-end",
+            element.align === "center" && "justify-center",
+          )}
           style={{
             fontSize: element.size,
             fontWeight: element.weight,
-            width: itemSize + "%",
-            textAlign: element.align,
           }}
         >
-          {element.text}
+          <span className="truncate">{element.text}</span>
         </span>
       );
+
     case "image":
       return (
-        <div
-          style={{
-            alignContent: element.align,
-            width: itemSize + "%",
-          }}
+        <span
+          className={cn(
+            "flex w-full items-center px-1",
+            element.align === "left" && "justify-start",
+            element.align === "right" && "justify-end",
+            element.align === "center" && "justify-center",
+          )}
         >
           <img
             src={element.url}
             alt={element.file_name}
-            className="w-full h-full object-cover"
+            className="object-cover h-auto"
+            style={{
+              width: element.width + "%",
+            }}
           />
-        </div>
+        </span>
       );
+
     case "rule":
-      return <div className="border-t" style={{ width: itemSize + "%" }} />;
+      return (
+        <span
+          className={cn(
+            "flex w-full items-center px-1",
+            element.align === "left" && "justify-start",
+            element.align === "right" && "justify-end",
+            element.align === "center" && "justify-center",
+          )}
+        >
+          <div
+            className="border-t"
+            style={{
+              borderColor: element.stroke,
+              width: element.length + "%",
+            }}
+          />
+        </span>
+      );
+
     case "datetime":
       return (
         <span
-          className="whitespace-nowrap"
-          style={{ width: itemSize + "%", textAlign: element.align }}
+          className={cn(
+            "flex w-full items-center px-1",
+            element.align === "left" && "justify-start",
+            element.align === "right" && "justify-end",
+            element.align === "center" && "justify-center",
+          )}
+          style={{
+            fontWeight: element.style.weight,
+          }}
         >
-          {element.format}
+          <span className="flex gap-1 truncate">
+            <span>{element.label}</span>
+            <span>
+              {dayjs().format(
+                Object.keys(DateFormats).find(
+                  (key) =>
+                    DateFormats[key as keyof typeof DateFormats] ===
+                    element.format,
+                ),
+              )}
+            </span>
+          </span>
         </span>
       );
+
     default:
       return null;
   }
@@ -261,19 +302,24 @@ const SectionPreview = React.memo(function SectionPreview({
   const isTable = section.is_table;
   const { t } = useTranslation();
   return (
-    <>
+    <div className="flex flex-col gap-1 border-b border-gray-400 pb-4">
+      {section.options.title && (
+        <div className="text-lg font-bold">{t(section.options.title)}:</div>
+      )}
       {isTable ? (
-        <div className="rounded-lg border ">
+        <div className="border">
           <Table>
             <TableHeader className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">
               <TableRow>
                 {section.options.columns?.map((column) => (
-                  <TableHead key={column}>{t(column)}</TableHead>
+                  <TableHead key={column} className="uppercase">
+                    {t(column)}
+                  </TableHead>
                 ))}
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow className="bg-transparent hover:bg-transparent divide-x divide-gray-200">
+              <TableRow className="bg-blue-50 hover:bg-blue-50 divide-x divide-gray-200">
                 {section.options.columns?.map((column) => (
                   <TableHead key={column}>{"-"}</TableHead>
                 ))}
@@ -296,6 +342,6 @@ const SectionPreview = React.memo(function SectionPreview({
           })}
         </div>
       )}
-    </>
+    </div>
   );
 });

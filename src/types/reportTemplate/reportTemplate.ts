@@ -225,6 +225,30 @@ interface RuleElement extends BaseHeaderElement {
   stroke: string;
 }
 
+export const DateFormats = {
+  "DD/MM/YYYY": "[day]/[month]/[year]",
+  "MM/DD/YYYY": "[month]/[day]/[year]",
+  "YYYY/MM/DD": "[year]/[month]/[day]",
+  "DD-MM-YYYY": "[day]-[month]-[year]",
+  "MM-DD-YYYY": "[month]-[day]-[year]",
+  "YYYY-MM-DD": "[year]-[month]-[day]",
+  "YYYY-DD-MM": "[year]-[day]-[month]",
+  "DD/MM/YYYY hh:mm": "[day]/[month]/[year] [hour]:[minute]",
+  "MM/DD/YYYY hh:mm": "[month]/[day]/[year] [hour]:[minute]",
+  "YYYY/MM/DD hh:mm": "[year]/[month]/[day] [hour]:[minute]",
+  "DD-MM-YYYY hh:mm": "[day]-[month]-[year] [hour]:[minute]",
+  "MM-DD-YYYY hh:mm": "[month]-[day]-[year] [hour]:[minute]",
+  "YYYY-MM-DD hh:mm": "[year]-[month]-[day] [hour]:[minute]",
+  "YYYY-DD-MM hh:mm": "[year]-[day]-[month] [hour]:[minute]",
+  "DD/MM/YYYY hh:mm:ss": "[day]/[month]/[year] [hour]:[minute]:[second]",
+  "MM/DD/YYYY hh:mm:ss": "[month]/[day]/[year] [hour]:[minute]:[second]",
+  "YYYY/MM/DD hh:mm:ss": "[year]/[month]/[day] [hour]:[minute]:[second]",
+  "DD-MM-YYYY hh:mm:ss": "[day]-[month]-[year] [hour]:[minute]:[second]",
+  "MM-DD-YYYY hh:mm:ss": "[month]-[day]-[year] [hour]:[minute]:[second]",
+  "YYYY-MM-DD hh:mm:ss": "[year]-[month]-[day] [hour]:[minute]:[second]",
+  "YYYY-DD-MM hh:mm:ss": "[year]-[day]-[month] [hour]:[minute]:[second]",
+} as const;
+
 interface DateTimeElement extends BaseHeaderElement {
   type: "datetime";
   label: string;
@@ -321,7 +345,7 @@ export interface ReportTemplateGenerate {
 
 export const SECTION_DISPLAY_NAMES: Record<string, string> = {
   diagnosis: "REPORT_BUILDER_SECTION_DIAGNOSIS",
-  symptom: "REPORT_BUILDER_SECTION_SYMPTOM",
+  symptoms: "REPORT_BUILDER_SECTION_SYMPTOM",
   allergy_intolerance: "REPORT_BUILDER_SECTION_ALLERGY",
   observation: "REPORT_BUILDER_SECTION_OBSERVATION",
   medication_request: "REPORT_BUILDER_SECTION_MEDICATION",

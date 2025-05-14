@@ -269,6 +269,9 @@ export default function ReportBuilder({
       pathParams: {
         id: reportTemplateId,
       },
+      queryParams: {
+        facility: facilityId,
+      },
     }),
     onSuccess: () => {
       toast.success(t("REPORT_BUILDER_TEMPLATE_UPDATED"));
@@ -298,6 +301,22 @@ export default function ReportBuilder({
                 ...column,
                 ...(column.type === "rule" && {
                   length: column.length.split("%")[0],
+                  stroke:
+                    column.stroke?.match(/#[a-fA-F0-9]{6}/)?.[0] ||
+                    column.stroke,
+                }),
+                ...(column.type === "datetime" && {
+                  style: {
+                    ...column.style,
+                    fill:
+                      column.style.fill?.match(/#[a-fA-F0-9]{6}/)?.[0] ||
+                      column.style.fill,
+                  },
+                }),
+                ...(column.type === "image" && {
+                  width:
+                    column.width?.match("[0-9][0-9]?[0-9]?")?.[0] ||
+                    column.width,
                 }),
               })),
             })),
@@ -330,6 +349,16 @@ export default function ReportBuilder({
                 ...column,
                 ...(column.type === "rule" && {
                   length: column.length + "%",
+                  stroke: `rgb("${column.stroke}")`,
+                }),
+                ...(column.type === "datetime" && {
+                  style: {
+                    ...column.style,
+                    fill: `rgb("${column.style.fill}")`,
+                  },
+                }),
+                ...(column.type === "image" && {
+                  width: column.width + "%",
                 }),
               })),
             })),
@@ -348,8 +377,6 @@ export default function ReportBuilder({
     [reportTemplateId, updateReportTemplate, createReportTemplate, form],
   );
 
-  console.log(form.formState.errors);
-
   const handleExport = useCallback(() => {
     console.log("");
   }, []);
@@ -362,9 +389,6 @@ export default function ReportBuilder({
   const hasHeaderErrors = errorEntries.some((e) => e.section === "header");
   const hasLayoutErrors = errorEntries.some((e) => e.section === "layout");
   const hasSectionsErrors = errorEntries.some((e) => e.section === "sections");
-
-  console.log(form.formState.errors);
-  console.log(form.getValues());
 
   return (
     <div className="max-w-9xl mx-auto">
@@ -435,7 +459,7 @@ export default function ReportBuilder({
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card>
+              <Card className="rounded-none">
                 <CardHeader>
                   <CardTitle>{t("REPORT_BUILDER_TITLE")}</CardTitle>
                 </CardHeader>

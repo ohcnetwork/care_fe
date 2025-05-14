@@ -222,11 +222,13 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
   control,
   index,
   availableSections,
+  dataSource,
 }: {
   form: UseFormReturn<ReportTemplateFormData>;
   control: Control<ReportTemplateFormData>;
   index: number;
   availableSections?: Record<string, string[]>;
+  dataSource?: string;
 }) {
   const [selectedDataSource, setSelectedDataSource] = useState<string>("");
   const { t } = useTranslation();
@@ -241,10 +243,10 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
   });
 
   useEffect(() => {
-    if (form.getValues(`config.sections.${index}.source`)) {
-      setSelectedDataSource(form.getValues(`config.sections.${index}.source`));
+    if (dataSource) {
+      setSelectedDataSource(dataSource);
     }
-  }, [form, index]);
+  }, [dataSource]);
 
   const handleDataSourceChange = (value: string, field: any) => {
     setSelectedDataSource(value);
@@ -368,7 +370,6 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
 
 const SectionItem = React.memo(function SectionItem({
   index,
-  field,
   form,
   control,
   activeTab,
@@ -379,7 +380,6 @@ const SectionItem = React.memo(function SectionItem({
   availableSections,
 }: {
   index: number;
-  field: any;
   form: UseFormReturn<ReportTemplateFormData>;
   control: Control<ReportTemplateFormData>;
   activeTab: string;
@@ -391,6 +391,10 @@ const SectionItem = React.memo(function SectionItem({
 }) {
   const { t } = useTranslation();
   const values = useWatch({ control, name: "config.sections" });
+  const dataSource = useWatch({
+    control,
+    name: `config.sections.${index}.source`,
+  });
   return (
     <Card>
       <CardContent className="pt-6">
@@ -408,7 +412,7 @@ const SectionItem = React.memo(function SectionItem({
               </Button>
               <h3 className="text-lg font-semibold">
                 {t(
-                  SECTION_DISPLAY_NAMES[field.source] ||
+                  SECTION_DISPLAY_NAMES[dataSource || ""] ||
                     "REPORT_BUILDER_NEW_SECTION",
                 )}
               </h3>
@@ -471,9 +475,11 @@ const SectionItem = React.memo(function SectionItem({
               <TabsTrigger value="basic" className="w-full">
                 {t("REPORT_BUILDER_BASIC_SETTINGS")}
               </TabsTrigger>
-              <TabsTrigger value="fields" className="w-full">
-                {t("REPORT_BUILDER_FIELDS_COLUMNS")}
-              </TabsTrigger>
+              {dataSource && (
+                <TabsTrigger value="fields" className="w-full">
+                  {t("REPORT_BUILDER_FIELDS_COLUMNS")}
+                </TabsTrigger>
+              )}
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4 mt-4">
@@ -482,16 +488,19 @@ const SectionItem = React.memo(function SectionItem({
                 control={control}
                 index={index}
                 availableSections={availableSections}
+                dataSource={dataSource}
               />
             </TabsContent>
 
-            <TabsContent value="fields" className="space-y-4 mt-4">
-              <SectionFieldsAndColumns
-                control={control}
-                index={index}
-                availableSections={availableSections}
-              />
-            </TabsContent>
+            {dataSource && (
+              <TabsContent value="fields" className="space-y-4 mt-4">
+                <SectionFieldsAndColumns
+                  control={control}
+                  index={index}
+                  availableSections={availableSections}
+                />
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </CardContent>
@@ -591,7 +600,6 @@ export const SectionBuilder = React.memo(function SectionBuilder({
           <SectionItem
             key={field.id}
             index={index}
-            field={field}
             form={form}
             control={form.control}
             activeTab={activeTabs[index] || "basic"}
