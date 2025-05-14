@@ -152,8 +152,8 @@ export default function FacilityForm({
     if (facilityId) {
       updateFacility({
         ...data,
-        latitude: data.latitude,
-        longitude: data.longitude,
+        latitude: data.latitude ?? 0,
+        longitude: data.longitude ?? 0,
       });
     } else {
       createFacility(data);

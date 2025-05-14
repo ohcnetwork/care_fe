@@ -15,7 +15,7 @@ import { mergeAutocompleteOptions } from "@/Utils/utils";
 interface LocationPickerProps {
   latitude?: number;
   longitude?: number;
-  onLocationSelect: (lat: number | undefined, lng: number | undefined) => void;
+  onLocationSelect: (lat: number, lng: number) => void;
   isGettingLocation?: boolean;
   onGetCurrentLocation?: () => void;
 }
@@ -71,46 +71,26 @@ export default function GeoLocationPicker({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">{t("location_details")}</h3>
-        <div className="flex items-center gap-2">
-          {onGetCurrentLocation && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onGetCurrentLocation}
-              disabled={isGettingLocation}
-              className="flex items-center gap-2"
-              data-cy="get-location-button"
-            >
-              {isGettingLocation ? (
-                <CareIcon
-                  icon="l-spinner"
-                  className="size-4 animate-spin mr-1"
-                />
-              ) : (
-                <CareIcon icon="l-location-point" className="size-4 mr-1" />
-              )}
-              {isGettingLocation
-                ? t("getting_location")
-                : t("get_current_location")}
-            </Button>
-          )}
+        {onGetCurrentLocation && (
           <Button
             type="button"
             variant="outline"
             size="sm"
-            disabled={!latitude && !longitude}
-            onClick={() => {
-              setSelectedLocation(undefined);
-              setSearchQuery("");
-              onLocationSelect(undefined, undefined);
-            }}
+            onClick={onGetCurrentLocation}
+            disabled={isGettingLocation}
             className="flex items-center gap-2"
+            data-cy="get-location-button"
           >
-            <CareIcon icon="l-sync" className="size-4 mr-1" />
-            {t("reset")}
+            {isGettingLocation ? (
+              <CareIcon icon="l-spinner" className="size-4 animate-spin mr-1" />
+            ) : (
+              <CareIcon icon="l-location-point" className="size-4 mr-1" />
+            )}
+            {isGettingLocation
+              ? t("getting_location")
+              : t("get_current_location")}
           </Button>
-        </div>
+        )}
       </div>
 
       <div className="relative w-full">
