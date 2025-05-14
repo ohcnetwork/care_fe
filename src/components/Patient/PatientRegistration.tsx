@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { InfoIcon } from "lucide-react";
@@ -74,6 +75,7 @@ export default function PatientRegistration(
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
+  const defaultCountry = careConfig.defaultCountry.name;
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
@@ -137,7 +139,9 @@ export default function PatientRegistration(
         })
         .refine(
           (data) =>
-            data.nationality === "India" ? !!data.geo_organization : true,
+            data.nationality === defaultCountry
+              ? !!data.geo_organization
+              : true,
           {
             message: t("geo_organization_required"),
             path: ["geo_organization"],
@@ -172,14 +176,14 @@ export default function PatientRegistration(
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nationality: "India",
+      nationality: defaultCountry,
       phone_number: phone_number || "",
       emergency_phone_number: "",
       age_or_dob: "dob",
       same_phone_number: false,
       same_address: true,
     },
-    mode: "onChange",
+    mode: "onSubmit",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
@@ -321,7 +325,7 @@ export default function PatientRegistration(
         address: patientQuery.data.address || "",
         permanent_address: patientQuery.data.permanent_address || "",
         pincode: patientQuery.data.pincode || undefined,
-        nationality: patientQuery.data.nationality || "India",
+        nationality: patientQuery.data.nationality || defaultCountry,
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
@@ -623,7 +627,10 @@ export default function PatientRegistration(
                                 {t("invalid_age")}
                               </span>
                             ) : (
-                              <span className="text-violet-600">
+                              <span
+                                className="text-violet-600"
+                                data-cy="year-of-birth"
+                              >
                                 {t("year_of_birth")}:{" "}
                                 {new Date().getFullYear() -
                                   Number(form.getValues("age"))}
@@ -835,7 +842,7 @@ export default function PatientRegistration(
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {form.watch("nationality") === "India" && (
+                {form.watch("nationality") === defaultCountry && (
                   <FormField
                     control={form.control}
                     name="geo_organization"
@@ -850,7 +857,7 @@ export default function PatientRegistration(
                             onChange={(value) =>
                               form.setValue("geo_organization", value, {
                                 shouldDirty: true,
-                                shouldValidate: true,
+                                shouldValidate: form.formState.isSubmitted,
                               })
                             }
                           />
