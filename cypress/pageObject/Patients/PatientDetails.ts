@@ -12,6 +12,7 @@ export class PatientDetails {
   }
 
   selectUserToAssign(username: string) {
+    cy.wait(1000);
     cy.typeAndSelectOption(
       '[data-cy="patient-user-selector-container"]',
       username,
@@ -35,7 +36,6 @@ export class PatientDetails {
 
   verifyUserAssignmentSuccess() {
     cy.verifyNotification("User added to patient successfully");
-    cy.wait(1000);
     return this;
   }
 
