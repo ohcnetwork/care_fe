@@ -7,13 +7,13 @@ const facilityCreation = new FacilityCreation();
 const patientLocation = new PatientLocation();
 
 describe("Manage locations association to an encounter", () => {
-  const PARENT_LOCATION = "Block B";
+  const PARENT_LOCATION = "Ward";
 
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("devdoctor3");
+    cy.loginByApi("superadmin");
     cy.visit("/");
-    facilityCreation.selectFacility("GHC Payyanur");
+    facilityCreation.selectFirstRandomFacility();
   });
 
   it("should create and delete a room location", () => {
@@ -24,7 +24,6 @@ describe("Manage locations association to an encounter", () => {
     patientLocation
       .navigateToSettings()
       .clickLocationTab()
-      .searchLocation(PARENT_LOCATION)
       .openFirstExistingLocation(PARENT_LOCATION)
       .clickChildAddLocation()
       .fillLocationData(roomData)
@@ -50,7 +49,6 @@ describe("Manage locations association to an encounter", () => {
     patientLocation
       .navigateToSettings()
       .clickLocationTab()
-      .searchLocation(PARENT_LOCATION)
       .openFirstExistingLocation(PARENT_LOCATION)
       .clickChildAddLocation()
       .fillLocationData(houseData)
@@ -77,17 +75,16 @@ describe("Manage locations association to an encounter", () => {
     patientLocation
       .navigateToSettings()
       .clickLocationTab()
-      .searchLocation(PARENT_LOCATION)
       .openFirstExistingLocation(PARENT_LOCATION)
       .clickChildAddLocation()
       .fillLocationData(bedData)
       .submitLocationForm()
       .assertMultipleBedsCreationSuccess(bedData.bedsCount)
       .interceptLocationDeletionAPICall()
-      .searchChildLocation(bedData.name)
+      .searchChildLocation(bedData.name + " 1")
       .clickFirstDeleteLocationButton()
       .verifyLocationDeletionAPICall()
-      .searchChildLocation(bedData.name)
+      .searchChildLocation(bedData.name + " 2")
       .clickFirstDeleteLocationButton()
       .assertLocationDeletionSuccess();
   });
