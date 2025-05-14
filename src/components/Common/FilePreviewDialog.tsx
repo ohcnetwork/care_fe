@@ -432,7 +432,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               )}
             </div>
             <div className="flex items-center justify-center">
-              <div className="mt-2 grid grid-cols-3 gap-4">
+              <div className="mt-2 grid grid-cols-3 md:grid-cols-6 gap-4">
                 {file_state.isImage && (
                   <>
                     {[
@@ -463,10 +463,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         disabled: false,
                       },
                       {
-                        label: null,
-                        icon: null,
-                        action: () => {},
-                        disabled: true,
+                        label: t("reset"),
+                        icon: "l-minus-circle",
+                        action: () =>
+                          setFileState((prev) => ({ ...prev, rotation: 0 })),
+                        disabled: false,
                       },
                       {
                         label: t("rotate_right"),
