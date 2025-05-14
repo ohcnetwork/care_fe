@@ -183,15 +183,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
     return <Loading />;
   }
 
-  const coverImageHint = (
-    <>
-      {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
-      <br />
-      {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
-      {t("recommended_aspect_ratio_for", { aspectRatio: "16:9" })}
-    </>
-  );
-
   if (!facilityData) {
     return <ErrorPage />;
   }
@@ -205,7 +196,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
         handleUpload={handleCoverImageUpload}
         handleDelete={handleCoverImageDelete}
         onOpenChange={(open) => setEditCoverImage(open)}
-        hint={coverImageHint}
       />
       <div className="container mx-auto pt-2">
         <div className="mx-auto max-w-3xl space-y-6">
