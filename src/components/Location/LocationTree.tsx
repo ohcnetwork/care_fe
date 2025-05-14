@@ -7,7 +7,8 @@ import { LocationList } from "@/types/location/location";
 
 interface LocationPathProps {
   location: LocationList;
-  datetime?: string;
+  startTime?: string;
+  endTime?: string;
   isLatest?: boolean;
   showTimeline?: boolean;
 }
@@ -15,14 +16,17 @@ interface LocationPathProps {
 interface LocationNodeProps {
   location: LocationList;
   isLast: boolean;
-  datetime?: string;
+  startTime?: string;
+
+  endTime?: string;
   children?: React.ReactNode;
 }
 
 function LocationNode({
   location,
   isLast,
-  datetime,
+  startTime,
+  endTime,
   children,
 }: LocationNodeProps) {
   if (!location.parent?.id) {
@@ -37,9 +41,14 @@ function LocationNode({
           </span>
         </div>
         {children}
-        {isLast && datetime && (
-          <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
-            {format(new Date(datetime), "MMM d, yyyy h:mm a")}
+        {isLast && (startTime || endTime) && (
+          <div className="pl-6 text-sm font-normal text-gray-700 italic">
+            {[
+              startTime && format(new Date(startTime), "MMM d, yyyy h:mm a"),
+              endTime && format(new Date(endTime), "MMM d, yyyy h:mm a"),
+            ]
+              .filter(Boolean)
+              .join(" - ")}
           </div>
         )}
       </div>
@@ -47,7 +56,12 @@ function LocationNode({
   }
 
   return (
-    <LocationNode location={location.parent} isLast={false} datetime={datetime}>
+    <LocationNode
+      location={location.parent}
+      isLast={false}
+      startTime={startTime}
+      endTime={endTime}
+    >
       <div className="flex flex-col gap-2 ml-2">
         <div className="flex items-center text-sm">
           <CareIcon
@@ -61,9 +75,14 @@ function LocationNode({
           </span>
         </div>
         {children}
-        {isLast && datetime && (
-          <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
-            {format(new Date(datetime), "MMM d, yyyy h:mm a")}
+        {isLast && (startTime || endTime) && (
+          <div className="pl-6 text-sm font-normal text-gray-700 italic">
+            {[
+              startTime && format(new Date(startTime), "MMM d, yyyy h:mm a"),
+              endTime && format(new Date(endTime), "MMM d, yyyy h:mm a"),
+            ]
+              .filter(Boolean)
+              .join(" - ")}
           </div>
         )}
       </div>
@@ -73,7 +92,8 @@ function LocationNode({
 
 export function LocationTree({
   location,
-  datetime,
+  startTime,
+  endTime,
   isLatest,
   showTimeline = false,
 }: LocationPathProps) {
@@ -98,7 +118,12 @@ export function LocationTree({
         </div>
       )}
       <div className="flex flex-col gap-2">
-        <LocationNode location={location} isLast={true} datetime={datetime} />
+        <LocationNode
+          location={location}
+          isLast={true}
+          startTime={startTime}
+          endTime={endTime}
+        />
       </div>
     </div>
   );
