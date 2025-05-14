@@ -9,6 +9,7 @@ import { UserBase } from "@/types/user/user";
 
 import { AppRoutes } from "./Routers/AppRouter";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
+import { NavigationLink } from "./components/ui/sidebar/facility-nav";
 import { pluginMap } from "./pluginMap";
 import { FacilityData } from "./types/facility/facility";
 
@@ -102,6 +103,7 @@ export type PluginManifest = {
   plugin: string;
   routes?: AppRoutes;
   extends?: readonly SupportedPluginExtensions[];
+  navItems?: NavigationLink[];
   components?: PluginComponentMap;
   encounterTabs?: Record<string, LazyComponent<React.FC<EncounterTabProps>>>;
   devices?: readonly PluginDeviceManifest[];

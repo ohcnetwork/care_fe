@@ -349,7 +349,7 @@ export function ResponseCard({ item }: ResponseCardProps) {
   if (isStructured && structuredType) return null;
 
   return (
-    <div className="flex flex-col py-3 transition-colors hover:bg-muted/50">
+    <div className="flex flex-col py-3 transition-colors">
       <div className="text-sm m-1">
         <p>
           {t("created_by")}: {formatName(item.created_by)}

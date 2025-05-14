@@ -90,7 +90,7 @@ Cypress.Commands.add(
   "clickAndSelectOption",
   (
     element: string,
-    reference: string,
+    reference?: string,
     options: { position?: "first" | "last" } = {},
   ) => {
     // Click to open the select dropdown based on position
@@ -102,12 +102,14 @@ Cypress.Commands.add(
       cy.get(element).click();
     }
 
-    // Common selection logic
-    cy.get('[role="listbox"]')
-      .find('[role="option"]')
-      .contains(reference)
-      .should("be.visible")
-      .click();
+    // Selection logic based on whether reference is provided
+    const listbox = cy.get('[role="listbox"]').find('[role="option"]');
+
+    if (reference) {
+      listbox.contains(reference).should("be.visible").click();
+    } else {
+      listbox.first().should("be.visible").click();
+    }
   },
 );
 
@@ -194,7 +196,7 @@ Cypress.Commands.add(
     const inputField = cy.get(selector);
 
     if (clearBeforeTyping) {
-      inputField.clear();
+      inputField.click().clear();
     }
 
     // Handle click based on position

@@ -2,9 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { UserFacilityModel } from "@/components/Users/models";
+
+import { useCareApps } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -15,7 +19,7 @@ import { usePermissions } from "@/context/PermissionContext";
 export interface NavigationLink {
   name: string;
   url: string;
-  icon?: string;
+  icon?: React.ReactNode;
   visibility?: boolean;
   children?: NavigationLink[];
 }
@@ -34,22 +38,27 @@ function generateFacilityLinks(
     canCreateEncounter: boolean;
     canViewEncounter: boolean;
   },
+  pluginLinks: NavigationLink[],
 ) {
   if (!selectedFacility) return [];
 
   const baseUrl = `/facility/${selectedFacility.id}`;
   const links: NavigationLink[] = [
-    { name: t("overview"), url: `${baseUrl}/overview`, icon: "d-hospital" },
+    {
+      name: t("overview"),
+      url: `${baseUrl}/overview`,
+      icon: <CareIcon icon="d-hospital" />,
+    },
     {
       name: t("appointments"),
       url: `${baseUrl}/appointments`,
-      icon: "d-calendar",
+      icon: <CareIcon icon="d-calendar" />,
       visibility: permissions.canViewAppointments,
     },
     {
       name: t("patients"),
       url: `${baseUrl}/patients`,
-      icon: "d-patient",
+      icon: <CareIcon icon="d-patient" />,
       visibility:
         permissions.canCreateAppointment ||
         permissions.canListEncounters ||
@@ -72,13 +81,17 @@ function generateFacilityLinks(
     {
       name: t("resource"),
       url: `${baseUrl}/resource`,
-      icon: "d-book-open",
+      icon: <CareIcon icon="d-book-open" />,
     },
-    { name: t("users"), url: `${baseUrl}/users`, icon: "d-people" },
+    {
+      name: t("users"),
+      url: `${baseUrl}/users`,
+      icon: <CareIcon icon="d-people" />,
+    },
     {
       name: t("settings"),
       url: `${baseUrl}/settings/general`,
-      icon: "l-setting",
+      icon: <CareIcon icon="l-setting" />,
       children: [
         {
           name: t("general"),
@@ -100,12 +113,22 @@ function generateFacilityLinks(
     },
   ];
 
-  return links;
+  return [
+    ...links,
+    ...pluginLinks.map((l) => ({
+      ...l,
+      url: `${baseUrl}/${l.url}`,
+    })),
+  ];
 }
 
 export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
+  const careApps = useCareApps();
+  const pluginNavItems = careApps
+    .filter((c) => !!c.navItems)
+    .flatMap((c) => c.navItems) as NavigationLink[];
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", selectedFacility?.id],
@@ -130,6 +153,13 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canViewEncounter,
   };
   return (
-    <NavMain links={generateFacilityLinks(selectedFacility, t, permissions)} />
+    <NavMain
+      links={generateFacilityLinks(
+        selectedFacility,
+        t,
+        permissions,
+        pluginNavItems,
+      )}
+    />
   );
 }
