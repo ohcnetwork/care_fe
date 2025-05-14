@@ -772,7 +772,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   errors,
 }) => {
   const { t } = useTranslation();
-  const [showDosageDialog, setShowDosageDialog] = useState(false);
+  const [showDosageSheet, setShowDosageSheet] = useState(false);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
   const dosageInstruction = medication.dosage_instruction[0] || {};
   const isReadOnly = !!medication.id;
@@ -786,11 +786,11 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     });
   };
 
-  interface DosageDialogProps {
+  interface DosageSheetProps {
     dosageRange: DoseRange;
   }
 
-  const DosageDialog: React.FC<DosageDialogProps> = ({ dosageRange }) => {
+  const DosageSheet: React.FC<DosageSheetProps> = ({ dosageRange }) => {
     const [localDoseRange, setLocalDoseRange] =
       useState<DoseRange>(dosageRange);
 
@@ -838,7 +838,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               handleUpdateDosageInstruction({
                 dose_and_rate: undefined,
               });
-              setShowDosageDialog(false);
+              setShowDosageSheet(false);
             }}
           >
             {t("clear")}
@@ -851,7 +851,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   dose_range: localDoseRange,
                 },
               });
-              setShowDosageDialog(false);
+              setShowDosageSheet(false);
             }}
             disabled={
               !localDoseRange.low.value ||
@@ -883,7 +883,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         },
       });
     }
-    setShowDosageDialog(true);
+    setShowDosageSheet(true);
   };
 
   return (
@@ -926,7 +926,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               value={formatDoseRange(
                 dosageInstruction.dose_and_rate.dose_range,
               )}
-              onClick={() => setShowDosageDialog(true)}
+              onClick={() => setShowDosageSheet(true)}
               className={cn(
                 "h-9 text-sm cursor-pointer mb-3",
                 hasError(MEDICATION_REQUEST_FIELDS.DOSAGE.key) &&
@@ -983,23 +983,23 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
 
         {dosageInstruction?.dose_and_rate?.dose_range &&
           (desktopLayout ? (
-            <Popover open={showDosageDialog} onOpenChange={setShowDosageDialog}>
+            <Popover open={showDosageSheet} onOpenChange={setShowDosageSheet}>
               <PopoverTrigger asChild>
                 <div className="w-full" />
               </PopoverTrigger>
               <PopoverContent className="w-55 p-4" align="start">
-                <DosageDialog
+                <DosageSheet
                   dosageRange={dosageInstruction.dose_and_rate.dose_range}
                 />
               </PopoverContent>
             </Popover>
           ) : (
-            <Sheet open={showDosageDialog} onOpenChange={setShowDosageDialog}>
+            <Sheet open={showDosageSheet} onOpenChange={setShowDosageSheet}>
               <SheetContent
                 className="h-[90dvh] pt-2 pb-0 sm:max-w-md sm:mx-auto"
                 side="bottom"
               >
-                <DosageDialog
+                <DosageSheet
                   dosageRange={dosageInstruction.dose_and_rate.dose_range}
                 />
               </SheetContent>
