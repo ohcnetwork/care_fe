@@ -1,8 +1,6 @@
 import { format, isToday, isValid } from "date-fns";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { relativeDate } from "@/Utils/utils";
@@ -54,7 +52,7 @@ export default function RelativeDateTooltip({
 
   return (
     <TooltipComponent content={tooltipContent}>
-      <time dateTime={datetimeAttr} className={cn(className, "capitalize")}>
+      <time dateTime={datetimeAttr} className={className}>
         {relativeDate(dateObj)}
       </time>
     </TooltipComponent>
