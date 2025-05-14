@@ -59,6 +59,8 @@ import type {
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
+import { isRecordEnteredInError } from "./utils";
+
 interface AllergyQuestionProps {
   patientId: string;
   question: Question;
@@ -422,13 +424,10 @@ export function AllergyQuestion({
                     allergy={allergy}
                     disabled={
                       disabled ||
-                      patientAllergies?.results
-                        .filter(
-                          (result) =>
-                            result.verification_status === "entered_in_error",
-                        )
-                        .map((result) => result.id)
-                        .includes(allergy.id as string)
+                      isRecordEnteredInError(
+                        patientAllergies,
+                        allergy.id as string,
+                      )
                     }
                     onUpdate={(updates) => handleUpdateAllergy(index, updates)}
                     onRemove={() => handleRemoveAllergy(index)}
@@ -447,14 +446,10 @@ export function AllergyQuestion({
                   "p-3 space-y-3",
                   allergy.clinical_status === "inactive" && "opacity-60",
                   allergy.clinical_status === "resolved" && "line-through",
-                  patientAllergies?.results
-                    .filter(
-                      (result) =>
-                        result.verification_status === "entered_in_error",
-                    )
-                    .map((result) => result.id)
-                    .includes(allergy.id as string) &&
-                    "opacity-40 pointer-events-none",
+                  isRecordEnteredInError(
+                    patientAllergies,
+                    allergy.id as string,
+                  ) && "opacity-40 pointer-events-none",
                 )}
               >
                 <div className="flex items-center justify-between">

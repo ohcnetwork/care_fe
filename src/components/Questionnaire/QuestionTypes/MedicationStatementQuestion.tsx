@@ -75,6 +75,7 @@ import {
 } from "@/types/questionnaire/validation";
 
 import { FieldError } from "./FieldError";
+import { isRecordEnteredInError } from "./utils";
 
 interface MedicationStatementQuestionProps {
   patientId: string;
@@ -598,13 +599,10 @@ export function MedicationStatementQuestion({
                                 medication={medication}
                                 disabled={
                                   disabled ||
-                                  patientMedications?.results
-                                    .filter(
-                                      (result) =>
-                                        result.status === "entered_in_error",
-                                    )
-                                    .map((result) => result.id)
-                                    .includes(medication.id as string)
+                                  isRecordEnteredInError(
+                                    patientMedications,
+                                    medication.id as string,
+                                  )
                                 }
                                 onUpdate={(updates) =>
                                   handleUpdateMedication(index, updates)
@@ -623,12 +621,10 @@ export function MedicationStatementQuestion({
                         medication={medication}
                         disabled={
                           disabled ||
-                          patientMedications?.results
-                            .filter(
-                              (result) => result.status === "entered_in_error",
-                            )
-                            .map((result) => result.id)
-                            .includes(medication.id as string)
+                          isRecordEnteredInError(
+                            patientMedications,
+                            medication.id as string,
+                          )
                         }
                         onUpdate={(updates) =>
                           handleUpdateMedication(index, updates)

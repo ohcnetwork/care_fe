@@ -70,6 +70,8 @@ import {
   ResponseValue,
 } from "@/types/questionnaire/form";
 
+import { isRecordEnteredInError } from "./utils";
+
 interface SymptomQuestionProps {
   patientId: string;
   encounterId: string;
@@ -880,13 +882,10 @@ export function SymptomQuestion({
                       index={index}
                       disabled={
                         disabled ||
-                        patientSymptoms?.results
-                          .filter(
-                            (result) =>
-                              result.verification_status === "entered_in_error",
-                          )
-                          .map((result) => result.id)
-                          .includes(symptom.id as string)
+                        isRecordEnteredInError(
+                          patientSymptoms,
+                          symptom.id as string,
+                        )
                       }
                       onUpdate={handleUpdateSymptom}
                       onRemove={handleRemoveSymptom}
@@ -909,13 +908,10 @@ export function SymptomQuestion({
                   index={index}
                   disabled={
                     disabled ||
-                    patientSymptoms?.results
-                      .filter(
-                        (result) =>
-                          result.verification_status === "entered_in_error",
-                      )
-                      .map((result) => result.id)
-                      .includes(symptom.id as string)
+                    isRecordEnteredInError(
+                      patientSymptoms,
+                      symptom.id as string,
+                    )
                   }
                   onUpdate={handleUpdateSymptom}
                   onRemove={handleRemoveSymptom}
