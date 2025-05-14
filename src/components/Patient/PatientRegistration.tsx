@@ -183,7 +183,7 @@ export default function PatientRegistration(
       same_phone_number: false,
       same_address: true,
     },
-    mode: "onChange",
+    mode: "onSubmit",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
@@ -627,7 +627,10 @@ export default function PatientRegistration(
                                 {t("invalid_age")}
                               </span>
                             ) : (
-                              <span className="text-violet-600">
+                              <span
+                                className="text-violet-600"
+                                data-cy="year-of-birth"
+                              >
                                 {t("year_of_birth")}:{" "}
                                 {new Date().getFullYear() -
                                   Number(form.getValues("age"))}
@@ -854,7 +857,7 @@ export default function PatientRegistration(
                             onChange={(value) =>
                               form.setValue("geo_organization", value, {
                                 shouldDirty: true,
-                                shouldValidate: true,
+                                shouldValidate: form.formState.isSubmitted,
                               })
                             }
                           />
