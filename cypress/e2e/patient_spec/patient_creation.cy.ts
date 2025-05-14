@@ -34,26 +34,10 @@ describe("Patient Search and Encounter Creation", () => {
       .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
       .clickPatientDetailsButton()
-      .clickPatientEditButton();
-
-    // Extract patient details from input fields
-    cy.get('[data-cy="patient-phone-input"]').invoke("val").as("patientPhone");
-    cy.get('[data-cy="patient-name-input"]').invoke("val").as("patientName");
-
-    // Check which year input field is visible and handle accordingly
-    cy.get("body").then(($body) => {
-      if ($body.find('[data-cy="dob-year-input"]').length > 0) {
-        cy.get('[data-cy="dob-year-input"]').invoke("val").as("patientYear");
-      } else {
-        cy.get('[data-cy="year-of-birth"]')
-          .invoke("text")
-          .then((text) => {
-            // Extract numeric value from text like "Year of Birth: 20"
-            const year = text.match(/\d+/)?.[0];
-            cy.wrap(year).as("patientYear");
-          });
-      }
-    });
+      .clickPatientEditButton()
+      .getPatientPhone()
+      .getPatientName()
+      .getPatientYear();
 
     // use that patient details to search and create a new encounter
     cy.get("@patientPhone").then((phoneNumber) => {

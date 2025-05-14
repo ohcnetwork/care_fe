@@ -112,4 +112,30 @@ export class PatientEncounter {
     cy.wait("@getEncounters").its("response.statusCode").should("eq", 200);
     return this;
   }
+
+  getPatientPhone() {
+    cy.get('[data-cy="patient-phone-input"]').invoke("val").as("patientPhone");
+    return this;
+  }
+
+  getPatientName() {
+    cy.get('[data-cy="patient-name-input"]').invoke("val").as("patientName");
+    return this;
+  }
+
+  getPatientYear() {
+    cy.get("body").then(($body) => {
+      if ($body.find('[data-cy="dob-year-input"]').length > 0) {
+        cy.get('[data-cy="dob-year-input"]').invoke("val").as("patientYear");
+      } else {
+        cy.get('[data-cy="year-of-birth"]')
+          .invoke("text")
+          .then((text) => {
+            const year = text.match(/\d+/)?.[0];
+            cy.wrap(year).as("patientYear");
+          });
+      }
+    });
+    return this;
+  }
 }
