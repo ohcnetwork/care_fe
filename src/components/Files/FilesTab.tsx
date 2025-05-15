@@ -717,8 +717,8 @@ export const FilesTab = (props: FilesTabProps) => {
                 </div>
               </Button>
             }
-            onSuccess={async () => {
-              await queryClient.invalidateQueries({
+            onSuccess={() => {
+              queryClient.invalidateQueries({
                 queryKey: ["files"],
               });
             }}

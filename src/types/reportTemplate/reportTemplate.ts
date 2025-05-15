@@ -283,7 +283,7 @@ export const REPORT_TEMPLATE_TYPE = [
 export type ReportTemplateType = (typeof REPORT_TEMPLATE_TYPE)[number]["id"];
 
 export interface ReportTemplateBase {
-  id?: string;
+  id: string;
   config: ReportConfig;
   slug: string;
   type: ReportTemplateType;

@@ -107,7 +107,7 @@ export const reportTemplateSchema = z.object({
               }),
               z.object({
                 type: z.literal("rule"),
-                length: z.number(),
+                length: z.number().min(1).max(100),
                 stroke: z.string(),
                 align: z
                   .enum(

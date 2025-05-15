@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -37,9 +37,9 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { HeaderBuilder } from "@/pages/Encounters/ReportBuilder/HeaderBuilder";
-import { LayoutBuilder } from "@/pages/Encounters/ReportBuilder/LayoutBuilder";
-import { SectionBuilder } from "@/pages/Encounters/ReportBuilder/SectionBuilder";
+import HeaderBuilder from "@/pages/Encounters/ReportBuilder/HeaderBuilder";
+import LayoutBuilder from "@/pages/Encounters/ReportBuilder/LayoutBuilder";
+import SectionBuilder from "@/pages/Encounters/ReportBuilder/SectionBuilder";
 import {
   ReportTemplateFormData,
   reportTemplateSchema,
@@ -47,7 +47,7 @@ import {
 import { REPORT_TEMPLATE_TYPE } from "@/types/reportTemplate/reportTemplate";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
 
-import { ReportBuilderPreview } from "./ReportBuilderPreview";
+import ReportBuilderPreview from "./ReportBuilderPreview";
 
 interface ReportBuilderProps {
   facilityId: string;
@@ -251,7 +251,7 @@ export default function ReportBuilder({
     queryKey: ["report-template", reportTemplateId],
     queryFn: query(reportTemplateApi.get, {
       pathParams: {
-        id: reportTemplateId,
+        id: reportTemplateId ?? "",
       },
       queryParams: {
         facility: facilityId,
@@ -270,7 +270,7 @@ export default function ReportBuilder({
   const { mutate: updateReportTemplate } = useMutation({
     mutationFn: mutate(reportTemplateApi.update, {
       pathParams: {
-        id: reportTemplateId,
+        id: reportTemplateId ?? "",
       },
       queryParams: {
         facility: facilityId,
@@ -404,9 +404,9 @@ export default function ReportBuilder({
     }
   };
 
-  const handleExport = useCallback(() => {
+  const handleExport = () => {
     console.log("");
-  }, []);
+  };
 
   if (reportTemplateId && isTemplateLoading) {
     return <Loading />;

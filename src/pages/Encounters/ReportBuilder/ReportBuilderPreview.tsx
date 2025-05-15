@@ -70,7 +70,7 @@ export function parseAlignment(align: AlignmentOptions): Position {
   };
 }
 
-export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
+export default function ReportBuilderPreview({
   form,
 }: ReportBuilderPreviewProps) {
   // Get layout settings
@@ -183,13 +183,9 @@ export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
       </div>
     </div>
   );
-});
+}
 
-const HeaderRowPreview = React.memo(function HeaderRowPreview({
-  row,
-}: {
-  row: HeaderRow;
-}) {
+function HeaderRowPreview({ row }: { row: HeaderRow }) {
   const rowSizeRatio = row.size_ratio || [1];
   const convertedSizePercent = rowSizeRatio.map((size) => size);
 
@@ -223,9 +219,9 @@ const HeaderRowPreview = React.memo(function HeaderRowPreview({
       ))}
     </div>
   );
-});
+}
 
-const HeaderElementPreview = React.memo(function HeaderElementPreview({
+function HeaderElementPreview({
   element,
 }: {
   element: HeaderRow["columns"][number];
@@ -322,13 +318,9 @@ const HeaderElementPreview = React.memo(function HeaderElementPreview({
     default:
       return null;
   }
-});
+}
 
-const SectionPreview = React.memo(function SectionPreview({
-  section,
-}: {
-  section: SectionConfig;
-}) {
+function SectionPreview({ section }: { section: SectionConfig }) {
   const isTable = section.is_table;
   const { t } = useTranslation();
   return (
@@ -374,4 +366,4 @@ const SectionPreview = React.memo(function SectionPreview({
       )}
     </div>
   );
-});
+}

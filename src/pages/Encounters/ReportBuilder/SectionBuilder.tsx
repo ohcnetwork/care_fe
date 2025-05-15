@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, GripVertical, Plus, X } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Control,
   UseFormReturn,
@@ -41,7 +41,7 @@ interface SectionBuilderProps {
   facilityId: string;
 }
 
-const SectionFieldsAndColumns = React.memo(function SectionFieldsAndColumns({
+function SectionFieldsAndColumns({
   control,
   index,
   availableSections,
@@ -211,9 +211,9 @@ const SectionFieldsAndColumns = React.memo(function SectionFieldsAndColumns({
       )}
     </div>
   );
-});
+}
 
-const SectionBasicSettings = React.memo(function SectionBasicSettings({
+function SectionBasicSettings({
   form,
   control,
   index,
@@ -356,9 +356,9 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
       />
     </div>
   );
-});
+}
 
-const SectionItem = React.memo(function SectionItem({
+function SectionItem({
   index,
   form,
   control,
@@ -493,11 +493,9 @@ const SectionItem = React.memo(function SectionItem({
       </CardContent>
     </Card>
   );
-});
+}
 
-export const SectionBuilder = React.memo(function SectionBuilder({
-  form,
-}: SectionBuilderProps) {
+export default function SectionBuilder({ form }: SectionBuilderProps) {
   const { t } = useTranslation();
   const { fields, append, remove, move } = useFieldArray({
     control: form.control,
@@ -511,7 +509,7 @@ export const SectionBuilder = React.memo(function SectionBuilder({
     queryFn: query(reportTemplateApi.getAvailableSections),
   });
 
-  const addSection = useCallback(() => {
+  const addSection = () => {
     append({
       source: "",
       is_table: false,
@@ -522,46 +520,34 @@ export const SectionBuilder = React.memo(function SectionBuilder({
         fields: [],
       },
     });
-  }, [append]);
+  };
 
-  const moveSection = useCallback(
-    (from: number, to: number) => {
-      move(from, to);
-    },
-    [move],
-  );
+  const moveSection = (from: number, to: number) => {
+    move(from, to);
+  };
 
-  const moveSectionUp = useCallback(
-    (index: number) => {
-      if (index > 0) {
-        moveSection(index, index - 1);
-      }
-    },
-    [moveSection],
-  );
+  const moveSectionUp = (index: number) => {
+    if (index > 0) {
+      moveSection(index, index - 1);
+    }
+  };
 
-  const moveSectionDown = useCallback(
-    (index: number) => {
-      if (index < fields.length - 1) {
-        moveSection(index, index + 1);
-      }
-    },
-    [moveSection, fields.length],
-  );
+  const moveSectionDown = (index: number) => {
+    if (index < fields.length - 1) {
+      moveSection(index, index + 1);
+    }
+  };
 
-  const removeSection = useCallback(
-    (index: number) => {
-      remove(index);
-    },
-    [remove],
-  );
+  const removeSection = (index: number) => {
+    remove(index);
+  };
 
-  const handleTabChange = useCallback((index: number, value: string) => {
+  const handleTabChange = (index: number, value: string) => {
     setActiveTabs((prev) => ({
       ...prev,
       [index]: value,
     }));
-  }, []);
+  };
 
   return (
     <Card>
@@ -606,4 +592,4 @@ export const SectionBuilder = React.memo(function SectionBuilder({
       </CardContent>
     </Card>
   );
-});
+}

@@ -46,4 +46,4 @@ export default {
     TBody: Type<ReportTemplateGenerate>(),
     TRes: Type<string[]>(),
   },
-};
+} as const;

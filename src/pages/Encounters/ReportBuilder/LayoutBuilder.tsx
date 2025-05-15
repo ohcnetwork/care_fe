@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -48,22 +48,16 @@ interface LayoutBuilderProps {
   form: UseFormReturn<ReportTemplateFormData>;
 }
 
-// Memoized component to prevent unnecessary re-renders
-export const LayoutBuilder = React.memo(function LayoutBuilder({
-  form,
-}: LayoutBuilderProps) {
+export default function LayoutBuilder({ form }: LayoutBuilderProps) {
   const [pageSizeOpen, setPageSizeOpen] = useState(false);
   const { t } = useTranslation();
 
-  const handlePageNumberingAlignChange = useCallback(
-    (value: AlignmentOptions) => {
-      form.setValue("config.layout.page_numbering.align", value, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [form],
-  );
+  const handlePageNumberingAlignChange = (value: AlignmentOptions) => {
+    form.setValue("config.layout.page_numbering.align", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
 
   const marginMode = useWatch({
     control: form.control,
@@ -393,4 +387,4 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
       </CardContent>
     </Card>
   );
-});
+}
