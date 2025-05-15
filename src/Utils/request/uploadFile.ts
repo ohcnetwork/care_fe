@@ -2,8 +2,9 @@ import { t } from "i18next";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 
-import * as Notification from "@/Utils/Notifications";
 import { handleUploadPercentage } from "@/Utils/request/utils";
+
+import { handleHttpError } from "./errorHandler";
 
 const uploadFile = async (
   url: string,
@@ -31,9 +32,17 @@ const uploadFile = async (
         } catch {
           error = xhr.responseText;
         }
-        Notification.BadRequest({ errs: error.errors });
-        reject(new Error("Client error"));
-        reject(new Error("Client error"));
+        const profileErrors = error?.errors?.[0]?.msg?.profile_picture || [];
+        const hasImageShouldBeError = profileErrors.some((msg: string) =>
+          msg.toLowerCase().includes("image size is greater than"),
+        );
+
+        error = hasImageShouldBeError
+          ? new Error("Image size should be up to 1 MB")
+          : new Error("Client error");
+
+        handleHttpError(error);
+        reject(error);
       } else {
         resolve();
       }
