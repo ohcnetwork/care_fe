@@ -263,7 +263,7 @@ export default function ReportBuilder({
   const { mutate: createReportTemplate } = useMutation({
     mutationFn: mutate(reportTemplateApi.create),
     onSuccess: () => {
-      toast.success(t("REPORT_BUILDER_TEMPLATE_SAVED"));
+      toast.success(t("template_saved"));
     },
   });
 
@@ -277,7 +277,7 @@ export default function ReportBuilder({
       },
     }),
     onSuccess: () => {
-      toast.success(t("REPORT_BUILDER_TEMPLATE_UPDATED"));
+      toast.success(t("template_updated"));
     },
   });
 
@@ -487,7 +487,7 @@ export default function ReportBuilder({
                     variant="primary"
                     className="w-full sm:w-auto"
                   >
-                    {t("REPORT_BUILDER_SAVE_TEMPLATE")}
+                    {t("save_template")}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-full">
@@ -498,7 +498,7 @@ export default function ReportBuilder({
                       className="w-full"
                       onClick={() => onSubmit(form.getValues(), false)}
                     >
-                      {t("REPORT_BUILDER_SAVE_TEMPLATE")}
+                      {t("save_template")}
                     </Button>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -508,7 +508,7 @@ export default function ReportBuilder({
                       className="w-full"
                       onClick={() => onSubmit(form.getValues(), true)}
                     >
-                      {t("REPORT_BUILDER_SAVE_AND_EXIT")}
+                      {t("save_and_exit")}
                     </Button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -518,7 +518,7 @@ export default function ReportBuilder({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card className="rounded-none">
                 <CardHeader>
-                  <CardTitle>{t("REPORT_BUILDER_TITLE")}</CardTitle>
+                  <CardTitle>{t("report_builder_title")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Tabs
@@ -527,29 +527,25 @@ export default function ReportBuilder({
                     className="w-full"
                   >
                     <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="layout">
-                        {t("REPORT_BUILDER_LAYOUT")}
-                      </TabsTrigger>
-                      <TabsTrigger value="header">
-                        {t("REPORT_BUILDER_HEADER")}
-                      </TabsTrigger>
+                      <TabsTrigger value="layout">{t("layout")}</TabsTrigger>
+                      <TabsTrigger value="header">{t("header")}</TabsTrigger>
                       <TabsTrigger value="sections">
-                        {t("REPORT_BUILDER_SECTIONS")}
+                        {t("sections")}
                       </TabsTrigger>
                     </TabsList>
                     {hasLayoutErrors && (
                       <span className="text-red-500 bg-red-100 p-2 rounded-md text-sm">
-                        {t("REPORT_BUILDER_LAYOUT_ERROR")}
+                        {t("layout_error")}
                       </span>
                     )}
                     {hasHeaderErrors && (
                       <span className="text-red-500 bg-red-100 p-2 rounded-md text-sm">
-                        {t("REPORT_BUILDER_HEADER_ERROR")}
+                        {t("header_error")}
                       </span>
                     )}
                     {hasSectionsErrors && (
                       <span className="text-red-500 bg-red-100 p-2 rounded-md text-sm">
-                        {t("REPORT_BUILDER_SECTIONS_ERROR")}
+                        {t("sections_error")}
                       </span>
                     )}
                     <TabsContent value="layout">

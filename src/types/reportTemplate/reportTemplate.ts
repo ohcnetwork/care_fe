@@ -312,15 +312,15 @@ export interface ReportTemplateGenerate {
 }
 
 export const SECTION_DISPLAY_NAMES: Record<string, string> = {
-  diagnosis: "REPORT_BUILDER_SECTION_DIAGNOSIS",
-  symptoms: "REPORT_BUILDER_SECTION_SYMPTOM",
-  allergy_intolerance: "REPORT_BUILDER_SECTION_ALLERGY",
-  observation: "REPORT_BUILDER_SECTION_OBSERVATION",
-  medication_request: "REPORT_BUILDER_SECTION_MEDICATION",
-  patient_info: "REPORT_BUILDER_SECTION_PATIENT_INFO",
-  care_team: "REPORT_BUILDER_SECTION_CARE_TEAM",
-  file_upload: "REPORT_BUILDER_SECTION_FILE_UPLOAD",
-  encounter: "REPORT_BUILDER_SECTION_ENCOUNTER",
-  discharge_summary_advice: "REPORT_BUILDER_SECTION_DISCHARGE_ADVICE",
-  custom_section: "REPORT_BUILDER_SECTION_CUSTOM",
+  diagnosis: "section_diagnosis",
+  symptoms: "section_symptom",
+  allergy_intolerance: "section_allergy",
+  observation: "section_observation",
+  medication_request: "section_medication",
+  patient_info: "section_patient_info",
+  care_team: "section_care_team",
+  file_upload: "section_file_upload",
+  encounter: "section_encounter",
+  discharge_summary_advice: "section_discharge_advice",
+  custom_section: "section_custom",
 } as const;

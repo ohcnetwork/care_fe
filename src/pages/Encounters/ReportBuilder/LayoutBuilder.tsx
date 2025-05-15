@@ -94,9 +94,9 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("REPORT_BUILDER_LAYOUT")}</CardTitle>
+        <CardTitle>{t("layout")}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          {t("REPORT_BUILDER_LAYOUT_DESCRIPTION")}
+          {t("layout_description")}
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -106,24 +106,24 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
           name="config.layout.page_size"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("REPORT_BUILDER_PAGE_SIZE")}</FormLabel>
+              <FormLabel>{t("page_size")}</FormLabel>
               <FormControl>
                 <Popover open={pageSizeOpen} onOpenChange={setPageSizeOpen}>
                   <PopoverTrigger asChild className="w-full">
                     <Button variant="outline" type="button">
                       {REPORT_SIZE_OPTIONS.find(
                         (size) => size.id === field.value,
-                      )?.value || t("REPORT_BUILDER_SELECT_PAGE_SIZE")}
+                      )?.value || t("select_page_size")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[calc(100vh-25rem)] overflow-y-auto">
                     <Command>
                       <CommandInput
-                        placeholder={t("REPORT_BUILDER_SEARCH_PAGE_SIZE")}
+                        placeholder={t("search_page_size")}
                         className="outline-hidden border-none ring-0 shadow-none"
                       />
                       <CommandEmpty>
-                        <p>{t("REPORT_BUILDER_NO_RESULTS")}</p>
+                        <p>{t("no_results")}</p>
                       </CommandEmpty>
                       <CommandGroup>
                         {REPORT_SIZE_OPTIONS.map((size) => (
@@ -155,7 +155,7 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
           name="config.layout.page_margin.mode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("REPORT_BUILDER_PAGE_MARGIN")}</FormLabel>
+              <FormLabel>{t("page_margin")}</FormLabel>
               <FormControl>
                 <RadioGroup
                   value={field.value}
@@ -165,15 +165,11 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="uniform" id="uniform" />
-                    <FormLabel htmlFor="uniform">
-                      {t("REPORT_BUILDER_UNIFORM")}
-                    </FormLabel>
+                    <FormLabel htmlFor="uniform">{t("uniform")}</FormLabel>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="custom" id="custom" />
-                    <FormLabel htmlFor="custom">
-                      {t("REPORT_BUILDER_CUSTOM")}
-                    </FormLabel>
+                    <FormLabel htmlFor="custom">{t("custom")}</FormLabel>
                   </div>
                 </RadioGroup>
               </FormControl>
@@ -210,7 +206,7 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
               name="config.layout.page_margin.values.top"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("REPORT_BUILDER_TOP")}</FormLabel>
+                  <FormLabel>{t("top")}</FormLabel>
                   <FormControl>
                     <div className="flex items-center gap-2">
                       <Input {...field} type="text" placeholder="40" />
@@ -226,7 +222,7 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
               name="config.layout.page_margin.values.bottom"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("REPORT_BUILDER_BOTTOM")}</FormLabel>
+                  <FormLabel>{t("bottom")}</FormLabel>
                   <FormControl>
                     <div className="flex items-center gap-2">
                       <Input {...field} type="text" placeholder="40" />
@@ -242,7 +238,7 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
               name="config.layout.page_margin.values.left"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("REPORT_BUILDER_LEFT")}</FormLabel>
+                  <FormLabel>{t("left")}</FormLabel>
                   <FormControl>
                     <div className="flex items-center gap-2">
                       <Input {...field} type="text" placeholder="40" />
@@ -258,7 +254,7 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
               name="config.layout.page_margin.values.right"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("REPORT_BUILDER_RIGHT")}</FormLabel>
+                  <FormLabel>{t("right")}</FormLabel>
                   <FormControl>
                     <div className="flex items-center gap-2">
                       <Input {...field} type="text" placeholder="40" />
@@ -278,7 +274,7 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
           name="config.layout.page_numbering.enabled"
           render={({ field }) => (
             <FormItem className="flex items-center justify-between max-w-[300px]">
-              <FormLabel>{t("REPORT_BUILDER_PAGE_NUMBERING")}</FormLabel>
+              <FormLabel>{t("page_numbering")}</FormLabel>
               <FormControl>
                 <Switch
                   checked={field.value}
@@ -294,17 +290,17 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
           name="config.layout.page_numbering.format"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("REPORT_BUILDER_FORMAT")}</FormLabel>
+              <FormLabel>{t("format")}</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   type="text"
-                  placeholder={t("REPORT_BUILDER_PAGE_NUMBER_FORMAT")}
+                  placeholder={t("page_number_format")}
                   className="max-w-[300px]"
                 />
               </FormControl>
               <p className="text-sm text-muted-foreground">
-                {t("REPORT_BUILDER_PAGE_NUMBER_FORMAT_HELP")}
+                {t("page_number_format_help")}
               </p>
               <FormMessage />
             </FormItem>
@@ -316,16 +312,14 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
           name="config.layout.page_numbering.align"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("REPORT_BUILDER_ALIGNMENT")}</FormLabel>
+              <FormLabel>{t("alignment")}</FormLabel>
               <FormControl>
                 <Select
                   value={field.value}
                   onValueChange={handlePageNumberingAlignChange}
                 >
                   <SelectTrigger className="max-w-[200px]">
-                    <SelectValue
-                      placeholder={t("REPORT_BUILDER_SELECT_ALIGNMENT")}
-                    />
+                    <SelectValue placeholder={t("select_alignment")} />
                   </SelectTrigger>
                   <SelectContent>
                     {ALIGNMENT_OPTIONS.map((alignment) => (
@@ -343,22 +337,18 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
 
         {/* Text Settings */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">
-            {t("REPORT_BUILDER_TEXT_SETTINGS")}
-          </h3>
+          <h3 className="text-lg font-semibold mb-4">{t("text_settings")}</h3>
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="config.layout.text.font"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("REPORT_BUILDER_FONT_FAMILY")}</FormLabel>
+                  <FormLabel>{t("font_family")}</FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
-                        <SelectValue
-                          placeholder={t("REPORT_BUILDER_SELECT_FONT")}
-                        />
+                        <SelectValue placeholder={t("select_font")} />
                       </SelectTrigger>
                       <SelectContent>
                         {FONT_OPTIONS.map((font) => (
@@ -379,13 +369,11 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
               name="config.layout.text.size"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("REPORT_BUILDER_FONT_SIZE")}</FormLabel>
+                  <FormLabel>{t("font_size")}</FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
-                        <SelectValue
-                          placeholder={t("REPORT_BUILDER_SELECT_SIZE")}
-                        />
+                        <SelectValue placeholder={t("select_size")} />
                       </SelectTrigger>
                       <SelectContent>
                         {FONT_SIZES.map((size) => (

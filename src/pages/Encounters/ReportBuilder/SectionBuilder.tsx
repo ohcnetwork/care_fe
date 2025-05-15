@@ -84,9 +84,7 @@ const SectionFieldsAndColumns = React.memo(function SectionFieldsAndColumns({
                     onValueChange={setSelectedField}
                   >
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={t("REPORT_BUILDER_SELECT_COLUMN")}
-                      />
+                      <SelectValue placeholder={t("select_column")} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableFieldsAndColumns?.map((field) => (
@@ -105,7 +103,7 @@ const SectionFieldsAndColumns = React.memo(function SectionFieldsAndColumns({
                     onClick={() => onChange([...columns, selectedField])}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    {t("REPORT_BUILDER_ADD_COLUMN")}
+                    {t("add_column")}
                   </Button>
                 </div>
 
@@ -155,9 +153,7 @@ const SectionFieldsAndColumns = React.memo(function SectionFieldsAndColumns({
                     onValueChange={setSelectedField}
                   >
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={t("REPORT_BUILDER_SELECT_FIELD")}
-                      />
+                      <SelectValue placeholder={t("select_field")} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableFieldsAndColumns?.map((field) => (
@@ -181,7 +177,7 @@ const SectionFieldsAndColumns = React.memo(function SectionFieldsAndColumns({
                     }
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    {t("REPORT_BUILDER_ADD_FIELD")}
+                    {t("add_field")}
                   </Button>
                 </div>
 
@@ -265,7 +261,7 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
         name={`config.sections.${index}.source`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{t("REPORT_BUILDER_DATA_SOURCE")}</FormLabel>
+            <FormLabel>{t("data_source")}</FormLabel>
             <Select
               value={selectedDataSource}
               onValueChange={(value) => handleDataSourceChange(value, field)}
@@ -273,9 +269,7 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
             >
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder={t("REPORT_BUILDER_SELECT_DATA_SOURCE")}
-                  />
+                  <SelectValue placeholder={t("select_data_source")} />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
@@ -296,13 +290,13 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
         name={`config.sections.${index}.options.title`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{t("REPORT_BUILDER_SECTION_TITLE")}</FormLabel>
+            <FormLabel>{t("section_title")}</FormLabel>
             <FormControl>
               <Input
                 disabled={!isEnabled}
                 value={field.value || ""}
                 onChange={field.onChange}
-                placeholder={t("REPORT_BUILDER_ENTER_SECTION_TITLE")}
+                placeholder={t("enter_section_title")}
               />
             </FormControl>
             <FormMessage />
@@ -315,7 +309,7 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
         name={`config.sections.${index}.is_table`}
         render={({ field }) => (
           <FormItem className="flex items-center justify-between">
-            <FormLabel>{t("REPORT_BUILDER_DISPLAY_AS_TABLE")}</FormLabel>
+            <FormLabel>{t("display_as_table")}</FormLabel>
             <FormControl>
               <Switch
                 checked={field.value}
@@ -334,7 +328,7 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
         render={({ field }) => {
           return (
             <FormItem>
-              <FormLabel>{t("REPORT_BUILDER_DISPLAY_STYLE")}</FormLabel>
+              <FormLabel>{t("display_style")}</FormLabel>
               <Select
                 disabled={!isEnabled || isTable}
                 value={field.value?.options?.style || "list"}
@@ -347,18 +341,12 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue
-                      placeholder={t("REPORT_BUILDER_SELECT_DISPLAY_STYLE")}
-                    />
+                    <SelectValue placeholder={t("select_display_style")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="list">
-                    {t("REPORT_BUILDER_STYLE_LIST")}
-                  </SelectItem>
-                  <SelectItem value="text">
-                    {t("REPORT_BUILDER_STYLE_TEXT")}
-                  </SelectItem>
+                  <SelectItem value="list">{t("style_list")}</SelectItem>
+                  <SelectItem value="text">{t("style_text")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -413,10 +401,7 @@ const SectionItem = React.memo(function SectionItem({
                 <GripVertical className="h-4 w-4" />
               </Button>
               <h3 className="text-lg font-semibold">
-                {t(
-                  SECTION_DISPLAY_NAMES[dataSource || ""] ||
-                    "REPORT_BUILDER_NEW_SECTION",
-                )}
+                {t(SECTION_DISPLAY_NAMES[dataSource || ""] || "new_section")}
               </h3>
             </div>
 
@@ -426,7 +411,7 @@ const SectionItem = React.memo(function SectionItem({
                 name={`config.sections.${index}.enabled`}
                 render={({ field: enabledField }) => (
                   <FormItem className="flex items-center space-x-2">
-                    <FormLabel>{t("REPORT_BUILDER_ENABLED")}</FormLabel>
+                    <FormLabel>{t("enabled")}</FormLabel>
                     <FormControl>
                       <Switch
                         checked={enabledField.value}
@@ -475,11 +460,11 @@ const SectionItem = React.memo(function SectionItem({
           >
             <TabsList className="overflow-x-auto w-full">
               <TabsTrigger value="basic" className="w-full">
-                {t("REPORT_BUILDER_BASIC_SETTINGS")}
+                {t("basic_settings")}
               </TabsTrigger>
               {dataSource && (
                 <TabsTrigger value="fields" className="w-full">
-                  {t("REPORT_BUILDER_FIELDS_COLUMNS")}
+                  {t("fields_columns")}
                 </TabsTrigger>
               )}
             </TabsList>
@@ -582,9 +567,9 @@ export const SectionBuilder = React.memo(function SectionBuilder({
     <Card>
       <CardHeader className="flex flex-col sm:flex-row items-center justify-between">
         <div>
-          <CardTitle>{t("REPORT_BUILDER_SECTIONS")}</CardTitle>
+          <CardTitle>{t("sections")}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            {t("REPORT_BUILDER_SECTIONS_DESCRIPTION")}
+            {t("sections_description")}
           </p>
         </div>
         <Button
@@ -594,7 +579,7 @@ export const SectionBuilder = React.memo(function SectionBuilder({
           className="w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
-          {t("REPORT_BUILDER_ADD_SECTION")}
+          {t("add_section")}
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -615,7 +600,7 @@ export const SectionBuilder = React.memo(function SectionBuilder({
 
         {fields.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
-            {t("REPORT_BUILDER_NO_SECTIONS")}
+            {t("no_sections")}
           </div>
         )}
       </CardContent>

@@ -73,7 +73,7 @@ export default function ReportBuilderSheet({
       facility: facilityId,
     });
     toast.success(
-      t("REPORT_BUILDER_WILL_BE_GENERATED", {
+      t("report_builder_will_be_generated", {
         reportSlug: reportTemplate.slug,
       }),
     );
