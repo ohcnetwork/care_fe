@@ -39,9 +39,9 @@ function generateFacilityLinks(
     canCreateEncounter: boolean;
     canViewEncounter: boolean;
   },
+  pluginLinks: NavigationLink[],
   patientId?: string,
   encounterId?: string,
-  pluginLinks: NavigationLink[],
 ) {
   if (!selectedFacility) return [];
 
@@ -177,9 +177,9 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
         selectedFacility,
         t,
         permissions,
+        pluginNavItems,
         patientId,
         encounterId,
-        pluginNavItems,
       )}
     />
   );
