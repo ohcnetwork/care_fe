@@ -31,7 +31,28 @@ const uploadFile = async (
         } catch {
           error = xhr.responseText;
         }
-        Notification.BadRequest({ errs: error.errors });
+        // Extracting messages from response Text
+        let userFriendlyMessages: string[] = [];
+        if (error?.errors && Array.isArray(error.errors)) {
+          error.errors.forEach((err: any) => {
+            if (
+              err.msg?.profile_picture &&
+              Array.isArray(err.msg.profile_picture)
+            ) {
+              userFriendlyMessages = userFriendlyMessages.concat(
+                err.msg.profile_picture,
+              );
+            }
+          });
+        }
+
+        if (userFriendlyMessages.length > 0) {
+          // Combining messages into a single string
+          const message = userFriendlyMessages.join("\n• ");
+          Notification.BadRequest({ errs: `• ${message}` });
+        } else {
+          Notification.BadRequest({ errs: error.errors });
+        }
         reject(new Error("Client error"));
         reject(new Error("Client error"));
       } else {

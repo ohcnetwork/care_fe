@@ -22,8 +22,17 @@ const formatKey = (key: string) => {
 const notifyError = (error: any) => {
   let errorMsg = "";
   if (typeof error === "string" || !error) {
-    errorMsg =
-      !error || error.length > 100 ? "Something went wrong...!" : error;
+    if (!error) {
+      errorMsg = "Something went wrong...!";
+    } else if (
+      error.toLowerCase().includes("image size is greater than") ||
+      error.toLowerCase().includes("image width is greater than") ||
+      error.toLowerCase().includes("image height is greater than")
+    ) {
+      errorMsg = "Please upload an image up to 1MB.";
+    } else {
+      errorMsg = error.length > 100 ? "Something went wrong...!" : error;
+    }
   } else if (error.detail) {
     errorMsg = error.detail;
   } else {
