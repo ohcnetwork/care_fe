@@ -15,8 +15,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { getPermissions } from "@/common/Permissions";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import { ReportTemplateType } from "@/types/reportTemplate/reportTemplate";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
 
@@ -26,6 +29,7 @@ interface ReportBuilderSheetProps {
   patientId: string;
   trigger: React.ReactNode;
   onSuccess?: () => void;
+  permissions: string[];
 }
 
 export default function ReportBuilderSheet({
@@ -33,10 +37,16 @@ export default function ReportBuilderSheet({
   encounterId,
   patientId,
   trigger,
+  permissions,
   onSuccess,
 }: ReportBuilderSheetProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const { hasPermission } = usePermissions();
+  const { canManageTemplate, canListTemplate } = getPermissions(
+    hasPermission,
+    permissions,
+  );
   const { data: reportTemplateData } = useQuery({
     queryKey: ["report-templates", facilityId],
     queryFn: query(reportTemplateApi.list, {
@@ -44,7 +54,7 @@ export default function ReportBuilderSheet({
         facility: facilityId,
       },
     }),
-    enabled: open,
+    enabled: open && canListTemplate,
   });
 
   const { mutate: generateReport } = useMutation({
@@ -90,18 +100,20 @@ export default function ReportBuilderSheet({
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    asChild
-                  >
-                    <Link
-                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${reportTemplate.id}`}
+                  {canManageTemplate && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      asChild
                     >
-                      {t("edit_template")}
-                    </Link>
-                  </Button>
+                      <Link
+                        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${reportTemplate.id}`}
+                      >
+                        {t("edit_template")}
+                      </Link>
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -116,13 +128,15 @@ export default function ReportBuilderSheet({
           </div>
         </div>
         <SheetFooter className="mt-4">
-          <Button variant="outline" size="sm" asChild>
-            <Link
-              href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/new`}
-            >
-              {t("create_new_report")}
-            </Link>
-          </Button>
+          {canManageTemplate && (
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/new`}
+              >
+                {t("create_new_report")}
+              </Link>
+            </Button>
+          )}
         </SheetFooter>
       </SheetContent>
     </Sheet>

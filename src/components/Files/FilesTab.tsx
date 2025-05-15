@@ -705,6 +705,7 @@ export const FilesTab = (props: FilesTabProps) => {
             facilityId={facilityId || ""}
             patientId={patient?.id || encounter?.patient.id || ""}
             encounterId={encounter?.id || ""}
+            permissions={encounter?.permissions || patient?.permissions || []}
             trigger={
               <Button variant="primary" asChild>
                 <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer">

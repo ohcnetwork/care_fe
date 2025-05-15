@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 
 import {
+  AlignmentOptions,
   DateFormats,
   FONT_OPTIONS,
   FONT_SIZES,
@@ -44,18 +45,29 @@ function getMarginValues({
     custom?.bottom &&
     custom?.left
   ) {
-    return [
-      custom.top.replace("pt", ""),
-      custom.right.replace("pt", ""),
-      custom.bottom.replace("pt", ""),
-      custom.left.replace("pt", ""),
-    ];
+    return [custom.top, custom.right, custom.bottom, custom.left];
   }
   if (mode === "uniform" && uniform) {
-    const value = uniform.replace("pt", "");
-    return [value, value, value, value];
+    return [uniform, uniform, uniform, uniform];
   }
   return null;
+}
+
+export type Position = {
+  vertical: "top" | "bottom";
+  horizontal: "left" | "right" | "center";
+};
+
+export function parseAlignment(align: AlignmentOptions): Position {
+  const isTop = align.startsWith("top");
+  const horizontal = align.includes("+")
+    ? align.split("+")[1].toLowerCase()
+    : align.toLowerCase();
+
+  return {
+    vertical: isTop ? "top" : "bottom",
+    horizontal: horizontal as Position["horizontal"],
+  };
 }
 
 export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
@@ -117,6 +129,14 @@ export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
   const fontSizeValue =
     FONT_SIZES.find((size) => size.id.toString() === fontSize)?.value || "12pt";
 
+  const pageNumberingAlign = useWatch({
+    control: form.control,
+    name: "config.layout.page_numbering.align",
+  });
+
+  const { vertical, horizontal } = parseAlignment(pageNumberingAlign);
+  const showPageNumberAtTop = vertical === "top";
+
   return (
     <div className="w-full overflow-auto sticky top-0">
       <div
@@ -131,6 +151,19 @@ export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
           }),
         }}
       >
+        {/* Top Page Numbering */}
+        {pageNumbering.enabled && (
+          <div
+            className={cn(
+              "w-full mb-2",
+              `text-${horizontal}`,
+              showPageNumberAtTop ? "order-first" : "order-last",
+            )}
+          >
+            {pageNumbering.format.replace("{page}", "1")}
+          </div>
+        )}
+
         {/* Header Preview */}
         <div className="flex flex-col gap-2 p-4">
           {headerRows.map((row, rowIndex) => (
@@ -140,17 +173,13 @@ export const ReportBuilderPreview = React.memo(function ReportBuilderPreview({
 
         {/* Sections Preview */}
         <div className="flex flex-col gap-4 p-4 flex-grow">
-          {sections.map((section, index) => (
-            <SectionPreview key={index} section={section} />
-          ))}
+          {sections.map(
+            (section, index) =>
+              section.enabled && (
+                <SectionPreview key={index} section={section} />
+              ),
+          )}
         </div>
-
-        {/* Page Numbering */}
-        {pageNumbering.enabled && (
-          <div className="w-full text-center mb-2">
-            {pageNumbering.format.replace("{page}", "1")}
-          </div>
-        )}
       </div>
     </div>
   );

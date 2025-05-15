@@ -40,6 +40,7 @@ import {
   AlignmentOptions,
   FONT_OPTIONS,
   FONT_SIZES,
+  PageMargin,
   REPORT_SIZE_OPTIONS,
 } from "@/types/reportTemplate/reportTemplate";
 
@@ -68,6 +69,27 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
     control: form.control,
     name: "config.layout.page_margin.mode",
   });
+
+  const handlePageSizeChange = (margins: PageMargin) => {
+    if (margins) {
+      const mode = margins.mode;
+      form.setValue("config.layout.page_margin.mode", mode, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      if (mode === "uniform" && margins.value) {
+        form.setValue("config.layout.page_margin.value", margins.value, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      } else if (mode === "custom" && margins.values) {
+        form.setValue("config.layout.page_margin.values", margins.values, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      }
+    }
+  };
 
   return (
     <Card>
@@ -110,6 +132,7 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
                             value={size.id}
                             onSelect={() => {
                               field.onChange(size.id);
+                              handlePageSizeChange(size.margins);
                               setPageSizeOpen(false);
                             }}
                           >
@@ -135,32 +158,8 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
               <FormLabel>{t("REPORT_BUILDER_PAGE_MARGIN")}</FormLabel>
               <FormControl>
                 <RadioGroup
-                  onValueChange={(value: "uniform" | "custom") => {
-                    if (value === "uniform") {
-                      form.setValue(
-                        "config.layout.page_margin",
-                        {
-                          mode: "uniform",
-                          value: "0pt",
-                        },
-                        { shouldValidate: true },
-                      );
-                    } else {
-                      form.setValue(
-                        "config.layout.page_margin",
-                        {
-                          mode: "custom",
-                          values: {
-                            top: "0pt",
-                            right: "0pt",
-                            bottom: "0pt",
-                            left: "0pt",
-                          },
-                        },
-                        { shouldValidate: true },
-                      );
-                    }
-                  }}
+                  value={field.value}
+                  onValueChange={field.onChange}
                   defaultValue={field.value}
                   className="flex flex-row gap-2 mt-2"
                 >
@@ -190,19 +189,22 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input
-                    {...field}
-                    type="text"
-                    placeholder="40pt"
-                    className="max-w-[200px]"
-                  />
+                  <div className="flex items-center gap-2">
+                    <Input
+                      {...field}
+                      type="text"
+                      placeholder="40"
+                      className="max-w-[200px]"
+                    />
+                    <span className="text-sm">pt</span>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         ) : (
-          <div className="flex flex-row justify-start gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="config.layout.page_margin.values.top"
@@ -210,12 +212,10 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
                 <FormItem>
                   <FormLabel>{t("REPORT_BUILDER_TOP")}</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="text"
-                      placeholder="40pt"
-                      className="max-w-[200px]"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input {...field} type="text" placeholder="40" />
+                      <span className="text-sm">pt</span>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -228,12 +228,10 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
                 <FormItem>
                   <FormLabel>{t("REPORT_BUILDER_BOTTOM")}</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="text"
-                      placeholder="40pt"
-                      className="max-w-[200px]"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input {...field} type="text" placeholder="40" />
+                      <span className="text-sm">pt</span>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -246,12 +244,10 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
                 <FormItem>
                   <FormLabel>{t("REPORT_BUILDER_LEFT")}</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="text"
-                      placeholder="40pt"
-                      className="max-w-[200px]"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input {...field} type="text" placeholder="40" />
+                      <span className="text-sm">pt</span>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -264,12 +260,10 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
                 <FormItem>
                   <FormLabel>{t("REPORT_BUILDER_RIGHT")}</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="text"
-                      placeholder="40pt"
-                      className="max-w-[200px]"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input {...field} type="text" placeholder="40" />
+                      <span className="text-sm">pt</span>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

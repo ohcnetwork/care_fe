@@ -11,6 +11,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Form,
   FormControl,
   FormField,
@@ -64,7 +70,7 @@ const defaultTemplate: ReportTemplateFormData = {
       page_numbering: {
         enabled: true,
         format: "1 of 1",
-        align: "right + bottom",
+        align: "right",
       },
       text: {
         font: "DejaVu Sans",
@@ -101,7 +107,7 @@ const defaultTemplate: ReportTemplateFormData = {
             {
               type: "text",
               text: "Patient Discharge Summary",
-              size: "15pt",
+              size: "16pt",
               weight: 400,
             },
             {
@@ -258,9 +264,6 @@ export default function ReportBuilder({
     mutationFn: mutate(reportTemplateApi.create),
     onSuccess: () => {
       toast.success(t("REPORT_BUILDER_TEMPLATE_SAVED"));
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/files`,
-      );
     },
   });
 
@@ -275,9 +278,6 @@ export default function ReportBuilder({
     }),
     onSuccess: () => {
       toast.success(t("REPORT_BUILDER_TEMPLATE_UPDATED"));
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/files`,
-      );
     },
   });
 
@@ -307,64 +307,102 @@ export default function ReportBuilder({
               })),
             })),
           },
+          layout: {
+            ...templateSchema.config.layout,
+            page_margin:
+              templateSchema.config.layout.page_margin.mode === "custom"
+                ? {
+                    mode: "custom",
+                    values: {
+                      top: templateSchema.config.layout.page_margin.values.top.split(
+                        "pt",
+                      )[0],
+                      right:
+                        templateSchema.config.layout.page_margin.values.right.split(
+                          "pt",
+                        )[0],
+                      bottom:
+                        templateSchema.config.layout.page_margin.values.bottom.split(
+                          "pt",
+                        )[0],
+                      left: templateSchema.config.layout.page_margin.values.left.split(
+                        "pt",
+                      )[0],
+                    },
+                  }
+                : {
+                    mode: "uniform",
+                    value:
+                      templateSchema.config.layout.page_margin.value.split(
+                        "pt",
+                      )[0],
+                  },
+          },
         },
       });
     }
   }, [templateSchema, form]);
 
-  const onSubmit = useCallback(
-    async (data: ReportTemplateFormData) => {
-      const isValid = await form.trigger();
-      if (!isValid) {
-        return;
-      }
+  const onSubmit = async (data: ReportTemplateFormData, exit: boolean) => {
+    const isValid = await form.trigger();
+    if (!isValid) {
+      return;
+    }
 
-      data = {
-        ...data,
-        config: {
-          ...data.config,
-          header: {
-            ...data.config.header,
-            rows: data.config.header.rows.map((row) => ({
-              ...row,
-              size_ratio:
-                row.size_ratio && row.size_ratio.length > 0
-                  ? row.size_ratio.map((ratio) => ratio ?? 1)
-                  : Array(row.columns.length).fill(1),
-              columns: row.columns.map((column) => ({
-                ...column,
-                ...(column.type === "image" && {
-                  width: column.width + "%",
-                }),
-              })),
+    data = {
+      ...data,
+      config: {
+        ...data.config,
+        header: {
+          ...data.config.header,
+          rows: data.config.header.rows.map((row) => ({
+            ...row,
+            size_ratio:
+              row.size_ratio && row.size_ratio.length > 0
+                ? row.size_ratio.map((ratio) => ratio ?? 1)
+                : Array(row.columns.length).fill(1),
+            columns: row.columns.map((column) => ({
+              ...column,
+              ...(column.type === "image" && {
+                width: column.width + "%",
+              }),
             })),
-          },
-          layout: {
-            ...data.config.layout,
-            page_margin:
-              data.config.layout.page_margin.mode === "custom"
-                ? {
-                    mode: "custom",
-                    values: data.config.layout.page_margin.values!,
-                  }
-                : {
-                    mode: "uniform",
-                    value: data.config.layout.page_margin.value!,
-                  },
-          },
+          })),
         },
-      };
-      if (reportTemplateId) {
-        updateReportTemplate({ config: data.config });
-      } else {
-        createReportTemplate({
-          ...data,
-          facility: facilityId,
-        });
-      }
-    },
-    [reportTemplateId, updateReportTemplate, createReportTemplate, form],
-  );
+        layout: {
+          ...data.config.layout,
+          page_margin:
+            data.config.layout.page_margin.mode === "custom"
+              ? {
+                  mode: "custom",
+                  values: {
+                    top: data.config.layout.page_margin.values.top + "pt",
+                    right: data.config.layout.page_margin.values.right + "pt",
+                    bottom: data.config.layout.page_margin.values.bottom + "pt",
+                    left: data.config.layout.page_margin.values.left + "pt",
+                  },
+                }
+              : {
+                  mode: "uniform",
+                  value: data.config.layout.page_margin.value + "pt",
+                },
+        },
+      },
+    };
+    if (reportTemplateId) {
+      updateReportTemplate({ config: data.config });
+    } else {
+      createReportTemplate({
+        ...data,
+        facility: facilityId,
+      });
+    }
+    if (exit) {
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/files`,
+      );
+    }
+  };
 
   const handleExport = useCallback(() => {
     console.log("");
@@ -386,7 +424,7 @@ export default function ReportBuilder({
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              onSubmit(form.getValues());
+              onSubmit(form.getValues(), true);
             }}
             className="space-y-6"
           >
@@ -442,9 +480,39 @@ export default function ReportBuilder({
               >
                 {t("export")}
               </Button>
-              <Button type="submit" className="w-full sm:w-auto">
-                {t("REPORT_BUILDER_SAVE_TEMPLATE")}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    className="w-full sm:w-auto"
+                  >
+                    {t("REPORT_BUILDER_SAVE_TEMPLATE")}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-full">
+                  <DropdownMenuItem asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => onSubmit(form.getValues(), false)}
+                    >
+                      {t("REPORT_BUILDER_SAVE_TEMPLATE")}
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Button
+                      type="submit"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => onSubmit(form.getValues(), true)}
+                    >
+                      {t("REPORT_BUILDER_SAVE_AND_EXIT")}
+                    </Button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
