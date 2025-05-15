@@ -130,10 +130,8 @@ export function ComboboxQuantityInput({
         <PopoverContent
           className="w-auto p-0"
           align="start"
-          onOpenAutoFocus={() => {
-            setTimeout(() => {
-              inputRef.current?.focus();
-            }, 900);
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
           }}
         >
           <Command>
