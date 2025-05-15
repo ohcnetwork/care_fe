@@ -27,10 +27,11 @@ export default function RelativeDateTooltip({
     );
   }
 
-  const hasTime =
-    dateObj.getHours() !== 0 ||
-    dateObj.getMinutes() !== 0 ||
-    dateObj.getSeconds() !== 0;
+  const hasTime = !!(
+    dateObj.getHours() ||
+    dateObj.getMinutes() ||
+    dateObj.getSeconds()
+  );
 
   const tooltipContent = hasTime
     ? format(dateObj, "PPpp")

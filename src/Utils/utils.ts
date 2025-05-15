@@ -38,7 +38,7 @@ export const relativeDate = (date: DateLike, withoutSuffix = false) => {
 
   const relative = obj.fromNow(withoutSuffix);
 
-  const hasTime = obj.hour() !== 0 || obj.minute() !== 0 || obj.second() !== 0;
+  const hasTime = !!(obj.hour() || obj.minute() || obj.second());
 
   if (isToday && !hasTime) {
     return t("today");
