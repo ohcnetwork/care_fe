@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -102,6 +102,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
     props;
 
   const { t } = useTranslation();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const values =
     (questionnaireResponse.values?.[0]?.value as FileUploadQuestion[]) || [];
@@ -131,6 +132,9 @@ export function FilesQuestion(props: FilesQuestionProps) {
   });
 
   useEffect(() => {
+    if (fileUpload.files.length > 0) {
+      setDropdownOpen(false);
+    }
     (async () => {
       updateQuestionnaireResponseCB(
         [
@@ -186,7 +190,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
           </Button>
         </div>
       ))}
-      <DropdownMenu>
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant={"secondary"} className="border border-secondary-300">
             <CareIcon icon="l-file-upload-alt" />
@@ -216,7 +220,10 @@ export function FilesQuestion(props: FilesQuestionProps) {
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => fileUpload.handleCameraCapture()}
+              onClick={() => {
+                fileUpload.handleCameraCapture();
+                setDropdownOpen(false);
+              }}
               className="flex flex-row justify-stretch items-center w-full text-primary-900"
             >
               <CareIcon icon="l-camera" />
@@ -227,7 +234,10 @@ export function FilesQuestion(props: FilesQuestionProps) {
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => fileUpload.handleAudioCapture()}
+              onClick={() => {
+                fileUpload.handleAudioCapture();
+                setDropdownOpen(false);
+              }}
               className="flex flex-row justify-stretch items-center w-full text-primary-900"
             >
               <CareIcon icon="l-microphone" />
