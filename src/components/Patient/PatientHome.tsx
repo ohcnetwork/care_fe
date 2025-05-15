@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -70,7 +70,7 @@ export const PatientHome = (props: {
     <Page
       title={t("patient_details")}
       options={
-        <>
+        <div className="flex gap-2">
           {facilityId && canCreateAppointment && (
             <Button asChild variant="primary">
               <Link
@@ -80,7 +80,15 @@ export const PatientHome = (props: {
               </Link>
             </Button>
           )}
-        </>
+          <Button
+            variant="primary"
+            onClick={() =>
+              navigate(`/facility/${facilityId}/patient/${id}/clinical_history`)
+            }
+          >
+            {t("clinical_history")}
+          </Button>
+        </div>
       }
     >
       <div className="mt-3 overflow-y-auto" data-testid="patient-dashboard">

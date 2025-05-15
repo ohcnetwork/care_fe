@@ -2,6 +2,7 @@ import { Redirect } from "raviger";
 import { Suspense, lazy } from "react";
 
 import Loading from "@/components/Common/Loading";
+import { PatientClinicalHistory } from "@/components/Patient/PatientClinicalHistory";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientDrawingTab } from "@/components/Patient/PatientDetailsTab/PatientDrawingsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
@@ -48,6 +49,9 @@ const PatientRoutes: AppRoutes = {
     ),
   "/facility/:facilityId/patients/verify": ({ facilityId }) => (
     <VerifyPatient facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/patient/:id/clinical_history": ({ id }) => (
+    <PatientClinicalHistory patientId={id} />
   ),
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,
