@@ -160,8 +160,6 @@ const AvatarEditModal = ({
   const imgRef = useRef<HTMLImageElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [imageError, setImageError] = useState<string | null>(null);
-
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
       constraint.facingMode === "user"
@@ -239,10 +237,11 @@ const AvatarEditModal = ({
 
   const closeModal = () => {
     setPreview(undefined);
+    setPreviewImage(null);
     setIsProcessing(false);
     setSelectedFile(undefined);
     setIsCropping(false);
-    setImageError(null);
+    dragProps.setFileDropError("");
     onOpenChange(false);
   };
 
@@ -262,18 +261,16 @@ const AvatarEditModal = ({
     }
     const file = e.target.files[0];
     if (!isImageFile(file)) {
-      toast.warning(t("please_upload_an_image_file"));
+      toast.error(t("please_upload_an_image_file"));
       return;
     }
 
     // Default 1MB = 1048576 bytes
     if (file.size > careConfig.maxImageSize) {
-      toast.warning(t("image_too_large"));
-      setImageError(t("image_too_large"));
+      toast.error(t("image_too_large"));
       return;
     }
 
-    setImageError(null);
     setSelectedFile(file);
     setIsCropping(true);
   };
@@ -412,12 +409,10 @@ const AvatarEditModal = ({
 
     // Default 1MB = 1048576 bytes
     if (droppedFile.size > careConfig.maxImageSize) {
-      toast.warning(t("image_too_large"));
-      setImageError(t("image_too_large"));
+      toast.error(t("image_too_large"));
       return;
     }
 
-    setImageError(null);
     setSelectedFile(droppedFile);
     setIsCropping(true);
   };
@@ -524,11 +519,6 @@ const AvatarEditModal = ({
                     <p className="text-center font-medium text-secondary-700">
                       {hintMessage}
                     </p>
-                    {imageError && (
-                      <p className="mt-2 text-center text-red-500">
-                        {imageError}
-                      </p>
-                    )}
                   </>
                 ) : (
                   <div
@@ -579,11 +569,6 @@ const AvatarEditModal = ({
                     <p className="mt-4 text-center font-medium text-secondary-700">
                       {t("no_image_found")}. {hintMessage}
                     </p>
-                    {imageError && (
-                      <p className="mt-2 text-center text-red-500">
-                        {imageError}
-                      </p>
-                    )}
                   </div>
                 )}
 
