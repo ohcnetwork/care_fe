@@ -502,7 +502,11 @@ const AvatarEditModal = ({
                       >
                         {t("cancel")}
                       </Button>
-                      <Button variant="primary" onClick={applyCrop}>
+                      <Button
+                        variant="primary"
+                        onClick={applyCrop}
+                        data-cy="apply-crop"
+                      >
                         {t("apply_crop")}
                       </Button>
                     </div>

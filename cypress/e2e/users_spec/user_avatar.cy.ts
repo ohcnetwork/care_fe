@@ -12,6 +12,7 @@ describe("User Profile Avatar Modification", () => {
       .interceptUploadAvatarRequest()
       .clickChangeAvatarButton()
       .uploadAvatar()
+      .clickApplyCropButton()
       .clickSaveAvatarButton()
       .verifyUploadAvatarApiCall()
       .interceptDeleteAvatarRequest()
