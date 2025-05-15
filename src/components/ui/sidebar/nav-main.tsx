@@ -75,11 +75,11 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                             {
                               "group-data-collapsible:data-[active=true]:bg-white group-data-collapsible:data-[active=true]:text-green-700 group-collapsible:data-[active=true]:shadow":
                                 link.name == "Patients" &&
-                                /^\/facility\/[^/]+\/patient\/[^/]+$/.test(
+                                /^\/facility\/[^/]+\/patient\/[^/]+(\/[^/]+)?$/.test(
                                   currentPath,
                                 ),
                               "group-data-[state=closed]/collapsible:data-[active=true]:bg-white group-data-[state=closed]/collapsible:data-[active=true]:text-green-700 group-data-[state=closed]/collapsible:data-[active=true]:shadow":
-                                true,
+                                isChildActive(link, currentPath),
                             },
                           )}
                         >
