@@ -900,7 +900,7 @@ function AppointmentRow(props: {
                   {t("patient")}
                 </TableHead>
                 <TableHead className="font-semibold text-black text-xs">
-                  {t("consulting_doctor")}
+                  {t("practitioner")}
                 </TableHead>
                 <TableHead className="font-semibold text-black text-xs">
                   {t("current_status")}
