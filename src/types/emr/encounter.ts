@@ -8,6 +8,8 @@ import {
   Stethoscope,
 } from "lucide-react";
 
+import { IconName } from "@/CAREUI/icons/CareIcon";
+
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
@@ -28,14 +30,14 @@ export const ENCOUNTER_ADMIT_SOURCE = [
   "other",
 ] as const;
 
-export const ENCOUNTER_CLASS = [
-  "imp",
-  "amb",
-  "obsenc",
-  "emer",
-  "vr",
-  "hh",
-] as const;
+export const ENCOUNTER_CLASS = {
+  INPATIENT: "imp",
+  AMBULATORY: "amb",
+  OBSERVATION: "obsenc",
+  EMERGENCY: "emer",
+  VIRTUAL: "vr",
+  HOME_HEALTH: "hh",
+} as const;
 
 export const ENCOUNTER_DIET_PREFERENCE = [
   "vegetarian",
@@ -99,9 +101,34 @@ export const ENCOUNTER_CLASSES_ICONS = {
   hh: Home,
 } as const satisfies Record<EncounterClass, LucideIcon>;
 
+export const ENCOUNTER_STATUS_ICONS = {
+  planned: "l-calender",
+  in_progress: "l-spinner",
+  discharged: "l-home",
+  completed: "l-check",
+  cancelled: "l-x",
+} as const satisfies Partial<Record<EncounterStatus, IconName>>;
+
+export const PRIORITY_EMOJI: Record<EncounterPriority, string> = {
+  stat: "🔴",
+  ASAP: "🟡",
+  emergency: "🔴",
+  urgent: "🟠",
+  routine: "⚪️",
+  elective: "🟤",
+  rush_reporting: "🟤",
+  timing_critical: "🟡",
+  callback_results: "🔵",
+  callback_for_scheduling: "🟣",
+  preop: "🟠",
+  as_needed: "⚫️",
+  use_as_directed: "🔵",
+};
+
 export type EncounterAdmitSources = (typeof ENCOUNTER_ADMIT_SOURCE)[number];
 
-export type EncounterClass = (typeof ENCOUNTER_CLASS)[number];
+export type EncounterClass =
+  (typeof ENCOUNTER_CLASS)[keyof typeof ENCOUNTER_CLASS];
 
 export type EncounterDietPreference =
   (typeof ENCOUNTER_DIET_PREFERENCE)[number];
