@@ -26,7 +26,7 @@ import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicine
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 import { EncounterDrawingsTab } from "./tabs/EncounterDrawingsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";

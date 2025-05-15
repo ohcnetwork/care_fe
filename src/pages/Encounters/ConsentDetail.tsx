@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import {
   AlertCircle,
   ArrowLeft,
@@ -290,6 +291,8 @@ export function ConsentDetailPage({
                     </h3>
                     <p className="text-base font-semibold text-gray-700">
                       {formatDateTime(consent.date, "MMMM D, YYYY")}
+                      {" , "}
+                      {format(consent.date, "h:mm a")}
                     </p>
                   </div>
 
@@ -299,12 +302,12 @@ export function ConsentDetailPage({
                     </h3>
                     <p className="text-base font-semibold text-gray-700">
                       {consent.period.start
-                        ? formatDateTime(consent.period.start, "MMMM D, YYYY")
-                        : t("NA")}
+                        ? `${format(new Date(consent.period.start), "MMMM d, yyyy")}${" , "} ${format(new Date(consent.period.start), "h:mm a")}`
+                        : t("na")}
                       {" - "}
                       {consent.period.end
-                        ? formatDateTime(consent.period.end, "MMMM D, YYYY")
-                        : t("NA")}
+                        ? `${format(new Date(consent.period.end), "MMMM d, yyyy")}${" , "} ${format(new Date(consent.period.end), "h:mm a")}`
+                        : t("na")}
                     </p>
                   </div>
 

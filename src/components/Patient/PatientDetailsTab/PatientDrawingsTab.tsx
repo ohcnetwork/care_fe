@@ -1,6 +1,6 @@
 import { DrawingTab } from "@/components/Common/Drawings/DrawingTab";
 
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 interface PatientDrawingTabProps {
   patientId: string;

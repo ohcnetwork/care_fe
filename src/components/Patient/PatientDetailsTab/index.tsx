@@ -4,7 +4,7 @@ import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
 
 import { HasPermissionFn, getPermissions } from "@/common/Permissions";
 
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 import { Appointments } from "./Appointments";
 import { PatientDrawingTab } from "./PatientDrawingsTab";
