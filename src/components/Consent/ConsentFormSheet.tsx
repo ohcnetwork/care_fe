@@ -340,6 +340,7 @@ export default function ConsentFormSheet({
                         onChange={(e) => {
                           const value = e.target.value;
                           field.onChange(value ? new Date(value) : null);
+                          form.trigger("period");
                         }}
                       />
                       <FormMessage />
@@ -368,6 +369,7 @@ export default function ConsentFormSheet({
                           onChange={(e) => {
                             const value = e.target.value;
                             field.onChange(value ? new Date(value) : null);
+                            form.trigger("period");
                           }}
                         />
                         <FormMessage />
@@ -395,6 +397,7 @@ export default function ConsentFormSheet({
                           onChange={(e) => {
                             const value = e.target.value;
                             field.onChange(value ? new Date(value) : null);
+                            form.trigger("period");
                           }}
                         />
                         <FormMessage />
