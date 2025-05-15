@@ -347,10 +347,10 @@ export default function SymptomsTimeline() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        {/* <Button variant="outline" className="flex items-center gap-2 h-10">
+        <Button variant="outline" className="flex items-center gap-2 h-10">
           <Filter className="h-4 w-4" />
           Filter
-        </Button> */}
+        </Button>
       </div>
 
       {sortedYears.length === 0 ? (
@@ -383,52 +383,10 @@ export default function SymptomsTimeline() {
                         {format(new Date(date), "dd MMMM, yyyy")}
                       </h3>
                     </div>
-                    <div>
-                      {datesInYear[date].map((symptom, index) => (
-                        <SymptomRow key={index} symptom={symptom} />
-                      ))}
-                    </div>
 
                     <div className="bg-gray-50 rounded-lg overflow-hidden">
-                      {datesInYear[date].map((symptom) => (
-                        <div
-                          key={symptom.id}
-                          className="grid grid-cols-[1fr,100px,120px,120px,40px] text-sm bg-white border-t border-gray-100"
-                        >
-                          <div className="p-3 font-medium">
-                            {symptom.code.display}
-                          </div>
-                          <div
-                            className={`p-3 ${getStatusColor(symptom.clinical_status)}`}
-                          >
-                            {symptom.clinical_status ===
-                            SymptomClinicalStatus.ACTIVE
-                              ? "Active"
-                              : symptom.clinical_status ===
-                                  SymptomClinicalStatus.INACTIVE
-                                ? "Inactive"
-                                : "Resolved"}
-                          </div>
-                          <div className="p-3 text-green-600">
-                            {symptom.verification_status ===
-                            SymptomVerificationStatus.CONFIRMED
-                              ? "Confirmed"
-                              : "Unconfirmed"}
-                          </div>
-                          <div className="p-3">
-                            {symptom.onset?.date
-                              ? format(
-                                  parseISO(symptom.onset.date),
-                                  "dd MMM yyyy",
-                                )
-                              : "Not specified"}
-                          </div>
-                          <div className="p-3 flex justify-center">
-                            <button className="text-gray-400 hover:text-gray-600">
-                              <Info size={18} />
-                            </button>
-                          </div>
-                        </div>
+                      {datesInYear[date].map((symptom, index) => (
+                        <SymptomRow key={index} symptom={symptom} />
                       ))}
                     </div>
                   </div>
