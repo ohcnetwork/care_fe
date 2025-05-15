@@ -225,20 +225,6 @@ export default function SearchInput({
     }
   }, [searchValue]);
 
-  const renderInput = (
-    <SearchInputFieldRenderer
-      selectedOption={selectedOption}
-      searchValue={searchValue}
-      setSearchValue={setSearchValue}
-      inputRef={inputRef}
-      inputClassName={inputClassName}
-      autoFocus={autoFocus}
-      isSingleOption={isSingleOption}
-      open={open}
-      {...props}
-    />
-  );
-
   useEffect(() => {
     if (autoFocus) {
       inputRef.current?.focus();
@@ -355,7 +341,19 @@ export default function SearchInput({
             </PopoverContent>
           </Popover>
         )}
-        <div className="w-full">{renderInput}</div>
+        <div className="w-full">
+          <SearchInputFieldRenderer
+            selectedOption={selectedOption}
+            searchValue={searchValue}
+            setSearchValue={setSearchValue}
+            inputRef={inputRef}
+            inputClassName={inputClassName}
+            autoFocus={autoFocus}
+            isSingleOption={isSingleOption}
+            open={open}
+            {...props}
+          />
+        </div>
       </div>
       {error && (
         <div className="px-2 mb-1 text-xs font-medium tracking-wide transition-opacity duration-300 error-text text-danger-500">
