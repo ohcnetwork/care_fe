@@ -484,7 +484,23 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 name={`contact.${index}.system`}
                 render={({ field }) => (
                   <FormItem className="space-y-0">
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      value={field.value}
+                      onValueChange={(newSystem) => {
+                        const isPhoneSystem = (system: string) =>
+                          ["phone", "fax", "sms"].includes(system);
+                        const oldSystem = form.getValues(
+                          `contact.${index}.system`,
+                        );
+                        const wasPhoneType = isPhoneSystem(oldSystem);
+                        const isNowPhoneType = isPhoneSystem(newSystem);
+
+                        if (wasPhoneType !== isNowPhoneType) {
+                          form.setValue(`contact.${index}.value`, "");
+                        }
+                        field.onChange(newSystem);
+                      }}
+                    >
                       <FormControl>
                         <SelectTrigger className="h-[42px] md:h-[38px]">
                           <SelectValue
@@ -510,20 +526,14 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 name={`contact.${index}.value`}
                 render={({ field }) => {
                   const system = form.watch(`contact.${index}.system`);
-                  const isPhoneSystem = ["phone", "fax", "sms"].includes(
-                    system,
-                  );
-                  const inputValue =
-                    isPhoneSystem && field.value && !field.value.startsWith("+")
-                      ? ""
-                      : field.value;
                   return (
                     <FormItem className="space-y-0">
                       <FormControl>
-                        {isPhoneSystem ? (
+                        {system === "phone" ||
+                        system === "fax" ||
+                        system === "sms" ? (
                           <PhoneInput
                             {...field}
-                            value={inputValue}
                             placeholder={t(
                               `contact_point_placeholder__${system}`,
                             )}
