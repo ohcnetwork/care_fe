@@ -90,8 +90,8 @@ const defaultTemplate: ReportTemplateFormData = {
           columns: [
             {
               type: "rule",
-              length: "100%",
-              stroke: "mygray",
+              length: 100,
+              stroke: "#808080",
             },
           ],
         },
@@ -121,7 +121,7 @@ const defaultTemplate: ReportTemplateFormData = {
               label: "Created on",
               format: "[day]/[month]/[year]",
               style: {
-                fill: "mygray",
+                fill: "#808080",
                 weight: 500,
               },
               align: "left",
@@ -133,8 +133,8 @@ const defaultTemplate: ReportTemplateFormData = {
           columns: [
             {
               type: "rule",
-              length: "100%",
-              stroke: "mygray",
+              length: 100,
+              stroke: "#808080",
             },
           ],
         },
@@ -299,20 +299,6 @@ export default function ReportBuilder({
               size_ratio: row.size_ratio ?? Array(row.columns.length).fill(1),
               columns: row.columns.map((column) => ({
                 ...column,
-                ...(column.type === "rule" && {
-                  length: column.length.split("%")[0],
-                  stroke:
-                    column.stroke?.match(/#[a-fA-F0-9]{6}/)?.[0] ||
-                    column.stroke,
-                }),
-                ...(column.type === "datetime" && {
-                  style: {
-                    ...column.style,
-                    fill:
-                      column.style.fill?.match(/#[a-fA-F0-9]{6}/)?.[0] ||
-                      column.style.fill,
-                  },
-                }),
                 ...(column.type === "image" && {
                   width:
                     column.width?.match("[0-9][0-9]?[0-9]?")?.[0] ||
@@ -347,21 +333,24 @@ export default function ReportBuilder({
                   : Array(row.columns.length).fill(1),
               columns: row.columns.map((column) => ({
                 ...column,
-                ...(column.type === "rule" && {
-                  length: column.length + "%",
-                  stroke: `rgb("${column.stroke}")`,
-                }),
-                ...(column.type === "datetime" && {
-                  style: {
-                    ...column.style,
-                    fill: `rgb("${column.style.fill}")`,
-                  },
-                }),
                 ...(column.type === "image" && {
                   width: column.width + "%",
                 }),
               })),
             })),
+          },
+          layout: {
+            ...data.config.layout,
+            page_margin:
+              data.config.layout.page_margin.mode === "custom"
+                ? {
+                    mode: "custom",
+                    values: data.config.layout.page_margin.values!,
+                  }
+                : {
+                    mode: "uniform",
+                    value: data.config.layout.page_margin.value!,
+                  },
           },
         },
       };

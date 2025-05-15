@@ -251,6 +251,8 @@ const SectionBasicSettings = React.memo(function SectionBasicSettings({
   const handleDataSourceChange = (value: string, field: any) => {
     setSelectedDataSource(value);
     field.onChange(value);
+    form.setValue(`config.sections.${index}.options.title`, "");
+    form.setValue(`config.sections.${index}.options.columns`, []);
     form.setValue(`config.sections.${index}.options.fields`, []);
   };
 

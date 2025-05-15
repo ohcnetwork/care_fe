@@ -32,11 +32,17 @@ interface Margins {
   left: string;
 }
 
-interface PageMargin {
-  mode: "uniform" | "custom";
-  value?: string;
-  values?: Margins;
-}
+type PageMargin =
+  | {
+      mode: "uniform";
+      value: string;
+      values?: Margins;
+    }
+  | {
+      mode: "custom";
+      values: Margins;
+      value?: string;
+    };
 
 interface PageNumbering {
   enabled: boolean;
@@ -221,7 +227,7 @@ interface ImageElement extends BaseHeaderElement {
 
 interface RuleElement extends BaseHeaderElement {
   type: "rule";
-  length: string;
+  length: number;
   stroke: string;
 }
 

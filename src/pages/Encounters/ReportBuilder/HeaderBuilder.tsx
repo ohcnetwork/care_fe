@@ -282,7 +282,15 @@ const RuleElement = React.memo(function RuleElement({
             <FormLabel>{t("REPORT_BUILDER_LENGTH")}</FormLabel>
             <FormControl>
               <div className="relative flex items-center">
-                <Input {...field} type="number" value={field.value} />
+                <Input
+                  {...field}
+                  type="number"
+                  value={field.value}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value, 10);
+                    field.onChange(value);
+                  }}
+                />
                 <span className="absolute right-10 text-xs">%</span>
               </div>
             </FormControl>
@@ -772,8 +780,8 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
         case "rule":
           newElement = {
             type: "rule",
-            length: "100%",
-            stroke: "solid",
+            length: 100,
+            stroke: "#808080",
             align: "center",
           };
           break;
@@ -783,7 +791,7 @@ export const HeaderBuilder = React.memo(function HeaderBuilder({
             label: t("REPORT_BUILDER_CREATED_ON"),
             format: "DD/MM/YYYY",
             style: {
-              fill: "#000000",
+              fill: "#808080",
               weight: 400,
             },
             align: "right",

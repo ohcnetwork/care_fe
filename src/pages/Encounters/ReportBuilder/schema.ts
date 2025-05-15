@@ -22,10 +22,12 @@ export const reportTemplateSchema = z.object({
   config: z.object({
     layout: z.object({
       page_size: z.string(),
-      page_margin: z
-        .object({
-          mode: z.enum(["uniform", "custom"]),
-          value: z.string().optional(),
+      page_margin: z.discriminatedUnion("mode", [
+        z.object({
+          mode: z.literal("uniform"),
+          value: z.string({
+            required_error: "Field is Required",
+          }),
           values: z
             .object({
               top: z.string(),
@@ -34,31 +36,26 @@ export const reportTemplateSchema = z.object({
               left: z.string(),
             })
             .optional(),
-        })
-        .refine(
-          (data) => {
-            if (data.mode === "custom") {
-              return data.values !== undefined;
-            }
-            return true;
-          },
-          {
-            message: "Values are required for custom mode",
-            path: ["values"],
-          },
-        )
-        .refine(
-          (data) => {
-            if (data.mode === "uniform") {
-              return data.value !== undefined;
-            }
-            return true;
-          },
-          {
-            message: "Value is required for uniform mode",
-            path: ["value"],
-          },
-        ),
+        }),
+        z.object({
+          mode: z.literal("custom"),
+          values: z.object({
+            top: z.string({
+              required_error: "Field is Required",
+            }),
+            right: z.string({
+              required_error: "Field is Required",
+            }),
+            bottom: z.string({
+              required_error: "Field is Required",
+            }),
+            left: z.string({
+              required_error: "Field is Required",
+            }),
+          }),
+          value: z.string().optional(),
+        }),
+      ]),
       page_numbering: z.object({
         enabled: z.boolean(),
         format: z.string(),
@@ -110,7 +107,7 @@ export const reportTemplateSchema = z.object({
               }),
               z.object({
                 type: z.literal("rule"),
-                length: z.string(),
+                length: z.number(),
                 stroke: z.string(),
                 align: z
                   .enum(

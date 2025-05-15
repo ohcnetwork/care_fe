@@ -135,7 +135,32 @@ export const LayoutBuilder = React.memo(function LayoutBuilder({
               <FormLabel>{t("REPORT_BUILDER_PAGE_MARGIN")}</FormLabel>
               <FormControl>
                 <RadioGroup
-                  onValueChange={field.onChange}
+                  onValueChange={(value: "uniform" | "custom") => {
+                    if (value === "uniform") {
+                      form.setValue(
+                        "config.layout.page_margin",
+                        {
+                          mode: "uniform",
+                          value: "0pt",
+                        },
+                        { shouldValidate: true },
+                      );
+                    } else {
+                      form.setValue(
+                        "config.layout.page_margin",
+                        {
+                          mode: "custom",
+                          values: {
+                            top: "0pt",
+                            right: "0pt",
+                            bottom: "0pt",
+                            left: "0pt",
+                          },
+                        },
+                        { shouldValidate: true },
+                      );
+                    }
+                  }}
                   defaultValue={field.value}
                   className="flex flex-row gap-2 mt-2"
                 >

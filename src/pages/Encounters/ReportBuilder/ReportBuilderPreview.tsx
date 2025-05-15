@@ -272,6 +272,7 @@ const HeaderElementPreview = React.memo(function HeaderElementPreview({
           )}
           style={{
             fontWeight: element.style.weight,
+            color: element.style.fill,
           }}
         >
           <span className="flex gap-1 truncate">
