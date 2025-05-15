@@ -3,10 +3,18 @@ import { useEffect, useState } from "react";
 import { Control, UseFormReturn, useFieldArray } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   FormControl,
   FormField,
@@ -15,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -22,6 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 
 import { ReportTemplateFormData } from "@/pages/Encounters/ReportBuilder/schema";
 import {
@@ -65,14 +76,169 @@ const AlignmentInput = ({
   );
 };
 
+function RatioBuilder({
+  form,
+  rowIndex,
+  column,
+}: {
+  form: UseFormReturn<ReportTemplateFormData>;
+  rowIndex: number;
+  column: HeaderElementType[];
+}) {
+  const { t } = useTranslation();
+  const [totalRatio, setTotalRatio] = useState(6);
+  const [lockRatio, setLockRatio] = useState(false);
+
+  const columnLength = column?.length ?? 0;
+
+  useEffect(() => {
+    const initialTotalRatio = columnLength * 6 || 6;
+    setTotalRatio(initialTotalRatio);
+    if (lockRatio) {
+      setRatios(initialTotalRatio / columnLength);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnLength, lockRatio]);
+
+  const setRatios = (newRatio: number, skipIndex?: number) => {
+    column.forEach((_, index) => {
+      if (!!skipIndex || index !== skipIndex) {
+        form.setValue(
+          `config.header.rows.${rowIndex}.size_ratio.${index}`,
+          newRatio,
+        );
+      }
+    });
+  };
+
+  const handleTotalRatioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTotalRatio = parseInt(e.target.value, 10);
+    setTotalRatio(newTotalRatio);
+    if (lockRatio) {
+      setRatios(newTotalRatio / columnLength);
+    }
+  };
+
+  const handleRatioChange = (curIndex: number, value: number) => {
+    const totalRatioMinusCurrent = totalRatio - value;
+    if (lockRatio) {
+      const dividedRatio = totalRatioMinusCurrent / (columnLength - 1);
+      setRatios(dividedRatio, curIndex);
+    }
+  };
+
+  const ratioSum = column.reduce((acc, column, index) => {
+    return (
+      acc +
+      (form.watch(`config.header.rows.${rowIndex}.size_ratio.${index}`) || 0)
+    );
+  }, 0);
+
+  if (columnLength === 0 || columnLength === 1) {
+    return <></>;
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-4 justify-between">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="total-ratio">{t("total_ratio")}</Label>
+          <Input
+            id="total-ratio"
+            type="number"
+            value={totalRatio}
+            onChange={handleTotalRatioChange}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="lock-ratio">{t("lock_ratios")}</Label>
+          <Switch
+            id="lock-ratio"
+            checked={lockRatio}
+            onCheckedChange={setLockRatio}
+            className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500 my-2"
+          />
+        </div>
+      </div>
+      <div className="flex flex-col gap-4">
+        {column?.map((column, index) => (
+          <SizeRatioInput
+            key={`${index}-${column.type}`}
+            control={form.control}
+            rowIndex={rowIndex}
+            elementIndex={index}
+            maxValue={totalRatio}
+            elementType={column.type}
+            onChange={handleRatioChange}
+          />
+        ))}
+      </div>
+      <div>
+        <h4 className="text-sm font-medium mb-2">
+          {t("preview_of_proportions")}
+        </h4>
+        {ratioSum !== totalRatio ? (
+          <p className="text-xs text-red-500">
+            {t("preview_proportions_error")}
+          </p>
+        ) : (
+          <>
+            <div className="flex w-full">
+              {column?.map((col, index) => {
+                const ratio =
+                  form.watch(
+                    `config.header.rows.${rowIndex}.size_ratio.${index}`,
+                  ) || 1;
+                const width = `${(ratio / totalRatio) * 100}%`;
+                return (
+                  <div
+                    key={`preview-${index}`}
+                    className="h-12 flex items-center justify-center text-xs"
+                    style={{
+                      width,
+                      backgroundColor: index % 2 ? "#e8f5e9" : "#e3f2fd",
+                    }}
+                  >
+                    {col.type === "text" && <span className="text-lg">T</span>}
+                    {col.type === "image" && <span>📷</span>}
+                    {col.type === "rule" && <span>━</span>}
+                    {col.type === "datetime" && <span>📅</span>}
+                    <span className="ml-1">{ratio}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {t("total_ratio")}: {totalRatio}
+              {column?.map((col, index) => {
+                const ratio =
+                  form.watch(
+                    `config.header.rows.${rowIndex}.size_ratio.${index}`,
+                  ) || 1;
+                return ` (${col.type}: ${((ratio / totalRatio) * 100).toFixed(2)}%)`;
+              })}
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const SizeRatioInput = ({
   control,
   rowIndex,
   elementIndex,
+  maxValue,
+  elementType,
+  onChange,
 }: {
   control: Control<ReportTemplateFormData>;
   rowIndex: number;
   elementIndex: number;
+  maxValue: number;
+  elementType: string;
+  onChange: (curIndex: number, value: number) => void;
 }) => {
   const { t } = useTranslation();
   return (
@@ -81,20 +247,37 @@ const SizeRatioInput = ({
       name={`config.header.rows.${rowIndex}.size_ratio.${elementIndex}`}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{t("size_ratio")}</FormLabel>
-          <Input
-            {...field}
-            value={field.value}
-            defaultValue={1}
-            type="number"
-            placeholder="1"
-            pattern="\d*"
-            inputMode="numeric"
-            onChange={(e) => {
-              const value = parseInt(e.target.value, 10);
-              field.onChange(value);
-            }}
-          />
+          <FormLabel>
+            {t("size_ratio")}: {elementType}
+          </FormLabel>
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <Input
+              {...field}
+              value={field.value}
+              defaultValue={1}
+              type="number"
+              placeholder="1"
+              pattern="\d*"
+              inputMode="numeric"
+              onChange={(e) => {
+                const value = parseInt(e.target.value, 10);
+                onChange(elementIndex, value);
+                field.onChange(value);
+              }}
+              className="w-full sm:w-1/6"
+            />
+            <Slider
+              value={[field.value]}
+              min={1}
+              max={maxValue}
+              step={1}
+              onValueChange={(value) => {
+                onChange(elementIndex, value[0]);
+                field.onChange(value[0]);
+              }}
+              className="w-full sm:w-5/6"
+            />
+          </div>
           <FormMessage />
         </FormItem>
       )}
@@ -179,11 +362,6 @@ function TextElement({
         rowIndex={rowIndex}
         elementIndex={elementIndex}
       />
-      <SizeRatioInput
-        control={control}
-        rowIndex={rowIndex}
-        elementIndex={elementIndex}
-      />
     </div>
   );
 }
@@ -247,11 +425,6 @@ function ImageElement({
         rowIndex={rowIndex}
         elementIndex={elementIndex}
       />
-      <SizeRatioInput
-        control={control}
-        rowIndex={rowIndex}
-        elementIndex={elementIndex}
-      />
     </div>
   );
 }
@@ -279,7 +452,7 @@ function RuleElement({
                 <Input
                   {...field}
                   type="number"
-                  value={field.value}
+                  value={field.value ?? 100}
                   onChange={(e) => {
                     const value = parseInt(e.target.value, 10);
                     field.onChange(value);
@@ -304,11 +477,6 @@ function RuleElement({
         )}
       />
       <AlignmentInput
-        control={control}
-        rowIndex={rowIndex}
-        elementIndex={elementIndex}
-      />
-      <SizeRatioInput
         control={control}
         rowIndex={rowIndex}
         elementIndex={elementIndex}
@@ -409,22 +577,17 @@ function DateTimeElement({
         rowIndex={rowIndex}
         elementIndex={elementIndex}
       />
-      <SizeRatioInput
-        control={control}
-        rowIndex={rowIndex}
-        elementIndex={elementIndex}
-      />
     </div>
   );
 }
 
 function HeaderElement({
-  columnIndex: rowIndex,
+  rowIndex,
   elementIndex,
   control,
   type,
 }: {
-  columnIndex: number;
+  rowIndex: number;
   elementIndex: number;
   control: Control<ReportTemplateFormData>;
   type: HeaderElementType["type"];
@@ -473,7 +636,7 @@ function HeaderElement({
 }
 
 interface HeaderRowProps {
-  columnIndex: number;
+  rowIndex: number;
   column: HeaderElementType[];
   form: UseFormReturn<ReportTemplateFormData>;
   onRemoveRow: (rowIndex: number) => void;
@@ -484,23 +647,25 @@ interface HeaderRowProps {
 }
 
 const RowButtons = ({
-  columnIndex: rowIndex,
+  rowIndex,
   size = "sm",
   handleAddElement,
 }: {
-  columnIndex: number;
+  rowIndex: number;
   size?: "sm" | "xs" | "default" | "lg" | "icon";
   handleAddElement: (rowIndex: number, type: HeaderElementType["type"]) => void;
 }) => {
   const { t } = useTranslation();
+  const buttonClasses =
+    "w-full flex flex-col items-center gap-1 px-5 py-8 rounded-none bg-green-50 text-green-900 hover:bg-green-200/80 hover:text-green-900";
   return (
-    <div className="flex flex-col sm:flex-row items-center rounded-lg border overflow-clip">
+    <>
       <Button
         type="button"
         size={size}
         variant="ghost"
         onClick={() => handleAddElement(rowIndex, "text")}
-        className="w-full flex flex-col items-center gap-1 px-5 py-8 rounded-none border-r border-gray-200 bg-green-50 text-green-900 hover:bg-green-200/80 hover:text-green-900"
+        className={cn(buttonClasses, "border-r border-gray-200")}
       >
         <CareIcon icon="l-text" className="w-4 h-4" />
         {t("add_text")}
@@ -510,7 +675,10 @@ const RowButtons = ({
         size={size}
         variant="ghost"
         onClick={() => handleAddElement(rowIndex, "image")}
-        className="w-full flex flex-col items-center gap-1 px-5 py-8 rounded-none border-t sm:border-t-0 border-r border-gray-200 bg-green-50 text-green-900 hover:bg-green-200/80 hover:text-green-900"
+        className={cn(
+          buttonClasses,
+          "border-t sm:border-t-0 border-r border-gray-200",
+        )}
       >
         <CareIcon icon="l-image-v" className="w-4 h-4" />
         {t("add_image")}
@@ -520,7 +688,10 @@ const RowButtons = ({
         size={size}
         variant="ghost"
         onClick={() => handleAddElement(rowIndex, "rule")}
-        className="w-full flex flex-col items-center gap-1 px-5 py-8 rounded-none border-t sm:border-t-0 border-r border-gray-200 bg-green-50 text-green-900 hover:bg-green-200/80 hover:text-green-900"
+        className={cn(
+          buttonClasses,
+          "border-t sm:border-t-0 border-r border-gray-200",
+        )}
       >
         <CareIcon icon="l-minus" className="w-4 h-4" />
         {t("add_rule")}
@@ -530,17 +701,17 @@ const RowButtons = ({
         size={size}
         variant="ghost"
         onClick={() => handleAddElement(rowIndex, "datetime")}
-        className="w-full flex flex-col items-center gap-1 px-4 py-8 rounded-none border-t sm:border-t-0 border-r border-gray-200 bg-green-50 text-green-900 hover:bg-green-200/80 hover:text-green-900"
+        className={cn(buttonClasses, "border-t sm:border-t-0 border-gray-200")}
       >
         <CareIcon icon="l-calender" className="w-4 h-4" />
         {t("add_datetime")}
       </Button>
-    </div>
+    </>
   );
 };
 
 function HeaderRow({
-  columnIndex: columnIndex,
+  rowIndex,
   column: column,
   form,
   onRemoveRow,
@@ -582,7 +753,7 @@ function HeaderRow({
       <div className="border rounded-lg p-2 bg-gray-50 flex justify-center items-center gap-2">
         <RowButtons
           size="lg"
-          columnIndex={columnIndex}
+          rowIndex={rowIndex}
           handleAddElement={handleAddElement}
         />
       </div>
@@ -590,9 +761,9 @@ function HeaderRow({
   }
 
   return (
-    <div className="border rounded-lg p-2">
+    <Card className="overflow-clip">
       {/* Element Tabs */}
-      <div className="p-3 flex sm:flex-row flex-col justify-between gap-2">
+      <CardHeader className="sm:flex-row flex-wrap flex-col justify-between gap-2">
         {column.length > 0 && (
           <div className="flex flex-col sm:flex-row justify-start gap-2">
             <Select
@@ -626,7 +797,7 @@ function HeaderRow({
             <Button
               type="button"
               variant="secondary"
-              onClick={() => onRemoveElement(columnIndex, activeElement)}
+              onClick={() => onRemoveElement(rowIndex, activeElement)}
             >
               <span className="text-sm">
                 {t(`remove_${column[activeElement].type}`)}
@@ -639,31 +810,33 @@ function HeaderRow({
           type="button"
           size={"sm"}
           variant="destructive"
-          onClick={() => onRemoveRow(columnIndex)}
+          onClick={() => onRemoveRow(rowIndex)}
         >
           <Trash2Icon className="size-3" />
           <span className="text-sm">{t("remove_row")}</span>
         </Button>
-      </div>
-
-      {/* Element Content */}
-      {activeElement !== null && column[activeElement] && (
-        <div className="p-4">
-          <HeaderElement
-            columnIndex={columnIndex}
-            elementIndex={activeElement}
-            control={form.control}
-            type={column[activeElement].type}
-          />
-        </div>
-      )}
-
-      <RowButtons
-        size="default"
-        columnIndex={columnIndex}
-        handleAddElement={handleAddElement}
-      />
-    </div>
+      </CardHeader>
+      <CardContent>
+        {/* Element Content */}
+        {activeElement !== null && column[activeElement] && (
+          <div className="p-4">
+            <HeaderElement
+              rowIndex={rowIndex}
+              elementIndex={activeElement}
+              control={form.control}
+              type={column[activeElement].type}
+            />
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="flex flex-col sm:flex-row items-center p-0">
+        <RowButtons
+          size="default"
+          rowIndex={rowIndex}
+          handleAddElement={handleAddElement}
+        />
+      </CardFooter>
+    </Card>
   );
 }
 
@@ -680,6 +853,7 @@ export default function HeaderBuilder({
   const [activeElements, setActiveElements] = useState<Record<number, number>>(
     {},
   );
+  const [activeRow, setActiveRow] = useState<number | null>(null);
 
   const rows = form.watch("config.header.rows");
 
@@ -708,6 +882,7 @@ export default function HeaderBuilder({
       },
     ]);
     setActiveElements((prev) => ({ ...prev, [rowLength]: 0 }));
+    setActiveRow(rowLength);
   };
 
   const handleRemoveRow = (rowIndex: number) => {
@@ -723,6 +898,24 @@ export default function HeaderBuilder({
     });
     remove(rowIndex);
     setActiveElements(newActiveElements);
+    let newActiveRowIndex: number | null = null;
+    // If there will be no fields after removal
+    if (fields.length <= 1) {
+      newActiveRowIndex = null;
+    }
+    // removing the first row and there are more rows
+    else if (rowIndex === 0) {
+      newActiveRowIndex = 0; // Next row will become first
+    }
+    // removing a row in the middle
+    else if (rowIndex < fields.length - 1) {
+      newActiveRowIndex = rowIndex; // Keep same index as next row will shift up
+    }
+    // removing last row
+    else {
+      newActiveRowIndex = rowIndex - 1; // Set to previous row
+    }
+    setActiveRow(newActiveRowIndex);
   };
 
   const handleAddElement = (
@@ -818,25 +1011,43 @@ export default function HeaderBuilder({
         <CardTitle>{t("header")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
-        {Object.keys(activeElements).length > 0 &&
-          fields.map((field, rowIndex) => (
-            <HeaderRow
+        <div className="flex flex-col flex-wrap sm:flex-row gap-2">
+          {fields.map((field, rowIndex) => (
+            <Button
               key={field.id}
-              columnIndex={rowIndex}
-              column={rows[rowIndex]?.columns || []}
+              type="button"
+              variant="white"
+              onClick={() => setActiveRow(rowIndex)}
+              className={cn(activeRow === rowIndex && "bg-green-100")}
+            >
+              {t("row")} {rowIndex + 1}
+            </Button>
+          ))}
+          <Button type="button" onClick={handleAddRow}>
+            {t("add_row")}
+          </Button>
+        </div>
+        {activeRow !== null && (
+          <>
+            <HeaderRow
+              rowIndex={activeRow}
+              column={rows[activeRow]?.columns || []}
               form={form}
               onRemoveRow={handleRemoveRow}
               onAddElement={handleAddElement}
               onRemoveElement={handleRemoveElement}
-              activeElement={activeElements[rowIndex]}
+              activeElement={activeElements[activeRow]}
               setActiveElement={(index: number) =>
-                setActiveElements((prev) => ({ ...prev, [rowIndex]: index }))
+                setActiveElements((prev) => ({ ...prev, [activeRow]: index }))
               }
             />
-          ))}
-        <Button type="button" onClick={handleAddRow} className="mt-4">
-          {t("add_row")}
-        </Button>
+            <RatioBuilder
+              form={form}
+              rowIndex={activeRow}
+              column={rows[activeRow]?.columns || []}
+            />
+          </>
+        )}
       </CardContent>
     </Card>
   );

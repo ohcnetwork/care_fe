@@ -304,6 +304,12 @@ export default function ReportBuilder({
                     column.width?.match("[0-9][0-9]?[0-9]?")?.[0] ||
                     column.width,
                 }),
+                ...(column.type === "rule" && {
+                  length:
+                    Number(
+                      column.length?.toString().match("[0-9][0-9]?[0-9]?")?.[0],
+                    ) || 100,
+                }),
               })),
             })),
           },
