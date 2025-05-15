@@ -133,7 +133,7 @@ export function ComboboxQuantityInput({
           onOpenAutoFocus={() => {
             setTimeout(() => {
               inputRef.current?.focus();
-            }, 200);
+            }, 900);
           }}
         >
           <Command>
