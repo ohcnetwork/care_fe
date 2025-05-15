@@ -242,6 +242,8 @@ const AvatarEditModal = ({
     setSelectedFile(undefined);
     setIsCropping(false);
     dragProps.setFileDropError("");
+    setIsCameraOpen(false);
+    setPreviewImage(null);
     onOpenChange(false);
   };
 
@@ -383,6 +385,8 @@ const AvatarEditModal = ({
       setPreview(undefined);
       setIsProcessing(false);
       setSelectedFile(undefined);
+      setIsCameraOpen(false);
+      setPreviewImage(null);
     }
   };
 

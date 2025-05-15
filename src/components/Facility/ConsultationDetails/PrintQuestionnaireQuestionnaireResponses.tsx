@@ -17,7 +17,7 @@ import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
