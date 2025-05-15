@@ -174,6 +174,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                 ]}
                 onSearch={handleSearch}
                 className="w-full"
+                autoFocus
               />
 
               <div className="min-h-[200px]" id="patient-search-results">
