@@ -41,7 +41,7 @@ import { GENDER_TYPES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { PartialPatientModel } from "@/types/emr/newPatient";
+import { PartialPatientModel } from "@/types/emr/patient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
@@ -215,7 +215,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                             {patientList.results.map((patient) => (
                               <TableRow
                                 key={patient.id}
-                                className="cursor-pointer hover:bg-muted/50"
+                                className="cursor-pointer"
                                 onClick={() => handlePatientSelect(patient)}
                               >
                                 <TableCell className="font-medium">
