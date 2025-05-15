@@ -588,7 +588,7 @@ export const DischargeTab = ({
         <div className="relative flex-1 min-w-72 max-w-96 ml-2">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
-            id="search-by-filename"
+            id="search-by-dischargefilename"
             name="name"
             placeholder={t("search_files")}
             value={qParams.name || ""}

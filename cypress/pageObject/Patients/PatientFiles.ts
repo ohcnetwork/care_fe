@@ -52,14 +52,14 @@ export class PatientFiles {
 
   fillMultipleFileNames(fileNames: string[]) {
     cy.get("input").each(($input, index) => {
-      cy.wrap($input).clear();
+      cy.wrap($input).click().clear();
       cy.wrap($input).type(`${fileNames[index]}`);
     });
     return this;
   }
 
   fillSingleFileName(fileName: string) {
-    cy.get('[data-cy="filename-input"]').type(fileName);
+    cy.get('[data-cy="input"]').type(fileName);
     return this;
   }
 
