@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { differenceInMinutes, format } from "date-fns";
 import { toPng } from "html-to-image";
+import { useTranslation } from "react-i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
@@ -31,12 +32,18 @@ export const formatTimeShort = (time: Time) => {
   return format(new Date(`1970-01-01T${time}`), "h:mm a").replace(":00", "");
 };
 
-export const relativeDate = (date: DateLike, withOutSuffix = false): string => {
+export const relativeDate = (date: DateLike, withoutSuffix = false) => {
+  const { t } = useTranslation();
   const obj = dayjs(date);
+  const isToday = obj.isSame(dayjs(), "day");
 
-  const relative = obj.fromNow(withOutSuffix);
+  const relative = obj.fromNow(withoutSuffix);
 
   const hasTime = obj.hour() !== 0 || obj.minute() !== 0 || obj.second() !== 0;
+
+  if (isToday && !hasTime) {
+    return t("today");
+  }
 
   const time = hasTime ? ` at ${obj.format(TIME_FORMAT)}` : "";
 

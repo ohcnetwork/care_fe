@@ -1,4 +1,4 @@
-import { format, isToday, isValid } from "date-fns";
+import { format, isValid } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import { TooltipComponent } from "@/components/ui/tooltip";
@@ -27,8 +27,6 @@ export default function RelativeDateTooltip({
     );
   }
 
-  const isDateToday = isToday(dateObj);
-
   const hasTime =
     dateObj.getHours() !== 0 ||
     dateObj.getMinutes() !== 0 ||
@@ -39,16 +37,6 @@ export default function RelativeDateTooltip({
     : format(dateObj, "PP");
 
   const datetimeAttr = dateObj.toISOString();
-
-  if (isDateToday && !hasTime) {
-    return (
-      <TooltipComponent content={tooltipContent}>
-        <time dateTime={datetimeAttr} className={className}>
-          {t("today")}
-        </time>
-      </TooltipComponent>
-    );
-  }
 
   return (
     <TooltipComponent content={tooltipContent}>
