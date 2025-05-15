@@ -22,7 +22,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge, relativeTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 export const PatientHome = (props: {
   facilityId?: string;

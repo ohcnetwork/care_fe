@@ -39,6 +39,8 @@ export default defineConfig({
     requestTimeout: 15000,
     numTestsKeptInMemory: 15,
     experimentalMemoryManagement: true,
+    watchForFileChanges: false,
+    trashAssetsBeforeRuns: true,
   },
 
   env: {

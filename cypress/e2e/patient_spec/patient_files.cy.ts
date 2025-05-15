@@ -2,7 +2,6 @@ import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { PatientFiles } from "@/pageObject/Patients/PatientFiles";
 import { UserProfile } from "@/pageObject/Users/UserProfile";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
-import { generateName } from "@/utils/commonUtils";
 import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
@@ -13,14 +12,12 @@ const userProfile = new UserProfile();
 describe("Patient Files", () => {
   beforeEach(() => {
     cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
-    cy.loginByApi("devnurse1");
+    cy.loginByApi("doctor");
     cy.visit("/");
-    facilityCreation.selectFacility("GHC Payyanur");
-    const patientName = generateName(true);
+    facilityCreation.selectFirstRandomFacility();
 
     patientEncounter
       .navigateToEncounters()
-      .searchEncounter(patientName)
       .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
       .clickPatientDetailsButton();
@@ -78,7 +75,7 @@ describe("Patient Files", () => {
       .saveCurrentUrl();
 
     userProfile.openUserMenu().clickUserLogout();
-    cy.loginByApi("devnurse2");
+    cy.loginByApi("nurse");
     patientFiles
       .navigateToSavedUrl()
       .clickFirstFileViewButton()

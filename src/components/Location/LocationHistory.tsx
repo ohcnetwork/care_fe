@@ -23,7 +23,8 @@ export function LocationHistory({ history }: LocationHistoryProps) {
         <div key={index}>
           <LocationTree
             location={item.location}
-            datetime={item.start_datetime}
+            startTime={item.start_datetime}
+            endTime={item.end_datetime}
             isLatest={index === 0}
             showTimeline
           />
