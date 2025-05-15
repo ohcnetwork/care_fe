@@ -13,7 +13,7 @@ import api from "@/Utils/request/api";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { Encounter } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 type PrintQuestionnaireResponseProps = {
   questionnaireResponseId: string;

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -257,6 +257,62 @@ function PrintButton({ item }: { item: QuestionnaireResponse }) {
   );
 }
 
+function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
+  return (
+    <div className="px-2 space-y-4">
+      {item.questionnaire?.questions.map((question: Question) => {
+        if (question.type === "structured") return null;
+
+        if (question.type === "group") {
+          return (
+            <QuestionGroup
+              key={question.id}
+              group={question}
+              responses={item.responses}
+            />
+          );
+        }
+
+        const response = item.responses.find(
+          (r) => r.question_id === question.id,
+        );
+        if (!response) return null;
+
+        return (
+          <QuestionResponseValue
+            key={question.id}
+            question={question}
+            response={response}
+          />
+        );
+      })}
+
+      <div className="flex items-start justify-between max-sm:flex-col gap-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <Trans
+              i18nKey="by_name"
+              values={{
+                by: `${formatName(item.created_by)}${
+                  item.created_by?.user_type
+                    ? ` (${item.created_by.user_type})`
+                    : ""
+                }`,
+              }}
+              components={{ strong: <strong /> }}
+            />
+            <Trans
+              i18nKey="at_time"
+              values={{ time: formatDateTime(item.created_date) }}
+              components={{ strong: <strong /> }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ResponseCard({
   item,
   isPrintPreview,
@@ -271,63 +327,21 @@ function ResponseCard({
       ? properCase(structuredType.replace(/_/g, " "))
       : item.questionnaire?.title || "";
 
-  return (
+  return isPrintPreview ? (
+    <Card className="shadow-none rounded-xl border border-gray-200">
+      <CardHeader>
+        <CardTitle className="text-base font-semibold">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ResponseCardContent item={item} />
+      </CardContent>
+    </Card>
+  ) : (
     <EncounterAccordionLayout
       title={isStructured && structuredType ? structuredType : title}
-      actionButton={isPrintPreview ? null : <PrintButton item={item} />}
-      className={cn(isPrintPreview && "shadow-none")}
+      actionButton={<PrintButton item={item} />}
     >
-      {item.questionnaire && (
-        <div className="px-2 space-y-4">
-          {item.questionnaire?.questions.map((question: Question) => {
-            if (question.type === "structured") return null;
-            if (question.type === "group") {
-              return (
-                <QuestionGroup
-                  key={question.id}
-                  group={question}
-                  responses={item.responses}
-                />
-              );
-            }
-
-            const response = item.responses.find(
-              (r) => r.question_id === question.id,
-            );
-            if (!response) return null;
-
-            return (
-              <QuestionResponseValue
-                key={question.id}
-                question={question}
-                response={response}
-              />
-            );
-          })}{" "}
-          <div className="flex items-start justify-between max-sm:flex-col gap-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <Trans
-                  i18nKey="by_name"
-                  values={{
-                    by: `${formatName(item.created_by)}${
-                      item.created_by?.user_type
-                        ? ` (${item.created_by.user_type})`
-                        : ""
-                    }`,
-                  }}
-                  components={{ strong: <strong /> }}
-                />
-                <Trans
-                  i18nKey="at_time"
-                  values={{ time: formatDateTime(item.created_date) }}
-                  components={{ strong: <strong /> }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ResponseCardContent item={item} />
     </EncounterAccordionLayout>
   );
 }
