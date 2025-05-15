@@ -510,14 +510,20 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 name={`contact.${index}.value`}
                 render={({ field }) => {
                   const system = form.watch(`contact.${index}.system`);
+                  const isPhoneSystem = ["phone", "fax", "sms"].includes(
+                    system,
+                  );
+                  const inputValue =
+                    isPhoneSystem && field.value && !field.value.startsWith("+")
+                      ? ""
+                      : field.value;
                   return (
                     <FormItem className="space-y-0">
                       <FormControl>
-                        {system === "phone" ||
-                        system === "fax" ||
-                        system === "sms" ? (
+                        {isPhoneSystem ? (
                           <PhoneInput
                             {...field}
+                            value={inputValue}
                             placeholder={t(
                               `contact_point_placeholder__${system}`,
                             )}
