@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { differenceInMinutes, format } from "date-fns";
 import { toPng } from "html-to-image";
-import { useTranslation } from "react-i18next";
+import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
@@ -33,7 +33,6 @@ export const formatTimeShort = (time: Time) => {
 };
 
 export const relativeDate = (date: DateLike, withoutSuffix = false) => {
-  const { t } = useTranslation();
   const obj = dayjs(date);
   const isToday = obj.isSame(dayjs(), "day");
 
