@@ -38,7 +38,10 @@ import {
   ReportTemplateFormData,
   useReportTemplateSchema,
 } from "@/pages/Encounters/ReportBuilder/schema";
-import { REPORT_TEMPLATE_TYPE } from "@/types/reportTemplate/reportTemplate";
+import {
+  REPORT_TEMPLATE_TYPE,
+  ReportTemplateModel,
+} from "@/types/reportTemplate/reportTemplate";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
 
 import ReportBuilderPreview from "./ReportBuilderPreview";
@@ -257,8 +260,11 @@ export default function ReportBuilder({
 
   const { mutate: createReportTemplate } = useMutation({
     mutationFn: mutate(reportTemplateApi.create),
-    onSuccess: () => {
+    onSuccess: (data: ReportTemplateModel) => {
       toast.success(t("template_saved"));
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${data.id}`,
+      );
     },
   });
 
@@ -495,14 +501,16 @@ export default function ReportBuilder({
                 >
                   {t("save_template")}
                 </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  className="w-full"
-                  onClick={() => onSubmit(form.getValues(), true)}
-                >
-                  {t("save_and_exit")}
-                </Button>
+                {reportTemplateId && (
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    className="w-full"
+                    onClick={() => onSubmit(form.getValues(), true)}
+                  >
+                    {t("save_and_exit")}
+                  </Button>
+                )}
               </div>
             </div>
 

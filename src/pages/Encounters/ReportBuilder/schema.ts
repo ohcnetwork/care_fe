@@ -120,68 +120,70 @@ export const useReportTemplateSchema = () => {
         rows: z.array(
           z.object({
             size_ratio: z.array(z.number()).default([1]).optional(),
-            columns: z.array(
-              z.discriminatedUnion("type", [
-                z.object({
-                  type: z.literal("text"),
-                  text: z.string(),
-                  size: z.string(),
-                  weight: z.number(),
-                  align: z
-                    .enum(
-                      HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
-                        HeaderAlignment,
-                        ...HeaderAlignment[],
-                      ],
-                    )
-                    .optional(),
-                }),
-                z.object({
-                  type: z.literal("image"),
-                  file_name: z.string(),
-                  url: z.string().url(),
-                  width: z.string(),
-                  align: z
-                    .enum(
-                      HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
-                        HeaderAlignment,
-                        ...HeaderAlignment[],
-                      ],
-                    )
-                    .optional(),
-                }),
-                z.object({
-                  type: z.literal("rule"),
-                  length: z.number().min(1).max(100),
-                  stroke: z.string(),
-                  align: z
-                    .enum(
-                      HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
-                        HeaderAlignment,
-                        ...HeaderAlignment[],
-                      ],
-                    )
-                    .optional(),
-                }),
-                z.object({
-                  type: z.literal("datetime"),
-                  label: z.string(),
-                  format: z.string(),
-                  style: z.object({
-                    fill: z.string().optional(),
-                    weight: z.number().optional(),
+            columns: z
+              .array(
+                z.discriminatedUnion("type", [
+                  z.object({
+                    type: z.literal("text"),
+                    text: z.string(),
+                    size: z.string(),
+                    weight: z.number(),
+                    align: z
+                      .enum(
+                        HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                          HeaderAlignment,
+                          ...HeaderAlignment[],
+                        ],
+                      )
+                      .optional(),
                   }),
-                  align: z
-                    .enum(
-                      HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
-                        HeaderAlignment,
-                        ...HeaderAlignment[],
-                      ],
-                    )
-                    .optional(),
-                }),
-              ]),
-            ),
+                  z.object({
+                    type: z.literal("image"),
+                    file_name: z.string(),
+                    url: z.string().url(),
+                    width: z.string(),
+                    align: z
+                      .enum(
+                        HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                          HeaderAlignment,
+                          ...HeaderAlignment[],
+                        ],
+                      )
+                      .optional(),
+                  }),
+                  z.object({
+                    type: z.literal("rule"),
+                    length: z.number().min(1).max(100),
+                    stroke: z.string(),
+                    align: z
+                      .enum(
+                        HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                          HeaderAlignment,
+                          ...HeaderAlignment[],
+                        ],
+                      )
+                      .optional(),
+                  }),
+                  z.object({
+                    type: z.literal("datetime"),
+                    label: z.string(),
+                    format: z.string(),
+                    style: z.object({
+                      fill: z.string().optional(),
+                      weight: z.number().optional(),
+                    }),
+                    align: z
+                      .enum(
+                        HEADER_ALIGNMENT_OPTIONS.map((option) => option.id) as [
+                          HeaderAlignment,
+                          ...HeaderAlignment[],
+                        ],
+                      )
+                      .optional(),
+                  }),
+                ]),
+              )
+              .min(1, t("at_least_one_item_required")),
           }),
         ),
       }),
@@ -213,7 +215,7 @@ export const useReportTemplateSchema = () => {
           })
           .refine(
             (data) => {
-              if (data.is_table) {
+              if (data.is_table && data.source !== "custom_section") {
                 return (
                   (data.options.rows !== undefined &&
                     data.options.rows.length > 0) ||
@@ -230,7 +232,7 @@ export const useReportTemplateSchema = () => {
           )
           .refine(
             (data) => {
-              if (!data.is_table) {
+              if (!data.is_table || data.source === "custom_section") {
                 return (
                   (data.options.text !== undefined &&
                     data.options.text.trim() !== "") ||

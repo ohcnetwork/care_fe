@@ -701,28 +701,30 @@ export const FilesTab = (props: FilesTabProps) => {
               </Button>
             </>
           )}
-          <ReportBuilderSheet
-            facilityId={facilityId || ""}
-            patientId={patient?.id || encounter?.patient.id || ""}
-            encounterId={encounter?.id || ""}
-            permissions={encounter?.permissions || patient?.permissions || []}
-            trigger={
-              <Button variant="primary" asChild>
-                <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer">
-                  <CareIcon
-                    icon="l-file-export"
-                    className="size-4 text-green-600"
-                  />
-                  {t("report_builder")}
-                </div>
-              </Button>
-            }
-            onSuccess={() => {
-              queryClient.invalidateQueries({
-                queryKey: ["files"],
-              });
-            }}
-          />
+          {encounter && (
+            <ReportBuilderSheet
+              facilityId={facilityId || ""}
+              patientId={encounter?.patient.id || ""}
+              encounterId={encounter?.id || ""}
+              permissions={encounter?.permissions || []}
+              trigger={
+                <Button variant="primary" asChild>
+                  <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer">
+                    <CareIcon
+                      icon="l-file-export"
+                      className="size-4 text-green-600"
+                    />
+                    {t("report_builder")}
+                  </div>
+                </Button>
+              }
+              onSuccess={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["files"],
+                });
+              }}
+            />
+          )}
           <FileUploadButtons />
         </div>
         <FilterBadges />

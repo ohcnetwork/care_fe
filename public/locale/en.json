@@ -514,6 +514,7 @@
   "association_end_date": "Association end date",
   "association_start_date": "Association start date",
   "at_least_one_department_is_required": "At least one department is required",
+  "at_least_one_item_required": "At least one item is required. Please add one item or remove the row.",
   "at_time": "at <strong>{{time}}</strong>",
   "attach_files_to_consent_description": "Attach supporting documents to the consent.",
   "atypical_presentation_details": "Atypical presentation details",

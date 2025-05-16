@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, GripVertical, Plus, X } from "lucide-react";
+import { ChevronDown, ChevronUp, GripVertical, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Control,
@@ -49,200 +49,352 @@ interface SectionBuilderProps {
   facilityId: string;
 }
 
+interface StandardLayoutProps {
+  form: UseFormReturn<ReportTemplateFormData>;
+  index: number;
+  fieldName: `config.sections.${number}.options.${"fields" | "columns"}`;
+  availableFieldsAndColumns?: string[];
+  isEnabled: boolean;
+  addButtonText: string;
+  selectPlaceholder: string;
+  emptyText: string;
+}
+
+function StandardLayout({
+  form,
+  index,
+  fieldName,
+  availableFieldsAndColumns,
+  isEnabled,
+  addButtonText,
+  selectPlaceholder,
+  emptyText,
+}: StandardLayoutProps) {
+  const { t } = useTranslation();
+  const [selectedField, setSelectedField] = useState<string>("");
+
+  return (
+    <FormField
+      control={form.control}
+      name={fieldName}
+      render={({ field: { value = [], onChange } }) => {
+        const items = (Array.isArray(value) ? value : []) as string[];
+        return (
+          <FormItem>
+            <FormControl>
+              <div className="flex flex-col w-full justify-between mb-4 gap-2">
+                <Select value={selectedField} onValueChange={setSelectedField}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={selectPlaceholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableFieldsAndColumns?.map((field) => (
+                      <SelectItem key={field} value={field}>
+                        {t(field)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                  disabled={!selectedField}
+                  onClick={() => {
+                    onChange([...items, selectedField]);
+                    setSelectedField("");
+                  }}
+                >
+                  <Plus className="size-2 mr-2" />
+                  {addButtonText}
+                </Button>
+                {items.length > 0 ? (
+                  <div className="flex flex-row flex-wrap gap-2 mt-4">
+                    {items.map((item, itemIndex) => (
+                      <div
+                        key={itemIndex}
+                        className="flex space-x-2 mb-2 border border-gray-300 rounded-md p-1 pl-2 items-center justify-between"
+                      >
+                        <span className="text-sm">{t(item)}</span>
+                        {isEnabled && (
+                          <Button
+                            variant="link"
+                            type="button"
+                            size="xs"
+                            disabled={!isEnabled}
+                            onClick={() => {
+                              const newItems = [...items];
+                              newItems.splice(itemIndex, 1);
+                              onChange(newItems);
+                            }}
+                            className="py-0"
+                          >
+                            <CareIcon icon="l-multiply" className="size-2" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-red-500 text-sm mt-2">{emptyText}</p>
+                )}
+              </div>
+            </FormControl>
+            <FormMessage className="mt-2">
+              {
+                form.formState.errors?.config?.sections?.[index]?.options?.[
+                  fieldName.split(".").pop() as "fields" | "columns"
+                ]?.message
+              }
+            </FormMessage>
+          </FormItem>
+        );
+      }}
+    />
+  );
+}
+
+interface CustomLayoutProps {
+  form: UseFormReturn<ReportTemplateFormData>;
+  index: number;
+  fieldName: `config.sections.${number}.options.fields`;
+  isEnabled: boolean;
+  addButtonText: string;
+  emptyText: string;
+  isTable: boolean;
+  style?: "list" | "text";
+}
+
+function CustomLayout({
+  form,
+  index,
+  fieldName,
+  isEnabled,
+  addButtonText,
+  emptyText,
+  isTable,
+  style = "list",
+}: CustomLayoutProps) {
+  const { t } = useTranslation();
+  const [newField, setNewField] = useState<{ label: string; value: string }>({
+    label: "",
+    value: "",
+  });
+  const [textField, setTextField] = useState<string>("");
+
+  const isTextMode = !isTable && style === "text";
+
+  return (
+    <FormField
+      control={form.control}
+      name={fieldName}
+      render={({ field: { value = [], onChange } }) => {
+        const items = isTextMode
+          ? Array.isArray(value)
+            ? value
+            : []
+          : (Array.isArray(value) ? value : []).map((field) =>
+              typeof field === "string"
+                ? { label: field, value: field }
+                : field,
+            );
+
+        return (
+          <FormItem>
+            <FormControl>
+              <div className="flex flex-col w-full justify-between mb-4 gap-2">
+                {isTextMode ? (
+                  <div className="flex flex-col gap-2 w-full">
+                    <FormLabel aria-required>{t("value")}</FormLabel>
+                    <Input
+                      value={textField}
+                      onChange={(e) => setTextField(e.target.value)}
+                      placeholder={t("enter_value")}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex flex-row gap-2 justify-between">
+                    <div className="flex flex-col gap-2 w-full">
+                      <FormLabel aria-required>{t("label")}</FormLabel>
+                      <Input
+                        value={newField.label}
+                        onChange={(e) =>
+                          setNewField({ ...newField, label: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2 w-full">
+                      <FormLabel aria-required>{t("value")}</FormLabel>
+                      <Input
+                        value={newField.value}
+                        onChange={(e) =>
+                          setNewField({ ...newField, value: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                  disabled={
+                    isTextMode ? !textField : !newField.label || !newField.value
+                  }
+                  onClick={() => {
+                    if (isTextMode) {
+                      onChange([...items, textField]);
+                      setTextField("");
+                    } else {
+                      onChange([...items, newField]);
+                      setNewField({ label: "", value: "" });
+                    }
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {addButtonText}
+                </Button>
+                {items.length > 0 ? (
+                  <div className="flex flex-row flex-wrap gap-2 mt-4">
+                    {items.map((item, itemIndex) => (
+                      <div
+                        key={itemIndex}
+                        className="flex space-x-2 mb-2 border border-gray-300 rounded-md p-2 items-center justify-between"
+                      >
+                        {isTextMode ? (
+                          <span className="text-sm">{t(item as string)}</span>
+                        ) : (
+                          <div className="flex flex-col gap-2">
+                            <span className="text-sm">
+                              {t((item as { label: string }).label)}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {(item as { value: string }).value}
+                            </span>
+                          </div>
+                        )}
+                        {isEnabled && (
+                          <Button
+                            variant="link"
+                            type="button"
+                            size="xs"
+                            disabled={!isEnabled}
+                            onClick={() => {
+                              const newItems = [...items];
+                              newItems.splice(itemIndex, 1);
+                              onChange(newItems);
+                            }}
+                          >
+                            <CareIcon icon="l-multiply" className="size-2" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-red-500 text-sm mt-2">{emptyText}</p>
+                )}
+              </div>
+            </FormControl>
+            <FormMessage className="mt-2">
+              {
+                form.formState.errors?.config?.sections?.[index]?.options
+                  ?.fields?.message
+              }
+            </FormMessage>
+          </FormItem>
+        );
+      }}
+    />
+  );
+}
+
+function CustomTableAndFields({
+  form,
+  index,
+  isEnabled,
+  isTable,
+  style,
+}: {
+  form: UseFormReturn<ReportTemplateFormData>;
+  index: number;
+  isEnabled: boolean;
+  isTable: boolean;
+  style?: "list" | "text";
+}) {
+  const { t } = useTranslation();
+  return (
+    <CustomLayout
+      form={form}
+      index={index}
+      fieldName={`config.sections.${index}.options.fields`}
+      isEnabled={isEnabled}
+      addButtonText={t("add_field")}
+      emptyText={t("no_fields")}
+      isTable={isTable}
+      style={style}
+    />
+  );
+}
 function SectionFieldsAndColumns({
   form,
   index,
   availableSections,
+  isEnabled,
+  isTable,
 }: {
   form: UseFormReturn<ReportTemplateFormData>;
   index: number;
   availableSections?: Record<string, string[]>;
+  isEnabled: boolean;
+  isTable: boolean;
 }) {
-  const [selectedField, setSelectedField] = useState<string>("");
   const { t } = useTranslation();
-  const isEnabled = useWatch({
-    control: form.control,
-    name: `config.sections.${index}.enabled`,
-  });
-
-  const isTable = useWatch({
-    control: form.control,
-    name: `config.sections.${index}.is_table`,
-  });
-
   const section = useWatch({
     control: form.control,
     name: `config.sections.${index}.source`,
   });
+  const style = useWatch({
+    control: form.control,
+    name: `config.sections.${index}.options.style`,
+  }) as "list" | "text" | undefined;
+
+  const isCustomSection = section === "custom_section";
   const availableFieldsAndColumns = availableSections?.[section];
 
   return (
     <div className="space-y-4">
-      {isTable ? (
-        <FormField
-          control={form.control}
-          name={`config.sections.${index}.options.columns`}
-          render={({ field: { value = [], onChange } }) => {
-            const columns = Array.isArray(value) ? value : [];
-            return (
-              <FormItem>
-                <FormControl className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
-                  <>
-                    <Select
-                      value={selectedField}
-                      onValueChange={setSelectedField}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("select_column")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableFieldsAndColumns?.map((field) => (
-                          <SelectItem key={field} value={field}>
-                            {t(field)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="w-full sm:w-auto"
-                      disabled={!selectedField}
-                      onClick={() => onChange([...columns, selectedField])}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      {t("add_column")}
-                    </Button>
-                    {columns.length > 0 ? (
-                      columns.map((column, columnIndex) => (
-                        <div
-                          key={columnIndex}
-                          className="flex space-x-2 mb-2 border rounded-md p-2 items-center justify-between"
-                        >
-                          <span>{t(column)}</span>
-                          {isEnabled && (
-                            <Button
-                              variant="link"
-                              type="button"
-                              size="icon"
-                              disabled={!isEnabled}
-                              onClick={() => {
-                                const newColumns = [...columns];
-                                newColumns.splice(columnIndex, 1);
-                                onChange(newColumns);
-                              }}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-red-500 text-sm mt-2">
-                        {t("no_columns")}{" "}
-                        {t("rows_or_columns_required_for_table_sections")}
-                      </p>
-                    )}
-                  </>
-                </FormControl>
-                <FormMessage className="mt-2">
-                  {
-                    form.formState.errors?.config?.sections?.[index]?.options
-                      ?.columns?.message
-                  }
-                </FormMessage>
-              </FormItem>
-            );
-          }}
+      {isCustomSection ? (
+        <CustomTableAndFields
+          form={form}
+          index={index}
+          isEnabled={isEnabled}
+          isTable={isTable}
+          style={style || "list"}
+        />
+      ) : isTable ? (
+        <StandardLayout
+          form={form}
+          index={index}
+          fieldName={`config.sections.${index}.options.columns`}
+          availableFieldsAndColumns={availableFieldsAndColumns}
+          isEnabled={isEnabled}
+          addButtonText={t("add_column")}
+          selectPlaceholder={t("select_column")}
+          emptyText={t("no_columns")}
         />
       ) : (
-        <FormField
-          control={form.control}
-          name={`config.sections.${index}.options.fields`}
-          render={({ field: { value = [], onChange } }) => {
-            const fields = (Array.isArray(value) ? value : []).map((field) =>
-              typeof field === "string"
-                ? { label: field, value: field }
-                : field,
-            ) as Array<{ label: string; value: string }>;
-
-            return (
-              <FormItem>
-                <FormControl className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
-                  <>
-                    <Select
-                      value={selectedField}
-                      onValueChange={setSelectedField}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("select_field")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableFieldsAndColumns?.map((field) => (
-                          <SelectItem key={field} value={field}>
-                            {t(field)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="w-full sm:w-auto"
-                      disabled={!selectedField}
-                      onClick={() =>
-                        onChange([
-                          ...fields,
-                          { label: selectedField, value: selectedField },
-                        ])
-                      }
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      {t("add_field")}
-                    </Button>
-                    {fields.length > 0 ? (
-                      fields.map((fieldValue, fieldIndex) => (
-                        <div
-                          key={fieldIndex}
-                          className="flex space-x-2 mb-2 border rounded-md p-2 items-center justify-between"
-                        >
-                          <span>{t(fieldValue.label)}</span>
-                          {isEnabled && (
-                            <Button
-                              variant="link"
-                              type="button"
-                              size="icon"
-                              disabled={!isEnabled}
-                              onClick={() => {
-                                const newFields = [...fields];
-                                newFields.splice(fieldIndex, 1);
-                                onChange(newFields);
-                              }}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-red-500 text-sm mt-2">
-                        {t("no_fields")}{" "}
-                        {t("text_or_fields_required_for_non_table_sections")}
-                      </p>
-                    )}
-                  </>
-                </FormControl>
-                <FormMessage className="mt-2">
-                  {
-                    form.formState.errors?.config?.sections?.[index]?.options
-                      ?.fields?.message
-                  }
-                </FormMessage>
-              </FormItem>
-            );
-          }}
+        <StandardLayout
+          form={form}
+          index={index}
+          fieldName={`config.sections.${index}.options.fields`}
+          availableFieldsAndColumns={availableFieldsAndColumns}
+          isEnabled={isEnabled}
+          addButtonText={t("add_field")}
+          selectPlaceholder={t("select_field")}
+          emptyText={t("no_fields")}
         />
       )}
     </div>
@@ -254,23 +406,18 @@ function SectionBasicSettings({
   index,
   availableSections,
   dataSource,
+  isEnabled,
+  isTable,
 }: {
   form: UseFormReturn<ReportTemplateFormData>;
   index: number;
   availableSections?: Record<string, string[]>;
   dataSource?: string;
+  isEnabled: boolean;
+  isTable: boolean;
 }) {
   const [selectedDataSource, setSelectedDataSource] = useState<string>("");
   const { t } = useTranslation();
-  const isEnabled = useWatch({
-    control: form.control,
-    name: `config.sections.${index}.enabled`,
-  });
-
-  const isTable = useWatch({
-    control: form.control,
-    name: `config.sections.${index}.is_table`,
-  });
 
   useEffect(() => {
     if (dataSource) {
@@ -278,12 +425,42 @@ function SectionBasicSettings({
     }
   }, [dataSource]);
 
-  const handleDataSourceChange = (value: string, field: any) => {
+  const handleDataSourceChange = (value: string) => {
     setSelectedDataSource(value);
-    field.onChange(value);
     form.setValue(`config.sections.${index}.options.title`, "");
     form.setValue(`config.sections.${index}.options.columns`, []);
     form.setValue(`config.sections.${index}.options.fields`, []);
+  };
+
+  const handleTableChange = (value: boolean) => {
+    if (dataSource !== "custom_section") {
+      if (value) {
+        const fields = form.getValues(
+          `config.sections.${index}.options.fields`,
+        );
+        if (fields && Array.isArray(fields) && typeof fields[0] === "string") {
+          form.setValue(
+            `config.sections.${index}.options.columns`,
+            fields as string[],
+          );
+        }
+      } else {
+        const columns = form.getValues(
+          `config.sections.${index}.options.columns`,
+        );
+        form.setValue(`config.sections.${index}.options.fields`, columns);
+      }
+    } else {
+      if (form.getValues(`config.sections.${index}.options.style`) === "text") {
+        form.setValue(`config.sections.${index}.options.fields`, []);
+      }
+    }
+  };
+
+  const handleStyleChange = () => {
+    if (dataSource === "custom_section") {
+      form.setValue(`config.sections.${index}.options.fields`, []);
+    }
   };
 
   const availableSectionSources = Object.keys(availableSections || {});
@@ -298,7 +475,10 @@ function SectionBasicSettings({
             <FormLabel aria-required>{t("data_source")}</FormLabel>
             <Select
               value={selectedDataSource}
-              onValueChange={(value) => handleDataSourceChange(value, field)}
+              onValueChange={(value) => {
+                handleDataSourceChange(value);
+                field.onChange(value);
+              }}
               disabled={!isEnabled}
             >
               <FormControl>
@@ -347,7 +527,10 @@ function SectionBasicSettings({
             <FormControl>
               <Switch
                 checked={field.value}
-                onCheckedChange={field.onChange}
+                onCheckedChange={(value) => {
+                  handleTableChange(value);
+                  field.onChange(value);
+                }}
                 disabled={!isEnabled}
               />
             </FormControl>
@@ -366,7 +549,10 @@ function SectionBasicSettings({
               <Select
                 disabled={!isEnabled || isTable}
                 value={field.value || "list"}
-                onValueChange={(value) => field.onChange(value)}
+                onValueChange={(value) => {
+                  handleStyleChange();
+                  field.onChange(value);
+                }}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -413,6 +599,16 @@ function SectionItem({
   const dataSource = useWatch({
     control,
     name: `config.sections.${index}.source`,
+  });
+
+  const isEnabled = useWatch({
+    control: form.control,
+    name: `config.sections.${index}.enabled`,
+  });
+
+  const isTable = useWatch({
+    control: form.control,
+    name: `config.sections.${index}.is_table`,
   });
 
   const sectionHasErrors = form.formState.errors?.config?.sections?.[index];
@@ -512,6 +708,8 @@ function SectionItem({
                 index={index}
                 availableSections={availableSections}
                 dataSource={dataSource}
+                isEnabled={isEnabled}
+                isTable={isTable}
               />
             </TabsContent>
 
@@ -521,6 +719,8 @@ function SectionItem({
                   form={form}
                   index={index}
                   availableSections={availableSections}
+                  isEnabled={isEnabled}
+                  isTable={isTable}
                 />
               </TabsContent>
             )}

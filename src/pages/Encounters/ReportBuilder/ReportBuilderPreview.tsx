@@ -307,7 +307,20 @@ function HeaderElementPreview({
 
 function SectionPreview({ section }: { section: SectionConfig }) {
   const isTable = section.is_table;
+  const isCustomSection = section.source === "custom_section";
   const { t } = useTranslation();
+
+  const fields = section.options.fields;
+
+  const columns = section.options.columns;
+
+  const customSectionFields = fields?.map((field) => {
+    if (typeof field === "string") {
+      return { label: field, value: field };
+    }
+    return field;
+  });
+
   return (
     <div className="flex flex-col gap-1 border-b border-gray-400 pb-4">
       {section.options.title && (
@@ -318,31 +331,41 @@ function SectionPreview({ section }: { section: SectionConfig }) {
           <Table>
             <TableHeader className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">
               <TableRow>
-                {section.options.columns?.map((column) => (
-                  <TableHead key={column} className="uppercase">
-                    {t(column)}
-                  </TableHead>
-                ))}
+                {isCustomSection
+                  ? customSectionFields?.map((field) => (
+                      <TableHead key={field.label} className="uppercase">
+                        {t(field.label)}
+                      </TableHead>
+                    ))
+                  : columns?.map((column) => (
+                      <TableHead key={column} className="uppercase">
+                        {t(column)}
+                      </TableHead>
+                    ))}
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow className="bg-blue-50 hover:bg-blue-50 divide-x divide-gray-200">
-                {section.options.columns?.map((column) => (
-                  <TableHead key={column}>{t("value")}</TableHead>
-                ))}
+                {isCustomSection
+                  ? customSectionFields?.map((field) => (
+                      <TableHead key={field.value}>{t(field.value)}</TableHead>
+                    ))
+                  : columns?.map((column) => (
+                      <TableHead key={column}>{t("value")}</TableHead>
+                    ))}
               </TableRow>
             </TableBody>
           </Table>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {section.options.fields?.map((field, index) => {
+          {fields?.map((field, index) => {
             if (typeof field === "string") {
               return <div key={index}>{t(field)}</div>;
             } else {
               return (
                 <div key={index}>
-                  {t(field.label)}: {t("value")}
+                  {t(field.label)}: {t(field.value)}
                 </div>
               );
             }

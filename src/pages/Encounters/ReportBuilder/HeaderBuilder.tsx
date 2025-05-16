@@ -186,7 +186,7 @@ function RatioBuilder({
           {t("preview_of_proportions")}
         </h4>
         {ratioSum !== totalRatio ? (
-          <p className="text-xs text-red-500">
+          <p className="text-sm text-yellow-800 bg-yellow-50 p-2 rounded-md">
             {t("preview_proportions_error")}
           </p>
         ) : (
@@ -764,23 +764,19 @@ function HeaderRow({
     }
   };
 
-  if (column.length === 0) {
-    return (
-      <div className="border rounded-lg p-2 bg-gray-50 flex justify-center items-center gap-2">
-        <RowButtons
-          size="lg"
-          rowIndex={rowIndex}
-          handleAddElement={handleAddElement}
-        />
-      </div>
-    );
-  }
+  const rowColumnError =
+    form.formState.errors?.config?.header?.rows?.[rowIndex]?.columns?.message;
 
   return (
     <>
       <Card className="overflow-clip">
         {/* Element Tabs */}
-        <CardHeader className="sm:flex-row flex-wrap flex-col justify-between gap-2">
+        <CardHeader
+          className={cn(
+            "sm:flex-row flex-wrap flex-col justify-between gap-2",
+            column.length === 0 && "justify-end",
+          )}
+        >
           {column.length > 0 && (
             <div className="flex flex-col sm:flex-row justify-start gap-2">
               <Select
@@ -833,6 +829,7 @@ function HeaderRow({
                 rowIndex: rowIndex,
               })
             }
+            className="self-end"
           >
             <Trash2Icon className="size-3" />
             <span className="text-sm">{t("remove_row")}</span>
@@ -840,15 +837,22 @@ function HeaderRow({
         </CardHeader>
         <CardContent>
           {/* Element Content */}
-          {activeElement !== null && column[activeElement] && (
-            <div className="p-4">
-              <HeaderElement
-                rowIndex={rowIndex}
-                elementIndex={activeElement}
-                control={form.control}
-                type={column[activeElement].type}
-              />
-            </div>
+          {column.length > 0 &&
+            activeElement !== null &&
+            column[activeElement] && (
+              <div className="p-4">
+                <HeaderElement
+                  rowIndex={rowIndex}
+                  elementIndex={activeElement}
+                  control={form.control}
+                  type={column[activeElement].type}
+                />
+              </div>
+            )}
+          {column.length === 0 && rowColumnError && (
+            <p className="text-sm text-red-800 bg-red-50 p-2 rounded-md">
+              {rowColumnError}
+            </p>
           )}
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row items-center p-0">
@@ -1005,7 +1009,7 @@ export default function HeaderBuilder({
         newElement = {
           type: "text",
           text: t("new_text"),
-          size: "medium",
+          size: "12px",
           weight: 400,
           align: "left",
         };
@@ -1071,6 +1075,11 @@ export default function HeaderBuilder({
     }
   };
 
+  const rowErrors = form.formState.errors?.config?.header?.rows;
+  const rowHasErrors = (index: number) => {
+    return rowErrors?.[index];
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -1084,7 +1093,10 @@ export default function HeaderBuilder({
               type="button"
               variant="white"
               onClick={() => setActiveRow(rowIndex)}
-              className={cn(activeRow === rowIndex && "bg-green-100")}
+              className={cn(
+                activeRow === rowIndex && "bg-green-100",
+                rowHasErrors(rowIndex) && "border-red-500 border-1 bg-red-50",
+              )}
             >
               {t("row")} {rowIndex + 1}
             </Button>
