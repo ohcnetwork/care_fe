@@ -85,8 +85,8 @@ export const PatientHome = (props: {
             onClick={() =>
               navigate(
                 facilityId
-                  ? `/facility/${facilityId}/patient/${id}/clinical_history/symptoms`
-                  : `/organization/organizationId/patient/${id}/clinical_history/symptoms`,
+                  ? `/facility/${facilityId}/patient/${id}/clinical_history/overview`
+                  : `/organization/organizationId/patient/${id}/clinical_history/overview`,
               )
             }
           >

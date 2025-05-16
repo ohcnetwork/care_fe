@@ -13,6 +13,30 @@ export type BloodGroupChoices =
   | "O_positive"
   | "unknown";
 
+export const BLOOD_GROUP_STYLES = {
+  A_positive: "bg-red-100 text-red-800 border-red-200",
+  A_negative: "bg-red-50 text-red-700 border-red-100",
+  B_positive: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  B_negative: "bg-yellow-50 text-yellow-700 border-yellow-100",
+  AB_positive: "bg-purple-100 text-purple-800 border-purple-200",
+  AB_negative: "bg-purple-50 text-purple-700 border-purple-100",
+  O_positive: "bg-green-100 text-green-800 border-green-200",
+  O_negative: "bg-green-50 text-green-700 border-green-100",
+  unknown: "bg-gray-100 text-gray-800 border-gray-200",
+} as const;
+
+export const BLOOD_GROUP_LABELS: Record<BloodGroupChoices, string> = {
+  A_positive: "A Positive",
+  A_negative: "A Negative",
+  B_positive: "B Positive",
+  B_negative: "B Negative",
+  AB_positive: "AB Positive",
+  AB_negative: "AB Negative",
+  O_positive: "O Positive",
+  O_negative: "O Negative",
+  unknown: "Unknown",
+};
+
 export type GenderChoices = "male" | "female" | "non_binary" | "transgender";
 
 export interface Patient {

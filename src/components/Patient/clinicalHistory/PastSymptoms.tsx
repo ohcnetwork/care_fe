@@ -159,7 +159,7 @@ const SymptomRow = ({
   );
 };
 
-const SymptomTable = ({
+export const SymptomTable = ({
   symptoms,
   patientId,
   facilityId,
@@ -171,45 +171,41 @@ const SymptomTable = ({
   const { t } = useTranslation();
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4">
-      <div className="overflow-x-auto">
-        <div className="border border-gray-200 rounded-lg mb-3 overflow-hidden">
-          <Table className="w-full">
-            <TableHeader className="bg-gray-100 divide-x divide-gray-200">
-              <TableRow className="divide-x divide-gray-200">
-                <TableHead
-                  className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate"
-                  style={{ minWidth: "150px" }}
-                >
-                  {t("symptom")}
-                </TableHead>
-                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
-                  {t("severity")}
-                </TableHead>
-                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
-                  {t("status")}
-                </TableHead>
-                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
-                  {t("onset")}
-                </TableHead>
-                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600"></TableHead>
-              </TableRow>
-            </TableHeader>
+    <div className="border border-gray-200 rounded-lg mb-3 overflow-hidden">
+      <Table className="w-full">
+        <TableHeader className="bg-gray-100 divide-x divide-gray-200">
+          <TableRow className="divide-x divide-gray-200">
+            <TableHead
+              className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate"
+              style={{ minWidth: "150px" }}
+            >
+              {t("symptom")}
+            </TableHead>
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+              {t("severity")}
+            </TableHead>
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+              {t("status")}
+            </TableHead>
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+              {t("onset")}
+            </TableHead>
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600"></TableHead>
+          </TableRow>
+        </TableHeader>
 
-            <TableBody>
-              {symptoms.map((symptom) => (
-                <SymptomRow
-                  key={symptom.id}
-                  symptom={symptom}
-                  patientId={patientId}
-                  facilityId={facilityId}
-                  t={t}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+        <TableBody>
+          {symptoms.map((symptom) => (
+            <SymptomRow
+              key={symptom.id}
+              symptom={symptom}
+              patientId={patientId}
+              facilityId={facilityId}
+              t={t}
+            />
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };
@@ -341,7 +337,7 @@ export default function SymptomsTimeline({
                           </div>
                         </div>
 
-                        <div className="ml-3">
+                        <div className="ml-3 bg-gray-50 rounded-lg p-4 overflow-x-auto">
                           <SymptomTable
                             symptoms={datesInYear[date]}
                             patientId={patientId}

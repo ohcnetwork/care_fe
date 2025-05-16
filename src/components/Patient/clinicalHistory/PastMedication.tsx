@@ -170,7 +170,7 @@ const MedicineRow = ({
   );
 };
 
-const MedicationTable = ({
+export const MedicationTable = ({
   medicines,
   patientId,
   facilityId,
@@ -182,43 +182,39 @@ const MedicationTable = ({
   const { t } = useTranslation();
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4">
-      <div className="overflow-x-auto">
-        <div className="border border-gray-200 rounded-lg mb-3 overflow-hidden">
-          <Table className="w-full">
-            <TableHeader className="bg-gray-100 divide-x divide-gray-200">
-              <TableRow className="divide-x divide-gray-200">
-                <TableHead className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate">
-                  {t("medicine")}
-                </TableHead>
-                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
-                  {t("dosage")}
-                </TableHead>
-                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
-                  {t("frequency")}
-                </TableHead>
-                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
-                  {t("duration")}
-                </TableHead>
+    <div className="border border-gray-200 rounded-lg mb-3 overflow-hidden">
+      <Table className="w-full">
+        <TableHeader className="bg-gray-100 divide-x divide-gray-200">
+          <TableRow className="divide-x divide-gray-200">
+            <TableHead className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate">
+              {t("medicine")}
+            </TableHead>
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+              {t("dosage")}
+            </TableHead>
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+              {t("frequency")}
+            </TableHead>
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+              {t("duration")}
+            </TableHead>
 
-                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600"></TableHead>
-              </TableRow>
-            </TableHeader>
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600"></TableHead>
+          </TableRow>
+        </TableHeader>
 
-            <TableBody>
-              {medicines.map((medicine) => (
-                <MedicineRow
-                  key={medicine.id}
-                  medicine={medicine}
-                  patientId={patientId}
-                  facilityId={facilityId}
-                  t={t}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+        <TableBody>
+          {medicines.map((medicine) => (
+            <MedicineRow
+              key={medicine.id}
+              medicine={medicine}
+              patientId={patientId}
+              facilityId={facilityId}
+              t={t}
+            />
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };
@@ -348,7 +344,7 @@ export default function MedicationTimeline({
                           </div>
                         </div>
 
-                        <div className="ml-3">
+                        <div className="ml-3 bg-gray-50 rounded-lg p-4 overflow-x-auto">
                           <MedicationTable
                             medicines={datesInYear[date]}
                             patientId={patientId}

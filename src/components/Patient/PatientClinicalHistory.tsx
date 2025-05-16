@@ -12,8 +12,8 @@ import PageHeadTitle from "@/components/Common/PageHeadTitle";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatPatientAge, keysOf } from "@/Utils/utils";
-import { Patient } from "@/types/emr/patient";
 
+import Overview from "./clinicalHistory/Overview";
 import DiagnosisTimeline from "./clinicalHistory/PastDiagnosis";
 import MedicationTimeline from "./clinicalHistory/PastMedication";
 import SymptomsTimeline from "./clinicalHistory/PastSymptoms";
@@ -24,6 +24,7 @@ interface TabProps {
 }
 
 export const clinicalDefaultTabs = {
+  overview: Overview,
   symptoms: SymptomsTimeline,
   diagnosis: DiagnosisTimeline,
   medication: MedicationTimeline,
@@ -34,7 +35,7 @@ export const PatientClinicalHistory = (props: {
   facilityId: string;
 }) => {
   const { t } = useTranslation();
-  const { data: patientData } = useQuery<Patient>({
+  const { data: patientData } = useQuery({
     queryKey: ["patient", props.patientId],
     queryFn: query(routes.patient.getPatient, {
       pathParams: {
@@ -114,7 +115,7 @@ export const PatientClinicalHistory = (props: {
           <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
               <nav
-                className="flex space-x-6 overflow-x-auto pb-2 pl-2"
+                className="flex space-x-6 overflow-x-auto pb-2 pl-2 pr-6"
                 id="encounter_tab_nav"
               >
                 {keysOf(clinicalDefaultTabs).map((tab) => (
