@@ -84,7 +84,9 @@ export const PatientHome = (props: {
             variant="primary"
             onClick={() =>
               navigate(
-                `/facility/${facilityId}/patient/${id}/clinical_history/symptoms`,
+                facilityId
+                  ? `/facility/${facilityId}/patient/${id}/clinical_history/symptoms`
+                  : `/organization/organizationId/patient/${id}/clinical_history/symptoms`,
               )
             }
           >

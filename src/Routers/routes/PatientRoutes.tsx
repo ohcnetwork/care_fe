@@ -50,13 +50,16 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patients/verify": ({ facilityId }) => (
     <VerifyPatient facilityId={facilityId} />
   ),
-  "/facility/:facilityId/patient/:id/clinical_history/:tab": ({
-    id,
-    tab,
-    facilityId,
-  }) => (
-    <PatientClinicalHistory patientId={id} tab={tab} facilityId={facilityId} />
-  ),
+  ...["facility", "organization"].reduce((acc: AppRoutes, identifier) => {
+    acc[`/${identifier}/:id/patient/:patientId/clinical_history/:tab`] = ({
+      id,
+      tab,
+      patientId,
+    }) => (
+      <PatientClinicalHistory patientId={patientId} tab={tab} facilityId={id} />
+    );
+    return acc;
+  }, {}),
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,
   ...patientTabs.reduce((acc: AppRoutes, tab) => {

@@ -153,7 +153,9 @@ const SymptomTable = ({
                       <DropdownMenuItem
                         onClick={() =>
                           navigate(
-                            `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                            facilityId
+                              ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                              : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
                           )
                         }
                       >
