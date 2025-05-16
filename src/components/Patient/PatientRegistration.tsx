@@ -690,8 +690,6 @@ export default function PatientRegistration(
                       control={form.control}
                       name="deceased_datetime"
                       render={({ field }) => {
-                        console.log("field.value:", field.value); // 👈 log here for debugging
-
                         return (
                           <FormItem>
                             <FormLabel>{t("date_and_time_of_death")}</FormLabel>

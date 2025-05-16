@@ -25,8 +25,6 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
 
   const values = (questionnaireResponse.values?.[0]?.value as string[]) || [];
 
-  console.log("jey:", dayjs(values[0]).toISOString());
-
   const handleUpdate = (updates: string) => {
     if (isFuture(updates)) {
       return;
