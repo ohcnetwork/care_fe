@@ -453,8 +453,8 @@ const AvatarEditModal = ({
             {t("edit_avatar")}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex h-full w-full items-center justify-center overflow-y-auto">
-          <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
+        <div className="flex h-full w-full items-center justify-center">
+          <div className="flex max-h-screen min-h-96 w-full flex-col">
             {!isCameraOpen ? (
               <>
                 {isCropping && preview ? (
