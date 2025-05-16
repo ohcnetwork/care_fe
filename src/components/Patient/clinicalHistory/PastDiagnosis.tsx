@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { TFunction } from "i18next";
 import { Info, Search, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -55,7 +56,7 @@ const DiagnosisRow = ({
   diagnosis: Diagnosis;
   patientId: string;
   facilityId: string;
-  t: (key: string) => string;
+  t: TFunction;
 }) => {
   const [showNote, setShowNote] = useState(false);
 
@@ -144,7 +145,7 @@ const DiagnosisRow = ({
               onClick={() => setShowNote(false)}
             >
               <X size={16} />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{t("close")}</span>
             </Button>
             <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8">
               {diagnosis.note}
@@ -267,7 +268,7 @@ export default function DiagnosisTimeline({
         <div className="bg-sky-100 p-2 rounded-md">
           <img src="/images/diagnosis-icon.svg" alt="diagnosis-icon" />
         </div>
-        <h1 className="text-2xl font-bold">Past Diagnosis</h1>
+        <h1 className="text-2xl font-bold">{t("past_diagnosis")}</h1>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -293,7 +294,7 @@ export default function DiagnosisTimeline({
             id="exclude-entered-in-error"
           />
           <Label htmlFor="exclude-entered-in-error">
-            Exclude Entered-in-error
+            {t("exclude_entered_in_error")}
           </Label>
         </div>
       </div>
@@ -301,7 +302,7 @@ export default function DiagnosisTimeline({
         <TimelineLoading />
       ) : sortedYears.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center">
-          <p className="text-gray-500">No diagnosis found</p>
+          <p className="text-gray-500">{t("no_diagnoses_description")}</p>
         </div>
       ) : (
         <div className="relative">

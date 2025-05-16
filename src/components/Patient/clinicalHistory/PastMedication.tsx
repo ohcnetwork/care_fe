@@ -158,7 +158,7 @@ const MedicineRow = ({
               onClick={() => setShowInstruction(false)}
             >
               <X size={16} />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{t("close")}</span>
             </Button>
             <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8">
               {combinedInstruction}
@@ -281,7 +281,7 @@ export default function MedicationTimeline({
         <div className="bg-pink-100 p-2 rounded-md">
           <img src="/images/medicines-icon.svg" alt="medicines-icon" />
         </div>
-        <h1 className="text-2xl font-bold">Past Medication</h1>
+        <h1 className="text-2xl font-bold">{t("past_medication")}</h1>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -311,7 +311,7 @@ export default function MedicationTimeline({
         <TimelineLoading />
       ) : sortedYears.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center">
-          <p className="text-gray-500">No Medication found</p>
+          <p className="text-gray-500">{t("no_medications_description")}</p>
         </div>
       ) : (
         <div className="relative">

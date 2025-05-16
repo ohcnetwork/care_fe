@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { t } from "i18next";
+import { TFunction, t } from "i18next";
 import { Info, Search, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -56,7 +56,7 @@ const SymptomRow = ({
   symptom: Symptom;
   patientId: string;
   facilityId: string;
-  t: (key: string) => string;
+  t: TFunction;
 }) => {
   const [showNote, setShowNote] = useState(false);
 
@@ -133,7 +133,6 @@ const SymptomRow = ({
         </TableCell>
       </TableRow>
 
-      {/* Expandable note section */}
       {showNote && symptom.note && (
         <tr>
           <td
@@ -147,7 +146,7 @@ const SymptomRow = ({
               onClick={() => setShowNote(false)}
             >
               <X size={16} />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{t("close")}</span>
             </Button>
             <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8">
               {symptom.note}
@@ -175,10 +174,7 @@ export const SymptomTable = ({
       <Table className="w-full">
         <TableHeader className="bg-gray-100 divide-x divide-gray-200">
           <TableRow className="divide-x divide-gray-200">
-            <TableHead
-              className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate"
-              style={{ minWidth: "150px" }}
-            >
+            <TableHead className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate">
               {t("symptom")}
             </TableHead>
             <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
@@ -270,7 +266,7 @@ export default function SymptomsTimeline({
         <div className="bg-sky-100 p-2 rounded-md">
           <img src="/images/symptoms-icon.svg" alt="symptoms-icon" />
         </div>
-        <h1 className="text-2xl font-bold">Past Symptoms</h1>
+        <h1 className="text-2xl font-bold">{t("past_symptoms")}</h1>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -296,7 +292,7 @@ export default function SymptomsTimeline({
             id="exclude-entered-in-error"
           />
           <Label htmlFor="exclude-entered-in-error">
-            Exclude Entered-in-error
+            {t("exclude_entered_in_error")}
           </Label>
         </div>
       </div>
@@ -304,7 +300,7 @@ export default function SymptomsTimeline({
         <TimelineLoading />
       ) : sortedYears.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center">
-          <p className="text-gray-500">No symptoms found</p>
+          <p className="text-gray-500">{t("no_symptoms_description")}</p>
         </div>
       ) : (
         <div className="relative">

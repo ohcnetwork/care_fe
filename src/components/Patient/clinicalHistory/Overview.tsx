@@ -83,9 +83,10 @@ export default function Overview(props: {
 
   return (
     <div className="max-w-screen-lg mx-auto space-y-8 py-6 px-4">
-      {/* Blood Group */}
       <div className="flex flex-col gap-2">
-        <div className="text-sm text-muted-foreground">{t("blood_group")}</div>
+        <div className="text-sm text-muted-foreground">
+          {t("blood_group")} :
+        </div>
         <Badge
           variant="outline"
           className={`flex items-center gap-1 w-fit whitespace-nowrap ${
@@ -99,44 +100,6 @@ export default function Overview(props: {
         </Badge>
       </div>
 
-      {/* Medications */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="bg-pink-100 p-2 rounded-md">
-              <img src="/images/medicines-icon.svg" alt="medicines-icon" />
-            </div>
-            <h2 className="text-base font-medium">{t("past_medications")}</h2>
-          </div>
-          {(medicationData?.results?.length ?? 0) > 0 && (
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(
-                  facilityId
-                    ? `/facility/${facilityId}/patient/${patientId}/clinical_history/medication`
-                    : `/organization/organizationId/patient/${patientId}/clinical_history/medication`,
-                )
-              }
-              className="flex items-center gap-1"
-            >
-              <ClockIcon className="size-4" />
-              {t("all_medications")}
-            </Button>
-          )}
-        </div>
-        {medicationData?.results?.length ? (
-          <MedicationTable
-            medicines={medicationData.results}
-            patientId={patientId}
-            facilityId={facilityId}
-          />
-        ) : (
-          <EmptyState type="Medications" />
-        )}
-      </div>
-
-      {/* Symptoms */}
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -173,7 +136,6 @@ export default function Overview(props: {
         )}
       </div>
 
-      {/* Diagnoses */}
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -207,6 +169,42 @@ export default function Overview(props: {
           />
         ) : (
           <EmptyState type="Diagnoses" />
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="bg-pink-100 p-2 rounded-md">
+              <img src="/images/medicines-icon.svg" alt="medicines-icon" />
+            </div>
+            <h2 className="text-base font-medium">{t("past_medications")}</h2>
+          </div>
+          {(medicationData?.results?.length ?? 0) > 0 && (
+            <Button
+              variant="outline"
+              onClick={() =>
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patientId}/clinical_history/medication`
+                    : `/organization/organizationId/patient/${patientId}/clinical_history/medication`,
+                )
+              }
+              className="flex items-center gap-1"
+            >
+              <ClockIcon className="size-4" />
+              {t("all_medications")}
+            </Button>
+          )}
+        </div>
+        {medicationData?.results?.length ? (
+          <MedicationTable
+            medicines={medicationData.results}
+            patientId={patientId}
+            facilityId={facilityId}
+          />
+        ) : (
+          <EmptyState type="Medications" />
         )}
       </div>
     </div>
