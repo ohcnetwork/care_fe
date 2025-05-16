@@ -25,7 +25,6 @@ export function EmptyState({ type }: { type: string }) {
   return (
     <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-10 gap-2">
       <FileQuestion className="w-8 h-8" />
-      <p className="text-sm font-medium">{t(`no_${type.toLowerCase()}`)}</p>
       <p className="text-sm">{t(`no_${type.toLowerCase()}_description`)}</p>
     </div>
   );
