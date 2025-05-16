@@ -486,19 +486,16 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                   <FormItem className="space-y-0">
                     <Select
                       value={field.value}
-                      onValueChange={(newSystem) => {
-                        const isPhoneSystem = (system: string) =>
+                      onValueChange={(value) => {
+                        const isPhone = (system: string) =>
                           ["phone", "fax", "sms"].includes(system);
-                        const oldSystem = form.getValues(
-                          `contact.${index}.system`,
-                        );
-                        const wasPhoneType = isPhoneSystem(oldSystem);
-                        const isNowPhoneType = isPhoneSystem(newSystem);
 
-                        if (wasPhoneType !== isNowPhoneType) {
+                        // If the system is changing from a phone type to a non-phone type, clear the value
+                        if (isPhone(value) !== isPhone(field.value)) {
                           form.setValue(`contact.${index}.value`, "");
                         }
-                        field.onChange(newSystem);
+
+                        field.onChange(value);
                       }}
                     >
                       <FormControl>
