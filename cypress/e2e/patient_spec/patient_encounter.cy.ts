@@ -68,11 +68,13 @@ describe("Patient Encounter Questionnaire", () => {
 
 describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
   beforeEach(() => {
+    cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
+    cy.loginByApi("nurse");
     cy.visit("/");
+    facilityCreation.selectFirstRandomFacility();
   });
 
   it("Create and edit an allergy and verify the changes", () => {
-    facilityCreation.selectFirstRandomFacility();
     const createAllergyDetails = {
       allergyName: getRandomAllergyName(),
       criticality: "Low",
@@ -105,7 +107,6 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
   });
 
   it("Create and edit a symptom and verify the changes", () => {
-    facilityCreation.selectFirstRandomFacility();
     const createSymptomsDetails = {
       symptomName: getRandomConditionName(),
       severity: "Moderate",
@@ -138,7 +139,6 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
   });
 
   it("Create and edit a diagnosis and verify the changes", () => {
-    facilityCreation.selectFirstRandomFacility();
     const createDiagnosisDetails = {
       diagnosisName: getRandomConditionName(),
       verification: "Confirmed",
