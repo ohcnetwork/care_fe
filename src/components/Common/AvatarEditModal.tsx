@@ -123,6 +123,8 @@ const AvatarEditModal = ({
     setPreview(undefined);
     setIsProcessing(false);
     setSelectedFile(undefined);
+    setIsCameraOpen(false);
+    setPreviewImage(null);
     onOpenChange(false);
   };
 
@@ -174,6 +176,8 @@ const AvatarEditModal = ({
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
       setSelectedFile(undefined);
+      setIsCameraOpen(false);
+      setPreviewImage(null);
     }
   };
 
@@ -238,7 +242,7 @@ const AvatarEditModal = ({
               <>
                 {preview || imageUrl ? (
                   <>
-                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
+                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center rounded-lg border border-secondary-200">
                       <img
                         src={
                           preview && preview.startsWith("blob:")

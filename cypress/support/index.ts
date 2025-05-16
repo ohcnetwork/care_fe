@@ -9,6 +9,11 @@ declare global {
       getAttached(selector: string): Chainable<Subject>;
       clickSubmitButton(buttonText?: string): Chainable<Element>;
       clickCancelButton(buttonText?: string): Chainable<Element>;
+      typeAndVerifyOptionNotPresent(
+        selector: string,
+        value: string,
+        emptyMessage: string,
+      ): Chainable<void>;
       typeAndSelectOption(
         element: string,
         reference: string,
@@ -20,7 +25,7 @@ declare global {
       ): Chainable<Element>;
       clickAndSelectOption(
         element: string,
-        reference: string,
+        reference?: string,
         options?: { position?: "first" | "last" },
       ): Chainable<Element>;
       verifyAndClickElement(

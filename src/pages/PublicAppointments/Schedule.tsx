@@ -326,27 +326,29 @@ export function ScheduleAppointment(props: AppointmentsProps) {
             {(isCreatingAppointment || isCancellingAppointment) && (
               <Loader2 className="size-4 animate-spin self-center mr-2" />
             )}
-            <Button
-              variant="primary_gradient"
-              disabled={isCreatingAppointment || isCancellingAppointment}
-              onClick={() => {
-                if (appointmentId && appointment) {
-                  handleRescheduleAppointment(appointment);
-                } else {
-                  localStorage.setItem(
-                    "selectedSlot",
-                    JSON.stringify(selectedSlot),
-                  );
-                  localStorage.setItem("reason", reason);
-                  navigate(
-                    `/facility/${facilityId}/appointments/${staffId}/patient-select`,
-                  );
-                }
-              }}
-            >
-              {appointmentId ? t("reschedule_appointment") : t("continue")}
-              <CareIcon icon="l-arrow-right" className="size-4" />
-            </Button>
+            {appointment?.status !== "in_consultation" && (
+              <Button
+                variant="primary_gradient"
+                disabled={isCreatingAppointment || isCancellingAppointment}
+                onClick={() => {
+                  if (appointmentId && appointment) {
+                    handleRescheduleAppointment(appointment);
+                  } else {
+                    localStorage.setItem(
+                      "selectedSlot",
+                      JSON.stringify(selectedSlot),
+                    );
+                    localStorage.setItem("reason", reason);
+                    navigate(
+                      `/facility/${facilityId}/appointments/${staffId}/patient-select`,
+                    );
+                  }
+                }}
+              >
+                {appointmentId ? t("reschedule_appointment") : t("continue")}
+                <CareIcon icon="l-arrow-right" className="size-4" />
+              </Button>
+            )}
           </div>
         )}
       </div>

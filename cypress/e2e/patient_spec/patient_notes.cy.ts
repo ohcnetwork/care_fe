@@ -2,7 +2,7 @@ import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { PatientNotes } from "@/pageObject/Patients/PatientNotes";
 import { UserProfile } from "@/pageObject/Users/UserProfile";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
-import { generateName, generatePhoneNumber } from "@/utils/commonUtils";
+import { generatePhoneNumber } from "@/utils/commonUtils";
 import { viewPort } from "@/utils/viewPort";
 
 const patientEncounter = new PatientEncounter();
@@ -13,15 +13,13 @@ const userProfile = new UserProfile();
 describe("Encounter Notes", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("devdoctor2");
+    cy.loginByApi("doctor");
     cy.visit("/");
-    const patientName = generateName(true);
-    facilityCreation.selectFacility("GHC Payyanur");
+    facilityCreation.selectFirstRandomFacility();
     // Step 1: Navigate to encounter
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
-      .searchEncounter(patientName)
       .openFirstEncounterDetails();
   });
 
@@ -73,7 +71,7 @@ describe("Encounter Notes", () => {
 
     // Switch to second user and verify existing messages
     userProfile.openUserMenu().clickUserLogout();
-    cy.loginByApi("devdoctor4");
+    cy.loginByApi("nurse");
     patientNotes
       .navigateToSavedUrl()
       .verifyMessagesInChat(testData.firstUserThreadMessages)

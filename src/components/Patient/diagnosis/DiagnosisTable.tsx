@@ -72,7 +72,7 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
             )}
           >
             <TableCell className="font-medium first:rounded-l-md">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 md:whitespace-normal">
                 {diagnosis.code.display}
               </div>
             </TableCell>

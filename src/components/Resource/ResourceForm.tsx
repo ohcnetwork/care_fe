@@ -104,7 +104,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     enabled: !!id,
   });
 
-  const form = useForm<ResourceFormValues>({
+  const form = useForm({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
       status: "pending",

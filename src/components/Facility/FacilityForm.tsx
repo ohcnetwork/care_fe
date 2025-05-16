@@ -78,7 +78,7 @@ export default function FacilityForm({
 
   type FacilityFormValues = z.infer<typeof facilityFormSchema>;
 
-  const form = useForm<FacilityFormValues>({
+  const form = useForm({
     resolver: zodResolver(facilityFormSchema),
     defaultValues: {
       facility_type: "",
@@ -239,11 +239,14 @@ export default function FacilityForm({
               control={form.control}
               name="facility_type"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="max-w-full">
                   <FormLabel aria-required>{t("facility_type")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger data-cy="facility-type">
+                      <SelectTrigger
+                        data-cy="facility-type"
+                        className="max-w-full truncate"
+                      >
                         <SelectValue placeholder={t("select_facility_type")} />
                       </SelectTrigger>
                     </FormControl>
@@ -314,7 +317,7 @@ export default function FacilityForm({
                         icon: obj.icon,
                       }))}
                       onValueChange={handleFeatureChange}
-                      value={field.value.map((val) => val.toString())}
+                      value={field.value?.map((val) => val.toString()) || []}
                       placeholder={t("select_facility_feature")}
                       id="facility-features"
                     />
@@ -433,7 +436,7 @@ export default function FacilityForm({
             control={form.control}
             name="is_public"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4 bg-muted/5">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
