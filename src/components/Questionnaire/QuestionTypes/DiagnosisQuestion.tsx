@@ -6,13 +6,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -61,7 +55,6 @@ import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
 import {
   ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
-  DIAGNOSIS_CATEGORY,
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
@@ -539,7 +532,6 @@ export function DiagnosisQuestion({
     );
   };
 
-
   return (
     <div className="space-y-4">
       <HistoricalRecordSelector<DiagnosisRequest>
@@ -809,11 +801,11 @@ const DiagnosisTableRow = ({
       </TableRow>
       {showNotes && (
         <TableRow>
-          <TableCell 
-            colSpan={5} 
+          <TableCell
+            colSpan={5}
             className="px-4 py-2"
             data-cy="diagnosis-notes"
-           >
+          >
             <DiagnosisNotesInput
               note={diagnosis.note}
               onChange={(e) => onUpdate?.({ note: e.target.value })}
@@ -951,50 +943,3 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
     </div>
   );
 };
-
-function CategorySelector({
-  categories,
-  selectedCategory,
-  onCategorySelect,
-  gridCols = "grid-cols-1",
-}: {
-  categories: readonly string[];
-  selectedCategory: DiagnosisRequest["category"];
-  onCategorySelect: Dispatch<SetStateAction<DiagnosisRequest["category"]>>;
-  gridCols?: string;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <div className={cn("grid gap-4", gridCols)}>
-      {categories.map((category) => (
-        <div
-          key={category}
-          className={cn(
-            "relative flex flex-col p-4 rounded-lg border cursor-pointer transition-colors",
-            selectedCategory === category
-              ? "border-primary bg-primary/5"
-              : "border-border hover:border-primary/50",
-          )}
-          onClick={() =>
-            onCategorySelect(category as DiagnosisRequest["category"])
-          }
-        >
-          <div className="flex items-center space-x-2">
-            <div className="flex-1">
-              <div className="font-medium">
-                {t(`Diagnosis_${category}__title`)}
-              </div>
-              <div className="flex-1 text-sm text-muted-foreground">
-                {t(`Diagnosis_${category}__description`)}
-              </div>
-            </div>
-            {selectedCategory === category && (
-              <div className="size-4 rounded-full bg-primary" />
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
