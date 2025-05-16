@@ -72,6 +72,24 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add(
+  "typeAndVerifyOptionNotPresent",
+  (selector: string, value: string, emptyMessage: string) => {
+    cy.get(selector)
+      .click()
+      .then(() => {
+        cy.get("[cmdk-input]")
+          .should("be.visible")
+          .type(value)
+          .then(() => {
+            cy.get("[cmdk-empty]")
+              .should("be.visible")
+              .and("contain", emptyMessage);
+          });
+      });
+  },
+);
+
+Cypress.Commands.add(
   "clickAndMultiSelectOption",
   (selector: string, options: string | string[]) => {
     const optionArray = Array.isArray(options) ? options : [options];
