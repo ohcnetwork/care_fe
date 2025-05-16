@@ -126,6 +126,7 @@ const RenderCard = ({
 
                 <div className="mt-4 flex justify-end">
                   <Button
+                    data-cy="questionnaire-view"
                     variant="outline"
                     size="sm"
                     onClick={(e) => {
@@ -208,6 +209,7 @@ const RenderTable = ({
                       {questionnaire.description}
                     </div>
                     <Button
+                      data-cy="questionnaire-view"
                       variant="outline"
                       size="sm"
                       className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
@@ -282,6 +284,7 @@ export function QuestionnaireList() {
             <div className="relative md:min-w-80 w-full">
               <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
               <Input
+                data-cy="questionnaire-search"
                 placeholder={t("search_questionnaires")}
                 className="pl-10"
                 value={qParams.title || ""}
