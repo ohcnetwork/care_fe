@@ -8,6 +8,7 @@ export class PatientFiles {
 
   clickAddFilesButton() {
     cy.verifyAndClickElement('[data-cy="add-files-button"]', "Add Files");
+    cy.wait(1000);
     return this;
   }
 
