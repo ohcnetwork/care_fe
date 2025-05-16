@@ -16,6 +16,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import {
   FormControl,
   FormField,
   FormItem,
@@ -722,6 +730,14 @@ function HeaderRow({
 }: HeaderRowProps) {
   const { t } = useTranslation();
 
+  const [removeRowDialog, setRemoveRowDialog] = useState<{
+    display: boolean;
+    rowIndex: number | null;
+  }>({
+    display: false,
+    rowIndex: null,
+  });
+
   const toggleElement = (index: number) => {
     setActiveElement(index);
   };
@@ -761,82 +777,132 @@ function HeaderRow({
   }
 
   return (
-    <Card className="overflow-clip">
-      {/* Element Tabs */}
-      <CardHeader className="sm:flex-row flex-wrap flex-col justify-between gap-2">
-        {column.length > 0 && (
-          <div className="flex flex-col sm:flex-row justify-start gap-2">
-            <Select
-              value={`${activeElement}`}
-              onValueChange={(value) => toggleElement(Number(value))}
-            >
-              <SelectTrigger className="bg-green-100">
-                <SelectValue placeholder={t("add_element")}>
-                  <CareIcon
-                    icon={getElementIcon(column[activeElement].type)}
-                    className="w-4 h-4 text-green-900"
-                  />
-                  <span className="text-sm text-green-900">
-                    {activeElement}
-                    {". "}
-                    {t(`${column[activeElement].type}`)}
-                  </span>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {column.map((element, elementIndex) => (
-                  <SelectItem
-                    key={elementIndex}
-                    value={elementIndex.toString()}
-                  >
-                    {t(`${element.type}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <>
+      <Card className="overflow-clip">
+        {/* Element Tabs */}
+        <CardHeader className="sm:flex-row flex-wrap flex-col justify-between gap-2">
+          {column.length > 0 && (
+            <div className="flex flex-col sm:flex-row justify-start gap-2">
+              <Select
+                value={`${activeElement}`}
+                onValueChange={(value) => toggleElement(Number(value))}
+              >
+                <SelectTrigger className="bg-green-100">
+                  <SelectValue placeholder={t("add_element")}>
+                    <CareIcon
+                      icon={getElementIcon(column[activeElement].type)}
+                      className="w-4 h-4 text-green-900"
+                    />
+                    <span className="text-sm text-green-900">
+                      {activeElement}
+                      {". "}
+                      {t(`${column[activeElement].type}`)}
+                    </span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {column.map((element, elementIndex) => (
+                    <SelectItem
+                      key={elementIndex}
+                      value={elementIndex.toString()}
+                    >
+                      {t(`${element.type}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => onRemoveElement(rowIndex, activeElement)}
+              >
+                <span className="text-sm">
+                  {t(`remove_${column[activeElement].type}`)}
+                </span>
+                <Trash2Icon className="size-3" />
+              </Button>
+            </div>
+          )}
+          <Button
+            type="button"
+            size={"sm"}
+            variant="destructive"
+            onClick={() =>
+              setRemoveRowDialog({
+                display: true,
+                rowIndex: rowIndex,
+              })
+            }
+          >
+            <Trash2Icon className="size-3" />
+            <span className="text-sm">{t("remove_row")}</span>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {/* Element Content */}
+          {activeElement !== null && column[activeElement] && (
+            <div className="p-4">
+              <HeaderElement
+                rowIndex={rowIndex}
+                elementIndex={activeElement}
+                control={form.control}
+                type={column[activeElement].type}
+              />
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="flex flex-col sm:flex-row items-center p-0">
+          <RowButtons
+            size="default"
+            rowIndex={rowIndex}
+            handleAddElement={handleAddElement}
+          />
+        </CardFooter>
+      </Card>
+      <Dialog
+        open={removeRowDialog.display}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRemoveRowDialog({
+              display: false,
+              rowIndex: null,
+            });
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("remove_row")}</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>{t("remove_row_confirmation")}</DialogDescription>
+          <DialogFooter>
             <Button
-              type="button"
               variant="secondary"
-              onClick={() => onRemoveElement(rowIndex, activeElement)}
+              onClick={() =>
+                setRemoveRowDialog({
+                  display: false,
+                  rowIndex: null,
+                })
+              }
             >
-              <span className="text-sm">
-                {t(`remove_${column[activeElement].type}`)}
-              </span>
-              <Trash2Icon className="size-3" />
+              {t("cancel")}
             </Button>
-          </div>
-        )}
-        <Button
-          type="button"
-          size={"sm"}
-          variant="destructive"
-          onClick={() => onRemoveRow(rowIndex)}
-        >
-          <Trash2Icon className="size-3" />
-          <span className="text-sm">{t("remove_row")}</span>
-        </Button>
-      </CardHeader>
-      <CardContent>
-        {/* Element Content */}
-        {activeElement !== null && column[activeElement] && (
-          <div className="p-4">
-            <HeaderElement
-              rowIndex={rowIndex}
-              elementIndex={activeElement}
-              control={form.control}
-              type={column[activeElement].type}
-            />
-          </div>
-        )}
-      </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row items-center p-0">
-        <RowButtons
-          size="default"
-          rowIndex={rowIndex}
-          handleAddElement={handleAddElement}
-        />
-      </CardFooter>
-    </Card>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                onRemoveRow(removeRowDialog.rowIndex!);
+                setRemoveRowDialog({
+                  display: false,
+                  rowIndex: null,
+                });
+              }}
+            >
+              {t("remove")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

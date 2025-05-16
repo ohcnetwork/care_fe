@@ -2480,6 +2480,7 @@
   "remove_medication_confirmation": "Are you sure you want to remove {{medication}}?",
   "remove_organization": "Remove organization",
   "remove_row": "Remove Row",
+  "remove_row_confirmation": "Are you sure you want to remove this row?",
   "remove_rule": "Remove Separator",
   "remove_symptom": "Remove Symptom",
   "remove_text": "Remove Text",
