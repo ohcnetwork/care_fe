@@ -132,7 +132,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   onSearch={(key, value) =>
                     updateQuery({ [key]: value || undefined })
                   }
-                  autoFocus
                 />
                 <div className="w-full flex justify-center sm:justify-start sm:w-auto">
                   <Tabs value={incoming ? "incoming" : "outgoing"}>
@@ -295,7 +294,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
                       data-cy={`resource-view-details-${index}`}
                     >
-                      View Details
+                      {t("view_details")}
                       <CareIcon icon="l-arrow-right" className="ml-1 size-4" />
                     </Link>
                   </CardFooter>
