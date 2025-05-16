@@ -142,7 +142,7 @@ const SymptomRow = ({
             <Button
               variant="ghost"
               size="sm"
-              className="absolute top-2 right-2 h-6 w-6 p-0"
+              className="absolute top-2 right-2 size-6 p-0"
               onClick={() => setShowNote(false)}
             >
               <X size={16} />

@@ -24,7 +24,7 @@ export function EmptyState({ type }: { type: string }) {
 
   return (
     <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-10 gap-2">
-      <FileQuestion className="w-8 h-8" />
+      <FileQuestion className="size-8" />
       <p className="text-sm">{t(`no_${type.toLowerCase()}_description`)}</p>
     </div>
   );
@@ -94,7 +94,7 @@ export default function ClinicalHistoryOverview(props: {
               : BLOOD_GROUP_STYLES.unknown
           }`}
         >
-          <Droplet className="w-4 h-4" />
+          <Droplet className="size-4" />
           {BLOOD_GROUP_LABELS[patientData.blood_group ?? "unknown"]}
         </Badge>
       </div>
