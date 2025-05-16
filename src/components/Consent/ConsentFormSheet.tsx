@@ -88,7 +88,7 @@ const consentFormSchema = (isEdit: boolean) =>
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("valid_from_after_valid_untill"),
-          path: ["period.start"],
+          path: ["period.end"],
         });
       }
 
@@ -132,6 +132,8 @@ export default function ConsentFormSheet({
 
   const form = useForm({
     resolver: zodResolver(consentFormSchema(isEdit)),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       decision: "permit",
       category: "treatment",
@@ -340,7 +342,6 @@ export default function ConsentFormSheet({
                         onChange={(e) => {
                           const value = e.target.value;
                           field.onChange(value ? new Date(value) : null);
-                          form.trigger("period");
                         }}
                       />
                       <FormMessage />
@@ -369,7 +370,6 @@ export default function ConsentFormSheet({
                           onChange={(e) => {
                             const value = e.target.value;
                             field.onChange(value ? new Date(value) : null);
-                            form.trigger("period");
                           }}
                         />
                         <FormMessage />
@@ -397,7 +397,6 @@ export default function ConsentFormSheet({
                           onChange={(e) => {
                             const value = e.target.value;
                             field.onChange(value ? new Date(value) : null);
-                            form.trigger("period");
                           }}
                         />
                         <FormMessage />
