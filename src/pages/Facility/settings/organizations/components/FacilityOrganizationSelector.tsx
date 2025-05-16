@@ -176,8 +176,6 @@ export default function FacilityOrganizationSelector(
     );
   };
 
-  console.log("hey:", getCurrentLevelOrganizations());
-
   const renderOrganizationPopover = (className?: string) => {
     return (
       <Command className={className}>
