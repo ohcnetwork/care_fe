@@ -4,8 +4,22 @@ import { Filter, Info, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Types based on your schema
 interface Code {
@@ -149,6 +163,20 @@ const mockSymptoms: Symptom[] = [
     category: "General",
     encounter: "enc126",
   },
+  {
+    id: "1",
+    code: { code: "386661006", display: "Fever", system: "SNOMED-CT" },
+    clinical_status: SymptomClinicalStatus.ACTIVE,
+    verification_status: SymptomVerificationStatus.CONFIRMED,
+    severity: SymptomSeverity.MODERATE,
+    recorded_date: "2025-04-19T10:30:00Z",
+    created_date: "2024-12-10T09:15:00Z",
+    note: "Patient reported fever of 101°F",
+    created_by: { id: "user1", name: "Dr. Smith" },
+    updated_by: { id: "user1", name: "Dr. Smith" },
+    category: "General",
+    encounter: "enc123",
+  },
 ];
 
 // Group symptoms by year and then by date
@@ -158,31 +186,72 @@ type GroupedByYearAndDate = {
   };
 };
 
-const SymptomRow = ({ symptom }: { symptom: Symptom }) => {
+const SymptomTable = ({ symptoms }: { symptoms: Symptom[] }) => {
+  const getStatusColor = (status: SymptomClinicalStatus) => {
+    switch (status) {
+      case SymptomClinicalStatus.ACTIVE:
+        return "text-green-600";
+      case SymptomClinicalStatus.INACTIVE:
+        return "text-gray-600";
+      case SymptomClinicalStatus.RESOLVED:
+        return "text-blue-600";
+      default:
+        return "";
+    }
+  };
+
   return (
-    <div className="flex items-center justify-between rounded-md border px-4 py-2 bg-gray-50 text-sm">
-      <div className="font-medium text-black">{symptom.code.display}</div>
-
-      <div className="flex gap-2">
-        <span className="rounded-md bg-green-100 px-2 py-1 text-green-800">
-          {symptom.clinical_status}
-        </span>
-        <span className="rounded-md bg-green-100 px-2 py-1 text-green-800">
-          {symptom.verification_status}
-        </span>
+    <div className="bg-gray-50 rounded-lg p-4">
+      <div className="overflow-x-auto">
+        <Table className="w-full table-auto">
+          <TableHeader>
+            <TableRow className="divide-x">
+              <TableHead className="w-1/3">Symptom</TableHead>
+              <TableHead className="w-1/5">Status</TableHead>
+              <TableHead className="w-1/5">Verification</TableHead>
+              <TableHead className="w-1/5">Onset Date</TableHead>
+              <TableHead className="text-center w-[1%]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="space-y-2">
+            {symptoms.map((symptom) => (
+              <TableRow
+                key={symptom.id}
+                className="bg-white border border-gray-200 rounded-md shadow-sm divide-x [&>td:first-child]:rounded-l-md [&>td:last-child]:rounded-r-md"
+              >
+                <TableCell className="truncate whitespace-nowrap overflow-hidden font-medium">
+                  {symptom.code.display}
+                </TableCell>
+                <TableCell
+                  className={`${getStatusColor(symptom.clinical_status)} whitespace-nowrap`}
+                >
+                  {symptom.clinical_status === SymptomClinicalStatus.ACTIVE
+                    ? "Active"
+                    : symptom.clinical_status === SymptomClinicalStatus.INACTIVE
+                      ? "Inactive"
+                      : "Resolved"}
+                </TableCell>
+                <TableCell className="text-green-600 whitespace-nowrap">
+                  {symptom.verification_status ===
+                  SymptomVerificationStatus.CONFIRMED
+                    ? "Confirmed"
+                    : "Unconfirmed"}
+                </TableCell>
+                <TableCell className="truncate whitespace-nowrap overflow-hidden">
+                  {symptom.onset?.date
+                    ? format(parseISO(symptom.onset.date), "dd MMM yyyy")
+                    : "Not specified"}
+                </TableCell>
+                <TableCell className="text-center">
+                  <button className="text-gray-400 hover:text-gray-600">
+                    <Info size={18} />
+                  </button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
-
-      <div className="text-black">
-        {symptom.onset?.date
-          ? format(parseISO(symptom.onset.date), "dd MMM yyyy")
-          : symptom.onset?.string
-            ? symptom.onset.string
-            : "-"}
-      </div>
-
-      <button className="text-gray-600 hover:text-black">
-        <Info size={16} />
-      </button>
     </div>
   );
 };
@@ -193,8 +262,16 @@ export default function SymptomsTimeline() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // const { data: symptoms, isLoading: symptomsLoading } = useQuery({
+  //   queryKey: ["symptoms", patientId, encounterId],
+  //   queryFn: query.paginated(symptomApi.listSymptoms, {
+  //     pathParams: { patientId },
+  //     pageSize: 100,
+  //   }),
+  //   enabled: !!patientId && !!encounterId,
+  // });
+
   useEffect(() => {
-    // Simulate API call to fetch symptoms
     const fetchSymptoms = async () => {
       try {
         // In a real app, you would fetch from your API
@@ -268,13 +345,13 @@ export default function SymptomsTimeline() {
         return "";
     }
   };
-
+  // fix it to only content
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto py-8 px-4">
         <div className="flex items-center gap-3 mb-6">
           <div className="bg-sky-100 p-2 rounded-md">
-            <Skeleton className="h-6 w-6" />
+            <Skeleton className="size-6" />
           </div>
           <Skeleton className="h-8 w-40" />
         </div>
@@ -287,7 +364,7 @@ export default function SymptomsTimeline() {
           {[1, 2, 3].map((i) => (
             <div key={i} className="space-y-4">
               <div className="flex items-center gap-3">
-                <Skeleton className="h-6 w-6 rounded-full" />
+                <Skeleton className="size-6 rounded-full" />
                 <Skeleton className="h-6 w-32" />
               </div>
               <Skeleton className="h-40 w-full" />
@@ -337,7 +414,7 @@ export default function SymptomsTimeline() {
       <div className="flex justify-between mb-6">
         <div className="relative w-full max-w-md">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className="size-5 text-gray-400" />
           </div>
           <Input
             type="search"
@@ -348,7 +425,7 @@ export default function SymptomsTimeline() {
           />
         </div>
         <Button variant="outline" className="flex items-center gap-2 h-10">
-          <Filter className="h-4 w-4" />
+          <Filter className="size-4" />
           Filter
         </Button>
       </div>
@@ -358,42 +435,48 @@ export default function SymptomsTimeline() {
           <p className="text-gray-500">No symptoms found</p>
         </div>
       ) : (
-        <div className="space-y-8">
-          {sortedYears.map((year) => {
-            const datesInYear = groupedSymptoms[year];
-            const sortedDates = Object.keys(datesInYear).sort(
-              (a, b) => new Date(b).getTime() - new Date(a).getTime(),
-            );
+        <div className="relative">
+          <div className="absolute left-[11px] top-0 bottom-0 w-[1px] bg-gray-300"></div>
 
-            return (
-              <div key={year} className="space-y-6">
-                <h2 className="text-lg font-medium text-gray-900 border-b pb-1">
-                  {year}
-                </h2>
+          <div className="space-y-8">
+            {sortedYears.map((year, yearIndex) => {
+              const datesInYear = groupedSymptoms[year];
+              const sortedDates = Object.keys(datesInYear).sort(
+                (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+              );
 
-                {sortedDates.map((date) => (
-                  <div key={date} className="relative pl-7">
-                    <div className="absolute left-0 top-1">
-                      <div className="h-6 w-6 rounded-full bg-sky-200 flex items-center justify-center">
-                        <div className="h-3 w-3 rounded-full bg-sky-500"></div>
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <h3 className="text-md font-medium text-sky-600">
-                        {format(new Date(date), "dd MMMM, yyyy")}
-                      </h3>
-                    </div>
-
-                    <div className="bg-gray-50 rounded-lg overflow-hidden">
-                      {datesInYear[date].map((symptom, index) => (
-                        <SymptomRow key={index} symptom={symptom} />
-                      ))}
+              return (
+                <div key={year} className="relative">
+                  <div className="flex items-center mb-6">
+                    <div className="bg-white z-10 text-lg text-indigo-700 font-medium border-t-2 border-b-2 border-gray px-3 ">
+                      {year}
                     </div>
                   </div>
-                ))}
-              </div>
-            );
-          })}
+
+                  <div className="space-y-8 ml-[12px]">
+                    {sortedDates.map((date) => (
+                      <div key={date} className="relative">
+                        {/* Date marker */}
+                        <div className="flex items-center mb-3">
+                          <div className="absolute left-[-7px] z-10">
+                            <div className="size-3 rounded-full bg-sky-500 border border-black" />
+                          </div>
+                          <div className="font-medium text-indigo-700 ml-3">
+                            {format(new Date(date), "dd MMMM, yyyy")}
+                          </div>
+                        </div>
+
+                        {/* Symptoms table for this date */}
+                        <div className="ml-3">
+                          <SymptomTable symptoms={datesInYear[date]} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
