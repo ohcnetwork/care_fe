@@ -133,7 +133,6 @@ export default function ConsentFormSheet({
   const form = useForm({
     resolver: zodResolver(consentFormSchema(isEdit)),
     mode: "onChange",
-    reValidateMode: "onChange",
     defaultValues: {
       decision: "permit",
       category: "treatment",
