@@ -254,20 +254,21 @@ export default function SymptomsTimeline({
         <h1 className="text-2xl font-bold">Past Symptoms</h1>
       </div>
 
-      <div className="flex justify-between mb-6">
-        <div className="relative w-full max-w-md">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="relative w-full sm:max-w-md">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Search className="size-5 text-gray-400" />
           </div>
           <Input
             type="search"
-            placeholder="Search by symptom"
+            placeholder="Search by diagnosis"
             className="pl-10 h-10 border-gray-300"
             value={qParams.name}
             onChange={(e) => updateQuery({ name: e.target.value })}
           />
         </div>
-        <div className="flex gap-2 items-center">
+
+        <div className="flex items-center gap-2">
           <Switch
             checked={qParams.exclude_entered_in_error ?? false}
             onCheckedChange={(val) =>

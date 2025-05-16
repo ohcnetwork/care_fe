@@ -46,7 +46,7 @@ type GroupedByYearAndDate = {
   };
 };
 
-const SymptomTable = ({
+const DiagnosisTable = ({
   diagnosis,
   patientId,
   facilityId,
@@ -58,22 +58,22 @@ const SymptomTable = ({
   return (
     <div className="bg-gray-50 rounded-lg p-4">
       <div className="overflow-x-auto">
-        <Table className="w-full border border-gray-200">
+        <Table className="w-full border border-gray-200 min-w-[650px]">
           <TableHeader className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">
             <TableRow className="rounded-md overflow-hidden divide-x bg-gray-100">
-              <TableHead className="first:rounded-l-md h-auto py-1 px-2  text-gray-600">
+              <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600 w-[250px]">
                 {t("diagnosis")}
               </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
+              <TableHead className="h-auto text-center py-1 px-2 text-gray-600">
                 {t("severity")}
               </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
+              <TableHead className="h-auto text-center py-1 px-2 text-gray-600">
                 {t("status")}
               </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
+              <TableHead className="h-auto text-center py-1 px-2 text-gray-600">
                 {t("verification")}
               </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
+              <TableHead className="h-auto text-center py-1 px-2 text-gray-600">
                 {t("note")}
               </TableHead>
               <TableHead className="h-auto py-1 px-2 text-gray-600"></TableHead>
@@ -85,17 +85,15 @@ const SymptomTable = ({
                 key={diagnosis.id}
                 className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200"
               >
-                <TableCell className="truncate whitespace-nowrap overflow-hidden font-bold">
-                  {diagnosis.code.display}
+                <TableCell className="max-w-[250px] truncate whitespace-nowrap overflow-hidden font-bold">
+                  <div className="truncate" title={diagnosis.code.display}>
+                    {diagnosis.code.display}
+                  </div>
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-center">
                   <Badge
                     variant="outline"
-                    className={`whitespace-nowrap ${
-                      DIAGNOSIS_CLINICAL_STATUS_STYLES[
-                        diagnosis.clinical_status
-                      ]
-                    }`}
+                    className={`whitespace-nowrap ${DIAGNOSIS_CLINICAL_STATUS_STYLES[diagnosis.clinical_status]}`}
                   >
                     {t(diagnosis.clinical_status)}
                   </Badge>
@@ -256,8 +254,8 @@ export default function DiagnosisTimeline({
         <h1 className="text-2xl font-bold">Past Diagnosis</h1>
       </div>
 
-      <div className="flex justify-between mb-6">
-        <div className="relative w-full max-w-md">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="relative w-full sm:max-w-md">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Search className="size-5 text-gray-400" />
           </div>
@@ -269,7 +267,8 @@ export default function DiagnosisTimeline({
             onChange={(e) => updateQuery({ name: e.target.value })}
           />
         </div>
-        <div className="flex gap-2 items-center">
+
+        <div className="flex items-center gap-2">
           <Switch
             checked={qParams.exclude_entered_in_error ?? false}
             onCheckedChange={(val) =>
@@ -320,7 +319,7 @@ export default function DiagnosisTimeline({
                         </div>
 
                         <div className="ml-3">
-                          <SymptomTable
+                          <DiagnosisTable
                             diagnosis={datesInYear[date]}
                             patientId={patientId}
                             facilityId={facilityId}
