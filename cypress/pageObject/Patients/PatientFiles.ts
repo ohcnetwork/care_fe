@@ -8,7 +8,6 @@ export class PatientFiles {
 
   clickAddFilesButton() {
     cy.verifyAndClickElement('[data-cy="add-files-button"]', "Add Files");
-    cy.wait(1000);
     return this;
   }
 
@@ -211,12 +210,11 @@ export class PatientFiles {
 
   filterActiveFiles() {
     this.interceptFilterRequest();
-    cy.wait(1000);
     cy.verifyAndClickElement('[data-cy="files-filter-button"]', "Filter");
     cy.verifyAndClickElement('[data-cy="active-files-button"]', "Active Files");
     this.verifyFilterApiCall();
     cy.verifyContentPresence('[data-cy="file-status-badge"]', ["Active Files"]);
-    cy.wait(100);
+    cy.wait(1000);
     return this;
   }
 
@@ -228,6 +226,13 @@ export class PatientFiles {
 
   navigateToSavedUrl() {
     cy.navigateToSavedUrl();
+    return this;
+  }
+
+  clickAddFilesAndSelectUpload() {
+    cy.wrap(this.clickAddFilesButton()).then(() => {
+      this.selectUploadFromDevice();
+    });
     return this;
   }
 }
