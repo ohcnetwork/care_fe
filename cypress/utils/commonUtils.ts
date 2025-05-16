@@ -164,7 +164,6 @@ export const conditionStatus = [
   "Recurrence",
   "Relapse",
   "Inactive",
-  "Remission",
   "Resolved",
 ];
 

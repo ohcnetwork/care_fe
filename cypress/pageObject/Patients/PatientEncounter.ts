@@ -83,10 +83,10 @@ export class PatientEncounter {
   }
 
   deleteAllergy() {
-    cy.get('[data-cy="allergy-status"]').scrollIntoView();
-    cy.clickAndSelectOption('[data-cy="allergy-status"]', "Entered in Error", {
-      position: "first",
-    });
+    cy.get('[data-cy="allergy-options"]').last().scrollIntoView();
+    cy.get('[data-cy="allergy-options"]').last().click();
+    cy.get('[data-cy="remove-allergy"]').click();
+
     return this;
   }
 
