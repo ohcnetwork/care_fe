@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 
 import { Avatar } from "@/components/Common/Avatar";
+import Loading from "@/components/Common/Loading";
 import PageHeadTitle from "@/components/Common/PageHeadTitle";
 
 import routes from "@/Utils/request/api";
@@ -35,7 +36,7 @@ export const PatientClinicalHistory = (props: {
   facilityId: string;
 }) => {
   const { t } = useTranslation();
-  const { data: patientData } = useQuery({
+  const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", props.patientId],
     queryFn: query(routes.patient.getPatient, {
       pathParams: {
@@ -44,6 +45,8 @@ export const PatientClinicalHistory = (props: {
     }),
     enabled: !!props.patientId,
   });
+
+  if (isLoading) return <Loading />;
 
   if (!patientData) {
     return <div>{t("patient_not_found")}</div>;
