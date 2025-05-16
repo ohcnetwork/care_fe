@@ -14,7 +14,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatPatientAge, keysOf } from "@/Utils/utils";
 
-import Overview from "./clinicalHistory/Overview";
+import ClinicalHistoryOverview from "./clinicalHistory/ClinicalHistoryOverview";
 import DiagnosisTimeline from "./clinicalHistory/PastDiagnosis";
 import MedicationTimeline from "./clinicalHistory/PastMedication";
 import SymptomsTimeline from "./clinicalHistory/PastSymptoms";
@@ -25,7 +25,7 @@ interface TabProps {
 }
 
 export const clinicalDefaultTabs = {
-  overview: Overview,
+  overview: ClinicalHistoryOverview,
   symptoms: SymptomsTimeline,
   diagnosis: DiagnosisTimeline,
   medication: MedicationTimeline,

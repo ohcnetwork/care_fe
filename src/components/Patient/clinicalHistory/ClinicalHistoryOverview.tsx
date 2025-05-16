@@ -31,7 +31,7 @@ export function EmptyState({ type }: { type: string }) {
   );
 }
 
-export default function Overview(props: {
+export default function ClinicalHistoryOverview(props: {
   patientId: string;
   facilityId: string;
 }) {
