@@ -381,63 +381,67 @@ export const DischargeTab = ({
 
   const RenderCard = () => (
     <div className="xl:hidden space-y-4 px-2">
-      {files?.results && files?.results?.length > 0 ? (
-        files.results.map((file) => {
-          const filetype = getFileType(file);
-          const fileName = file.name ? file.name + file.extension : "";
+      {files?.results && files?.results?.length > 0
+        ? files.results.map((file) => {
+            const filetype = getFileType(file);
+            const fileName = file.name ? file.name + file.extension : "";
 
-          return (
-            <Card
-              key={file.id}
-              className={cn(
-                "overflow-hidden",
-                file.is_archived ? "bg-white/50" : "bg-white",
-              )}
-            >
-              <CardContent className="p-4 space-y-4">
-                <div className="flex items-start gap-3">
-                  <span className="p-2 rounded-full bg-gray-100 shrink-0">
-                    <CareIcon icon={icons[filetype]} className="text-xl" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium text-gray-900 truncate">
-                      {fileName}
-                    </div>
-                    <div className="mt-1 text-sm text-gray-500">{filetype}</div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <div className="text-gray-500">{t("date")}</div>
-                    <div className="font-medium">
-                      {dayjs(file.created_date).format("DD MMM YYYY, hh:mm A")}
+            return (
+              <Card
+                key={file.id}
+                className={cn(
+                  "overflow-hidden",
+                  file.is_archived ? "bg-white/50" : "bg-white",
+                )}
+              >
+                <CardContent className="p-4 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <span className="p-2 rounded-full bg-gray-100 shrink-0">
+                      <CareIcon icon={icons[filetype]} className="text-xl" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-gray-900 truncate">
+                        {fileName}
+                      </div>
+                      <div className="mt-1 text-sm text-gray-500">
+                        {filetype}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <div className="text-gray-500">{t("shared_by")}</div>
-                    <div className="font-medium">
-                      {file.uploaded_by ? formatName(file.uploaded_by) : ""}
+
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="text-gray-500">{t("date")}</div>
+                      <div className="font-medium">
+                        {dayjs(file.created_date).format(
+                          "DD MMM YYYY, hh:mm A",
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">{t("shared_by")}</div>
+                      <div className="font-medium">
+                        {file.uploaded_by ? formatName(file.uploaded_by) : ""}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="pt-2 flex justify-end">
-                  {file.is_archived ? (
-                    getArchivedMessage(file)
-                  ) : (
-                    <DetailButtons file={file} />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })
-      ) : (
-        <div className="text-center py-4 text-gray-500">
-          {t("no_files_found")}
-        </div>
-      )}
+                  <div className="pt-2 flex justify-end">
+                    {file.is_archived ? (
+                      getArchivedMessage(file)
+                    ) : (
+                      <DetailButtons file={file} />
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        : !filesLoading && (
+            <div className="text-center py-4 text-gray-500">
+              {t("no_files_found")}
+            </div>
+          )}
     </div>
   );
 
@@ -462,93 +466,96 @@ export const DischargeTab = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {files?.results && files?.results?.length > 0 ? (
-            files.results.map((file) => {
-              const filetype = getFileType(file);
-              const fileName = file.name ? file.name + file.extension : "";
+          {files?.results && files?.results?.length > 0
+            ? files.results.map((file) => {
+                const filetype = getFileType(file);
+                const fileName = file.name ? file.name + file.extension : "";
 
-              return (
-                <TableRow
-                  key={file.id}
-                  className={cn("shadow rounded-md overflow-hidden group")}
-                >
-                  <TableCell
-                    className={cn(
-                      "font-medium rounded-l-md rounded-y-md group-hover:bg-transparent",
-                      file.is_archived ? "bg-white/50" : "bg-white",
-                    )}
+                return (
+                  <TableRow
+                    key={file.id}
+                    className={cn("shadow rounded-md overflow-hidden group")}
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="p-2 rounded-full bg-gray-100 shrink-0">
-                        <CareIcon icon={icons[filetype]} className="text-xl" />
-                      </span>
-                      {file.name && file.name.length > 20 ? (
-                        <TooltipComponent content={fileName}>
+                    <TableCell
+                      className={cn(
+                        "font-medium rounded-l-md rounded-y-md group-hover:bg-transparent",
+                        file.is_archived ? "bg-white/50" : "bg-white",
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="p-2 rounded-full bg-gray-100 shrink-0">
+                          <CareIcon
+                            icon={icons[filetype]}
+                            className="text-xl"
+                          />
+                        </span>
+                        {file.name && file.name.length > 20 ? (
+                          <TooltipComponent content={fileName}>
+                            <span className="text-gray-900 truncate block">
+                              {fileName}
+                            </span>
+                          </TooltipComponent>
+                        ) : (
                           <span className="text-gray-900 truncate block">
                             {fileName}
                           </span>
-                        </TooltipComponent>
-                      ) : (
-                        <span className="text-gray-900 truncate block">
-                          {fileName}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "rounded-y-md group-hover:bg-transparent",
-                      file.is_archived ? "bg-white/50" : "bg-white",
-                    )}
-                  >
-                    {filetype}
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "rounded-y-md group-hover:bg-transparent",
-                      file.is_archived ? "bg-white/50" : "bg-white",
-                    )}
-                  >
-                    <TooltipComponent
-                      content={dayjs(file.created_date).format(
-                        "DD MMM YYYY, hh:mm A",
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className={cn(
+                        "rounded-y-md group-hover:bg-transparent",
+                        file.is_archived ? "bg-white/50" : "bg-white",
                       )}
                     >
-                      <span>
-                        {dayjs(file.created_date).format("DD MMM YYYY ")}
-                      </span>
-                    </TooltipComponent>
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "rounded-y-md group-hover:bg-transparent",
-                      file.is_archived ? "bg-white/50" : "bg-white",
-                    )}
-                  >
-                    {file.uploaded_by ? formatName(file.uploaded_by) : ""}
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "text-right rounded-r-md rounded-y-md group-hover:bg-transparent",
-                      file.is_archived ? "bg-white/50" : "bg-white",
-                    )}
-                  >
-                    {file.is_archived ? (
-                      getArchivedMessage(file)
-                    ) : (
-                      <DetailButtons file={file} />
-                    )}
+                      {filetype}
+                    </TableCell>
+                    <TableCell
+                      className={cn(
+                        "rounded-y-md group-hover:bg-transparent",
+                        file.is_archived ? "bg-white/50" : "bg-white",
+                      )}
+                    >
+                      <TooltipComponent
+                        content={dayjs(file.created_date).format(
+                          "DD MMM YYYY, hh:mm A",
+                        )}
+                      >
+                        <span>
+                          {dayjs(file.created_date).format("DD MMM YYYY ")}
+                        </span>
+                      </TooltipComponent>
+                    </TableCell>
+                    <TableCell
+                      className={cn(
+                        "rounded-y-md group-hover:bg-transparent",
+                        file.is_archived ? "bg-white/50" : "bg-white",
+                      )}
+                    >
+                      {file.uploaded_by ? formatName(file.uploaded_by) : ""}
+                    </TableCell>
+                    <TableCell
+                      className={cn(
+                        "text-right rounded-r-md rounded-y-md group-hover:bg-transparent",
+                        file.is_archived ? "bg-white/50" : "bg-white",
+                      )}
+                    >
+                      {file.is_archived ? (
+                        getArchivedMessage(file)
+                      ) : (
+                        <DetailButtons file={file} />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            : !filesLoading && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center">
+                    {t("no_files_found")}
                   </TableCell>
                 </TableRow>
-              );
-            })
-          ) : (
-            <TableRow>
-              <TableCell colSpan={5} className="text-center">
-                {t("no_files_found")}
-              </TableCell>
-            </TableRow>
-          )}
+              )}
         </TableBody>
       </Table>
     </div>
