@@ -185,21 +185,19 @@ type GroupedByYearAndDate = {
     [date: string]: Symptom[];
   };
 };
-
+const getStatusColor = (status: SymptomClinicalStatus) => {
+  switch (status) {
+    case SymptomClinicalStatus.ACTIVE:
+      return "text-green-600";
+    case SymptomClinicalStatus.INACTIVE:
+      return "text-gray-600";
+    case SymptomClinicalStatus.RESOLVED:
+      return "text-blue-600";
+    default:
+      return "";
+  }
+};
 const SymptomTable = ({ symptoms }: { symptoms: Symptom[] }) => {
-  const getStatusColor = (status: SymptomClinicalStatus) => {
-    switch (status) {
-      case SymptomClinicalStatus.ACTIVE:
-        return "text-green-600";
-      case SymptomClinicalStatus.INACTIVE:
-        return "text-gray-600";
-      case SymptomClinicalStatus.RESOLVED:
-        return "text-blue-600";
-      default:
-        return "";
-    }
-  };
-
   return (
     <div className="bg-gray-50 rounded-lg p-4">
       <div className="overflow-x-auto">
@@ -219,7 +217,7 @@ const SymptomTable = ({ symptoms }: { symptoms: Symptom[] }) => {
                 key={symptom.id}
                 className="bg-white border border-gray-200 rounded-md shadow-sm divide-x [&>td:first-child]:rounded-l-md [&>td:last-child]:rounded-r-md"
               >
-                <TableCell className="truncate whitespace-nowrap overflow-hidden font-medium">
+                <TableCell className="truncate whitespace-nowrap overflow-hidden font-bold">
                   {symptom.code.display}
                 </TableCell>
                 <TableCell
@@ -458,8 +456,8 @@ export default function SymptomsTimeline() {
                       <div key={date} className="relative">
                         {/* Date marker */}
                         <div className="flex items-center mb-3">
-                          <div className="absolute left-[-7px] z-10">
-                            <div className="size-3 rounded-full bg-sky-500 border border-black" />
+                          <div className="absolute left-[-8px] z-10">
+                            <div className="size-4 rounded-full bg-sky-500 border border-black" />
                           </div>
                           <div className="font-medium text-indigo-700 ml-3">
                             {format(new Date(date), "dd MMMM, yyyy")}
