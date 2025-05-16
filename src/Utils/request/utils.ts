@@ -96,3 +96,12 @@ export function handleUploadPercentage(
     setUploadPercent(percentComplete);
   }
 }
+
+export function swapElements<T>(arr: T[], idx1: number, idx2: number): T[] {
+  if (idx1 < 0 || idx1 >= arr.length || idx2 < 0 || idx2 >= arr.length) {
+    return arr;
+  }
+  const newArray = [...arr];
+  [newArray[idx1], newArray[idx2]] = [newArray[idx2], newArray[idx1]];
+  return newArray;
+}

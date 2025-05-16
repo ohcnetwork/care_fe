@@ -19,13 +19,14 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { EncounterConsentsTab } from "@/pages/Encounters/tabs/EncounterConsentsTab";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 import { EncounterDrawingsTab } from "./tabs/EncounterDrawingsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
@@ -43,6 +44,7 @@ const defaultTabs = {
   notes: EncounterNotesTab,
   devices: EncounterDevicesTab,
   drawings: EncounterDrawingsTab,
+  consents: EncounterConsentsTab,
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
   // pressure_sore: EncounterPressureSoreTab,
@@ -89,7 +91,7 @@ export const EncounterShow = (props: Props) => {
         id: patientId,
       },
     }),
-    enabled: !!patientId,
+    enabled: !facilityIdFromProps && !!patientId,
   });
 
   const facilityId = facilityIdFromProps ?? encounterData?.facility.id;
@@ -131,13 +133,13 @@ export const EncounterShow = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, isPatientLoading]);
 
-  if (isLoading || !encounterData || !patient) {
+  if (isLoading || !encounterData || (!facilityIdFromProps && !patient)) {
     return <Loading />;
   }
 
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
-    patient: patient,
+    patient: patient ?? encounterData.patient,
   };
 
   if (!props.tab) {

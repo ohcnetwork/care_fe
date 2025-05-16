@@ -301,7 +301,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 rounded-lg p-4 shadow-xl md:p-6 overflow-y-auto">
+      <DialogContent className="h-full w-full max-w-[100vw] md:max-w-[80vw] flex-col gap-4 rounded-lg p-4 shadow-xl md:p-6 overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-sm text-gray-600">
             {t("file_preview")}
@@ -309,7 +309,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
         </DialogHeader>
         {fileUrl ? (
           <>
-            <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
+            <div className="mb-2 flex flex-col items-start md:justify-between md:flex-row gap-4">
               <div>
                 <TooltipComponent content={fileName}>
                   <p className="text-2xl font-bold text-gray-800 truncate">
@@ -330,12 +330,12 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     </p>
                   )}
               </div>
-              <div className="flex gap-4 mt-2 md:mt-0">
+              <div>
                 {downloadURL && downloadURL.length > 0 && (
                   <Button variant="primary" data-cy="file-preview-download">
                     <a
                       href={downloadURL}
-                      className="text-white"
+                      className="text-white flex items-center gap-2"
                       download={`${file_state.name}.${file_state.extension}`}
                     >
                       <CareIcon icon="l-file-download" className="size-4" />
@@ -345,11 +345,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 )}
               </div>
             </div>
-            <div className="flex flex-1 items-center justify-center">
+            <div className="flex flex-1 items-center justify-between gap-4">
               {uploadedFiles && uploadedFiles.length > 1 && (
                 <Button
                   variant="primary"
-                  className="mr-4"
                   onClick={() => handleNext(index - 1)}
                   disabled={index <= 0}
                   aria-label="Previous file"
@@ -359,7 +358,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               )}
               <div
                 className={cn(
-                  "flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200 touch-none",
+                  "flex h-[50vh] md:h-[70vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200 touch-none",
                   dragState.isDragging ? "cursor-grabbing" : "cursor-grab",
                 )}
                 onMouseDown={handleMouseDown}
@@ -401,6 +400,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       }}
                       pageNumber={page}
                       scale={scale}
+                      className="max-md:max-w-[50vw]"
                     />
                   </Suspense>
                 ) : previewExtensions.includes(file_state.extension) ? (
@@ -408,7 +408,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     sandbox=""
                     title={t("source_file")}
                     src={fileUrl}
-                    className="h-[50vh] md:h-[75vh] w-full"
+                    className="h-[50vh] md:h-[70vh] w-full"
                   />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center">
@@ -423,7 +423,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               {uploadedFiles && uploadedFiles.length > 1 && (
                 <Button
                   variant="primary"
-                  className="ml-4"
                   onClick={() => handleNext(index + 1)}
                   disabled={index >= uploadedFiles.length - 1}
                   aria-label={t("next_file")}
@@ -433,61 +432,65 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               )}
             </div>
             <div className="flex items-center justify-center">
-              <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-4">
+              <div className="mt-2 grid grid-cols-3 md:grid-cols-6 gap-4">
                 {file_state.isImage && (
                   <>
                     {[
-                      [
-                        t("zoom_in"),
-                        "l-search-plus",
-                        handleZoomIn,
-                        file_state.zoom === zoom_values.length,
-                      ],
-                      [
-                        `${25 * file_state.zoom}%`,
-                        false,
-                        () => {
+                      {
+                        label: t("zoom_in"),
+                        icon: "l-search-plus",
+                        action: handleZoomIn,
+                        disabled: file_state.zoom === zoom_values.length,
+                      },
+                      {
+                        label: `${25 * file_state.zoom}%`,
+                        icon: null,
+                        action: () => {
                           setFileState({ ...file_state, zoom: 4 });
                         },
-                        false,
-                      ],
-                      [
-                        t("zoom_out"),
-                        "l-search-minus",
-                        handleZoomOut,
-                        file_state.zoom === 1,
-                      ],
-                      [
-                        t("rotate_left"),
-                        "l-corner-up-left",
-                        () => handleRotate(-90),
-                        false,
-                      ],
-                      [
-                        t("rotate_right"),
-                        "l-corner-up-right",
-                        () => handleRotate(90),
-                        false,
-                      ],
+                        disabled: false,
+                      },
+                      {
+                        label: t("zoom_out"),
+                        icon: "l-search-minus",
+                        action: handleZoomOut,
+                        disabled: file_state.zoom === 1,
+                      },
+                      {
+                        label: t("rotate_left"),
+                        icon: "l-corner-up-left",
+                        action: () => handleRotate(-90),
+                        disabled: false,
+                      },
+                      {
+                        label: t("reset"),
+                        icon: "l-minus-circle",
+                        action: () =>
+                          setFileState((prev) => ({ ...prev, rotation: 0 })),
+                        disabled: false,
+                      },
+                      {
+                        label: t("rotate_right"),
+                        icon: "l-corner-up-right",
+                        action: () => handleRotate(90),
+                        disabled: false,
+                      },
                     ].map((button, index) => (
                       <Button
                         variant="ghost"
                         key={index}
-                        onClick={button[2] as () => void}
-                        className={cn(
-                          "z-50 rounded bg-white/60 text-black backdrop-blur-sm transition hover:bg-white/70",
-                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
-                        )}
-                        disabled={button[3] as boolean}
+                        onClick={button.action}
+                        className="z-50 rounded bg-white/60 text-black backdrop-blur-sm transition hover:bg-white/70"
+                        disabled={button.disabled}
                       >
                         <div>
-                          {button[1] && (
+                          {button.icon && (
                             <CareIcon
-                              icon={button[1] as IconName}
+                              icon={button.icon as IconName}
                               className="text-lg"
                             />
                           )}
-                          <div>{button[0] as string}</div>
+                          <div>{button.label}</div>
                         </div>
                       </Button>
                     ))}
@@ -496,45 +499,57 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 {file_state.extension === "pdf" && (
                   <>
                     {[
-                      [t("zoom_in"), "l-search-plus", handleZoomIn, scale >= 2],
-                      [`${Math.round(scale * 100)}%`, false, () => {}, false],
-                      [
-                        t("zoom_out"),
-                        "l-search-minus",
-                        handleZoomOut,
-                        scale <= 0.5,
-                      ],
-                      [
-                        t("previous"),
-                        "l-arrow-left",
-                        () => setPage((prev) => prev - 1),
-                        page === 1,
-                      ],
-                      [`${page}/${numPages}`, false, () => ({}), false],
-                      [
-                        t("next"),
-                        "l-arrow-right",
-                        () => setPage((prev) => prev + 1),
-                        page === numPages,
-                      ],
+                      {
+                        label: t("zoom_in"),
+                        icon: "l-search-plus",
+                        action: handleZoomIn,
+                        disabled: scale >= 2,
+                      },
+                      {
+                        label: `${Math.round(scale * 100)}%`,
+                        icon: null,
+                        action: () => {},
+                        disabled: false,
+                      },
+                      {
+                        label: t("zoom_out"),
+                        icon: "l-search-minus",
+                        action: handleZoomOut,
+                        disabled: scale <= 0.5,
+                      },
+                      {
+                        label: t("previous"),
+                        icon: "l-arrow-left",
+                        action: () => setPage((prev) => prev - 1),
+                        disabled: page === 1,
+                      },
+                      {
+                        label: `${page}/${numPages}`,
+                        icon: null,
+                        action: () => {},
+                        disabled: false,
+                      },
+                      {
+                        label: t("next"),
+                        icon: "l-arrow-right",
+                        action: () => setPage((prev) => prev + 1),
+                        disabled: page === numPages,
+                      },
                     ].map((button, index) => (
                       <Button
                         variant="ghost"
                         key={index}
-                        onClick={button[2] as () => void}
-                        className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
-                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
-                        )}
-                        disabled={button[3] as boolean}
+                        onClick={button.action}
+                        className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                        disabled={button.disabled}
                       >
-                        {button[1] && (
+                        {button.icon && (
                           <CareIcon
-                            icon={button[1] as IconName}
+                            icon={button.icon as IconName}
                             className="mr-2 text-lg"
                           />
                         )}
-                        {button[0] as string}
+                        {button.label}
                       </Button>
                     ))}
                   </>
@@ -543,7 +558,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
           </>
         ) : (
-          <div className="flex h-[50vh] md:h-[75vh] items-center justify-center">
+          <div className="flex h-[50vh] md:h-[70vh] items-center justify-center">
             <CircularProgress />
           </div>
         )}

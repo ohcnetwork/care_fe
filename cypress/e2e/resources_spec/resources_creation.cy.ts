@@ -13,31 +13,25 @@ const resourceCreation = new ResourcesCreation();
 
 describe("Resources Management", () => {
   const testData = {
-    facility: "DH Aluva",
-    sourceFacility: "GHC Payyanur",
     status: "Pending",
     category: "Medicines",
     title: "TestCypress",
     reason: "Reason Testing",
-    assignedUser: "devnurse3",
   };
   const updatedTestData = {
-    facility: "DH Eloor",
-    sourceFacility: "GHC Payyanur",
     status: "Pending",
     category: "Comfort Devices",
     title: "Updated Resource test title",
     reason: "Updated Reason Testing",
-    assignedUser: "devnurse2",
   };
 
   beforeEach(() => {
-    cy.loginByApi("devnurse4");
+    cy.loginByApi("nurse");
     cy.visit("/");
   });
 
   it("Create a new resource request and verify it on Resources Board and Patient Detail Page", () => {
-    facilityCreation.selectFacility(testData.sourceFacility);
+    facilityCreation.selectFirstRandomFacility();
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
@@ -59,16 +53,16 @@ describe("Resources Management", () => {
     patientDetails.navigateToSavedUrl();
 
     resourceCreation
-      .verifyResourceInPatientPage(testData)
+      .verifyResourceInPatientPage(testData as ResourceRequestFormData)
       .navigateToResources()
       .applyFilter("outgoing")
       .applyFilter("pending")
       .searchResource(testData.title)
-      .verifyResourceCardDetails(testData)
+      .verifyResourceCardDetails(testData as ResourceRequestFormData)
       .openResourceDetails()
       .updateResourceStatus()
       .fillResourceRequestForm(updatedTestData as ResourceRequestFormData)
-      .selectAssignedUser(updatedTestData.assignedUser)
+      .selectAssignedUser()
       .interceptUpdateRequest()
       .submitForm()
       .verifyUpdateRequest()
@@ -77,11 +71,11 @@ describe("Resources Management", () => {
     patientDetails.navigateToSavedUrl();
 
     resourceCreation
-      .verifyResourceInPatientPage(updatedTestData)
+      .verifyResourceInPatientPage(updatedTestData as ResourceRequestFormData)
       .navigateToResources()
       .applyFilter("outgoing")
       .applyFilter("pending")
       .searchResource(updatedTestData.title)
-      .verifyResourceCardDetails(updatedTestData);
+      .verifyResourceCardDetails(updatedTestData as ResourceRequestFormData);
   });
 });
