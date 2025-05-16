@@ -20,6 +20,7 @@ export class PatientFiles {
   }
 
   uploadSingleFile(filePath: string) {
+    // The filePath is already in the format 'cypress/fixtures/filename'
     cy.get('input[type="file"]').selectFile(filePath, { force: true });
     return this;
   }
@@ -51,15 +52,16 @@ export class PatientFiles {
   }
 
   fillMultipleFileNames(fileNames: string[]) {
-    cy.get("input").each(($input, index) => {
-      cy.wrap($input).click().clear();
-      cy.wrap($input).type(`${fileNames[index]}`);
+    fileNames.forEach((fileName, index) => {
+      cy.typeIntoField(`[data-cy="upload-file-name-${index}"]`, fileName, {
+        clearBeforeTyping: true,
+      });
     });
     return this;
   }
 
   fillSingleFileName(fileName: string) {
-    cy.get('[data-cy="input"]').type(fileName);
+    cy.get('[data-cy="upload-file-name-0"]').type(fileName);
     return this;
   }
 
@@ -208,10 +210,11 @@ export class PatientFiles {
 
   filterActiveFiles() {
     this.interceptFilterRequest();
-    cy.wait(200);
+    cy.wait(1000);
     cy.verifyAndClickElement('[data-cy="files-filter-button"]', "Filter");
     cy.verifyAndClickElement('[data-cy="active-files-button"]', "Active Files");
     this.verifyFilterApiCall();
+    cy.verifyContentPresence('[data-cy="file-status-badge"]', ["Active Files"]);
     cy.wait(100);
     return this;
   }
