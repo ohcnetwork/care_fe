@@ -72,10 +72,11 @@ const MedicineRow = ({
 
   const frequencyDisplay = instruction?.as_needed_boolean
     ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
-    : (frequency?.meaning ?? "-") +
-      (instruction?.additional_instruction?.[0]?.display
-        ? `, ${instruction.additional_instruction[0].display}`
-        : "");
+    : [
+        frequency?.meaning ?? "-",
+        ...(instruction?.additional_instruction?.map((inst) => inst.display) ||
+          []),
+      ].join(", ");
 
   return (
     <>
@@ -314,7 +315,7 @@ export default function MedicationTimeline({
         <TimelineLoading />
       ) : sortedYears.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center">
-          <p className="text-gray-500">No diagnosis found</p>
+          <p className="text-gray-500">No Medication found</p>
         </div>
       ) : (
         <div className="relative">
@@ -340,7 +341,7 @@ export default function MedicationTimeline({
                       <div key={date} className="relative">
                         <div className="flex items-center mb-3">
                           <div className="absolute left-[-8px] z-10">
-                            <div className="size-4 rounded-full bg-sky-500 border border-black" />
+                            <div className="size-4 rounded-full bg-pink-300 border border-black" />
                           </div>
                           <div className="font-medium text-indigo-700 ml-3">
                             {format(new Date(date), "dd MMMM, yyyy")}
