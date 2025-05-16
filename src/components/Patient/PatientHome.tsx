@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -81,17 +81,16 @@ export const PatientHome = (props: {
             </Button>
           )}
           {canViewClinicalData && (
-            <Button
-              variant="primary"
-              onClick={() =>
-                navigate(
+            <Button variant="primary" asChild>
+              <Link
+                href={
                   facilityId
                     ? `/facility/${facilityId}/patient/${id}/clinical_history/overview`
-                    : `/organization/organizationId/patient/${id}/clinical_history/overview`,
-                )
-              }
-            >
-              {t("clinical_history")}
+                    : `/organization/organizationId/patient/${id}/clinical_history/overview`
+                }
+              >
+                {t("clinical_history")}
+              </Link>
             </Button>
           )}
         </div>
