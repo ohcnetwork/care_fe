@@ -439,8 +439,6 @@ const AvatarEditModal = ({
       <br />
       {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
       {t("recommended_aspect_ratio_for", { aspectRatio: "1:1" })}
-      <br />
-      {t("image_dimensions_should_be_less_than", { maxDimension: "400px" })}
     </>
   );
 
