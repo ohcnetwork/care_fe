@@ -50,8 +50,12 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patients/verify": ({ facilityId }) => (
     <VerifyPatient facilityId={facilityId} />
   ),
-  "/facility/:facilityId/patient/:id/clinical_history/:tab": ({ id, tab }) => (
-    <PatientClinicalHistory patientId={id} tab={tab} />
+  "/facility/:facilityId/patient/:id/clinical_history/:tab": ({
+    id,
+    tab,
+    facilityId,
+  }) => (
+    <PatientClinicalHistory patientId={id} tab={tab} facilityId={facilityId} />
   ),
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,

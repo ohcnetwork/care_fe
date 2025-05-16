@@ -39,6 +39,7 @@ import SymptomsTimeline from "./clinicalHistory/PastSymptoms";
 
 interface TabProps {
   patientId: string;
+  facilityId: string;
 }
 
 export const clinicalDefaultTabs = {
@@ -49,6 +50,7 @@ export const clinicalDefaultTabs = {
 export const PatientClinicalHistory = (props: {
   patientId: string;
   tab: string;
+  facilityId: string;
 }) => {
   const { t } = useTranslation();
   const { data: patientData, isLoading } = useQuery<Patient>({
@@ -67,10 +69,9 @@ export const PatientClinicalHistory = (props: {
 
   const tabProp: TabProps = {
     patientId: props.patientId,
+    facilityId: props.facilityId,
   };
   const SelectedTab = clinicalDefaultTabs[props.tab];
-
-  console.log(props.tab);
 
   const tabButtonClasses = (selected: boolean) =>
     `capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap ${
@@ -153,7 +154,6 @@ export const PatientClinicalHistory = (props: {
           <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
           <SelectedTab {...tabProp} />
         </div>
-        <SymptomsTimeline />
       </div>
     </>
   );

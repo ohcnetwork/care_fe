@@ -1,8 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { Filter, Info, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { t } from "i18next";
+import { Info, Search } from "lucide-react";
+import { navigate } from "raviger";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +13,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -21,229 +30,137 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-// Types based on your schema
-interface Code {
-  code: string;
-  display: string;
-  system: string;
-}
+import useFilters from "@/hooks/useFilters";
 
-enum SymptomClinicalStatus {
-  ACTIVE = "active",
-  INACTIVE = "inactive",
-  RESOLVED = "resolved",
-}
+import query from "@/Utils/request/query";
+import {
+  SYMPTOM_CLINICAL_STATUS_STYLES,
+  SYMPTOM_VERIFICATION_STATUS_STYLES,
+  Symptom,
+} from "@/types/emr/symptom/symptom";
+import symptomApi from "@/types/emr/symptom/symptomApi";
 
-enum SymptomVerificationStatus {
-  CONFIRMED = "confirmed",
-  UNCONFIRMED = "unconfirmed",
-}
-
-enum SymptomSeverity {
-  MILD = "mild",
-  MODERATE = "moderate",
-  SEVERE = "severe",
-}
-
-interface Onset {
-  date?: string;
-  string?: string;
-}
-
-interface UserBase {
-  id: string;
-  name: string;
-}
-
-interface Symptom {
-  id: string;
-  code: Code;
-  clinical_status: SymptomClinicalStatus;
-  verification_status: SymptomVerificationStatus;
-  severity: SymptomSeverity;
-  onset?: Onset;
-  recorded_date?: string;
-  note?: string;
-  created_by: UserBase;
-  updated_by: UserBase;
-  category: string;
-  encounter: string;
-  created_date?: string;
-  updated_date?: string;
-}
-
-// Mock data for demonstration
-const mockSymptoms: Symptom[] = [
-  {
-    id: "1",
-    code: { code: "386661006", display: "Fever", system: "SNOMED-CT" },
-    clinical_status: SymptomClinicalStatus.ACTIVE,
-    verification_status: SymptomVerificationStatus.CONFIRMED,
-    severity: SymptomSeverity.MODERATE,
-    recorded_date: "2025-04-19T10:30:00Z",
-    created_date: "2025-04-19T10:30:00Z",
-    note: "Patient reported fever of 101°F",
-    created_by: { id: "user1", name: "Dr. Smith" },
-    updated_by: { id: "user1", name: "Dr. Smith" },
-    category: "General",
-    encounter: "enc123",
-  },
-  {
-    id: "2",
-    code: { code: "49727002", display: "Cough", system: "SNOMED-CT" },
-    clinical_status: SymptomClinicalStatus.ACTIVE,
-    verification_status: SymptomVerificationStatus.CONFIRMED,
-    severity: SymptomSeverity.MILD,
-    recorded_date: "2025-04-19T10:35:00Z",
-    created_date: "2025-04-19T10:35:00Z",
-    note: "Dry cough, worse at night",
-    created_by: { id: "user1", name: "Dr. Smith" },
-    updated_by: { id: "user1", name: "Dr. Smith" },
-    category: "Respiratory",
-    encounter: "enc123",
-  },
-  {
-    id: "3",
-    code: {
-      code: "267036007",
-      display: "Shortness of breath",
-      system: "SNOMED-CT",
-    },
-    clinical_status: SymptomClinicalStatus.ACTIVE,
-    verification_status: SymptomVerificationStatus.CONFIRMED,
-    severity: SymptomSeverity.MODERATE,
-    recorded_date: "2025-04-19T10:40:00Z",
-    created_date: "2025-04-19T10:40:00Z",
-    note: "Occurs with minimal exertion",
-    created_by: { id: "user1", name: "Dr. Smith" },
-    updated_by: { id: "user1", name: "Dr. Smith" },
-    category: "Respiratory",
-    encounter: "enc123",
-  },
-  {
-    id: "4",
-    code: { code: "25064002", display: "Headache", system: "SNOMED-CT" },
-    clinical_status: SymptomClinicalStatus.ACTIVE,
-    verification_status: SymptomVerificationStatus.CONFIRMED,
-    severity: SymptomSeverity.SEVERE,
-    recorded_date: "2025-04-15T14:20:00Z",
-    created_date: "2025-04-15T14:20:00Z",
-    note: "Frontal headache with photophobia",
-    created_by: { id: "user2", name: "Dr. Johnson" },
-    updated_by: { id: "user2", name: "Dr. Johnson" },
-    category: "Neurological",
-    encounter: "enc124",
-  },
-  {
-    id: "5",
-    code: { code: "422587007", display: "Nausea", system: "SNOMED-CT" },
-    clinical_status: SymptomClinicalStatus.RESOLVED,
-    verification_status: SymptomVerificationStatus.CONFIRMED,
-    severity: SymptomSeverity.MILD,
-    recorded_date: "2025-04-10T09:15:00Z",
-    created_date: "2025-04-10T09:15:00Z",
-    note: "Mild nausea in the morning",
-    created_by: { id: "user3", name: "Dr. Williams" },
-    updated_by: { id: "user3", name: "Dr. Williams" },
-    category: "Gastrointestinal",
-    encounter: "enc125",
-  },
-  // Adding symptoms from 2024 for demonstration
-  {
-    id: "6",
-    code: { code: "267036007", display: "Fatigue", system: "SNOMED-CT" },
-    clinical_status: SymptomClinicalStatus.ACTIVE,
-    verification_status: SymptomVerificationStatus.CONFIRMED,
-    severity: SymptomSeverity.MODERATE,
-    recorded_date: "2024-12-10T09:15:00Z",
-    created_date: "2024-12-10T09:15:00Z",
-    note: "General fatigue throughout the day",
-    created_by: { id: "user3", name: "Dr. Williams" },
-    updated_by: { id: "user3", name: "Dr. Williams" },
-    category: "General",
-    encounter: "enc126",
-  },
-  {
-    id: "1",
-    code: { code: "386661006", display: "Fever", system: "SNOMED-CT" },
-    clinical_status: SymptomClinicalStatus.ACTIVE,
-    verification_status: SymptomVerificationStatus.CONFIRMED,
-    severity: SymptomSeverity.MODERATE,
-    recorded_date: "2025-04-19T10:30:00Z",
-    created_date: "2024-12-10T09:15:00Z",
-    note: "Patient reported fever of 101°F",
-    created_by: { id: "user1", name: "Dr. Smith" },
-    updated_by: { id: "user1", name: "Dr. Smith" },
-    category: "General",
-    encounter: "enc123",
-  },
-];
-
-// Group symptoms by year and then by date
 type GroupedByYearAndDate = {
   [year: string]: {
     [date: string]: Symptom[];
   };
 };
-const getStatusColor = (status: SymptomClinicalStatus) => {
-  switch (status) {
-    case SymptomClinicalStatus.ACTIVE:
-      return "text-green-600";
-    case SymptomClinicalStatus.INACTIVE:
-      return "text-gray-600";
-    case SymptomClinicalStatus.RESOLVED:
-      return "text-blue-600";
-    default:
-      return "";
-  }
-};
-const SymptomTable = ({ symptoms }: { symptoms: Symptom[] }) => {
+
+const SymptomTable = ({
+  symptoms,
+  patientId,
+  facilityId,
+}: {
+  symptoms: Symptom[];
+  patientId: string;
+  facilityId: string;
+}) => {
   return (
     <div className="bg-gray-50 rounded-lg p-4">
       <div className="overflow-x-auto">
-        <Table className="w-full table-auto">
-          <TableHeader>
-            <TableRow className="divide-x">
-              <TableHead className="w-1/3">Symptom</TableHead>
-              <TableHead className="w-1/5">Status</TableHead>
-              <TableHead className="w-1/5">Verification</TableHead>
-              <TableHead className="w-1/5">Onset Date</TableHead>
-              <TableHead className="text-center w-[1%]"></TableHead>
+        <Table className="w-full border border-gray-200">
+          <TableHeader className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">
+            <TableRow className="rounded-md overflow-hidden divide-x bg-gray-100">
+              <TableHead className="first:rounded-l-md h-auto py-1 px-2  text-gray-600">
+                {t("symptom")}
+              </TableHead>
+              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
+                {t("severity")}
+              </TableHead>
+              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
+                {t("status")}
+              </TableHead>
+              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
+                {t("verification")}
+              </TableHead>
+              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
+                {t("note")}
+              </TableHead>
+              <TableHead className="h-auto  py-1 px-2  text-gray-600"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="space-y-2">
             {symptoms.map((symptom) => (
               <TableRow
                 key={symptom.id}
-                className="bg-white border border-gray-200 rounded-md shadow-sm divide-x [&>td:first-child]:rounded-l-md [&>td:last-child]:rounded-r-md"
+                className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200"
               >
                 <TableCell className="truncate whitespace-nowrap overflow-hidden font-bold">
                   {symptom.code.display}
                 </TableCell>
-                <TableCell
-                  className={`${getStatusColor(symptom.clinical_status)} whitespace-nowrap`}
-                >
-                  {symptom.clinical_status === SymptomClinicalStatus.ACTIVE
-                    ? "Active"
-                    : symptom.clinical_status === SymptomClinicalStatus.INACTIVE
-                      ? "Inactive"
-                      : "Resolved"}
+                <TableCell className="whitespace-nowrap text-center">
+                  <Badge
+                    variant="outline"
+                    className={`whitespace-nowrap ${
+                      SYMPTOM_CLINICAL_STATUS_STYLES[symptom.clinical_status]
+                    }`}
+                  >
+                    {t(symptom.clinical_status)}
+                  </Badge>
                 </TableCell>
-                <TableCell className="text-green-600 whitespace-nowrap">
-                  {symptom.verification_status ===
-                  SymptomVerificationStatus.CONFIRMED
-                    ? "Confirmed"
-                    : "Unconfirmed"}
+                <TableCell className="whitespace-nowrap text-center">
+                  <Badge
+                    variant="outline"
+                    className={`whitespace-nowrap capitalize ${
+                      SYMPTOM_VERIFICATION_STATUS_STYLES[
+                        symptom.verification_status
+                      ]
+                    }`}
+                  >
+                    {t(symptom.verification_status)}
+                  </Badge>
                 </TableCell>
-                <TableCell className="truncate whitespace-nowrap overflow-hidden">
-                  {symptom.onset?.date
-                    ? format(parseISO(symptom.onset.date), "dd MMM yyyy")
-                    : "Not specified"}
+                <TableCell className="truncate whitespace-nowrap overflow-hidden text-center">
+                  {symptom.onset?.onset_datetime
+                    ? format(
+                        parseISO(symptom.onset.onset_datetime),
+                        "dd MMM yyyy",
+                      )
+                    : "-"}
                 </TableCell>
                 <TableCell className="text-center">
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <Info size={18} />
-                  </button>
+                  {symptom.note ? (
+                    <div className="flex justify-center items-center">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs shrink-0"
+                          >
+                            {t("see_note")}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-4">
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                            {symptom.note}
+                          </p>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  ) : (
+                    "-"
+                  )}
+                </TableCell>
+                <TableCell className="text-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="link">
+                        <Info size={18} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          navigate(
+                            `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                          )
+                        }
+                      >
+                        {t("view_encounter")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -254,63 +171,55 @@ const SymptomTable = ({ symptoms }: { symptoms: Symptom[] }) => {
   );
 };
 
-export default function SymptomsTimeline() {
-  const [symptoms, setSymptoms] = useState<Symptom[]>([]);
-  const [filteredSymptoms, setFilteredSymptoms] = useState<Symptom[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+function LoadingState() {
+  return (
+    <div className="max-w-5xl mx-auto py-8 px-4">
+      <Skeleton className="h-6 w-16 mb-4" />
+      <div className="space-y-8">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-6 rounded-full" />
+              <Skeleton className="h-6 w-32" />
+            </div>
+            <Skeleton className="h-40 w-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-  // const { data: symptoms, isLoading: symptomsLoading } = useQuery({
-  //   queryKey: ["symptoms", patientId, encounterId],
-  //   queryFn: query.paginated(symptomApi.listSymptoms, {
-  //     pathParams: { patientId },
-  //     pageSize: 100,
-  //   }),
-  //   enabled: !!patientId && !!encounterId,
-  // });
-
-  useEffect(() => {
-    const fetchSymptoms = async () => {
-      try {
-        // In a real app, you would fetch from your API
-        // const response = await fetch('/api/symptoms');
-        // const data = await response.json();
-
-        // Using mock data for demonstration
-        setTimeout(() => {
-          setSymptoms(mockSymptoms);
-          setFilteredSymptoms(mockSymptoms);
-          setLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error("Error fetching symptoms:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchSymptoms();
-  }, []);
-
-  useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilteredSymptoms(symptoms);
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    const filtered = symptoms.filter(
-      (symptom) =>
-        symptom.code.display.toLowerCase().includes(query) ||
-        symptom.category.toLowerCase().includes(query) ||
-        symptom.note?.toLowerCase().includes(query) ||
-        symptom.created_by.name.toLowerCase().includes(query),
-    );
-    setFilteredSymptoms(filtered);
-  }, [searchQuery, symptoms]);
+export default function SymptomsTimeline({
+  patientId,
+  facilityId,
+}: {
+  patientId: string;
+  facilityId: string;
+}) {
+  console.log(facilityId);
+  const { qParams, updateQuery } = useFilters({
+    disableCache: true,
+  });
+  const { data, isLoading } = useQuery({
+    queryKey: ["symptoms", patientId, qParams],
+    queryFn: query.paginated(symptomApi.listSymptoms, {
+      pathParams: { patientId },
+      pageSize: 100,
+      queryParams: {
+        name: qParams.name,
+        exclude_verification_status: qParams.exclude_entered_in_error
+          ? "entered_in_error"
+          : undefined,
+      },
+    }),
+    enabled: !!patientId,
+  });
 
   const groupSymptomsByYearAndDate = (
-    symptoms: Symptom[],
+    symptoms: Symptom[] | undefined,
   ): GroupedByYearAndDate => {
+    if (!symptoms) return {};
     return symptoms.reduce((groups, symptom) => {
       if (!symptom.created_date) return groups;
 
@@ -331,49 +240,7 @@ export default function SymptomsTimeline() {
     }, {} as GroupedByYearAndDate);
   };
 
-  const getStatusColor = (status: SymptomClinicalStatus) => {
-    switch (status) {
-      case SymptomClinicalStatus.ACTIVE:
-        return "text-green-600";
-      case SymptomClinicalStatus.INACTIVE:
-        return "text-gray-600";
-      case SymptomClinicalStatus.RESOLVED:
-        return "text-blue-600";
-      default:
-        return "";
-    }
-  };
-  // fix it to only content
-  if (loading) {
-    return (
-      <div className="max-w-5xl mx-auto py-8 px-4">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="bg-sky-100 p-2 rounded-md">
-            <Skeleton className="size-6" />
-          </div>
-          <Skeleton className="h-8 w-40" />
-        </div>
-        <div className="flex justify-between mb-6">
-          <Skeleton className="h-10 w-full max-w-md" />
-          <Skeleton className="h-10 w-24" />
-        </div>
-        <Skeleton className="h-6 w-16 mb-4" />
-        <div className="space-y-8">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Skeleton className="size-6 rounded-full" />
-                <Skeleton className="h-6 w-32" />
-              </div>
-              <Skeleton className="h-40 w-full" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  const groupedSymptoms = groupSymptomsByYearAndDate(filteredSymptoms);
+  const groupedSymptoms = groupSymptomsByYearAndDate(data?.results);
   const sortedYears = Object.keys(groupedSymptoms).sort(
     (a, b) => Number.parseInt(b) - Number.parseInt(a),
   );
@@ -382,29 +249,7 @@ export default function SymptomsTimeline() {
     <div className="max-w-5xl mx-auto py-8 px-4">
       <div className="flex items-center gap-3 mb-6">
         <div className="bg-sky-100 p-2 rounded-md">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-sky-500"
-          >
-            <path d="M8 2v4"></path>
-            <path d="M16 2v4"></path>
-            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-            <path d="M3 10h18"></path>
-            <path d="M8 14h.01"></path>
-            <path d="M12 14h.01"></path>
-            <path d="M16 14h.01"></path>
-            <path d="M8 18h.01"></path>
-            <path d="M12 18h.01"></path>
-            <path d="M16 18h.01"></path>
-          </svg>
+          <img src="/images/symptoms-icon.svg" alt="symptoms-icon" />
         </div>
         <h1 className="text-2xl font-bold">Past Symptoms</h1>
       </div>
@@ -418,17 +263,26 @@ export default function SymptomsTimeline() {
             type="search"
             placeholder="Search by symptom"
             className="pl-10 h-10 border-gray-300"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={qParams.name}
+            onChange={(e) => updateQuery({ name: e.target.value })}
           />
         </div>
-        <Button variant="outline" className="flex items-center gap-2 h-10">
-          <Filter className="size-4" />
-          Filter
-        </Button>
+        <div className="flex gap-2 items-center">
+          <Switch
+            checked={qParams.exclude_entered_in_error ?? false}
+            onCheckedChange={(val) =>
+              updateQuery({ exclude_entered_in_error: val })
+            }
+            id="exclude-entered-in-error"
+          />
+          <Label htmlFor="exclude-entered-in-error">
+            Exclude Entered-in-error
+          </Label>
+        </div>
       </div>
-
-      {sortedYears.length === 0 ? (
+      {isLoading ? (
+        <LoadingState />
+      ) : sortedYears.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center">
           <p className="text-gray-500">No symptoms found</p>
         </div>
@@ -437,7 +291,7 @@ export default function SymptomsTimeline() {
           <div className="absolute left-[11px] top-0 bottom-0 w-[1px] bg-gray-300"></div>
 
           <div className="space-y-8">
-            {sortedYears.map((year, yearIndex) => {
+            {sortedYears.map((year) => {
               const datesInYear = groupedSymptoms[year];
               const sortedDates = Object.keys(datesInYear).sort(
                 (a, b) => new Date(b).getTime() - new Date(a).getTime(),
@@ -446,7 +300,7 @@ export default function SymptomsTimeline() {
               return (
                 <div key={year} className="relative">
                   <div className="flex items-center mb-6">
-                    <div className="bg-white z-10 text-lg text-indigo-700 font-medium border-t-2 border-b-2 border-gray px-3 ">
+                    <div className="bg-gray-50 z-10 text-lg text-indigo-700 font-medium border-t-2 border-b-2 border-gray px-3">
                       {year}
                     </div>
                   </div>
@@ -454,7 +308,6 @@ export default function SymptomsTimeline() {
                   <div className="space-y-8 ml-[12px]">
                     {sortedDates.map((date) => (
                       <div key={date} className="relative">
-                        {/* Date marker */}
                         <div className="flex items-center mb-3">
                           <div className="absolute left-[-8px] z-10">
                             <div className="size-4 rounded-full bg-sky-500 border border-black" />
@@ -464,9 +317,12 @@ export default function SymptomsTimeline() {
                           </div>
                         </div>
 
-                        {/* Symptoms table for this date */}
                         <div className="ml-3">
-                          <SymptomTable symptoms={datesInYear[date]} />
+                          <SymptomTable
+                            symptoms={datesInYear[date]}
+                            patientId={patientId}
+                            facilityId={facilityId}
+                          />
                         </div>
                       </div>
                     ))}

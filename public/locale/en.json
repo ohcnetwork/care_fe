@@ -705,6 +705,7 @@
   "click_manage_sub_locations_mobile": "Click <PenLine/>to edit and <ArrowIcon/> to manage sub-locations.",
   "click_on": "Click on",
   "click_on_map_to_select_location": "Click on the map to select the location",
+  "clinical_history": "Clinical History",
   "clone": "Clone",
   "clone_questionnaire": "Clone Questionnaire",
   "clone_questionnaire_description": "Create a copy of this questionnaire with a new slug and select organizations.",
