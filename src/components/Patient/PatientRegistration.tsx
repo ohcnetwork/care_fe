@@ -705,9 +705,9 @@ export default function PatientRegistration(
                                   : ""
                               }
                               onChange={(e) => {
-                                const value =
-                                  dayjs(e.target.value).toISOString() ||
-                                  undefined;
+                                const value = e.target.value
+                                  ? dayjs(e.target.value).toISOString()
+                                  : undefined;
                                 field.onChange(value);
                                 setIsDeceased(!!value);
                               }}

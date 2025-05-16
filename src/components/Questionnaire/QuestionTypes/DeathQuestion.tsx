@@ -50,7 +50,10 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
           : undefined
       }
       max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-      onChange={(e) => handleUpdate(dayjs(e.target.value).toISOString() || "")}
+      onChange={(e) => {
+        const value = e.target.value ? dayjs(e.target.value).toISOString() : "";
+        handleUpdate(value);
+      }}
       disabled={props.disabled}
     />
   );
