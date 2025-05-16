@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { t } from "i18next";
-import { Info, Search } from "lucide-react";
+import { Info, Search, X } from "lucide-react";
 import { navigate } from "raviger";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,11 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -29,9 +25,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { Avatar } from "@/components/Common/Avatar";
+
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import {
   DIAGNOSIS_CLINICAL_STATUS_STYLES,
   DIAGNOSIS_VERIFICATION_STATUS_STYLES,
@@ -47,6 +46,116 @@ type GroupedByYearAndDate = {
   };
 };
 
+const DiagnosisRow = ({
+  diagnosis,
+  patientId,
+  facilityId,
+  t,
+}: {
+  diagnosis: Diagnosis;
+  patientId: string;
+  facilityId: string;
+  t: (key: string) => string;
+}) => {
+  const [showNote, setShowNote] = useState(false);
+
+  return (
+    <>
+      <TableRow className="bg-white hover:bg-gray-50 divide-x divide-gray-200">
+        <TableCell className="truncate px-4 py-4 w-[30%] max-w-[300px] font-bold text-left">
+          {diagnosis.code.display}
+        </TableCell>
+        <TableCell className="px-4 py-4 w-[14%] text-center">
+          <Badge
+            variant="outline"
+            className={`whitespace-nowrap ${DIAGNOSIS_CLINICAL_STATUS_STYLES[diagnosis.clinical_status]}`}
+          >
+            {t(diagnosis.clinical_status)}
+          </Badge>
+        </TableCell>
+        <TableCell className="px-4 py-4 w-[14%] text-center">
+          <Badge
+            variant="outline"
+            className={`whitespace-nowrap capitalize ${DIAGNOSIS_VERIFICATION_STATUS_STYLES[diagnosis.verification_status]}`}
+          >
+            {t(diagnosis.verification_status)}
+          </Badge>
+        </TableCell>
+        <TableCell className="truncate px-4 py-4 w-[14%] text-center">
+          {diagnosis.onset?.onset_datetime
+            ? format(parseISO(diagnosis.onset.onset_datetime), "dd MMM yyyy")
+            : "-"}
+        </TableCell>
+
+        <TableCell className="px-4 py-4 w-[14%] text-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="link">
+                <Info size={18} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <div className="px-3 py-2 text-sm text-gray-500 border-b">
+                <div className="font-medium text-gray-700">
+                  {t("reported_by")}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Avatar
+                    name={diagnosis.created_by.username}
+                    className="size-4"
+                    imageUrl={diagnosis.created_by.profile_picture_url}
+                  />
+                  <span className="text-sm">
+                    {formatName(diagnosis.created_by)}
+                  </span>
+                </div>
+              </div>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate(
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                      : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                  )
+                }
+              >
+                {t("view_encounter")}
+              </DropdownMenuItem>
+              {diagnosis.note && (
+                <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
+                  {showNote ? t("hide_note") : t("see_note")}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+
+      {showNote && diagnosis.note && (
+        <tr>
+          <td
+            colSpan={6}
+            className="border border-gray-200 border-t-0 rounded-b-lg p-4 bg-gray-50 relative"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-2 right-2 h-6 w-6 p-0"
+              onClick={() => setShowNote(false)}
+            >
+              <X size={16} />
+              <span className="sr-only">Close</span>
+            </Button>
+            <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8">
+              {diagnosis.note}
+            </p>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+};
+
 const DiagnosisTable = ({
   diagnosis,
   patientId,
@@ -56,119 +165,48 @@ const DiagnosisTable = ({
   patientId: string;
   facilityId: string;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-gray-50 rounded-lg p-4">
       <div className="overflow-x-auto">
-        <Table className="w-full border border-gray-200 min-w-[650px]">
-          <TableHeader className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">
-            <TableRow className="rounded-md overflow-hidden divide-x bg-gray-100">
-              <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600 w-[250px]">
-                {t("diagnosis")}
-              </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2 text-gray-600">
-                {t("severity")}
-              </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2 text-gray-600">
-                {t("status")}
-              </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2 text-gray-600">
-                {t("onset")}
-              </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2 text-gray-600">
-                {t("note")}
-              </TableHead>
-              <TableHead className="h-auto py-1 px-2 text-gray-600"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="space-y-2">
-            {diagnosis.map((diagnosis) => (
-              <TableRow
-                key={diagnosis.id}
-                className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200"
-              >
-                <TableCell className="max-w-[250px] truncate whitespace-nowrap overflow-hidden font-bold">
-                  <div className="truncate" title={diagnosis.code.display}>
-                    {diagnosis.code.display}
-                  </div>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-center">
-                  <Badge
-                    variant="outline"
-                    className={`whitespace-nowrap ${DIAGNOSIS_CLINICAL_STATUS_STYLES[diagnosis.clinical_status]}`}
-                  >
-                    {t(diagnosis.clinical_status)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-center">
-                  <Badge
-                    variant="outline"
-                    className={`whitespace-nowrap capitalize ${
-                      DIAGNOSIS_VERIFICATION_STATUS_STYLES[
-                        diagnosis.verification_status
-                      ]
-                    }`}
-                  >
-                    {t(diagnosis.verification_status)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="truncate whitespace-nowrap overflow-hidden text-center">
-                  {diagnosis.onset?.onset_datetime
-                    ? format(
-                        parseISO(diagnosis.onset.onset_datetime),
-                        "dd MMM yyyy",
-                      )
-                    : "-"}
-                </TableCell>
-                <TableCell className="text-center">
-                  {diagnosis.note ? (
-                    <div className="flex justify-center items-center">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 text-xs shrink-0"
-                          >
-                            {t("see_note")}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80 p-4">
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                            {diagnosis.note}
-                          </p>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  ) : (
-                    "-"
-                  )}
-                </TableCell>
-                <TableCell className="text-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="link">
-                        <Info size={18} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          navigate(
-                            facilityId
-                              ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
-                              : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                          )
-                        }
-                      >
-                        {t("view_encounter")}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+        <div className="border border-gray-200 rounded-lg mb-3 overflow-hidden">
+          <Table className="w-full">
+            <TableHeader className="bg-gray-100 divide-x divide-gray-200">
+              <TableRow className="divide-x divide-gray-200">
+                <TableHead
+                  className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate"
+                  style={{ minWidth: "150px" }}
+                >
+                  {t("diagnosis")}
+                </TableHead>
+                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+                  {t("severity")}
+                </TableHead>
+                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+                  {t("status")}
+                </TableHead>
+                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+                  {t("onset")}
+                </TableHead>
+
+                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600"></TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+
+            <TableBody>
+              {diagnosis.map((diagnosis) => (
+                <DiagnosisRow
+                  key={diagnosis.id}
+                  diagnosis={diagnosis}
+                  patientId={patientId}
+                  facilityId={facilityId}
+                  t={t}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
