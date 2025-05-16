@@ -136,7 +136,7 @@ export const PatientClinicalHistory = (props: {
           </div>
         </div>
         <div className="mt-4">
-          <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
+          <PageHeadTitle title={t(`CLINICAL_HISTORY_TAB_${props.tab}`)} />
           <SelectedTab {...tabProp} />
         </div>
       </div>
