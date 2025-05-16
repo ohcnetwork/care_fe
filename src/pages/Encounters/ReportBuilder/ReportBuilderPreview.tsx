@@ -18,7 +18,6 @@ import {
   DateFormats,
   FONT_OPTIONS,
   FONT_SIZES,
-  HeaderAlignment,
   HeaderRow,
   SectionConfig,
 } from "@/types/reportTemplate/reportTemplate";
@@ -186,35 +185,21 @@ export default function ReportBuilderPreview({
 }
 
 function HeaderRowPreview({ row }: { row: HeaderRow }) {
-  const rowSizeRatio = row.size_ratio || [1];
-  const convertedSizePercent = rowSizeRatio.map((size) => size);
-
-  const elementsByAlignment = row.columns.reduce(
-    (acc, element, index) => {
-      acc[index] = {
-        align: element.align || "left",
-        size: convertedSizePercent[index],
-        elements: [...(acc[index]?.elements || []), element],
-      };
-      return acc;
-    },
-    {} as Record<
-      string,
-      {
-        align: HeaderAlignment;
-        size: number;
-        elements: HeaderRow["columns"];
-      }
-    >,
-  );
+  const rowSizeRatio = row.size_ratio || Array(row.columns.length).fill(1);
+  const totalSizeRatio = rowSizeRatio.reduce((acc, curr) => acc + curr, 0);
 
   return (
     <div className="flex flex-row w-full min-w-0">
-      {Object.entries(elementsByAlignment).map(([key, item]) => (
-        <div key={key} className="flex min-w-0" style={{ flexGrow: item.size }}>
-          {item.elements.map((element, index) => (
-            <HeaderElementPreview key={index} element={element} />
-          ))}
+      {row.columns.map((column, index) => (
+        <div
+          key={index}
+          className="flex flex-wrap min-w-0 basis-0"
+          style={{
+            flexGrow: rowSizeRatio[index],
+            width: `${(rowSizeRatio[index] / totalSizeRatio) * 100}%`,
+          }}
+        >
+          <HeaderElementPreview element={column} />
         </div>
       ))}
     </div>
@@ -241,7 +226,7 @@ function HeaderElementPreview({
             fontWeight: element.weight,
           }}
         >
-          <span className="truncate">{element.text}</span>
+          <span>{element.text}</span>
         </span>
       );
 

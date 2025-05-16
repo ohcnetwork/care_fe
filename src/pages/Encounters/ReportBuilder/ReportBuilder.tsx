@@ -42,7 +42,7 @@ import LayoutBuilder from "@/pages/Encounters/ReportBuilder/LayoutBuilder";
 import SectionBuilder from "@/pages/Encounters/ReportBuilder/SectionBuilder";
 import {
   ReportTemplateFormData,
-  reportTemplateSchema,
+  useReportTemplateSchema,
 } from "@/pages/Encounters/ReportBuilder/schema";
 import { REPORT_TEMPLATE_TYPE } from "@/types/reportTemplate/reportTemplate";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
@@ -246,6 +246,7 @@ export default function ReportBuilder({
   const [activeTab, setActiveTab] = useState("layout");
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const reportTemplateSchema = useReportTemplateSchema();
 
   const { data: templateSchema, isLoading: isTemplateLoading } = useQuery({
     queryKey: ["report-template", reportTemplateId],

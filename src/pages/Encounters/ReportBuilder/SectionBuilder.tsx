@@ -12,7 +12,13 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   FormControl,
   FormField,
@@ -42,28 +48,28 @@ interface SectionBuilderProps {
 }
 
 function SectionFieldsAndColumns({
-  control,
+  form,
   index,
   availableSections,
 }: {
-  control: Control<ReportTemplateFormData>;
+  form: UseFormReturn<ReportTemplateFormData>;
   index: number;
   availableSections?: Record<string, string[]>;
 }) {
   const [selectedField, setSelectedField] = useState<string>("");
   const { t } = useTranslation();
   const isEnabled = useWatch({
-    control,
+    control: form.control,
     name: `config.sections.${index}.enabled`,
   });
 
   const isTable = useWatch({
-    control,
+    control: form.control,
     name: `config.sections.${index}.is_table`,
   });
 
   const section = useWatch({
-    control,
+    control: form.control,
     name: `config.sections.${index}.source`,
   });
   const availableFieldsAndColumns = availableSections?.[section];
@@ -72,71 +78,85 @@ function SectionFieldsAndColumns({
     <div className="space-y-4">
       {isTable ? (
         <FormField
-          control={control}
+          control={form.control}
           name={`config.sections.${index}.options.columns`}
           render={({ field: { value = [], onChange } }) => {
             const columns = Array.isArray(value) ? value : [];
             return (
-              <div>
-                <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
-                  <Select
-                    value={selectedField}
-                    onValueChange={setSelectedField}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("select_column")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableFieldsAndColumns?.map((field) => (
-                        <SelectItem key={field} value={field}>
-                          {t(field)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full sm:w-auto"
-                    disabled={!selectedField}
-                    onClick={() => onChange([...columns, selectedField])}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("add_column")}
-                  </Button>
-                </div>
-
-                {columns.map((column, columnIndex) => (
-                  <div
-                    key={columnIndex}
-                    className="flex space-x-2 mb-2 border rounded-md p-2 items-center justify-between"
-                  >
-                    <span>{t(column)}</span>
-                    {isEnabled && (
-                      <Button
-                        variant="link"
-                        type="button"
-                        size="icon"
-                        disabled={!isEnabled}
-                        onClick={() => {
-                          const newColumns = [...columns];
-                          newColumns.splice(columnIndex, 1);
-                          onChange(newColumns);
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+              <FormItem>
+                <FormControl className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
+                  <>
+                    <Select
+                      value={selectedField}
+                      onValueChange={setSelectedField}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("select_column")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableFieldsAndColumns?.map((field) => (
+                          <SelectItem key={field} value={field}>
+                            {t(field)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                      disabled={!selectedField}
+                      onClick={() => onChange([...columns, selectedField])}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {t("add_column")}
+                    </Button>
+                    {columns.length > 0 ? (
+                      columns.map((column, columnIndex) => (
+                        <div
+                          key={columnIndex}
+                          className="flex space-x-2 mb-2 border rounded-md p-2 items-center justify-between"
+                        >
+                          <span>{t(column)}</span>
+                          {isEnabled && (
+                            <Button
+                              variant="link"
+                              type="button"
+                              size="icon"
+                              disabled={!isEnabled}
+                              onClick={() => {
+                                const newColumns = [...columns];
+                                newColumns.splice(columnIndex, 1);
+                                onChange(newColumns);
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-red-500 text-sm mt-2">
+                        {t("no_columns")}{" "}
+                        {t("rows_or_columns_required_for_table_sections")}
+                      </p>
                     )}
-                  </div>
-                ))}
-              </div>
+                  </>
+                </FormControl>
+                <FormMessage className="mt-2">
+                  {
+                    form.formState.errors?.config?.sections?.[index]?.options
+                      ?.columns?.message
+                  }
+                </FormMessage>
+              </FormItem>
             );
           }}
         />
       ) : (
         <FormField
-          control={control}
+          control={form.control}
           name={`config.sections.${index}.options.fields`}
           render={({ field: { value = [], onChange } }) => {
             const fields = (Array.isArray(value) ? value : []).map((field) =>
@@ -146,65 +166,79 @@ function SectionFieldsAndColumns({
             ) as Array<{ label: string; value: string }>;
 
             return (
-              <div>
-                <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
-                  <Select
-                    value={selectedField}
-                    onValueChange={setSelectedField}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("select_field")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableFieldsAndColumns?.map((field) => (
-                        <SelectItem key={field} value={field}>
-                          {t(field)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full sm:w-auto"
-                    disabled={!selectedField}
-                    onClick={() =>
-                      onChange([
-                        ...fields,
-                        { label: selectedField, value: selectedField },
-                      ])
-                    }
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("add_field")}
-                  </Button>
-                </div>
-
-                {fields.map((fieldValue, fieldIndex) => (
-                  <div
-                    key={fieldIndex}
-                    className="flex space-x-2 mb-2 border rounded-md p-2 items-center justify-between"
-                  >
-                    <span>{t(fieldValue.label)}</span>
-                    {isEnabled && (
-                      <Button
-                        variant="link"
-                        type="button"
-                        size="icon"
-                        disabled={!isEnabled}
-                        onClick={() => {
-                          const newFields = [...fields];
-                          newFields.splice(fieldIndex, 1);
-                          onChange(newFields);
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+              <FormItem>
+                <FormControl className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
+                  <>
+                    <Select
+                      value={selectedField}
+                      onValueChange={setSelectedField}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("select_field")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableFieldsAndColumns?.map((field) => (
+                          <SelectItem key={field} value={field}>
+                            {t(field)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                      disabled={!selectedField}
+                      onClick={() =>
+                        onChange([
+                          ...fields,
+                          { label: selectedField, value: selectedField },
+                        ])
+                      }
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {t("add_field")}
+                    </Button>
+                    {fields.length > 0 ? (
+                      fields.map((fieldValue, fieldIndex) => (
+                        <div
+                          key={fieldIndex}
+                          className="flex space-x-2 mb-2 border rounded-md p-2 items-center justify-between"
+                        >
+                          <span>{t(fieldValue.label)}</span>
+                          {isEnabled && (
+                            <Button
+                              variant="link"
+                              type="button"
+                              size="icon"
+                              disabled={!isEnabled}
+                              onClick={() => {
+                                const newFields = [...fields];
+                                newFields.splice(fieldIndex, 1);
+                                onChange(newFields);
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-red-500 text-sm mt-2">
+                        {t("no_fields")}{" "}
+                        {t("text_or_fields_required_for_non_table_sections")}
+                      </p>
                     )}
-                  </div>
-                ))}
-              </div>
+                  </>
+                </FormControl>
+                <FormMessage className="mt-2">
+                  {
+                    form.formState.errors?.config?.sections?.[index]?.options
+                      ?.fields?.message
+                  }
+                </FormMessage>
+              </FormItem>
             );
           }}
         />
@@ -215,13 +249,11 @@ function SectionFieldsAndColumns({
 
 function SectionBasicSettings({
   form,
-  control,
   index,
   availableSections,
   dataSource,
 }: {
   form: UseFormReturn<ReportTemplateFormData>;
-  control: Control<ReportTemplateFormData>;
   index: number;
   availableSections?: Record<string, string[]>;
   dataSource?: string;
@@ -229,12 +261,12 @@ function SectionBasicSettings({
   const [selectedDataSource, setSelectedDataSource] = useState<string>("");
   const { t } = useTranslation();
   const isEnabled = useWatch({
-    control,
+    control: form.control,
     name: `config.sections.${index}.enabled`,
   });
 
   const isTable = useWatch({
-    control,
+    control: form.control,
     name: `config.sections.${index}.is_table`,
   });
 
@@ -257,11 +289,11 @@ function SectionBasicSettings({
   return (
     <div className="grid md:grid-cols-2 gap-4 items-center">
       <FormField
-        control={control}
+        control={form.control}
         name={`config.sections.${index}.source`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{t("data_source")}</FormLabel>
+            <FormLabel aria-required>{t("data_source")}</FormLabel>
             <Select
               value={selectedDataSource}
               onValueChange={(value) => handleDataSourceChange(value, field)}
@@ -286,7 +318,7 @@ function SectionBasicSettings({
       />
 
       <FormField
-        control={control}
+        control={form.control}
         name={`config.sections.${index}.options.title`}
         render={({ field }) => (
           <FormItem>
@@ -305,7 +337,7 @@ function SectionBasicSettings({
       />
 
       <FormField
-        control={control}
+        control={form.control}
         name={`config.sections.${index}.is_table`}
         render={({ field }) => (
           <FormItem className="flex items-center justify-between">
@@ -323,21 +355,16 @@ function SectionBasicSettings({
       />
 
       <FormField
-        control={control}
-        name={`config.sections.${index}`}
+        control={form.control}
+        name={`config.sections.${index}.options.style`}
         render={({ field }) => {
           return (
             <FormItem>
               <FormLabel>{t("display_style")}</FormLabel>
               <Select
                 disabled={!isEnabled || isTable}
-                value={field.value?.options?.style || "list"}
-                onValueChange={(value) =>
-                  field.onChange({
-                    ...field.value,
-                    options: { ...field.value.options, style: value },
-                  })
-                }
+                value={field.value || "list"}
+                onValueChange={(value) => field.onChange(value)}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -472,7 +499,6 @@ function SectionItem({
             <TabsContent value="basic" className="space-y-4 mt-4">
               <SectionBasicSettings
                 form={form}
-                control={control}
                 index={index}
                 availableSections={availableSections}
                 dataSource={dataSource}
@@ -482,7 +508,7 @@ function SectionItem({
             {dataSource && (
               <TabsContent value="fields" className="space-y-4 mt-4">
                 <SectionFieldsAndColumns
-                  control={control}
+                  form={form}
                   index={index}
                   availableSections={availableSections}
                 />
@@ -558,15 +584,6 @@ export default function SectionBuilder({ form }: SectionBuilderProps) {
             {t("sections_description")}
           </p>
         </div>
-        <Button
-          type="button"
-          onClick={addSection}
-          size="sm"
-          className="w-full sm:w-auto"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          {t("add_section")}
-        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {fields.map((field, index) => (
@@ -590,6 +607,12 @@ export default function SectionBuilder({ form }: SectionBuilderProps) {
           </div>
         )}
       </CardContent>
+      <CardFooter>
+        <Button type="button" onClick={addSection} size="sm" className="w-full">
+          <Plus className="h-4 w-4 mr-2" />
+          {t("add_section")}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
