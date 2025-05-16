@@ -49,7 +49,7 @@ export const PatientHome = (props: {
     hasPermission,
   );
 
-  const { canCreateAppointment } = getPermissions(
+  const { canCreateAppointment, canViewClinicalData } = getPermissions(
     hasPermission,
     patientData?.permissions ?? [],
   );
@@ -80,18 +80,20 @@ export const PatientHome = (props: {
               </Link>
             </Button>
           )}
-          <Button
-            variant="primary"
-            onClick={() =>
-              navigate(
-                facilityId
-                  ? `/facility/${facilityId}/patient/${id}/clinical_history/overview`
-                  : `/organization/organizationId/patient/${id}/clinical_history/overview`,
-              )
-            }
-          >
-            {t("clinical_history")}
-          </Button>
+          {canViewClinicalData && (
+            <Button
+              variant="primary"
+              onClick={() =>
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${id}/clinical_history/overview`
+                    : `/organization/organizationId/patient/${id}/clinical_history/overview`,
+                )
+              }
+            >
+              {t("clinical_history")}
+            </Button>
+          )}
         </div>
       }
     >
