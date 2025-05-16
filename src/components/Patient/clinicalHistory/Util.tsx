@@ -1,3 +1,5 @@
+import { format, parseISO } from "date-fns";
+
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function TimelineLoading() {
@@ -17,4 +19,37 @@ export function TimelineLoading() {
       </div>
     </div>
   );
+}
+
+export type GroupedByYearAndDate<T> = {
+  [year: string]: {
+    [date: string]: T[];
+  };
+};
+
+export function groupByYearAndDate<T>(
+  items: T[] | undefined,
+  getDate: (item: T) => string | undefined,
+): GroupedByYearAndDate<T> {
+  if (!items) return {};
+
+  return items.reduce((groups, item) => {
+    const dateString = getDate(item);
+    if (!dateString) return groups;
+
+    const date = parseISO(dateString);
+    const year = format(date, "yyyy");
+    const fullDate = format(date, "yyyy-MM-dd");
+
+    if (!groups[year]) {
+      groups[year] = {};
+    }
+
+    if (!groups[year][fullDate]) {
+      groups[year][fullDate] = [];
+    }
+
+    groups[year][fullDate].push(item);
+    return groups;
+  }, {} as GroupedByYearAndDate<T>);
 }

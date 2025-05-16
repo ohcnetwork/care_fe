@@ -39,13 +39,7 @@ import {
 } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
-import { TimelineLoading } from "./Util";
-
-type GroupedByYearAndDate = {
-  [year: string]: {
-    [date: string]: Symptom[];
-  };
-};
+import { TimelineLoading, groupByYearAndDate } from "./Util";
 
 const SymptomRow = ({
   symptom,
@@ -231,31 +225,10 @@ export default function SymptomsTimeline({
     enabled: !!patientId,
   });
 
-  const groupSymptomsByYearAndDate = (
-    symptoms: Symptom[] | undefined,
-  ): GroupedByYearAndDate => {
-    if (!symptoms) return {};
-    return symptoms.reduce((groups, symptom) => {
-      if (!symptom.created_date) return groups;
-
-      const date = parseISO(symptom.created_date);
-      const year = format(date, "yyyy");
-      const fullDate = format(date, "yyyy-MM-dd");
-
-      if (!groups[year]) {
-        groups[year] = {};
-      }
-
-      if (!groups[year][fullDate]) {
-        groups[year][fullDate] = [];
-      }
-
-      groups[year][fullDate].push(symptom);
-      return groups;
-    }, {} as GroupedByYearAndDate);
-  };
-
-  const groupedSymptoms = groupSymptomsByYearAndDate(data?.results);
+  const groupedSymptoms = groupByYearAndDate(
+    data?.results,
+    (s) => s.created_date,
+  );
   const sortedYears = Object.keys(groupedSymptoms).sort(
     (a, b) => Number.parseInt(b) - Number.parseInt(a),
   );

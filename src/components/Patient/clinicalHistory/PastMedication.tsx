@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { Info, Search, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -38,13 +38,7 @@ import {
 } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
-import { TimelineLoading } from "./Util";
-
-type GroupedByYearAndDate = {
-  [year: string]: {
-    [date: string]: MedicationRequestRead[];
-  };
-};
+import { TimelineLoading, groupByYearAndDate } from "./Util";
 
 const MedicineRow = ({
   medicine,
@@ -246,32 +240,11 @@ export default function MedicationTimeline({
     enabled: !!patientId,
   });
 
-  const groupSymptomsByYearAndDate = (
-    medicines: MedicationRequestRead[] | undefined,
-  ): GroupedByYearAndDate => {
-    if (!medicines) return {};
-    return medicines.reduce((groups, medicines) => {
-      if (!medicines.created_date) return groups;
-
-      const date = parseISO(medicines.created_date);
-      const year = format(date, "yyyy");
-      const fullDate = format(date, "yyyy-MM-dd");
-
-      if (!groups[year]) {
-        groups[year] = {};
-      }
-
-      if (!groups[year][fullDate]) {
-        groups[year][fullDate] = [];
-      }
-
-      groups[year][fullDate].push(medicines);
-      return groups;
-    }, {} as GroupedByYearAndDate);
-  };
-
-  const groupedSymptoms = groupSymptomsByYearAndDate(data?.results);
-  const sortedYears = Object.keys(groupedSymptoms).sort(
+  const groupedMedicines = groupByYearAndDate(
+    data?.results,
+    (m) => m.created_date,
+  );
+  const sortedYears = Object.keys(groupedMedicines).sort(
     (a, b) => Number.parseInt(b) - Number.parseInt(a),
   );
 
@@ -319,7 +292,7 @@ export default function MedicationTimeline({
 
           <div className="space-y-8">
             {sortedYears.map((year) => {
-              const datesInYear = groupedSymptoms[year];
+              const datesInYear = groupedMedicines[year];
               const sortedDates = Object.keys(datesInYear).sort(
                 (a, b) => new Date(b).getTime() - new Date(a).getTime(),
               );

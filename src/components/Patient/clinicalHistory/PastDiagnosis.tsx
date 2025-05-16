@@ -39,13 +39,7 @@ import {
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 
-import { TimelineLoading } from "./Util";
-
-type GroupedByYearAndDate = {
-  [year: string]: {
-    [date: string]: Diagnosis[];
-  };
-};
+import { TimelineLoading, groupByYearAndDate } from "./Util";
 
 const DiagnosisRow = ({
   diagnosis,
@@ -233,32 +227,11 @@ export default function DiagnosisTimeline({
     enabled: !!patientId,
   });
 
-  const groupSymptomsByYearAndDate = (
-    diagnosis: Diagnosis[] | undefined,
-  ): GroupedByYearAndDate => {
-    if (!diagnosis) return {};
-    return diagnosis.reduce((groups, diagnosis) => {
-      if (!diagnosis.created_date) return groups;
-
-      const date = parseISO(diagnosis.created_date);
-      const year = format(date, "yyyy");
-      const fullDate = format(date, "yyyy-MM-dd");
-
-      if (!groups[year]) {
-        groups[year] = {};
-      }
-
-      if (!groups[year][fullDate]) {
-        groups[year][fullDate] = [];
-      }
-
-      groups[year][fullDate].push(diagnosis);
-      return groups;
-    }, {} as GroupedByYearAndDate);
-  };
-
-  const groupedSymptoms = groupSymptomsByYearAndDate(data?.results);
-  const sortedYears = Object.keys(groupedSymptoms).sort(
+  const groupedDiagnosis = groupByYearAndDate(
+    data?.results,
+    (d) => d.created_date,
+  );
+  const sortedYears = Object.keys(groupedDiagnosis).sort(
     (a, b) => Number.parseInt(b) - Number.parseInt(a),
   );
 
@@ -310,7 +283,7 @@ export default function DiagnosisTimeline({
 
           <div className="space-y-8">
             {sortedYears.map((year) => {
-              const datesInYear = groupedSymptoms[year];
+              const datesInYear = groupedDiagnosis[year];
               const sortedDates = Object.keys(datesInYear).sort(
                 (a, b) => new Date(b).getTime() - new Date(a).getTime(),
               );
