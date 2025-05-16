@@ -61,16 +61,19 @@ export class PatientEncounter {
   updateAllergy(details: AllergyDetails) {
     const { criticality, status, notes } = details;
     if (criticality) {
+      cy.get('[data-cy="allergy-criticality"]').first().scrollIntoView();
       cy.clickAndSelectOption('[data-cy="allergy-criticality"]', criticality, {
         position: "first",
       });
     }
     if (status) {
+      cy.get('[data-cy="allergy-status"]').first().scrollIntoView();
       cy.clickAndSelectOption('[data-cy="allergy-status"]', status, {
         position: "first",
       });
     }
     if (notes) {
+      cy.get('[data-cy="allergy-notes"]').first().scrollIntoView();
       cy.typeIntoField('[data-cy="allergy-notes"]', notes, {
         position: "first",
         skipVerification: true,
@@ -80,6 +83,7 @@ export class PatientEncounter {
   }
 
   deleteAllergy() {
+    cy.get('[data-cy="allergy-status"]').scrollIntoView();
     cy.clickAndSelectOption('[data-cy="allergy-status"]', "Entered in Error", {
       position: "first",
     });
@@ -87,6 +91,7 @@ export class PatientEncounter {
   }
 
   verifyAllergyDelete(name: string) {
+    cy.get('[data-cy="allergies-table"]').scrollIntoView();
     cy.get('[data-cy="allergies-table"]').then(($el) => {
       cy.wrap($el).should("not.contain", name);
     });
@@ -95,6 +100,7 @@ export class PatientEncounter {
 
   verifyAllergy(details: AllergyDetails) {
     const { allergyName, criticality, status, notes } = details;
+    cy.get('[data-cy="allergies-table"]').scrollIntoView();
     cy.verifyContentPresence('[data-cy="allergies-table"]', [
       allergyName,
       criticality,
@@ -142,6 +148,7 @@ export class PatientEncounter {
       });
     }
     if (notes) {
+      cy.get('[data-cy="symptom-options"]').last().scrollIntoView();
       cy.get('[data-cy="symptom-options"]').last().click();
       cy.get('[data-cy="add-symptom-notes"]').last().click();
       cy.typeIntoField('[data-cy="symptom-notes"]', notes, {
@@ -169,6 +176,7 @@ export class PatientEncounter {
 
   verifySymptom(details: SymptomDetails) {
     const { symptomName, severity, status, notes } = details;
+    cy.get('[data-cy="symptoms-table"]').scrollIntoView();
     cy.verifyContentPresence('[data-cy="symptoms-table"]', [
       symptomName,
       severity,
@@ -198,7 +206,6 @@ export class PatientEncounter {
     const { diagnosisName } = details;
     cy.get('[data-cy="add-diagnoses"]').scrollIntoView();
     cy.typeAndSelectOption('[data-cy="add-diagnoses"]', diagnosisName, false);
-    cy.verifyAndClickElement('[data-cy="add-diagnosis"]', "Add Diagnosis");
     return this;
   }
 
@@ -221,6 +228,7 @@ export class PatientEncounter {
       });
     }
     if (notes) {
+      cy.get('[data-cy="diagnosis-options"]').last().scrollIntoView();
       cy.get('[data-cy="diagnosis-options"]').last().click();
       cy.get('[data-cy="add-diagnosis-notes"]').last().click();
       cy.typeIntoField('[data-cy="diagnosis-notes"]', notes, {
@@ -245,6 +253,7 @@ export class PatientEncounter {
   }
 
   verifyDiagnosisDelete(name: string) {
+    cy.get('[data-cy="diagnoses-table"]').scrollIntoView();
     cy.get('[data-cy="diagnoses-table"]').then(($el) => {
       cy.wrap($el).should("not.contain", name);
     });
@@ -253,6 +262,7 @@ export class PatientEncounter {
 
   verifyDiagnoses(details: DiagnosisDetails) {
     const { diagnosisName, verification, status, notes } = details;
+    cy.get('[data-cy="diagnoses-table"]').scrollIntoView();
     cy.verifyContentPresence('[data-cy="diagnoses-table"]', [
       diagnosisName,
       verification,
