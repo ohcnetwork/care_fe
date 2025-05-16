@@ -1,36 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { c } from "vite/dist/node/moduleRunnerTransport.d-DJ_mE5sf";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
 import PageHeadTitle from "@/components/Common/PageHeadTitle";
-import {
-  getTabs,
-  patientTabs as tabs,
-} from "@/components/Patient/PatientDetailsTab";
 
-import { getPermissions } from "@/common/Permissions";
-
-import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import {
-  formatDateTime,
-  formatPatientAge,
-  keysOf,
-  relativeTime,
-} from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
+import { formatPatientAge, keysOf } from "@/Utils/utils";
 import { Patient } from "@/types/emr/patient";
 
 import DiagnosisTimeline from "./clinicalHistory/PastDiagnosis";
@@ -53,7 +34,7 @@ export const PatientClinicalHistory = (props: {
   facilityId: string;
 }) => {
   const { t } = useTranslation();
-  const { data: patientData, isLoading } = useQuery<Patient>({
+  const { data: patientData } = useQuery<Patient>({
     queryKey: ["patient", props.patientId],
     queryFn: query(routes.patient.getPatient, {
       pathParams: {

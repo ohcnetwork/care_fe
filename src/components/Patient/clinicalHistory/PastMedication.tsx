@@ -178,7 +178,6 @@ export default function MedicationTimeline({
   patientId: string;
   facilityId: string;
 }) {
-  console.log(facilityId);
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading } = useQuery({

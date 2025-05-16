@@ -72,7 +72,7 @@ const SymptomTable = ({
                 {t("status")}
               </TableHead>
               <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
-                {t("verification")}
+                {t("onset")}
               </TableHead>
               <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
                 {t("note")}
@@ -181,7 +181,6 @@ export default function SymptomsTimeline({
   patientId: string;
   facilityId: string;
 }) {
-  console.log(facilityId);
   const { qParams, updateQuery } = useFilters({
     disableCache: true,
   });
