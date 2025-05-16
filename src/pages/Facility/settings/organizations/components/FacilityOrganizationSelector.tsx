@@ -104,9 +104,11 @@ export default function FacilityOrganizationSelector(
   };
 
   const handleConfirmSelection = (org: FacilityOrganization) => {
-    const newSelection = [...selectedOrganizations, org];
-    setSelectedOrganizations(newSelection);
-    onChange(newSelection.map((org) => org.id));
+    if (!selectedOrganizations.includes(org)) {
+      const newSelection = [...selectedOrganizations, org];
+      setSelectedOrganizations(newSelection);
+      onChange(newSelection.map((org) => org.id));
+    }
     setCurrentSelection(null);
     setNavigationLevels([]);
     setOpen(false);
@@ -173,6 +175,8 @@ export default function FacilityOrganizationSelector(
       </div>
     );
   };
+
+  console.log("hey:", getCurrentLevelOrganizations());
 
   const renderOrganizationPopover = (className?: string) => {
     return (
