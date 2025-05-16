@@ -30,14 +30,14 @@ export const ENCOUNTER_ADMIT_SOURCE = [
   "other",
 ] as const;
 
-export const ENCOUNTER_CLASS = {
-  INPATIENT: "imp",
-  AMBULATORY: "amb",
-  OBSERVATION: "obsenc",
-  EMERGENCY: "emer",
-  VIRTUAL: "vr",
-  HOME_HEALTH: "hh",
-} as const;
+export const ENCOUNTER_CLASS = [
+  "imp",
+  "amb",
+  "obsenc",
+  "emer",
+  "vr",
+  "hh",
+] as const;
 
 export const ENCOUNTER_DIET_PREFERENCE = [
   "vegetarian",
@@ -127,8 +127,7 @@ export const PRIORITY_EMOJI: Record<EncounterPriority, string> = {
 
 export type EncounterAdmitSources = (typeof ENCOUNTER_ADMIT_SOURCE)[number];
 
-export type EncounterClass =
-  (typeof ENCOUNTER_CLASS)[keyof typeof ENCOUNTER_CLASS];
+export type EncounterClass = (typeof ENCOUNTER_CLASS)[number];
 
 export type EncounterDietPreference =
   (typeof ENCOUNTER_DIET_PREFERENCE)[number];
