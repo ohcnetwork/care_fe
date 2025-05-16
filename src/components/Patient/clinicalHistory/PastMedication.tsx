@@ -19,7 +19,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -36,6 +35,8 @@ import {
 } from "@/types/emr/diagnosis/diagnosis";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+
+import { TimelineLoading } from "./Util";
 
 type GroupedByYearAndDate = {
   [year: string]: {
@@ -170,25 +171,6 @@ const SymptomTable = ({
   );
 };
 
-function LoadingState() {
-  return (
-    <div className="max-w-5xl mx-auto py-8 px-4">
-      <Skeleton className="h-6 w-16 mb-4" />
-      <div className="space-y-8">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Skeleton className="size-6 rounded-full" />
-              <Skeleton className="h-6 w-32" />
-            </div>
-            <Skeleton className="h-40 w-full" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function MedicationTimeline({
   patientId,
   facilityId,
@@ -269,7 +251,7 @@ export default function MedicationTimeline({
         </Button>
       </div>
       {isLoading ? (
-        <LoadingState />
+        <TimelineLoading />
       ) : sortedYears.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center">
           <p className="text-gray-500">No Medication found</p>
