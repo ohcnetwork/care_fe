@@ -83,7 +83,9 @@ export const PatientHome = (props: {
           <Button
             variant="primary"
             onClick={() =>
-              navigate(`/facility/${facilityId}/patient/${id}/clinical_history`)
+              navigate(
+                `/facility/${facilityId}/patient/${id}/clinical_history/symptoms`,
+              )
             }
           >
             {t("clinical_history")}

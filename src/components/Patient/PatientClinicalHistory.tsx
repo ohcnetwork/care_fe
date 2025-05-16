@@ -2,7 +2,9 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
+import React from "react";
 import { useTranslation } from "react-i18next";
+import { c } from "vite/dist/node/moduleRunnerTransport.d-DJ_mE5sf";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +13,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import PageHeadTitle from "@/components/Common/PageHeadTitle";
 import {
   getTabs,
   patientTabs as tabs,
@@ -21,31 +24,60 @@ import { getPermissions } from "@/common/Permissions";
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatPatientAge, relativeTime } from "@/Utils/utils";
+import {
+  formatDateTime,
+  formatPatientAge,
+  keysOf,
+  relativeTime,
+} from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Patient } from "@/types/emr/patient";
 
+import DiagnosisTimeline from "./clinicalHistory/PastDiagnosis";
+import MedicationTimeline from "./clinicalHistory/PastMedication";
 import SymptomsTimeline from "./clinicalHistory/PastSymptoms";
 
-export const PatientClinicalHistory = ({
-  patientId,
-}: {
+interface TabProps {
   patientId: string;
+}
+
+export const clinicalDefaultTabs = {
+  symptoms: SymptomsTimeline,
+  diagnosis: DiagnosisTimeline,
+  medication: MedicationTimeline,
+} as Record<string, React.FC<TabProps>>;
+export const PatientClinicalHistory = (props: {
+  patientId: string;
+  tab: string;
 }) => {
   const { t } = useTranslation();
   const { data: patientData, isLoading } = useQuery<Patient>({
-    queryKey: ["patient", patientId],
+    queryKey: ["patient", props.patientId],
     queryFn: query(routes.patient.getPatient, {
       pathParams: {
-        id: patientId,
+        id: props.patientId,
       },
     }),
-    enabled: !!patientId,
+    enabled: !!props.patientId,
   });
 
   if (!patientData) {
     return <div>{t("patient_not_found")}</div>;
   }
+
+  const tabProp: TabProps = {
+    patientId: props.patientId,
+  };
+  const SelectedTab = clinicalDefaultTabs[props.tab];
+
+  console.log(props.tab);
+
+  const tabButtonClasses = (selected: boolean) =>
+    `capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap ${
+      selected === true
+        ? "border-primary-500 hover:border-secondary-300 text-primary-600 border-b-2"
+        : "text-secondary-700 hover:text-secondary-700"
+    }`;
   return (
     <>
       <div className="rounded-md bg-white p-3 shadow-xs">
@@ -96,6 +128,31 @@ export const PatientClinicalHistory = ({
         </div>
       </div>
       <div>
+        <div className="mt-4 w-full border-b-2 border-secondary-200">
+          <div className="overflow-x-auto sm:flex sm:items-baseline">
+            <div className="mt-4 sm:mt-0">
+              <nav
+                className="flex space-x-6 overflow-x-auto pb-2 pl-2"
+                id="encounter_tab_nav"
+              >
+                {keysOf(clinicalDefaultTabs).map((tab) => (
+                  <Link
+                    key={tab}
+                    data-cy={`tab-${tab}`}
+                    className={tabButtonClasses(props.tab === tab)}
+                    href={`${tab}`}
+                  >
+                    {t(`${tab}`)}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4">
+          <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
+          <SelectedTab {...tabProp} />
+        </div>
         <SymptomsTimeline />
       </div>
     </>
