@@ -104,7 +104,6 @@ jobs:
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: chrome
-          browser-version: "136"
           record: true
           parallel: true
           group: "UI - Chrome"
@@ -130,7 +129,6 @@ jobs:
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: chrome
-          browser-version: "136"
           record: false
           parallel: false
           install-command: npm ci
