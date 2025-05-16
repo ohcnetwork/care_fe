@@ -125,8 +125,9 @@ export default function ReportBuilderPreview({
 
   const fontFamilyValue =
     FONT_OPTIONS.find((font) => font.value === fontFamily)?.value || "Arial";
-  const fontSizeValue =
-    FONT_SIZES.find((size) => size.id.toString() === fontSize)?.value || "12pt";
+  const fontSizeValue = Math.floor(
+    (FONT_SIZES.find((size) => size.value === fontSize)?.id || 12) * 1.33,
+  );
 
   const pageNumberingAlign = useWatch({
     control: form.control,
@@ -139,13 +140,15 @@ export default function ReportBuilderPreview({
   return (
     <div className="w-full overflow-auto sticky top-0">
       <div
-        className="bg-white shadow-lg mx-auto h-full flex flex-col gap-2 border"
+        className={cn(
+          "bg-white shadow-lg mx-auto h-full flex flex-col gap-2 border",
+        )}
         style={{
           fontFamily: fontFamilyValue,
-          fontSize: fontSizeValue,
+          fontSize: `${fontSizeValue}px`,
           ...(marginValuesEnabled && {
             padding: marginValues
-              .map((value) => Number(value) * 1.33 + "px")
+              .map((value) => Math.floor(Number(value) * 1.33) + "px")
               .join(" "),
           }),
         }}

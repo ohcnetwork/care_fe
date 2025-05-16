@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -87,45 +88,47 @@ export default function ReportBuilderSheet({
           <SheetTitle>{t("available_reports")}</SheetTitle>
         </SheetHeader>
         <div className="space-y-4 mt-6">
-          <div className="space-y-2">
-            {reportTemplateData?.results?.map((reportTemplate) => (
-              <Card
-                key={reportTemplate.id}
-                className="flex items-center justify-between gap-2 rounded-md bg-gray-100 p-3"
-              >
-                <div className="flex flex-col">
-                  <span>{reportTemplate.slug}</span>
-                  <span className="text-sm text-gray-500">
-                    {reportTemplate.type.toString()}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  {canManageTemplate && (
+          <ScrollArea className="h-[calc(100vh-10rem)]">
+            <div className="space-y-2 m-4">
+              {reportTemplateData?.results?.map((reportTemplate) => (
+                <Card
+                  key={reportTemplate.id}
+                  className="flex flex-col sm:flex-row justify-between gap-2 rounded-md bg-gray-100 p-3"
+                >
+                  <div className="flex flex-col">
+                    <span>{reportTemplate.slug}</span>
+                    <span className="text-xs text-gray-500">
+                      {t(reportTemplate.type.toString())}
+                    </span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    {canManageTemplate && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        asChild
+                      >
+                        <Link
+                          href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${reportTemplate.id}`}
+                        >
+                          {t("edit_template")}
+                        </Link>
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      asChild
+                      onClick={() => handleGenerateReport(reportTemplate)}
                     >
-                      <Link
-                        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${reportTemplate.id}`}
-                      >
-                        {t("edit_template")}
-                      </Link>
+                      {t("generate_report")}
                     </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => handleGenerateReport(reportTemplate)}
-                  >
-                    {t("generate_report")}
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
         <SheetFooter className="mt-4">
           {canManageTemplate && (

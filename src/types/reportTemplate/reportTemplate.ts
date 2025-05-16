@@ -58,15 +58,10 @@ interface PageNumbering {
 }
 
 export const FONT_OPTIONS = [
-  { id: "helvetica", value: "Helvetica" },
   { id: "arial", value: "Arial" },
   { id: "times-new-roman", value: "Times New Roman" },
   { id: "courier", value: "Courier" },
   { id: "verdana", value: "Verdana" },
-  { id: "libertinus-serif", value: "Libertinus Serif" },
-  { id: "new-computer-modern", value: "New Computer Modern" },
-  { id: "new-computer-modern-math", value: "New Computer Modern Math" },
-  { id: "dejavu-sans", value: "DejaVu Sans" },
 ] as const;
 
 export const FONT_SIZES = [

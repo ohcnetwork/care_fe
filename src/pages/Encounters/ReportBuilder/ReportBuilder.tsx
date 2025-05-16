@@ -70,7 +70,7 @@ const defaultTemplate: ReportTemplateFormData = {
         align: "right",
       },
       text: {
-        font: "DejaVu Sans",
+        font: "Times New Roman",
         size: "10pt",
       },
     },
