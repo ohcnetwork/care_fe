@@ -1,4 +1,5 @@
 import { format, isFuture } from "date-fns";
+import dayjs from "dayjs";
 
 import { Input } from "@/components/ui/input";
 
@@ -23,6 +24,8 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
   const { questionnaireResponse, updateQuestionnaireResponseCB } = props;
 
   const values = (questionnaireResponse.values?.[0]?.value as string[]) || [];
+
+  console.log("jey:", dayjs(values[0]).toISOString());
 
   const handleUpdate = (updates: string) => {
     if (isFuture(updates)) {
@@ -49,7 +52,7 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
           : undefined
       }
       max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-      onChange={(e) => handleUpdate(e.target.value || "")}
+      onChange={(e) => handleUpdate(dayjs(e.target.value).toISOString() || "")}
       disabled={props.disabled}
     />
   );

@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { InfoIcon } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
@@ -688,27 +689,39 @@ export default function PatientRegistration(
                     <FormField
                       control={form.control}
                       name="deceased_datetime"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("date_and_time_of_death")}</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="datetime-local"
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) => {
-                                const value = e.target.value || undefined;
-                                field.onChange(value);
-                                setIsDeceased(!!value);
-                              }}
-                              max={dayjs().format("YYYY-MM-DDTHH:mm")}
-                              id="death-datetime"
-                              data-cy="death-datetime-input"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      render={({ field }) => {
+                        console.log("field.value:", field.value); // 👈 log here for debugging
+
+                        return (
+                          <FormItem>
+                            <FormLabel>{t("date_and_time_of_death")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="datetime-local"
+                                {...field}
+                                value={
+                                  field.value
+                                    ? format(
+                                        new Date(field.value),
+                                        "yyyy-MM-dd'T'HH:mm",
+                                      )
+                                    : ""
+                                }
+                                onChange={(e) => {
+                                  const value =
+                                    dayjs(e.target.value).toISOString() ||
+                                    undefined;
+                                  field.onChange(value);
+                                  setIsDeceased(!!value);
+                                }}
+                                max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                                id="death-datetime"
+                                data-cy="death-datetime-input"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        );
+                      }}
                     />
                   </div>
                 )}
