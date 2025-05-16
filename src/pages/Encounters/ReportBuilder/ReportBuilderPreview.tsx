@@ -328,7 +328,7 @@ function SectionPreview({ section }: { section: SectionConfig }) {
             <TableBody>
               <TableRow className="bg-blue-50 hover:bg-blue-50 divide-x divide-gray-200">
                 {section.options.columns?.map((column) => (
-                  <TableHead key={column}>{"-"}</TableHead>
+                  <TableHead key={column}>{t("value")}</TableHead>
                 ))}
               </TableRow>
             </TableBody>
@@ -342,7 +342,7 @@ function SectionPreview({ section }: { section: SectionConfig }) {
             } else {
               return (
                 <div key={index}>
-                  {field.label}: {field.value}
+                  {t(field.label)}: {t("value")}
                 </div>
               );
             }

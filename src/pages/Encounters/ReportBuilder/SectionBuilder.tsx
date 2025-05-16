@@ -9,6 +9,8 @@ import {
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -412,9 +414,17 @@ function SectionItem({
     control,
     name: `config.sections.${index}.source`,
   });
+
+  const sectionHasErrors = form.formState.errors?.config?.sections?.[index];
+
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent
+        className={cn(
+          "pt-6",
+          sectionHasErrors && "border-red-500 border-1 rounded-md",
+        )}
+      >
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">

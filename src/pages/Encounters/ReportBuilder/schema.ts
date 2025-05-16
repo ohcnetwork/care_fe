@@ -14,7 +14,14 @@ export const useReportTemplateSchema = () => {
   const { t } = useTranslation();
   return z.object({
     id: z.string().optional(),
-    slug: z.string(),
+    slug: z
+      .string()
+      .trim()
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 }))
+      .regex(/^[-\w]+$/, {
+        message: t("slug_format_message"),
+      }),
     type: z.enum(
       REPORT_TEMPLATE_TYPE.map((type) => type.id) as [
         ReportTemplateType,

@@ -11,12 +11,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Form,
   FormControl,
   FormField,
@@ -411,6 +405,8 @@ export default function ReportBuilder({
     }
   };
 
+  // TODO: Implement export functionality
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleExport = () => {
     console.log("");
   };
@@ -435,91 +431,79 @@ export default function ReportBuilder({
             }}
             className="space-y-6"
           >
-            <div className="flex flex-col sm:flex-row gap-2 justify-end items-center">
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={!!reportTemplateId}
-                      >
-                        <FormItem>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a template type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {REPORT_TEMPLATE_TYPE.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
-                                {type.value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </FormItem>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleExport}
-                className="w-full sm:w-auto"
-              >
-                {t("export")}
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="primary"
-                    className="w-full sm:w-auto"
-                  >
-                    {t("save_template")}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-full">
-                  <DropdownMenuItem asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() => onSubmit(form.getValues(), false)}
-                    >
-                      {t("save_template")}
-                    </Button>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() => onSubmit(form.getValues(), true)}
-                    >
-                      {t("save_and_exit")}
-                    </Button>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="flex flex-col sm:flex-row justify-between gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem className="">
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={!!reportTemplateId}
+                        >
+                          <FormItem>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a template type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {REPORT_TEMPLATE_TYPE.map((type) => (
+                                <SelectItem key={type.id} value={type.id}>
+                                  {type.value}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </FormItem>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  disabled={!!reportTemplateId}
+                  render={({ field }) => (
+                    <FormItem className="">
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                {/*                 <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleExport}
+                  className="w-full sm:w-auto"
+                >
+                  {t("export")}
+                </Button> */}
+                <Button
+                  type="button"
+                  variant="primary"
+                  className="w-full"
+                  onClick={() => onSubmit(form.getValues(), false)}
+                >
+                  {t("save_template")}
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="w-full"
+                  onClick={() => onSubmit(form.getValues(), true)}
+                >
+                  {t("save_and_exit")}
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
