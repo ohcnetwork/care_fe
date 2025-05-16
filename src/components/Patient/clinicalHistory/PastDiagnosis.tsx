@@ -219,6 +219,7 @@ export default function DiagnosisTimeline({
   patientId: string;
   facilityId: string;
 }) {
+  const { t } = useTranslation();
   const { qParams, updateQuery } = useFilters({
     disableCache: true,
   });
@@ -283,7 +284,7 @@ export default function DiagnosisTimeline({
           </div>
           <Input
             type="search"
-            placeholder="Search by diagnosis"
+            placeholder={t("search_by_diagnosis")}
             className="pl-10 h-10 border-gray-300"
             value={qParams.name}
             onChange={(e) => updateQuery({ name: e.target.value })}

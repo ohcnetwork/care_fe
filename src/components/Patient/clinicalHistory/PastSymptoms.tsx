@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { t } from "i18next";
 import { Info, Search, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -283,7 +284,7 @@ export default function SymptomsTimeline({
           </div>
           <Input
             type="search"
-            placeholder="Search by diagnosis"
+            placeholder={t("search_by_symptoms")}
             className="pl-10 h-10 border-gray-300"
             value={qParams.name}
             onChange={(e) => updateQuery({ name: e.target.value })}

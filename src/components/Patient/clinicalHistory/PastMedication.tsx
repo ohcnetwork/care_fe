@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { t } from "i18next";
-import { Filter, Info, Search } from "lucide-react";
+import { Info, Search, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,11 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -28,144 +24,199 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { Avatar } from "@/components/Common/Avatar";
+import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
+import { formatDosage, formatSig } from "@/components/Medicine/utils";
+
+import useFilters from "@/hooks/useFilters";
+
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import {
-  DIAGNOSIS_CLINICAL_STATUS_STYLES,
-  DIAGNOSIS_VERIFICATION_STATUS_STYLES,
-} from "@/types/emr/diagnosis/diagnosis";
-import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
-import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+  ACTIVE_MEDICATION_STATUSES,
+  MedicationRequestRead,
+} from "@/types/emr/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 import { TimelineLoading } from "./Util";
 
 type GroupedByYearAndDate = {
   [year: string]: {
-    [date: string]: Diagnosis[];
+    [date: string]: MedicationRequestRead[];
   };
 };
 
-const SymptomTable = ({
-  diagnosis,
+const MedicineRow = ({
+  medicine,
+  patientId,
+  facilityId,
+  t,
+}: {
+  medicine: MedicationRequestRead;
+  patientId: string;
+  facilityId: string;
+  t: (key: string) => string;
+}) => {
+  const [showInstruction, setShowInstruction] = useState(false);
+
+  const instruction = medicine.dosage_instruction?.[0];
+  const frequency = getFrequencyDisplay(instruction?.timing);
+  const dosage = formatDosage(instruction);
+  const duration = instruction?.timing?.repeat?.bounds_duration;
+  const remarks = formatSig(instruction);
+  const notes = medicine.note;
+
+  const combinedInstruction = `${remarks || "-"}${
+    notes ? ` (${t("note")}: ${notes})` : ""
+  }`;
+
+  const frequencyDisplay = instruction?.as_needed_boolean
+    ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
+    : (frequency?.meaning ?? "-") +
+      (instruction?.additional_instruction?.[0]?.display
+        ? `, ${instruction.additional_instruction[0].display}`
+        : "");
+
+  return (
+    <>
+      <TableRow className="bg-white hover:bg-gray-50 divide-x divide-gray-200">
+        <TableCell className="truncate px-4 py-4 w-[30%] max-w-[300px] font-bold text-left">
+          {medicine.medication?.display}
+        </TableCell>
+
+        <TableCell className="px-4 py-4 w-[14%] text-center">
+          {dosage || "-"}
+        </TableCell>
+
+        <TableCell className="px-4 py-4 w-[14%] text-center">
+          {frequencyDisplay}
+        </TableCell>
+
+        <TableCell className="px-4 py-4 w-[14%] text-center">
+          {duration ? `${duration.value} ${duration.unit}` : "-"}
+        </TableCell>
+
+        <TableCell className="px-4 py-4 w-[14%] text-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="link">
+                <Info size={18} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <div className="px-3 py-2 text-sm text-gray-500 border-b">
+                <div className="font-medium text-gray-700">
+                  {t("reported_by")}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Avatar
+                    name={medicine.created_by?.username}
+                    className="size-4"
+                    imageUrl={medicine.created_by.read_profile_picture_url}
+                  />
+                  <span className="text-sm">
+                    {formatName(medicine.created_by)}
+                  </span>
+                </div>
+              </div>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate(
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${medicine.encounter}/updates`
+                      : `/organization/organizationId/patient/${patientId}/encounter/${medicine.encounter}/updates`,
+                  )
+                }
+              >
+                {t("view_encounter")}
+              </DropdownMenuItem>
+              {combinedInstruction && (
+                <DropdownMenuItem
+                  onClick={() => setShowInstruction(!showInstruction)}
+                >
+                  {showInstruction
+                    ? t("hide_instruction")
+                    : t("see_instruction")}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+
+      {showInstruction && combinedInstruction && (
+        <tr>
+          <td
+            colSpan={6}
+            className="border border-gray-200 border-t-0 rounded-b-lg p-4 bg-gray-50 relative"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-2 right-2 h-6 w-6 p-0"
+              onClick={() => setShowInstruction(false)}
+            >
+              <X size={16} />
+              <span className="sr-only">Close</span>
+            </Button>
+            <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8">
+              {combinedInstruction}
+            </p>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+};
+
+const MedicationTable = ({
+  medicines,
   patientId,
   facilityId,
 }: {
-  diagnosis: Diagnosis[];
+  medicines: MedicationRequestRead[];
   patientId: string;
   facilityId: string;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-gray-50 rounded-lg p-4">
       <div className="overflow-x-auto">
-        <Table className="w-full border border-gray-200">
-          <TableHeader className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">
-            <TableRow className="rounded-md overflow-hidden divide-x bg-gray-100">
-              <TableHead className="first:rounded-l-md h-auto py-1 px-2  text-gray-600">
-                {t("diagnosis")}
-              </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
-                {t("severity")}
-              </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
-                {t("status")}
-              </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
-                {t("verification")}
-              </TableHead>
-              <TableHead className="h-auto text-center py-1 px-2  text-gray-600">
-                {t("note")}
-              </TableHead>
-              <TableHead className="h-auto py-1 px-2 text-gray-600"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="space-y-2">
-            {diagnosis.map((diagnosis) => (
-              <TableRow
-                key={diagnosis.id}
-                className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200"
-              >
-                <TableCell className="truncate whitespace-nowrap overflow-hidden font-bold">
-                  {diagnosis.code.display}
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-center">
-                  <Badge
-                    variant="outline"
-                    className={`whitespace-nowrap ${
-                      DIAGNOSIS_CLINICAL_STATUS_STYLES[
-                        diagnosis.clinical_status
-                      ]
-                    }`}
-                  >
-                    {t(diagnosis.clinical_status)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-center">
-                  <Badge
-                    variant="outline"
-                    className={`whitespace-nowrap capitalize ${
-                      DIAGNOSIS_VERIFICATION_STATUS_STYLES[
-                        diagnosis.verification_status
-                      ]
-                    }`}
-                  >
-                    {t(diagnosis.verification_status)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="truncate whitespace-nowrap overflow-hidden text-center">
-                  {diagnosis.onset?.onset_datetime
-                    ? format(
-                        parseISO(diagnosis.onset.onset_datetime),
-                        "dd MMM yyyy",
-                      )
-                    : "-"}
-                </TableCell>
-                <TableCell className="text-center">
-                  {diagnosis.note ? (
-                    <div className="flex justify-center items-center">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 text-xs shrink-0"
-                          >
-                            {t("see_note")}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80 p-4">
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                            {diagnosis.note}
-                          </p>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  ) : (
-                    "-"
-                  )}
-                </TableCell>
-                <TableCell className="text-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="link">
-                        <Info size={18} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                          )
-                        }
-                      >
-                        {t("view_encounter")}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+        <div className="border border-gray-200 rounded-lg mb-3 overflow-hidden">
+          <Table className="w-full">
+            <TableHeader className="bg-gray-100 divide-x divide-gray-200">
+              <TableRow className="divide-x divide-gray-200">
+                <TableHead className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate">
+                  {t("medicine")}
+                </TableHead>
+                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+                  {t("dosage")}
+                </TableHead>
+                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+                  {t("frequency")}
+                </TableHead>
+                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+                  {t("duration")}
+                </TableHead>
+
+                <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600"></TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+
+            <TableBody>
+              {medicines.map((medicine) => (
+                <MedicineRow
+                  key={medicine.id}
+                  medicine={medicine}
+                  patientId={patientId}
+                  facilityId={facilityId}
+                  t={t}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
@@ -178,29 +229,34 @@ export default function MedicationTimeline({
   patientId: string;
   facilityId: string;
 }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useTranslation();
+  const { qParams, updateQuery } = useFilters({
+    disableCache: true,
+  });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["diagnosis", patientId, searchQuery],
-    queryFn: query.paginated(diagnosisApi.listDiagnosis, {
+    queryKey: ["medication", patientId, qParams],
+    queryFn: query.paginated(medicationRequestApi.list, {
       pathParams: { patientId },
       pageSize: 100,
       queryParams: {
-        name: searchQuery,
-        exclude_verification_status: "entered_in_error",
+        name: qParams.name,
+        status: qParams.exclude_inactive
+          ? ACTIVE_MEDICATION_STATUSES.join(",")
+          : undefined,
       },
     }),
     enabled: !!patientId,
   });
 
   const groupSymptomsByYearAndDate = (
-    diagnosis: Diagnosis[] | undefined,
+    medicines: MedicationRequestRead[] | undefined,
   ): GroupedByYearAndDate => {
-    if (!diagnosis) return {};
-    return diagnosis.reduce((groups, diagnosis) => {
-      if (!diagnosis.created_date) return groups;
+    if (!medicines) return {};
+    return medicines.reduce((groups, medicines) => {
+      if (!medicines.created_date) return groups;
 
-      const date = parseISO(diagnosis.created_date);
+      const date = parseISO(medicines.created_date);
       const year = format(date, "yyyy");
       const fullDate = format(date, "yyyy-MM-dd");
 
@@ -212,7 +268,7 @@ export default function MedicationTimeline({
         groups[year][fullDate] = [];
       }
 
-      groups[year][fullDate].push(diagnosis);
+      groups[year][fullDate].push(medicines);
       return groups;
     }, {} as GroupedByYearAndDate);
   };
@@ -225,35 +281,40 @@ export default function MedicationTimeline({
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
       <div className="flex items-center gap-3 mb-6">
-        <div className="bg-pink-200 p-2 rounded-md">
-          <img src="/images/Medicines-icon.svg" alt="medicines-icon" />
+        <div className="bg-pink-100 p-2 rounded-md">
+          <img src="/images/medicines-icon.svg" alt="medicines-icon" />
         </div>
         <h1 className="text-2xl font-bold">Past Medication</h1>
       </div>
 
-      <div className="flex justify-between mb-6">
-        <div className="relative w-full max-w-md">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="relative w-full sm:max-w-md">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Search className="size-5 text-gray-400" />
           </div>
           <Input
             type="search"
-            placeholder="Search by diagnosis"
+            placeholder={t("search_by_medicine")}
             className="pl-10 h-10 border-gray-300"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={qParams.name}
+            onChange={(e) => updateQuery({ name: e.target.value })}
           />
         </div>
-        <Button variant="outline" className="flex items-center gap-2 h-10">
-          <Filter className="size-4" />
-          Filter
-        </Button>
+
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={qParams.exclude_inactive ?? false}
+            onCheckedChange={(val) => updateQuery({ exclude_inactive: val })}
+            id="exclude-inactive"
+          />
+          <Label htmlFor="exclude-inactive">Exclude Inactive</Label>
+        </div>
       </div>
       {isLoading ? (
         <TimelineLoading />
       ) : sortedYears.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center">
-          <p className="text-gray-500">No Medication found</p>
+          <p className="text-gray-500">No diagnosis found</p>
         </div>
       ) : (
         <div className="relative">
@@ -287,8 +348,8 @@ export default function MedicationTimeline({
                         </div>
 
                         <div className="ml-3">
-                          <SymptomTable
-                            diagnosis={datesInYear[date]}
+                          <MedicationTable
+                            medicines={datesInYear[date]}
                             patientId={patientId}
                             facilityId={facilityId}
                           />
