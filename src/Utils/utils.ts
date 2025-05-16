@@ -44,9 +44,7 @@ export const relativeDate = (date: DateLike, withoutSuffix = false) => {
     return t("today");
   }
 
-  const time = hasTime ? ` at ${obj.format(TIME_FORMAT)}` : "";
-
-  return `${relative}${time}`;
+  return `${relative}`;
 };
 
 export const formatName = (
