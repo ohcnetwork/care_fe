@@ -61,29 +61,33 @@ export default function UserAvatar({ username }: { username: string }) {
     formData.append("profile_picture", file);
     const url = `${careConfig.apiUrl}/api/v1/users/${userData.username}/profile_picture/`;
 
-    await uploadFile(
-      url,
-      formData,
-      "POST",
-      { Authorization: getAuthorizationHeader() },
-      async (xhr: XMLHttpRequest) => {
-        if (xhr.status === 200) {
-          setEditAvatar(false);
-          await sleep(1000);
-          queryClient.invalidateQueries({
-            queryKey: ["getUserDetails", username],
-          });
-          if (authUser.username === username) {
-            queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    try {
+      await uploadFile(
+        url,
+        formData,
+        "POST",
+        { Authorization: getAuthorizationHeader() },
+        async (xhr: XMLHttpRequest) => {
+          if (xhr.status === 200) {
+            setEditAvatar(false);
+            await sleep(1000);
+            queryClient.invalidateQueries({
+              queryKey: ["getUserDetails", username],
+            });
+            if (authUser.username === username) {
+              queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+            }
+            toast.success(t("avatar_updated_success"));
           }
-          toast.success(t("avatar_updated_success"));
-        }
-      },
-      null,
-      () => {
-        onError();
-      },
-    );
+        },
+        null,
+        () => {
+          onError();
+        },
+      );
+    } catch {
+      setEditAvatar(false);
+    }
   };
 
   const handleAvatarDelete = async (
