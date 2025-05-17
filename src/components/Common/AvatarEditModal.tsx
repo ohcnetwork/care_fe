@@ -220,7 +220,7 @@ const AvatarEditModal = ({
   const defaultHint = (
     <>
       {t("max_size_for_image_uploaded_should_be", {
-        maxSize: `${careConfig.MAX_IMAGE_UPLOAD_SIZE_MB}MB`,
+        maxSize: `${careConfig.imageUploadMaxSizeInMB}MB`,
       })}
       <br />
       {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
