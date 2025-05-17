@@ -144,7 +144,7 @@ const careConfig = {
     ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
     : 30,
 
-  imageUploadMaxSizeInMB: env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB
+  MAX_IMAGE_UPLOAD_SIZE_MB: env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
 } as const;
