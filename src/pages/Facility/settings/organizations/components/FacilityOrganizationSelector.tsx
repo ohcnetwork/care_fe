@@ -95,20 +95,15 @@ export default function FacilityOrganizationSelector(
   const handleSelect = (org: FacilityOrganization) => {
     if (org.has_children) {
       setNavigationLevels([...navigationLevels, org]);
-      setCurrentSelection(org);
-    } else {
-      setCurrentSelection(org);
-      handleConfirmSelection(org);
     }
+    setCurrentSelection(org);
     setFacilityOrgSearch("");
   };
 
   const handleConfirmSelection = (org: FacilityOrganization) => {
-    if (!selectedOrganizations.includes(org)) {
-      const newSelection = [...selectedOrganizations, org];
-      setSelectedOrganizations(newSelection);
-      onChange(newSelection.map((org) => org.id));
-    }
+    const newSelection = [...selectedOrganizations, org];
+    setSelectedOrganizations(newSelection);
+    onChange(newSelection.map((org) => org.id));
     setCurrentSelection(null);
     setNavigationLevels([]);
     setOpen(false);
@@ -265,7 +260,7 @@ export default function FacilityOrganizationSelector(
                 {currentSelection.name}
               </span>
             </div>
-            {currentSelection.has_children && (
+            {currentSelection && (
               <Button
                 variant="ghost"
                 size="sm"
