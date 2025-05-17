@@ -1515,6 +1515,7 @@
   "icd11_as_recommended": "As per ICD-11 recommended by WHO",
   "icmr_specimen_referral_form": "ICMR Specimen Referral Form",
   "identifier": "Identifier",
+  "image_upload_validation_error": "Image size must be up to 2 MB.",
   "immunisation-records": "Immunisation",
   "import": "Import",
   "import_form": "Import Form",
