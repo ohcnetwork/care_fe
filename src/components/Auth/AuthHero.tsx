@@ -85,14 +85,7 @@ export const AuthHero = () => {
               />
             </a>
           </div>
-          <a
-            href={urls.ohcn}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-secondary-500"
-          >
-            {t("footer_body")}
-          </a>
+          <span className="text-secondary-500">{t("footer_body")}</span>
           <div className="mx-auto mt-2">
             <a
               href={urls.github}
