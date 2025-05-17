@@ -9,7 +9,7 @@ import {
   ViewIcon,
 } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -292,21 +292,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   // This useMemo will automatically include the new tag in options
-  const tagOptions = useMemo(() => {
-    if (!availableTags?.results) return selectedTags;
-    if (tagSearchQuery) return availableTags.results;
-
-    const availableSlugs = new Set(
-      availableTags.results.map((tag) => tag.slug),
-    );
-
-    // Add selected tags that aren't in availableTags
-    const selectedNotInAvailable = selectedTags.filter(
-      (selectedTag) => !availableSlugs.has(selectedTag.slug),
-    );
-
-    return [...availableTags.results, ...selectedNotInAvailable];
-  }, [availableTags, selectedTags, tagSearchQuery]);
+  const tagOptions = availableTags?.results || [];
 
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.create, {
@@ -642,6 +628,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const handleTagCreated = (tag: QuestionnaireTagModel) => {
     setSelectedTags((current) => [...current, tag]);
+    queryClient.invalidateQueries({ queryKey: ["tags"] });
   };
 
   return (
