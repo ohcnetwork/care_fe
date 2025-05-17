@@ -404,6 +404,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       <FormControl>
                         <div data-cy="select-assigned-user">
                           <UserSelector
+                            facilityId={form.watch("assigned_facility")?.id}
                             selected={assignedToUser}
                             onChange={handleUserChange}
                             placeholder={t("search_users")}
