@@ -41,6 +41,7 @@ const uploadFile = async (
         });
 
         handleHttpError(httpError);
+        reject(httpError);
       } else {
         resolve();
       }
