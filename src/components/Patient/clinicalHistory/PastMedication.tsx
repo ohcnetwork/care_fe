@@ -277,7 +277,7 @@ export default function MedicationTimeline({
             onCheckedChange={(val) => updateQuery({ exclude_inactive: val })}
             id="exclude-inactive"
           />
-          <Label htmlFor="exclude-inactive">Exclude Inactive</Label>
+          <Label htmlFor="exclude-inactive">{t("exclude_inactive")}</Label>
         </div>
       </div>
       {isLoading ? (
