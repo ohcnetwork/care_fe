@@ -185,7 +185,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const coverImageHint = (
     <>
-      {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
+      {t("max_size_for_image_uploaded_should_be", {
+        maxSize: `${careConfig.imageUploadMaxSizeInMB}MB`,
+      })}
       <br />
       {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
       {t("recommended_aspect_ratio_for", { aspectRatio: "16:9" })}
