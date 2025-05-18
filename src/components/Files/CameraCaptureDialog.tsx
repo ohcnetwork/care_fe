@@ -45,6 +45,14 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     facingMode: cameraFacingMode,
   };
 
+  const closeMediaStream = () => {
+    if (stream) {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
+  };
+
   useEffect(() => {
     if (!open) return;
 
@@ -66,11 +74,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     getCameraStream();
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => {
-          track.stop();
-        });
-      }
+      closeMediaStream();
     };
   }, [open, cameraFacingMode, onOpenChange]);
 
@@ -103,8 +107,13 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     });
   };
 
+  const handleDialogClose = (open: boolean) => {
+    closeMediaStream();
+    onOpenChange(open);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
@@ -196,6 +205,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                     variant="primary"
                     onClick={() => {
                       setPreviewImage(null);
+                      closeMediaStream();
                       onOpenChange(false);
                       setPreview?.(false);
                     }}
@@ -212,6 +222,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             <Button
               variant="outline"
               onClick={() => {
+                closeMediaStream();
                 setPreviewImage(null);
                 onResetCapture();
                 onOpenChange(false);
@@ -259,6 +270,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       variant="primary"
                       onClick={() => {
                         onOpenChange(false);
+                        closeMediaStream();
                         setPreviewImage(null);
                         setPreview?.(false);
                       }}
@@ -274,6 +286,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
               variant="outline"
               onClick={() => {
                 setPreviewImage(null);
+                closeMediaStream();
                 onResetCapture();
                 onOpenChange(false);
                 setPreview?.(false);
