@@ -209,42 +209,87 @@ export const useReportTemplateSchema = () => {
               columns: z.array(z.string()).optional(),
               style: z.enum(["list", "text"]).optional(),
               filters: z.record(z.array(z.string())).optional(),
-              text: z.string().optional(),
+              text: z.array(z.string()).optional(),
               rows: z.array(z.array(z.string())).optional(),
             }),
           })
           .refine(
             (data) => {
-              if (data.is_table && data.source !== "custom_section") {
+              if (
+                !data.is_table &&
+                data.source === "custom_section" &&
+                data.options.style === "text"
+              ) {
                 return (
-                  (data.options.rows !== undefined &&
-                    data.options.rows.length > 0) ||
-                  (data.options.columns !== undefined &&
-                    data.options.columns.length > 0)
+                  data.options.text !== undefined &&
+                  data.options.text.length > 0
                 );
               }
               return true;
             },
             {
-              message: t("rows_or_columns_required_for_table_sections"),
-              path: ["options", "columns"],
+              message: t("text_required_for_custom_sections"),
+              path: ["options", "text"],
             },
           )
           .refine(
             (data) => {
-              if (!data.is_table || data.source === "custom_section") {
+              if (!data.is_table && data.options.style === "list") {
                 return (
-                  (data.options.text !== undefined &&
-                    data.options.text.trim() !== "") ||
-                  (data.options.fields !== undefined &&
-                    data.options.fields.length > 0)
+                  data.options.fields !== undefined &&
+                  data.options.fields.length > 0
                 );
               }
               return true;
             },
             {
-              message: t("text_or_fields_required_for_non_table_sections"),
+              message: t("fields_required_for_custom_sections"),
               path: ["options", "fields"],
+            },
+          )
+          .refine(
+            (data) => {
+              if (data.is_table && data.source === "custom_section") {
+                return (
+                  data.options.fields !== undefined &&
+                  data.options.fields.length > 0
+                );
+              }
+              return true;
+            },
+            {
+              message: t("fields_required_for_custom_sections"),
+              path: ["options", "fields"],
+            },
+          )
+          .refine(
+            (data) => {
+              if (!data.is_table && data.source !== "custom_section") {
+                return (
+                  data.options.fields !== undefined &&
+                  data.options.fields.length > 0
+                );
+              }
+              return true;
+            },
+            {
+              message: t("fields_required_for_structured_sections"),
+              path: ["options", "fields"],
+            },
+          )
+          .refine(
+            (data) => {
+              if (data.is_table && data.source !== "custom_section") {
+                return (
+                  data.options.columns !== undefined &&
+                  data.options.columns.length > 0
+                );
+              }
+              return true;
+            },
+            {
+              message: t("columns_required_for_table_sections"),
+              path: ["options", "columns"],
             },
           ),
       ),

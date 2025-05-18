@@ -253,8 +253,10 @@ export interface SectionOptions {
   columns?: string[];
   style?: "list" | "text";
   filters?: Record<string, string[]>;
-  text?: string;
+  text?: string[];
   rows?: Array<Array<string>>;
+  count?: number;
+  separator?: string;
 }
 
 export interface SectionConfig {

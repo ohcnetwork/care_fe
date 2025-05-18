@@ -155,102 +155,67 @@ function StandardLayout({
   );
 }
 
-interface CustomLayoutProps {
-  form: UseFormReturn<ReportTemplateFormData>;
-  index: number;
-  fieldName: `config.sections.${number}.options.fields`;
-  isEnabled: boolean;
-  addButtonText: string;
-  emptyText: string;
-  isTable: boolean;
-  style?: "list" | "text";
-}
-
-function CustomLayout({
+function CustomFieldsLayout({
   form,
   index,
-  fieldName,
   isEnabled,
   addButtonText,
   emptyText,
-  isTable,
-  style = "list",
-}: CustomLayoutProps) {
+}: {
+  form: UseFormReturn<ReportTemplateFormData>;
+  index: number;
+  isEnabled: boolean;
+  addButtonText: string;
+  emptyText: string;
+}) {
   const { t } = useTranslation();
   const [newField, setNewField] = useState<{ label: string; value: string }>({
     label: "",
     value: "",
   });
-  const [textField, setTextField] = useState<string>("");
-
-  const isTextMode = !isTable && style === "text";
 
   return (
     <FormField
       control={form.control}
-      name={fieldName}
+      name={`config.sections.${index}.options.fields`}
       render={({ field: { value = [], onChange } }) => {
-        const items = isTextMode
-          ? Array.isArray(value)
-            ? value
-            : []
-          : (Array.isArray(value) ? value : []).map((field) =>
-              typeof field === "string"
-                ? { label: field, value: field }
-                : field,
-            );
+        const items = (Array.isArray(value) ? value : []).map((field) =>
+          typeof field === "string" ? { label: field, value: field } : field,
+        );
 
         return (
           <FormItem>
             <FormControl>
               <div className="flex flex-col w-full justify-between mb-4 gap-2">
-                {isTextMode ? (
+                <div className="flex flex-row gap-2 justify-between">
+                  <div className="flex flex-col gap-2 w-full">
+                    <FormLabel aria-required>{t("label")}</FormLabel>
+                    <Input
+                      value={newField.label}
+                      onChange={(e) =>
+                        setNewField({ ...newField, label: e.target.value })
+                      }
+                    />
+                  </div>
                   <div className="flex flex-col gap-2 w-full">
                     <FormLabel aria-required>{t("value")}</FormLabel>
                     <Input
-                      value={textField}
-                      onChange={(e) => setTextField(e.target.value)}
-                      placeholder={t("enter_value")}
+                      value={newField.value}
+                      onChange={(e) =>
+                        setNewField({ ...newField, value: e.target.value })
+                      }
                     />
                   </div>
-                ) : (
-                  <div className="flex flex-row gap-2 justify-between">
-                    <div className="flex flex-col gap-2 w-full">
-                      <FormLabel aria-required>{t("label")}</FormLabel>
-                      <Input
-                        value={newField.label}
-                        onChange={(e) =>
-                          setNewField({ ...newField, label: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-col gap-2 w-full">
-                      <FormLabel aria-required>{t("value")}</FormLabel>
-                      <Input
-                        value={newField.value}
-                        onChange={(e) =>
-                          setNewField({ ...newField, value: e.target.value })
-                        }
-                      />
-                    </div>
-                  </div>
-                )}
+                </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   className="w-full sm:w-auto"
-                  disabled={
-                    isTextMode ? !textField : !newField.label || !newField.value
-                  }
+                  disabled={!newField.label || !newField.value}
                   onClick={() => {
-                    if (isTextMode) {
-                      onChange([...items, textField]);
-                      setTextField("");
-                    } else {
-                      onChange([...items, newField]);
-                      setNewField({ label: "", value: "" });
-                    }
+                    onChange([...items, newField]);
+                    setNewField({ label: "", value: "" });
                   }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -263,18 +228,12 @@ function CustomLayout({
                         key={itemIndex}
                         className="flex space-x-2 mb-2 border border-gray-300 rounded-md p-2 items-center justify-between"
                       >
-                        {isTextMode ? (
-                          <span className="text-sm">{t(item as string)}</span>
-                        ) : (
-                          <div className="flex flex-col gap-2">
-                            <span className="text-sm">
-                              {t((item as { label: string }).label)}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {(item as { value: string }).value}
-                            </span>
-                          </div>
-                        )}
+                        <div className="flex flex-col gap-2">
+                          <span className="text-sm">{t(item.label)}</span>
+                          <span className="text-xs text-gray-500">
+                            {item.value}
+                          </span>
+                        </div>
                         {isEnabled && (
                           <Button
                             variant="link"
@@ -311,6 +270,99 @@ function CustomLayout({
   );
 }
 
+function CustomTextLayout({
+  form,
+  index,
+  isEnabled,
+  addButtonText,
+  emptyText,
+}: {
+  form: UseFormReturn<ReportTemplateFormData>;
+  index: number;
+  isEnabled: boolean;
+  addButtonText: string;
+  emptyText: string;
+}) {
+  const { t } = useTranslation();
+  const [textField, setTextField] = useState<string>("");
+
+  return (
+    <FormField
+      control={form.control}
+      name={`config.sections.${index}.options.text`}
+      render={({ field: { value = [], onChange } }) => {
+        const items = Array.isArray(value) ? value : [];
+
+        return (
+          <FormItem>
+            <FormControl>
+              <div className="flex flex-col w-full justify-between mb-4 gap-2">
+                <div className="flex flex-col gap-2 w-full">
+                  <FormLabel aria-required>{t("text")}</FormLabel>
+                  <Input
+                    value={textField}
+                    onChange={(e) => setTextField(e.target.value)}
+                    placeholder={t("enter_custom_text")}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                  disabled={!textField}
+                  onClick={() => {
+                    onChange([...items, textField]);
+                    setTextField("");
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {addButtonText}
+                </Button>
+                {items.length > 0 ? (
+                  <div className="flex flex-row flex-wrap gap-2 mt-4">
+                    {items.map((item, itemIndex) => (
+                      <div
+                        key={itemIndex}
+                        className="flex space-x-2 mb-2 border border-gray-300 rounded-md p-2 items-center justify-between"
+                      >
+                        <span className="text-sm">{t(item)}</span>
+                        {isEnabled && (
+                          <Button
+                            variant="link"
+                            type="button"
+                            size="xs"
+                            disabled={!isEnabled}
+                            onClick={() => {
+                              const newItems = [...items];
+                              newItems.splice(itemIndex, 1);
+                              onChange(newItems);
+                            }}
+                          >
+                            <CareIcon icon="l-multiply" className="size-2" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-red-500 text-sm mt-2">{emptyText}</p>
+                )}
+              </div>
+            </FormControl>
+            <FormMessage className="mt-2">
+              {
+                form.formState.errors?.config?.sections?.[index]?.options?.text
+                  ?.message
+              }
+            </FormMessage>
+          </FormItem>
+        );
+      }}
+    />
+  );
+}
+
 function CustomTableAndFields({
   form,
   index,
@@ -325,19 +377,38 @@ function CustomTableAndFields({
   style?: "list" | "text";
 }) {
   const { t } = useTranslation();
-  return (
-    <CustomLayout
+
+  if (isTable) {
+    return (
+      <CustomFieldsLayout
+        form={form}
+        index={index}
+        isEnabled={isEnabled}
+        addButtonText={t("add_field")}
+        emptyText={t("no_fields")}
+      />
+    );
+  }
+
+  return style === "text" ? (
+    <CustomTextLayout
       form={form}
       index={index}
-      fieldName={`config.sections.${index}.options.fields`}
+      isEnabled={isEnabled}
+      addButtonText={t("add_text")}
+      emptyText={t("no_text")}
+    />
+  ) : (
+    <CustomFieldsLayout
+      form={form}
+      index={index}
       isEnabled={isEnabled}
       addButtonText={t("add_field")}
       emptyText={t("no_fields")}
-      isTable={isTable}
-      style={style}
     />
   );
 }
+
 function SectionFieldsAndColumns({
   form,
   index,
@@ -430,6 +501,7 @@ function SectionBasicSettings({
     form.setValue(`config.sections.${index}.options.title`, "");
     form.setValue(`config.sections.${index}.options.columns`, []);
     form.setValue(`config.sections.${index}.options.fields`, []);
+    form.setValue(`config.sections.${index}.options.text`, []);
   };
 
   const handleTableChange = (value: boolean) => {
@@ -438,12 +510,10 @@ function SectionBasicSettings({
         const fields = form.getValues(
           `config.sections.${index}.options.fields`,
         );
-        if (fields && Array.isArray(fields) && typeof fields[0] === "string") {
-          form.setValue(
-            `config.sections.${index}.options.columns`,
-            fields as string[],
-          );
-        }
+        form.setValue(
+          `config.sections.${index}.options.columns`,
+          fields as string[],
+        );
       } else {
         const columns = form.getValues(
           `config.sections.${index}.options.columns`,
@@ -453,6 +523,8 @@ function SectionBasicSettings({
     } else {
       if (form.getValues(`config.sections.${index}.options.style`) === "text") {
         form.setValue(`config.sections.${index}.options.fields`, []);
+      } else {
+        form.setValue(`config.sections.${index}.options.text`, []);
       }
     }
   };

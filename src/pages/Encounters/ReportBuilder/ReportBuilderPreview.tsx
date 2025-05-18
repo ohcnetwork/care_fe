@@ -311,10 +311,11 @@ function HeaderElementPreview({
 function SectionPreview({ section }: { section: SectionConfig }) {
   const isTable = section.is_table;
   const isCustomSection = section.source === "custom_section";
+  const isTextStyle = !isTable && section.options.style === "text";
   const { t } = useTranslation();
 
   const fields = section.options.fields;
-
+  const text = section.options.text;
   const columns = section.options.columns;
 
   const customSectionFields = fields?.map((field) => {
@@ -330,18 +331,24 @@ function SectionPreview({ section }: { section: SectionConfig }) {
         <div className="text-lg font-bold">{t(section.options.title)}:</div>
       )}
       {isTable ? (
-        <div className="border">
-          <Table>
+        <div className="border w-full">
+          <Table className="table-fixed overflow-clip">
             <TableHeader className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">
               <TableRow>
                 {isCustomSection
                   ? customSectionFields?.map((field) => (
-                      <TableHead key={field.label} className="uppercase">
+                      <TableHead
+                        key={field.label}
+                        className="uppercase break-words whitespace-normal p-2"
+                      >
                         {t(field.label)}
                       </TableHead>
                     ))
                   : columns?.map((column) => (
-                      <TableHead key={column} className="uppercase">
+                      <TableHead
+                        key={column}
+                        className="uppercase break-words whitespace-normal p-2"
+                      >
                         {t(column)}
                       </TableHead>
                     ))}
@@ -354,25 +361,52 @@ function SectionPreview({ section }: { section: SectionConfig }) {
                       <TableHead key={field.value}>{t(field.value)}</TableHead>
                     ))
                   : columns?.map((column) => (
-                      <TableHead key={column}>{t("value")}</TableHead>
+                      <TableHead key={column}>########</TableHead>
                     ))}
               </TableRow>
             </TableBody>
           </Table>
         </div>
+      ) : isTextStyle ? (
+        isCustomSection ? (
+          <ul className="list-disc list-inside">
+            {text?.map((item, index) => <li key={index}>{t(item)}</li>)}
+          </ul>
+        ) : (
+          <ul className="list-disc list-inside">
+            <li className="lowercase">
+              {fields
+                ?.map(
+                  (field) =>
+                    t(typeof field === "string" ? field : field.label) +
+                    " " +
+                    t("value"),
+                )
+                .join(", ")}
+            </li>
+          </ul>
+        )
       ) : (
         <div className="flex flex-col gap-2">
-          {fields?.map((field, index) => {
-            if (typeof field === "string") {
-              return <div key={index}>{t(field)}</div>;
-            } else {
-              return (
-                <div key={index}>
-                  {t(field.label)}: {t(field.value)}
-                </div>
-              );
-            }
-          })}
+          <div className="grid grid-cols-[max-content_1fr] gap-3">
+            {fields?.map((field, index) => {
+              if (typeof field === "string") {
+                return (
+                  <React.Fragment key={index}>
+                    <span>{t(field)}:</span>
+                    <span>########</span>
+                  </React.Fragment>
+                );
+              } else {
+                return (
+                  <React.Fragment key={index}>
+                    <span>{t(field.label)}:</span>
+                    <span>{t(field.value)}</span>
+                  </React.Fragment>
+                );
+              }
+            })}
+          </div>
         </div>
       )}
     </div>
