@@ -22,7 +22,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
 
 export interface DrawingsTabProps {

@@ -239,11 +239,14 @@ export default function FacilityForm({
               control={form.control}
               name="facility_type"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="max-w-full">
                   <FormLabel aria-required>{t("facility_type")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger data-cy="facility-type">
+                      <SelectTrigger
+                        data-cy="facility-type"
+                        className="max-w-full truncate"
+                      >
                         <SelectValue placeholder={t("select_facility_type")} />
                       </SelectTrigger>
                     </FormControl>
@@ -433,7 +436,7 @@ export default function FacilityForm({
             control={form.control}
             name="is_public"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4 bg-muted/5">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
                 <FormControl>
                   <Checkbox
                     checked={field.value}

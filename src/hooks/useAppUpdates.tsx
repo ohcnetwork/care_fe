@@ -7,7 +7,10 @@ import { checkForUpdate } from "@/components/Common/UpdatableApp";
 const APP_VERSION_KEY = "app-version";
 const APP_UPDATED_KEY = "app-updated";
 
-export const useAppUpdates = (silentlyAutoUpdate?: boolean) => {
+export const useAppUpdates = (
+  silentlyAutoUpdate?: boolean,
+  onDismissUpdateToast?: () => void,
+) => {
   const [newVersion, setNewVersion] = useState<string>();
   const [appUpdated, setAppUpdated] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -61,6 +64,11 @@ export const useAppUpdates = (silentlyAutoUpdate?: boolean) => {
         action: {
           label: isUpdating ? t("updating") : t("update"),
           onClick: updateApp,
+        },
+        onDismiss() {
+          if (onDismissUpdateToast) {
+            onDismissUpdateToast();
+          }
         },
       });
     }

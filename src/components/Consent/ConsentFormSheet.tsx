@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { t } from "i18next";
 import { Edit, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -11,7 +12,6 @@ import * as z from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -65,8 +65,8 @@ const consentFormSchema = (isEdit: boolean) =>
       status: z.enum(CONSENT_STATUSES).default("active"),
       date: z.date(),
       period: z.object({
-        start: z.date().optional(),
-        end: z.date().optional(),
+        start: z.date().nullable().optional(),
+        end: z.date().nullable().optional(),
       }),
       note: z.string().optional(),
       fileEntries: z
@@ -80,7 +80,6 @@ const consentFormSchema = (isEdit: boolean) =>
     })
     .superRefine((data, ctx) => {
       if (isEdit) return;
-
       if (
         data.period.start &&
         data.period.end &&
@@ -140,7 +139,7 @@ export default function ConsentFormSheet({
       date: new Date(),
       period: {
         start: new Date(),
-        end: undefined,
+        end: null,
       },
       note: "",
       fileEntries: [],
@@ -224,10 +223,10 @@ export default function ConsentFormSheet({
         period: {
           start: existingConsent!.period.start
             ? new Date(existingConsent!.period.start)
-            : undefined,
+            : null,
           end: existingConsent!.period.end
             ? new Date(existingConsent!.period.end)
-            : undefined,
+            : null,
         },
         note: existingConsent!.note || "",
         fileEntries: [],
@@ -254,14 +253,14 @@ export default function ConsentFormSheet({
         ? {
             start: existingConsent!.period.start
               ? new Date(existingConsent!.period.start)
-              : undefined,
+              : null,
             end: existingConsent!.period.end
               ? new Date(existingConsent!.period.end)
-              : undefined,
+              : null,
           }
         : {
-            start: values.period.start,
-            end: values.period.end,
+            start: values.period.start ?? null,
+            end: values.period.end ?? null,
           },
       encounter: encounterId,
       source_attachments: [],
@@ -327,9 +326,21 @@ export default function ConsentFormSheet({
                       <FormLabel aria-required>
                         {t("consent_given_on")}
                       </FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={field.onChange}
+                      <Input
+                        type="datetime-local"
+                        {...field}
+                        value={
+                          field.value
+                            ? format(
+                                new Date(field.value),
+                                "yyyy-MM-dd'T'HH:mm",
+                              )
+                            : undefined
+                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value ? new Date(value) : null);
+                        }}
                       />
                       <FormMessage />
                     </FormItem>
@@ -343,9 +354,21 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_from")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={field.onChange}
+                        <Input
+                          type="datetime-local"
+                          {...field}
+                          value={
+                            field.value
+                              ? format(
+                                  new Date(field.value),
+                                  "yyyy-MM-dd'T'HH:mm",
+                                )
+                              : undefined
+                          }
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value ? new Date(value) : null);
+                          }}
                         />
                         <FormMessage />
                       </FormItem>
@@ -358,9 +381,21 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_until")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={field.onChange}
+                        <Input
+                          type="datetime-local"
+                          {...field}
+                          value={
+                            field.value
+                              ? format(
+                                  new Date(field.value),
+                                  "yyyy-MM-dd'T'HH:mm",
+                                )
+                              : undefined
+                          }
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value ? new Date(value) : null);
+                          }}
                         />
                         <FormMessage />
                       </FormItem>

@@ -656,11 +656,20 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <p className="text-sm text-gray-500">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={handleCancel}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            data-cy="cancel-questionnaire-form"
+          >
             {t("cancel")}
           </Button>
           {id && (
-            <Button variant="outline" onClick={handleDownload}>
+            <Button
+              variant="outline"
+              onClick={handleDownload}
+              data-cy="download-questionnaire-form"
+            >
               <CareIcon icon="l-import" className="mr-1 size-4" />
               {t("download")}
             </Button>
@@ -671,7 +680,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               {t("import_from_url")}
             </Button>
           )}
-          <Button onClick={handleSave} disabled={isCreating || isUpdating}>
+          <Button
+            onClick={handleSave}
+            disabled={isCreating || isUpdating}
+            data-cy="save-questionnaire-form"
+          >
             <CareIcon icon="l-save" className="mr-2 size-4" />
             {id ? t("save") : t("create")}
           </Button>
@@ -1398,7 +1411,7 @@ function QuestionEditor({
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex flex-col items-start">
                           <span>{type.name}</span>
-                          <span className="text-xs max-w-xs text-muted-foreground whitespace-normal">
+                          <span className="text-xs max-w-xs text-gray-500 whitespace-normal">
                             {t(type.description)}
                           </span>
                         </div>
@@ -1610,7 +1623,7 @@ function QuestionEditor({
                 <h3 className="text-sm font-medium mb-2">
                   {t("group_layout_options")}
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-gray-500 mb-4">
                   {t("choose_layout_style")}
                 </p>
                 <RadioGroup

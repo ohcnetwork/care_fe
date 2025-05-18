@@ -405,7 +405,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         <p className="text-sm font-medium">
                           {t("delete_facility")}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-gray-700">
                           {t("delete_facility_description")}
                         </p>
                       </div>
