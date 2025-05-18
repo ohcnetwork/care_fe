@@ -1,8 +1,6 @@
-import careConfig from "@careConfig";
 import DOMPurify from "dompurify";
-import type React from "react";
 import {
-  type ChangeEventHandler,
+  ChangeEventHandler,
   useCallback,
   useEffect,
   useRef,
@@ -34,6 +32,7 @@ import {
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
+import { compressImage } from "@/Utils/compressImage";
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
 interface Props {
@@ -68,7 +67,6 @@ const isImageFile = (file?: File) => file?.type.split("/")[0] === "image";
 type IVideoConstraint =
   (typeof VideoConstraints)[keyof typeof VideoConstraints];
 
-// Function to create a centered crop with a 1:1 aspect ratio
 function centerAspectCrop(
   mediaWidth: number,
   mediaHeight: number,
@@ -89,7 +87,6 @@ function centerAspectCrop(
   );
 }
 
-// Function to get a resized canvas
 function getResizedCanvas(
   canvas: HTMLCanvasElement,
   maxWidth: number,
@@ -153,7 +150,6 @@ const AvatarEditModal = ({
   const [isDragging, setIsDragging] = useState(false);
   const { requestPermission } = useMediaDevicePermission();
 
-  // Crop related states
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [isCropping, setIsCropping] = useState(false);
@@ -178,28 +174,24 @@ const AvatarEditModal = ({
 
       const canvas = webRef.current?.getCanvas();
       if (canvas) {
-        // Create a square crop from the center of the webcam image
         const size = Math.min(canvas.width, canvas.height);
         const x = (canvas.width - size) / 2;
         const y = (canvas.height - size) / 2;
 
         const squareCanvas = document.createElement("canvas");
 
-        // Use a larger canvas size initially for better quality
         squareCanvas.width = size;
         squareCanvas.height = size;
 
         const ctx = squareCanvas.getContext("2d");
 
         if (ctx && canvas) {
-          // Enable high quality image rendering
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = "high";
 
           ctx.drawImage(canvas, x, y, size, size, 0, 0, size, size);
 
-          // Resize to ensure dimensions are less than 400px
-          const resizedCanvas = getResizedCanvas(squareCanvas, 400, 400);
+          const resizedCanvas = getResizedCanvas(squareCanvas, 1024, 1024);
 
           resizedCanvas.toBlob(
             (blob) => {
@@ -267,8 +259,12 @@ const AvatarEditModal = ({
       return;
     }
 
-    // Default 1MB = 1048576 bytes
-    if (file.size > careConfig.maxImageSize) {
+    // Check file size (min 1KB, max 2MB)
+    if (file.size < 1024) {
+      toast.error(t("image_too_small"));
+      return;
+    }
+    if (file.size > 1024 * 1024 * 2) {
       toast.error(t("image_too_large"));
       return;
     }
@@ -281,7 +277,6 @@ const AvatarEditModal = ({
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
 
-    // Initialize with a centered 1:1 crop
     setCrop(centerAspectCrop(width, height, 1));
   };
 
@@ -321,6 +316,30 @@ const AvatarEditModal = ({
         return;
       }
 
+      // Check dimensions after crop
+      const finalWidth = crop.width;
+      const finalHeight = crop.height;
+
+      // Validate dimensions
+      if (finalWidth < 400 || finalHeight < 400) {
+        toast.error(t("image_dimensions_too_small"));
+        return;
+      }
+
+      if (finalWidth > 1024 || finalHeight > 1024) {
+        // Instead of failing, resize the image to fit within max dimensions
+        const ratio = Math.min(1024 / finalWidth, 1024 / finalHeight);
+        canvas.width = finalWidth * ratio * pixelRatio;
+        canvas.height = finalHeight * ratio * pixelRatio;
+
+        // Update display size
+        canvas.style.width = `${finalWidth * ratio}px`;
+        canvas.style.height = `${finalHeight * ratio}px`;
+
+        // Scale context again after resize
+        ctx.scale(pixelRatio, pixelRatio);
+      }
+
       // Scale the context to account for pixel ratio
       ctx.scale(pixelRatio, pixelRatio);
 
@@ -341,19 +360,38 @@ const AvatarEditModal = ({
         crop.height,
       );
 
-      // Convert to blob with high quality
+      // Convert to blob with appropriate compression
       canvas.toBlob(
         (blob) => {
           if (blob) {
-            const croppedFile = new File([blob], "cropped-image.png", {
-              type: "image/png",
-            });
-            setSelectedFile(croppedFile);
-            setIsCropping(false);
+            if (blob.size > 1024 * 1024 * 2) {
+              compressImage(blob, 0.8, 1024 * 1024 * 2, (compressedBlob) => {
+                const croppedFile = new File(
+                  [compressedBlob],
+                  "cropped-image.jpg",
+                  {
+                    type: "image/jpeg",
+                  },
+                );
+                setSelectedFile(croppedFile);
+                setIsCropping(false);
 
-            // Create a preview of the cropped image
-            const croppedUrl = URL.createObjectURL(blob);
-            setPreview(croppedUrl);
+                // Create a preview of the cropped image
+                const croppedUrl = URL.createObjectURL(compressedBlob);
+                setPreview(croppedUrl);
+              });
+            } else {
+              // If size is acceptable, use the blob as is
+              const croppedFile = new File([blob], "cropped-image.jpg", {
+                type: "image/jpeg", // Use JPEG for better compression
+              });
+              setSelectedFile(croppedFile);
+              setIsCropping(false);
+
+              // Create a preview of the cropped image
+              const croppedUrl = URL.createObjectURL(blob);
+              setPreview(croppedUrl);
+            }
           }
         },
         "image/png",
@@ -411,8 +449,12 @@ const AvatarEditModal = ({
     if (!isImageFile(droppedFile))
       return dragProps.setFileDropError("Please drop an image file to upload!");
 
-    // Default 1MB = 1048576 bytes
-    if (droppedFile.size > careConfig.maxImageSize) {
+    // Check file size (min 1KB, max 2MB)
+    if (droppedFile.size < 1024) {
+      toast.error(t("image_too_small"));
+      return;
+    }
+    if (droppedFile.size > 1024 * 1024 * 2) {
       toast.error(t("image_too_large"));
       return;
     }
@@ -475,8 +517,10 @@ const AvatarEditModal = ({
                         aspect={1}
                         circularCrop
                         ruleOfThirds
-                        minWidth={100} // Set minimum crop size
-                        minHeight={100}
+                        minWidth={400}
+                        minHeight={400}
+                        maxHeight={1024}
+                        maxWidth={1024}
                       >
                         <img
                           ref={imgRef}
@@ -484,7 +528,7 @@ const AvatarEditModal = ({
                           alt="Crop preview"
                           onLoad={onImageLoad}
                           className="max-h-[60vh] max-w-full object-contain"
-                          crossOrigin="anonymous" // Add this to handle CORS issues
+                          crossOrigin="anonymous"
                         />
                       </ReactCrop>
                       <canvas ref={previewCanvasRef} className="hidden" />

@@ -1520,6 +1520,7 @@
   "icmr_specimen_referral_form": "ICMR Specimen Referral Form",
   "identifier": "Identifier",
   "image_too_large": "Image too large",
+  "image_too_small": "Image too small",
   "immunisation-records": "Immunisation",
   "import": "Import",
   "import_form": "Import Form",
