@@ -69,7 +69,7 @@ describe("Patient Encounter Questionnaire", () => {
 describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("devnurse5");
+    cy.loginByApi("nurse");
     cy.visit("/");
     facilityCreation.selectFirstRandomFacility();
   });
