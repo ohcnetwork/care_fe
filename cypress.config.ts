@@ -28,6 +28,15 @@ export default defineConfig({
         cypressSplit(on, config);
       }
 
+      // Add required environment parameters for parallel execution
+      config.env = {
+        ...config.env,
+        osName: "linux",
+        osVersion: "Ubuntu",
+        browserName: "Chrome",
+        browserVersion: "136",
+      };
+
       return config;
     },
     baseUrl: "http://localhost:4000",
