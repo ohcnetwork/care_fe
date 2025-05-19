@@ -147,12 +147,7 @@ function FilterFields({
                     disabled={disabled}
                   />
                 </FormControl>
-                <FormMessage>
-                  {
-                    parentForm.formState.errors?.compose?.[type]?.[nestIndex]
-                      ?.filter?.[index]?.property?.message
-                  }
-                </FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -168,12 +163,7 @@ function FilterFields({
                     disabled={disabled}
                   />
                 </FormControl>
-                <FormMessage>
-                  {
-                    parentForm.formState.errors?.compose?.[type]?.[nestIndex]
-                      ?.filter?.[index]?.op?.message
-                  }
-                </FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -189,12 +179,7 @@ function FilterFields({
                     disabled={disabled}
                   />
                 </FormControl>
-                <FormMessage>
-                  {
-                    parentForm.formState.errors?.compose?.[type]?.[nestIndex]
-                      ?.filter?.[index]?.value?.message
-                  }
-                </FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />

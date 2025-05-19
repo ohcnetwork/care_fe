@@ -74,7 +74,7 @@ export const CodingField = ({
       <FormField
         control={form.control}
         name={`${name}.code`}
-        render={({ field, fieldState: { error } }) => (
+        render={({ field }) => (
           <FormItem className="flex-1">
             <FormControl>
               <Input
@@ -86,14 +86,14 @@ export const CodingField = ({
                 }}
               />
             </FormControl>
-            <FormMessage>{error?.message}</FormMessage>
+            <FormMessage />
           </FormItem>
         )}
       />
       <FormField
         control={form.control}
         name={`${name}.display`}
-        render={({ field, fieldState: { error } }) => (
+        render={({ field }) => (
           <FormItem className="flex-1">
             <FormControl>
               <Input
@@ -103,7 +103,7 @@ export const CodingField = ({
                 readOnly
               />
             </FormControl>
-            <FormMessage>{error?.message}</FormMessage>
+            <FormMessage />
           </FormItem>
         )}
       />
