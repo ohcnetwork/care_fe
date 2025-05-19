@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/input-password";
 
 interface PasswordDialogProps {
   open: boolean;
@@ -43,7 +43,6 @@ export function PasswordDialog({
 }: PasswordDialogProps) {
   const { t } = useTranslation();
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,21 +76,11 @@ export function PasswordDialog({
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("password")}</label>
-              <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-hidden"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  <CareIcon icon={showPassword ? "l-eye" : "l-eye-slash"} />
-                </button>
-              </div>
+              <PasswordInput
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoFocus
+              />
               {error && <p className="text-sm text-red-500">{error}</p>}
             </div>
           </div>
