@@ -43,6 +43,7 @@ export function PasswordDialog({
 }: PasswordDialogProps) {
   const { t } = useTranslation();
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,12 +77,21 @@ export function PasswordDialog({
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("password")}</label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoFocus
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-hidden"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  <CareIcon icon={showPassword ? "l-eye" : "l-eye-slash"} />
+                </button>
+              </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
             </div>
           </div>
