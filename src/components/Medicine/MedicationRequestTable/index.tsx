@@ -22,7 +22,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 interface EmptyStateProps {
   searching?: boolean;

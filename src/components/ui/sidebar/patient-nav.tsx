@@ -8,7 +8,7 @@ import { PatientSwitcher } from "@/components/ui/sidebar/patient-switcher";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 import { NavigationLink } from "./facility-nav";
 

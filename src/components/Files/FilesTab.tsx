@@ -51,7 +51,7 @@ import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 export interface FilesTabProps {
   type: "encounter" | "patient";
