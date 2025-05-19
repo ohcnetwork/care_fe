@@ -339,27 +339,17 @@ export function ValueSetForm({
           concept: z
             .array(
               z.object({
-                code: z.string().refine((val) => val !== "", {
-                  message: t("code_required"),
-                }),
-                display: z.string().refine((val) => val !== "", {
-                  message: t("display_required"),
-                }),
+                code: z.string().min(1, t("field_required")),
+                display: z.string().min(1, t("field_required")),
               }),
             )
             .optional(),
           filter: z
             .array(
               z.object({
-                property: z.string().refine((val) => val !== "", {
-                  message: t("property_required"),
-                }),
-                op: z.string().refine((val) => val !== "", {
-                  message: t("operator_required"),
-                }),
-                value: z.string().refine((val) => val !== "", {
-                  message: t("value_required"),
-                }),
+                property: z.string().min(1, t("field_required")),
+                op: z.string().min(1, t("field_required")),
+                value: z.string().min(1, t("field_required")),
               }),
             )
             .optional(),
@@ -371,27 +361,17 @@ export function ValueSetForm({
           concept: z
             .array(
               z.object({
-                code: z.string().refine((val) => val !== "", {
-                  message: t("code_required"),
-                }),
-                display: z.string().refine((val) => val !== "", {
-                  message: t("display_required"),
-                }),
+                code: z.string().min(1, t("field_required")),
+                display: z.string().min(1, t("field_required")),
               }),
             )
             .optional(),
           filter: z
             .array(
               z.object({
-                property: z.string().refine((val) => val !== "", {
-                  message: t("property_required"),
-                }),
-                op: z.string().refine((val) => val !== "", {
-                  message: t("operator_required"),
-                }),
-                value: z.string().refine((val) => val !== "", {
-                  message: t("value_required"),
-                }),
+                property: z.string().min(1, t("field_required")),
+                op: z.string().min(1, t("field_required")),
+                value: z.string().min(1, t("field_required")),
               }),
             )
             .optional(),
