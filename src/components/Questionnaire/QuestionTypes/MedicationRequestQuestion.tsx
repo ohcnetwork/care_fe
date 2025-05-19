@@ -5,6 +5,7 @@ import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -793,6 +794,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   const addInstruction = (instruction: Code) => {
     if (!currentInstructions.some((item) => item.code === instruction.code)) {
       updateInstructions([...currentInstructions, instruction]);
+    } else {
+      toast.error(`${instruction.display} ${t("is_already_selected")}`);
     }
   };
 

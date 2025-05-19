@@ -1588,6 +1588,7 @@
   "ip_encounter": "IP Encounter",
   "ip_op_obs_emr_number": "Ip/op/obs/emr number",
   "is": "Is",
+  "is_already_selected": "is already selected",
   "is_antenatal": "Is Antenatal",
   "is_atypical_presentation": "Is Atypical presentation",
   "is_component": "Is component",
