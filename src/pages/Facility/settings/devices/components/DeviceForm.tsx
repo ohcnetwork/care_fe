@@ -484,7 +484,20 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 name={`contact.${index}.system`}
                 render={({ field }) => (
                   <FormItem className="space-y-0">
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        const isPhone = (system: string) =>
+                          ["phone", "fax", "sms"].includes(system);
+
+                        // If the system is changing from a phone type to a non-phone type, clear the value
+                        if (isPhone(value) !== isPhone(field.value)) {
+                          form.setValue(`contact.${index}.value`, "");
+                        }
+
+                        field.onChange(value);
+                      }}
+                    >
                       <FormControl>
                         <SelectTrigger className="h-[42px] md:h-[38px]">
                           <SelectValue
@@ -573,7 +586,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               control={form.control}
               name="metadata"
               render={({ field }) => (
-                <FormItem className="space-y-0">
+                <FormItem className="space-y-0 block">
                   <PluginDeviceConfigureForm
                     type={careType}
                     facilityId={facilityId}

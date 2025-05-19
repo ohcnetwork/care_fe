@@ -485,7 +485,7 @@
   "caution": "ജാഗ്രത",
   "central_nursing_station": "സെൻട്രൽ നഴ്‌സിംഗ് സ്റ്റേഷൻ",
   "change_avatar": "അവതാർ മാറ്റുക",
-  "change_avatar_note": "JPG, GIF അല്ലെങ്കിൽ PNG. പരമാവധി 1MB.",
+  "change_avatar_note": "JPG, GIF അല്ലെങ്കിൽ PNG. പരമാവധി {{maxSize}}MB.",
   "change_file": "ഫയൽ മാറ്റുക",
   "change_password": "പാസ്വേഡ് മാറ്റുക",
   "change_phone_number": "ഫോൺ നമ്പർ മാറ്റുക",
