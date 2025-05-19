@@ -126,7 +126,6 @@ export const medicineNames = [
 
 export const allergyNames = [
   "Vomitus",
-  "Gold",
   "Methylbenzethonium chloride",
   "Iron",
   "Soya bean protein",
