@@ -304,7 +304,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
               <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
                 <Card className="basis-1/2">
                   <CardContent className="p-6 flex flex-col h-full">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                      data-cy="facility-address-details"
+                    >
                       <div className="col-span-1 sm:col-span-2 flex flex-col">
                         <span className="font-semibold">{t("address")}</span>
                         <span className="text-gray-700 whitespace-pre-wrap break-words text-sm">

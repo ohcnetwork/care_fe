@@ -143,6 +143,7 @@ export default function OrganizationFacilities({
                     <CardFooter className="flex justify-end">
                       <div>
                         <Button
+                          data-cy="view-facility-button"
                           variant="link"
                           size="icon"
                           className="text-primary"
