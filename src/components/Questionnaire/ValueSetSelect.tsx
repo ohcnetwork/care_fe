@@ -217,7 +217,12 @@ export default function ValueSetSelect({
 
   const content = (
     <Command filter={() => 1} className="rounded-t-3xl">
-      <div className="py-3 px-3 border-b border-gray-200 flex justify-between items-center">
+      <div
+        className={cn(
+          "px-3 border-b border-gray-200 flex justify-between items-center",
+          title && "py-3",
+        )}
+      >
         {title && <h3 className="text-base font-semibold">{title}</h3>}
         <Tabs
           value={activeTab.toString()}

@@ -8,7 +8,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -48,17 +47,17 @@ function InstructionContentSection({
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {currentInstructions.length > 0 && (
-        <ScrollArea className="max-h-60">
-          <div className="flex flex-wrap gap-2 mb-2">
+        <div className="max-h-32 overflow-y-auto pr-1">
+          <div className="flex flex-wrap gap-2 mb-1">
             {currentInstructions.map((instruction) => (
               <Badge
                 key={instruction.code}
                 variant="secondary"
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 break-words"
               >
-                {instruction.display}
+                <span className="whitespace-normal">{instruction.display}</span>
                 {!isReadOnly && (
                   <Button
                     variant="ghost"
@@ -74,7 +73,7 @@ function InstructionContentSection({
               </Badge>
             ))}
           </div>
-        </ScrollArea>
+        </div>
       )}
 
       {!isReadOnly && (
@@ -94,7 +93,6 @@ function InstructionContentSection({
             }
             disabled={disabled || isReadOnly}
             data-cy="medication-instructions"
-            wrapTextForSmallScreen
           />
         </div>
       )}
@@ -185,11 +183,7 @@ export default function InstructionsPopover({
       <PopoverTrigger asChild>
         {TriggerButton(currentInstructions, disabledButton)}
       </PopoverTrigger>
-      <PopoverContent
-        side="bottom"
-        align="start"
-        className="w-96 absolute mt-2"
-      >
+      <PopoverContent side="bottom" align="start" className="w-xl">
         <InstructionContentSection
           currentInstructions={currentInstructions}
           isReadOnly={isReadOnly}
