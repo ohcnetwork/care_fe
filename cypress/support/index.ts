@@ -9,6 +9,11 @@ declare global {
       getAttached(selector: string): Chainable<Subject>;
       clickSubmitButton(buttonText?: string): Chainable<Element>;
       clickCancelButton(buttonText?: string): Chainable<Element>;
+      typeAndVerifyOptionNotPresent(
+        selector: string,
+        value: string,
+        emptyMessage: string,
+      ): Chainable<void>;
       typeAndSelectOption(
         element: string,
         reference: string,

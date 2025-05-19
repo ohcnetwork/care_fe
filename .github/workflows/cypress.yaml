@@ -117,6 +117,7 @@ jobs:
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
           CYPRESS_CHROME_ARGS: "--no-sandbox --disable-dev-shm-usage"
+          CYPRESS_BROWSER_VERSION: "136"
 
       # For forked PRs
       - name: "UI Tests - Chrome (Forked)"
@@ -142,6 +143,7 @@ jobs:
           SPLIT_INDEX: ${{ strategy.job-index }}
           DEBUG: "cypress-split,find-cypress-specs"
           CYPRESS_CHROME_ARGS: "--no-sandbox --disable-dev-shm-usage"
+          CYPRESS_BROWSER_VERSION: "136"
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v4
