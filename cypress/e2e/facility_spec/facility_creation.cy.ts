@@ -73,14 +73,12 @@ describe("Facility Management", () => {
         .verifyFacilityCreation()
         .waitForFacilityCardsToLoad()
         .searchFacility(testFacility.name)
-        .verifyFacilityNameInCard(testFacility.name);
-      cy.verifyAndClickElement(
-        '[data-cy="view-facility-button"]',
-        "View Facility",
-      );
-      cy.verifyContentPresence('[data-cy="facility-address-details"]', [
-        testFacility.address,
-      ]);
+        .verifyFacilityNameInCard(testFacility.name)
+        .verifyFacilityDetails(
+          testFacility.name,
+          facilityType,
+          testFacility.address,
+        );
     });
   });
 });

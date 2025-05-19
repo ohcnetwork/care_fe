@@ -196,4 +196,19 @@ export class FacilityCreation {
     }
     return this;
   }
+
+  verifyFacilityDetails(
+    facilityName: string,
+    facilityType: string,
+    address: string,
+  ) {
+    cy.verifyAndClickElement(
+      '[data-cy="view-facility-button"]',
+      "View Facility",
+    );
+    cy.verifyContentPresence('[data-cy="facility-address-details"]', [address]);
+    cy.verifyContentPresence('[data-cy="facility-name-card"]', [facilityName]);
+    cy.verifyContentPresence('[data-cy="facility-type-card"]', [facilityType]);
+    return this;
+  }
 }

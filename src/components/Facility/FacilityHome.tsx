@@ -239,7 +239,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   <div className="flex-1 min-w-0 mb-2">
                     <div className="text-white">
                       <TooltipComponent content={facilityData?.name}>
-                        <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold">
+                        <h1
+                          className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold"
+                          data-cy="facility-name-card"
+                        >
                           {facilityData?.name}
                         </h1>
                       </TooltipComponent>
@@ -247,7 +250,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         content={facilityData?.facility_type}
                         side="right"
                       >
-                        <h2 className="text-xs sm:text-sm md:text-base lg:text-base text-white/70">
+                        <h2
+                          className="text-xs sm:text-sm md:text-base lg:text-base text-white/70"
+                          data-cy="facility-type-card"
+                        >
                           {facilityData?.facility_type}
                         </h2>
                       </TooltipComponent>
