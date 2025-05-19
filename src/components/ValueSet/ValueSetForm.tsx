@@ -147,6 +147,12 @@ function FilterFields({
                     disabled={disabled}
                   />
                 </FormControl>
+                <FormMessage>
+                  {
+                    parentForm.formState.errors?.compose?.[type]?.[nestIndex]
+                      ?.filter?.[index]?.property?.message
+                  }
+                </FormMessage>
               </FormItem>
             )}
           />
@@ -162,6 +168,12 @@ function FilterFields({
                     disabled={disabled}
                   />
                 </FormControl>
+                <FormMessage>
+                  {
+                    parentForm.formState.errors?.compose?.[type]?.[nestIndex]
+                      ?.filter?.[index]?.op?.message
+                  }
+                </FormMessage>
               </FormItem>
             )}
           />
@@ -177,6 +189,12 @@ function FilterFields({
                     disabled={disabled}
                   />
                 </FormControl>
+                <FormMessage>
+                  {
+                    parentForm.formState.errors?.compose?.[type]?.[nestIndex]
+                      ?.filter?.[index]?.value?.message
+                  }
+                </FormMessage>
               </FormItem>
             )}
           />
@@ -319,14 +337,29 @@ export function ValueSetForm({
         z.object({
           system: z.string(),
           concept: z
-            .array(z.object({ code: z.string(), display: z.string() }))
+            .array(
+              z.object({
+                code: z.string().refine((val) => val !== "", {
+                  message: t("code_required"),
+                }),
+                display: z.string().refine((val) => val !== "", {
+                  message: t("display_required"),
+                }),
+              }),
+            )
             .optional(),
           filter: z
             .array(
               z.object({
-                property: z.string(),
-                op: z.string(),
-                value: z.string(),
+                property: z.string().refine((val) => val !== "", {
+                  message: t("property_required"),
+                }),
+                op: z.string().refine((val) => val !== "", {
+                  message: t("operator_required"),
+                }),
+                value: z.string().refine((val) => val !== "", {
+                  message: t("value_required"),
+                }),
               }),
             )
             .optional(),
@@ -336,14 +369,29 @@ export function ValueSetForm({
         z.object({
           system: z.string(),
           concept: z
-            .array(z.object({ code: z.string(), display: z.string() }))
+            .array(
+              z.object({
+                code: z.string().refine((val) => val !== "", {
+                  message: t("code_required"),
+                }),
+                display: z.string().refine((val) => val !== "", {
+                  message: t("display_required"),
+                }),
+              }),
+            )
             .optional(),
           filter: z
             .array(
               z.object({
-                property: z.string(),
-                op: z.string(),
-                value: z.string(),
+                property: z.string().refine((val) => val !== "", {
+                  message: t("property_required"),
+                }),
+                op: z.string().refine((val) => val !== "", {
+                  message: t("operator_required"),
+                }),
+                value: z.string().refine((val) => val !== "", {
+                  message: t("value_required"),
+                }),
               }),
             )
             .optional(),
