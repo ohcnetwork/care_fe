@@ -159,13 +159,7 @@ export const conditionNames = [
   "Renal scarring due to vesicoureteral reflux",
 ];
 
-export const conditionStatus = [
-  "Active",
-  "Recurrence",
-  "Relapse",
-  "Inactive",
-  "Resolved",
-];
+export const conditionStatus = ["Active", "Recurrence", "Relapse"];
 
 export const symptomSeverity = ["Severe", "Moderate", "Mild"];
 
