@@ -265,7 +265,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                 name="assigned_facility"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("facility_for_care_support")}</FormLabel>
+                    <FormLabel aria-required>
+                      {t("facility_for_care_support")}
+                    </FormLabel>
                     <FormControl>
                       <Autocomplete
                         data-cy="select-facility"
