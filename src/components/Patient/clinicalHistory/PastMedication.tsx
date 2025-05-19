@@ -83,8 +83,8 @@ const MedicineRow = ({
           {dosage || "-"}
         </TableCell>
 
-        <TableCell className="px-4 py-4 w-[14%] text-center">
-          {frequencyDisplay}
+        <TableCell className="px-4 py-4 w-[14%] text-center whitespace-pre-wrap break-words min-w-[20rem]">
+          {frequencyDisplay || "-"}
         </TableCell>
 
         <TableCell className="px-4 py-4 w-[14%] text-center">
@@ -125,7 +125,7 @@ const MedicineRow = ({
               >
                 {t("view_encounter")}
               </DropdownMenuItem>
-              {combinedInstruction && (
+              {combinedInstruction && combinedInstruction !== "-" && (
                 <DropdownMenuItem
                   onClick={() => setShowInstruction(!showInstruction)}
                 >
