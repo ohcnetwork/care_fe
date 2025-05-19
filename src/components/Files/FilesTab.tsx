@@ -49,6 +49,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
@@ -588,7 +589,7 @@ export const FilesTab = (props: FilesTabProps) => {
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
                   >
-                    {file.uploaded_by?.first_name} {file.uploaded_by?.last_name}
+                    {file.uploaded_by && formatName(file.uploaded_by)}
                   </TableCell>
                   <TableCell
                     className={cn(
