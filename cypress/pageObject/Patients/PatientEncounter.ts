@@ -244,15 +244,9 @@ export class PatientEncounter {
   }
 
   deleteDiagnosis() {
-    cy.get('[data-cy="diagnosis-verification"]').last().scrollIntoView();
-    cy.clickAndSelectOption(
-      '[data-cy="diagnosis-verification"]',
-      "Entered in Error",
-      {
-        position: "last",
-      },
-    );
-
+    cy.get('[data-cy="diagnosis-options"]').last().scrollIntoView();
+    cy.get('[data-cy="diagnosis-options"]').last().click();
+    cy.get('[data-cy="remove-diagnosis"]').click();
     return this;
   }
 
