@@ -34,7 +34,7 @@ const uploadFile = async (
           error = xhr.responseText;
         }
         const httpError = new HTTPError({
-          message: t("image_upload_validation_error"),
+          message: "Request failed",
           status: xhr.status,
           silent: false,
           cause: error,
