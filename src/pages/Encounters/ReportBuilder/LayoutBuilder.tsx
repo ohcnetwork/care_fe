@@ -64,6 +64,11 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
     name: "config.layout.page_margin.mode",
   });
 
+  const pageNumberingEnabled = useWatch({
+    control: form.control,
+    name: "config.layout.page_numbering.enabled",
+  });
+
   const handlePageSizeChange = (margins: PageMargin) => {
     if (margins) {
       const mode = margins.mode;
@@ -279,60 +284,64 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="config.layout.page_numbering.format"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("format")}</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="text"
-                  placeholder={t("page_number_format")}
-                  className="max-w-[300px]"
-                />
-              </FormControl>
-              <p className="text-sm text-muted-foreground">
-                {t("page_number_format_help")}
-              </p>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex flex-col sm:flex-row gap-3">
+          <FormField
+            control={form.control}
+            name="config.layout.page_numbering.format"
+            disabled={!pageNumberingEnabled}
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-2">
+                <FormLabel>{t("format")}</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="text"
+                    placeholder={t("page_number_format")}
+                    className="w-full sm:w-auto"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="config.layout.page_numbering.align"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("alignment")}</FormLabel>
-              <FormControl>
-                <Select
-                  value={field.value}
-                  onValueChange={handlePageNumberingAlignChange}
-                >
-                  <SelectTrigger className="max-w-[200px]">
-                    <SelectValue placeholder={t("select_alignment")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALIGNMENT_OPTIONS.map((alignment) => (
-                      <SelectItem key={alignment.id} value={alignment.id}>
-                        {alignment.value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="config.layout.page_numbering.align"
+            disabled={!pageNumberingEnabled}
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>{t("alignment")}</FormLabel>
+                <FormControl>
+                  <Select
+                    value={field.value}
+                    onValueChange={handlePageNumberingAlignChange}
+                    disabled={!pageNumberingEnabled}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t("select_alignment")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALIGNMENT_OPTIONS.map((alignment) => (
+                        <SelectItem key={alignment.id} value={alignment.id}>
+                          {alignment.value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <p className="text-sm text-gray-600">{t("page_number_format_help")}</p>
 
         {/* Text Settings */}
         <div>
           <h3 className="text-lg font-semibold mb-4">{t("text_settings")}</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="config.layout.text.font"

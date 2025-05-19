@@ -10,7 +10,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -85,7 +84,18 @@ export default function ReportBuilderSheet({
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>{t("available_reports")}</SheetTitle>
+          <SheetTitle className="flex flex-col sm:flex-row justify-between mt-4">
+            <span>{t("available_reports")}</span>
+            {canManageTemplate && (
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/new`}
+                >
+                  {t("create_new_report")}
+                </Link>
+              </Button>
+            )}
+          </SheetTitle>
         </SheetHeader>
         <div className="space-y-4 mt-6">
           <ScrollArea className="h-[calc(100vh-10rem)]">
@@ -130,17 +140,6 @@ export default function ReportBuilderSheet({
             </div>
           </ScrollArea>
         </div>
-        <SheetFooter className="mt-4">
-          {canManageTemplate && (
-            <Button variant="outline" size="sm" asChild>
-              <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/new`}
-              >
-                {t("create_new_report")}
-              </Link>
-            </Button>
-          )}
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

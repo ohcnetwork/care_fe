@@ -111,13 +111,13 @@ export const REPORT_SIZE_OPTIONS = [
   },
   {
     id: "us-letter",
-    value: "US LETTER",
+    value: "Letter",
     margins: PAPER_MARGINS.STANDARD,
     dimensions: { width: 612, height: 792 },
   },
   {
     id: "us-legal",
-    value: "US LEGAL",
+    value: "Legal",
     margins: PAPER_MARGINS.STANDARD,
     dimensions: { width: 612, height: 1008 },
   },

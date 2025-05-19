@@ -94,7 +94,7 @@ const defaultTemplate: ReportTemplateFormData = {
             {
               type: "rule",
               length: 100,
-              stroke: "#808080",
+              stroke: "#000000",
               align: "left",
             },
           ],
@@ -126,7 +126,7 @@ const defaultTemplate: ReportTemplateFormData = {
               label: "Created on",
               format: "[day]/[month]/[year]",
               style: {
-                fill: "#808080",
+                fill: "#000000",
                 weight: 500,
               },
               align: "left",
@@ -139,7 +139,7 @@ const defaultTemplate: ReportTemplateFormData = {
             {
               type: "rule",
               length: 100,
-              stroke: "#808080",
+              stroke: "#000000",
               align: "left",
             },
           ],
