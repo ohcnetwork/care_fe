@@ -135,7 +135,7 @@ export default function UserResetPassword({
                   control={form.control}
                   name="new_password_1"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="h-full flex flex-col">
                       <FormLabel>{t("new_password")}</FormLabel>
                       <FormControl>
                         <PasswordInput
@@ -147,10 +147,16 @@ export default function UserResetPassword({
                           onBlur={() => setIsPasswordFieldFocused(false)}
                         />
                       </FormControl>
-                      {isPasswordFieldFocused ? (
+                      <div
+                        className="text-small mt-2 pl-2 min-h-[120px] overflow-hidden relative"
+                        aria-live="polite"
+                      >
                         <div
-                          className="text-small mt-2 pl-2 text-secondary-500"
-                          aria-live="polite"
+                          className={`transition-opacity duration-150 ${
+                            isPasswordFieldFocused
+                              ? "opacity-100"
+                              : "opacity-0 absolute"
+                          }`}
                         >
                           <ValidationHelper
                             isInputEmpty={!field.value}
@@ -180,9 +186,16 @@ export default function UserResetPassword({
                             ]}
                           />
                         </div>
-                      ) : (
-                        <FormMessage />
-                      )}
+                        <div
+                          className={`transition-opacity duration-150 ${
+                            !isPasswordFieldFocused
+                              ? "opacity-100"
+                              : "opacity-0 absolute"
+                          }`}
+                        >
+                          <FormMessage />
+                        </div>
+                      </div>
                     </FormItem>
                   )}
                 />
@@ -191,7 +204,7 @@ export default function UserResetPassword({
                   control={form.control}
                   name="new_password_2"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="h-full flex flex-col">
                       <FormLabel>{t("new_password_confirmation")}</FormLabel>
                       <FormControl>
                         <PasswordInput
@@ -201,7 +214,9 @@ export default function UserResetPassword({
                           }}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <div className="text-small mt-2 pl-2 min-h-[120px]">
+                        <FormMessage />
+                      </div>
                     </FormItem>
                   )}
                 />
