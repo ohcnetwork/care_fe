@@ -625,7 +625,7 @@
   "central_nursing_station": "Central Nursing Station",
   "change": "Change",
   "change_avatar": "Change Avatar",
-  "change_avatar_note": "JPG, GIF or PNG. 1MB max.",
+  "change_avatar_note": "JPG, GIF or PNG. {{maxSize}}MB max.",
   "change_file": "Change File",
   "change_location": "Change Location",
   "change_phone_number": "Change Phone Number",
