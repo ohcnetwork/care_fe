@@ -81,9 +81,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       .min(1, { message: t("field_required") }),
     referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),
-    assigned_to: id
-      ? z.string().min(1, { message: t("field_required") })
-      : z.string().optional(),
+    assigned_to: z.string().optional(),
   });
 
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
@@ -294,6 +292,12 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           } else {
                             form.resetField("assigned_facility");
                           }
+
+                          // When the assigned facility changes, we need to clear the assigned to user
+                          form.setValue("assigned_to", undefined, {
+                            shouldDirty: true,
+                          });
+                          setAssignedToUser(undefined);
                         }}
                       />
                     </FormControl>
@@ -400,7 +404,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   name="assigned_to"
                   render={() => (
                     <FormItem>
-                      <FormLabel aria-required>{t("assigned_to")}</FormLabel>
+                      <FormLabel>{t("assigned_to")}</FormLabel>
                       <FormControl>
                         <div data-cy="select-assigned-user">
                           <UserSelector
