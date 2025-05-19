@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import DOMPurify from "dompurify";
 import {
   ChangeEventHandler,
@@ -264,7 +265,7 @@ const AvatarEditModal = ({
       toast.error(t("image_too_small"));
       return;
     }
-    if (file.size > 1024 * 1024 * 2) {
+    if (file.size > 1024 * 1024 * careConfig.imageUploadMaxSizeInMB) {
       toast.error(t("image_too_large"));
       return;
     }
@@ -454,7 +455,7 @@ const AvatarEditModal = ({
       toast.error(t("image_too_small"));
       return;
     }
-    if (droppedFile.size > 1024 * 1024 * 2) {
+    if (droppedFile.size > 1024 * 1024 * careConfig.imageUploadMaxSizeInMB) {
       toast.error(t("image_too_large"));
       return;
     }
@@ -477,7 +478,9 @@ const AvatarEditModal = ({
 
   const defaultHint = (
     <>
-      {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
+      {t("max_size_for_image_uploaded_should_be", {
+        maxSize: `${careConfig.imageUploadMaxSizeInMB}`,
+      })}
       <br />
       {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
       {t("recommended_aspect_ratio_for", { aspectRatio: "1:1" })}
