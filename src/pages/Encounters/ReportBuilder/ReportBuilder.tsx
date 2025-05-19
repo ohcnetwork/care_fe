@@ -95,6 +95,7 @@ const defaultTemplate: ReportTemplateFormData = {
               type: "rule",
               length: 100,
               stroke: "#808080",
+              align: "left",
             },
           ],
         },
@@ -106,6 +107,7 @@ const defaultTemplate: ReportTemplateFormData = {
               text: "Patient Discharge Summary",
               size: "16pt",
               weight: 400,
+              align: "left",
             },
             {
               type: "image",
@@ -138,6 +140,7 @@ const defaultTemplate: ReportTemplateFormData = {
               type: "rule",
               length: 100,
               stroke: "#808080",
+              align: "left",
             },
           ],
         },

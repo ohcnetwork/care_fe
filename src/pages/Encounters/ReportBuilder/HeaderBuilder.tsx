@@ -47,6 +47,7 @@ import {
   DateFormats,
   FONT_SIZES,
   FONT_WEIGHT_OPTIONS,
+  HEADER_ALIGNMENT_OPTIONS,
   HeaderElementType,
 } from "@/types/reportTemplate/reportTemplate";
 
@@ -72,9 +73,11 @@ const AlignmentInput = ({
               <SelectValue placeholder={t("alignment")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="left">{t("left")}</SelectItem>
-              <SelectItem value="center">{t("center")}</SelectItem>
-              <SelectItem value="right">{t("right")}</SelectItem>
+              {HEADER_ALIGNMENT_OPTIONS.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {t(option.value)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <FormMessage />
@@ -944,7 +947,7 @@ export default function HeaderBuilder({
           {
             type: "text",
             text: t("new_text"),
-            size: "medium",
+            size: "12pt",
             weight: 400,
             align: "left",
           },
@@ -1009,7 +1012,7 @@ export default function HeaderBuilder({
         newElement = {
           type: "text",
           text: t("new_text"),
-          size: "12px",
+          size: "12pt",
           weight: 400,
           align: "left",
         };
@@ -1019,7 +1022,7 @@ export default function HeaderBuilder({
           type: "image",
           file_name: "",
           url: "",
-          width: "100%",
+          width: "100",
           align: "center",
         };
         break;
@@ -1035,7 +1038,7 @@ export default function HeaderBuilder({
         newElement = {
           type: "datetime",
           label: t("created_on"),
-          format: "DD/MM/YYYY",
+          format: "[day]/[month]/[year]",
           style: {
             fill: "#808080",
             weight: 400,
