@@ -9,6 +9,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { tzAwareDateTime } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
+
 import useFileUpload from "@/hooks/useFileUpload";
 
 import mutate from "@/Utils/request/mutate";
@@ -63,7 +67,7 @@ const consentFormSchema = (isEdit: boolean) =>
       decision: z.enum(CONSENT_DECISIONS).default("permit"),
       category: z.enum(CONSENT_CATEGORIES).default("treatment"),
       status: z.enum(CONSENT_STATUSES).default("active"),
-      date: z.date(),
+      date: tzAwareDateTime,
       period: z.object({
         start: z.date().nullable().optional(),
         end: z.date().nullable().optional(),
@@ -92,7 +96,7 @@ const consentFormSchema = (isEdit: boolean) =>
         });
       }
 
-      if (data.period.start && data.period.start < data.date) {
+      if (data.period.start && data.period.start < new Date(data.date)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("consent_period_start_before_consent_date_validation"),
@@ -136,7 +140,7 @@ export default function ConsentFormSheet({
       decision: "permit",
       category: "treatment",
       status: "active",
-      date: new Date(),
+      date: new Date().toISOString(),
       period: {
         start: new Date(),
         end: null,
@@ -219,7 +223,7 @@ export default function ConsentFormSheet({
         decision: existingConsent!.decision,
         category: existingConsent!.category,
         status: existingConsent!.status,
-        date: new Date(existingConsent!.date),
+        date: new Date(existingConsent!.date).toISOString(),
         period: {
           start: existingConsent!.period.start
             ? new Date(existingConsent!.period.start)
@@ -247,7 +251,7 @@ export default function ConsentFormSheet({
     const consentData: CreateConsentRequest = {
       status: values.status,
       category: isEdit ? existingConsent!.category : values.category,
-      date: isEdit ? new Date(existingConsent!.date) : values.date,
+      date: isEdit ? new Date(existingConsent!.date) : new Date(values.date),
       decision: isEdit ? existingConsent!.decision : values.decision,
       period: isEdit
         ? {
@@ -326,20 +330,11 @@ export default function ConsentFormSheet({
                       <FormLabel aria-required>
                         {t("consent_given_on")}
                       </FormLabel>
-                      <Input
-                        type="datetime-local"
+                      <DateTimeInput
                         {...field}
-                        value={
-                          field.value
-                            ? format(
-                                new Date(field.value),
-                                "yyyy-MM-dd'T'HH:mm",
-                              )
-                            : undefined
-                        }
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          field.onChange(value ? new Date(value) : null);
+                        value={field.value}
+                        onChange={(val) => {
+                          field.onChange(val);
                         }}
                       />
                       <FormMessage />
