@@ -69,7 +69,7 @@ describe("Patient Encounter Questionnaire", () => {
 describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("nurse");
+    cy.loginByApi("devnurse5");
     cy.visit("/");
     facilityCreation.selectFirstRandomFacility();
   });
@@ -128,7 +128,10 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       notes: "Edit symptom notes",
     };
 
-    patientEncounter.clickEditSymptoms().updateSymptom(updateSymptomsDetails);
+    patientEncounter
+      .clickEditSymptoms()
+      .verifyDuplicateSymptom(updateSymptomsDetails.symptomName)
+      .updateSymptom(updateSymptomsDetails);
 
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifySymptom(updateSymptomsDetails);
@@ -162,6 +165,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
 
     patientEncounter
       .clickEditDiagnosis()
+      .verifyDuplicateDiagnosis(updateDiagnosisDetails.diagnosisName)
       .updateDiagnosis(updateDiagnosisDetails);
 
     patientPrescription.submitQuestionnaire();

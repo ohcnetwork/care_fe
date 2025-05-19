@@ -132,7 +132,11 @@ export class PatientEncounter {
     cy.typeAndSelectOption('[data-cy="add-symptom"]', symptomName, false);
     return this;
   }
-
+  verifyDuplicateSymptom(symptomName: string) {
+    this.addSymptoms({ symptomName });
+    cy.verifyNotification("Symptom already exists!");
+    return this;
+  }
   updateSymptom(details: SymptomDetails) {
     const { severity, status, notes } = details;
     if (severity) {
@@ -249,6 +253,12 @@ export class PatientEncounter {
       },
     );
 
+    return this;
+  }
+
+  verifyDuplicateDiagnosis(diagnosisName: string) {
+    this.addDiagnosis({ diagnosisName });
+    cy.verifyNotification("Diagnosis already exists!");
     return this;
   }
 
