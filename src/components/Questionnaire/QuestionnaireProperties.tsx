@@ -94,6 +94,7 @@ function StatusSelector({
           >
             <RadioGroupItem value={status} id={`status-${status}`} />
             <Label
+              data-cy={`questionnaire-status-${status}`}
               htmlFor={`status-${status}`}
               className="text-sm font-normal text-gray-950"
             >
@@ -184,7 +185,11 @@ function OrganizationSelector({
         <ManageQuestionnaireOrganizationsSheet
           questionnaireId={id}
           trigger={
-            <Button variant="outline" className="w-full justify-start">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              data-cy="manage-organisation-questionnaire"
+            >
               <Building className="mr-2 size-4" />
               {t("manage_organization_one")}
             </Button>
