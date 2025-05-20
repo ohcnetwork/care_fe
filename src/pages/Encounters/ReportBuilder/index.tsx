@@ -2,9 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
 
@@ -14,6 +12,8 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
+
+import ReportCard from "./ReportCard";
 
 interface ReportBuilderListProps {
   facilityId: string;
@@ -65,32 +65,11 @@ export default function ReportBuilderList({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
           {reportTemplateData?.results?.map((reportTemplate) => (
-            <Card
+            <ReportCard
               key={reportTemplate.id}
-              className="flex flex-col justify-between gap-2 rounded-md bg-gray-100 p-3"
-            >
-              <div className="flex flex-col sm:flex-row justify-between">
-                <span>{reportTemplate.slug}</span>
-                <span className="text-xs text-gray-500">
-                  {t(reportTemplate.type.toString())}
-                </span>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 justify-between">
-                <div className="flex flex-row gap-2 justify-start">
-                  {reportTemplate?.facility ? (
-                    <Badge variant="primary" className="text-xs">
-                      {t("facility")}
-                    </Badge>
-                  ) : (
-                    <Badge
-                      variant="primary"
-                      className="bg-blue-100 border-blue-300"
-                    >
-                      {t("instance")}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
+              template={reportTemplate}
+              buttons={
+                <>
                   {canManageTemplate && (
                     <Button
                       variant="outline"
@@ -103,9 +82,9 @@ export default function ReportBuilderList({
                       </Link>
                     </Button>
                   )}
-                </div>
-              </div>
-            </Card>
+                </>
+              }
+            />
           ))}
         </div>
       </div>

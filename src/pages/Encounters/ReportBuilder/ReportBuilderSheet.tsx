@@ -3,9 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -22,6 +20,8 @@ import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { ReportTemplateType } from "@/types/reportTemplate/reportTemplate";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
+
+import ReportCard from "./ReportCard";
 
 interface ReportBuilderSheetProps {
   facilityId: string;
@@ -88,43 +88,20 @@ export default function ReportBuilderSheet({
           <ScrollArea className="h-[calc(100vh-10rem)]">
             <div className="space-y-2 m-4">
               {reportTemplateData?.results?.map((reportTemplate) => (
-                <Card
+                <ReportCard
                   key={reportTemplate.id}
-                  className="flex flex-col justify-between gap-2 rounded-md bg-gray-100 p-3"
-                >
-                  <div className="flex flex-col sm:flex-row justify-between">
-                    <span>{reportTemplate.slug}</span>
-                    <span className="text-xs text-gray-500">
-                      {t(reportTemplate.type.toString())}
-                    </span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2 justify-between">
-                    <div className="flex flex-row gap-2 justify-start">
-                      {reportTemplate?.facility ? (
-                        <Badge variant="primary" className="text-xs">
-                          {t("facility")}
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="primary"
-                          className="bg-blue-100 border-blue-300"
-                        >
-                          {t("instance")}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => handleGenerateReport(reportTemplate)}
-                      >
-                        {t("generate_report")}
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
+                  template={reportTemplate}
+                  buttons={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => handleGenerateReport(reportTemplate)}
+                    >
+                      {t("generate_report")}
+                    </Button>
+                  }
+                />
               ))}
             </div>
           </ScrollArea>
