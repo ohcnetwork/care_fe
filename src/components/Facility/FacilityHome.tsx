@@ -239,7 +239,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   <div className="flex-1 min-w-0 mb-2">
                     <div className="text-white">
                       <TooltipComponent content={facilityData?.name}>
-                        <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold">
+                        <h1
+                          className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold"
+                          data-cy="facility-name-card"
+                        >
                           {facilityData?.name}
                         </h1>
                       </TooltipComponent>
@@ -247,7 +250,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         content={facilityData?.facility_type}
                         side="right"
                       >
-                        <h2 className="text-xs sm:text-sm md:text-base lg:text-base text-white/70">
+                        <h2
+                          className="text-xs sm:text-sm md:text-base lg:text-base text-white/70"
+                          data-cy="facility-type-card"
+                        >
                           {facilityData?.facility_type}
                         </h2>
                       </TooltipComponent>
@@ -304,7 +310,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
               <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
                 <Card className="basis-1/2">
                   <CardContent className="p-6 flex flex-col h-full">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                      data-cy="facility-address-details"
+                    >
                       <div className="col-span-1 sm:col-span-2 flex flex-col">
                         <span className="font-semibold">{t("address")}</span>
                         <span className="text-gray-700 whitespace-pre-wrap break-words text-sm">

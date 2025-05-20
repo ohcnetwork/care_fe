@@ -25,7 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
@@ -101,6 +101,7 @@ export function EncounterList({
     limit: 15,
     cacheBlacklist: ["name", "encounter_id", "external_identifier"],
   });
+  const { t } = useTranslation();
   const {
     status,
     encounter_class: encounterClass,
@@ -234,7 +235,7 @@ export function EncounterList({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[20rem] p-3"
+                    className="w-[20rem] p-3 border-none"
                     align="start"
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
@@ -242,15 +243,9 @@ export function EncounterList({
                       <h4 className="font-medium leading-none">
                         {t("search_encounters")}
                       </h4>
-                      <SearchByMultipleFields
-                        id="encounter-search"
+                      <SearchInput
+                        data-cy="encounter-search"
                         options={searchOptions}
-                        initialOptionIndex={Math.max(
-                          searchOptions.findIndex(
-                            (option) => option.value !== "",
-                          ),
-                          0,
-                        )}
                         onFieldChange={handleFieldChange}
                         onSearch={handleSearch}
                         className="w-full border-none shadow-none"
