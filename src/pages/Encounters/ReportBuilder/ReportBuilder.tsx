@@ -347,7 +347,7 @@ export default function ReportBuilder({
     }
   }, [templateSchema, form]);
 
-  const onSubmit = async (data: ReportTemplateFormData) => {
+  const onSubmit = async (data: ReportTemplateFormData, exit: boolean) => {
     const isValid = await form.trigger();
     if (!isValid) {
       return;
@@ -401,6 +401,9 @@ export default function ReportBuilder({
         facility: facilityId,
       });
     }
+    if (exit) {
+      navigate(`/reportbuilder`);
+    }
   };
 
   // TODO: Implement export functionality
@@ -425,7 +428,7 @@ export default function ReportBuilder({
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              onSubmit(form.getValues());
+              onSubmit(form.getValues(), false);
             }}
             className="space-y-6"
           >
@@ -489,10 +492,20 @@ export default function ReportBuilder({
                   type="button"
                   variant="primary"
                   className="w-full"
-                  onClick={() => onSubmit(form.getValues())}
+                  onClick={() => onSubmit(form.getValues(), false)}
                 >
                   {t("save_template")}
                 </Button>
+                {reportTemplateId && (
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    className="w-full"
+                    onClick={() => onSubmit(form.getValues(), true)}
+                  >
+                    {t("save_and_exit")}
+                  </Button>
+                )}
               </div>
             </div>
 
