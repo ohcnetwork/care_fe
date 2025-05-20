@@ -1,8 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -46,9 +45,7 @@ import {
 } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { HTTPError } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
 import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
@@ -113,17 +110,6 @@ export const FilesTab = (props: FilesTabProps) => {
     { value: "unspecified", label: "Unspecified" },
     { value: "discharge_summary", label: "Discharge Summary" },
   ] as const;
-
-  const { mutate: generateDischargeSummary, isPending: isGenerating } =
-    useMutation<{ detail: string }, HTTPError>({
-      mutationFn: mutate(routes.encounter.generateDischargeSummary, {
-        pathParams: { encounterId: encounter?.id || "" },
-      }),
-      onSuccess: (response) => {
-        toast.success(response.detail);
-        refetch();
-      },
-    });
 
   const {
     data: files,
@@ -671,36 +657,6 @@ export const FilesTab = (props: FilesTabProps) => {
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
           <FilterButton />
-          {type === "encounter" && qParams.file === "discharge_summary" && (
-            <>
-              <Button
-                variant="outline_primary"
-                className="flex flex-row items-center"
-                onClick={async () => {
-                  await queryClient.invalidateQueries({
-                    queryKey: ["files"],
-                  });
-                  toast.success(t("refreshed"));
-                }}
-              >
-                <CareIcon icon="l-sync" />
-                <span className="ml-2">{t("refresh")}</span>
-              </Button>
-              <Button
-                variant="primary"
-                className="flex flex-row items-center"
-                onClick={() => generateDischargeSummary()}
-                disabled={isGenerating}
-              >
-                <CareIcon icon="l-file-medical" className="hidden sm:block" />
-                <span>
-                  {isGenerating
-                    ? t("generating")
-                    : t("generate_discharge_summary")}
-                </span>
-              </Button>
-            </>
-          )}
           {encounter && (
             <ReportBuilderSheet
               facilityId={facilityId || ""}
