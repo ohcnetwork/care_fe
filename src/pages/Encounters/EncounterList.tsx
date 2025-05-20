@@ -25,7 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
@@ -87,6 +87,7 @@ export function EncounterList({
     limit: 15,
     cacheBlacklist: ["name", "encounter_id", "external_identifier"],
   });
+  const { t } = useTranslation();
   const {
     status,
     encounter_class: encounterClass,
@@ -149,23 +150,20 @@ export function EncounterList({
   const searchOptions = [
     {
       key: "name",
-      label: "Patient Name",
       type: "text" as const,
-      placeholder: "Search by patient name",
+      placeholder: t("search_by_patient_name"),
       value: name || "",
     },
     {
       key: "encounter_id",
-      label: "Encounter ID",
       type: "text" as const,
-      placeholder: "Search by encounter ID",
+      placeholder: t("search_by_encounter_id"),
       value: encounter_id || "",
     },
     {
       key: "external_identifier",
-      label: "External ID",
       type: "text" as const,
-      placeholder: "Search by external ID",
+      placeholder: t("search_by_external_id"),
       value: external_identifier || "",
     },
   ];
@@ -174,8 +172,6 @@ export function EncounterList({
     propEncounters ||
     queryEncounters?.results ||
     (queryEncounter ? [queryEncounter] : []);
-
-  const { t } = useTranslation();
 
   return (
     <Page
@@ -222,7 +218,7 @@ export function EncounterList({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[20rem] p-3"
+                    className="w-[20rem] p-3 border-none"
                     align="start"
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
@@ -230,15 +226,9 @@ export function EncounterList({
                       <h4 className="font-medium leading-none">
                         {t("search_encounters")}
                       </h4>
-                      <SearchByMultipleFields
-                        id="encounter-search"
+                      <SearchInput
+                        data-cy="encounter-search"
                         options={searchOptions}
-                        initialOptionIndex={Math.max(
-                          searchOptions.findIndex(
-                            (option) => option.value !== "",
-                          ),
-                          0,
-                        )}
                         onFieldChange={handleFieldChange}
                         onSearch={handleSearch}
                         className="w-full border-none shadow-none"

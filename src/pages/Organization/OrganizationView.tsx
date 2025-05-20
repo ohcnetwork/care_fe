@@ -7,8 +7,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -65,13 +65,21 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                 />
               </div>
               <div className="w-72">
-                <Input
-                  placeholder="Search by name..."
-                  value={qParams.name || ""}
-                  onChange={(e) => {
-                    updateQuery({ name: e.target.value });
-                  }}
-                  className="w-full"
+                <SearchInput
+                  options={[
+                    {
+                      key: "name",
+                      type: "text",
+                      placeholder: t("search_by_name"),
+                      value: qParams.name || "",
+                    },
+                  ]}
+                  onSearch={(key, value) =>
+                    updateQuery({
+                      [key]: value || undefined,
+                    })
+                  }
+                  className="w-full border-none shadow-none"
                 />
               </div>
             </div>
