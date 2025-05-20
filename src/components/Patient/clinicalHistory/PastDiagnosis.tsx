@@ -57,7 +57,7 @@ const DiagnosisRow = ({
   return (
     <>
       <TableRow className="bg-white hover:bg-gray-50 divide-x divide-gray-200">
-        <TableCell className="truncate px-4 py-4 w-[30%] max-w-[300px] font-bold text-left">
+        <TableCell className="px-4 py-4 w-[30%] max-w-[300px] font-bold text-left break-words whitespace-normal">
           {diagnosis.code.display}
         </TableCell>
         <TableCell className="px-4 py-4 w-[14%] text-center">

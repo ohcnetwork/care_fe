@@ -177,7 +177,7 @@ export default function ClinicalHistoryOverview(props: {
             <div className="bg-pink-100 p-2 rounded-md">
               <img src="/images/medicines-icon.svg" alt="medicines-icon" />
             </div>
-            <h2 className="text-base font-medium">{t("past_medication")}</h2>
+            <h2 className="text-base font-medium">{t("medication")}</h2>
           </div>
           {(medicationData?.results?.length ?? 0) > 0 && (
             <Button
