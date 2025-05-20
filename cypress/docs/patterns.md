@@ -48,7 +48,7 @@ describe("Feature Name", () => {
   });
 
   it("should perform action", () => {
-    page.navigateToGovernance("Kerala");
+    page.navigateToGovernance("Government");
     page.navigateToFacilitiesList();
   });
 });

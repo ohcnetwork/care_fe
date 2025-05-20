@@ -347,16 +347,14 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
       }}
     >
       <SheetTrigger asChild>
-        <div className="flex items-center justify-end">
-          <Button
-            variant="outline"
-            data-cy="view-history"
-            className="border-gray-400"
-          >
-            <Clock className="size-4" />
-            <span className="font-semibold">{buttonLabel}</span>
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          data-cy="view-history"
+          className="border-gray-400 flex ml-auto"
+        >
+          <Clock className="size-4" />
+          <span className="font-semibold">{buttonLabel}</span>
+        </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-3xl p-0 overflow-y-auto">
         <div className="flex flex-col gap-2 p-2">

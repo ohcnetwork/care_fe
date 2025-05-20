@@ -89,7 +89,7 @@ export default function OrganizationIndex() {
                   href={`/organization/${org.id}`}
                   className="flex items-center justify-center gap-2"
                 >
-                  View Details
+                  {t("view_details")}
                   <CareIcon icon="l-arrow-right" className="size-4" />
                 </Link>
               </Button>
