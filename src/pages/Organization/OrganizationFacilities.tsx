@@ -6,9 +6,9 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -80,17 +80,21 @@ export default function OrganizationFacilities({
             </div>
 
             <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Search facilities..."
-                value={qParams.name || ""}
-                onChange={(e) =>
+              <SearchInput
+                options={[
+                  {
+                    key: "name",
+                    type: "text",
+                    placeholder: t("search_by_facility_name"),
+                    value: qParams.name || "",
+                  },
+                ]}
+                onSearch={(key, value) =>
                   updateQuery({
-                    name: e.target.value,
-                    page: 1,
+                    [key]: value || undefined,
                   })
                 }
-                className="max-w-sm"
+                className="w-full max-w-sm"
                 data-cy="search-facility"
               />
             </div>
