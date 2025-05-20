@@ -48,7 +48,7 @@ import {
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder";
+import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder/ReportBuilderSheet";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
@@ -686,7 +686,9 @@ export const FilesTab = (props: FilesTabProps) => {
                       icon="l-file-export"
                       className="size-4 text-green-600"
                     />
-                    {t("report_builder")}
+                    {t("generate_report", {
+                      count: 2,
+                    })}
                   </div>
                 </Button>
               }

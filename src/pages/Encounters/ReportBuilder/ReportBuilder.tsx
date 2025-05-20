@@ -48,8 +48,6 @@ import ReportBuilderPreview from "./ReportBuilderPreview";
 
 interface ReportBuilderProps {
   facilityId: string;
-  patientId: string;
-  encounterId: string;
   reportTemplateId?: string;
 }
 
@@ -240,8 +238,6 @@ function collectErrors(
 export default function ReportBuilder({
   facilityId,
   reportTemplateId,
-  encounterId,
-  patientId,
 }: ReportBuilderProps) {
   const [activeTab, setActiveTab] = useState("layout");
   const { t } = useTranslation();
@@ -265,9 +261,7 @@ export default function ReportBuilder({
     mutationFn: mutate(reportTemplateApi.create),
     onSuccess: (data: ReportTemplateModel) => {
       toast.success(t("template_saved"));
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${data.id}`,
-      );
+      navigate(`/facility/${facilityId}/reportbuilder/${data.id}`);
     },
   });
 
@@ -353,7 +347,7 @@ export default function ReportBuilder({
     }
   }, [templateSchema, form]);
 
-  const onSubmit = async (data: ReportTemplateFormData, exit: boolean) => {
+  const onSubmit = async (data: ReportTemplateFormData) => {
     const isValid = await form.trigger();
     if (!isValid) {
       return;
@@ -407,11 +401,6 @@ export default function ReportBuilder({
         facility: facilityId,
       });
     }
-    if (exit) {
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/files`,
-      );
-    }
   };
 
   // TODO: Implement export functionality
@@ -430,13 +419,13 @@ export default function ReportBuilder({
   const hasSectionsErrors = errorEntries.some((e) => e.section === "sections");
 
   return (
-    <div className="max-w-9xl mx-auto">
+    <div className="max-w-9xl mx-auto -mt-4">
       <Form {...form}>
         <div>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              onSubmit(form.getValues(), true);
+              onSubmit(form.getValues());
             }}
             className="space-y-6"
           >
@@ -500,20 +489,10 @@ export default function ReportBuilder({
                   type="button"
                   variant="primary"
                   className="w-full"
-                  onClick={() => onSubmit(form.getValues(), false)}
+                  onClick={() => onSubmit(form.getValues())}
                 >
                   {t("save_template")}
                 </Button>
-                {reportTemplateId && (
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    className="w-full"
-                    onClick={() => onSubmit(form.getValues(), true)}
-                  >
-                    {t("save_and_exit")}
-                  </Button>
-                )}
               </div>
             </div>
 

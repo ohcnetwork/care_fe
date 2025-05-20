@@ -11,7 +11,6 @@ import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
-import ReportBuilder from "@/pages/Encounters/ReportBuilder/ReportBuilder";
 
 const ExcalidrawEditor = lazy(
   () => import("@/components/Common/Drawings/ExcalidrawEditor"),
@@ -133,23 +132,6 @@ const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:id":
     ({ patientId, id }) => (
       <QuestionnaireResponseView responseId={id} patientId={patientId} />
-    ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/reportbuilder/new":
-    ({ facilityId, patientId, encounterId }) => (
-      <ReportBuilder
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-      />
-    ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/reportbuilder/:reportTemplateId":
-    ({ facilityId, patientId, encounterId, reportTemplateId }) => (
-      <ReportBuilder
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-        reportTemplateId={reportTemplateId}
-      />
     ),
   ...["facility", "organization"].reduce((acc: AppRoutes, identifier) => {
     acc[`/${identifier}/:id/patient/:patientId/encounter/:encounterId/:tab`] =
