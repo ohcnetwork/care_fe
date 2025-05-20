@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -657,6 +658,21 @@ export const FilesTab = (props: FilesTabProps) => {
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
           <FilterButton />
+          {type === "encounter" && (
+            <Button
+              variant="outline_primary"
+              className="flex flex-row items-center"
+              onClick={async () => {
+                await queryClient.invalidateQueries({
+                  queryKey: ["files"],
+                });
+                toast.success(t("refreshed"));
+              }}
+            >
+              <CareIcon icon="l-sync" />
+              <span className="ml-2">{t("refresh")}</span>
+            </Button>
+          )}
           {encounter && (
             <ReportBuilderSheet
               facilityId={facilityId || ""}
