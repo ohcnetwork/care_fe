@@ -49,7 +49,6 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
-import facilityApi from "@/types/facility/facilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { UserBase } from "@/types/user/user";
 
@@ -185,9 +184,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   };
   const { data: facilities } = useQuery({
     queryKey: ["facilities", facilitySearch],
-    queryFn: query.debounced(facilityApi.getAllFacilities, {
+    queryFn: query.debounced(routes.facility.list, {
       queryParams: {
-        search_text: facilitySearch ? facilitySearch : undefined,
+        name: facilitySearch ? facilitySearch : undefined,
         limit: 50,
       },
     }),
