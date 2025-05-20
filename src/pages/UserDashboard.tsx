@@ -90,7 +90,13 @@ export default function UserDashboard() {
         </div>
         <div className="flex gap-2">
           {user.is_superuser && (
-            <Button variant="outline" size="sm" className="w-full" asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              asChild
+              data-cy="admin-dashboard-button"
+            >
               <Link
                 href="/admin/questionnaire"
                 className="gap-2 text-inherit flex items-center"

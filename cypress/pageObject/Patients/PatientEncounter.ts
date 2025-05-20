@@ -16,7 +16,7 @@ export class PatientEncounter {
 
   searchEncounter(patientName: string) {
     cy.get('[data-cy="search-encounter"]').click();
-    cy.typeIntoField("#encounter-search", patientName);
+    cy.typeIntoField('[data-cy="encounter-search"]', patientName);
     cy.get('[data-cy="search-encounter"]').click();
     return this;
   }
