@@ -473,7 +473,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           />
           {!disableButtons && (
             <div
-              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+              className="flex w-full flex-col gap-3 sm:w-auto"
               data-cy="update-encounter-button"
             >
               <DropdownMenu>
@@ -486,7 +486,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     <ChevronDown className="ml-2 size-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto">
                   <EncounterActions encounter={encounter} layout="dropdown" />
                   <PLUGIN_Component
                     __name="PatientInfoCardActions"
