@@ -261,7 +261,7 @@ export default function ReportBuilder({
     mutationFn: mutate(reportTemplateApi.create),
     onSuccess: (data: ReportTemplateModel) => {
       toast.success(t("template_saved"));
-      navigate(`/facility/${facilityId}/reportbuilder/${data.id}`);
+      navigate(`/reportbuilder/${data.id}`);
     },
   });
 
