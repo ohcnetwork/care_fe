@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -103,37 +104,53 @@ export default function ReportBuilderSheet({
               {reportTemplateData?.results?.map((reportTemplate) => (
                 <Card
                   key={reportTemplate.id}
-                  className="flex flex-col sm:flex-row justify-between gap-2 rounded-md bg-gray-100 p-3"
+                  className="flex flex-col justify-between gap-2 rounded-md bg-gray-100 p-3"
                 >
-                  <div className="flex flex-col">
+                  <div className="flex flex-col sm:flex-row justify-between">
                     <span>{reportTemplate.slug}</span>
                     <span className="text-xs text-gray-500">
                       {t(reportTemplate.type.toString())}
                     </span>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    {canManageTemplate && (
+                  <div className="flex flex-col sm:flex-row gap-2 justify-between">
+                    <div className="flex flex-row gap-2 justify-start">
+                      {reportTemplate?.facility ? (
+                        <Badge variant="primary" className="text-xs">
+                          {t("facility")}
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="primary"
+                          className="bg-blue-100 border-blue-300"
+                        >
+                          {t("instance")}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      {canManageTemplate && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          asChild
+                        >
+                          <Link
+                            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${reportTemplate.id}`}
+                          >
+                            {t("edit_template")}
+                          </Link>
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
                         className="w-full"
-                        asChild
+                        onClick={() => handleGenerateReport(reportTemplate)}
                       >
-                        <Link
-                          href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/reportbuilder/${reportTemplate.id}`}
-                        >
-                          {t("edit_template")}
-                        </Link>
+                        {t("generate_report")}
                       </Button>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => handleGenerateReport(reportTemplate)}
-                    >
-                      {t("generate_report")}
-                    </Button>
+                    </div>
                   </div>
                 </Card>
               ))}
