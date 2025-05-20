@@ -1,6 +1,11 @@
 import { Trash2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Control, UseFormReturn, useFieldArray } from "react-hook-form";
+import {
+  Control,
+  UseFormReturn,
+  useFieldArray,
+  useWatch,
+} from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -50,6 +55,8 @@ import {
   HEADER_ALIGNMENT_OPTIONS,
   HeaderElementType,
 } from "@/types/reportTemplate/reportTemplate";
+
+const RATIO_PER_COLUMN = 6;
 
 const AlignmentInput = ({
   control,
@@ -103,9 +110,10 @@ function RatioBuilder({
   const columnLength = column?.length ?? 0;
 
   useEffect(() => {
-    const initialTotalRatio = columnLength * 6 || 6;
+    const initialTotalRatio =
+      columnLength * RATIO_PER_COLUMN || RATIO_PER_COLUMN;
     setTotalRatio(initialTotalRatio);
-    if (lockRatio) {
+    if (lockRatio && columnLength > 0) {
       setRatios(initialTotalRatio / columnLength);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -113,7 +121,7 @@ function RatioBuilder({
 
   const setRatios = (newRatio: number, skipIndex?: number) => {
     column.forEach((_, index) => {
-      if (!!skipIndex || index !== skipIndex) {
+      if (skipIndex === undefined || index !== skipIndex) {
         form.setValue(
           `config.header.rows.${rowIndex}.size_ratio.${index}`,
           newRatio,
@@ -121,6 +129,12 @@ function RatioBuilder({
       }
     });
   };
+
+  const sizeRatio =
+    useWatch({
+      control: form.control,
+      name: `config.header.rows.${rowIndex}.size_ratio`,
+    }) || Array(columnLength).fill(1);
 
   const handleTotalRatioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTotalRatio = parseInt(e.target.value, 10);
@@ -138,12 +152,8 @@ function RatioBuilder({
     }
   };
 
-  const ratioSum = column.reduce((acc, column, index) => {
-    return (
-      acc +
-      (form.watch(`config.header.rows.${rowIndex}.size_ratio.${index}`) || 0)
-    );
-  }, 0);
+  const isZeroValue = sizeRatio.some((value) => value === 0);
+  const ratioSum = sizeRatio.reduce((acc, value) => acc + value, 0);
 
   if (columnLength === 0 || columnLength === 1) {
     return <></>;
@@ -192,14 +202,15 @@ function RatioBuilder({
           <p className="text-sm text-yellow-800 bg-yellow-50 p-2 rounded-md">
             {t("preview_proportions_error")}
           </p>
+        ) : isZeroValue ? (
+          <p className="text-sm text-yellow-800 bg-yellow-50 p-2 rounded-md">
+            {t("preview_proportions_zero_error")}
+          </p>
         ) : (
           <>
             <div className="flex w-full">
               {column?.map((col, index) => {
-                const ratio =
-                  form.watch(
-                    `config.header.rows.${rowIndex}.size_ratio.${index}`,
-                  ) || 1;
+                const ratio = sizeRatio[index] || 1;
                 const width = `${(ratio / totalRatio) * 100}%`;
                 return (
                   <div
@@ -222,10 +233,7 @@ function RatioBuilder({
             <p className="text-xs text-gray-500 mt-2">
               {t("total_ratio")}: {totalRatio}
               {column?.map((col, index) => {
-                const ratio =
-                  form.watch(
-                    `config.header.rows.${rowIndex}.size_ratio.${index}`,
-                  ) || 1;
+                const ratio = sizeRatio[index];
                 return ` (${col.type}: ${((ratio / totalRatio) * 100).toFixed(2)}%)`;
               })}
             </p>

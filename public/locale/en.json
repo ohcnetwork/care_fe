@@ -2339,6 +2339,7 @@
   "preview_form": "Preview form",
   "preview_of_proportions": "Preview of proportions",
   "preview_proportions_error": "The sum of the ratios does not equal the total ratio. Please adjust either the total ratio or the ratios of the elements to enable preview.",
+  "preview_proportions_zero_error": "One or more of the elements have a size ratio of 0. Please adjust the ratios of the elements to enable preview.",
   "preview_value_set": "Preview ValueSet",
   "previous": "Previous",
   "primary": "Primary",

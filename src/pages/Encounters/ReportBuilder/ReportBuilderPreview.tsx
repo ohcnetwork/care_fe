@@ -188,8 +188,9 @@ export default function ReportBuilderPreview({
 }
 
 function HeaderRowPreview({ row }: { row: HeaderRow }) {
-  const rowSizeRatio = row.size_ratio || Array(row.columns.length).fill(1);
-  const totalSizeRatio = rowSizeRatio.reduce((acc, curr) => acc + curr, 0);
+  const rowSizeRatio: number[] =
+    row.size_ratio || Array(row.columns.length).fill(1);
+  const totalSizeRatio = rowSizeRatio.reduce((acc, curr) => acc + curr, 0) || 1;
 
   return (
     <div className="flex flex-row w-full min-w-0">
