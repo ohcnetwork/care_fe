@@ -56,11 +56,11 @@ const SymptomRow = ({
 
   return (
     <>
-      <TableRow className="bg-white hover:bg-gray-50 divide-x divide-gray-200">
-        <TableCell className="px-4 py-4 w-[30%] max-w-[300px] font-bold text-left break-words whitespace-normal">
+      <TableRow>
+        <TableCell className="px-4 py-4 w-[30%] max-w-[300px] font-bold text-left break-words whitespace-normal border border-gray-200 rounded-md bg-white">
           {symptom.code.display}
         </TableCell>
-        <TableCell className="px-4 py-4 w-[14%] text-center">
+        <TableCell className="px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
           <Badge
             variant="outline"
             className={`whitespace-nowrap ${SYMPTOM_CLINICAL_STATUS_STYLES[symptom.clinical_status]}`}
@@ -68,7 +68,7 @@ const SymptomRow = ({
             {t(symptom.clinical_status)}
           </Badge>
         </TableCell>
-        <TableCell className="px-4 py-4 w-[14%] text-center">
+        <TableCell className="px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
           <Badge
             variant="outline"
             className={`whitespace-nowrap capitalize ${SYMPTOM_VERIFICATION_STATUS_STYLES[symptom.verification_status]}`}
@@ -76,13 +76,13 @@ const SymptomRow = ({
             {t(symptom.verification_status)}
           </Badge>
         </TableCell>
-        <TableCell className="truncate px-4 py-4 w-[14%] text-center">
+        <TableCell className="truncate px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
           {symptom.onset?.onset_datetime
             ? format(parseISO(symptom.onset.onset_datetime), "dd MMM yyyy")
             : "-"}
         </TableCell>
 
-        <TableCell className="px-4 py-4 w-[14%] text-center">
+        <TableCell className="px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="link">
@@ -131,7 +131,7 @@ const SymptomRow = ({
         <tr>
           <td
             colSpan={6}
-            className="border border-gray-200 border-t-0 rounded-b-lg p-4 bg-gray-50 relative"
+            className="border border-gray-200 rounded-md p-4 bg-gray-50 relative"
           >
             <Button
               variant="ghost"
@@ -164,23 +164,23 @@ export const SymptomTable = ({
   const { t } = useTranslation();
 
   return (
-    <div className="border border-gray-200 rounded-lg mb-3 overflow-hidden">
-      <Table className="w-full">
-        <TableHeader className="bg-gray-100 divide-x divide-gray-200">
-          <TableRow className="divide-x divide-gray-200">
-            <TableHead className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate">
+    <div className="border-0 mb-3">
+      <Table className="w-full border-separate border-spacing-2">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate border border-gray-200 rounded-md bg-gray-100">
               {t("symptom")}
             </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100">
               {t("severity")}
             </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100">
               {t("status")}
             </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100">
               {t("onset")}
             </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600"></TableHead>
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100"></TableHead>
           </TableRow>
         </TableHeader>
 

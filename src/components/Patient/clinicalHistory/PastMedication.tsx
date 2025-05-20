@@ -60,9 +60,7 @@ const MedicineRow = ({
   const remarks = formatSig(instruction);
   const notes = medicine.note;
 
-  const combinedInstruction = `${remarks || "-"}${
-    notes ? ` (${t("note")}: ${notes})` : ""
-  }`;
+  const combinedInstruction = `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`;
 
   const frequencyDisplay = instruction?.as_needed_boolean
     ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
@@ -74,24 +72,24 @@ const MedicineRow = ({
 
   return (
     <>
-      <TableRow className="bg-white hover:bg-gray-50 divide-x divide-gray-200">
-        <TableCell className="px-4 py-4 w-[30%] max-w-[300px] font-bold text-left break-words whitespace-normal">
+      <TableRow>
+        <TableCell className="px-4 py-4 w-[30%] max-w-[300px] font-bold text-left break-words whitespace-normal border border-gray-200 rounded-md bg-white">
           {medicine.medication?.display}
         </TableCell>
 
-        <TableCell className="px-4 py-4 w-[14%] text-center">
+        <TableCell className="px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
           {dosage || "-"}
         </TableCell>
 
-        <TableCell className="px-4 py-4 w-[14%] text-center whitespace-pre-wrap break-words min-w-[20rem]">
+        <TableCell className="px-4 py-4 w-[14%] text-center whitespace-pre-wrap break-words min-w-[20rem] border border-gray-200 rounded-md bg-white">
           {frequencyDisplay || "-"}
         </TableCell>
 
-        <TableCell className="px-4 py-4 w-[14%] text-center">
+        <TableCell className="px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
           {duration ? `${duration.value} ${duration.unit}` : "-"}
         </TableCell>
 
-        <TableCell className="px-4 py-4 w-[14%] text-center">
+        <TableCell className="px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="link">
@@ -143,7 +141,7 @@ const MedicineRow = ({
         <tr>
           <td
             colSpan={6}
-            className="border border-gray-200 border-t-0 rounded-b-lg p-4 bg-gray-50 relative"
+            className="border border-gray-200 rounded-md p-4 bg-gray-50 relative"
           >
             <Button
               variant="ghost"
@@ -176,24 +174,25 @@ export const MedicationTable = ({
   const { t } = useTranslation();
 
   return (
-    <div className="border border-gray-200 rounded-lg mb-3 overflow-hidden">
-      <Table className="w-full">
-        <TableHeader className="bg-gray-100 divide-x divide-gray-200">
-          <TableRow className="divide-x divide-gray-200">
-            <TableHead className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate">
+    <div className="border-0 mb-3">
+      <Table className="w-full border-separate border-spacing-2">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate border border-gray-200 rounded-md bg-gray-100">
               {t("medicine")}
             </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100">
               {t("dosage")}
             </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100">
               {t("frequency")}
             </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600">
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100">
               {t("duration")}
             </TableHead>
-
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600"></TableHead>
+            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100">
+              {/* Empty header for actions column */}
+            </TableHead>
           </TableRow>
         </TableHeader>
 
