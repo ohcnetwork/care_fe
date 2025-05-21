@@ -14,7 +14,7 @@ export enum Preference {
 }
 
 export interface QuantitySpec {
-  value: number | null;
+  value: number;
   unit: Code;
 }
 
@@ -71,7 +71,6 @@ export const RETENTION_TIME_UNITS = [
 
 export interface TypeTestedSpec {
   is_derived: boolean;
-  specimen_type: Code | null;
   preference: Preference;
   container: ContainerSpec | null;
   requirement: string | null;
@@ -85,7 +84,7 @@ export interface SpecimenDefinition {
   slug: string;
   derived_from_uri: string | null;
   status: Status;
-  description: string | null;
+  description: string;
   type_collected: Code | null;
   patient_preparation: Code[] | null;
   collection: Code | null;

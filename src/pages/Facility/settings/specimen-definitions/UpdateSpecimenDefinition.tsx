@@ -63,7 +63,10 @@ export function UpdateSpecimenDefinition({
       <SpecimenDefinitionForm
         initialData={specimenDefinition}
         onSubmit={(data) =>
-          updateSpecimenDefinition(data as SpecimenDefinitionUpdate)
+          updateSpecimenDefinition({
+            ...data,
+            id: specimenDefinitionId,
+          })
         }
         specimenDefinitionId={specimenDefinitionId}
         isLoading={isUpdating}
