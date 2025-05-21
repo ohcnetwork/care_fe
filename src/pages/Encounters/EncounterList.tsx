@@ -162,7 +162,6 @@ export function EncounterList({
   const searchOptions = [
     {
       key: "name",
-      label: t("patient_name"),
       type: "text" as const,
       placeholder: t("search_by_patient_name"),
       value: name || "",
