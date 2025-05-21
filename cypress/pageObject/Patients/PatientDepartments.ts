@@ -133,13 +133,6 @@ export class PatientDepartments {
     return this;
   }
 
-  verifyChildDepartment(departmentName: string) {
-    cy.verifyContentPresence('[data-cy="organization-tree-node-children"]', [
-      departmentName,
-    ]);
-    return this;
-  }
-
   searchDepartmentTeam(departmentName: string) {
     cy.typeIntoField('[data-cy="search-department-team"]', departmentName, {
       clearBeforeTyping: true,

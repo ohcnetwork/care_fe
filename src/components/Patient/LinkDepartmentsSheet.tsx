@@ -117,14 +117,12 @@ function DeleteOrganizationButton({
   entityId,
   facilityId,
   onSuccess,
-  dataCy,
 }: {
   organizationId: string;
   entityType: "encounter" | "location" | "device";
   entityId: string;
   facilityId: string;
   onSuccess?: () => void;
-  dataCy: string;
 }) {
   const { t } = useTranslation();
 
@@ -168,7 +166,7 @@ function DeleteOrganizationButton({
       size="icon"
       onClick={() => removeOrganization(organizationId)}
       disabled={isPending}
-      data-cy={dataCy}
+      data-cy="delete-organization-button"
     >
       {isPending ? (
         <Loader2 className="size-4 animate-spin" />
@@ -352,7 +350,6 @@ export default function LinkDepartmentsSheet({
                       entityId={entityId}
                       facilityId={facilityId}
                       onSuccess={onUpdate}
-                      dataCy="delete-organization-button"
                     />
                   </div>
                 ))}

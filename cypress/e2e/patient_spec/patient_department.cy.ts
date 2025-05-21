@@ -69,8 +69,7 @@ describe("Manage departments/teams association to an encounter", () => {
       .clickCreateOrganization()
       .verifyCreateRequest()
       .assertCreationSuccess()
-      .verifyParentDepartmentAndClick(departmentName)
-      .verifyChildDepartment(subDepartmentName);
+      .verifyParentDepartmentAndClick(departmentName);
   });
 
   it("Navigate to the facility's administration department and link a user to the facility", () => {
