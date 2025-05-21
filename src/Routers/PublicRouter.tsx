@@ -4,6 +4,7 @@ import { Authenticate } from "@/components/Auth/Authenticate";
 import Login from "@/components/Auth/Login";
 import ResetPassword from "@/components/Auth/ResetPassword";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import InvalidReset from "@/components/ErrorPages/InvalidReset";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
@@ -41,7 +42,7 @@ export default function PublicRouter() {
   return (
     <>
       <BrowserWarning />
-      {useRoutes(routes) || <Login />}
+      {useRoutes(routes) || <ErrorPage />}
     </>
   );
 }
