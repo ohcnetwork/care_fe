@@ -132,7 +132,6 @@ export default function FacilityOrganizationNavbar({
         pathParams: { facilityId },
         queryParams: {
           parent: "",
-          limit: 1000,
         },
       }),
       refetchOnWindowFocus: false,

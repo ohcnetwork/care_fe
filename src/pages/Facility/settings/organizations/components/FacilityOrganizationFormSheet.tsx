@@ -103,7 +103,7 @@ export default function FacilityOrganizationFormSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["list", facilityId, parentId],
+        queryKey: [facilityId, parentId],
       });
       queryClient.invalidateQueries({
         queryKey: ["getCurrentUser"],
