@@ -3,7 +3,6 @@ import { BoxIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Autocomplete from "@/components/ui/autocomplete";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -21,17 +20,14 @@ import {
 } from "@/components/ui/sheet";
 
 import query from "@/Utils/request/query";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { ProductFormContent } from "@/pages/Facility/settings/product/ProductForm";
 import {
   ProductRead,
   ProductStatusOptions,
 } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
-import {
-  ProductKnowledgeBase,
-  ProductKnowledgeStatus,
-} from "@/types/inventory/productKnowledge/productKnowledge";
-import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
 interface ProductSelectProps {
   facilityId: string;
@@ -45,25 +41,12 @@ export function ProductSearch({
   facilityId,
   onChange,
   disabled,
-  className,
 }: ProductSelectProps) {
   const { t } = useTranslation();
 
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [productKnowledge, setProductKnowledge] =
     useState<ProductKnowledgeBase>();
-
-  const { data: productKnowledges, isLoading: isProductKnowledgeLoading } =
-    useQuery({
-      queryKey: ["productKnowledge"],
-      queryFn: query(productKnowledgeApi.listProductKnowledge, {
-        queryParams: {
-          facility: facilityId,
-          limit: 100,
-          status: ProductKnowledgeStatus.active,
-        },
-      }),
-    });
 
   const { data: products, isFetching: isProductsFetching } = useQuery({
     queryKey: ["products", productKnowledge?.id],
@@ -77,29 +60,12 @@ export function ProductSearch({
     enabled: !!productKnowledge?.id,
   });
 
-  const productKnowledgeOptions =
-    productKnowledges?.results.map((productKnowledge) => ({
-      label: productKnowledge.name,
-      value: productKnowledge.id,
-    })) || [];
-
   return (
     <>
       <div className="flex-1">
-        <Autocomplete
-          value={productKnowledge?.id || ""}
-          onChange={(selectedId) => {
-            setProductKnowledge(
-              productKnowledges?.results.find((p) => p.id === selectedId),
-            );
-          }}
-          options={productKnowledgeOptions}
-          isLoading={isProductKnowledgeLoading}
-          placeholder={t("search_product_knowledge")}
-          noOptionsMessage={t("no_product_knowledge_found")}
-          disabled={disabled}
-          className={className}
-          closeOnSelect
+        <ProductKnowledgeSelect
+          value={productKnowledge}
+          onChange={setProductKnowledge}
         />
       </div>
 

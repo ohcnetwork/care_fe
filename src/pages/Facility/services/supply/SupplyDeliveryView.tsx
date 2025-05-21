@@ -5,25 +5,15 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DefinitionList } from "@/components/ui/definition-list";
-import { DefinitionListItem } from "@/components/ui/definition-list";
 
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
+import { SupplyDeliveryDetails } from "@/pages/Facility/services/supply/components/SupplyDeliveryDetails";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 
 import SupplyRequestDetails from "./components/SupplyRequestDetails";
-
-const STATUS_COLORS: Record<string, string> = {
-  in_progress: "bg-amber-100 text-amber-700",
-  completed: "bg-green-100 text-green-700",
-  abandoned: "bg-red-100 text-red-700",
-  entered_in_error: "bg-red-100 text-red-700",
-};
 
 function LoadingSkeleton() {
   return (
@@ -149,52 +139,7 @@ export default function SupplyDeliveryView({
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("delivery_details")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <DefinitionList>
-                <DefinitionListItem
-                  term={t("supplied_item")}
-                  description={delivery.supplied_item.product_knowledge.name}
-                />
-                <DefinitionListItem
-                  term={t("supplied_item_quantity")}
-                  description={delivery.supplied_item_quantity}
-                />
-                <DefinitionListItem
-                  term={t("supplied_item_type")}
-                  description={t(delivery.supplied_item_type)}
-                />
-                {delivery.supplied_item_condition && (
-                  <DefinitionListItem
-                    term={t("supplied_item_condition")}
-                    description={t(delivery.supplied_item_condition)}
-                  />
-                )}
-                <DefinitionListItem
-                  term={t("origin")}
-                  description={delivery.origin?.name}
-                />
-                <DefinitionListItem
-                  term={t("destination")}
-                  description={delivery.destination.name}
-                />
-                <DefinitionListItem
-                  term={t("status")}
-                  description={
-                    <Badge
-                      className={STATUS_COLORS[delivery.status]}
-                      variant="secondary"
-                    >
-                      {t(delivery.status)}
-                    </Badge>
-                  }
-                />
-              </DefinitionList>
-            </CardContent>
-          </Card>
+          <SupplyDeliveryDetails delivery={delivery} />
 
           {delivery.supply_request && (
             <SupplyRequestDetails

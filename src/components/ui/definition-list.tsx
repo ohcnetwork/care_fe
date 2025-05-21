@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface DefinitionListProps {
   children: ReactNode;
@@ -22,10 +23,16 @@ export function DefinitionListItem({
   term,
   description,
 }: DefinitionListItemProps) {
+  const { t } = useTranslation();
+
   return (
     <div>
       <dt className="text-sm font-medium text-gray-500">{term}</dt>
-      <dd className="mt-1">{description}</dd>
+      {description ? (
+        <dd className="mt-1">{description}</dd>
+      ) : (
+        <dd className="mt-1 text-gray-500">{t("not_specified")}</dd>
+      )}
     </div>
   );
 }

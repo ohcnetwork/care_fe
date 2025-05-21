@@ -5,6 +5,8 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import BedsList from "@/pages/Facility/locations/BedsList";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
 import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
+import { ApproveExternalSupplyDelivery } from "@/pages/Facility/services/inventory/externalSupply/ApproveDeliveries";
+import { IncomingDeliveries } from "@/pages/Facility/services/inventory/externalSupply/IncomingDeliveries";
 import MedicationBillForm from "@/pages/Facility/services/pharmacy/MedicationBillForm";
 import MedicationDispenseHistory from "@/pages/Facility/services/pharmacy/MedicationDispenseHistory";
 import MedicationRequestList from "@/pages/Facility/services/pharmacy/MedicationRequestList";
@@ -137,8 +139,19 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       supplyDeliveryId={id}
     />
   ),
-  "/receive_stock": () => (
+
+  // Inventory - External Supply
+  "/external_supply/incoming_deliveries": () => (
+    <IncomingDeliveries facilityId={facilityId} locationId={locationId} />
+  ),
+  "/external_supply/receive": () => (
     <ReceiveStock facilityId={facilityId} locationId={locationId} />
+  ),
+  "/external_supply/incoming_deliveries/approve": () => (
+    <ApproveExternalSupplyDelivery
+      facilityId={facilityId}
+      locationId={locationId}
+    />
   ),
 
   "/medication_requests/patient/:patientId": ({

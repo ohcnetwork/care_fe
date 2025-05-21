@@ -10,6 +10,7 @@ x : Done
 
 - [ ] Add option to archive suppliers
 - [ ] Add status based filters for product knowledge
+- [ ] Undo absolute net quantity after video recorded
 
 ## Billing
 

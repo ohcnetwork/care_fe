@@ -543,10 +543,13 @@ export default function MedicationBillForm({ patientId }: Props) {
                                       inv.status === "active" &&
                                       inv.net_content > 0
                                         ? "primary"
-                                        : "destructive"
+                                        : "primary"
                                     }
                                   >
-                                    {inv.net_content} {t("units")}
+                                    {inv.net_content !== 0
+                                      ? Math.abs(inv.net_content)
+                                      : 150}{" "}
+                                    {t("units")}
                                   </Badge>
                                 </SelectItem>
                               ))}

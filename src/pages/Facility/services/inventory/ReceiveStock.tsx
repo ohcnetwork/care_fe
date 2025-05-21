@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -67,6 +68,7 @@ export function ReceiveStock({
   locationId: string;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const form = useForm({
     resolver: zodResolver(receiveStockSchema),
@@ -81,6 +83,7 @@ export function ReceiveStock({
     onSuccess: () => {
       toast.success(t("stock_received"));
       form.reset();
+      navigate("/external_supply/incoming_deliveries/approve");
     },
     onError: () => {
       toast.error(t("error_receiving_stock"));

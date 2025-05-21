@@ -4,6 +4,7 @@ import {
   SupplyDeliveryBase,
   SupplyDeliveryCreate,
   SupplyDeliveryRead,
+  SupplyDeliveryUpdate,
   SupplyDeliveryUpsert,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 
@@ -34,6 +35,6 @@ export default {
     path: "/api/v1/supply_delivery/{supplyDeliveryId}/",
     method: HttpMethod.PUT,
     TRes: Type<SupplyDeliveryBase>(),
-    TBody: Type<SupplyDeliveryCreate>(),
+    TBody: Type<SupplyDeliveryUpdate>(),
   },
 } as const;

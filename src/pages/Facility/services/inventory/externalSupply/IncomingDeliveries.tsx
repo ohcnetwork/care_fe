@@ -1,17 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { CheckCircleIcon, TruckIcon } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import { FilterSelect } from "@/components/definition-list/FilterSelect";
@@ -19,29 +12,16 @@ import { FilterSelect } from "@/components/definition-list/FilterSelect";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import SupplyDeliveryTable from "@/pages/Facility/services/supply/components/SupplyDeliveryTable";
 import { SupplyDeliveryStatus } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
-
-import SupplyDeliveryTable from "./components/SupplyDeliveryTable";
-
-export enum SupplyDeliveryTab {
-  INCOMING = "incoming",
-  OUTGOING = "outgoing",
-}
 
 interface Props {
   facilityId: string;
   locationId: string;
-  tab?: SupplyDeliveryTab;
-  type?: "internal" | "external";
 }
 
-export default function SupplyDeliveryList({
-  facilityId,
-  locationId,
-  tab,
-  type,
-}: Props) {
+export function IncomingDeliveries({ facilityId, locationId }: Props) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
@@ -49,7 +29,7 @@ export default function SupplyDeliveryList({
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["supplyDeliveries", qParams, tab],
+    queryKey: ["externalSupplyDeliveries", qParams],
     queryFn: query.debounced(supplyDeliveryApi.listSupplyDelivery, {
       queryParams: {
         facility: facilityId,
@@ -57,14 +37,8 @@ export default function SupplyDeliveryList({
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         search: qParams.search,
         status: qParams.status,
-        destination:
-          tab === SupplyDeliveryTab.INCOMING ? locationId : undefined,
-        origin:
-          tab === SupplyDeliveryTab.OUTGOING &&
-          (type == null || type === "internal")
-            ? locationId
-            : undefined,
-        origin_isnull: type === "external",
+        destination: locationId,
+        origin_isnull: true,
       },
     }),
   });
@@ -72,13 +46,34 @@ export default function SupplyDeliveryList({
   const deliveries = response?.results || [];
 
   return (
-    <Page title={t("supply_deliveries")} hideTitleOnPage>
+    <Page title={t("incoming_deliveries")} hideTitleOnPage>
       <div className="container mx-auto">
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h1 className="text-xl font-semibold text-gray-900">
-              {t("supply_deliveries")}
+              {t("incoming_deliveries")}
             </h1>
+
+            <div className="flex flex-row gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href="/external_supply/receive"
+                  className="flex items-center gap-2"
+                >
+                  <TruckIcon />
+                  {t("receive_stock")}
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href="/external_supply/incoming_deliveries/approve"
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircleIcon />
+                  {t("approve_deliveries")}
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -86,7 +81,7 @@ export default function SupplyDeliveryList({
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex-1">
               <Input
-                placeholder={t("search_supply_deliveries")}
+                placeholder={t("search_incoming_deliveries")}
                 value={qParams.search}
                 onChange={(e) => updateQuery({ search: e.target.value })}
                 className="w-full"
@@ -105,44 +100,6 @@ export default function SupplyDeliveryList({
               </div>
             </div>
           </div>
-
-          <div className="flex flex-row justify-between items-center gap-2">
-            {(type == null || type === "internal") && (
-              <Tabs
-                value={tab}
-                onValueChange={(value) =>
-                  navigate(
-                    `/facility/${facilityId}/locations/${locationId}/supply_deliveries/${value}`,
-                  )
-                }
-                className="max-sm:hidden"
-              >
-                <TabsList>
-                  <TabsTrigger value="incoming">{t("incoming")}</TabsTrigger>
-                  <TabsTrigger value="outgoing">{t("outgoing")}</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            )}
-
-            <Select
-              value={tab}
-              onValueChange={(value) =>
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/supply_deliveries/${value}`,
-                )
-              }
-            >
-              <SelectTrigger className="sm:hidden">
-                <SelectValue placeholder={t("filter_by_delivery")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="incoming">{t("incoming")}</SelectItem>
-                  <SelectItem value="outgoing">{t("outgoing")}</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         <SupplyDeliveryTable
@@ -150,7 +107,6 @@ export default function SupplyDeliveryList({
           isLoading={isLoading}
           facilityId={facilityId}
           locationId={locationId}
-          tab={tab ?? SupplyDeliveryTab.INCOMING}
         />
 
         <div className="mt-4">

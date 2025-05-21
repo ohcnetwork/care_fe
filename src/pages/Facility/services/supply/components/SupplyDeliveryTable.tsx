@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -18,13 +17,8 @@ import {
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/definition-list/EmptyState";
 
-import mutate from "@/Utils/request/mutate";
 import { SupplyDeliveryTab } from "@/pages/Facility/services/supply/SupplyDeliveryList";
-import {
-  SupplyDeliveryRead,
-  SupplyDeliveryStatus,
-} from "@/types/inventory/supplyDelivery/supplyDelivery";
-import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
+import { SupplyDeliveryRead } from "@/types/inventory/supplyDelivery/supplyDelivery";
 
 const STATUS_COLORS: Record<string, string> = {
   in_progress: "bg-amber-100 text-amber-700",
@@ -38,7 +32,7 @@ interface Props {
   isLoading: boolean;
   facilityId: string;
   locationId: string;
-  tab: SupplyDeliveryTab;
+  tab?: SupplyDeliveryTab;
 }
 
 export default function SupplyDeliveryTable({
@@ -71,11 +65,13 @@ export default function SupplyDeliveryTable({
           <TableRow>
             <TableHead>{t("item")}</TableHead>
             <TableHead>{t("quantity")}</TableHead>
-            <TableHead>
-              {tab === SupplyDeliveryTab.INCOMING
-                ? t("origin")
-                : t("destination")}
-            </TableHead>
+            {tab != null && (
+              <TableHead>
+                {tab === SupplyDeliveryTab.INCOMING
+                  ? t("origin")
+                  : t("destination")}
+              </TableHead>
+            )}
             <TableHead>{t("status")}</TableHead>
             <TableHead className="w-[100px]">{t("actions")}</TableHead>
           </TableRow>
@@ -100,11 +96,13 @@ export default function SupplyDeliveryTable({
                 )}
               </TableCell>
               <TableCell>{delivery.supplied_item_quantity}</TableCell>
-              <TableCell>
-                {tab === SupplyDeliveryTab.INCOMING
-                  ? delivery.origin?.name
-                  : delivery.destination.name}
-              </TableCell>
+              {tab != null && (
+                <TableCell>
+                  {tab === SupplyDeliveryTab.INCOMING
+                    ? delivery.origin?.name
+                    : delivery.destination.name}
+                </TableCell>
+              )}
               <TableCell>
                 <Badge
                   className={STATUS_COLORS[delivery.status]}
@@ -126,9 +124,6 @@ export default function SupplyDeliveryTable({
                   >
                     <CareIcon icon="l-eye" className="size-4" />
                   </Button>
-                  {delivery.status === SupplyDeliveryStatus.in_progress && (
-                    <SupplyDeliveryMarkAsCompleteButton delivery={delivery} />
-                  )}
                 </div>
               </TableCell>
             </TableRow>
@@ -138,41 +133,3 @@ export default function SupplyDeliveryTable({
     </div>
   );
 }
-
-const SupplyDeliveryMarkAsCompleteButton = ({
-  delivery,
-}: {
-  delivery: SupplyDeliveryRead;
-}) => {
-  const queryClient = useQueryClient();
-
-  const { mutate: updateDeliveryStatus } = useMutation({
-    mutationFn: mutate(supplyDeliveryApi.updateSupplyDelivery, {
-      pathParams: { supplyDeliveryId: delivery.id },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
-    },
-  });
-
-  return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={() =>
-        updateDeliveryStatus({
-          status: SupplyDeliveryStatus.completed,
-          supplied_item_quantity: delivery.supplied_item_quantity,
-          supplied_item: delivery.supplied_item?.id,
-          supplied_inventory_item: delivery.supplied_inventory_item?.id,
-          supplied_item_type: delivery.supplied_item_type,
-          origin: delivery.origin?.id,
-          destination: delivery.destination.id,
-          supply_request: delivery.supply_request?.id,
-        })
-      }
-    >
-      <CareIcon icon="l-check" className="size-4" />
-    </Button>
-  );
-};
