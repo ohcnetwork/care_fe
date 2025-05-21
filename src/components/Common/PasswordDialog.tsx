@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/input-password";
 
 interface PasswordDialogProps {
   open: boolean;
@@ -76,8 +76,7 @@ export function PasswordDialog({
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("password")}</label>
-              <Input
-                type="password"
+              <PasswordInput
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoFocus

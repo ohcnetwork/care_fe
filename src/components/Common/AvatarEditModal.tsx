@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import DOMPurify from "dompurify";
 import React, {
   ChangeEventHandler,
@@ -123,6 +124,8 @@ const AvatarEditModal = ({
     setPreview(undefined);
     setIsProcessing(false);
     setSelectedFile(undefined);
+    setIsCameraOpen(false);
+    setPreviewImage(null);
     onOpenChange(false);
   };
 
@@ -174,6 +177,8 @@ const AvatarEditModal = ({
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
       setSelectedFile(undefined);
+      setIsCameraOpen(false);
+      setPreviewImage(null);
     }
   };
 
@@ -214,7 +219,9 @@ const AvatarEditModal = ({
 
   const defaultHint = (
     <>
-      {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
+      {t("max_size_for_image_uploaded_should_be", {
+        maxSize: `${careConfig.imageUploadMaxSizeInMB}MB`,
+      })}
       <br />
       {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
       {t("recommended_aspect_ratio_for", { aspectRatio: "1:1" })}

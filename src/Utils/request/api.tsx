@@ -14,12 +14,11 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
-import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
   Observation,
   ObservationAnalyzeResponse,
 } from "@/types/emr/observation";
-import { PatientModel } from "@/types/emr/patient";
+import { PartialPatientModel, Patient } from "@/types/emr/patient";
 import {
   BaseFacility,
   CreateFacility,
@@ -208,18 +207,18 @@ const routes = {
   addPatient: {
     path: "/api/v1/patient/",
     method: "POST",
-    TRes: Type<PatientModel>(),
+    TRes: Type<Patient>(),
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
     method: "GET",
-    TBody: Type<PatientModel>(),
-    TRes: Type<PatientModel>(),
+    TBody: Type<Patient>(),
+    TRes: Type<Patient>(),
   },
   updatePatient: {
     path: "/api/v1/patient/{id}/",
     method: "PUT",
-    TRes: Type<PatientModel>(),
+    TRes: Type<Patient>(),
   },
 
   //Profile

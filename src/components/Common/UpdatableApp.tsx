@@ -9,6 +9,7 @@ const APP_UPDATED_KEY = "app-updated";
 interface UpdatableAppProps {
   children: ReactNode;
   silentlyAutoUpdate?: boolean;
+  onDismissUpdateToast?: () => void;
 }
 
 export const checkForUpdate = async () => {
@@ -38,8 +39,12 @@ export const checkForUpdate = async () => {
   }
 };
 
-const UpdatableApp = ({ children, silentlyAutoUpdate }: UpdatableAppProps) => {
-  useAppUpdates(silentlyAutoUpdate);
+const UpdatableApp = ({
+  children,
+  silentlyAutoUpdate,
+  onDismissUpdateToast,
+}: UpdatableAppProps) => {
+  useAppUpdates(silentlyAutoUpdate, onDismissUpdateToast);
   return children;
 };
 
