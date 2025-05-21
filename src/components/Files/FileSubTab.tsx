@@ -645,6 +645,9 @@ export const FilesPage = ({
                   await queryClient.invalidateQueries({
                     queryKey: ["files"],
                   });
+                  queryClient.invalidateQueries({
+                    queryKey: ["discharge_files"],
+                  });
                   toast.success(t("refreshed"));
                 }}
               >
@@ -672,6 +675,9 @@ export const FilesPage = ({
                 onSuccess={() => {
                   queryClient.invalidateQueries({
                     queryKey: ["files"],
+                  });
+                  queryClient.invalidateQueries({
+                    queryKey: ["discharge_files"],
                   });
                 }}
               />

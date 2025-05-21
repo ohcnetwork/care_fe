@@ -607,6 +607,9 @@ export const DischargeTab = ({
               await queryClient.invalidateQueries({
                 queryKey: ["discharge_files"],
               });
+              await queryClient.invalidateQueries({
+                queryKey: ["files"],
+              });
               toast.success(t("refreshed"));
             }}
           >
@@ -632,6 +635,9 @@ export const DischargeTab = ({
               </Button>
             }
             onSuccess={() => {
+              queryClient.invalidateQueries({
+                queryKey: ["discharge_files"],
+              });
               queryClient.invalidateQueries({
                 queryKey: ["files"],
               });
