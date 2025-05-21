@@ -206,71 +206,81 @@ export function AccountShow({
                   {t("settle_close")}
                 </Button>
               )}
-            <Button
-              variant="outline"
-              className="border-gray-400 text-gray-950"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                )
-              }
-            >
-              <CareIcon icon="l-plus" className="mr-2 size-4" />
-              {t("create_invoice")}
-            </Button>
+            {account.status === AccountStatus.active &&
+              !isAccountBillingClosed && (
+                <>
+                  <Button
+                    variant="outline"
+                    className="border-gray-400 text-gray-950"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
+                      )
+                    }
+                  >
+                    <CareIcon icon="l-plus" className="mr-2 size-4" />
+                    {t("create_invoice")}
+                  </Button>
 
-            <Button
-              variant="primary"
-              onClick={() => setIsPaymentSheetOpen(true)}
-            >
-              <CareIcon icon="l-plus" className="size-4" />
-              {t("record_payment")}
-            </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => setIsPaymentSheetOpen(true)}
+                  >
+                    <CareIcon icon="l-plus" className="size-4" />
+                    {t("record_payment")}
+                  </Button>
+                </>
+              )}
           </div>
 
-          <div className="sm:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="border-gray-400 text-gray-950"
-                >
-                  {t("actions")}
-                  <ChevronDown className="size-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {account.status === AccountStatus.active &&
-                  !isAccountBillingClosed && (
+          {account.status === AccountStatus.active &&
+            !isAccountBillingClosed && (
+              <div className="sm:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="border-gray-400 text-gray-950"
+                    >
+                      {t("actions")}
+                      <ChevronDown className="size-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {account.status === AccountStatus.active &&
+                      !isAccountBillingClosed && (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            setCloseAccountStatus({
+                              ...closeAccountStatus,
+                              sheetOpen: true,
+                            })
+                          }
+                        >
+                          <CareIcon icon="l-check" className="mr-2 size-5" />
+                          {t("settle_close")}
+                        </DropdownMenuItem>
+                      )}
                     <DropdownMenuItem
                       onClick={() =>
-                        setCloseAccountStatus({
-                          ...closeAccountStatus,
-                          sheetOpen: true,
-                        })
+                        navigate(
+                          `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
+                        )
                       }
                     >
-                      <CareIcon icon="l-check" className="mr-2 size-5" />
-                      {t("settle_close")}
+                      <CareIcon icon="l-plus" className="mr-2 size-4" />
+                      {t("create_invoice")}
                     </DropdownMenuItem>
-                  )}
-                <DropdownMenuItem
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                    )
-                  }
-                >
-                  <CareIcon icon="l-plus" className="mr-2 size-4" />
-                  {t("create_invoice")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsPaymentSheetOpen(true)}>
-                  <CareIcon icon="l-plus" className="mr-2 size-4" />
-                  {t("record_payment")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                    <DropdownMenuItem
+                      onClick={() => setIsPaymentSheetOpen(true)}
+                    >
+                      <CareIcon icon="l-plus" className="mr-2 size-4" />
+                      {t("record_payment")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
         </div>
       </div>
       <div className="bg-gray-100 p-3 space-y-4 rounded-lg">
@@ -298,7 +308,9 @@ export function AccountShow({
                 {t("start_date")}
               </p>
               <p className="font-medium text-base text-gray-950">
-                {formatDate(account.service_period?.start)}
+                {account.service_period?.start
+                  ? formatDate(account.service_period?.start)
+                  : formatDate(account.created_date)}
               </p>
             </div>
             <div>
@@ -308,7 +320,7 @@ export function AccountShow({
               <p className="font-medium text-base text-gray-950">
                 {account.service_period?.end
                   ? formatDate(account.service_period?.end)
-                  : "-- (" + t("ongoing") + ")"}
+                  : t("ongoing")}
               </p>
             </div>
           </div>

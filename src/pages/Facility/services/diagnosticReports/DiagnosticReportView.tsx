@@ -162,12 +162,12 @@ export default function DiagnosticReportView({
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("uploaded_files")}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-2">
-            {files?.results && files.results.length > 0 && (
+        {files?.results && files.results.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("uploaded_files")}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-2">
               <FileListTable
                 files={files.results}
                 type="diagnostic_report"
@@ -176,9 +176,10 @@ export default function DiagnosticReportView({
                 showHeader={false}
                 onRefetch={refetchFiles}
               />
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Test Results */}
         <Card>
           <CardHeader>

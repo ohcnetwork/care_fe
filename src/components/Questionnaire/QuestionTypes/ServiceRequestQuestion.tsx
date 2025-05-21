@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronDown, ChevronsUpDown, Trash2 } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
+import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,19 +11,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -456,7 +443,6 @@ export function ServiceRequestQuestion({
   errors,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
   const [selectedActivityDefinition, setSelectedActivityDefinition] = useState<
     string | null
   >(null);
@@ -530,7 +516,6 @@ export function ServiceRequestQuestion({
       };
 
       setPreviewServiceRequest(newServiceRequest);
-      setOpen(false);
     }
   }, [
     selectedActivityDefinition,
@@ -650,12 +635,12 @@ export function ServiceRequestQuestion({
     });
   };
 
-  // Memoize activity definitions to prevent unnecessary re-renders
+  // Memoize activity definitions to match Autocomplete's expected format
   const activityDefinitionOptions = useMemo(
     () =>
       activityDefinitions?.results.map((ad) => ({
-        id: ad.id,
-        title: ad.title,
+        label: ad.title,
+        value: ad.id,
       })) || [],
     [activityDefinitions?.results],
   );
@@ -731,56 +716,17 @@ export function ServiceRequestQuestion({
       )}
 
       <div className="space-y-2 w-full">
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className="w-full justify-between"
-              disabled={disabled}
-            >
-              {selectedActivityDefinition
-                ? activityDefinitionOptions.find(
-                    (ad) => ad.id === selectedActivityDefinition,
-                  )?.title
-                : t("select_activity_definition")}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[300px] p-0">
-            <Command>
-              <CommandInput
-                placeholder={t("search_activity_definitions")}
-                className="h-9"
-                value={activityDefinitionSearch}
-                onValueChange={setActivityDefinitionSearch}
-              />
-              <CommandEmpty>{t("no_activity_definitions_found")}</CommandEmpty>
-              <CommandGroup>
-                {activityDefinitionOptions.map((ad) => (
-                  <CommandItem
-                    key={ad.id}
-                    value={ad.title}
-                    onSelect={() => {
-                      handleActivityDefinitionSelect(ad.id);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        selectedActivityDefinition === ad.id
-                          ? "opacity-100"
-                          : "opacity-0",
-                      )}
-                    />
-                    {ad.title}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        <Autocomplete
+          options={activityDefinitionOptions}
+          value={selectedActivityDefinition || ""}
+          onChange={(value) => handleActivityDefinitionSelect(value)}
+          onSearch={setActivityDefinitionSearch}
+          placeholder={t("select_activity_definition")}
+          inputPlaceholder={t("search_activity_definitions")}
+          noOptionsMessage={t("no_activity_definitions_found")}
+          disabled={disabled}
+          data-cy="activity-definition-select"
+        />
       </div>
     </div>
   );

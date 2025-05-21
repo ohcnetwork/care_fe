@@ -289,7 +289,9 @@ export function AccountList({
                   </TableCell>
                   <TableCell className={tableCellClass}>
                     <span className="text-gray-950 font-medium">
-                      {formatDate(account.service_period?.start)}
+                      {account.service_period?.start
+                        ? formatDate(account.service_period?.start)
+                        : formatDate(account.created_date)}
                       {account.service_period?.end &&
                         ` - ${formatDate(account.service_period?.end)}`}
                     </span>

@@ -474,7 +474,9 @@ function ActivityDefinitionFormContent({
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("title")}</FormLabel>
+                        <FormLabel>
+                          {t("title")} <span className="text-red-500">*</span>
+                        </FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -488,7 +490,9 @@ function ActivityDefinitionFormContent({
                     name="slug"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("slug")}</FormLabel>
+                        <FormLabel>
+                          {t("slug")} <span className="text-red-500">*</span>
+                        </FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -503,7 +507,10 @@ function ActivityDefinitionFormContent({
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("description")}</FormLabel>
+                      <FormLabel>
+                        {t("description")}{" "}
+                        <span className="text-red-500">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Textarea {...field} className="min-h-[60px]" />
                       </FormControl>
@@ -517,7 +524,9 @@ function ActivityDefinitionFormContent({
                   name="usage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("usage")}</FormLabel>
+                      <FormLabel>
+                        {t("usage")} <span className="text-red-500">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Textarea {...field} className="min-h-[60px]" />
                       </FormControl>
@@ -560,7 +569,10 @@ function ActivityDefinitionFormContent({
                     name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("category")}</FormLabel>
+                        <FormLabel>
+                          {t("category")}{" "}
+                          <span className="text-red-500">*</span>
+                        </FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
@@ -629,22 +641,33 @@ function ActivityDefinitionFormContent({
                 </div>
 
                 <div>
-                  <FormLabel>{t("code")}</FormLabel>
-                  <div className="mt-2">
-                    <ValueSetSelect
-                      system="activity-definition-procedure-code"
-                      value={form.watch("code")}
-                      placeholder={t("search_for_activity_codes")}
-                      onSelect={(code) => {
-                        form.setValue("code", {
-                          code: code.code,
-                          display: code.display,
-                          system: code.system,
-                        });
-                      }}
-                      showCode={true}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t("code")} <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <div className="mt-2">
+                          <ValueSetSelect
+                            system="activity-definition-procedure-code"
+                            value={field.value}
+                            placeholder={t("search_for_activity_codes")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </div>

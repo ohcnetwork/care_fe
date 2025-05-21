@@ -71,8 +71,10 @@ export function ProductSearch({
       pathParams: { facilityId },
       queryParams: {
         status: ProductStatusOptions.active,
+        product_knowledge: productKnowledge?.id,
       },
     }),
+    enabled: !!productKnowledge?.id,
   });
 
   const productKnowledgeOptions =

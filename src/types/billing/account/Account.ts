@@ -48,6 +48,7 @@ export interface AccountRead extends AccountBase {
   total_gross: number;
   total_paid: number;
   total_balance: number;
+  created_date: string;
 }
 
 export interface AccountUpdate extends AccountBase {

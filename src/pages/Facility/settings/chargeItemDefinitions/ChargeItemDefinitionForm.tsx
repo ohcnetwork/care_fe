@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
 
@@ -62,33 +62,8 @@ const priceComponentSchema = z.object({
     })
     .nullable()
     .optional(),
-  factor: z.number().min(0).max(100).nullable().optional(),
-  amount: z.number().min(0).nullable().optional(),
-});
-
-// Main form schema
-const formSchema = z.object({
-  title: z.string().min(1, { message: "field_required" }),
-  status: z.nativeEnum(ChargeItemDefinitionStatus),
-  description: z.string().nullable(),
-  purpose: z.string().nullable(),
-  derived_from_uri: z.string().url().nullable(),
-  price_components: z.array(priceComponentSchema).refine(
-    (components) => {
-      // Ensure there is exactly one base price component and it's the first one
-      return (
-        components.length > 0 &&
-        components[0].monetary_component_type === MonetaryComponentType.base &&
-        components.filter(
-          (c) => c.monetary_component_type === MonetaryComponentType.base,
-        ).length === 1
-      );
-    },
-    {
-      message:
-        "Exactly one base price component is required as the first component",
-    },
-  ),
+  factor: z.number().gt(0).max(100).nullable().optional(),
+  amount: z.number().gt(0).nullable().optional(),
 });
 
 interface ChargeItemDefinitionFormProps {
@@ -104,9 +79,7 @@ const monetaryComponentIsEqual = <T extends MonetaryComponent>(a: T, b: T) => {
     a.monetary_component_type === b.monetary_component_type &&
     a.code?.code === b.code?.code &&
     a.code?.system === b.code?.system &&
-    a.code?.display === b.code?.display &&
-    a.factor == b.factor &&
-    a.amount == b.amount
+    a.code?.display === b.code?.display
   );
 };
 
@@ -120,6 +93,7 @@ function MonetaryComponentSelectionSection({
   onValueChange,
   summary,
   type,
+  errors,
 }: {
   title: string;
   description: string;
@@ -129,6 +103,7 @@ function MonetaryComponentSelectionSection({
   onValueChange: (component: MonetaryComponent, value: number) => void;
   summary: number;
   type: MonetaryComponentType;
+  errors: FieldErrors<z.infer<typeof priceComponentSchema>>[];
 }) {
   const { t } = useTranslation();
 
@@ -199,6 +174,7 @@ function MonetaryComponentSelectionSection({
                 <Input
                   type="number"
                   min="0"
+                  step="any"
                   max={component.factor != null ? 100 : undefined}
                   value={getComponentValue(component)}
                   onChange={(e) =>
@@ -213,6 +189,11 @@ function MonetaryComponentSelectionSection({
                   {component.factor != null ? "%" : "₹"}
                 </span>
               </div>
+              {errors && errors[idx] && (
+                <p className="text-red-500">
+                  {errors[idx].amount?.message || errors[idx].factor?.message}
+                </p>
+              )}
             </div>
           );
         })}
@@ -267,6 +248,36 @@ export function ChargeItemDefinitionForm({
     queryFn: query(facilityApi.getFacility, {
       pathParams: { id: facilityId },
     }),
+  });
+
+  // Main form schema
+  const formSchema = z.object({
+    title: z.string().min(1, { message: t("field_required") }),
+    status: z.nativeEnum(ChargeItemDefinitionStatus),
+    description: z.string().nullable(),
+    purpose: z.string().nullable(),
+    derived_from_uri: z.string().url().nullable(),
+    price_components: z.array(priceComponentSchema).refine(
+      (components) => {
+        // Ensure there is exactly one base price component and it's the first one
+        return (
+          components.length > 0 &&
+          components[0].monetary_component_type ===
+            MonetaryComponentType.base &&
+          components.filter(
+            (c) => c.monetary_component_type === MonetaryComponentType.base,
+          ).length === 1 &&
+          components[0].amount !== undefined &&
+          components[0].amount !== null &&
+          components[0].amount !== 0
+        );
+      },
+      {
+        message:
+          "Exactly one base price component is required as the first component",
+        path: ["price_components", "0", "amount"],
+      },
+    ),
   });
 
   // Initialize form
@@ -341,6 +352,16 @@ export function ChargeItemDefinitionForm({
   const getSelectedComponents = (type: MonetaryComponentType) =>
     priceComponents.filter((c) => c.monetary_component_type === type);
 
+  const getSelectedComponentError = (type: MonetaryComponentType) => {
+    const priceComponentsErrors = form.formState.errors.price_components;
+    if (!priceComponentsErrors || !Array.isArray(priceComponentsErrors))
+      return [];
+    const indices = priceComponents
+      .map((c, index) => (c.monetary_component_type === type ? index : -1))
+      .filter((index) => index !== -1);
+    return indices.map((index) => priceComponentsErrors[index]);
+  };
+
   // Handle component selection
   const handleComponentToggle = (
     component: MonetaryComponent,
@@ -362,6 +383,7 @@ export function ChargeItemDefinitionForm({
     }
 
     form.setValue("price_components", newComponents, { shouldValidate: true });
+    form.trigger("price_components");
   };
 
   // Handle component value change
@@ -441,7 +463,7 @@ export function ChargeItemDefinitionForm({
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("title")}</FormLabel>
+                    <FormLabel aria-required>{t("title")}</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder={t("title")} />
                     </FormControl>
@@ -574,29 +596,35 @@ export function ChargeItemDefinitionForm({
                 </div> */}
 
                 {/* Base Price */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      {t("base_price")}
-                    </h4>
-                  </div>
-                  <div className="w-48">
-                    <FormField
-                      control={form.control}
-                      name="price_components.0.amount"
-                      render={({ field }) => (
-                        <MonetaryAmountInput
-                          {...field}
-                          value={field.value ?? 0}
-                          onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber)
+                <FormField
+                  control={form.control}
+                  name="price_components.0.amount"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between gap-2">
+                      <FormLabel className="font-medium text-gray-900 text-xl">
+                        {t("base_price")}
+                      </FormLabel>
+                      <div className="flex flex-col items-end gap-2">
+                        <FormControl className="w-48">
+                          <MonetaryAmountInput
+                            {...field}
+                            value={field.value ?? 0}
+                            onChange={(e) =>
+                              field.onChange(e.target.valueAsNumber)
+                            }
+                            placeholder="0.00"
+                          />
+                        </FormControl>
+                        <FormMessage>
+                          {
+                            form.formState.errors.price_components?.[0]?.amount
+                              ?.message
                           }
-                          placeholder="0.00"
-                        />
-                      )}
-                    />
-                  </div>
-                </div>
+                        </FormMessage>
+                      </div>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
@@ -618,6 +646,7 @@ export function ChargeItemDefinitionForm({
               onValueChange={handleComponentValueChange}
               summary={priceSummary.netAmount - priceSummary.taxableAmount}
               type={MonetaryComponentType.discount}
+              errors={getSelectedComponentError(MonetaryComponentType.discount)}
             />
 
             {/* Taxes */}
@@ -638,6 +667,7 @@ export function ChargeItemDefinitionForm({
               onValueChange={handleComponentValueChange}
               summary={priceSummary.totalAmount - priceSummary.taxableAmount}
               type={MonetaryComponentType.tax}
+              errors={getSelectedComponentError(MonetaryComponentType.tax)}
             />
 
             {/* Price Summary */}
