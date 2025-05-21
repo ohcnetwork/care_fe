@@ -104,7 +104,7 @@ function RatioBuilder({
   column: HeaderElementType[];
 }) {
   const { t } = useTranslation();
-  const [totalRatio, setTotalRatio] = useState(6);
+  const [totalRatio, setTotalRatio] = useState(RATIO_PER_COLUMN);
   const [lockRatio, setLockRatio] = useState(false);
 
   const columnLength = column?.length ?? 0;

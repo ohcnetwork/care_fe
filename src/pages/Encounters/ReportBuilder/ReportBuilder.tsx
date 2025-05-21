@@ -111,7 +111,7 @@ const defaultTemplate: ReportTemplateFormData = {
               type: "image",
               file_name: "care-black-logo.svg",
               url: "https://raw.githubusercontent.com/ohcnetwork/care/refs/heads/develop/care/static/images/logos/black-logo.svg",
-              width: "40%",
+              width: "40",
               align: "right",
             },
           ],
