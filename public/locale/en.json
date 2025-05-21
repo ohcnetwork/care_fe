@@ -2350,6 +2350,7 @@
   "no_dispenses_found": "No dispenses made",
   "no_dispenses_found_description": "No medication dispenses has been made in this location! You'll see them here once dispensed.",
   "no_doctors_found": "No Doctors Found",
+  "no_dosage_instrctions_available": "No dosage instructions available",
   "no_drawings_so_far": "No drawings so far",
   "no_duplicate_facility": "You should not create duplicate facilities",
   "no_encounter_associated": "No encounter associated",

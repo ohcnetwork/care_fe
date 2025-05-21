@@ -1,4 +1,7 @@
-import { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  DoseRange,
+  MedicationRequestDosageInstruction,
+} from "@/types/emr/medicationRequest/medicationRequest";
 
 // Helper function to format dosage in Rx style
 export function formatDosage(instruction: MedicationRequestDosageInstruction) {
@@ -33,4 +36,17 @@ export function formatSig(instruction: MedicationRequestDosageInstruction) {
   }
 
   return parts.join(" ");
+}
+
+export function formatDoseRange(range?: DoseRange): string {
+  if (!range?.high?.value) return "";
+
+  const formatValue = (value?: number | null) =>
+    value != null
+      ? value.toString().includes(".")
+        ? value.toFixed(2)
+        : value.toString()
+      : "";
+
+  return `${formatValue(range.low?.value)} → ${formatValue(range.high?.value)} ${range.high?.unit?.display}`;
 }
