@@ -50,6 +50,10 @@ function isQuestionEnabled(
         return value ? "Yes" : "No";
       }
 
+      if (typeof value === "number") {
+        return value.toString();
+      }
+
       return value;
     }
 
