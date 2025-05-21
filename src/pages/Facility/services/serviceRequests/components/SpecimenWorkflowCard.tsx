@@ -97,6 +97,7 @@ interface SpecimenWorkflowCardProps {
   facilityId: string;
   serviceRequestId: string;
   requirement: SpecimenDefinitionRead;
+  draftSpecimen?: SpecimenRead;
   collectedSpecimen?: SpecimenRead; // Collected specimen is optional
   onCollect: () => void; // Function to trigger collection form
 }
@@ -105,6 +106,7 @@ export function SpecimenWorkflowCard({
   facilityId,
   serviceRequestId,
   requirement,
+  draftSpecimen,
   collectedSpecimen,
   onCollect,
 }: SpecimenWorkflowCardProps) {
@@ -427,9 +429,16 @@ export function SpecimenWorkflowCard({
                   Collection Pending
                 </Badge>
 
-                <Badge variant="outline" className="bg-gray-100 text-gray-900">
-                  <FileText className="h-4 w-4 mr-1.5 stroke-1.5" />
-                  Draft
+                <Badge
+                  variant="outline"
+                  className={SPECIMEN_STATUS_COLOR_MAP["draft"]}
+                >
+                  {draftSpecimen && (
+                    <>
+                      <FileText className="size-4 mr-1.5 stroke-1.5" />
+                      <span className="text-xs">{t("draft")}</span>
+                    </>
+                  )}
                 </Badge>
 
                 <Button onClick={onCollect} variant="outline_primary">

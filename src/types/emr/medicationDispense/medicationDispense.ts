@@ -64,7 +64,7 @@ export interface MedicationDispenseBase {
   when_prepared: Date;
   when_handed_over?: Date;
   note?: string;
-  dosage_instruction: MedicationRequestDosageInstruction;
+  dosage_instruction: MedicationRequestDosageInstruction[];
   substitution?: MedicationDispenseSubstitution;
 }
 

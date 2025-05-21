@@ -414,6 +414,7 @@ export default function ServiceRequestShow({
                     key={requirement.id}
                     facilityId={facilityId}
                     serviceRequestId={serviceRequestId}
+                    draftSpecimen={getExistingDraftSpecimen(requirement.id)}
                     requirement={requirement}
                     collectedSpecimen={collectedSpecimen}
                     onCollect={() => {

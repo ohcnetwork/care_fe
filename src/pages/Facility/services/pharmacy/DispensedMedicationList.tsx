@@ -87,7 +87,7 @@ function MedicationTable({
         </TableHeader>
         <TableBody>
           {medications.map((medication) => {
-            const instruction = medication.dosage_instruction;
+            const instruction = medication.dosage_instruction[0] ?? {};
             const frequency = instruction?.timing?.code;
             const dosage = instruction?.dose_and_rate?.dose_quantity;
             const isPaid = medication.charge_item.paid_invoice;
