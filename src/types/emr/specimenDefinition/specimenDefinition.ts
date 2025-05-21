@@ -19,8 +19,8 @@ export interface QuantitySpec {
 }
 
 export interface MinimumVolumeSpec {
-  quantity: QuantitySpec | null;
-  string: string | null;
+  quantity?: QuantitySpec | null;
+  string?: string | null;
 }
 
 export interface DurationSpec {

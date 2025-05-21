@@ -59,8 +59,9 @@ const typeTestedSchema = z.object({
               value: z.number(),
               unit: CodeSchema,
             })
+            .optional()
             .nullable(),
-          string: z.string().nullable(),
+          string: z.string().optional().nullable(),
         })
         .nullable(),
       cap: CodeSchema.nullable(),
