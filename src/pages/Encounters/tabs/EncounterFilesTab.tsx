@@ -8,6 +8,7 @@ export const EncounterFilesTab = (props: EncounterTabProps) => {
       type="encounter"
       encounter={props.encounter}
       patient={props.patient}
+      facilityId={props.encounter.facility.id}
     />
   );
 };

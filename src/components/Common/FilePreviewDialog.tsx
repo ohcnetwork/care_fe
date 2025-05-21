@@ -122,7 +122,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [index, setIndex] = useState<number>(currentIndex);
-  const [scale, setScale] = useState(1.0);
+  const [scale, setScale] = useState(0.75);
   const [dragState, setDragState] = useState<DragState>(initialDragState);
 
   useEffect(() => {
@@ -202,7 +202,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     setPage(1);
     setNumPages(1);
     setIndex(-1);
-    setScale(1);
+    setScale(0.75);
     onClose?.();
   };
 
@@ -312,7 +312,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             <div className="mb-2 flex flex-col items-start md:justify-between md:flex-row gap-4">
               <div>
                 <TooltipComponent content={fileName}>
-                  <p className="text-2xl font-bold text-gray-800 truncate">
+                  <p className="text-xl font-bold text-gray-800 truncate">
                     {fileNameTooltip}
                   </p>
                 </TooltipComponent>
