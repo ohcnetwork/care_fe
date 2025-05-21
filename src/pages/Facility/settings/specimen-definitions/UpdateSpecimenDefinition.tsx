@@ -65,6 +65,9 @@ export function UpdateSpecimenDefinition({
           updateSpecimenDefinition({
             ...data,
             id: specimenDefinitionId,
+            patient_preparation:
+              data.patient_preparation?.filter((item) => item && item.code) ||
+              [],
           })
         }
         isLoading={isUpdating}

@@ -39,7 +39,7 @@ export function CreateSpecimenDefinition({
     createSpecimenDefinition({
       ...data,
       patient_preparation:
-        data.patient_preparation?.filter((item) => item !== null) || [],
+        data.patient_preparation?.filter((item) => item && item.code) || [],
     });
   };
   return (
