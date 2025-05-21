@@ -85,7 +85,7 @@ export interface SpecimenDefinition {
   derived_from_uri: string | null;
   status: Status;
   description: string;
-  type_collected: Code | null;
+  type_collected: Code;
   patient_preparation: Code[] | null;
   collection: Code | null;
   facility: string;

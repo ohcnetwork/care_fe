@@ -86,7 +86,7 @@ const formSchema = z.object({
     .string()
     .url({ message: "Please enter a valid URL" })
     .nullable(),
-  type_collected: CodeSchema.nullable(),
+  type_collected: CodeSchema,
   patient_preparation: z.array(CodeSchema).min(0),
   collection: CodeSchema.nullable(),
   type_tested: typeTestedSchema.nullable(),
@@ -117,7 +117,7 @@ export function SpecimenDefinitionForm({
       status: initialData?.status || Status.active,
       description: initialData?.description || "",
       derived_from_uri: initialData?.derived_from_uri || null,
-      type_collected: initialData?.type_collected || null,
+      type_collected: initialData?.type_collected,
       patient_preparation: initialData?.patient_preparation || [],
       collection: initialData?.collection || null,
       type_tested: initialData?.type_tested || {
