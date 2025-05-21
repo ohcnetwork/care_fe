@@ -17,6 +17,7 @@ interface FilesTabsProps {
   type: "encounter" | "patient";
   encounter?: Encounter;
   patient?: Patient;
+  facilityId?: string;
 }
 
 type QueryParams = {
@@ -27,7 +28,7 @@ const allowedTabs = ["all", "discharge_summary", "drawings"] as const;
 type TabType = (typeof allowedTabs)[number];
 
 export const FilesTab = (props: FilesTabsProps) => {
-  const { patient, type, encounter } = props;
+  const { patient, type, encounter, facilityId } = props;
   const [qParams, setQParams] = useQueryParams<QueryParams>();
 
   const { hasPermission } = usePermissions();
@@ -73,7 +74,7 @@ export const FilesTab = (props: FilesTabsProps) => {
           >
             {t("files")}
           </TabsTrigger>
-          {type === "encounter" && (
+          {type === "encounter" && encounter && (
             <TabsTrigger
               value="discharge_summary"
               className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
@@ -96,14 +97,16 @@ export const FilesTab = (props: FilesTabsProps) => {
             patient={patient}
             associatingId={associatingId}
             canEdit={canEdit}
+            facilityId={facilityId || ""}
           />
         </TabsContent>
 
-        {type === "encounter" && (
+        {type === "encounter" && encounter && (
           <TabsContent value="discharge_summary">
             <DischargeTab
               type={type}
-              encounterId={encounter?.id || ""}
+              facilityId={facilityId || ""}
+              encounter={encounter}
               canEdit={canEdit}
             />
           </TabsContent>
