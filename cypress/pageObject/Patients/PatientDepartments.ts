@@ -130,15 +130,13 @@ export class PatientDepartments {
       .contains(departmentName)
       .scrollIntoView()
       .click();
-    cy.wait(2000);
     return this;
   }
 
   verifyChildDepartment(departmentName: string) {
-    cy.get('[data-cy="organization-tree-node-children"]')
-      .contains(departmentName)
-      .scrollIntoView()
-      .should("be.visible");
+    cy.verifyContentPresence('[data-cy="organization-tree-node-children"]', [
+      departmentName,
+    ]);
     return this;
   }
 
@@ -160,7 +158,7 @@ export class PatientDepartments {
     return this;
   }
 
-  openDepartmentsTeamDetails() {
+  openDepartmentsTeamFirstRandomDetails() {
     cy.get('[data-cy="department-team-list"]')
       .first()
       .contains("See Details")
@@ -254,9 +252,19 @@ export class PatientDepartments {
     return this;
   }
 
-  selectOrganization() {
-    cy.clickAndSelectOption('[data-cy="facility-organization"]');
+  selectOrganization(organizationName: string) {
+    cy.clickAndSelectOption(
+      '[data-cy="facility-organization"]',
+      organizationName,
+    );
     return this;
+  }
+
+  deleteExistingOrganization() {
+    cy.verifyAndClickElement(
+      '[data-cy="delete-organization"]',
+      "Delete Organization",
+    );
   }
 
   clickAddOrganizationToEncounterSubmit() {
@@ -269,6 +277,28 @@ export class PatientDepartments {
 
   clickAddOrganization() {
     cy.get('[data-cy="add-organization-badge"]').first().click();
+    return this;
+  }
+
+  interceptDeleteOrganization() {
+    cy.intercept("DELETE", "**/api/v1/encounter/*/organizations_remove/**").as(
+      "deleteOrganization",
+    );
+    return this;
+  }
+
+  deleteOrganization() {
+    cy.get('[data-cy="delete-organization-button"]').first().click();
+    return this;
+  }
+
+  verifyDeleteOrganizationSuccess() {
+    cy.wait("@deleteOrganization").its("response.statusCode").should("eq", 200);
+    return this;
+  }
+
+  verifyOrganizationAdded() {
+    cy.verifyNotification("Organization added successfully");
     return this;
   }
 }

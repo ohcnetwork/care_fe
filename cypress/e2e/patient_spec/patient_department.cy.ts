@@ -16,6 +16,27 @@ describe("Manage departments/teams association to an encounter", () => {
     facilityCreation.selectFirstRandomFacility();
   });
 
+  it("Assign Department/Team to an Encounter and verify it", () => {
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails();
+    patientDepartments.clickAddOrganization();
+
+    cy.get('[data-cy="link-organisation-name"]').then(($el) => {
+      const departmentName = $el.text().trim();
+
+      patientDepartments
+        .interceptDeleteOrganization()
+        .deleteOrganization()
+        .verifyDeleteOrganizationSuccess()
+        .selectAllOrganizationsTab()
+        .selectOrganization(departmentName)
+        .clickAddOrganizationToEncounterSubmit()
+        .verifyOrganizationAdded();
+    });
+  });
+
   it("Add a new department and create a sub-child, and now verify both are visible in the sidebar nav", () => {
     const departmentName = generateDeptName();
     const subDepartmentName = generateDeptName("Sub-");
@@ -23,11 +44,8 @@ describe("Manage departments/teams association to an encounter", () => {
       charLimit: 50,
     });
     const OrganizationType = "Department";
-    // const updatedOrganizationType = "Team";
-    // const updatedDescription = generateRandomCharacter({
-    //   charLimit: 50,
-    // });
-    // const updatedDepartmentTeamName = generateDeptName("Updated-Sub-");
+
+    // Create a new department in the facility
     patientDepartments
       .navigateToSettings()
       .navigateToDepartments()
@@ -38,9 +56,11 @@ describe("Manage departments/teams association to an encounter", () => {
       .interceptCreateRequest()
       .clickCreateOrganization()
       .verifyCreateRequest()
-      .assertCreationSuccess()
+      .assertCreationSuccess();
+    // Create a sub-department in the facility
+    patientDepartments
       .searchDepartmentTeam(departmentName)
-      .openDepartmentsTeamDetails()
+      .openDepartmentsTeamFirstRandomDetails()
       .clickAddDepartmentTeam()
       .enterName(subDepartmentName)
       .selectType(OrganizationType)
@@ -54,16 +74,17 @@ describe("Manage departments/teams association to an encounter", () => {
   });
 
   it("Navigate to the facility's administration department and link a user to the facility", () => {
-    const userName = "nurse_2_0";
-    const role = "Nurse";
+    const userName = "care-nurse";
+    const role = "Volunteer";
     const updatedRole = "Doctor";
     const departmentName = "Administration";
 
+    // Navigate to the facility's administration department and link a user to the facility
     patientDepartments
       .navigateToSettings()
       .navigateToDepartments()
       .searchDepartmentTeam(departmentName)
-      .openDepartmentsTeamDetails()
+      .openDepartmentsTeamFirstRandomDetails()
       .clickUsersTab()
       .clickLinkUser()
       .selectAssignedUser(userName)
@@ -71,7 +92,9 @@ describe("Manage departments/teams association to an encounter", () => {
       .interceptAssignUserRequest()
       .clickAddUserToOrganization()
       .verifyAssignUserRequest()
-      .assertUserAddedSuccess()
+      .assertUserAddedSuccess();
+    // Update the new added user role to doctor
+    patientDepartments
       .searchUser(userName)
       .verifyUserRole(role)
       .clickEditRole()
@@ -80,23 +103,12 @@ describe("Manage departments/teams association to an encounter", () => {
       .clickUpdateUserRole()
       .verifyUpdateRoleRequest()
       .verifyUserRole(updatedRole)
+      // Remove the user from the facility
       .clickEditRole()
       .interceptRemoveUserRequest()
       .clickRemoveUser()
       .clickConfirmRemove()
       .verifyRemoveUserRequest()
       .assertUserRemovalSuccess();
-  });
-
-  it("Assign Department/Team to an Encounter and verify it", () => {
-    patientEncounter
-      .navigateToEncounters()
-      .clickInProgressEncounterFilter()
-      .openFirstEncounterDetails();
-    patientDepartments
-      .clickAddOrganization()
-      .selectAllOrganizationsTab()
-      .selectOrganization()
-      .clickAddOrganizationToEncounterSubmit();
   });
 });
