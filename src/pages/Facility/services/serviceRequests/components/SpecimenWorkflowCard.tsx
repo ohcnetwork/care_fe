@@ -97,8 +97,7 @@ interface SpecimenWorkflowCardProps {
   facilityId: string;
   serviceRequestId: string;
   requirement: SpecimenDefinitionRead;
-  draftSpecimen?: SpecimenRead;
-  collectedSpecimen?: SpecimenRead; // Collected specimen is optional
+  specimen?: SpecimenRead; // Collected specimen is optional
   onCollect: () => void; // Function to trigger collection form
 }
 
@@ -106,14 +105,14 @@ export function SpecimenWorkflowCard({
   facilityId,
   serviceRequestId,
   requirement,
-  draftSpecimen,
-  collectedSpecimen,
+  specimen,
   onCollect,
 }: SpecimenWorkflowCardProps) {
   const queryClient = useQueryClient();
   const authUser = useAuthUser();
   const currentUserId = authUser.external_id;
-
+  const isDraft = specimen?.status === SpecimenStatus.draft;
+  const collectedSpecimen = !isDraft ? specimen : undefined;
   const container = requirement.type_tested?.container;
   const hasCollected = !!collectedSpecimen;
 
@@ -429,17 +428,17 @@ export function SpecimenWorkflowCard({
                   Collection Pending
                 </Badge>
 
-                <Badge
-                  variant="outline"
-                  className={SPECIMEN_STATUS_COLOR_MAP["draft"]}
-                >
-                  {draftSpecimen && (
+                {isDraft && (
+                  <Badge
+                    variant="outline"
+                    className={SPECIMEN_STATUS_COLOR_MAP["draft"]}
+                  >
                     <>
                       <FileText className="size-4 mr-1.5 stroke-1.5" />
                       <span className="text-xs">{t("draft")}</span>
                     </>
-                  )}
-                </Badge>
+                  </Badge>
+                )}
 
                 <Button onClick={onCollect} variant="outline_primary">
                   <Plus className="h-4 w-4" />

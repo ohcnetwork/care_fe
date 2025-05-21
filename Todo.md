@@ -51,6 +51,10 @@ x : Done
 - [ ] SR Details page - Disable the process step once the report generation is done | Confirm with Bodhi before working on this
 - [ ] SR overview page - Show the current status of the service request. Upon completion, update the status from active to complete
 - [ ] SR Questionnaire - Investigate placement of Priority and Urgent text fields, as the text field appears in Overview and the request in the SR tab upon submission. Currently, Priority is recorded both as structured data and plain text in the same question.
+- [x] Pass only the active and draft specimens to multi QR print - Yash
+- [x] Get all matching specimens for a requierment so that draftspecimen creation works as expected, -> when there are multiple specimens for a requirement -> when a previous specimen is discarded - Yash
+- [-] Fix the explicit type casting and add proper types to SDF - Yash
+- [x] Fix the draft badge in SR show - Amjith & Yash
 
 ## Back End
 

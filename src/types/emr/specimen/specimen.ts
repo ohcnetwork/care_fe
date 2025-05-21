@@ -91,3 +91,15 @@ export interface SpecimenRead extends SpecimenBase {
   type_tested: TypeTestedSpec | null;
   specimen_definition: SpecimenDefinitionRead;
 }
+
+export function getActiveAndDraftSpecimens(
+  specimens: SpecimenRead[],
+): SpecimenRead[] {
+  return (
+    specimens.filter(
+      (specimen) =>
+        specimen.status === SpecimenStatus.available ||
+        specimen.status === SpecimenStatus.draft,
+    ) || []
+  );
+}

@@ -31,7 +31,11 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
-import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
+import {
+  SpecimenRead,
+  SpecimenStatus,
+  getActiveAndDraftSpecimens,
+} from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 
@@ -133,13 +137,16 @@ export default function ServiceRequestShow({
   });
 
   const createDraftSpecimen = (requirement: SpecimenDefinitionRead) => {
-    const existingSpecimen = request?.specimens.find(
+    const matchingSpecimens = request?.specimens.filter(
       (spec) => spec.specimen_definition?.id === requirement.id,
     );
 
     if (
-      existingSpecimen?.status === SpecimenStatus.available ||
-      existingSpecimen?.status === SpecimenStatus.draft
+      matchingSpecimens?.some(
+        (spec) =>
+          spec.status === SpecimenStatus.available ||
+          spec.status === SpecimenStatus.draft,
+      )
     ) {
       return;
     }
@@ -353,7 +360,7 @@ export default function ServiceRequestShow({
                 <h2 className="text-xl font-semibold">{t("specimens")}</h2>
                 <div className="flex items-center gap-2">
                   <MultiQRCodePrintSheet
-                    specimens={request?.specimens || []}
+                    specimens={getActiveAndDraftSpecimens(request?.specimens)}
                     open={isQRCodeSheetOpen}
                     onOpenChange={setIsQRCodeSheetOpen}
                   >
@@ -398,7 +405,9 @@ export default function ServiceRequestShow({
                 );
 
                 const validSpecimens = allMatchingForThisDefId.filter(
-                  (spec) => spec.status === SpecimenStatus.available,
+                  (spec) =>
+                    spec.status === SpecimenStatus.available ||
+                    spec.status === SpecimenStatus.draft,
                 );
 
                 const collectedSpecimen = validSpecimens.find(
@@ -414,9 +423,8 @@ export default function ServiceRequestShow({
                     key={requirement.id}
                     facilityId={facilityId}
                     serviceRequestId={serviceRequestId}
-                    draftSpecimen={getExistingDraftSpecimen(requirement.id)}
                     requirement={requirement}
-                    collectedSpecimen={collectedSpecimen}
+                    specimen={collectedSpecimen}
                     onCollect={() => {
                       createDraftSpecimen(requirement);
                       setSelectedSpecimenDefinition(requirement);
