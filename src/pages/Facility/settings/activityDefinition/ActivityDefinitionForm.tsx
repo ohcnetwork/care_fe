@@ -291,10 +291,7 @@ function ActivityDefinitionFormContent({
                   },
                   {
                     label: t("container"),
-                    value:
-                      s.type_tested?.container?.description ||
-                      s.type_tested?.specimen_type?.display ||
-                      undefined,
+                    value: s.type_tested?.container?.description || undefined,
                   },
                   {
                     label: t("minimum_volume"),
@@ -745,7 +742,6 @@ function ActivityDefinitionFormContent({
                                 label: t("container"),
                                 value:
                                   spec.type_tested?.container?.description ??
-                                  spec.type_tested?.specimen_type?.display ??
                                   undefined,
                               },
                               {

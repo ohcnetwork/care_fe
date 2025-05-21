@@ -184,14 +184,6 @@ export function SpecimenDefinitionDetail({
                     : t("no")}
                 </Badge>
               </div>
-              {specimenDefinition.type_tested.specimen_type && (
-                <div>
-                  <p className="text-sm font-medium text-gray-400">
-                    {t("specimen_type")}
-                  </p>
-                  <p>{specimenDefinition.type_tested.specimen_type.display}</p>
-                </div>
-              )}
               {/* Additional Information */}
               {specimenDefinition.type_tested.requirement && (
                 <div>

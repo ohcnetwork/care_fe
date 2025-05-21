@@ -5,7 +5,6 @@ import { toast } from "sonner";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { SpecimenDefinitionUpdate } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 
 import { SpecimenDefinitionForm } from "./SpecimenDefinitionForm";
@@ -68,7 +67,6 @@ export function UpdateSpecimenDefinition({
             id: specimenDefinitionId,
           })
         }
-        specimenDefinitionId={specimenDefinitionId}
         isLoading={isUpdating}
       />
     </div>

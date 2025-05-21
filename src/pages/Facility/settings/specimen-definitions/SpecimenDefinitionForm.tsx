@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, XCircle } from "lucide-react";
 import { navigate } from "raviger";
-import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -39,10 +38,7 @@ import {
   SPECIMEN_DEFINITION_UNITS_CODES,
   Status,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
-import {
-  SpecimenDefinitionCreate,
-  SpecimenDefinitionUpdate,
-} from "@/types/emr/specimenDefinition/specimenDefinition";
+import { SpecimenDefinitionCreate } from "@/types/emr/specimenDefinition/specimenDefinition";
 
 const typeTestedSchema = z.object({
   is_derived: z.boolean(),
@@ -100,14 +96,12 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface SpecimenDefinitionFormProps {
   initialData?: SpecimenDefinitionCreate;
-  specimenDefinitionId?: string;
   onSubmit: (data: SpecimenDefinitionCreate) => void;
   isLoading?: boolean;
 }
 
 export function SpecimenDefinitionForm({
   initialData,
-  specimenDefinitionId,
   onSubmit,
   isLoading,
 }: SpecimenDefinitionFormProps) {
