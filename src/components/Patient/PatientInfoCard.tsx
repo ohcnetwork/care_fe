@@ -35,8 +35,6 @@ import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
-
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
@@ -61,7 +59,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { t } = useTranslation();
-  const isMobile = useBreakpoints({ default: true, sm: false });
 
   return (
     <>
@@ -488,7 +485,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
-                          align={isMobile ? "center" : "end"}
+                          align="end"
                           className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
                         >
                           <EncounterActions
