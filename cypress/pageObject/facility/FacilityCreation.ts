@@ -6,10 +6,12 @@ export class FacilityCreation {
       '[data-cy="governance-panel-list"]',
       governanceName,
     );
+    return this;
   }
 
   navigateToFacilitiesList() {
     cy.verifyAndClickElement('[data-cy="org-nav-facilities"]', "Facilities");
+    return this;
   }
 
   selectFirstRandomFacility() {
@@ -24,41 +26,50 @@ export class FacilityCreation {
 
   clickAddFacility() {
     cy.get('[data-cy="add-facility-button"]').should("be.visible").click();
+    return this;
   }
 
   // Individual field methods
   enterFacilityName(name: string) {
     cy.typeIntoField('[data-cy="facility-name"]', name);
+    return this;
   }
 
   selectFacilityType(facilityType: string) {
     cy.clickAndSelectOption('[data-cy="facility-type"]', facilityType);
+    return this;
   }
 
   enterDescription(description: string) {
     cy.typeIntoField('[data-cy="facility-description"]', description);
+    return this;
   }
 
   enterPhoneNumber(phone: string) {
     cy.typeIntoField('[data-cy="facility-phone"]', phone, {
       skipVerification: true,
     });
+    return this;
   }
 
   enterPincode(pincode: string) {
     cy.typeIntoField('[data-cy="facility-pincode"]', pincode);
+    return this;
   }
 
   enterAddress(address: string) {
     cy.typeIntoField('[data-cy="facility-address"]', address);
+    return this;
   }
 
   enterLatitude(latitude: string) {
     cy.typeIntoField('[data-cy="facility-latitude"]', latitude);
+    return this;
   }
 
   enterLongitude(longitude: string) {
     cy.typeIntoField('[data-cy="facility-longitude"]', longitude);
+    return this;
   }
 
   // Combined methods using individual functions
@@ -66,41 +77,50 @@ export class FacilityCreation {
     this.enterFacilityName(name);
     this.selectFacilityType(facilityType);
     this.enterDescription(description);
+    return this;
   }
 
   selectFeatures(features: string[]) {
     cy.clickAndMultiSelectOption("#facility-features", features);
+    return this;
   }
 
   fillContactDetails(phone: string, pincode: string, address: string) {
     this.enterPhoneNumber(phone);
     this.enterPincode(pincode);
     this.enterAddress(address);
+    return this;
   }
 
   fillLocationDetails(location: string) {
     cy.typeAndSelectOption('[data-cy="location-search"]', location);
+    return this;
   }
 
   makePublicFacility() {
     cy.get('[data-cy="make-facility-public"]').click();
+    return this;
   }
 
   submitFacilityCreationForm() {
     cy.clickSubmitButton("Create Facility");
+    return this;
   }
 
   interceptFacilityCreation() {
     cy.intercept("POST", "**/api/v1/facility/").as("facilityCreation");
+    return this;
   }
 
   verifyFacilityCreation() {
     cy.wait("@facilityCreation").its("response.statusCode").should("eq", 200);
+    return this;
   }
 
   // Verification Methods
   verifySuccessMessage() {
     cy.verifyNotification("Facility created successfully");
+    return this;
   }
 
   verifyValidationErrors() {
@@ -114,6 +134,7 @@ export class FacilityCreation {
       },
       { label: "Pincode", message: "Invalid Pincode" },
     ]);
+    return this;
   }
 
   searchFacility(facilityName: string) {
@@ -130,16 +151,19 @@ export class FacilityCreation {
         cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
       }
     });
+    return this;
   }
 
   verifyFacilityNameInCard(facilityName: string) {
     cy.get('[data-cy="facility-cards"]').should("contain", facilityName);
+    return this;
   }
 
   waitForFacilityCardsToLoad(timeout = 10000) {
     cy.get('[data-cy="facility-cards"]', { timeout })
       .should("be.visible")
       .should("not.be.empty");
+    return this;
   }
 
   fillLocationHierarchy(
@@ -170,6 +194,21 @@ export class FacilityCreation {
     if (location.ward) {
       cy.typeAndSelectOption('[data-cy="select-ward"]', location.ward, false);
     }
+    return this;
+  }
+
+  verifyFacilityDetails(
+    facilityName: string,
+    facilityType: string,
+    address: string,
+  ) {
+    cy.verifyAndClickElement(
+      '[data-cy="view-facility-button"]',
+      "View Facility",
+    );
+    cy.verifyContentPresence('[data-cy="facility-address-details"]', [address]);
+    cy.verifyContentPresence('[data-cy="facility-name-card"]', [facilityName]);
+    cy.verifyContentPresence('[data-cy="facility-type-card"]', [facilityType]);
     return this;
   }
 }

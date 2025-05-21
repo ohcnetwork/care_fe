@@ -43,7 +43,7 @@ import {
   completedEncounterStatus,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 export interface PatientInfoCardProps {
