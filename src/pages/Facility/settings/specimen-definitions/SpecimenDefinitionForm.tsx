@@ -51,6 +51,7 @@ const typeTestedSchema = z.object({
           value: z.number(),
           unit: CodeSchema,
         })
+        .optional()
         .nullable(),
       minimum_volume: z
         .object({
@@ -64,7 +65,7 @@ const typeTestedSchema = z.object({
           string: z.string().optional().nullable(),
         })
         .nullable(),
-      cap: CodeSchema.nullable(),
+      cap: CodeSchema.optional().nullable(),
       preparation: z.string().nullable(),
     })
     .nullable(),
@@ -74,6 +75,7 @@ const typeTestedSchema = z.object({
       value: z.number().int({ message: "should be a valid integer" }),
       unit: CodeSchema,
     })
+    .optional()
     .nullable(),
   single_use: z.boolean().nullable(),
 });
@@ -126,7 +128,7 @@ export function SpecimenDefinitionForm({
         preference: Preference.preferred,
         container: {
           description: "",
-          capacity: initialData?.type_tested?.container?.capacity || null,
+          capacity: initialData?.type_tested?.container?.capacity,
           minimum_volume: {
             quantity:
               initialData?.type_tested?.container?.minimum_volume?.quantity ||
@@ -135,11 +137,11 @@ export function SpecimenDefinitionForm({
               initialData?.type_tested?.container?.minimum_volume?.string ||
               null,
           },
-          cap: initialData?.type_tested?.container?.cap || null,
+          cap: initialData?.type_tested?.container?.cap,
           preparation: "",
         },
         requirement: "",
-        retention_time: initialData?.type_tested?.retention_time || null,
+        retention_time: initialData?.type_tested?.retention_time,
         single_use: false,
       },
     },

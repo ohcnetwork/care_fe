@@ -30,9 +30,9 @@ export interface DurationSpec {
 
 export interface ContainerSpec {
   description: string | null;
-  capacity: QuantitySpec | null;
-  minimum_volume: MinimumVolumeSpec | null;
-  cap: Code | null;
+  capacity?: QuantitySpec | null;
+  minimum_volume?: MinimumVolumeSpec | null;
+  cap?: Code | null;
   preparation: string | null;
 }
 
@@ -74,7 +74,7 @@ export interface TypeTestedSpec {
   preference: Preference;
   container: ContainerSpec | null;
   requirement: string | null;
-  retention_time: DurationSpec | null;
+  retention_time?: DurationSpec | null;
   single_use: boolean | null;
 }
 
