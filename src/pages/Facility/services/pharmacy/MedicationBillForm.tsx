@@ -341,7 +341,7 @@ export default function MedicationBillForm({ patientId }: Props) {
         status: MedicationDispenseStatus.preparation,
         category: MedicationDispenseCategory.outpatient,
         when_prepared: new Date(),
-        dosage_instruction: medication?.dosage_instruction?.[0] as any,
+        dosage_instruction: medication?.dosage_instruction as any,
         encounter: encounterId!,
         location: locationId,
         authorizing_prescription: medication?.id ?? null,
