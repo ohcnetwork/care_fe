@@ -181,7 +181,7 @@ export function SpecimenDefinitionForm({
     form.setValue("type_tested.container.minimum_volume", {
       quantity:
         type === "quantity"
-          ? { value: 0, unit: SPECIMEN_DEFINITION_UNITS_CODES[0] } // Use 0 instead of null
+          ? { value: 0, unit: SPECIMEN_DEFINITION_UNITS_CODES[0] }
           : null,
       string: type === "text" ? "" : null,
     });
@@ -196,7 +196,7 @@ export function SpecimenDefinitionForm({
       form.setValue("type_tested.container.minimum_volume", {
         quantity: {
           value: quantityValue.value,
-          unit: quantityValue.unit, // Now unit is guaranteed to be Code
+          unit: quantityValue.unit,
         },
         string: null,
       });
