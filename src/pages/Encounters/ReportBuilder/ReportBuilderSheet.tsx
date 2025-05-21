@@ -13,6 +13,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+
 import { getPermissions } from "@/common/Permissions";
 
 import mutate from "@/Utils/request/mutate";
@@ -43,15 +45,16 @@ export default function ReportBuilderSheet({
   const [open, setOpen] = useState(false);
   const { hasPermission } = usePermissions();
   const { canListTemplate } = getPermissions(hasPermission, permissions);
-  const { data: reportTemplateData } = useQuery({
-    queryKey: ["report-templates", facilityId],
-    queryFn: query(reportTemplateApi.list, {
-      queryParams: {
-        facility: facilityId,
-      },
-    }),
-    enabled: open && canListTemplate,
-  });
+  const { data: reportTemplateData, isLoading: isReportTemplateLoading } =
+    useQuery({
+      queryKey: ["report-templates", facilityId],
+      queryFn: query(reportTemplateApi.list, {
+        queryParams: {
+          facility: facilityId,
+        },
+      }),
+      enabled: open && canListTemplate,
+    });
 
   const { mutate: generateReport } = useMutation({
     mutationFn: mutate(reportTemplateApi.generateReport),
@@ -85,26 +88,34 @@ export default function ReportBuilderSheet({
           </SheetTitle>
         </SheetHeader>
         <div className="space-y-4 mt-6">
-          <ScrollArea className="h-[calc(100vh-10rem)]">
-            <div className="space-y-2 m-4">
-              {reportTemplateData?.results?.map((reportTemplate) => (
-                <ReportCard
-                  key={reportTemplate.id}
-                  template={reportTemplate}
-                  buttons={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => handleGenerateReport(reportTemplate)}
-                    >
-                      {t("generate_report")}
-                    </Button>
-                  }
-                />
-              ))}
+          {isReportTemplateLoading ? (
+            <CardGridSkeleton count={5} />
+          ) : reportTemplateData?.results?.length === 0 ? (
+            <div className="text-center text-gray-500 p-5">
+              {t("no_templates_found")}
             </div>
-          </ScrollArea>
+          ) : (
+            <ScrollArea className="h-[calc(100vh-10rem)]">
+              <div className="space-y-2 m-4">
+                {reportTemplateData?.results?.map((reportTemplate) => (
+                  <ReportCard
+                    key={reportTemplate.id}
+                    template={reportTemplate}
+                    buttons={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => handleGenerateReport(reportTemplate)}
+                      >
+                        {t("generate_report")}
+                      </Button>
+                    }
+                  />
+                ))}
+              </div>
+            </ScrollArea>
+          )}
         </div>
       </SheetContent>
     </Sheet>

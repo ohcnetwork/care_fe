@@ -86,12 +86,14 @@ export default function ReportBuilderPreview({
   const headerRows = useWatch({
     control: form.control,
     name: "config.header.rows",
+    defaultValue: [],
   }) as HeaderRow[];
 
   // Get sections
   const sections = useWatch({
     control: form.control,
     name: "config.sections",
+    defaultValue: [],
   }) as SectionConfig[];
 
   // Get page numbering settings
@@ -154,7 +156,7 @@ export default function ReportBuilderPreview({
         }}
       >
         {/* Top Page Numbering */}
-        {pageNumbering.enabled && (
+        {pageNumbering?.enabled && (
           <div
             className={cn(
               "w-full mb-2",
@@ -168,19 +170,21 @@ export default function ReportBuilderPreview({
 
         {/* Header Preview */}
         <div className="flex flex-col gap-2 p-4">
-          {headerRows.map((row, rowIndex) => (
-            <HeaderRowPreview key={rowIndex} row={row} />
-          ))}
+          {headerRows.length > 0 &&
+            headerRows.map((row, rowIndex) => (
+              <HeaderRowPreview key={rowIndex} row={row} />
+            ))}
         </div>
 
         {/* Sections Preview */}
         <div className="flex flex-col gap-4 p-4 flex-grow">
-          {sections.map(
-            (section, index) =>
-              section.enabled && (
-                <SectionPreview key={index} section={section} />
-              ),
-          )}
+          {sections.length > 0 &&
+            sections.map(
+              (section, index) =>
+                section.enabled && (
+                  <SectionPreview key={index} section={section} />
+                ),
+            )}
         </div>
       </div>
     </div>

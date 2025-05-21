@@ -1094,9 +1094,18 @@ export default function HeaderBuilder({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("header")}</CardTitle>
+        <CardTitle className="flex flex-col sm:flex-row gap-2 justify-between items-center">
+          {t("header")}
+          <Button
+            type="button"
+            onClick={handleAddRow}
+            className="w-full sm:w-auto"
+          >
+            {t("add_row")}
+          </Button>
+        </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-5">
+      <CardContent className="flex flex-col gap-3">
         <div className="flex flex-col flex-wrap sm:flex-row gap-2">
           {fields.map((field, rowIndex) => (
             <Button
@@ -1112,9 +1121,6 @@ export default function HeaderBuilder({
               {t("row")} {rowIndex + 1}
             </Button>
           ))}
-          <Button type="button" onClick={handleAddRow}>
-            {t("add_row")}
-          </Button>
         </div>
         {activeRow !== null && (
           <>

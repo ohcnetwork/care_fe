@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -36,15 +37,16 @@ export default function ReportBuilderList({
     hasPermission,
     facilityData?.permissions ?? [],
   );
-  const { data: reportTemplateData } = useQuery({
-    queryKey: ["report-templates", facilityId],
-    queryFn: query(reportTemplateApi.list, {
-      queryParams: {
-        facility: facilityId,
-      },
-    }),
-    enabled: canListTemplate,
-  });
+  const { data: reportTemplateData, isLoading: isReportTemplateLoading } =
+    useQuery({
+      queryKey: ["report-templates", facilityId],
+      queryFn: query(reportTemplateApi.list, {
+        queryParams: {
+          facility: facilityId,
+        },
+      }),
+      enabled: canListTemplate,
+    });
 
   return (
     <Page title={t("available_templates")} hideTitleOnPage className="p-0">
@@ -63,30 +65,40 @@ export default function ReportBuilderList({
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-          {reportTemplateData?.results?.map((reportTemplate) => (
-            <ReportCard
-              key={reportTemplate.id}
-              template={reportTemplate}
-              buttons={
-                <>
-                  {canManageTemplate && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      asChild
-                    >
-                      <Link href={`/reportbuilder/${reportTemplate.id}`}>
-                        {t("edit_template")}
-                      </Link>
-                    </Button>
-                  )}
-                </>
-              }
-            />
-          ))}
-        </div>
+        {isReportTemplateLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <CardListSkeleton count={5} />
+          </div>
+        ) : reportTemplateData?.results?.length === 0 ? (
+          <div className="text-center text-gray-500 p-5">
+            {t("no_templates_found")}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            {reportTemplateData?.results?.map((reportTemplate) => (
+              <ReportCard
+                key={reportTemplate.id}
+                template={reportTemplate}
+                buttons={
+                  <>
+                    {canManageTemplate && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        asChild
+                      >
+                        <Link href={`/reportbuilder/${reportTemplate.id}`}>
+                          {t("edit_template")}
+                        </Link>
+                      </Button>
+                    )}
+                  </>
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
     </Page>
   );

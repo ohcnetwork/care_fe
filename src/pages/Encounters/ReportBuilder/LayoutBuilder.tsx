@@ -159,7 +159,6 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
                 <RadioGroup
                   value={field.value}
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
                   className="flex flex-row gap-2 mt-2"
                 >
                   <div className="flex items-center space-x-2">

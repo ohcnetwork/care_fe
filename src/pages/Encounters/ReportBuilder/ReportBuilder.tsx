@@ -257,27 +257,29 @@ export default function ReportBuilder({
     enabled: !!reportTemplateId,
   });
 
-  const { mutate: createReportTemplate } = useMutation({
-    mutationFn: mutate(reportTemplateApi.create),
-    onSuccess: (data: ReportTemplateModel) => {
-      toast.success(t("template_saved"));
-      navigate(`/reportbuilder/${data.id}`);
-    },
-  });
+  const { mutate: createReportTemplate, isPending: isCreatePending } =
+    useMutation({
+      mutationFn: mutate(reportTemplateApi.create),
+      onSuccess: (data: ReportTemplateModel) => {
+        toast.success(t("template_saved"));
+        navigate(`/reportbuilder/${data.id}`);
+      },
+    });
 
-  const { mutate: updateReportTemplate } = useMutation({
-    mutationFn: mutate(reportTemplateApi.update, {
-      pathParams: {
-        id: reportTemplateId ?? "",
+  const { mutate: updateReportTemplate, isPending: isUpdatePending } =
+    useMutation({
+      mutationFn: mutate(reportTemplateApi.update, {
+        pathParams: {
+          id: reportTemplateId ?? "",
+        },
+        queryParams: {
+          facility: facilityId,
+        },
+      }),
+      onSuccess: () => {
+        toast.success(t("template_updated"));
       },
-      queryParams: {
-        facility: facilityId,
-      },
-    }),
-    onSuccess: () => {
-      toast.success(t("template_updated"));
-    },
-  });
+    });
 
   const form = useForm<ReportTemplateFormData>({
     resolver: zodResolver(reportTemplateSchema),
@@ -285,7 +287,7 @@ export default function ReportBuilder({
   });
 
   useEffect(() => {
-    if (templateSchema) {
+    if (templateSchema && !isTemplateLoading) {
       form.reset({
         ...templateSchema,
         config: {
@@ -345,7 +347,7 @@ export default function ReportBuilder({
         },
       });
     }
-  }, [templateSchema, form]);
+  }, [templateSchema, form, isTemplateLoading]);
 
   const onSubmit = async (data: ReportTemplateFormData, exit: boolean) => {
     const isValid = await form.trigger();
@@ -493,8 +495,11 @@ export default function ReportBuilder({
                   variant="primary"
                   className="w-full"
                   onClick={() => onSubmit(form.getValues(), false)}
+                  disabled={isCreatePending || isUpdatePending}
                 >
-                  {t("save_template")}
+                  {isCreatePending || isUpdatePending
+                    ? t("saving")
+                    : t("save_template")}
                 </Button>
                 {reportTemplateId && (
                   <Button
@@ -502,8 +507,9 @@ export default function ReportBuilder({
                     variant="primary"
                     className="w-full"
                     onClick={() => onSubmit(form.getValues(), true)}
+                    disabled={isUpdatePending}
                   >
-                    {t("save_and_exit")}
+                    {isUpdatePending ? t("saving") : t("save_and_exit")}
                   </Button>
                 )}
               </div>
