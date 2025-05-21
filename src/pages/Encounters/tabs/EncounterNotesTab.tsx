@@ -129,8 +129,6 @@ function MessageItem({
   const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
   const isCurrentUser = authUser?.external_id === message.created_by.id;
 
-  console.log(className);
-
   return (
     <div
       className={cn(
