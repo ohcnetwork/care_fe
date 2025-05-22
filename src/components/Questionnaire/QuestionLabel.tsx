@@ -26,11 +26,15 @@ export function QuestionLabel({
     <Label className={className ?? defaultClass}>
       <div className="flex flex-col gap-3 bg-gray-100 md:bg-transparent">
         {(question.type === "structured" || !isSubQuestion) && (
-          <div className="hidden md:block h-1 w-4 rounded-full bg-indigo-600" />
+          <div
+            className={`hidden md:block h-1 w-4 rounded-full ${question.required ? "bg-indigo-600" : "bg-green-500"}`}
+          />
         )}
         <div className="flex gap-3 items-center">
           {(question.type === "structured" || !isSubQuestion) && (
-            <div className="md:hidden absolute w-1 h-5 rounded-r-sm bg-indigo-500 left-3.5" />
+            <div
+              className={`md:hidden absolute w-1 h-5 rounded-r-sm ${question.required ? "bg-indigo-600" : "bg-green-500"} left-3.5`}
+            />
           )}
           <span>
             <span

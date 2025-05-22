@@ -92,6 +92,8 @@ import valuesetApi from "@/types/valueset/valuesetApi";
 
 import { CodingEditor } from "./CodingEditor";
 import { QuestionnaireForm } from "./QuestionnaireForm";
+import QuestionnaireNavigation from "./QuestionnaireNavigation";
+import QuestionnairePreviewProperties from "./QuestionnairePreviewProperties";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
 import ValueSetSelect from "./ValueSetSelect";
 
@@ -708,88 +710,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
             <div className="space-y-4 md:w-60">
-              <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
-                <CardHeader className="p-0">
-                  <CardTitle>{t("navigation")}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <nav className="space-y-1">
-                    {questionnaire.questions.map((question, index) => {
-                      const hasSubQuestions =
-                        question.type === "group" &&
-                        question.questions &&
-                        question.questions.length > 0;
-                      return (
-                        <div key={question.id} className="space-y-1">
-                          <button
-                            onClick={() => {
-                              const element = document.getElementById(
-                                `question-${question.id}`,
-                              );
-                              if (element) {
-                                element.scrollIntoView();
-                                toggleQuestionExpanded(question.id);
-                              }
-                            }}
-                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                              expandedQuestions.has(question.id)
-                                ? "bg-accent"
-                                : ""
-                            }`}
-                          >
-                            <span className="font-medium text-gray-500">
-                              {index + 1}.
-                            </span>
-                            <span className="flex-1 truncate">
-                              {question.text || t("untitled_question")}
-                            </span>
-                          </button>
-                          {hasSubQuestions && question.questions && (
-                            <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
-                              {question.questions.map(
-                                (subQuestion, subIndex) => (
-                                  <button
-                                    key={subQuestion.id}
-                                    onClick={() => {
-                                      if (!expandedQuestions.has(question.id)) {
-                                        toggleQuestionExpanded(question.id);
-                                        setTimeout(() => {
-                                          const element =
-                                            document.getElementById(
-                                              `question-${subQuestion.id}`,
-                                            );
-                                          if (element) {
-                                            element.scrollIntoView();
-                                          }
-                                        }, 100);
-                                      } else {
-                                        const element = document.getElementById(
-                                          `question-${subQuestion.id}`,
-                                        );
-                                        if (element) {
-                                          element.scrollIntoView();
-                                        }
-                                      }
-                                    }}
-                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
-                                  >
-                                    <span className="font-medium text-gray-500">
-                                      {index + 1}.{subIndex + 1}
-                                    </span>
-                                    <span className="flex-1 truncate">
-                                      {subQuestion.text || "Untitled Question"}
-                                    </span>
-                                  </button>
-                                ),
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </nav>
-                </CardContent>
-              </Card>
+              <QuestionnaireNavigation
+                questionnaire={questionnaire}
+                toggleQuestionExpanded={toggleQuestionExpanded}
+                expandedQuestions={expandedQuestions}
+              />
               <div className="space-y-4 max-w-sm lg:hidden">
                 <QuestionnaireProperties
                   questionnaire={questionnaire}
@@ -1066,20 +991,33 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsContent>
 
         <TabsContent value="preview">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("preview")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <QuestionnaireForm
-                questionnaireSlug={id}
-                patientId="preview"
-                subjectType={questionnaire.subject_type}
-                encounterId="preview"
-                facilityId="preview"
-              />
-            </CardContent>
-          </Card>
+          <div className="flex flex-col md:flex-row gap-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("preview")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 border-2 border-gray-100 rounded-lg w-full shadow-sm p-3 lg:hidden">
+                  <QuestionnairePreviewProperties
+                    questionnaire={questionnaire}
+                  />
+                </div>
+                <div className="max-w-fit">
+                  <QuestionnaireForm
+                    questionnaireSlug={id}
+                    patientId="preview"
+                    subjectType={questionnaire.subject_type}
+                    encounterId="preview"
+                    facilityId="preview"
+                    organizations={organizations?.results}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            <div className="space-y-4 min-w-60 hidden lg:block">
+              <QuestionnairePreviewProperties questionnaire={questionnaire} />
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>

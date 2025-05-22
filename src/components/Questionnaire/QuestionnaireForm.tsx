@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Building } from "lucide-react";
 import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,9 +19,12 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { Badge } from "@/src/components/ui/badge";
+import { Label } from "@/src/components/ui/label";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/files";
+import { Organization } from "@/types/organization/organization";
 import {
   DetailedValidationError,
   QuestionValidationError,
@@ -40,6 +44,7 @@ import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
 import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
+import QuestionnaireNavigation from "./QuestionnaireNavigation";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
@@ -64,6 +69,7 @@ interface ServerValidationError {
 }
 
 export interface QuestionnaireFormProps {
+  organizations?: Organization[];
   questionnaireSlug?: string;
   patientId: string;
   encounterId?: string;
@@ -305,6 +311,7 @@ const STRUCTURED_TYPE_VALIDATORS = {
 } as const;
 
 export function QuestionnaireForm({
+  organizations,
   questionnaireSlug,
   patientId,
   encounterId,
@@ -695,7 +702,9 @@ export function QuestionnaireForm({
     let element: Element | null;
 
     if (groupId) {
-      element = document.querySelector(`[data-group-id="${groupId}"]`);
+      element =
+        document.querySelector(`[data-group-id="${groupId}"]`) ||
+        document.querySelector(`[data-question-id="${groupId}"]`);
     } else {
       element = document.querySelector(
         `[data-questionnaire-id="${questionnaireId}"]`,
@@ -712,39 +721,50 @@ export function QuestionnaireForm({
       {/* Left Navigation */}
       <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         {questionnaireForms.map((form) => (
-          <div key={form.questionnaire.id} className="space-y-2">
-            <button
-              className={cn(
-                "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
-                activeQuestionnaireId === form.questionnaire.id &&
-                  "bg-gray-100 text-green-600",
-              )}
-              onClick={() => scrollToQuestion(form.questionnaire.id)}
-              disabled={isPending}
-            >
-              {form.questionnaire.title}
-            </button>
-            <div className="pl-4 space-y-1">
-              {form.questionnaire.questions
-                .filter((q) => q.type === "group")
-                .map((group) => (
-                  <button
-                    key={group.id}
-                    className={cn(
-                      "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
-                      activeGroupId === group.id &&
-                        "bg-gray-100 text-green-600",
-                    )}
-                    onClick={() =>
-                      scrollToQuestion(form.questionnaire.id, group.id)
-                    }
-                    disabled={isPending}
-                  >
-                    {group.text}
-                  </button>
-                ))}
-            </div>
-          </div>
+          <>
+            {encounterId === "preview" ? (
+              <QuestionnaireNavigation
+                questionnaire={form.questionnaire}
+                scrollToQuestion={(questionId?: string) => {
+                  scrollToQuestion(form.questionnaire.id, questionId);
+                }}
+              />
+            ) : (
+              <div key={form.questionnaire.id} className="space-y-2">
+                <button
+                  className={cn(
+                    "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
+                    activeQuestionnaireId === form.questionnaire.id &&
+                      "bg-gray-100 text-green-600",
+                  )}
+                  onClick={() => scrollToQuestion(form.questionnaire.id)}
+                  disabled={isPending}
+                >
+                  {form.questionnaire.title}
+                </button>
+                <div className="pl-4 space-y-1">
+                  {form.questionnaire.questions
+                    .filter((q) => q.type === "group")
+                    .map((group) => (
+                      <button
+                        key={group.id}
+                        className={cn(
+                          "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
+                          activeGroupId === group.id &&
+                            "bg-gray-100 text-green-600",
+                        )}
+                        onClick={() => {
+                          scrollToQuestion(form.questionnaire.id, group.id);
+                        }}
+                        disabled={isPending}
+                      >
+                        {group.text}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+          </>
         ))}
       </div>
 
@@ -758,14 +778,38 @@ export function QuestionnaireForm({
             data-questionnaire-id={form.questionnaire.id}
           >
             <div className="flex justify-between items-center max-w-4xl p-2">
-              <div className="space-y-1">
-                <h2 className="text-xl font-semibold">
-                  {form.questionnaire.title}
-                </h2>
-                {form.questionnaire.description && (
-                  <p className="text-sm text-gray-500">
-                    {form.questionnaire.description}
-                  </p>
+              <div
+                className={`${encounterId === "preview" && "space-y-5 border-2 border-gray-100 rounded-lg w-full shadow-sm p-3"}`}
+              >
+                <div className="space-y-1">
+                  <h2 className="text-xl font-semibold">
+                    {form.questionnaire.title}
+                  </h2>
+                  {form.questionnaire.description && (
+                    <p className="text-sm text-gray-500">
+                      {form.questionnaire.description}
+                    </p>
+                  )}
+                </div>
+
+                {encounterId === "preview" && organizations && (
+                  <div className="flex flex-col gap-3">
+                    <Label className="text-sm font-semibold">
+                      {t("organizations")}
+                    </Label>
+                    <div className="flex flex-wrap gap-3 mb-2">
+                      {organizations.map((org) => (
+                        <Badge
+                          key={org.id}
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          <Building className="h-3 w-3" />
+                          {org.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
               {form.questionnaire.slug !== questionnaireSlug && (
