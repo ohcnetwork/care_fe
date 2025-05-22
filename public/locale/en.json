@@ -3915,6 +3915,7 @@
   "vaccine_name": "Vaccine name",
   "valid_from": "Valid From",
   "valid_from_after_valid_untill": "Valid From must be before Valid Untill",
+  "valid_integer_required": "Please enter a valid integer",
   "valid_otp_found": "Valid OTP found, Navigating to Appointments",
   "valid_period": "Valid Period",
   "valid_till_equal_or_after_valid_from": "Valid till must be equal to or after valid from date",

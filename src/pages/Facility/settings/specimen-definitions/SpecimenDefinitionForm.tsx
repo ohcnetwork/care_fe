@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { t } from "i18next";
 import { PlusCircle, XCircle } from "lucide-react";
 import { navigate } from "raviger";
 import { useForm } from "react-hook-form";
@@ -72,7 +73,7 @@ const typeTestedSchema = z.object({
   requirement: z.string().nullable(),
   retention_time: z
     .object({
-      value: z.number().int({ message: "should be a valid integer" }),
+      value: z.number().int({ message: t("valid_integer_required") }),
       unit: CodeSchema,
     })
     .optional()
