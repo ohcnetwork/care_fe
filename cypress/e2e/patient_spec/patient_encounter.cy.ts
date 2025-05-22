@@ -2,15 +2,15 @@ import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { PatientPrescription } from "@/pageObject/Patients/PatientPrescription";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 import {
-  generateRandomCharacter,
   getRandomAllergyCriticality,
+  getRandomAllergyName,
   getRandomAllergyStatus,
   getRandomConditionName,
   getRandomConditionStatus,
   getRandomDiagnosisVerification,
   getRandomSymptomSeverity,
-} from "@/utils/commonUtils";
-import { getRandomAllergyName } from "@/utils/commonUtils";
+} from "@/utils/clinicalData";
+import { generateRandomCharacter } from "@/utils/commonUtils";
 import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
@@ -65,7 +65,6 @@ describe("Patient Encounter Questionnaire", () => {
     ]);
   });
 });
-
 describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
@@ -80,6 +79,12 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       criticality: "Low",
       status: "Confirmed",
     };
+    const updateAllergyDetails = {
+      allergyName: createAllergyDetails.allergyName,
+      criticality: getRandomAllergyCriticality(),
+      status: getRandomAllergyStatus(),
+      notes: "Edit allergy notes",
+    };
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
@@ -88,14 +93,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       .addAllergy(createAllergyDetails);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyAllergy(createAllergyDetails);
-
-    const updateAllergyDetails = {
-      allergyName: createAllergyDetails.allergyName,
-      criticality: getRandomAllergyCriticality(),
-      status: getRandomAllergyStatus(),
-      notes: "Edit allergy notes",
-    };
-
+    // update the patient allergy
     patientEncounter.clickEditAllergy().updateAllergy(updateAllergyDetails);
 
     patientPrescription.submitQuestionnaire();
@@ -112,6 +110,14 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       severity: "Moderate",
       status: "Active",
     };
+
+    const updateSymptomsDetails = {
+      symptomName: createSymptomsDetails.symptomName,
+      severity: getRandomSymptomSeverity(),
+      status: getRandomConditionStatus(),
+      notes: "Edit symptom notes",
+    };
+
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
@@ -121,13 +127,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifySymptom(createSymptomsDetails);
 
-    const updateSymptomsDetails = {
-      symptomName: createSymptomsDetails.symptomName,
-      severity: getRandomSymptomSeverity(),
-      status: getRandomConditionStatus(),
-      notes: "Edit symptom notes",
-    };
-
+    // update the patient symptom
     patientEncounter
       .clickEditSymptoms()
       .verifyDuplicateSymptom(updateSymptomsDetails.symptomName)
@@ -147,6 +147,14 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       verification: "Confirmed",
       status: "Active",
     };
+
+    const updateDiagnosisDetails = {
+      diagnosisName: createDiagnosisDetails.diagnosisName,
+      verification: getRandomDiagnosisVerification(),
+      status: getRandomConditionStatus(),
+      notes: "Edit diagnosis notes",
+    };
+
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
@@ -155,13 +163,6 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       .addDiagnosis(createDiagnosisDetails);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyDiagnoses(createDiagnosisDetails);
-
-    const updateDiagnosisDetails = {
-      diagnosisName: createDiagnosisDetails.diagnosisName,
-      verification: getRandomDiagnosisVerification(),
-      status: getRandomConditionStatus(),
-      notes: "Edit diagnosis notes",
-    };
 
     patientEncounter
       .clickEditDiagnosis()
