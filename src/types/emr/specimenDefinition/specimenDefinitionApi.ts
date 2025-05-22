@@ -4,7 +4,6 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import {
   SpecimenDefinitionCreate,
   SpecimenDefinitionRead,
-  SpecimenDefinitionUpdate,
 } from "./specimenDefinition";
 
 export default {
@@ -22,7 +21,7 @@ export default {
     path: "/api/v1/facility/{facilityId}/specimen_definition/{specimenDefinitionId}/",
     method: HttpMethod.PUT,
     TRes: Type<SpecimenDefinitionRead>(),
-    TBody: Type<SpecimenDefinitionUpdate>(),
+    TBody: Type<SpecimenDefinitionCreate>(),
   },
   createSpecimenDefinition: {
     path: "/api/v1/facility/{facilityId}/specimen_definition/",

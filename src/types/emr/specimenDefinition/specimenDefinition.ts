@@ -95,11 +95,6 @@ export interface SpecimenDefinitionCreate
   type_tested: TypeTestedSpec | null;
 }
 
-export interface SpecimenDefinitionUpdate
-  extends Omit<SpecimenDefinition, "facility"> {
-  type_tested: TypeTestedSpec | null;
-}
-
 export interface SpecimenDefinitionRead extends SpecimenDefinition {
   created_by: UserBase;
   updated_by: UserBase;

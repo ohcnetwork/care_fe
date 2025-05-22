@@ -191,25 +191,22 @@ export function SpecimenDefinitionForm({
     });
   };
 
-  const handleMinimumVolumeChange = (
-    type: "quantity" | "string",
-    value: { value: number | null; unit: Code | null } | string | null,
-  ) => {
-    if (type === "quantity") {
-      const quantityValue = value as { value: number; unit: Code };
-      form.setValue("type_tested.container.minimum_volume", {
-        quantity: {
-          value: quantityValue.value,
-          unit: quantityValue.unit,
-        },
-        string: null,
-      });
-    } else {
-      form.setValue("type_tested.container.minimum_volume", {
-        quantity: null,
-        string: value as string,
-      });
-    }
+  const handleMinimumVolumeQuantityChange = (value: {
+    value: number | null;
+    unit: Code;
+  }) => {
+    form.setValue("type_tested.container.minimum_volume", {
+      quantity:
+        value.value !== null ? { value: value.value, unit: value.unit } : null,
+      string: null,
+    });
+  };
+
+  const handleMinimumVolumeStringChange = (value: string) => {
+    form.setValue("type_tested.container.minimum_volume", {
+      quantity: null,
+      string: value,
+    });
   };
 
   return (
@@ -661,16 +658,13 @@ export function SpecimenDefinitionForm({
                                   quantity={
                                     field.value
                                       ? {
-                                          value: field.value.value || null,
+                                          value: field.value.value,
                                           unit: field.value.unit,
                                         }
-                                      : {
-                                          value: null,
-                                          unit: SPECIMEN_DEFINITION_UNITS_CODES[0],
-                                        }
+                                      : undefined
                                   }
                                   onChange={(value) =>
-                                    handleMinimumVolumeChange("quantity", value)
+                                    handleMinimumVolumeQuantityChange(value)
                                   }
                                   disabled={isLoading}
                                   placeholder={t("enter_minimum_volume")}
@@ -695,8 +689,7 @@ export function SpecimenDefinitionForm({
                                   value={field.value || ""}
                                   disabled={isLoading}
                                   onChange={(e) =>
-                                    handleMinimumVolumeChange(
-                                      "string",
+                                    handleMinimumVolumeStringChange(
                                       e.target.value,
                                     )
                                   }

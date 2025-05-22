@@ -71,7 +71,7 @@ export function SpecimenForm({
       accession_identifier: "",
       received_time: null,
       collection: {
-        method: specimenDefinition.collection,
+        method: specimenDefinition.collection || null,
         body_site: null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),
