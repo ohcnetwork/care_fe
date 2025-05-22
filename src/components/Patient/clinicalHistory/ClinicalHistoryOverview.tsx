@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { ClockIcon, Droplet, FileQuestion } from "lucide-react";
+import { ClockIcon, Droplet } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import Loading from "@/components/Common/Loading";
 
@@ -23,8 +24,18 @@ export function EmptyState({ type }: { type: string }) {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-10 gap-2">
-      <FileQuestion className="size-8" />
+    <div className="w-full rounded-lg bg-muted/50 py-12 flex flex-col items-center justify-center text-center space-y-4 bg-gray-100">
+      <div className="bg-white shadow-sm rounded-lg p-4 grid grid-cols-2 gap-2 w-40">
+        {/* Left column */}
+        <Skeleton className="h-3 w-full rounded-md" />
+        <Skeleton className="h-3 w-full rounded-md" />
+        <Skeleton className="h-3 w-full rounded-md" />
+
+        {/* Right column */}
+        <Skeleton className="h-3 w-full rounded-md" />
+        <Skeleton className="h-3 w-full rounded-md" />
+        <Skeleton className="h-3 w-full rounded-md" />
+      </div>
       <p className="text-sm">{t(`no_${type.toLowerCase()}_description`)}</p>
     </div>
   );

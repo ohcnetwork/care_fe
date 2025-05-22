@@ -17,14 +17,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -56,33 +48,32 @@ const SymptomRow = ({
 
   return (
     <>
-      <TableRow>
-        <TableCell className="px-4 py-4 w-[30%] max-w-[300px] font-bold text-left break-words whitespace-normal border border-gray-200 rounded-md bg-white">
+      <div className="grid grid-cols-12 gap-4 px-4 py-3 items-center bg-white border border-gray-200 rounded-md mb-2">
+        <div className="col-span-4 font-bold break-words whitespace-normal">
           {symptom.code.display}
-        </TableCell>
-        <TableCell className="px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
+        </div>
+        <div className="col-span-2 text-center">
           <Badge
             variant="outline"
             className={`whitespace-nowrap ${SYMPTOM_CLINICAL_STATUS_STYLES[symptom.clinical_status]}`}
           >
             {t(symptom.clinical_status)}
           </Badge>
-        </TableCell>
-        <TableCell className="px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
+        </div>
+        <div className="col-span-2 text-center">
           <Badge
             variant="outline"
             className={`whitespace-nowrap capitalize ${SYMPTOM_VERIFICATION_STATUS_STYLES[symptom.verification_status]}`}
           >
             {t(symptom.verification_status)}
           </Badge>
-        </TableCell>
-        <TableCell className="truncate px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
+        </div>
+        <div className="col-span-2 text-center truncate">
           {symptom.onset?.onset_datetime
             ? format(parseISO(symptom.onset.onset_datetime), "dd MMM yyyy")
             : "-"}
-        </TableCell>
-
-        <TableCell className="px-4 py-4 w-[14%] text-center border border-gray-200 rounded-md bg-white">
+        </div>
+        <div className="col-span-2 text-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="link">
@@ -94,13 +85,12 @@ const SymptomRow = ({
                 <div className="font-medium text-gray-700">
                   {t("reported_by")}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-1">
                   <Avatar
                     name={symptom.created_by.username}
                     className="size-4"
                     imageUrl={symptom.created_by.profile_picture_url}
                   />
-
                   <span className="text-sm">
                     {formatName(symptom.created_by)}
                   </span>
@@ -124,29 +114,24 @@ const SymptomRow = ({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-        </TableCell>
-      </TableRow>
+        </div>
+      </div>
 
       {showNote && symptom.note && (
-        <tr>
-          <td
-            colSpan={6}
-            className="border border-gray-200 rounded-md p-4 bg-gray-50 relative"
+        <div className="border border-gray-200 rounded-md p-4 bg-gray-50 relative mb-3 mx-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-2 right-2 size-6 p-0"
+            onClick={() => setShowNote(false)}
           >
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-2 right-2 size-6 p-0"
-              onClick={() => setShowNote(false)}
-            >
-              <X size={16} />
-              <span className="sr-only">{t("close")}</span>
-            </Button>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8">
-              {symptom.note}
-            </p>
-          </td>
-        </tr>
+            <X size={16} />
+            <span className="sr-only">{t("close")}</span>
+          </Button>
+          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8">
+            {symptom.note}
+          </p>
+        </div>
       )}
     </>
   );
@@ -164,38 +149,32 @@ export const SymptomTable = ({
   const { t } = useTranslation();
 
   return (
-    <div className="border-0 mb-3">
-      <Table className="w-full border-separate border-spacing-2">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[45%] max-w-[300px] px-4 py-3 text-left text-gray-600 truncate border border-gray-200 rounded-md bg-gray-100">
-              {t("symptom")}
-            </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100">
-              {t("severity")}
-            </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100">
-              {t("status")}
-            </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100">
-              {t("onset")}
-            </TableHead>
-            <TableHead className="w-[14%] px-4 py-3 text-center text-gray-600 border border-gray-200 rounded-md bg-gray-100"></TableHead>
-          </TableRow>
-        </TableHeader>
+    <div className="max-w-6xl mx-auto mb-4">
+      <div className="overflow-x-auto pb-2">
+        <div className="min-w-[800px]">
+          {/* Header */}
+          <div className="grid grid-cols-12 gap-4 px-4 py-3 font-semibold text-gray-700 mb-3">
+            <div className="col-span-4">{t("symptom")}</div>
+            <div className="col-span-2 text-center">{t("severity")}</div>
+            <div className="col-span-2 text-center">{t("status")}</div>
+            <div className="col-span-2 text-center">{t("onset")}</div>
+            <div className="col-span-2 text-center"></div>
+          </div>
 
-        <TableBody>
-          {symptoms.map((symptom) => (
-            <SymptomRow
-              key={symptom.id}
-              symptom={symptom}
-              patientId={patientId}
-              facilityId={facilityId}
-              t={t}
-            />
-          ))}
-        </TableBody>
-      </Table>
+          {/* Rows */}
+          <div>
+            {symptoms.map((symptom) => (
+              <SymptomRow
+                key={symptom.id}
+                symptom={symptom}
+                patientId={patientId}
+                facilityId={facilityId}
+                t={t}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
