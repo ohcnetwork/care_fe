@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   CartesianGrid,
@@ -22,6 +23,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip as RadixTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -241,7 +248,26 @@ export const ObservationVisualizer = ({
       {processedDataByGroup.map((group, groupIndex) => (
         <Card key={groupIndex} className="p-4">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-medium">{group.title}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-medium">{group.title}</h3>
+              <TooltipProvider>
+                <RadixTooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-gray-500 hover:text-gray-700 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[300px]">
+                    <div className="space-y-2">
+                      <div className="font-medium">Observations:</div>
+                      {group.codes.map((code) => (
+                        <div key={code.code} className="text-xs">
+                          {code.display} ({code.code})
+                        </div>
+                      ))}
+                    </div>
+                  </TooltipContent>
+                </RadixTooltip>
+              </TooltipProvider>
+            </div>
           </div>
           <Tabs defaultValue="graph" className="w-full">
             <TabsList className="flex w-full">
