@@ -865,7 +865,7 @@
   "encounter_status__discharged": "ഡിസ്ചാർജ് ചെയ്തു",
   "encounter_status__discontinued": "നിർത്തലാക്കി",
   "encounter_status__entered_in_error": "തെറ്റായി നൽകി",
-  "encounter_status__in_progress": "പുരോഗമിച്ചുകൊണ്ടിരിക്കുന്നു",
+  "encounter_status__in-progress": "പുരോഗമിച്ചുകൊണ്ടിരിക്കുന്നു",
   "encounter_status__on_hold": "ഹോൾഡ് ചെയ്തിരിക്കുന്നു",
   "encounter_status__planned": "പദ്ധതിയിട്ടിരിക്കുന്നത്",
   "encounter_status__unknown": "അറിയില്ല",
