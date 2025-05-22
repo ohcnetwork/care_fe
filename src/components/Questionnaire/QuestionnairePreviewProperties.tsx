@@ -1,14 +1,10 @@
 import { t } from "i18next";
 import { Building } from "lucide-react";
 
-import { Badge } from "@/src/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import { Label } from "@/src/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
