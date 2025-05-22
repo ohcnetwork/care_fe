@@ -82,7 +82,7 @@ export const ENCOUNTER_PRIORITY = [
 
 export const ENCOUNTER_STATUS = [
   "planned",
-  "in_progress",
+  "in-progress",
   "on_hold",
   "discharged",
   "completed",
