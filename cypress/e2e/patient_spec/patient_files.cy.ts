@@ -32,7 +32,6 @@ describe("Patient Files", () => {
 
   // Single File Upload Setup
   const fileName = "sample_img1.png";
-  const filePath = (fileName: string) => `cypress/fixtures/${fileName}`;
 
   // Multiple Files Upload Setup
   const fileNames = ["sample_img1.png", "sample_img2.png", "sample_file.xlsx"];
@@ -44,13 +43,18 @@ describe("Patient Files", () => {
 
   const inputFileName1 = `Upload1-${timestamp}`;
 
-  it("Add multiple patient files", () => {
-    const filePaths = (fileNames: string[]) =>
-      fileNames.map((file) => `cypress/fixtures/${file}`);
+  // Common file path function for both single and multiple files
+  const getFilePath = (fileName: string | string[]): string[] => {
+    if (Array.isArray(fileName)) {
+      return fileName.map((file) => `cypress/fixtures/${file}`);
+    }
+    return [`cypress/fixtures/${fileName}`];
+  };
 
+  it("Add multiple patient files", () => {
     patientFiles
-      .clickAddFilesButton()
-      .uploadMultipleFiles(filePaths(fileNames))
+      .clickAddFilesAndSelectUpload()
+      .uploadMultipleFiles(getFilePath(fileNames))
       .clickUploadFilesButton()
       .verifyValidationErrors(validationMessage)
       .fillMultipleFileNames(inputFileNames)
@@ -61,10 +65,8 @@ describe("Patient Files", () => {
 
   it("File Uploaded by one user is accessible to another user", () => {
     patientFiles
-      .filterActiveFiles()
-      .clickAddFilesButton()
-      .selectUploadFromDevice()
-      .uploadSingleFile(filePath(fileName))
+      .clickAddFilesAndSelectUpload()
+      .uploadSingleFile(getFilePath(fileName)[0])
       .fillSingleFileName(inputFileName1)
       .interceptFileUploadRequest()
       .clickUploadFilesButton()
@@ -87,9 +89,8 @@ describe("Patient Files", () => {
 
     // Upload a single file
     patientFiles
-      .clickAddFilesButton()
-      .selectUploadFromDevice()
-      .uploadSingleFile(filePath(fileName))
+      .clickAddFilesAndSelectUpload()
+      .uploadSingleFile(getFilePath(fileName)[0])
       .clickUploadFilesButton()
       .verifyValidationErrors(validationMessage)
       .fillSingleFileName(inputFileName1)
@@ -115,9 +116,8 @@ describe("Patient Files", () => {
 
     // Upload a single file
     patientFiles
-      .clickAddFilesButton()
-      .selectUploadFromDevice()
-      .uploadSingleFile(filePath(fileName))
+      .clickAddFilesAndSelectUpload()
+      .uploadSingleFile(getFilePath(fileName)[0])
       .clickUploadFilesButton()
       .verifyValidationErrors(validationMessage)
       .fillSingleFileName(inputFileName1)
