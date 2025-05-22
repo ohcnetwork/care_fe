@@ -282,6 +282,7 @@ export default function FacilityOrganizationSelector(
                   variant="ghost"
                   size="sm"
                   className="h-8 gap-2"
+                  disabled={alreadySelected}
                   data-cy="confirm-organization"
                 >
                   <span>{t("already_selected")}</span>
