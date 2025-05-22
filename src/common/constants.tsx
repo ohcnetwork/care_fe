@@ -69,7 +69,8 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   // { id: 1200, text: "Second Line Treatment Center" },
   // { id: 1400, text: "Covid Management Center" },
   // { id: 1600, text: "District War Room" },
-  { id: 3000, text: "Non Governmental Organization" },
+  { id: 3000, text: "Clinical Non Governmental Organization" },
+  { id: 3001, text: "Non Clinical Non Governmental Organization" },
   { id: 4000, text: "Community Based Organization" },
 ];
 
