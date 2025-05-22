@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { t } from "i18next";
 import { Edit, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -9,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import { tzAwareDateTime } from "@/lib/utils";
+import { tzAwareDateTime } from "@/lib/validators";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -69,8 +68,8 @@ const consentFormSchema = (isEdit: boolean) =>
       status: z.enum(CONSENT_STATUSES).default("active"),
       date: tzAwareDateTime,
       period: z.object({
-        start: z.date().nullable().optional(),
-        end: z.date().nullable().optional(),
+        start: tzAwareDateTime,
+        end: tzAwareDateTime,
       }),
       note: z.string().optional(),
       fileEntries: z
@@ -96,7 +95,10 @@ const consentFormSchema = (isEdit: boolean) =>
         });
       }
 
-      if (data.period.start && data.period.start < new Date(data.date)) {
+      if (
+        data.period.start &&
+        new Date(data.period.start) < new Date(data.date)
+      ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("consent_period_start_before_consent_date_validation"),
@@ -142,8 +144,8 @@ export default function ConsentFormSheet({
       status: "active",
       date: new Date().toISOString(),
       period: {
-        start: new Date(),
-        end: null,
+        start: new Date().toISOString(),
+        end: "",
       },
       note: "",
       fileEntries: [],
@@ -226,11 +228,11 @@ export default function ConsentFormSheet({
         date: new Date(existingConsent!.date).toISOString(),
         period: {
           start: existingConsent!.period.start
-            ? new Date(existingConsent!.period.start)
-            : null,
+            ? new Date(existingConsent!.period.start).toISOString()
+            : "",
           end: existingConsent!.period.end
-            ? new Date(existingConsent!.period.end)
-            : null,
+            ? new Date(existingConsent!.period.end).toISOString()
+            : "",
         },
         note: existingConsent!.note || "",
         fileEntries: [],
@@ -263,8 +265,8 @@ export default function ConsentFormSheet({
               : null,
           }
         : {
-            start: values.period.start ?? null,
-            end: values.period.end ?? null,
+            start: values.period.start ? new Date(values.period.start) : null,
+            end: values.period.end ? new Date(values.period.end) : null,
           },
       encounter: encounterId,
       source_attachments: [],
@@ -349,20 +351,11 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_from")}</FormLabel>
-                        <Input
-                          type="datetime-local"
+                        <DateTimeInput
                           {...field}
-                          value={
-                            field.value
-                              ? format(
-                                  new Date(field.value),
-                                  "yyyy-MM-dd'T'HH:mm",
-                                )
-                              : undefined
-                          }
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            field.onChange(value ? new Date(value) : null);
+                          value={field.value ?? ""}
+                          onChange={(val) => {
+                            field.onChange(val);
                           }}
                         />
                         <FormMessage />
@@ -376,20 +369,11 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_until")}</FormLabel>
-                        <Input
-                          type="datetime-local"
+                        <DateTimeInput
                           {...field}
-                          value={
-                            field.value
-                              ? format(
-                                  new Date(field.value),
-                                  "yyyy-MM-dd'T'HH:mm",
-                                )
-                              : undefined
-                          }
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            field.onChange(value ? new Date(value) : null);
+                          value={field.value ?? undefined}
+                          onChange={(val) => {
+                            field.onChange(val);
                           }}
                         />
                         <FormMessage />

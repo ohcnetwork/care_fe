@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
+
 import { LocationHistory } from "@/types/emr/encounter";
 import { LocationAssociationStatus } from "@/types/location/association";
 
@@ -109,13 +111,12 @@ export function LocationCardWrapper({
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>{t("end_time")}</Label>
-                  <Input
-                    type="datetime-local"
-                    value={format(
-                      editingState.timeConfig.end || new Date(),
-                      "yyyy-MM-dd'T'HH:mm",
-                    )}
-                    onChange={(e) =>
+                  <DateTimeInput
+                    value={
+                      editingState.timeConfig.end?.toISOString() ??
+                      new Date().toISOString()
+                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setEditingState((prev) => ({
                         ...prev,
                         timeConfig: {

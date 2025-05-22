@@ -13,11 +13,14 @@ function toLocalDateTimeString(isoString: string): string {
   return format(date, "yyyy-MM-dd'T'HH:mm");
 }
 
-type DateTimeInputProps = { value?: string; onChange?: (val: string) => void };
+type DateTimeInputProps = {
+  value?: string;
+  onDateChange?: (val: string) => void;
+} & React.InputHTMLAttributes<HTMLInputElement>;
 
 export function DateTimeInput({
   value,
-  onChange,
+  onDateChange,
   ...props
 }: DateTimeInputProps & React.ComponentProps<"input">) {
   const localValue = value ? toLocalDateTimeString(value) : "";
@@ -28,7 +31,7 @@ export function DateTimeInput({
       value={localValue}
       onChange={(e) => {
         const newLocalVal = e.target.value;
-        if (onChange) onChange(toISOWithTimezone(newLocalVal));
+        if (onDateChange) onDateChange(toISOWithTimezone(newLocalVal));
       }}
       {...props}
     />
