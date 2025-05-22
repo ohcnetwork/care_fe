@@ -92,6 +92,7 @@ export default function FileUploadDialog({
                 </Label>
                 <Input
                   name="file_name_0"
+                  data-cy="upload-file-name"
                   type="text"
                   id="upload-file-name-0"
                   required
@@ -141,11 +142,11 @@ export default function FileUploadDialog({
                   >
                     {t("enter_file_name")}
                   </Label>
-
                   <Input
                     name={`file_name_${index}`}
                     type="text"
                     id={`upload-file-name-${index}`}
+                    data-cy={`upload-file-name-${index}`}
                     required
                     value={fileUpload.fileNames[index] || ""}
                     disabled={fileUpload.uploading}
