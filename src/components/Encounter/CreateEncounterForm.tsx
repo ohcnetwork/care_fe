@@ -79,7 +79,7 @@ export default function CreateEncounterForm({
   const { t } = useTranslation();
 
   const encounterFormSchema = z.object({
-    status: z.enum(["planned", "in-progress", "on_hold"] as const),
+    status: z.enum(["planned", "in_progress", "on_hold"] as const),
     encounter_class: z.enum(ENCOUNTER_CLASS),
     priority: z.enum(ENCOUNTER_PRIORITY),
     organizations: z.array(z.string()).min(1, {
@@ -280,7 +280,7 @@ export default function CreateEncounterForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="in-progress">
+                        <SelectItem value="in_progress">
                           {t("in_progress")}
                         </SelectItem>
                         <SelectItem value="planned">{t("planned")}</SelectItem>

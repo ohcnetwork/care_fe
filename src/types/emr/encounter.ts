@@ -82,7 +82,7 @@ export const ENCOUNTER_PRIORITY = [
 
 export const ENCOUNTER_STATUS = [
   "planned",
-  "in-progress",
+  "in_progress",
   "on_hold",
   "discharged",
   "completed",
@@ -103,7 +103,7 @@ export const ENCOUNTER_CLASSES_ICONS = {
 
 export const ENCOUNTER_STATUS_ICONS = {
   planned: "l-calender",
-  "in-progress": "l-spinner",
+  in_progress: "l-spinner",
   discharged: "l-home",
   completed: "l-check",
   cancelled: "l-x",

@@ -1276,7 +1276,7 @@
   "encounter_status__discharged": "Discharged",
   "encounter_status__discontinued": "Discontinued",
   "encounter_status__entered_in_error": "Entered in error",
-  "encounter_status__in-progress": "In Progress",
+  "encounter_status__in_progress": "In Progress",
   "encounter_status__on_hold": "On Hold",
   "encounter_status__planned": "Planned",
   "encounter_status__unknown": "Unknown",
