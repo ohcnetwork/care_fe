@@ -36,6 +36,7 @@ export default function ErrorPage({
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
+  const touchTimeoutId = useRef(null);
   const [isUnblurred, setIsUnblurred] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
 
@@ -61,6 +62,9 @@ export default function ErrorPage({
   const handleTouchStart = () => {
     setIsTouched(true);
     setIsUnblurred(true);
+    if (touchTimeoutId.current) {
+      clearTimeout(touchTimeoutId.current);
+    }
     setTimeout(() => {
       setIsUnblurred(false);
       setIsTouched(false);
@@ -68,6 +72,9 @@ export default function ErrorPage({
   };
 
   useEffect(() => {
+    if (touchTimeoutId.current) {
+      clearTimeout(touchTimeoutId.current);
+    }
     toast.dismiss();
   }, []);
 
@@ -104,16 +111,16 @@ export default function ErrorPage({
         onTouchStart={handleTouchStart}
         style={{
           boxShadow: `
-            hsl(57, 19%, 35%, 0.73) 0px 1px 0.8px,
-            hsl(57, 19%, 35%, 0.67) 0px 2.3px 1.9px -0.5px,
-            hsl(57, 19%, 35%, 0.6) 0px 4.6px 3.8px -1px,
-            hsl(57, 19%, 35%, 0.54) 0.1px 9px 7.4px -1.5px,
-            hsl(57, 19%, 35%, 0.47) 0.1px 16.8px 13.9px -2px,
-            hsl(57, 19%, 35%, 0.41) 0.2px 29.3px 24.2px -2.5px,
-            hsl(57, 19%, 35%, 0.34) 0.3px 47.6px 39.3px -3px,
-            hsl(57, 19%, 35%, 0.28) 0.5px 73px 60.2px -3.5px,
-            hsl(57, 19%, 35%, 0.21) 0.7px 106.8px 88.1px -4px,
-            hsl(57, 19%, 35%, 0.15) 0.9px 150px 123.8px -4.5px
+            hsla(57, 19%, 35%, 0.73) 0px 1px 0.8px,
+  hsla(57, 19%, 35%, 0.67) 0px 2.3px 1.9px -0.5px,
+  hsla(57, 19%, 35%, 0.6) 0px 4.6px 3.8px -1px,
+  hsla(57, 19%, 35%, 0.54) 0.1px 9px 7.4px -1.5px,
+  hsla(57, 19%, 35%, 0.47) 0.1px 16.8px 13.9px -2px,
+  hsla(57, 19%, 35%, 0.41) 0.2px 29.3px 24.2px -2.5px,
+  hsla(57, 19%, 35%, 0.34) 0.3px 47.6px 39.3px -3px,
+  hsla(57, 19%, 35%, 0.28) 0.5px 73px 60.2px -3.5px,
+  hsla(57, 19%, 35%, 0.21) 0.7px 106.8px 88.1px -4px,
+  hsla(57, 19%, 35%, 0.15) 0.9px 150px 123.8px -4.5px
           `,
         }}
       >
