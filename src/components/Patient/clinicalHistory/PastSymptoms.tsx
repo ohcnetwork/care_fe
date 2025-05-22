@@ -48,72 +48,83 @@ const SymptomRow = ({
 
   return (
     <>
-      <div className="grid grid-cols-12 gap-4 px-4 py-3 items-center bg-white border border-gray-200 rounded-md mb-2">
-        <div className="col-span-4 font-bold break-words whitespace-normal">
-          {symptom.code.display}
-        </div>
-        <div className="col-span-2 text-center">
-          <Badge
-            variant="outline"
-            className={`whitespace-nowrap ${SYMPTOM_CLINICAL_STATUS_STYLES[symptom.clinical_status]}`}
-          >
-            {t(symptom.clinical_status)}
-          </Badge>
-        </div>
-        <div className="col-span-2 text-center">
-          <Badge
-            variant="outline"
-            className={`whitespace-nowrap capitalize ${SYMPTOM_VERIFICATION_STATUS_STYLES[symptom.verification_status]}`}
-          >
-            {t(symptom.verification_status)}
-          </Badge>
-        </div>
-        <div className="col-span-2 text-center truncate">
-          {symptom.onset?.onset_datetime
-            ? format(parseISO(symptom.onset.onset_datetime), "dd MMM yyyy")
-            : "-"}
-        </div>
-        <div className="col-span-2 text-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="link">
-                <Info size={18} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <div className="px-3 py-2 text-sm text-gray-500 border-b">
-                <div className="font-medium text-gray-700">
-                  {t("reported_by")}
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <Avatar
-                    name={symptom.created_by.username}
-                    className="size-4"
-                    imageUrl={symptom.created_by.profile_picture_url}
-                  />
-                  <span className="text-sm">
-                    {formatName(symptom.created_by)}
-                  </span>
-                </div>
-              </div>
-              <DropdownMenuItem
-                onClick={() =>
-                  navigate(
-                    facilityId
-                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
-                      : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
-                  )
-                }
-              >
-                {t("view_encounter")}
-              </DropdownMenuItem>
-              {symptom.note && (
-                <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
-                  {showNote ? t("hide_note") : t("see_note")}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+      <div className="bg-white rounded border border-gray-200 mb-3">
+        <div className="grid grid-cols-12 divide-x">
+          <div className="col-span-4 p-2 min-w-[200px] bg-gray-100 break-words whitespace-normal font-bold text-gray-900">
+            {symptom.code.display}
+          </div>
+
+          <div className="col-span-2 p-2 flex items-center justify-center">
+            <Badge
+              variant="outline"
+              className={`whitespace-nowrap text-sm font-medium ${SYMPTOM_CLINICAL_STATUS_STYLES[symptom.clinical_status]}`}
+            >
+              {t(symptom.clinical_status)}
+            </Badge>
+          </div>
+
+          <div className="col-span-2 p-2 flex items-center justify-center">
+            <Badge
+              variant="outline"
+              className={`whitespace-nowrap capitalize text-sm font-medium ${SYMPTOM_VERIFICATION_STATUS_STYLES[symptom.verification_status]}`}
+            >
+              {t(symptom.verification_status)}
+            </Badge>
+          </div>
+
+          <div className="col-span-2 p-2 bg-gray-100 flex items-center justify-center truncate text-sm text-gray-800">
+            {symptom.onset?.onset_datetime
+              ? format(parseISO(symptom.onset.onset_datetime), "dd MMM yyyy")
+              : "-"}
+          </div>
+
+          <div className="col-span-2 flex justify-between">
+            <div className="flex-1 flex items-center justify-center p-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="link"
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <Info size={18} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <div className="px-3 py-2 text-sm text-gray-500 border-b">
+                    <div className="font-medium text-gray-700">
+                      {t("reported_by")}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Avatar
+                        name={symptom.created_by.username}
+                        className="size-4"
+                        imageUrl={symptom.created_by.profile_picture_url}
+                      />
+                      <span className="text-sm">
+                        {formatName(symptom.created_by)}
+                      </span>
+                    </div>
+                  </div>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      navigate(
+                        facilityId
+                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                          : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                      )
+                    }
+                  >
+                    {t("view_encounter")}
+                  </DropdownMenuItem>
+                  {symptom.note && (
+                    <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
+                      {showNote ? t("hide_note") : t("see_note")}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -152,7 +163,6 @@ export const SymptomTable = ({
     <div className="max-w-6xl mx-auto mb-4">
       <div className="overflow-x-auto pb-2">
         <div className="min-w-[800px]">
-          {/* Header */}
           <div className="grid grid-cols-12 gap-4 px-4 py-3 font-semibold text-gray-700 mb-3">
             <div className="col-span-4">{t("symptom")}</div>
             <div className="col-span-2 text-center">{t("severity")}</div>
@@ -161,7 +171,6 @@ export const SymptomTable = ({
             <div className="col-span-2 text-center"></div>
           </div>
 
-          {/* Rows */}
           <div>
             {symptoms.map((symptom) => (
               <SymptomRow

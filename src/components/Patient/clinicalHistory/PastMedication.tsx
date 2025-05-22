@@ -64,66 +64,75 @@ const MedicineRow = ({
 
   return (
     <>
-      <div className="grid grid-cols-12 gap-4 px-4 py-3 items-center bg-white border border-gray-200 rounded-md mb-2">
-        <div className="col-span-4 font-bold break-words whitespace-normal">
-          {medicine.medication?.display}
-        </div>
+      <div className="bg-white rounded border border-gray-200">
+        <div className="grid grid-cols-12 divide-x">
+          <div className="col-span-4 p-2 min-w-[200px] bg-gray-100 break-words whitespace-normal font-bold text-gray-900">
+            {medicine.medication?.display}
+          </div>
 
-        <div className="col-span-2 text-center">{dosage || "-"}</div>
+          <div className="col-span-2 p-2 flex items-center justify-center text-sm text-gray-800">
+            {dosage || "-"}
+          </div>
 
-        <div className="col-span-2 text-center whitespace-pre-wrap break-words">
-          {frequencyDisplay || "-"}
-        </div>
+          <div className="col-span-2 p-2 flex items-center justify-center text-sm text-gray-800 whitespace-pre-wrap break-words text-center">
+            {frequencyDisplay || "-"}
+          </div>
 
-        <div className="col-span-2 text-center truncate">
-          {duration ? `${duration.value} ${duration.unit}` : "-"}
-        </div>
+          <div className="col-span-2 p-2 bg-gray-100 flex items-center justify-center text-sm text-gray-800 truncate">
+            {duration ? `${duration.value} ${duration.unit}` : "-"}
+          </div>
 
-        <div className="col-span-2 text-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="link">
-                <Info size={18} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <div className="px-3 py-2 text-sm text-gray-500 border-b">
-                <div className="font-medium text-gray-700">
-                  {t("reported_by")}
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <Avatar
-                    name={medicine.created_by?.username}
-                    className="size-4"
-                    imageUrl={medicine.created_by.read_profile_picture_url}
-                  />
-                  <span className="text-sm">
-                    {formatName(medicine.created_by)}
-                  </span>
-                </div>
-              </div>
-              <DropdownMenuItem
-                onClick={() =>
-                  navigate(
-                    facilityId
-                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${medicine.encounter}/updates`
-                      : `/organization/organizationId/patient/${patientId}/encounter/${medicine.encounter}/updates`,
-                  )
-                }
-              >
-                {t("view_encounter")}
-              </DropdownMenuItem>
-              {combinedInstruction && combinedInstruction !== "-" && (
-                <DropdownMenuItem
-                  onClick={() => setShowInstruction(!showInstruction)}
-                >
-                  {showInstruction
-                    ? t("hide_instruction")
-                    : t("see_instruction")}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="col-span-2 flex justify-between">
+            <div className="flex-1 flex items-center justify-center p-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="link"
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <Info size={18} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <div className="px-3 py-2 text-sm text-gray-500 border-b">
+                    <div className="font-medium text-gray-700">
+                      {t("reported_by")}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Avatar
+                        name={medicine.created_by?.username}
+                        className="size-4"
+                        imageUrl={medicine.created_by?.read_profile_picture_url}
+                      />
+                      <span className="text-sm">
+                        {formatName(medicine.created_by)}
+                      </span>
+                    </div>
+                  </div>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      navigate(
+                        facilityId
+                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${medicine.encounter}/updates`
+                          : `/organization/organizationId/patient/${patientId}/encounter/${medicine.encounter}/updates`,
+                      )
+                    }
+                  >
+                    {t("view_encounter")}
+                  </DropdownMenuItem>
+                  {combinedInstruction && combinedInstruction !== "-" && (
+                    <DropdownMenuItem
+                      onClick={() => setShowInstruction(!showInstruction)}
+                    >
+                      {showInstruction
+                        ? t("hide_instruction")
+                        : t("see_instruction")}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -162,7 +171,6 @@ export const MedicationTable = ({
     <div className="max-w-6xl mx-auto mb-4">
       <div className="overflow-x-auto pb-2">
         <div className="min-w-[800px]">
-          {/* Header */}
           <div className="grid grid-cols-12 gap-4 px-4 py-3 font-semibold text-gray-700 mb-3">
             <div className="col-span-4">{t("medicine")}</div>
             <div className="col-span-2 text-center">{t("dosage")}</div>
@@ -171,7 +179,6 @@ export const MedicationTable = ({
             <div className="col-span-2 text-center"></div>
           </div>
 
-          {/* Rows */}
           <div>
             {medicines.map((medicine) => (
               <MedicineRow
