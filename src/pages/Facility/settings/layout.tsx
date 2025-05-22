@@ -2,6 +2,8 @@ import { useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import ReportBuilderList from "@/pages/Encounters/ReportBuilder";
+import ReportBuilder from "@/pages/Encounters/ReportBuilder/ReportBuilder";
 import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
 import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
 import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
@@ -36,6 +38,18 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/devices/:id/edit": ({ id }: { id: string }) => (
     <UpdateDevice facilityId={facilityId} deviceId={id} />
+  ),
+  "/reportbuilder": () => <ReportBuilderList facilityId={facilityId} />,
+  "/reportbuilder/new": () => <ReportBuilder facilityId={facilityId} />,
+  "/reportbuilder/:reportTemplateId": ({
+    reportTemplateId,
+  }: {
+    reportTemplateId: string;
+  }) => (
+    <ReportBuilder
+      facilityId={facilityId}
+      reportTemplateId={reportTemplateId}
+    />
   ),
   "*": () => <ErrorPage />,
 });
