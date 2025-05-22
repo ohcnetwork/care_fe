@@ -103,7 +103,7 @@ export const ENCOUNTER_CLASSES_ICONS = {
 
 export const ENCOUNTER_STATUS_ICONS = {
   planned: "l-calender",
-  in_progress: "l-spinner",
+  "in-progress": "l-spinner",
   discharged: "l-home",
   completed: "l-check",
   cancelled: "l-x",
