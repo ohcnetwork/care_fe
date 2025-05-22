@@ -85,7 +85,7 @@ const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
   status: z.nativeEnum(Status),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().min(1, t("field_required")),
   derived_from_uri: z
     .string()
     .url({ message: "Please enter a valid URL" })
