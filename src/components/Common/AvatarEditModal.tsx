@@ -42,14 +42,26 @@ interface Props {
 
 const VideoConstraints = {
   user: {
-    width: 1024,
-    height: 576,
+    width: {
+      min: 400,
+      max: 1024,
+    },
+    height: {
+      min: 400,
+      max: 1024,
+    },
     facingMode: "user",
   },
   environment: {
-    width: 1024,
-    height: 576,
-    facingMode: { exact: "environment" },
+    width: {
+      min: 400,
+      max: 1024,
+    },
+    height: {
+      min: 400,
+      max: 1024,
+    },
+    facingMode: "environment",
   },
 } as const;
 
@@ -265,7 +277,7 @@ const AvatarEditModal = ({
               <>
                 {preview || imageUrl ? (
                   <>
-                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center rounded-lg border border-secondary-200">
+                    <div className="flex h-[30vh] md:h-[75vh] w-full items-center justify-center rounded-lg border border-secondary-200">
                       <img
                         src={
                           preview && preview.startsWith("blob:")
@@ -416,11 +428,19 @@ const AvatarEditModal = ({
                     <>
                       <Webcam
                         audio={false}
-                        height={720}
                         screenshotFormat="image/jpeg"
-                        width={1280}
                         ref={webRef}
-                        videoConstraints={constraint}
+                        videoConstraints={{
+                          ...constraint,
+                          width: {
+                            ...constraint.width,
+                            ideal: window.innerWidth,
+                          },
+                          height: {
+                            ...constraint.height,
+                            ideal: window.innerHeight,
+                          },
+                        }}
                         onUserMediaError={async () => {
                           const requestValue = await requestPermission("user");
                           if (!requestValue.hasPermission) {
