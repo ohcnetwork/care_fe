@@ -1209,6 +1209,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 });
               }}
               disabled={disabled || isReadOnly}
+              showAsSheet
             />
 
             <InstructionsPopover
@@ -1241,6 +1242,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(route) => handleUpdateDosageInstruction({ route })}
           placeholder={t("select_route")}
           disabled={disabled || isReadOnly}
+          showAsSheet
         />
       </div>
       {/* Site */}
@@ -1256,6 +1258,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_site")}
           disabled={disabled || isReadOnly}
           wrapTextForSmallScreen={true}
+          showAsSheet
         />
       </div>
       {/* Method */}
@@ -1271,6 +1274,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_method")}
           disabled={disabled || isReadOnly}
           count={20}
+          showAsSheet
         />
       </div>
       {/* Intent */}

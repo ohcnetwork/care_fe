@@ -54,6 +54,7 @@ interface Props {
   hideTrigger?: boolean;
   controlledOpen?: boolean;
   title?: string;
+  showAsSheet?: boolean;
 }
 
 const Item = ({
@@ -103,6 +104,7 @@ export default function ValueSetSelect({
   hideTrigger = false,
   controlledOpen = false,
   title,
+  showAsSheet = false,
 }: Props) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -112,13 +114,6 @@ export default function ValueSetSelect({
   const [isClearingFavourites, setIsClearingFavourites] = useState(false);
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
-  const showAsSheetSystems = [
-    "system-additional-instruction",
-    "system-route",
-    "system-body-site",
-    "system-administration-method",
-    "system-as-needed-reason",
-  ];
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
@@ -394,7 +389,7 @@ export default function ValueSetSelect({
     </AlertDialog>
   );
 
-  if (isMobile && !hideTrigger && showAsSheetSystems.includes(system)) {
+  if (isMobile && !hideTrigger && showAsSheet) {
     return (
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
