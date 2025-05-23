@@ -123,7 +123,7 @@ function ClinicalStatusSelect({
   const { t } = useTranslation();
   return (
     <Select value={status} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className="h-8 md:h-9">
+      <SelectTrigger data-cy="diagnosis-status" className="h-8 md:h-9">
         <SelectValue
           placeholder={
             <span className="text-gray-500">
@@ -155,7 +155,7 @@ function VerificationStatusSelect({
   const { t } = useTranslation();
   return (
     <Select value={status} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className="h-8 md:h-9">
+      <SelectTrigger data-cy="diagnosis-verification" className="h-8 md:h-9">
         <SelectValue
           placeholder={
             <span className="text-gray-500">
@@ -187,6 +187,7 @@ function DiagnosisNotesInput({
   const { t } = useTranslation();
   return (
     <Input
+      data-cy="diagnosis-notes"
       type="text"
       placeholder={t("additional_notes")}
       value={note || ""}
@@ -638,12 +639,14 @@ export function DiagnosisQuestion({
           </div>
         </EntitySelectionSheet>
       ) : (
-        <ValueSetSelect
-          system="system-condition-code"
-          placeholder={addDiagnosisPlaceholder}
-          onSelect={handleCodeSelect}
-          disabled={disabled}
-        />
+        <div className="max-w-4xl" data-cy="add-diagnosis">
+          <ValueSetSelect
+            system="system-condition-code"
+            placeholder={addDiagnosisPlaceholder}
+            onSelect={handleCodeSelect}
+            disabled={disabled}
+          />
+        </div>
       )}
     </div>
   );

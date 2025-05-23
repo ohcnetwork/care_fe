@@ -53,7 +53,6 @@ export class CommunityQuestionnaireForm {
     // Diagnosis Selectors
     diagnosis: {
       addDiagnosis: '[data-cy="add-diagnosis"]',
-      addDiagnosisConfirm: '[data-cy="add-diagnosis-confirm"]',
       status: '[data-cy="diagnosis-status"]',
       verification: '[data-cy="diagnosis-verification"]',
       actionsMenu: '[data-cy="diagnosis-actions-menu"]',
@@ -179,10 +178,6 @@ export class CommunityQuestionnaireForm {
       this.selectors.diagnosis.addDiagnosis,
       diagnosis,
       false,
-    );
-    cy.verifyAndClickElement(
-      this.selectors.diagnosis.addDiagnosisConfirm,
-      "Add Diagnosis",
     );
 
     cy.clickAndSelectOption(this.selectors.diagnosis.status, status);
