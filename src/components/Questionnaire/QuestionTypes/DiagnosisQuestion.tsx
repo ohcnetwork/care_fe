@@ -115,15 +115,17 @@ function ClinicalStatusSelect({
   status,
   onValueChange,
   disabled,
+  "data-cy": dataCy,
 }: {
   status: DiagnosisClinicalStatus;
   onValueChange: (value: DiagnosisClinicalStatus) => void;
   disabled?: boolean;
+  "data-cy"?: string;
 }) {
   const { t } = useTranslation();
   return (
     <Select value={status} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger data-cy="diagnosis-status" className="h-8 md:h-9">
+      <SelectTrigger data-cy={dataCy} className="h-8 md:h-9">
         <SelectValue
           placeholder={
             <span className="text-gray-500">
@@ -147,15 +149,17 @@ function VerificationStatusSelect({
   status,
   onValueChange,
   disabled,
+  "data-cy": dataCy,
 }: {
   status: string;
   onValueChange: (value: string) => void;
   disabled?: boolean;
+  "data-cy"?: string;
 }) {
   const { t } = useTranslation();
   return (
     <Select value={status} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger data-cy="diagnosis-verification" className="h-8 md:h-9">
+      <SelectTrigger data-cy={dataCy} className="h-8 md:h-9">
         <SelectValue
           placeholder={
             <span className="text-gray-500">
@@ -179,15 +183,17 @@ function DiagnosisNotesInput({
   note,
   onChange,
   disabled,
+  "data-cy": dataCy,
 }: {
   note?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
+  "data-cy"?: string;
 }) {
   const { t } = useTranslation();
   return (
     <Input
-      data-cy="diagnosis-notes"
+      data-cy={dataCy}
       type="text"
       placeholder={t("additional_notes")}
       value={note || ""}
@@ -700,6 +706,7 @@ const DiagnosisTableRow = ({
         </TableCell>
         <TableCell className="py-1">
           <ClinicalStatusSelect
+            data-cy="diagnosis-status"
             status={diagnosis.clinical_status}
             onValueChange={(value) =>
               onUpdate?.({
@@ -711,6 +718,7 @@ const DiagnosisTableRow = ({
         </TableCell>
         <TableCell className="py-1">
           <VerificationStatusSelect
+            data-cy="diagnosis-verification"
             status={diagnosis.verification_status}
             onValueChange={(value) =>
               onUpdate?.({
@@ -761,6 +769,7 @@ const DiagnosisTableRow = ({
         <TableRow>
           <TableCell colSpan={5} className="px-4 py-2">
             <DiagnosisNotesInput
+              data-cy="diagnosis-notes"
               note={diagnosis.note}
               onChange={(e) => onUpdate?.({ note: e.target.value })}
               disabled={disabled}
