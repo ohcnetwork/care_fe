@@ -42,13 +42,13 @@ interface Props {
 
 const VideoConstraints = {
   user: {
-    width: 1280,
-    height: 720,
+    width: 1024,
+    height: 576,
     facingMode: "user",
   },
   environment: {
-    width: 1280,
-    height: 720,
+    width: 1024,
+    height: 576,
     facingMode: { exact: "environment" },
   },
 } as const;
@@ -92,19 +92,39 @@ const AvatarEditModal = ({
 
   const captureImage = () => {
     if (webRef.current) {
-      setPreviewImage(webRef.current.getScreenshot());
+      const video = webRef.current.video;
+      if (!video) return;
+
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      if (!context) return;
+
+      const width = Math.min(Math.max(video.videoWidth, 400), 1024);
+      const height = Math.min(Math.max(video.videoHeight, 400), 1024);
+
+      canvas.width = width;
+      canvas.height = height;
+
+      context.drawImage(video, 0, 0, width, height);
+
+      const imageData = canvas.toDataURL("image/jpeg");
+      setPreviewImage(imageData);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const myFile = new File([blob], "image.png", {
+              type: blob.type,
+            });
+            setSelectedFile(myFile);
+          } else {
+            toast.error(t("failed_to_capture_image"));
+          }
+        },
+        "image/jpeg",
+        1.0,
+      );
     }
-    const canvas = webRef.current?.getCanvas();
-    canvas?.toBlob((blob) => {
-      if (blob) {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
-        });
-        setSelectedFile(myFile);
-      } else {
-        toast.error(t("failed_to_capture_image"));
-      }
-    });
   };
   const stopCamera = useCallback(() => {
     try {
