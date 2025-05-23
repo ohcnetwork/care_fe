@@ -42,14 +42,26 @@ interface Props {
 
 const VideoConstraints = {
   user: {
-    width: 1280,
-    height: 720,
+    width: {
+      min: 400,
+      max: 1024,
+    },
+    height: {
+      min: 400,
+      max: 1024,
+    },
     facingMode: "user",
   },
   environment: {
-    width: 1280,
-    height: 720,
-    facingMode: { exact: "environment" },
+    width: {
+      min: 400,
+      max: 1024,
+    },
+    height: {
+      min: 400,
+      max: 1024,
+    },
+    facingMode: "environment",
   },
 } as const;
 
@@ -92,19 +104,39 @@ const AvatarEditModal = ({
 
   const captureImage = () => {
     if (webRef.current) {
-      setPreviewImage(webRef.current.getScreenshot());
+      const video = webRef.current.video;
+      if (!video) return;
+
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      if (!context) return;
+
+      const width = Math.min(Math.max(video.videoWidth, 400), 1024);
+      const height = Math.min(Math.max(video.videoHeight, 400), 1024);
+
+      canvas.width = width;
+      canvas.height = height;
+
+      context.drawImage(video, 0, 0, width, height);
+
+      const imageData = canvas.toDataURL("image/jpeg");
+      setPreviewImage(imageData);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const myFile = new File([blob], "image.png", {
+              type: blob.type,
+            });
+            setSelectedFile(myFile);
+          } else {
+            toast.error(t("failed_to_capture_image"));
+          }
+        },
+        "image/jpeg",
+        1.0,
+      );
     }
-    const canvas = webRef.current?.getCanvas();
-    canvas?.toBlob((blob) => {
-      if (blob) {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
-        });
-        setSelectedFile(myFile);
-      } else {
-        toast.error(t("failed_to_capture_image"));
-      }
-    });
   };
   const stopCamera = useCallback(() => {
     try {
@@ -245,7 +277,7 @@ const AvatarEditModal = ({
               <>
                 {preview || imageUrl ? (
                   <>
-                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center rounded-lg border border-secondary-200">
+                    <div className="flex h-[30vh] md:h-[75vh] w-full items-center justify-center rounded-lg border border-secondary-200">
                       <img
                         src={
                           preview && preview.startsWith("blob:")
@@ -396,11 +428,19 @@ const AvatarEditModal = ({
                     <>
                       <Webcam
                         audio={false}
-                        height={720}
                         screenshotFormat="image/jpeg"
-                        width={1280}
                         ref={webRef}
-                        videoConstraints={constraint}
+                        videoConstraints={{
+                          ...constraint,
+                          width: {
+                            ...constraint.width,
+                            ideal: window.innerWidth,
+                          },
+                          height: {
+                            ...constraint.height,
+                            ideal: window.innerHeight,
+                          },
+                        }}
                         onUserMediaError={async () => {
                           const requestValue = await requestPermission("user");
                           if (!requestValue.hasPermission) {
