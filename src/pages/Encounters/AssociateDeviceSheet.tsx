@@ -59,8 +59,8 @@ export default function AssociateDeviceSheet({
   return (
     <Sheet
       open={open}
-      onOpenChange={() => {
-        setOpen((prev) => !prev);
+      onOpenChange={(open) => {
+        setOpen(open);
         setSelectedDevice(null);
       }}
     >
