@@ -52,14 +52,26 @@ interface Props {
 
 const VideoConstraints = {
   user: {
-    width: 1280,
-    height: 720,
+    width: {
+      min: 400,
+      max: 1024,
+    },
+    height: {
+      min: 400,
+      max: 1024,
+    },
     facingMode: "user",
   },
   environment: {
-    width: 1280,
-    height: 720,
-    facingMode: { exact: "environment" },
+    width: {
+      min: 400,
+      max: 1024,
+    },
+    height: {
+      min: 400,
+      max: 1024,
+    },
+    facingMode: "environment",
   },
 } as const;
 
@@ -86,47 +98,6 @@ function centerAspectCrop(
     mediaWidth,
     mediaHeight,
   );
-}
-
-function getResizedCanvas(
-  canvas: HTMLCanvasElement,
-  maxWidth: number,
-  maxHeight: number,
-) {
-  let width = canvas.width;
-  let height = canvas.height;
-
-  // Only resize if the image is larger than the maximum dimensions
-  if (width > height) {
-    if (width > maxWidth) {
-      height = Math.round((height * maxWidth) / width);
-      width = maxWidth;
-    }
-  } else {
-    if (height > maxHeight) {
-      width = Math.round((width * maxHeight) / height);
-      height = maxHeight;
-    }
-  }
-
-  const resizedCanvas = document.createElement("canvas");
-
-  // Set the canvas dimensions
-  resizedCanvas.width = width;
-  resizedCanvas.height = height;
-
-  const ctx = resizedCanvas.getContext("2d");
-
-  if (ctx) {
-    // Enable high quality image rendering
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-
-    // Draw the image at the new size
-    ctx.drawImage(canvas, 0, 0, width, height);
-  }
-
-  return resizedCanvas;
 }
 
 const AvatarEditModal = ({
@@ -167,49 +138,38 @@ const AvatarEditModal = ({
 
   const captureImage = () => {
     if (webRef.current) {
-      const screenshot = webRef.current.getScreenshot({
-        width: 1280,
-        height: 720,
-      });
-      setPreviewImage(screenshot);
+      const video = webRef.current.video;
+      if (!video) return;
 
-      const canvas = webRef.current?.getCanvas();
-      if (canvas) {
-        const size = Math.min(canvas.width, canvas.height);
-        const x = (canvas.width - size) / 2;
-        const y = (canvas.height - size) / 2;
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      if (!context) return;
 
-        const squareCanvas = document.createElement("canvas");
+      const width = Math.min(Math.max(video.videoWidth, 400), 1024);
+      const height = Math.min(Math.max(video.videoHeight, 400), 1024);
 
-        squareCanvas.width = size;
-        squareCanvas.height = size;
+      canvas.width = width;
+      canvas.height = height;
 
-        const ctx = squareCanvas.getContext("2d");
+      context.drawImage(video, 0, 0, width, height);
 
-        if (ctx && canvas) {
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = "high";
+      const imageData = canvas.toDataURL("image/jpeg");
+      setPreviewImage(imageData);
 
-          ctx.drawImage(canvas, x, y, size, size, 0, 0, size, size);
-
-          const resizedCanvas = getResizedCanvas(squareCanvas, 1024, 1024);
-
-          resizedCanvas.toBlob(
-            (blob) => {
-              if (blob) {
-                const myFile = new File([blob], "image.png", {
-                  type: "image/png",
-                });
-                setSelectedFile(myFile);
-              } else {
-                toast.error(t("failed_to_capture_image"));
-              }
-            },
-            "image/png",
-            1.0, // Use maximum quality
-          );
-        }
-      }
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const myFile = new File([blob], "image.png", {
+              type: blob.type,
+            });
+            setSelectedFile(myFile);
+          } else {
+            toast.error(t("failed_to_capture_image"));
+          }
+        },
+        "image/jpeg",
+        1.0,
+      );
     }
   };
 
@@ -558,7 +518,7 @@ const AvatarEditModal = ({
                   </div>
                 ) : preview || imageUrl ? (
                   <>
-                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center rounded-lg border border-secondary-200">
+                    <div className="flex h-[30vh] md:h-[75vh] w-full items-center justify-center rounded-lg border border-secondary-200">
                       <img
                         src={
                           preview && preview.startsWith("blob:")
@@ -705,25 +665,28 @@ const AvatarEditModal = ({
               <>
                 <div className="flex flex-1 items-center justify-center">
                   {!previewImage ? (
-                    <>
-                      <div className="relative">
-                        <Webcam
-                          audio={false}
-                          height={720}
-                          screenshotFormat="image/jpeg"
-                          width={1280}
-                          ref={webRef}
-                          videoConstraints={constraint}
-                          onUserMediaError={async () => {
-                            const requestValue =
-                              await requestPermission("user");
-                            if (!requestValue.hasPermission) {
-                              setIsCameraOpen(false);
-                            }
-                          }}
-                        />
-                      </div>
-                    </>
+                    <Webcam
+                      audio={false}
+                      screenshotFormat="image/jpeg"
+                      ref={webRef}
+                      videoConstraints={{
+                        ...constraint,
+                        width: {
+                          ...constraint.width,
+                          ideal: window.innerWidth,
+                        },
+                        height: {
+                          ...constraint.height,
+                          ideal: window.innerHeight,
+                        },
+                      }}
+                      onUserMediaError={async () => {
+                        const requestValue = await requestPermission("user");
+                        if (!requestValue.hasPermission) {
+                          setIsCameraOpen(false);
+                        }
+                      }}
+                    />
                   ) : (
                     <>
                       <img

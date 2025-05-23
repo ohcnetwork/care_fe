@@ -67,7 +67,6 @@ describe("Facility Management", () => {
           testFacility.address,
         )
         .fillLocationDetails("Ernakulam")
-        .makePublicFacility()
         .interceptFacilityCreation()
         .submitFacilityCreationForm()
         .verifyFacilityCreation()
