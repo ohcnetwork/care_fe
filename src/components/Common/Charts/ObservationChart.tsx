@@ -251,7 +251,7 @@ export const ObservationVisualizer = ({
               <h3 className="text-sm font-medium">{group.title}</h3>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Info className="h-4 w-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                  <Info className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
                 </PopoverTrigger>
                 <PopoverContent
                   className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
