@@ -97,11 +97,6 @@ export class FacilityCreation {
     return this;
   }
 
-  makePublicFacility() {
-    cy.get('[data-cy="make-facility-public"]').click();
-    return this;
-  }
-
   submitFacilityCreationForm() {
     cy.clickSubmitButton("Create Facility");
     return this;
