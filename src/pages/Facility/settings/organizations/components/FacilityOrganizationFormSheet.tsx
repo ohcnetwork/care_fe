@@ -103,12 +103,6 @@ export default function FacilityOrganizationFormSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [facilityId, parentId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["getCurrentUser"],
-      });
-      queryClient.invalidateQueries({
         queryKey: ["facilityOrganization"],
       });
       toast.success(t("organization_created_successfully"));
@@ -131,10 +125,7 @@ export default function FacilityOrganizationFormSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["facilityOrganization", "list", facilityId, parentId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["getCurrentUser"],
+        queryKey: ["facilityOrganization"],
       });
       toast.success(t("organization_updated_successfully"));
       setOpen(false);
