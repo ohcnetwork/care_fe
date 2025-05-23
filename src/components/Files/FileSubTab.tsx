@@ -1,8 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -49,6 +50,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder/ReportBuilderSheet";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/patient";
 
@@ -58,6 +60,7 @@ interface FilesTabProps {
   patient?: Patient;
   associatingId: string;
   canEdit: boolean | undefined;
+  facilityId: string;
 }
 
 export const FilesPage = ({
@@ -66,6 +69,7 @@ export const FilesPage = ({
   patient,
   encounter,
   canEdit,
+  facilityId,
 }: FilesTabProps) => {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
@@ -90,6 +94,7 @@ export const FilesPage = ({
     type === "encounter"
       ? canViewClinicalData || canViewEncounter
       : canViewClinicalData;
+  const queryClient = useQueryClient();
 
   const {
     data: files,
@@ -631,6 +636,53 @@ export const FilesPage = ({
 
         <div className="flex items-center gap-2">
           <FilterButton />
+          {type === "encounter" && (
+            <>
+              <Button
+                variant="outline_primary"
+                className="min-w-24 sm:min-w-28"
+                onClick={async () => {
+                  await queryClient.invalidateQueries({
+                    queryKey: ["files"],
+                  });
+                  queryClient.invalidateQueries({
+                    queryKey: ["discharge_files"],
+                  });
+                  toast.success(t("refreshed"));
+                }}
+              >
+                <CareIcon icon="l-sync" className="mr-2" />
+                {t("refresh")}
+              </Button>
+              <ReportBuilderSheet
+                facilityId={facilityId || ""}
+                patientId={encounter?.patient.id || ""}
+                encounterId={encounter?.id || ""}
+                permissions={encounter?.permissions || []}
+                trigger={
+                  <Button variant="primary" asChild>
+                    <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer">
+                      <CareIcon
+                        icon="l-file-export"
+                        className="size-4 text-green-600"
+                      />
+                      {t("generate_report", {
+                        count: 2,
+                      })}
+                    </div>
+                  </Button>
+                }
+                onSuccess={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["files"],
+                  });
+                  queryClient.invalidateQueries({
+                    queryKey: ["discharge_files"],
+                  });
+                }}
+              />
+            </>
+          )}
         </div>
 
         <div className="ml-auto">
