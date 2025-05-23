@@ -198,13 +198,16 @@ const AllergyTableRow = ({
               <SelectValue placeholder={t("verify")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(ALLERGY_VERIFICATION_STATUS).map(
-                ([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ),
-              )}
+              {(allergy.id
+                ? Object.entries(ALLERGY_VERIFICATION_STATUS)
+                : Object.entries(ALLERGY_VERIFICATION_STATUS).filter(
+                    ([key, _]) => key !== "entered_in_error",
+                  )
+              ).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </TableCell>

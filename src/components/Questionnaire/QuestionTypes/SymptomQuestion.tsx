@@ -169,10 +169,12 @@ function SeveritySelect({
 function VerificationStatusSelect({
   status,
   onValueChange,
+  isRecordNew,
   disabled,
 }: {
   status: string;
   onValueChange: (value: string) => void;
+  isRecordNew: boolean;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -182,7 +184,12 @@ function VerificationStatusSelect({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {SYMPTOM_VERIFICATION_STATUS.map((status) => (
+        {(isRecordNew
+          ? SYMPTOM_VERIFICATION_STATUS.filter(
+              (val) => val !== "entered_in_error",
+            )
+          : SYMPTOM_VERIFICATION_STATUS
+        ).map((status) => (
           <SelectItem key={status} value={status}>
             {t(status)}
           </SelectItem>
@@ -398,6 +405,7 @@ const SymptomRow = React.memo(function SymptomRow({
             status={symptom.verification_status}
             onValueChange={handleVerificationStatusChange}
             disabled={disabled}
+            isRecordNew={!symptom.id}
           />
         </div>
         <div>
@@ -539,6 +547,7 @@ const SymptomRow = React.memo(function SymptomRow({
                     status={symptom.verification_status}
                     onValueChange={handleVerificationStatusChange}
                     disabled={disabled}
+                    isRecordNew={!symptom.id}
                   />
                 </div>
                 <div>
@@ -596,6 +605,7 @@ const SymptomRow = React.memo(function SymptomRow({
             status={symptom.verification_status}
             onValueChange={handleVerificationStatusChange}
             disabled={disabled}
+            isRecordNew={!symptom.id}
           />
         </TableCell>
         <TableCell className="text-center">

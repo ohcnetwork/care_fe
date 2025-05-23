@@ -148,10 +148,12 @@ function ClinicalStatusSelect({
 function VerificationStatusSelect({
   status,
   onValueChange,
+  isRecordNew,
   disabled,
 }: {
   status: string;
   onValueChange: (value: string) => void;
+  isRecordNew: boolean;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -167,7 +169,12 @@ function VerificationStatusSelect({
         />
       </SelectTrigger>
       <SelectContent>
-        {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
+        {(isRecordNew
+          ? DIAGNOSIS_VERIFICATION_STATUS.filter(
+              (val) => val !== "entered_in_error",
+            )
+          : DIAGNOSIS_VERIFICATION_STATUS
+        ).map((status) => (
           <SelectItem key={status} value={status} className="capitalize">
             {t(status)}
           </SelectItem>
@@ -246,6 +253,7 @@ function DiagnosisDetailsForm({
                 value as DiagnosisRequest["verification_status"],
             })
           }
+          isRecordNew={!diagnosis.id}
           disabled={disabled}
         />
       </div>
@@ -722,6 +730,7 @@ const DiagnosisTableRow = ({
                   value as DiagnosisRequest["verification_status"],
               })
             }
+            isRecordNew={!diagnosis.id}
             disabled={disabled}
           />
         </TableCell>
