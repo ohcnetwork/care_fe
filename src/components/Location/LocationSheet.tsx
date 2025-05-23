@@ -929,8 +929,8 @@ export function LocationSheet({
             <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
             <AlertDialogDescription>
               {locationStatus === "active"
-                ? t("are_you_sure_mark_as_error")
-                : t("are_you_sure_cancel_plan")}
+                ? t("are_you_sure_mark_as_error_active_bed")
+                : t("are_you_sure_cancel_planned_bed")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
