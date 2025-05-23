@@ -40,7 +40,7 @@ export const relativeDate = (date: DateLike, withoutSuffix = false) => {
 };
 
 export const formatName = (
-  user: {
+  user?: {
     first_name: string;
     last_name: string;
     prefix?: string | null;
@@ -49,6 +49,7 @@ export const formatName = (
   },
   hidePrefixSuffix: boolean = false,
 ) => {
+  if (!user) return "-";
   return (
     [
       hidePrefixSuffix ? undefined : user.prefix,
