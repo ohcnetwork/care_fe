@@ -110,7 +110,6 @@ export default function FacilityOrganizationSelector(
     }
     setCurrentSelection(org);
     setFacilityOrgSearch("");
-    return;
   };
 
   const handleConfirmSelection = (org: FacilityOrganization) => {
@@ -277,18 +276,16 @@ export default function FacilityOrganizationSelector(
               </span>
             </div>
             {alreadySelected && !currentSelection.has_children && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 gap-2"
-                  disabled={alreadySelected}
-                  data-cy="confirm-organization"
-                >
-                  <span>{t("already_selected")}</span>
-                  <CareIcon icon="l-multiply" className="h-4 w-4" />
-                </Button>
-              </>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-2"
+                disabled={alreadySelected}
+                data-cy="confirm-organization"
+              >
+                <span>{t("already_selected")}</span>
+                <CareIcon icon="l-multiply" className="h-4 w-4" />
+              </Button>
             )}
             {currentSelection.has_children && (
               <Button
