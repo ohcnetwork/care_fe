@@ -8,8 +8,6 @@ import {
   Stethoscope,
 } from "lucide-react";
 
-import { IconName } from "@/CAREUI/icons/CareIcon";
-
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { Patient } from "@/types/emr/patient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
@@ -37,6 +35,15 @@ export const ENCOUNTER_CLASS = [
   "emer",
   "vr",
   "hh",
+] as const;
+
+export const ENCOUNTER_CLASSES = [
+  { id: "imp", name: "Inpatient", icon: "l-bed" },
+  { id: "amb", name: "Ambulatory", icon: "l-ambulance" },
+  { id: "obsenc", name: "Observation", icon: "l-stethoscope" },
+  { id: "emer", name: "Emergency", icon: "l-building" },
+  { id: "vr", name: "Virtual", icon: "l-monitor" },
+  { id: "hh", name: "Home Health", icon: "l-home" },
 ] as const;
 
 export const ENCOUNTER_DIET_PREFERENCE = [
@@ -80,17 +87,19 @@ export const ENCOUNTER_PRIORITY = [
   "use_as_directed",
 ] as const;
 
-export const ENCOUNTER_STATUS = [
-  "planned",
-  "in_progress",
-  "on_hold",
-  "discharged",
-  "completed",
-  "cancelled",
-  "discontinued",
-  "entered_in_error",
-  "unknown",
+export const ENCOUNTER_STATUSES = [
+  { id: "planned", icon: "l-calender" },
+  { id: "in_progress", icon: "l-spinner" },
+  { id: "on_hold" },
+  { id: "discharged", icon: "l-home" },
+  { id: "completed", icon: "l-check" },
+  { id: "cancelled", icon: "l-x" },
+  { id: "discontinued" },
+  { id: "entered_in_error" },
+  { id: "unknown" },
 ] as const;
+
+export const ENCOUNTER_STATUS = ENCOUNTER_STATUSES.map((status) => status.id);
 
 export const ENCOUNTER_CLASSES_ICONS = {
   imp: BedDouble,
@@ -101,29 +110,21 @@ export const ENCOUNTER_CLASSES_ICONS = {
   hh: Home,
 } as const satisfies Record<EncounterClass, LucideIcon>;
 
-export const ENCOUNTER_STATUS_ICONS = {
-  planned: "l-calender",
-  in_progress: "l-spinner",
-  discharged: "l-home",
-  completed: "l-check",
-  cancelled: "l-x",
-} as const satisfies Partial<Record<EncounterStatus, IconName>>;
-
-export const PRIORITY_EMOJI: Record<EncounterPriority, string> = {
-  stat: "🔴",
-  ASAP: "🟡",
-  emergency: "🔴",
-  urgent: "🟠",
-  routine: "⚪️",
-  elective: "🟤",
-  rush_reporting: "🟤",
-  timing_critical: "🟡",
-  callback_results: "🔵",
-  callback_for_scheduling: "🟣",
-  preop: "🟠",
-  as_needed: "⚫️",
-  use_as_directed: "🔵",
-};
+export const ENCOUNTER_PRIORITIES = [
+  { id: "stat", emote: "🔴" },
+  { id: "ASAP", emote: "🟡" },
+  { id: "emergency", emote: "🔴" },
+  { id: "urgent", emote: "🟠" },
+  { id: "routine", emote: "⚪️" },
+  { id: "elective", emote: "🟤" },
+  { id: "rush_reporting", emote: "🟤" },
+  { id: "timing_critical", emote: "🟡" },
+  { id: "callback_results", emote: "🔵" },
+  { id: "callback_for_scheduling", emote: "🟣" },
+  { id: "preop", emote: "🟠" },
+  { id: "as_needed", emote: "⚫️" },
+  { id: "use_as_directed", emote: "🔵" },
+] as const satisfies { id: EncounterPriority; emote: string }[];
 
 export type EncounterAdmitSources = (typeof ENCOUNTER_ADMIT_SOURCE)[number];
 

@@ -50,7 +50,7 @@ import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS,
-  ENCOUNTER_CLASSES_ICONS,
+  ENCOUNTER_CLASSES,
   ENCOUNTER_PRIORITY,
   Encounter,
   EncounterClass,
@@ -231,28 +231,27 @@ export default function CreateEncounterForm({
                 <FormItem className="space-y-3">
                   <FormLabel>{t("type_of_encounter")}</FormLabel>
                   <div className="grid grid-cols-2 gap-3">
-                    {ENCOUNTER_CLASS.map((value) => {
-                      const Icon = ENCOUNTER_CLASSES_ICONS[value];
+                    {ENCOUNTER_CLASSES.map((value) => {
                       return (
                         <Button
-                          key={value}
+                          key={value.id}
                           type="button"
-                          data-cy={`encounter-type-${value}`}
+                          data-cy={`encounter-type-${value.id}`}
                           className={cn(
                             "h-24 w-full justify-start text-lg",
-                            field.value === value &&
+                            field.value === value.id &&
                               "ring-2 ring-primary text-primary",
                           )}
                           variant="outline"
-                          onClick={() => field.onChange(value)}
+                          onClick={() => field.onChange(value.id)}
                         >
                           <div className="flex flex-col items-center text-center">
-                            <Icon className="size-6" />
+                            <CareIcon icon={value.icon} className="size-6" />
                             <div className="text-sm font-bold">
-                              {t(`encounter_class__${value}`)}
+                              {t(`encounter_class__${value.id}`)}
                             </div>
                             <div className="text-wrap text-center text-xs text-gray-500">
-                              {t(`encounter_class_description__${value}`)}
+                              {t(`encounter_class_description__${value.id}`)}
                             </div>
                           </div>
                         </Button>

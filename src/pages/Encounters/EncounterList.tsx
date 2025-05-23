@@ -35,15 +35,11 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
-  ENCOUNTER_CLASS,
-  ENCOUNTER_CLASSES_ICONS,
-  ENCOUNTER_PRIORITY,
-  ENCOUNTER_STATUS,
-  ENCOUNTER_STATUS_ICONS,
+  ENCOUNTER_CLASSES,
+  ENCOUNTER_PRIORITIES,
+  ENCOUNTER_STATUSES,
   Encounter,
   EncounterPriority,
-  EncounterStatus,
-  PRIORITY_EMOJI,
 } from "@/types/emr/encounter";
 
 interface EncounterListProps {
@@ -270,11 +266,11 @@ export function EncounterList({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t("all_priorities")}</SelectItem>
-                    {Object.entries(ENCOUNTER_PRIORITY).map(([, value]) => (
-                      <SelectItem key={value} value={value}>
+                    {ENCOUNTER_PRIORITIES.map((priority) => (
+                      <SelectItem key={priority.id} value={priority.id}>
                         <div className="flex items-center">
-                          <span className="mr-2">{PRIORITY_EMOJI[value]}</span>
-                          {t(`encounter_priority__${value}`)}
+                          <span className="mr-2">{priority.emote}</span>
+                          {t(`encounter_priority__${priority.id}`)}
                         </div>
                       </SelectItem>
                     ))}
@@ -297,19 +293,16 @@ export function EncounterList({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">{t("all_status")}</SelectItem>
-                      {ENCOUNTER_STATUS.filter(
-                        (
-                          status,
-                        ): status is keyof typeof ENCOUNTER_STATUS_ICONS =>
-                          status in ENCOUNTER_STATUS_ICONS,
-                      ).map((status) => (
-                        <SelectItem value={status} key={status}>
+                      {ENCOUNTER_STATUSES.filter(
+                        (status) => "icon" in status,
+                      ).map((status: { id: string; icon: IconName }) => (
+                        <SelectItem value={status.id} key={status.id}>
                           <div className="flex items-center">
                             <CareIcon
-                              icon={ENCOUNTER_STATUS_ICONS[status]}
+                              icon={status.icon as IconName}
                               className="mr-2 size-4"
                             />
-                            {t(`encounter_status__${status}`)}
+                            {t(`encounter_status__${status.id}`)}
                           </div>
                         </SelectItem>
                       ))}
@@ -334,13 +327,15 @@ export function EncounterList({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">{t("all_types")}</SelectItem>
-                      {Object.values(ENCOUNTER_CLASS).map((cls) => {
-                        const Icon = ENCOUNTER_CLASSES_ICONS[cls];
+                      {ENCOUNTER_CLASSES.map((cls) => {
                         return (
-                          <SelectItem value={cls} key={cls}>
+                          <SelectItem value={cls.id} key={cls.id}>
                             <div className="flex items-center">
-                              <Icon className="mr-2 size-4" />
-                              {t(`encounter_class__${cls}`)}
+                              <CareIcon
+                                icon={cls.icon}
+                                className="mr-2 size-4"
+                              />
+                              {t(`encounter_class__${cls.id}`)}
                             </div>
                           </SelectItem>
                         );
@@ -367,36 +362,28 @@ export function EncounterList({
                       >
                         {t("all_status")}
                       </TabsTrigger>
-                      {ENCOUNTER_STATUS.filter(
-                        (
-                          status,
-                        ): status is keyof typeof ENCOUNTER_STATUS_ICONS =>
-                          status in ENCOUNTER_STATUS_ICONS,
+
+                      {ENCOUNTER_STATUSES.filter(
+                        (status) => "icon" in status,
                       ).map((status) => (
                         <TabsTrigger
-                          key={status}
-                          value={status}
-                          data-cy={`${status}-filter`}
+                          key={status.id}
+                          value={status.id}
+                          data-cy={`${status.id}-filter`}
                           className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                           onClick={() =>
                             updateQuery({
                               encounter_class: encounterClass,
                               priority,
-                              status,
+                              status: status.id,
                             })
                           }
                         >
                           <CareIcon
-                            icon={
-                              (
-                                ENCOUNTER_STATUS_ICONS as Partial<
-                                  Record<EncounterStatus, IconName>
-                                >
-                              )[status] || "l-circle"
-                            }
+                            icon={status.icon as IconName}
                             className="size-4"
                           />
-                          {t(`encounter_status__${status}`)}
+                          {t(`encounter_status__${status.id}`)}
                         </TabsTrigger>
                       ))}
                     </div>
@@ -425,25 +412,23 @@ export function EncounterList({
                     >
                       {t("all_types")}
                     </TabsTrigger>
-                    {Object.entries(ENCOUNTER_CLASSES_ICONS).map(
-                      ([key, Icon]) => (
-                        <TabsTrigger
-                          key={key}
-                          value={key}
-                          className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                          onClick={() =>
-                            updateQuery({
-                              status,
-                              priority,
-                              encounter_class: key,
-                            })
-                          }
-                        >
-                          <Icon className="size-4 mr-1" />
-                          {t(`encounter_class__${key}`)}
-                        </TabsTrigger>
-                      ),
-                    )}
+                    {ENCOUNTER_CLASSES.map((cls) => (
+                      <TabsTrigger
+                        key={cls.id}
+                        value={cls.id}
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            status,
+                            priority,
+                            encounter_class: cls.id,
+                          })
+                        }
+                      >
+                        <CareIcon icon={cls.icon} className="size-4 mr-1" />
+                        {t(`encounter_class__${cls.id}`)}
+                      </TabsTrigger>
+                    ))}
                   </div>
                 </TabsList>
               </Tabs>
