@@ -553,4 +553,11 @@ const routes = {
   },
 } as const;
 
+export const offlineRoutes = {
+  addPatient: routes.addPatient,
+  updatePatient: routes.updatePatient,
+} as const;
+
+export type OfflineRouteKey = keyof typeof offlineRoutes;
+
 export default routes;

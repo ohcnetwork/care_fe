@@ -24,6 +24,7 @@ import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { PermissionProvider } from "@/context/PermissionContext";
+import { useSyncOfflineWrites } from "@/offlinesupport/useofflinesyncfn";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
@@ -76,7 +77,7 @@ const AdminRouter: AppRoutes = {
 export default function AppRouter() {
   const pluginRoutes = usePluginRoutes();
   let routes = Routes;
-
+  useSyncOfflineWrites();
   useRedirect("/user", "/users");
 
   // Merge in Plugin Routes

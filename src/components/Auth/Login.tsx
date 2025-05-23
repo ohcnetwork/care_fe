@@ -43,6 +43,7 @@ import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
+import { OfflineToggleButton } from "@/offlinesupport/offlinetogglebutton";
 import { TokenData } from "@/types/auth/otp";
 
 import { AuthHero } from "./AuthHero";
@@ -357,8 +358,9 @@ const Login = (props: LoginProps) => {
             </div>
             <Card className="mx-4">
               <CardHeader className="space-y-1 px-4">
-                <CardTitle className="text-2xl font-bold">
-                  Welcome back
+                <CardTitle className=" flex flex-col text-2xl font-bold">
+                  <p className="text-2xl font-bold">Welcome back</p>
+                  {OfflineToggleButton()}
                 </CardTitle>
                 <CardDescription>
                   Choose your login method to continue

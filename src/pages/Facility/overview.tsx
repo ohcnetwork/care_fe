@@ -19,6 +19,7 @@ import { getPermissions } from "@/common/Permissions";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { useNetworkStatus } from "@/offlinesupport/useNetworkstatus";
 
 interface FacilityOverviewProps {
   facilityId: string;
@@ -28,12 +29,14 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
   const { hasPermission } = usePermissions();
+  const { isOnline } = useNetworkStatus();
 
   const { data: facilityData } = useQuery({
-    queryKey: ["facility", facilityId],
+    queryKey: ["facility", facilityId, user.external_id],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId },
     }),
+    enabled: isOnline,
   });
 
   const { canViewSchedule, canListEncounters } = getPermissions(

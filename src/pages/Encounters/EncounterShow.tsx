@@ -11,6 +11,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
 import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
@@ -19,6 +20,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { useNetworkStatus } from "@/offlinesupport/useNetworkstatus";
 import { EncounterConsentsTab } from "@/pages/Encounters/tabs/EncounterConsentsTab";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
@@ -95,13 +97,14 @@ export const EncounterShow = (props: Props) => {
   });
 
   const facilityId = facilityIdFromProps ?? encounterData?.facility.id;
-
+  const user = useAuthUser();
+  const { isOnline } = useNetworkStatus();
   const { data: facilityData } = useQuery({
-    queryKey: ["facility", facilityId],
+    queryKey: ["facility", facilityId, user.external_id],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId ?? "" },
     }),
-    enabled: !!facilityId,
+    enabled: !!facilityId && isOnline,
   });
 
   const { canViewEncounter } = getPermissions(

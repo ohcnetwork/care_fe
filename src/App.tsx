@@ -1,10 +1,6 @@
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Suspense, useEffect } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -21,8 +17,10 @@ import { handleHttpError } from "@/Utils/request/errorHandler";
 import { HTTPError } from "@/Utils/request/types";
 
 import { PubSubProvider } from "./Utils/pubsubContext";
+import { NetworkStatusProvider } from "./offlinesupport/Offlinestatusprovider";
+import { createUserPersister } from "./offlinesupport/dexiepersister";
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error) => {
@@ -36,6 +34,7 @@ const queryClient = new QueryClient({
         return false;
       },
       refetchOnWindowFocus: false,
+      gcTime: 2000 * 60 * 60 * 24 * 7, // 48 hr
     },
   },
   queryCache: new QueryCache({
@@ -53,17 +52,25 @@ const App = () => {
 
   return (
     <>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister: createUserPersister(),
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 24 hr cache
+        }}
+      >
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
             <PluginEngine>
               <HistoryAPIProvider>
-                <AuthUserProvider
-                  unauthorized={<Routers.PublicRouter />}
-                  otpAuthorized={<Routers.PatientRouter />}
-                >
-                  <Routers.AppRouter />
-                </AuthUserProvider>
+                <NetworkStatusProvider>
+                  <AuthUserProvider
+                    unauthorized={<Routers.PublicRouter />}
+                    otpAuthorized={<Routers.PatientRouter />}
+                  >
+                    <Routers.AppRouter />
+                  </AuthUserProvider>
+                </NetworkStatusProvider>
               </HistoryAPIProvider>
               <Toaster
                 position="top-right"
@@ -80,7 +87,7 @@ const App = () => {
 
         {/* Devtools are not included in production builds by default */}
         <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
       <Integrations.Sentry disabled={!import.meta.env.PROD} />
     </>
   );

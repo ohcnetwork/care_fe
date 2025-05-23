@@ -21,6 +21,7 @@ import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { formatName } from "@/Utils/utils";
+import { OfflineToggleButton } from "@/offlinesupport/offlinetogglebutton";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
 
 enum DashboardTabs {
@@ -86,6 +87,7 @@ export default function UserDashboard() {
                 day: "numeric",
               })}
             </p>
+            {OfflineToggleButton()}
           </div>
         </div>
         <div className="flex gap-2">

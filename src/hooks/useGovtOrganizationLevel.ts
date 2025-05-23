@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FilterState } from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { useNetworkStatus } from "@/offlinesupport/useNetworkstatus";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -26,7 +27,7 @@ export function useGovtOrganizationLevel({
   authToken,
 }: UseGovtOrganizationLevelProps) {
   const [searchQuery, setSearchQuery] = useState("");
-
+  const { isOnline } = useNetworkStatus();
   const headers = authToken
     ? {
         headers: {
@@ -46,6 +47,7 @@ export function useGovtOrganizationLevel({
       },
       ...headers,
     }),
+    enabled: isOnline,
   });
 
   const handleChange = (value: string) => {

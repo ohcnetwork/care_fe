@@ -15,6 +15,8 @@ import {
   patientTabs as tabs,
 } from "@/components/Patient/PatientDetailsTab";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
 import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -22,6 +24,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge, relativeTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { useNetworkStatus } from "@/offlinesupport/useNetworkstatus";
 import { Patient } from "@/types/emr/newPatient";
 
 export const PatientHome = (props: {
@@ -30,18 +33,18 @@ export const PatientHome = (props: {
   page: (typeof tabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
-
+  const { isOnline } = useNetworkStatus();
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-
+  const user = useAuthUser();
   const { data: patientData, isLoading } = useQuery<Patient>({
-    queryKey: ["patient", id],
+    queryKey: ["patient", id, user.external_id],
     queryFn: query(routes.patient.getPatient, {
       pathParams: {
         id,
       },
     }),
-    enabled: !!id,
+    enabled: !!id && isOnline,
   });
 
   const { getPatientTabs } = getTabs(

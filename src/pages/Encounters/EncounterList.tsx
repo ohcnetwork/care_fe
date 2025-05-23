@@ -34,6 +34,7 @@ import useFilters from "@/hooks/useFilters";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { useNetworkStatus } from "@/offlinesupport/useNetworkstatus";
 import { Encounter, EncounterPriority } from "@/types/emr/encounter";
 
 interface EncounterListProps {
@@ -87,6 +88,8 @@ export function EncounterList({
     limit: 15,
     cacheBlacklist: ["name", "encounter_id", "external_identifier"],
   });
+
+  const { isOnline } = useNetworkStatus();
   const {
     status,
     encounter_class: encounterClass,
@@ -133,7 +136,7 @@ export function EncounterList({
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
-    enabled: !propEncounters && !encounter_id,
+    enabled: !propEncounters && !encounter_id && isOnline,
   });
 
   const { data: queryEncounter } = useQuery<Encounter>({
@@ -144,7 +147,7 @@ export function EncounterList({
         facility: facilityId,
       },
     }),
-    enabled: !!encounter_id,
+    enabled: !!encounter_id && isOnline,
   });
   const searchOptions = [
     {

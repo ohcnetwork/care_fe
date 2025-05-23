@@ -26,28 +26,46 @@ import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { EncounterCard } from "@/components/Facility/EncounterCard";
 
 import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
+import { queryClient } from "@/App";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { useNetworkStatus } from "@/offlinesupport/useNetworkstatus";
 import { Encounter } from "@/types/emr/encounter";
 
+interface SearchPatientParams {
+  phone_number: string;
+  year_of_birth: string;
+  partial_id: string;
+}
+interface Patient {
+  id: string;
+  name: string;
+  gender: string;
+  blood_group?: string;
+}
 export default function VerifyPatient(props: { facilityId: string }) {
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
   const { phone_number, year_of_birth, partial_id } = qParams;
   const { goBack } = useAppHistory();
   const { hasPermission } = usePermissions();
-
+  const user = useAuthUser();
+  const { isOnline } = useNetworkStatus();
+  const { getSearchKey } = useNetworkStatus();
   const { data: facilityData, isLoading: facilityLoading } = useQuery({
-    queryKey: ["facility", props.facilityId],
+    queryKey: ["facility", props.facilityId, user.external_id],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: props.facilityId },
     }),
+    enabled: isOnline,
   });
 
   const { canCreateAppointment, canCreateEncounter, canListEncounters } =
@@ -58,8 +76,38 @@ export default function VerifyPatient(props: { facilityId: string }) {
     data: patientData,
     isPending: isVerifyingPatient,
     isError,
-  } = useMutation({
-    mutationFn: mutate(routes.patient.search_retrieve),
+  } = useMutation<Patient, HTTPError, SearchPatientParams>({
+    mutationFn: async (variables) => {
+      console.log("mutationFn called", { variables, isOnline });
+
+      const key = getSearchKey(variables);
+
+      if (!isOnline) {
+        const cachedData = queryClient.getQueryData<Patient>(key);
+        console.log("Offline: cachedData", cachedData);
+
+        if (cachedData) {
+          console.log("Returning cached data");
+          return cachedData;
+        }
+
+        console.log("No cached data, throwing error");
+        throw new HTTPError({
+          message: "You are offline and no cached data is available.",
+          status: 503,
+          silent: false,
+          cause: { offline: true },
+        });
+      }
+
+      console.log("Online: calling network API");
+      const apiCall = mutate(routes.patient.search_retrieve);
+      return apiCall(variables);
+    },
+    onSuccess: (data, variables) => {
+      const key = getSearchKey(variables);
+      queryClient.setQueryData(key, data);
+    },
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string[] } };
       errorData.errors.msg.forEach((er) => {
@@ -69,7 +117,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
   });
 
   const { data: encounters, isLoading: encounterLoading } = useQuery({
-    queryKey: ["encounters", patientData?.id],
+    queryKey: ["encounters", patientData?.id, user.external_id],
     queryFn: query(routes.encounter.list, {
       queryParams: {
         patient: patientData?.id,
@@ -77,7 +125,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
       },
       silent: true,
     }),
-    enabled: !!patientData?.id && canListEncounters,
+    enabled: !!patientData?.id && canListEncounters && isOnline,
   });
 
   useEffect(() => {

@@ -6,11 +6,14 @@ import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { UserFacilityModel } from "@/components/Users/models";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
 import { getPermissions } from "@/common/Permissions";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { useNetworkStatus } from "@/offlinesupport/useNetworkstatus";
 
 export interface NavigationLink {
   name: string;
@@ -106,13 +109,14 @@ function generateFacilityLinks(
 export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-
+  const user = useAuthUser();
+  const { isOnline } = useNetworkStatus();
   const { data: facilityData } = useQuery({
-    queryKey: ["facility", selectedFacility?.id],
+    queryKey: ["facility", selectedFacility?.id, user.external_id],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: selectedFacility?.id ?? "" },
     }),
-    enabled: !!selectedFacility?.id,
+    enabled: !!selectedFacility?.id && isOnline,
   });
 
   const {

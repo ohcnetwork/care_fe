@@ -43,6 +43,7 @@ import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
 
 import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import { BLOOD_GROUP_CHOICES, GENDER_TYPES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
@@ -55,6 +56,8 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
+import { saveOfflineWrite } from "@/offlinesupport/saveofflinewites";
+import { useNetworkStatus } from "@/offlinesupport/useNetworkstatus";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
@@ -81,6 +84,8 @@ export default function PatientRegistration(
     useState(!!patientId);
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [isDeceased, setIsDeceased] = useState(false);
+  const user = useAuthUser();
+  const { isOnline } = useNetworkStatus();
 
   const formSchema = useMemo(
     () =>
@@ -224,7 +229,7 @@ export default function PatientRegistration(
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (patientId) {
-      updatePatient({
+      const updateData = {
         ...values,
         ward_old: undefined,
         age: values.age_or_dob === "age" ? values.age : undefined,
@@ -236,12 +241,28 @@ export default function PatientRegistration(
         permanent_address: values.same_address
           ? values.address
           : values.permanent_address,
-      });
+      };
+      if (!isOnline) {
+        console.log("Saving offline", patientQuery);
+        saveOfflineWrite({
+          userId: user.external_id,
+          syncrouteKey: "updatePatient",
+          resourceType: "patient",
+          payload: updateData,
+          pathParams: { id: patientId },
+          queryParams: { id: patientId },
+          queryrouteKey: "getPatient",
+          serverTimestamp: patientQuery.data?.modified_date,
+        });
+        toast.success("patient saved offline");
+        return;
+      }
+      updatePatient(updateData);
       return;
     }
 
     if (facilityId) {
-      createPatient({
+      const createdata = {
         ...values,
         emergency_phone_number: values.same_phone_number
           ? values.phone_number
@@ -251,7 +272,19 @@ export default function PatientRegistration(
           : values.permanent_address,
         facility: facilityId,
         ward_old: undefined,
-      });
+      };
+      if (!isOnline) {
+        saveOfflineWrite({
+          userId: user.external_id,
+          syncrouteKey: "addPatient",
+          payload: createdata,
+          resourceType: "patient",
+        });
+        toast.success("patient saved offline");
+        return;
+      }
+      createPatient(createdata);
+      return;
     }
   }
 
@@ -284,7 +317,7 @@ export default function PatientRegistration(
         phone_number: phoneNumber,
       },
     }),
-    enabled: isValidPhoneNumber(phoneNumber),
+    enabled: isValidPhoneNumber(phoneNumber) && isOnline,
   });
 
   const duplicatePatients = useMemo(() => {
@@ -292,11 +325,11 @@ export default function PatientRegistration(
   }, [patientPhoneSearch.data, patientId]);
 
   const patientQuery = useQuery({
-    queryKey: ["patient", patientId],
+    queryKey: ["patient", patientId, user.external_id],
     queryFn: query(routes.getPatient, {
       pathParams: { id: patientId || "" },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && isOnline,
   });
 
   useEffect(() => {

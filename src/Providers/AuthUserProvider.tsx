@@ -1,10 +1,11 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 
 import Loading from "@/components/Common/Loading";
+import { AuthUserModel } from "@/components/Users/models";
 
 import { AuthUserContext } from "@/hooks/useAuthUser";
 
@@ -18,6 +19,7 @@ import routes, {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
+import { useNetworkStatus } from "@/offlinesupport/useNetworkstatus";
 import authApi from "@/types/auth/authApi";
 import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
 
@@ -42,10 +44,12 @@ export default function AuthUserProvider({
   unauthorized,
   otpAuthorized,
 }: Props) {
+  const { isOnline } = useNetworkStatus();
   const queryClient = useQueryClient();
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
   );
+
   const [patientToken, setPatientToken] = useState<TokenData | null>(
     JSON.parse(
       localStorage.getItem(LocalStorageKeys.patientTokenKey) || "null",
@@ -56,13 +60,42 @@ export default function AuthUserProvider({
     queryKey: ["currentUser", accessToken],
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
-    enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
+    enabled: !!localStorage.getItem(LocalStorageKeys.accessToken) && isOnline,
   });
 
   const setUser = useSetAtom(userAtom);
+  const globalUser = useAtomValue(userAtom);
+
+  const { data: offlineuser } = useQuery<AuthUserModel>({
+    queryKey: ["offlineUser"],
+    enabled: false,
+  });
+
   useEffect(() => {
-    setUser(user);
-  }, [user, setUser]);
+    queryClient.setQueryData(["offlineUser"], user);
+  }, [user]);
+
+  useEffect(() => {
+    console.log(" online , user , offlineuser ", isOnline, user, offlineuser);
+    if (isOnline) {
+      if (user) {
+        setUser(user);
+        console.log("User from online ", user);
+      }
+    } else {
+      console.log(" online , user , offlineuser ", isOnline, user, offlineuser);
+      if (offlineuser && localStorage.getItem(LocalStorageKeys.accessToken)) {
+        setUser(offlineuser);
+        console.log(
+          "User from local storage",
+          offlineuser,
+          "accessToken",
+          localStorage.getItem(LocalStorageKeys.accessToken),
+        );
+      }
+    }
+  }, [isOnline, user, offlineuser, setUser]);
+
   const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
 
   const tokenRefreshQuery = useQuery({
@@ -72,7 +105,7 @@ export default function AuthUserProvider({
     }),
     refetchIntervalInBackground: true,
     refetchInterval: careConfig.auth.tokenRefreshInterval,
-    enabled: !!refreshToken && !!user,
+    enabled: !!refreshToken && !!user && isOnline,
   });
 
   useEffect(() => {
@@ -158,6 +191,7 @@ export default function AuthUserProvider({
     setAccessToken(null);
     setPatientToken(null);
 
+    setUser(undefined);
     await queryClient.resetQueries({ queryKey: ["currentUser"] });
 
     const redirectURL = getRedirectURL();
@@ -199,12 +233,16 @@ export default function AuthUserProvider({
         verifyMFA,
         isAuthenticating,
         isVerifyingMFA,
-        user,
+        user: globalUser,
         patientLogin,
         patientToken,
       }}
     >
-      {user ? children : patientToken?.token ? otpAuthorized : unauthorized}
+      {globalUser
+        ? children
+        : patientToken?.token
+          ? otpAuthorized
+          : unauthorized}
     </AuthUserContext.Provider>
   );
 }

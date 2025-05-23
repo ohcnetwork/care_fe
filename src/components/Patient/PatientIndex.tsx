@@ -35,12 +35,15 @@ import {
 import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { useNetworkStatus } from "@/offlinesupport/useNetworkstatus";
 import { PartialPatientModel } from "@/types/emr/newPatient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
@@ -52,12 +55,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
+  const user = useAuthUser();
+  const { isOnline } = useNetworkStatus();
 
   const { data: facilityData } = useQuery({
-    queryKey: ["facility", facilityId],
+    queryKey: ["facility", facilityId, user.external_id],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId },
     }),
+    enabled: isOnline,
   });
 
   const { canCreatePatient } = getPermissions(
@@ -125,7 +131,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         phone_number: phoneNumber,
       },
     }),
-    enabled: !!isValidPhoneNumber(phoneNumber),
+    enabled: !!isValidPhoneNumber(phoneNumber) && isOnline,
   });
 
   const handlePatientSelect = (patient: PartialPatientModel) => {
