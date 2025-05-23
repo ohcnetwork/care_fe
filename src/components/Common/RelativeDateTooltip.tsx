@@ -34,8 +34,8 @@ export default function RelativeDateTooltip({
   );
 
   const tooltipContent = hasTime
-    ? format(dateObj, "PPp")
-    : format(dateObj, "PP");
+    ? format(dateObj, "PPp zzz")
+    : format(dateObj, "PP zzz");
 
   const datetimeAttr = dateObj.toISOString();
 
