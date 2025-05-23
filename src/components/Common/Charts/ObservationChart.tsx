@@ -254,7 +254,7 @@ export const ObservationVisualizer = ({
                   <Info className="h-4 w-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
                 </PopoverTrigger>
                 <PopoverContent
-                  className="max-w-[300px] w-[calc(100vw-2rem)] sm:max-w-[300px] sm:w-auto"
+                  className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
                   side="bottom"
                   align="start"
                   sideOffset={4}
