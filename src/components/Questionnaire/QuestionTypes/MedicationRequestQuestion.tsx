@@ -795,7 +795,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     if (!currentInstructions.some((item) => item.code === instruction.code)) {
       updateInstructions([...currentInstructions, instruction]);
     } else {
-      toast.error(`${instruction.display} ${t("is_already_selected")}`);
+      toast.warning(`${instruction.display} ${t("is_already_selected")}`);
     }
   };
 
