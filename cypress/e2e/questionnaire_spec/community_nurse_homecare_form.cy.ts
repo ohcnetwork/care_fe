@@ -15,7 +15,6 @@ const MEDICINE_NAME = getRandomMedicineName();
 const ENCOUNTER_TYPE = "Observation";
 const ENCOUNTER_STATUS = "In Progress";
 const ENCOUNTER_PRIORITY = "ASAP";
-const ORGANIZATION_NAME = "Administration";
 
 const testData = {
   mandatoryFields: [
@@ -74,11 +73,6 @@ const testData = {
     reasonForVisit: "Follow-up assessment",
     practitioner: PRACTITIONER,
   },
-};
-
-const patientDetail = {
-  name: "Jumanji - Dont Change Name",
-  phone: "87445 82225",
 };
 
 const facilityCreation = new FacilityCreation();
@@ -168,19 +162,39 @@ describe("Community Nurse Homecare Form Tests", () => {
   }
 
   function createNewEncounter() {
-    patientCreation
-      .clickSearchPatients()
-      .searchPatient(patientDetail.phone)
-      .verifySearchResults(patientDetail.name)
-      .selectPatientFromResults(patientDetail.name)
-      .enterYearOfBirth("1999")
-      .clickVerifyButton();
-    patientVerify
-      .clickCreateEncounter()
-      .selectEncounterType(ENCOUNTER_TYPE)
-      .selectEncounterStatus(ENCOUNTER_STATUS)
-      .selectEncounterPriority(ENCOUNTER_PRIORITY)
-      .selectOrganization()
-      .clickSubmitEncounter();
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails()
+      .clickPatientDetailsButton()
+      .clickPatientEditButton()
+      .getPatientPhone()
+      .getPatientName()
+      .getPatientYear();
+
+    cy.get("@patientPhone").then((phoneNumber) => {
+      cy.get("@patientName").then((name) => {
+        cy.get("@patientYear").then((year) => {
+          patientCreation
+            .clickSearchPatients()
+            .searchPatient(String(phoneNumber))
+            .verifySearchResults(String(name))
+            .selectPatientFromResults(String(name))
+            .enterYearOfBirth(String(year))
+            .clickVerifyButton();
+
+          patientVerify
+            .verifyPatientName(String(name))
+            .verifyCreateEncounterButton()
+            .clickCreateEncounter()
+            .selectEncounterType(ENCOUNTER_TYPE)
+            .selectEncounterStatus(ENCOUNTER_STATUS)
+            .selectEncounterPriority(ENCOUNTER_PRIORITY)
+            .selectOrganization()
+            .clickSubmitEncounter()
+            .assertEncounterCreationSuccess();
+        });
+      });
+    });
   }
 });
