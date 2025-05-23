@@ -1,9 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Info, Search, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +25,7 @@ import { formatDosage, formatSig } from "@/components/Medicine/utils";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import {
   ACTIVE_MEDICATION_STATUSES,
@@ -208,23 +211,45 @@ export default function MedicationTimeline({
     disableCache: true,
   });
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["medication", patientId, qParams],
-    queryFn: query.paginated(medicationRequestApi.list, {
-      pathParams: { patientId },
-      pageSize: 100,
-      queryParams: {
-        name: qParams.name,
-        status: qParams.exclude_inactive
-          ? ACTIVE_MEDICATION_STATUSES.join(",")
-          : undefined,
+  // just did it for testing , what should be the limit ?
+  const LIMIT = 2;
+
+  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: [
+        "medication",
+        patientId,
+        qParams.name,
+        qParams.exclude_inactive,
+      ],
+      queryFn: async ({ pageParam = 0 }) => {
+        const response = await query(medicationRequestApi.list, {
+          pathParams: { patientId },
+          queryParams: {
+            name: qParams.name,
+            status: qParams.exclude_inactive
+              ? ACTIVE_MEDICATION_STATUSES.join(",")
+              : undefined,
+            limit: String(LIMIT),
+            offset: String(pageParam),
+            ordering: "-created_date",
+          },
+        })({ signal: new AbortController().signal });
+
+        return response as PaginatedResponse<MedicationRequestRead>;
       },
-    }),
-    enabled: !!patientId,
-  });
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * LIMIT;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+      enabled: !!patientId,
+    });
+
+  const medicationList = data?.pages.flatMap((p) => p.results) || [];
 
   const groupedMedicines = groupByYearAndDate(
-    data?.results,
+    medicationList,
     (m) => m.created_date,
   );
   const sortedYears = Object.keys(groupedMedicines).sort(
@@ -315,6 +340,19 @@ export default function MedicationTimeline({
             })}
           </div>
         </div>
+      )}
+      {hasNextPage && (
+        <Button
+          variant="link"
+          className={cn(
+            "text-md -ml-4 font-extrabold  w-fit",
+            isFetchingNextPage && "pointer-events-none hover:no-underline",
+          )}
+          // Should I go with  disable or is it fine pointer-event-none
+          onClick={() => fetchNextPage()}
+        >
+          {isFetchingNextPage ? t("loading") : t("load_more")}...
+        </Button>
       )}
     </div>
   );

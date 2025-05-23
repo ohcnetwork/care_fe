@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { TFunction } from "i18next";
 import { Info, Search, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +25,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import {
   DIAGNOSIS_CLINICAL_STATUS_STYLES,
@@ -200,23 +203,44 @@ export default function DiagnosisTimeline({
     disableCache: true,
   });
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["diagnosis", patientId, qParams],
-    queryFn: query.paginated(diagnosisApi.listDiagnosis, {
-      pathParams: { patientId },
-      pageSize: 100,
-      queryParams: {
-        name: qParams.name,
-        exclude_verification_status: qParams.exclude_entered_in_error
-          ? "entered_in_error"
-          : undefined,
-      },
-    }),
-    enabled: !!patientId,
-  });
+  // just did it for testing , what should be the limit ?
+  const LIMIT = 2;
 
+  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: [
+        "diagnosis",
+        patientId,
+        qParams.name,
+        qParams.exclude_entered_in_error,
+      ],
+      queryFn: async ({ pageParam = 0 }) => {
+        const response = await query(diagnosisApi.listDiagnosis, {
+          pathParams: { patientId },
+          queryParams: {
+            name: qParams.name,
+            exclude_verification_status: qParams.exclude_entered_in_error
+              ? "entered_in_error"
+              : undefined,
+            limit: String(LIMIT),
+            offset: String(pageParam),
+            ordering: "-created_date",
+          },
+        })({ signal: new AbortController().signal });
+
+        return response as PaginatedResponse<Diagnosis>;
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * LIMIT;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+      enabled: !!patientId,
+    });
+
+  const diagnosisList = data?.pages.flatMap((p) => p.results) || [];
   const groupedDiagnosis = groupByYearAndDate(
-    data?.results,
+    diagnosisList,
     (d) => d.created_date,
   );
   const sortedYears = Object.keys(groupedDiagnosis).sort(
@@ -311,6 +335,18 @@ export default function DiagnosisTimeline({
             })}
           </div>
         </div>
+      )}
+      {hasNextPage && (
+        <Button
+          variant="link"
+          className={cn(
+            "text-md -ml-4 font-extrabold  w-fit",
+            isFetchingNextPage && "pointer-events-none hover:no-underline",
+          )}
+          onClick={() => fetchNextPage()}
+        >
+          {isFetchingNextPage ? t("loading") : t("load_more")}...
+        </Button>
       )}
     </div>
   );
