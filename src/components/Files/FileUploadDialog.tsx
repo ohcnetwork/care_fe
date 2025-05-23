@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -40,6 +42,18 @@ export default function FileUploadDialog({
     onOpenChange(open);
   };
 
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  useEffect(() => {
+    const urls = fileUpload.files
+      .filter((file) => file.type.startsWith("image/"))
+      .map((file) => URL.createObjectURL(file));
+    setPreviewUrls(urls);
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [fileUpload.files]);
+
   return (
     <Dialog
       open={open}
@@ -47,7 +61,7 @@ export default function FileUploadDialog({
       aria-labelledby="file-upload-dialog"
     >
       <DialogContent
-        className="mb-8 rounded-lg p-5 max-w-fit md:max-w-[30rem]"
+        className="mb-8 rounded-lg p-5 max-w-fit md:max-w-[30rem] shadow-lg hover:shadow-xl transition-shadow duration-200"
         aria-describedby="file-upload"
       >
         <DialogHeader>
@@ -113,8 +127,25 @@ export default function FileUploadDialog({
             </>
           ) : (
             fileUpload.files.map((file, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+              <div
+                key={index}
+                className="rounded-lg p-4 shadow-md border-2 border-primary-500 relative"
+              >
+                {fileUpload.files.length > 1 && (
+                  <div
+                    className="absolute top-0 left-0 bg-primary-500 text-white px-3 py-1 text-sm font-bold rounded-tl-lg -mt-px -ml-px"
+                    style={{ zIndex: 1 }}
+                  >
+                    {t("file")} {index + 1}
+                  </div>
+                )}
+
+                <div
+                  className={cn(
+                    "flex items-center justify-between w-full gap-2 rounded-md bg-secondary-200 px-4 py-2 border border-gray-200",
+                    fileUpload.files.length > 1 ? "mb-4 mt-6" : "mb-4",
+                  )}
+                >
                   <span
                     className="flex items-center truncate"
                     title={file.name}
@@ -135,12 +166,24 @@ export default function FileUploadDialog({
                     <CareIcon icon="l-times" />
                   </Button>
                 </div>
-                <div>
+                {file.type.startsWith("image/") && previewUrls[index] && (
+                  <div className="mb-4 w-full max-w-md overflow-hidden rounded-lg border border-gray-300 shadow-md hover:shadow-lg transition-shadow duration-200">
+                    <img
+                      src={previewUrls[index]}
+                      alt="Preview"
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                )}
+
+                <div className="rounded-lg p-4 bg-gray-50 border border-gray-200">
                   <Label
                     htmlFor={`upload-file-name-${index}`}
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-bold text-gray-700 mb-2"
                   >
-                    {t("enter_file_name")}
+                    {fileUpload.files.length > 1
+                      ? `${t("enter_file_name")} ${index + 1}`
+                      : t("enter_file_name")}
                   </Label>
                   <Input
                     name={`file_name_${index}`}
@@ -154,7 +197,7 @@ export default function FileUploadDialog({
                       fileUpload.setFileName(e.target.value, index);
                       fileUpload.setError(null);
                     }}
-                    className="ml-0.5 mb-0.5"
+                    className="border border-gray-300 focus:border-gray-400 rounded-md px-3 py-1.5 w-full"
                   />
                   {fileUpload.error && (
                     <p className="mt-2 text-sm text-red-600">
