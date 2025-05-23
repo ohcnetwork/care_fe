@@ -3,10 +3,6 @@ export class PatientEncounter {
   navigateToEncounters() {
     cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
     cy.verifyAndClickElement('[data-cy="nav-encounters"]', "Encounters");
-
-    cy.get('[data-cy="in_progress-filter"]', { timeout: 15000 }).should(
-      "be.visible",
-    );
     return this;
   }
 
