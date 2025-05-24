@@ -158,9 +158,6 @@ const AvatarEditModal = ({
     setSelectedFile(undefined);
     setIsCameraOpen(false);
     setPreviewImage(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
     onOpenChange(false);
   };
 
@@ -173,8 +170,6 @@ const AvatarEditModal = ({
     return () => URL.revokeObjectURL(objectUrl);
   }, [selectedFile]);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const onSelectFile: ChangeEventHandler<HTMLInputElement> = (e) => {
     if (!e.target.files || e.target.files.length === 0) {
       setSelectedFile(undefined);
@@ -183,9 +178,6 @@ const AvatarEditModal = ({
     const file = e.target.files[0];
     if (!isImageFile(file)) {
       toast.warning(t("please_upload_an_image_file"));
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
       return;
     }
     setSelectedFile(file);
@@ -210,9 +202,6 @@ const AvatarEditModal = ({
           setPreviewImage(null);
           setIsCaptureImgBeingUploaded(false);
           setIsProcessing(false);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-          }
         },
       );
     } finally {
@@ -222,9 +211,6 @@ const AvatarEditModal = ({
       setSelectedFile(undefined);
       setIsCameraOpen(false);
       setPreviewImage(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
     }
   };
 
@@ -379,7 +365,6 @@ const AvatarEditModal = ({
                           accept="image/*"
                           className="hidden"
                           onChange={onSelectFile}
-                          ref={fileInputRef}
                         />
                       </label>
                     </Button>
