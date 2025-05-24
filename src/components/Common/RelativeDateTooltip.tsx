@@ -33,15 +33,11 @@ export default function RelativeDateTooltip({
     dateObj.getSeconds()
   );
 
-  const tooltipContent = hasTime
-    ? format(dateObj, "PPp zzz")
-    : format(dateObj, "PP zzz");
-
-  const datetimeAttr = dateObj.toISOString();
-
   return (
-    <TooltipComponent content={tooltipContent}>
-      <time dateTime={datetimeAttr} className={className}>
+    <TooltipComponent
+      content={hasTime ? format(dateObj, "PPp zzz") : format(dateObj, "PP")}
+    >
+      <time dateTime={dateObj.toISOString()} className={className}>
         {relativeDate(dateObj)}
       </time>
     </TooltipComponent>
