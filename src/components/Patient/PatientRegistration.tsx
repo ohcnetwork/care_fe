@@ -41,6 +41,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import { saveOfflineWrite } from "@/components/offlinessupport/saveofflinewrites";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -57,7 +58,6 @@ import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { saveOfflineWrite } from "@/src/components/offlinessupport/saveofflinewrites";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 

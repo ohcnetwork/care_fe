@@ -77,6 +77,25 @@ export default function AuthUserProvider({
 
   useEffect(() => {
     if (tokenRefreshQuery.isError) {
+      if (!navigator.onLine) {
+        // Offline fallback: try to read the old tokens (optional logging or warning UI here)
+        const cachedAccessToken = localStorage.getItem(
+          LocalStorageKeys.accessToken,
+        );
+        const cachedRefreshToken = localStorage.getItem(
+          LocalStorageKeys.refreshToken,
+        );
+
+        console.warn("Offline. Using cached tokens.", {
+          cachedAccessToken,
+          cachedRefreshToken,
+        });
+
+        // optionally: set these into state or a global store if needed
+        return;
+      }
+
+      // Online and still erroring: clear tokens
       localStorage.removeItem(LocalStorageKeys.accessToken);
       localStorage.removeItem(LocalStorageKeys.refreshToken);
       return;

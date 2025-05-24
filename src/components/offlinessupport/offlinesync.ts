@@ -8,7 +8,7 @@ import { AppCacheDB } from "./dexiepersister";
 export const syncOfflineWrites = async (userId: string) => {
   const db = new AppCacheDB();
   console.log("Syncing offline writes...");
-  console.log("User ID:", userId);
+  console.log("User ID:", userId, navigator.onLine);
   if (!navigator.onLine || !userId) return;
   console.log("User is online. Proceeding with sync...");
   const pendingWrites = await db.offlineWrites

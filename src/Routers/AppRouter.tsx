@@ -10,6 +10,7 @@ import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
+import { useSyncOfflineWrites } from "@/components/offlinessupport/useofflinesyncfn";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { usePluginRoutes } from "@/hooks/useCareApps";
@@ -76,7 +77,7 @@ const AdminRouter: AppRoutes = {
 export default function AppRouter() {
   const pluginRoutes = usePluginRoutes();
   let routes = Routes;
-
+  useSyncOfflineWrites();
   useRedirect("/user", "/users");
 
   // Merge in Plugin Routes
