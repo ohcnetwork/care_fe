@@ -96,7 +96,7 @@ function StatusSelector({
             <Label
               data-cy={`questionnaire-status-${status}`}
               htmlFor={`status-${status}`}
-              className="text-sm font-normal text-gray-950"
+              className="text-sm mx-1 font-normal text-gray-950"
             >
               {t(status)}
             </Label>
@@ -142,7 +142,7 @@ function SubjectTypeSelector({
             />
             <Label
               htmlFor={`subject-type-${type.value}`}
-              className="text-sm font-normal text-gray-950"
+              className="text-sm mx-1 font-normal text-gray-950"
             >
               {t(type.label)}
             </Label>
