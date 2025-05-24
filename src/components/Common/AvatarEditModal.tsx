@@ -742,9 +742,8 @@ const AvatarEditModal = ({
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      setPreviewImage(null);
-                      setIsCameraOpen(false);
                       stopCamera();
+                      closeModal();
                     }}
                     disabled={isProcessing}
                   >
