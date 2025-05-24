@@ -379,7 +379,7 @@ const AvatarEditModal = ({
     setIsDragging(false);
     const droppedFile = e?.dataTransfer?.files[0];
     if (!isImageFile(droppedFile))
-      return dragProps.setFileDropError(t("drop_an_image_error"));
+      return dragProps.setFileDropError(t("please_upload_an_image_file"));
     if (droppedFile.size > MAX_FILE_SIZE) {
       dragProps.setFileDropError(
         t("image_size_error", { size: careConfig.imageUploadMaxSizeInMB }),
