@@ -184,9 +184,9 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       createDiagnosisDetails.diagnosisName,
     );
 
-    patientEncounter.clickAddSymptoms().addDiagnosis(createDiagnosisDetails);
+    patientEncounter.clickAddDiagnosis().addDiagnosis(createDiagnosisDetails);
     patientPrescription.submitQuestionnaire();
-    patientEncounter.verifySymptom(createDiagnosisDetails);
+    patientEncounter.verifyDiagnoses(createDiagnosisDetails);
 
     patientEncounter
       .clickEditDiagnosis()
