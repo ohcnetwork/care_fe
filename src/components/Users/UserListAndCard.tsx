@@ -2,6 +2,8 @@ import { Link, navigate, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +39,7 @@ export const UserStatusIndicator = ({
   const { t } = useTranslation();
 
   return (
-    <span className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}>
+    <span className={cn(addPadding ? "px-3 py-1" : "py-px", className)}>
       {isUserOnline(user) || isAuthUser ? (
         <Badge variant="outline" className="bg-green-100 whitespace-nowrap">
           <span className="inline-block size-2 shrink-0 rounded-full bg-green-500 mr-2" />
