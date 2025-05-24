@@ -7,9 +7,12 @@ import React, {
   useRef,
   useState,
 } from "react";
+import Cropper, { type Area } from "react-easy-crop";
 import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
 import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -38,6 +41,7 @@ interface Props {
   ) => Promise<void>;
   handleDelete: (onSuccess: () => void, onError: () => void) => Promise<void>;
   hint?: React.ReactNode;
+  aspectRatio: keyof typeof ASPECT_RATIOS;
 }
 
 const VideoConstraints = {
@@ -65,7 +69,107 @@ const VideoConstraints = {
   },
 } as const;
 
+const ASPECT_RATIOS = {
+  "1:1": 1,
+  "16:9": 16 / 9,
+} as const;
+
+const MAX_FILE_SIZE = careConfig.imageUploadMaxSizeInMB * 1024 * 1024; // 2MB
+const MIN_DIMENSION = 400;
+const MAX_DIMENSION = 1024;
+
 const isImageFile = (file?: File) => file?.type.split("/")[0] === "image";
+
+const createImage = (url: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener("load", () => resolve(image));
+    image.addEventListener("error", (error) => reject(error));
+    image.setAttribute("crossOrigin", "anonymous");
+    image.src = url;
+  });
+
+const getCroppedImg = async (
+  imageSrc: string,
+  pixelCrop: Area,
+  aspectRatio: number,
+): Promise<File> => {
+  const image = await createImage(imageSrc);
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  if (!ctx) {
+    throw new Error("Could not get canvas context");
+  }
+
+  // Calculate output dimensions based on aspect ratio and constraints
+  let outputWidth: number;
+  let outputHeight: number;
+
+  if (aspectRatio === 1) {
+    // For 1:1, use the smaller dimension but ensure it's within bounds
+    const size = Math.min(pixelCrop.width, pixelCrop.height);
+    outputWidth = outputHeight = Math.max(
+      MIN_DIMENSION,
+      Math.min(MAX_DIMENSION, size),
+    );
+  } else {
+    // For 16:9, calculate based on the crop area
+    if (pixelCrop.width / pixelCrop.height > aspectRatio) {
+      // Width is the limiting factor
+      outputHeight = Math.max(
+        MIN_DIMENSION,
+        Math.min(MAX_DIMENSION, pixelCrop.height),
+      );
+      outputWidth = Math.min(MAX_DIMENSION, outputHeight * aspectRatio);
+    } else {
+      // Height is the limiting factor
+      outputWidth = Math.max(
+        MIN_DIMENSION,
+        Math.min(MAX_DIMENSION, pixelCrop.width),
+      );
+      outputHeight = Math.min(MAX_DIMENSION, outputWidth / aspectRatio);
+    }
+  }
+
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
+
+  // Clear canvas with white background
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, outputWidth, outputHeight);
+
+  // Draw the cropped image
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    outputWidth,
+    outputHeight,
+  );
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Canvas is empty"));
+          return;
+        }
+        const file = new File([blob], "cropped-image.jpeg", {
+          type: "image/jpeg",
+        });
+
+        resolve(file);
+      },
+      "image/jpeg",
+      1,
+    );
+  });
+};
 
 type IVideoConstraint =
   (typeof VideoConstraints)[keyof typeof VideoConstraints];
@@ -78,12 +182,16 @@ const AvatarEditModal = ({
   handleUpload,
   handleDelete,
   hint,
+  aspectRatio = "1:1",
 }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const webRef = useRef<Webcam>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
@@ -139,6 +247,7 @@ const AvatarEditModal = ({
       );
     }
   };
+
   const stopCamera = useCallback(() => {
     try {
       if (webRef.current) {
@@ -148,7 +257,7 @@ const AvatarEditModal = ({
         }
       }
     } catch {
-      toast.error("Failed to stop camera");
+      toast.error(t("failed_to_stop_camera"));
     } finally {
       setIsCameraOpen(false);
     }
@@ -173,6 +282,9 @@ const AvatarEditModal = ({
     setSelectedFile(undefined);
     setIsCameraOpen(false);
     setPreviewImage(null);
+    setCroppedAreaPixels(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
     onOpenChange(false);
   };
 
@@ -191,10 +303,13 @@ const AvatarEditModal = ({
       return;
     }
     const file = e.target.files[0];
-    if (!isImageFile(file)) {
-      toast.warning(t("please_upload_an_image_file"));
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(
+        t("image_size_error", { size: careConfig.imageUploadMaxSizeInMB }),
+      );
       return;
     }
+
     setSelectedFile(file);
   };
 
@@ -207,10 +322,28 @@ const AvatarEditModal = ({
 
       setIsProcessing(true);
       setIsCaptureImgBeingUploaded(true);
+
+      let fileToUpload = selectedFile;
+
+      if (croppedAreaPixels && preview) {
+        try {
+          fileToUpload = await getCroppedImg(
+            preview,
+            croppedAreaPixels,
+            ASPECT_RATIOS[aspectRatio],
+          );
+        } catch {
+          toast.error(t("failed_to_crop_image_using_original_image"));
+          // Fall back to original file if cropping fails
+          fileToUpload = selectedFile;
+        }
+      }
+
       await handleUpload(
-        selectedFile,
+        fileToUpload,
         () => {
           setPreview(undefined);
+          closeModal();
         },
         () => {
           setPreview(undefined);
@@ -220,12 +353,8 @@ const AvatarEditModal = ({
         },
       );
     } finally {
-      setPreview(undefined);
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
-      setSelectedFile(undefined);
-      setIsCameraOpen(false);
-      setPreviewImage(null);
     }
   };
 
@@ -236,6 +365,7 @@ const AvatarEditModal = ({
         setIsProcessing(false);
         setPreview(undefined);
         setPreviewImage(null);
+        closeModal();
       },
       () => setIsProcessing(false),
     );
@@ -248,7 +378,14 @@ const AvatarEditModal = ({
     setIsDragging(false);
     const droppedFile = e?.dataTransfer?.files[0];
     if (!isImageFile(droppedFile))
-      return dragProps.setFileDropError("Please drop an image file to upload!");
+      return dragProps.setFileDropError(t("drop_an_image_error"));
+    if (droppedFile.size > MAX_FILE_SIZE) {
+      dragProps.setFileDropError(
+        t("image_size_error", { size: careConfig.imageUploadMaxSizeInMB }),
+      );
+      return;
+    }
+
     setSelectedFile(droppedFile);
   };
 
@@ -286,69 +423,92 @@ const AvatarEditModal = ({
             {t("edit_avatar")}
           </DialogDescription>
         </DialogHeader>
+
         <div className="flex h-full w-full items-center justify-center overflow-y-auto">
-          <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
+          <div className="flex max-h-screen w-full flex-col overflow-auto">
             {!isCameraOpen ? (
               <>
-                {preview || imageUrl ? (
+                {preview ? (
                   <>
-                    <div className="flex h-[30vh] md:h-[75vh] w-full items-center justify-center rounded-lg border border-secondary-200">
-                      <img
-                        src={
+                    <div className="relative w-full h-[400px]">
+                      <Cropper
+                        image={
                           preview && preview.startsWith("blob:")
                             ? DOMPurify.sanitize(preview)
                             : imageUrl
                         }
-                        alt="cover-photo"
-                        className="h-full w-full object-contain"
+                        crop={crop}
+                        zoom={zoom}
+                        aspect={ASPECT_RATIOS[aspectRatio]}
+                        onCropChange={setCrop}
+                        onCropComplete={(
+                          croppedArea: Area,
+                          croppedAreaPixels: Area,
+                        ) => {
+                          setCroppedAreaPixels(croppedAreaPixels);
+                        }}
+                        onZoomChange={setZoom}
+                        minZoom={0.1}
+                        maxZoom={3}
+                        cropShape={aspectRatio === "1:1" ? "rect" : "rect"}
                       />
                     </div>
-                    <p className="text-center font-medium text-secondary-700">
+
+                    <p className="text-center font-medium text-secondary-700 mt-2">
                       {hintMessage}
                     </p>
                   </>
+                ) : imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt="saved-photo"
+                    className={cn(
+                      "w-full max-w-[400px] max-h-[400px] mx-auto object-cover",
+                      aspectRatio === "1:1" ? "aspect-square" : "aspect-video",
+                    )}
+                  />
                 ) : (
                   <div
                     onDragOver={onDragOver}
                     onDragLeave={onDragLeave}
                     onDrop={onDrop}
-                    className={`mt-8 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6 ${
-                      isDragging
-                        ? "border-primary-800 bg-primary-100"
-                        : dragProps.dragOver
-                          ? "border-primary-500"
-                          : "border-secondary-500"
-                    } ${dragProps.fileDropError !== "" ? "border-red-500" : ""}`}
+                    className={cn(
+                      "mt-8 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6",
+                      {
+                        "border-primary-800 bg-primary-100": isDragging,
+                        "border-primary-500": !isDragging && dragProps.dragOver,
+                        "border-secondary-500":
+                          !isDragging &&
+                          !dragProps.dragOver &&
+                          !dragProps.fileDropError,
+                        "border-red-500": dragProps.fileDropError !== "",
+                      },
+                    )}
                   >
                     <svg
                       stroke="currentColor"
                       fill="none"
                       viewBox="0 0 48 48"
                       aria-hidden="true"
-                      className={`size-12 stroke-[2px] ${
-                        isDragging
-                          ? "text-green-500"
-                          : dragProps.dragOver
-                            ? "text-primary-500"
-                            : "text-secondary-600"
-                      } ${
-                        dragProps.fileDropError !== ""
-                          ? "text-red-500"
-                          : "text-secondary-600"
-                      }`}
+                      className={cn("size-12 stroke-[2px]", {
+                        "text-green-500": isDragging,
+                        "text-primary-500": !isDragging && dragProps.dragOver,
+                        "text-secondary-600":
+                          !isDragging &&
+                          !dragProps.dragOver &&
+                          !dragProps.fileDropError,
+                        "text-red-500": dragProps.fileDropError !== "",
+                      })}
                     >
                       <path d="M28 8H12a4 4 0 0 0-4 4v20m32-12v8m0 0v8a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-4m32-4-3.172-3.172a4 4 0 0 0-5.656 0L28 28M8 32l9.172-9.172a4 4 0 0 1 5.656 0L28 28m0 0 4 4m4-24h8m-4-4v8m-12 4h.02" />
                     </svg>
                     <p
-                      className={`text-sm ${
-                        dragProps.dragOver
-                          ? "text-primary-500"
-                          : "text-secondary-700"
-                      } ${
-                        dragProps.fileDropError !== ""
-                          ? "text-red-500"
-                          : "text-secondary-700"
-                      } text-center`}
+                      className={cn("text-sm text-center", {
+                        "text-primary-500": dragProps.dragOver,
+                        "text-red-500": dragProps.fileDropError !== "",
+                        "text-secondary-700":
+                          !dragProps.dragOver && dragProps.fileDropError === "",
+                      })}
                     >
                       {dragProps.fileDropError !== ""
                         ? dragProps.fileDropError
@@ -470,11 +630,13 @@ const AvatarEditModal = ({
                     </>
                   ) : (
                     <>
-                      <img src={previewImage} />
+                      <img
+                        src={previewImage || "/placeholder.svg"}
+                        alt="Captured preview"
+                      />
                     </>
                   )}
                 </div>
-                {/* buttons for mobile screens */}
                 <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                   {!previewImage ? (
                     <>
