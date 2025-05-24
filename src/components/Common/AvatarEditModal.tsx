@@ -355,6 +355,7 @@ const AvatarEditModal = ({
     } finally {
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
+      setPreview(undefined);
     }
   };
 
