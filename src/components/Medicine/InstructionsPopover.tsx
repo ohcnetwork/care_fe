@@ -120,7 +120,7 @@ const TriggerButton = (
               .filter(Boolean)
               .join(", ")}
       </span>
-      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
     </Button>
   );
 };
@@ -137,24 +137,6 @@ export default function InstructionsPopover({
   const disabledButton =
     (isReadOnly || disabled) && currentInstructions.length <= 1;
 
-  // const TriggerButton = (
-  //   <Button
-  //     variant="outline"
-  //     data-cy="instructions"
-  //     className="w-full justify-between"
-  //     disabled={disabledButton}
-  //   >
-  //     <span className="truncate block max-w-full">
-  //       {currentInstructions.length === 0
-  //         ? t("no_instructions_selected")
-  //         : currentInstructions
-  //             .map((i) => i.display)
-  //             .filter(Boolean)
-  //             .join(", ")}
-  //     </span>
-  //     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-  //   </Button>
-  // );
 
   if (isMobile) {
     return (
