@@ -122,6 +122,7 @@ const ThreadItem = ({
 
 function MessageItem({
   message,
+  className,
   ...props
 }: React.ComponentProps<"div"> & { message: Message }) {
   const authUser = useAuthUser();
@@ -133,6 +134,7 @@ function MessageItem({
       className={cn(
         "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
         isCurrentUser ? "justify-end" : "justify-start",
+        className,
       )}
       {...props}
     >
@@ -643,7 +645,7 @@ export const EncounterNotesTab = ({
                         className="flex flex-col-reverse py-2 min-h-full"
                         data-cy="chat-messages"
                       >
-                        {messages.map((message) => (
+                        {messages.map((message, i) => (
                           <MessageItem
                             key={message.id}
                             message={message}
@@ -652,6 +654,7 @@ export const EncounterNotesTab = ({
                                 ? recentMessageRef
                                 : undefined
                             }
+                            className={cn(i === 0 && "mb-14")}
                           />
                         ))}
                         {isFetchingNextPage && (
@@ -670,7 +673,7 @@ export const EncounterNotesTab = ({
                         className="flex flex-col-reverse py-4 min-h-full"
                         data-cy="chat-messages"
                       >
-                        {messages.map((message) => (
+                        {messages.map((message, i) => (
                           <MessageItem
                             key={message.id}
                             message={message}
@@ -679,6 +682,7 @@ export const EncounterNotesTab = ({
                                 ? recentMessageRef
                                 : undefined
                             }
+                            className={cn(i === 0 && "mb-14")}
                           />
                         ))}
                         {isFetchingNextPage && (
@@ -695,7 +699,7 @@ export const EncounterNotesTab = ({
 
                   {/* Message Input */}
                   {canWriteCurrentEncounter && (
-                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky bottom-0">
+                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky max-sm:bottom-14">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
@@ -704,7 +708,7 @@ export const EncounterNotesTab = ({
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={(e) => {
-                              if (e.key === "Enter" && !e.shiftKey) {
+                              if (e.key === "Enter" && e.shiftKey) {
                                 e.preventDefault();
                                 if (newMessage.trim()) {
                                   handleSendMessage(e);

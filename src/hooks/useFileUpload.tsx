@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import jsPDF from "jspdf";
@@ -176,7 +175,7 @@ export default function useFileUpload(
         setError(t("file_error__file_name"));
         return false;
       }
-      if (file.size > careConfig.imageUploadMaxSizeInMB * 1024 * 1024) {
+      if (file.size > 10e7) {
         setError(t("file_error__file_size"));
         return false;
       }

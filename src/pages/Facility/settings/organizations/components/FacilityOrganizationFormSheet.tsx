@@ -248,25 +248,35 @@ export default function FacilityOrganizationFormSheet({
                 </FormItem>
               )}
             />
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isPending}
-              data-cy={
-                isEditMode
-                  ? "update-organization-button"
-                  : "create-organization-button"
-              }
-            >
-              {isPending
-                ? isEditMode
-                  ? t("updating")
-                  : t("creating")
-                : isEditMode
-                  ? t("update_organization")
-                  : t("create_organization")}
-            </Button>
+            <div className="flex justify-end mt-6 space-x-2">
+              <Button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  form.reset();
+                }}
+                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending}
+                data-cy={
+                  isEditMode
+                    ? "update-organization-button"
+                    : "create-organization-button"
+                }
+              >
+                {isPending
+                  ? isEditMode
+                    ? t("updating")
+                    : t("creating")
+                  : isEditMode
+                    ? t("update_organization")
+                    : t("create_organization")}
+              </Button>
+            </div>
           </form>
         </Form>
       </SheetContent>
