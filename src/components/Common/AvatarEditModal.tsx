@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import DOMPurify from "dompurify";
-import React, {
+import { Crop } from "lucide-react";
+import {
   ChangeEventHandler,
   useCallback,
   useEffect,
@@ -93,7 +94,7 @@ const getCroppedImg = async (
   imageSrc: string,
   pixelCrop: Area,
   aspectRatio: number,
-): Promise<File> => {
+): Promise<{ file: File; previewUrl: string }> => {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -135,6 +136,10 @@ const getCroppedImg = async (
   canvas.width = outputWidth;
   canvas.height = outputHeight;
 
+  // Enable image smoothing for better quality
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+
   // Clear canvas with white background
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, outputWidth, outputHeight);
@@ -162,8 +167,8 @@ const getCroppedImg = async (
         const file = new File([blob], "cropped-image.jpeg", {
           type: "image/jpeg",
         });
-
-        resolve(file);
+        const previewUrl = canvas.toDataURL("image/jpeg", 0.95);
+        resolve({ file, previewUrl });
       },
       "image/jpeg",
       1,
@@ -193,6 +198,7 @@ const AvatarEditModal = ({
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [croppedPreview, setCroppedPreview] = useState<string | null>(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
   const [constraint, setConstraint] = useState<IVideoConstraint>(
@@ -202,7 +208,7 @@ const AvatarEditModal = ({
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const { requestPermission } = useMediaDevicePermission();
-
+  const [showCroppedPreview, setShowCroppedPreview] = useState(false);
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
       constraint.facingMode === "user"
@@ -283,6 +289,8 @@ const AvatarEditModal = ({
     setIsCameraOpen(false);
     setPreviewImage(null);
     setCroppedAreaPixels(null);
+    setCroppedPreview(null);
+    setShowCroppedPreview(false);
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     onOpenChange(false);
@@ -309,8 +317,29 @@ const AvatarEditModal = ({
       );
       return;
     }
-
     setSelectedFile(file);
+    setShowCroppedPreview(false);
+  };
+
+  const cropImage = async () => {
+    if (!croppedAreaPixels || !preview) return;
+
+    try {
+      setIsProcessing(true);
+      const { file, previewUrl } = await getCroppedImg(
+        preview,
+        croppedAreaPixels,
+        ASPECT_RATIOS[aspectRatio],
+      );
+      setSelectedFile(file);
+      setCroppedPreview(previewUrl);
+      setShowCroppedPreview(true);
+      toast.success(t("image_cropped_successfully"));
+    } catch {
+      toast.error(t("failed_to_crop_image_using_original_image"));
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const uploadAvatar = async () => {
@@ -323,24 +352,8 @@ const AvatarEditModal = ({
       setIsProcessing(true);
       setIsCaptureImgBeingUploaded(true);
 
-      let fileToUpload = selectedFile;
-
-      if (croppedAreaPixels && preview) {
-        try {
-          fileToUpload = await getCroppedImg(
-            preview,
-            croppedAreaPixels,
-            ASPECT_RATIOS[aspectRatio],
-          );
-        } catch {
-          toast.error(t("failed_to_crop_image_using_original_image"));
-          // Fall back to original file if cropping fails
-          fileToUpload = selectedFile;
-        }
-      }
-
       await handleUpload(
-        fileToUpload,
+        selectedFile,
         () => {
           setPreview(undefined);
           closeModal();
@@ -431,37 +444,66 @@ const AvatarEditModal = ({
               <>
                 {preview ? (
                   <>
-                    <div className="relative w-full h-[400px]">
-                      <Cropper
-                        image={
-                          preview && preview.startsWith("blob:")
-                            ? DOMPurify.sanitize(preview)
-                            : imageUrl
-                        }
-                        crop={crop}
-                        zoom={zoom}
-                        aspect={ASPECT_RATIOS[aspectRatio]}
-                        onCropChange={setCrop}
-                        onCropComplete={(
-                          croppedArea: Area,
-                          croppedAreaPixels: Area,
-                        ) => {
-                          setCroppedAreaPixels(croppedAreaPixels);
-                        }}
-                        onZoomChange={setZoom}
-                        minZoom={0.1}
-                        maxZoom={3}
-                        cropShape={aspectRatio === "1:1" ? "rect" : "rect"}
-                      />
-                    </div>
-
-                    <p className="text-center font-medium text-secondary-700 mt-2">
-                      {hintMessage}
-                    </p>
+                    {!showCroppedPreview ? (
+                      <>
+                        <div className="relative w-full h-[400px]">
+                          <Cropper
+                            image={
+                              preview && preview.startsWith("blob:")
+                                ? DOMPurify.sanitize(preview)
+                                : imageUrl
+                            }
+                            crop={crop}
+                            zoom={zoom}
+                            aspect={ASPECT_RATIOS[aspectRatio]}
+                            onCropChange={setCrop}
+                            onCropComplete={(
+                              croppedArea: Area,
+                              croppedAreaPixels: Area,
+                            ) => {
+                              setCroppedAreaPixels(croppedAreaPixels);
+                            }}
+                            onZoomChange={setZoom}
+                            minZoom={0.1}
+                            maxZoom={3}
+                            cropShape={aspectRatio === "1:1" ? "rect" : "rect"}
+                          />
+                        </div>
+                        <p className="text-center font-medium text-secondary-700 mt-2">
+                          {hintMessage}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-full h-[400px] bg-gray-100 rounded-lg flex items-center justify-center">
+                          {croppedPreview ? (
+                            <img
+                              src={croppedPreview || "/placeholder.svg"}
+                              alt="Cropped preview"
+                              className={cn(
+                                "max-w-full max-h-full object-contain rounded-lg",
+                                aspectRatio === "1:1"
+                                  ? "aspect-square"
+                                  : "aspect-video",
+                              )}
+                            />
+                          ) : (
+                            <div className="text-center text-secondary-500">
+                              <p className="text-sm">
+                                {t("no_preview_available")}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-center font-medium text-secondary-700 mt-2">
+                          {t("preview_cropped_image_hint")}
+                        </p>
+                      </>
+                    )}
                   </>
                 ) : imageUrl ? (
                   <img
-                    src={imageUrl}
+                    src={imageUrl || "/placeholder.svg"}
                     alt="saved-photo"
                     className={cn(
                       "w-full max-w-[400px] max-h-[400px] mx-auto object-cover",
@@ -583,8 +625,13 @@ const AvatarEditModal = ({
                   <Button
                     id="save-cover-image"
                     variant="outline"
-                    onClick={uploadAvatar}
-                    disabled={isProcessing || !selectedFile}
+                    onClick={showCroppedPreview ? uploadAvatar : cropImage}
+                    disabled={
+                      !!imageUrl ||
+                      isProcessing ||
+                      !selectedFile ||
+                      (!croppedAreaPixels && !showCroppedPreview)
+                    }
                     data-cy="save-cover-image"
                   >
                     {isProcessing ? (
@@ -592,11 +639,17 @@ const AvatarEditModal = ({
                         icon="l-spinner"
                         className="animate-spin text-lg"
                       />
+                    ) : showCroppedPreview ? (
+                      <CareIcon icon="l-cloud-upload" className="text-lg" />
                     ) : (
-                      <CareIcon icon="l-save" className="text-lg" />
+                      <Crop className="text-lg" />
                     )}
                     <span>
-                      {isProcessing ? `${t("uploading")}...` : `${t("save")}`}
+                      {isProcessing
+                        ? `${t("uploading")}...`
+                        : showCroppedPreview
+                          ? `${t("upload")}`
+                          : `${t("crop")}`}
                     </span>
                   </Button>
                 </div>
