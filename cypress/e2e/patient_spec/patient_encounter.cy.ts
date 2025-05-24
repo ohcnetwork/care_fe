@@ -127,11 +127,21 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifySymptom(createSymptomsDetails);
 
-    // update the patient symptom
+    // verify duplicate symptoms behavior
     patientEncounter
       .clickEditSymptoms()
-      .verifyDuplicateSymptom(updateSymptomsDetails.symptomName)
-      .updateSymptom(updateSymptomsDetails);
+      .verifyDuplicateSymptom(createSymptomsDetails.symptomName);
+
+    patientEncounter.deleteSymptom();
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifySymptomDelete(createSymptomsDetails.symptomName);
+
+    patientEncounter.clickAddSymptoms().addSymptoms(createSymptomsDetails);
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifySymptom(createSymptomsDetails);
+
+    // update the patient symptom
+    patientEncounter.clickEditSymptoms().updateSymptom(updateSymptomsDetails);
 
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifySymptom(updateSymptomsDetails);
@@ -165,8 +175,21 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientEncounter.verifyDiagnoses(createDiagnosisDetails);
 
     patientEncounter
+      .clickAddDiagnosis()
+      .verifyDuplicateDiagnosis(createDiagnosisDetails.diagnosisName);
+
+    patientEncounter.deleteDiagnosis();
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifyDiagnosisDelete(
+      createDiagnosisDetails.diagnosisName,
+    );
+
+    patientEncounter.clickAddSymptoms().addDiagnosis(createDiagnosisDetails);
+    patientPrescription.submitQuestionnaire();
+    patientEncounter.verifySymptom(createDiagnosisDetails);
+
+    patientEncounter
       .clickEditDiagnosis()
-      .verifyDuplicateDiagnosis(updateDiagnosisDetails.diagnosisName)
       .updateDiagnosis(updateDiagnosisDetails);
 
     patientPrescription.submitQuestionnaire();

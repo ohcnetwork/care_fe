@@ -42,7 +42,9 @@ export class PatientEncounter {
   }
 
   clickEditAllergy() {
+    cy.intercept("GET", "**/allergy_intolerance/**").as("getAllergies");
     cy.verifyAndClickElement('[data-cy="edit-allergies"]', "Edit");
+    cy.wait("@getAllergies").its("response.statusCode").should("eq", 200);
     return this;
   }
 
@@ -117,7 +119,9 @@ export class PatientEncounter {
   }
 
   clickEditSymptoms() {
+    cy.intercept("GET", "**/symptom/**").as("getSymptoms");
     cy.verifyAndClickElement('[data-cy="edit-symptoms"]', "Edit");
+    cy.wait("@getSymptoms").its("response.statusCode").should("eq", 200);
     return this;
   }
 
@@ -197,7 +201,9 @@ export class PatientEncounter {
   }
 
   clickEditDiagnosis() {
+    cy.intercept("GET", "**/diagnosis/**").as("getDiagnosis");
     cy.verifyAndClickElement('[data-cy="edit-diagnoses"]', "Edit");
+    cy.wait("@getDiagnosis").its("response.statusCode").should("eq", 200);
     return this;
   }
 
