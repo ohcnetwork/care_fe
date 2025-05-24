@@ -632,7 +632,11 @@ const AvatarEditModal = ({
                       !selectedFile ||
                       (!croppedAreaPixels && !showCroppedPreview)
                     }
-                    data-cy="save-cover-image"
+                    data-cy={
+                      showCroppedPreview
+                        ? "upload-cover-image"
+                        : "crop-cover-image"
+                    }
                   >
                     {isProcessing ? (
                       <CareIcon

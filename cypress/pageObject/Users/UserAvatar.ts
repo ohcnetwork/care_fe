@@ -30,7 +30,12 @@ export class UserAvatar {
   }
 
   clickSaveAvatarButton() {
-    cy.verifyAndClickElement('[data-cy="save-cover-image"]', "Save");
+    cy.verifyAndClickElement('[data-cy="upload-cover-image"]', "Upload");
+    return this;
+  }
+
+  clickCropAvatar() {
+    cy.verifyAndClickElement('[data-cy="crop-cover-image"]', "crop");
     return this;
   }
 
