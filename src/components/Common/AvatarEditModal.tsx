@@ -134,7 +134,7 @@ const AvatarEditModal = ({
         ? VideoConstraints.environment
         : VideoConstraints.user,
     );
-  }, [constraint.facingMode]);
+  }, []);
 
   const captureImage = () => {
     if (webRef.current) {
