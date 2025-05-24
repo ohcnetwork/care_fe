@@ -15,7 +15,8 @@
     "@tailwindcss/vite",
     "@vitejs/plugin-react",
     "browserslist-useragent-regexp",
-    "cross-env"
+    "cross-env",
+    "normalize-wheel"
   ],
   "ignoreUnresolved": [
     [
