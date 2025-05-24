@@ -226,6 +226,14 @@ export default function FileUploadDialog({
 
         <div className="flex items-center gap-2 mt-4">
           <Button
+            variant="destructive"
+            onClick={fileUpload.clearFiles}
+            disabled={fileUpload.uploading}
+          >
+            <CareIcon icon="l-trash-alt" className="mr-1" />
+            {t("discard")}
+          </Button>
+          <Button
             variant="outline_primary"
             onClick={() => fileUpload.handleFileUpload(associatingId, isPdf)}
             disabled={fileUpload.uploading}
@@ -235,14 +243,6 @@ export default function FileUploadDialog({
           >
             <CareIcon icon="l-check" className="mr-1" />
             {t("upload")}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={fileUpload.clearFiles}
-            disabled={fileUpload.uploading}
-          >
-            <CareIcon icon="l-trash-alt" className="mr-1" />
-            {t("discard")}
           </Button>
         </div>
         {!!fileUpload.progress && (
