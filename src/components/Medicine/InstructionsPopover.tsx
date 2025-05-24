@@ -137,7 +137,6 @@ export default function InstructionsPopover({
   const disabledButton =
     (isReadOnly || disabled) && currentInstructions.length <= 1;
 
-
   if (isMobile) {
     return (
       <Sheet>
