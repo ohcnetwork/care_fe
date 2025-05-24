@@ -80,6 +80,7 @@ export default function ReportBuilderList({
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -116,6 +117,7 @@ export default function ReportBuilderList({
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
                       fill="currentColor"
+                      aria-hidden="true"
                     >
                       <path
                         fillRule="evenodd"
