@@ -73,10 +73,7 @@ export function UserCard(props: UserCardProps) {
   const { t } = useTranslation();
 
   return (
-    <Card
-      key={user.id}
-      className={`h-full ${user.deleted ? "opacity-60" : ""}`}
-    >
+    <Card key={user.id} className={cn("h-full", user.deleted && "opacity-60")}>
       <CardContent className="p-4 flex flex-col h-full justify-between">
         <div className="flex items-start gap-3">
           <Avatar
