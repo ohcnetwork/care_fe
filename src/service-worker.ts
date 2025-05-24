@@ -6,8 +6,11 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 import { clientsClaim } from "workbox-core";
+import { ExpirationPlugin } from "workbox-expiration";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { precacheAndRoute } from "workbox-precaching";
+import { registerRoute } from "workbox-routing";
+import { NetworkFirst } from "workbox-strategies";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -66,3 +69,75 @@ self.addEventListener("notificationclick", (e) => {
     }),
   );
 });
+
+registerRoute(
+  ({ request }) =>
+    request.destination === "style" ||
+    request.destination === "script" ||
+    request.destination === "image",
+  new NetworkFirst({
+    cacheName: "static-assets",
+    plugins: [
+      new ExpirationPlugin({
+        maxAgeSeconds: 7 * 24 * 60 * 60, // 1 week
+      }),
+    ],
+  }),
+);
+
+// ===========================================
+// 3. Navigation Routing (Network First for HTML)
+// ===========================================
+registerRoute(
+  ({ request }) => request.mode === "navigate",
+  new NetworkFirst({
+    cacheName: "html-cache",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 10,
+        maxAgeSeconds: 7 * 24 * 60 * 60, // 1 week
+      }),
+    ],
+  }),
+);
+
+// ===========================================
+// 4. API Caching (Network First with Auth Support)
+// ===========================================
+registerRoute(
+  ({ url }) => url.pathname.startsWith("/api/"),
+  new NetworkFirst({
+    cacheName: "api-cache",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 7 * 24 * 60 * 60, // 1 week
+      }),
+      {
+        cacheKeyWillBeUsed: async ({ request }) => {
+          // Add user ID to cache key if authenticated
+          const userId = await getUserIdFromRequest(request);
+          console.log("User ID from request:", userId);
+          return userId ? `${userId}|${request.url}` : request.url;
+        },
+      },
+    ],
+  }),
+);
+
+// ===========================================
+// Helper: Extract User ID from Auth Header
+// ===========================================
+async function getUserIdFromRequest(request: any) {
+  const authHeader = request.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+
+  try {
+    const token = authHeader.split(" ")[1];
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    console.log("JWT Payload:", payload);
+    return payload.user_id || null; // Adjust based on your JWT structure
+  } catch {
+    return null;
+  }
+}
