@@ -43,6 +43,7 @@ import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
 
 import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import { BLOOD_GROUP_CHOICES, GENDER_TYPES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
@@ -56,6 +57,7 @@ import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { saveOfflineWrite } from "@/src/components/offlinessupport/saveofflinewrites";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
@@ -81,7 +83,7 @@ export default function PatientRegistration(
     useState(!!patientId);
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [isDeceased, setIsDeceased] = useState(false);
-
+  const user = useAuthUser();
   const formSchema = useMemo(
     () =>
       z
@@ -224,7 +226,7 @@ export default function PatientRegistration(
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (patientId) {
-      updatePatient({
+      const updateData = {
         ...values,
         ward_old: undefined,
         age: values.age_or_dob === "age" ? values.age : undefined,
@@ -236,7 +238,23 @@ export default function PatientRegistration(
         permanent_address: values.same_address
           ? values.address
           : values.permanent_address,
-      });
+      };
+      if (!navigator.onLine) {
+        console.log("Saving offline", patientQuery);
+        saveOfflineWrite({
+          userId: user.external_id,
+          syncrouteKey: "updatePatient",
+          resourceType: "patient",
+          payload: updateData,
+          pathParams: { id: patientId },
+          queryParams: { id: patientId },
+          queryrouteKey: "getPatient",
+          serverTimestamp: patientQuery.data?.modified_date,
+        });
+        toast.success("patient saved offline");
+        return;
+      }
+      updatePatient(updateData);
       return;
     }
 
