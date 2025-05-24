@@ -179,6 +179,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
     }
   };
 
+  const isValidCoordinate = (val: number) => val && Number(val) !== 0;
+
   if (isLoading) {
     return <Loading />;
   }
@@ -339,12 +341,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           {t("location_details")}
                         </span>
                         <span className="text-sm">
-                          {facilityData.latitude && facilityData.longitude && (
-                            <FacilityMapsLink
-                              latitude={facilityData.latitude.toString()}
-                              longitude={facilityData.longitude.toString()}
-                            />
-                          )}
+                          {isValidCoordinate(facilityData.latitude) &&
+                            isValidCoordinate(facilityData.longitude) && (
+                              <FacilityMapsLink
+                                latitude={facilityData.latitude.toString()}
+                                longitude={facilityData.longitude.toString()}
+                              />
+                            )}
                         </span>
                       </div>
                     </div>
