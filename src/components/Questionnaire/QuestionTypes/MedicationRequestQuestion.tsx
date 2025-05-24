@@ -1203,13 +1203,13 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               system="system-as-needed-reason"
               value={dosageInstruction?.as_needed_for || null}
               placeholder={t("select_prn_reason")}
-              onSelect={(value: Code | null) => {
+              onSelect={(value) => {
                 handleUpdateDosageInstruction({
                   as_needed_for: value || undefined,
                 });
               }}
               disabled={disabled || isReadOnly}
-              showAsSheet
+              asSheet
             />
 
             <InstructionsPopover
@@ -1242,7 +1242,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(route) => handleUpdateDosageInstruction({ route })}
           placeholder={t("select_route")}
           disabled={disabled || isReadOnly}
-          showAsSheet
+          asSheet
         />
       </div>
       {/* Site */}
@@ -1258,7 +1258,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_site")}
           disabled={disabled || isReadOnly}
           wrapTextForSmallScreen={true}
-          showAsSheet
+          asSheet
         />
       </div>
       {/* Method */}
@@ -1274,7 +1274,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_method")}
           disabled={disabled || isReadOnly}
           count={20}
-          showAsSheet
+          asSheet
         />
       </div>
       {/* Intent */}
