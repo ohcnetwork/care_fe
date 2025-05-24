@@ -79,15 +79,12 @@ registerRoute(
     cacheName: "static-assets",
     plugins: [
       new ExpirationPlugin({
-        maxAgeSeconds: 7 * 24 * 60 * 60, // 1 week
+        maxAgeSeconds: 7 * 24 * 60 * 60,
       }),
     ],
   }),
 );
 
-// ===========================================
-// 3. Navigation Routing (Network First for HTML)
-// ===========================================
 registerRoute(
   ({ request }) => request.mode === "navigate",
   new NetworkFirst({
@@ -101,9 +98,6 @@ registerRoute(
   }),
 );
 
-// ===========================================
-// 4. API Caching (Network First with Auth Support)
-// ===========================================
 registerRoute(
   ({ url }) => url.pathname.startsWith("/api/"),
   new NetworkFirst({
@@ -115,7 +109,6 @@ registerRoute(
       }),
       {
         cacheKeyWillBeUsed: async ({ request }) => {
-          // Add user ID to cache key if authenticated
           const userId = await getUserIdFromRequest(request);
           console.log("User ID from request:", userId);
           return userId ? `${userId}|${request.url}` : request.url;
@@ -125,9 +118,6 @@ registerRoute(
   }),
 );
 
-// ===========================================
-// Helper: Extract User ID from Auth Header
-// ===========================================
 async function getUserIdFromRequest(request: any) {
   const authHeader = request.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) return null;
@@ -136,7 +126,7 @@ async function getUserIdFromRequest(request: any) {
     const token = authHeader.split(" ")[1];
     const payload = JSON.parse(atob(token.split(".")[1]));
     console.log("JWT Payload:", payload);
-    return payload.user_id || null; // Adjust based on your JWT structure
+    return payload.user_id || null;
   } catch {
     return null;
   }
