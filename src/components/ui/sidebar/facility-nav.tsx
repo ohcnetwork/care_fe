@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { TFunction } from "i18next";
-import { usePath } from "raviger";
+import { usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -75,13 +75,11 @@ function generateFacilityLinks(
           name: t("encounters"),
           url: `${baseUrl}/encounters/patients`,
           children: [
-            patientId && encounterId
-              ? {
-                  name: t("encounter"),
-                  url: `${baseUrl}/patient/${patientId}/encounter/${encounterId}`,
-                }
-              : null,
-          ].filter(Boolean) as NavigationLink[],
+            {
+              name: t("encounter"),
+              url: `${baseUrl}/patient/${patientId}/encounter/${encounterId}`,
+            },
+          ],
         },
         {
           name: t("locations"),
@@ -141,13 +139,17 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     .filter((c) => !!c.navItems)
     .flatMap((c) => c.navItems) as NavigationLink[];
 
-  const currentPath = usePath();
-
-  const pathMatch = currentPath?.match(
-    /\/facility\/[^/]+\/patient\/([^/]+)(?:\/encounter\/([^/]+))?/,
+  const paramsEncouters = (usePathParams(
+    "/facility/:facilityId/patient/:patientId/encounter/:encounterId/*",
+  ) ?? {}) as {
+    patientId?: string;
+    encounterId?: string;
+  };
+  const paramPatients = usePathParams(
+    "/facility/:facilityId/patient/:patientId",
   );
-  const patientId = pathMatch?.[1];
-  const encounterId = pathMatch?.[2];
+  const patientId = paramsEncouters?.patientId || paramPatients?.patientId;
+  const encounterId = paramsEncouters?.encounterId;
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", selectedFacility?.id],

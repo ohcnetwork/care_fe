@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react";
-import { ActiveLink } from "raviger";
+import { ActiveLink, usePath } from "raviger";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -45,7 +45,7 @@ const isChildActive = (link: NavigationLink, currentPath: string): boolean => {
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const currentPath = window.location.pathname;
+  const currentPath = usePath() || "";
 
   return (
     <SidebarGroup>
@@ -74,7 +74,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
                             {
                               "group-data-collapsible:data-[active=true]:bg-white group-data-collapsible:data-[active=true]:text-green-700 group-collapsible:data-[active=true]:shadow":
-                                link.name == "Patients" &&
+                                link.name === "Patients" &&
                                 /^\/facility\/[^/]+\/patient\/[^/]+(\/[^/]+)?$/.test(
                                   currentPath,
                                 ),
@@ -168,7 +168,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
 
 function PopoverMenu({ link }: { link: NavigationLink }) {
   const [open, setOpen] = useState(false);
-  const currentPath = window.location.pathname;
+  const currentPath = usePath() || "";
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
