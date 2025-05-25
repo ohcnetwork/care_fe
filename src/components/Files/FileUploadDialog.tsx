@@ -237,7 +237,6 @@ export default function FileUploadDialog({
             variant="outline_primary"
             onClick={() => fileUpload.handleFileUpload(associatingId, isPdf)}
             disabled={fileUpload.uploading}
-            className="w-full"
             id="upload_file_button"
             data-cy="upload-files-button"
           >
