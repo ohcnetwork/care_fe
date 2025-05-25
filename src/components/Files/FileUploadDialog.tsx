@@ -132,10 +132,7 @@ export default function FileUploadDialog({
                 className="rounded-lg p-4 shadow-md border-2 border-primary-500 relative"
               >
                 {fileUpload.files.length > 1 && (
-                  <div
-                    className="absolute top-0 left-0 bg-primary-500 text-white px-3 py-1 text-sm font-bold rounded-tl-lg -mt-px -ml-px"
-                    style={{ zIndex: 1 }}
-                  >
+                  <div className="absolute top-0 left-0 bg-primary-500 text-white px-3 py-1 text-sm font-bold rounded-tl-lg -mt-px -ml-px">
                     {t("file")} {index + 1}
                   </div>
                 )}
