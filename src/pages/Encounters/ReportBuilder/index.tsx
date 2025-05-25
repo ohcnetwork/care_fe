@@ -78,7 +78,7 @@ export default function ReportBuilderList({
               <div className="mx-auto bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center border border-gray-200 shadow-sm">
                 <CareIcon
                   icon="l-file-medical"
-                  className="h-8 w-8 text-blue-500 transform scale-170"
+                  className="text-blue-500 text-3xl"
                 />
               </div>
               <div>
@@ -100,7 +100,7 @@ export default function ReportBuilderList({
                     href={`/reportbuilder/new`}
                     className="flex items-center gap-2"
                   >
-                    <CareIcon icon="l-plus" className="h-5 w-5" />
+                    <CareIcon icon="l-plus" />
                     {t("create_new_report")}
                   </Link>
                 </Button>
