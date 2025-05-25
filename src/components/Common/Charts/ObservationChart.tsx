@@ -13,6 +13,11 @@ import {
 } from "recharts";
 
 import { Card } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -23,12 +28,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip as RadixTooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -250,23 +249,27 @@ export const ObservationVisualizer = ({
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-medium">{group.title}</h3>
-              <TooltipProvider>
-                <RadixTooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 text-gray-500 hover:text-gray-700 cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[300px]">
-                    <div className="space-y-2">
-                      <div className="font-medium">Observations:</div>
-                      {group.codes.map((code) => (
-                        <div key={code.code} className="text-xs">
-                          {code.display} ({code.code})
-                        </div>
-                      ))}
-                    </div>
-                  </TooltipContent>
-                </RadixTooltip>
-              </TooltipProvider>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Info className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                </PopoverTrigger>
+                <PopoverContent
+                  className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
+                  side="bottom"
+                  align="start"
+                  sideOffset={4}
+                  collisionPadding={16}
+                >
+                  <div className="space-y-2">
+                    <div className="font-medium">Observations:</div>
+                    {group.codes.map((code) => (
+                      <div key={code.code} className="text-xs">
+                        {code.display} ({code.code})
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           <Tabs defaultValue="graph" className="w-full">
