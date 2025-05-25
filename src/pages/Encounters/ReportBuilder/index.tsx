@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
@@ -74,31 +76,17 @@ export default function ReportBuilderList({
           <div className="flex flex-col items-center justify-center p-10 border border-dashed border-gray-300 rounded-lg bg-gray-50 my-4">
             <div className="text-center space-y-5 max-w-md">
               <div className="mx-auto bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center border border-gray-200 shadow-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8 text-blue-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
+                <CareIcon
+                  icon="l-file-medical"
+                  className="h-8 w-8 text-blue-500 transform scale-170"
+                />
               </div>
               <div>
                 <h4 className="text-xl font-semibold text-gray-800 mb-2">
-                  {t("no_templates_found", "No templates found")}
+                  {t("no_templates_found")}
                 </h4>
                 <p className="text-gray-600 mb-6">
-                  {t(
-                    "report_template_description",
-                    "Report templates help you create standardized formats for patient reports and clinical documentation.",
-                  )}
+                  {t("report_template_description")}
                 </p>
               </div>
               {canManageTemplate ? (
@@ -112,28 +100,13 @@ export default function ReportBuilderList({
                     href={`/reportbuilder/new`}
                     className="flex items-center gap-2"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CareIcon icon="l-plus" className="h-5 w-5" />
                     {t("create_new_report")}
                   </Link>
                 </Button>
               ) : (
                 <p className="text-sm text-amber-700 bg-amber-50 p-3 rounded-md border border-amber-200">
-                  {t(
-                    "template_permission_notice",
-                    "You don't have permission to create templates. Please contact your administrator.",
-                  )}
+                  {t("template_permission_notice")}
                 </p>
               )}
             </div>
