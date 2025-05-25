@@ -192,7 +192,7 @@ export default function FacilityOrganizationFormSheet({
               name="name"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>{t("name")}</FormLabel>
+                  <FormLabel aria-required>{t("name")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -258,7 +258,10 @@ export default function FacilityOrganizationFormSheet({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={Boolean(isPending || !form.formState.isValid)}
+              >
                 {isPending
                   ? isEditMode
                     ? t("updating")
