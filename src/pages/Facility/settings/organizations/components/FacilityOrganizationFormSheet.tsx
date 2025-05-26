@@ -260,7 +260,7 @@ export default function FacilityOrganizationFormSheet({
               </Button>
               <Button
                 type="submit"
-                disabled={Boolean(isPending || !form.formState.isValid)}
+                disabled={isPending || !form.formState.isValid}
               >
                 {isPending
                   ? isEditMode
