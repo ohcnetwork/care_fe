@@ -15,11 +15,8 @@ import {
 
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
-import { getPermissions } from "@/common/Permissions";
-
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { usePermissions } from "@/context/PermissionContext";
 import { ReportTemplateType } from "@/types/reportTemplate/reportTemplate";
 import reportTemplateApi from "@/types/reportTemplate/reportTemplateApi";
 
@@ -31,20 +28,16 @@ interface ReportBuilderSheetProps {
   patientId: string;
   trigger: React.ReactNode;
   onSuccess?: () => void;
-  permissions: string[];
 }
 
 export default function ReportBuilderSheet({
   facilityId,
   patientId,
   trigger,
-  permissions,
   onSuccess,
 }: ReportBuilderSheetProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const { hasPermission } = usePermissions();
-  const { canListTemplate } = getPermissions(hasPermission, permissions);
   const { data: reportTemplateData, isLoading: isReportTemplateLoading } =
     useQuery({
       queryKey: ["report-templates", facilityId],
@@ -53,7 +46,7 @@ export default function ReportBuilderSheet({
           facility: facilityId,
         },
       }),
-      enabled: open && canListTemplate,
+      enabled: open,
     });
 
   const { mutate: generateReport } = useMutation({

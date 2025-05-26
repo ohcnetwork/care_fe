@@ -40,16 +40,18 @@ import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
+import { getPermissions } from "@/common/Permissions";
 import {
   BACKEND_ALLOWED_EXTENSIONS,
   FILE_EXTENSIONS,
 } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder/ReportBuilderSheet";
 import { Encounter } from "@/types/emr/encounter";
+import reportApi from "@/types/reportTemplate/reportApi";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
@@ -76,18 +78,23 @@ export const DischargeTab = ({
     limit: 15,
   });
 
+  const { hasPermission } = usePermissions();
+  const { canListTemplate } = getPermissions(
+    hasPermission,
+    encounter.permissions,
+  );
+
   const {
     data: files,
     isLoading: filesLoading,
     refetch,
   } = useQuery({
     queryKey: ["discharge_files", encounter.id, qParams],
-    queryFn: query.debounced(routes.viewUpload, {
+    queryFn: query.debounced(reportApi.viewReports, {
       queryParams: {
-        file_type: type,
+        file_type: "discharge_summary",
         associating_id: encounter.id,
         name: qParams.name,
-        file_category: "discharge_summary",
         limit: qParams.limit,
         offset: ((qParams.page || 1) - 1) * qParams.limit,
         ...(qParams.is_archived !== undefined && {
@@ -99,6 +106,7 @@ export const DischargeTab = ({
 
   const fileManager = useFileManager({
     type: type,
+    mode: "report",
     onArchive: refetch,
     onEdit: refetch,
     uploadedFiles:
@@ -600,49 +608,49 @@ export const DischargeTab = ({
 
         <div className="flex flex-wrap items-center gap-2">
           <FilterButton />
-          <Button
-            variant="outline_primary"
-            className="min-w-24 sm:min-w-28"
-            onClick={async () => {
-              await queryClient.invalidateQueries({
-                queryKey: ["discharge_files"],
-              });
-              await queryClient.invalidateQueries({
-                queryKey: ["files"],
-              });
-              toast.success(t("refreshed"));
-            }}
-          >
-            <CareIcon icon="l-sync" className="mr-2" />
-            {t("refresh")}
-          </Button>
-          <ReportBuilderSheet
-            facilityId={facilityId || ""}
-            patientId={encounter?.patient.id || ""}
-            encounterId={encounter?.id || ""}
-            permissions={encounter?.permissions || []}
-            trigger={
-              <Button variant="primary" asChild>
-                <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer">
-                  <CareIcon
-                    icon="l-file-export"
-                    className="size-4 text-green-600"
-                  />
-                  {t("generate_report", {
-                    count: 2,
-                  })}
-                </div>
+          {type === "encounter" && encounter && canListTemplate && (
+            <>
+              <Button
+                variant="outline_primary"
+                className="min-w-24 sm:min-w-28"
+                onClick={async () => {
+                  await queryClient.invalidateQueries({
+                    queryKey: ["discharge_files"],
+                  });
+                  await queryClient.invalidateQueries({
+                    queryKey: ["files"],
+                  });
+                  toast.success(t("refreshed"));
+                }}
+              >
+                <CareIcon icon="l-sync" className="mr-2" />
+                {t("refresh")}
               </Button>
-            }
-            onSuccess={() => {
-              queryClient.invalidateQueries({
-                queryKey: ["discharge_files"],
-              });
-              queryClient.invalidateQueries({
-                queryKey: ["files"],
-              });
-            }}
-          />
+              <ReportBuilderSheet
+                facilityId={facilityId || ""}
+                patientId={encounter?.patient.id || ""}
+                encounterId={encounter?.id || ""}
+                trigger={
+                  <Button variant="primary" asChild>
+                    <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer">
+                      <CareIcon
+                        icon="l-file-export"
+                        className="size-4 text-green-600"
+                      />
+                      {t("generate_report", {
+                        count: 2,
+                      })}
+                    </div>
+                  </Button>
+                }
+                onSuccess={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["discharge_files"],
+                  });
+                }}
+              />
+            </>
+          )}
         </div>
 
         <div className="w-full sm:w-auto ml-auto">

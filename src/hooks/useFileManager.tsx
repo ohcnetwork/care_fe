@@ -31,9 +31,11 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import reportApi from "@/types/reportTemplate/reportApi";
 
 export interface FileManagerOptions {
   type: string;
+  mode?: "file" | "report";
   onArchive?: () => void;
   onEdit?: () => void;
   uploadedFiles?: FileUploadModel[];
@@ -58,10 +60,39 @@ export interface FileManagerResult {
   type: string;
 }
 
+const getApiRoutes = (type: string, mode: "file" | "report" = "file") => {
+  const isReport = mode === "report";
+  return {
+    retrieve: {
+      route: isReport ? reportApi.retrieveReport : routes.retrieveUpload,
+      getQueryParams: (associating_id: string) => ({
+        file_type: type,
+        associating_id,
+      }),
+      getPathParams: (id: string) => ({ id }),
+    },
+    edit: {
+      route: isReport ? reportApi.editReport : routes.editUpload,
+      getPathParams: (id: string) => ({ id }),
+    },
+    archive: {
+      route: isReport ? reportApi.archiveReport : routes.archiveUpload,
+      getPathParams: (id: string) => ({ id }),
+    },
+  };
+};
+
 export default function useFileManager(
   options: FileManagerOptions,
 ): FileManagerResult {
-  const { type: fileType, onArchive, onEdit, uploadedFiles } = options;
+  const {
+    type: fileType,
+    mode = "file",
+    onArchive,
+    onEdit,
+    uploadedFiles,
+  } = options;
+  const apiRoutes = getApiRoutes(fileType, mode);
 
   const { t } = useTranslation();
   const [file_state, setFileState] = useState<StateInterface>({
@@ -101,14 +132,10 @@ export default function useFileManager(
   ) => {
     return queryClient.fetchQuery({
       queryKey: ["file", fileType, associating_id, file.id],
-      queryFn: () =>
-        query(routes.retrieveUpload, {
-          queryParams: {
-            file_type: fileType,
-            associating_id,
-          },
-          pathParams: { id: file.id || "" },
-        })({} as any),
+      queryFn: query(apiRoutes.retrieve.route, {
+        queryParams: apiRoutes.retrieve.getQueryParams(associating_id),
+        pathParams: apiRoutes.retrieve.getPathParams(file.id || ""),
+      }),
     });
   };
 
@@ -150,9 +177,9 @@ export default function useFileManager(
 
   const { mutateAsync: archiveUpload } = useMutation({
     mutationFn: (body: { id: string; archive_reason: string }) =>
-      query(routes.archiveUpload, {
+      query(apiRoutes.archive.route, {
         body: { archive_reason: body.archive_reason },
-        pathParams: { id: body.id },
+        pathParams: apiRoutes.archive.getPathParams(body.id),
       })({} as any),
     onSuccess: () => {
       toast.success(t("file_archived_successfully"));
@@ -219,9 +246,9 @@ export default function useFileManager(
 
   const { mutateAsync: editUpload } = useMutation({
     mutationFn: (body: { id: string; name: string; associating_id: string }) =>
-      mutate(routes.editUpload, {
+      mutate(apiRoutes.edit.route, {
         body: { name: body.name },
-        pathParams: { id: body.id },
+        pathParams: apiRoutes.edit.getPathParams(body.id),
       })(body),
     onSuccess: (_, { associating_id }) => {
       toast.success(t("file_name_changed_successfully"));
