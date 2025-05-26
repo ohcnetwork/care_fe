@@ -408,16 +408,14 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormItem>
                       <FormLabel>{t("assigned_to")}</FormLabel>
                       <FormControl>
-                        <div data-cy="select-assigned-user">
-                          <UserSelector
-                            facilityId={form.watch("assigned_facility")?.id}
-                            selected={assignedToUser}
-                            onChange={handleUserChange}
-                            placeholder={t("search_users")}
-                            noOptionsMessage={t("no_users_found")}
-                            popoverClassName="w-full"
-                          />
-                        </div>
+                        <UserSelector
+                          facilityId={form.watch("assigned_facility")?.id}
+                          selected={assignedToUser}
+                          onChange={handleUserChange}
+                          placeholder={t("search_users")}
+                          noOptionsMessage={t("no_users_found")}
+                          popoverClassName="w-full"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
