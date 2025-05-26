@@ -42,15 +42,15 @@ export default function FileUploadDialog({
     onOpenChange(open);
   };
 
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<(string | null)[]>([]);
 
   useEffect(() => {
-    const urls = fileUpload.files
-      .filter((file) => file.type.startsWith("image/"))
-      .map((file) => URL.createObjectURL(file));
+    const urls = fileUpload.files.map((file) =>
+      file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+    );
     setPreviewUrls(urls);
     return () => {
-      urls.forEach((url) => URL.revokeObjectURL(url));
+      urls.forEach((url) => url && URL.revokeObjectURL(url));
     };
   }, [fileUpload.files]);
 
