@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate, useNavigationPrompt } from "raviger";
+import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -47,10 +47,11 @@ type PatientRegistrationProps = {
 
 export function PatientRegistration(props: PatientRegistrationProps) {
   const { staffId } = props;
-  const selectedSlot = JSON.parse(
-    localStorage.getItem("selectedSlot") ?? "",
-  ) as TokenSlot;
-  const reason = localStorage.getItem("reason");
+  const [params] = useQueryParams();
+  const selectedSlot = params.selectedSlot
+    ? (JSON.parse(decodeURIComponent(params.selectedSlot)) as TokenSlot)
+    : undefined;
+  const reason = params.reason || "";
 
   const { t } = useTranslation();
 
@@ -127,7 +128,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     useMutation({
       mutationFn: (body: AppointmentCreateRequest) =>
         mutate(PublicAppointmentApi.createAppointment, {
-          pathParams: { id: selectedSlot?.id },
+          pathParams: { id: selectedSlot?.id ?? "" },
           body,
           headers: {
             Authorization: `Bearer ${tokenData.token}`,

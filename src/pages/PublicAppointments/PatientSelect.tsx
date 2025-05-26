@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { ArrowLeft } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -111,10 +111,11 @@ export default function PatientSelect({
   staffId: string;
 }) {
   const { t } = useTranslation();
-  const selectedSlot = JSON.parse(
-    localStorage.getItem("selectedSlot") ?? "",
-  ) as TokenSlot;
-  const reason = localStorage.getItem("reason");
+  const [params] = useQueryParams();
+  const selectedSlot = params.selectedSlot
+    ? (JSON.parse(decodeURIComponent(params.selectedSlot)) as TokenSlot)
+    : undefined;
+  const reason = params.reason || "";
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
   const patientUserContext = usePatientContext();
@@ -149,7 +150,7 @@ export default function PatientSelect({
   const { mutate: createAppointment } = useMutation({
     mutationFn: (body: AppointmentCreateRequest) =>
       mutate(PublicAppointmentApi.createAppointment, {
-        pathParams: { id: selectedSlot?.id },
+        pathParams: { id: selectedSlot?.id ?? "" },
         body,
         headers: {
           Authorization: `Bearer ${tokenData.token}`,

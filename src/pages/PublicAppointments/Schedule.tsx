@@ -334,13 +334,15 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   if (appointmentId && appointment) {
                     handleRescheduleAppointment(appointment);
                   } else {
-                    localStorage.setItem(
-                      "selectedSlot",
-                      JSON.stringify(selectedSlot),
-                    );
-                    localStorage.setItem("reason", reason);
+                    const params = new URLSearchParams({
+                      selectedSlot: encodeURIComponent(
+                        JSON.stringify(selectedSlot),
+                      ),
+                      reason: reason,
+                    }).toString();
+
                     navigate(
-                      `/facility/${facilityId}/appointments/${staffId}/patient-select`,
+                      `/facility/${facilityId}/appointments/${staffId}/patient-select?${params}`,
                     );
                   }
                 }}
