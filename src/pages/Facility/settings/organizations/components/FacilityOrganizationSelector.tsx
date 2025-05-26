@@ -61,9 +61,10 @@ export default function FacilityOrganizationSelector(
   const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
   const [showAllOrgs, setShowAllOrgs] = useState(false);
   const [open, setOpen] = useState(false);
+  const [alreadySelected, setAlreadySelected] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
   const { data: rootOrganizations, isLoading: isLoadingRoot } = useQuery({
-    queryKey: ["organizations-root", facilityOrgSearch, showAllOrgs],
+    queryKey: ["facilityOrganization", facilityOrgSearch, showAllOrgs],
     queryFn: query.debounced(
       showAllOrgs
         ? facilityOrganizationApi.list
@@ -93,20 +94,31 @@ export default function FacilityOrganizationSelector(
   });
 
   const handleSelect = (org: FacilityOrganization) => {
+    const isAlreadySelected = !!currentOrganizations?.find(
+      (o) => o.id === org.id,
+    );
+    if (isAlreadySelected) {
+      setAlreadySelected(true);
+      setCurrentSelection(org);
+      setFacilityOrgSearch("");
+      return;
+    }
     if (org.has_children) {
       setNavigationLevels([...navigationLevels, org]);
-      setCurrentSelection(org);
     } else {
-      setCurrentSelection(org);
       handleConfirmSelection(org);
     }
+    setCurrentSelection(org);
     setFacilityOrgSearch("");
   };
 
   const handleConfirmSelection = (org: FacilityOrganization) => {
-    const newSelection = [...selectedOrganizations, org];
-    setSelectedOrganizations(newSelection);
-    onChange(newSelection.map((org) => org.id));
+    if (!selectedOrganizations.includes(org)) {
+      const newSelection = [...selectedOrganizations, org];
+      setSelectedOrganizations(newSelection);
+      onChange(newSelection.map((org) => org.id));
+      setAlreadySelected(true);
+    }
     setCurrentSelection(null);
     setNavigationLevels([]);
     setOpen(false);
@@ -263,6 +275,18 @@ export default function FacilityOrganizationSelector(
                 {currentSelection.name}
               </span>
             </div>
+            {alreadySelected && !currentSelection.has_children && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-2"
+                disabled={alreadySelected}
+                data-cy="confirm-organization"
+              >
+                <span>{t("already_selected")}</span>
+                <CareIcon icon="l-multiply" className="h-4 w-4" />
+              </Button>
+            )}
             {currentSelection.has_children && (
               <Button
                 variant="ghost"
@@ -316,8 +340,12 @@ export default function FacilityOrganizationSelector(
         className="w-full sm:w-auto"
       >
         <TabsList className="grid w-full grid-cols-2 sm:w-[300px]">
-          <TabsTrigger value="mine">{t("my_organizations")}</TabsTrigger>
-          <TabsTrigger value="all">{t("all_organizations")}</TabsTrigger>
+          <TabsTrigger value="mine" data-cy="my-organizations-tab">
+            {t("my_organizations")}
+          </TabsTrigger>
+          <TabsTrigger value="all" data-cy="all-organizations-tab">
+            {t("all_organizations")}
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 

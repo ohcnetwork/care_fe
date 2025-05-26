@@ -332,6 +332,7 @@ export default function CreateScheduleExceptionSheet({
                       className="mt-2 md:mt-0"
                       type="button"
                       disabled={isPending}
+                      onClick={() => form.reset()}
                     >
                       {t("cancel")}
                     </Button>
