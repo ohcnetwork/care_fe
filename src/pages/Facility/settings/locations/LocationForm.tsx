@@ -553,11 +553,11 @@ export default function LocationForm({
 
         <Button
           type="submit"
-          disabled={Boolean(
+          disabled={
             isPending ||
-              !form.formState.isValid ||
-              (location?.id && !form.formState.isDirty),
-          )}
+            !form.formState.isValid ||
+            (!!location?.id && !form.formState.isDirty)
+          }
         >
           {isPending ? (
             <>{isEditMode ? t("updating") : t("creating")}</>
