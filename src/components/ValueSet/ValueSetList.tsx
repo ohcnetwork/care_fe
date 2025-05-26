@@ -101,15 +101,6 @@ const RenderCard = ({
                   </Badge>
                 </div>
 
-                <div className="mb-4 border-b border-gray-200 pb-2">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("name")}
-                  </h3>
-                  <p className="mt-2 text-xl font-bold text-gray-900 truncate">
-                    {valueset.name}
-                  </p>
-                </div>
-
                 <div className="mb-4 border-b pb-2 border-gray-200">
                   <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     {t("name")}
@@ -117,14 +108,12 @@ const RenderCard = ({
                   {valueset.name && valueset.name.length > 20 ? (
                     <TooltipProvider>
                       <Tooltip>
-                        <TooltipTrigger className="turncate">
+                        <TooltipTrigger className="w-full flex">
                           <p className="mt-2 text-xl font-bold text-gray-900 truncate">
                             {valueset.name}
                           </p>
                         </TooltipTrigger>
-                        <TooltipContent className="bg-black text-white z-40">
-                          {valueset.name}
-                        </TooltipContent>
+                        <TooltipContent>{valueset.name}</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   ) : (
@@ -236,7 +225,7 @@ const RenderTable = ({
                   {valueset.name && valueset.name.length > 20 ? (
                     <TooltipProvider>
                       <Tooltip>
-                        <TooltipTrigger>
+                        <TooltipTrigger className="flex w-full">
                           <div className="text-sm font-medium text-gray-900 truncate">
                             {valueset.name}
                           </div>
