@@ -113,7 +113,19 @@ export default function PatientSelect({
   const { t } = useTranslation();
   const [params] = useQueryParams();
   const selectedSlot = params.selectedSlot
-    ? (JSON.parse(decodeURIComponent(params.selectedSlot)) as TokenSlot)
+    ? (() => {
+        try {
+          return JSON.parse(
+            decodeURIComponent(params.selectedSlot),
+          ) as TokenSlot;
+        } catch (error) {
+          console.error(
+            t("error_to_parse_selectedSlot_from_URL_parameters"),
+            error,
+          );
+          return undefined;
+        }
+      })()
     : undefined;
   const reason = params.reason || "";
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
