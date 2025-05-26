@@ -233,3 +233,15 @@ Cypress.Commands.add(
     });
   },
 );
+
+Cypress.Commands.add(
+  "selectComboboxDropdown",
+  (selector: string, value: string, unit?: string) => {
+    cy.get(selector).type(value);
+    if (unit) {
+      cy.get('[role="option"]').contains(unit).click();
+    } else {
+      cy.get('[role="option"]').contains(value).click();
+    }
+  },
+);

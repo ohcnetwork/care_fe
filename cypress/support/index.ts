@@ -51,6 +51,11 @@ declare global {
           position?: "first" | "last";
         },
       ): Chainable<Element>;
+      selectComboboxDropdown(
+        selector: string,
+        value: string,
+        unit?: string,
+      ): Chainable<Element>;
     }
   }
 }

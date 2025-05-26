@@ -98,7 +98,10 @@ export function SpecimenDefinitionDetail({
   };
 
   return (
-    <div className="space-y-2 p-2 md:p-6">
+    <div
+      className="space-y-2 p-2 md:p-6"
+      data-cy="specimen-definition-detail-page"
+    >
       {/* Header */}
       <div className="space-y-4">
         <Button
@@ -123,6 +126,7 @@ export function SpecimenDefinitionDetail({
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
+                    data-cy="specimen-definition-delete-btn"
                     variant="outline"
                     className="text-destructive"
                     size="sm"
@@ -148,6 +152,7 @@ export function SpecimenDefinitionDetail({
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
+                      data-cy="specimen-definition-delete-confirm-btn"
                       className={cn(buttonVariants({ variant: "destructive" }))}
                       onClick={handleDelete}
                     >
@@ -162,7 +167,11 @@ export function SpecimenDefinitionDetail({
               </AlertDialog>
             )}
             <Link href={`/specimen_definitions/${specimenDefinitionId}/edit`}>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                data-cy="specimen-definition-edit-btn"
+              >
                 <Pencil className="h-4 w-4 mr-2" />
                 {t("edit")}
               </Button>
