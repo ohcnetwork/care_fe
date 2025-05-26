@@ -75,7 +75,7 @@ export default function ReportBuilderList({
           reportTemplateData?.results?.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-10 border border-dashed border-gray-300 rounded-lg bg-gray-50 my-4">
             <div className="text-center space-y-5 max-w-md">
-              <div className="mx-auto bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center border border-gray-200 shadow-sm">
+              <div className="mx-auto bg-white p-4 rounded-full size-16 flex items-center justify-center border border-gray-200 shadow-sm">
                 <CareIcon
                   icon="l-file-medical"
                   className="text-blue-500 text-3xl"
@@ -90,12 +90,7 @@ export default function ReportBuilderList({
                 </p>
               </div>
               {canManageTemplate ? (
-                <Button
-                  variant="default"
-                  size="default"
-                  className="w-full sm:w-auto"
-                  asChild
-                >
+                <Button variant="default" className="w-full sm:w-auto" asChild>
                   <Link
                     href={`/reportbuilder/new`}
                     className="flex items-center gap-2"
