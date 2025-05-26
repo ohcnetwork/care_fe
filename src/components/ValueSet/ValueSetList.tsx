@@ -113,7 +113,9 @@ const RenderCard = ({
                             {valueset.name}
                           </p>
                         </TooltipTrigger>
-                        <TooltipContent>{valueset.name}</TooltipContent>
+                        <TooltipContent className="bg-black text-white">
+                          {valueset.name}
+                        </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   ) : (
@@ -230,7 +232,7 @@ const RenderTable = ({
                             {valueset.name}
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="bg-black text-white z-40">
+                        <TooltipContent className="bg-black text-white">
                           {valueset.name}
                         </TooltipContent>
                       </Tooltip>
