@@ -180,7 +180,8 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   </div>
                 )}
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row mt-2">
+
+              <div className="mt-3 w-full flex flex-col gap-3 sm:flex-row">
                 <div
                   className="flex w-full flex-wrap items-center justify-start gap-2 text-sm text-secondary-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
                   id="patient-consultationbadges"
@@ -458,44 +459,51 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     />
                   </Badge>
                 </div>
+                <div
+                  className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
+                  id="consultation-buttons"
+                >
+                  <PLUGIN_Component
+                    __name="PatientInfoCardQuickActions"
+                    encounter={encounter}
+                    className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+                  />
+                  {!disableButtons && (
+                    <div
+                      className="flex w-full flex-col gap-3 sm:w-auto"
+                      data-cy="update-encounter-button"
+                    >
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="primary">
+                            {inactiveEncounterStatus.includes(
+                              encounter.status,
+                            ) || !facilityIdExists
+                              ? t("actions")
+                              : t("update")}
+                            <ChevronDown className="ml-2 size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
+                        >
+                          <EncounterActions
+                            encounter={encounter}
+                            layout="dropdown"
+                          />
+                          <PLUGIN_Component
+                            __name="PatientInfoCardActions"
+                            encounter={encounter}
+                          />
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div
-          className="flex flex-col mt-4 items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
-          id="consultation-buttons"
-        >
-          <PLUGIN_Component
-            __name="PatientInfoCardQuickActions"
-            encounter={encounter}
-            className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
-          />
-          {!disableButtons && (
-            <div
-              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
-              data-cy="update-encounter-button"
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="primary">
-                    {inactiveEncounterStatus.includes(encounter.status) ||
-                    !facilityIdExists
-                      ? t("actions")
-                      : t("update")}
-                    <ChevronDown className="ml-2 size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <EncounterActions encounter={encounter} layout="dropdown" />
-                  <PLUGIN_Component
-                    __name="PatientInfoCardActions"
-                    encounter={encounter}
-                  />
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
         </div>
       </section>
     </>

@@ -700,7 +700,12 @@ export default function CreateScheduleTemplateSheet({
 
               <SheetFooter className="absolute inset-x-0 bottom-0 border-t border-gray-200 bg-white p-6">
                 <SheetClose asChild>
-                  <Button variant="outline" type="button" disabled={isPending}>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => form.reset()}
+                  >
                     {t("cancel")}
                   </Button>
                 </SheetClose>

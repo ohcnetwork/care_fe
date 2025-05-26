@@ -127,15 +127,7 @@ export default function CreateEncounterForm({
   }
 
   return (
-    <Sheet
-      open={isOpen}
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) {
-          form.reset();
-        }
-      }}
-    >
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         {trigger || (
           <Button
@@ -340,13 +332,24 @@ export default function CreateEncounterForm({
                 </FormItem>
               )}
             />
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isPending || !form.watch("organizations").length}
-            >
-              {isPending ? t("creating") : t("create_encounter")}
-            </Button>
+            <div className="flex justify-end mt-6 space-x-2">
+              <Button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  form.reset();
+                }}
+                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending || !form.watch("organizations").length}
+              >
+                {isPending ? t("creating") : t("create")}
+              </Button>
+            </div>
           </form>
         </Form>
       </SheetContent>

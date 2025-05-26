@@ -26,6 +26,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
@@ -36,6 +37,7 @@ interface Props {
   noOptionsMessage?: string;
   popoverClassName?: string;
   facilityId?: string;
+  organizationId?: string;
 }
 
 const PAGE_LIMIT = 50;
@@ -47,38 +49,58 @@ export default function UserSelector({
   noOptionsMessage,
   popoverClassName,
   facilityId,
+  organizationId,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const { ref, inView } = useInView();
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
-    useInfiniteQuery({
-      queryKey: ["users", facilityId, search],
-      queryFn: async ({ pageParam = 0 }) => {
-        const response = await query(
-          facilityId ? routes.facility.getUsers : UserApi.list,
-          {
-            pathParams: facilityId ? { facility_id: facilityId } : undefined,
-            queryParams: {
-              limit: String(PAGE_LIMIT),
-              offset: String(pageParam),
-              search_text: search,
-            },
-          },
-        )({ signal: new AbortController().signal });
+  const getPathParams = () => {
+    if (!facilityId) return undefined;
+    return organizationId
+      ? { facilityId, organizationId }
+      : { facility_id: facilityId };
+  };
 
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * PAGE_LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
+  const getQueryParams = (pageParam: number) => ({
+    limit: String(PAGE_LIMIT),
+    offset: String(pageParam),
+    search_text: search,
+  });
 
-  const usersList = data?.pages.flatMap((p) => p.results) || [];
+  const {
+    data: usersList,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+  } = useInfiniteQuery({
+    queryKey: ["users", facilityId, search, organizationId],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await query(
+        facilityId
+          ? organizationId
+            ? facilityOrganizationApi.listUsers
+            : routes.facility.getUsers
+          : UserApi.list,
+        {
+          pathParams: getPathParams(),
+          queryParams: getQueryParams(pageParam),
+        },
+      )({ signal: new AbortController().signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * PAGE_LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    select: (data) =>
+      data?.pages.flatMap((p) =>
+        p.results.map((u) => ("user" in u ? u.user : u)),
+      ) || [],
+  });
 
   useEffect(() => {
     if (inView && hasNextPage) fetchNextPage();
@@ -129,7 +151,7 @@ export default function UserSelector({
                 : noOptionsMessage || t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {usersList.map((user: UserBase, i) => (
+              {usersList?.map((user: UserBase, i) => (
                 <CommandItem
                   key={user.id}
                   value={`${formatName(user)} ${user.username ?? ""}`}

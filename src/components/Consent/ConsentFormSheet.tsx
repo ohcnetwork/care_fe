@@ -277,15 +277,7 @@ export default function ConsentFormSheet({
   };
 
   return (
-    <Sheet
-      open={isOpen}
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) {
-          form.reset();
-        }
-      }}
-    >
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant={isEdit ? "outline" : "primary"} className="gap-2">
           {isEdit ? (
@@ -603,7 +595,10 @@ export default function ConsentFormSheet({
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false);
+                  form.reset();
+                }}
                 className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
               >
                 {t("cancel")}
