@@ -103,10 +103,7 @@ export default function FacilityOrganizationFormSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["facilityOrganization", "list", facilityId, parentId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["getCurrentUser"],
+        queryKey: ["facilityOrganization"],
       });
       toast.success(t("organization_created_successfully"));
       setOpen(false);
@@ -128,10 +125,7 @@ export default function FacilityOrganizationFormSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["facilityOrganization", "list", facilityId, parentId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["getCurrentUser"],
+        queryKey: ["facilityOrganization"],
       });
       toast.success(t("organization_updated_successfully"));
       setOpen(false);
@@ -159,11 +153,16 @@ export default function FacilityOrganizationFormSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         {isEditMode ? (
-          <Button variant="white" size="sm" className="font-semibold">
+          <Button
+            data-cy="edit-department-team"
+            variant="white"
+            size="sm"
+            className="font-semibold"
+          >
             {t("edit")}
           </Button>
         ) : (
-          <Button>
+          <Button data-cy="add-department/team-button">
             <CareIcon icon="l-plus" className="mr-2 size-4" />
             {t("add_department_team")}
           </Button>
@@ -196,6 +195,7 @@ export default function FacilityOrganizationFormSheet({
                   <FormControl>
                     <Input
                       {...field}
+                      data-cy="department-team-name-input"
                       placeholder={t("enter_department_team_name")}
                     />
                   </FormControl>
@@ -212,7 +212,7 @@ export default function FacilityOrganizationFormSheet({
                   <FormLabel>{t(`type`)}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger data-cy="select-type-dropdown">
                         <SelectValue
                           placeholder={t("select_organization_type")}
                         />
@@ -240,6 +240,7 @@ export default function FacilityOrganizationFormSheet({
                   <FormControl>
                     <Textarea
                       {...field}
+                      data-cy="department-team-description-input"
                       placeholder={t("enter_department_team_description")}
                     />
                   </FormControl>
@@ -258,7 +259,15 @@ export default function FacilityOrganizationFormSheet({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending}
+                data-cy={
+                  isEditMode
+                    ? "update-organization-button"
+                    : "create-organization-button"
+                }
+              >
                 {isPending
                   ? isEditMode
                     ? t("updating")

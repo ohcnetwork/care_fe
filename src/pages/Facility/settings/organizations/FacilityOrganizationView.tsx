@@ -53,7 +53,7 @@ function OrganizationCard({
                   variant="primary"
                   className=" border border-transparent text-indigo-800 bg-indigo-100 px-2 py-1"
                 >
-                  {org.org_type}
+                  {t(`facility_organization_type__${org.org_type}`)}
                 </Badge>
               </div>
             </div>
@@ -71,7 +71,10 @@ function OrganizationCard({
                 className="font-semibold"
                 asChild
               >
-                <Link href={`/departments/${org.id}/departments`}>
+                <Link
+                  href={`/departments/${org.id}/departments`}
+                  data-cy="view-department-team"
+                >
                   {t("see_details")}
                 </Link>
               </Button>
@@ -133,6 +136,7 @@ export default function FacilityOrganizationView({
               <Input
                 placeholder={t("search_by_department_team_name")}
                 value={qParams.search || ""}
+                data-cy="search-department-team"
                 onChange={(e) => {
                   updateQuery({ search: e.target.value || undefined });
                 }}
@@ -157,7 +161,7 @@ export default function FacilityOrganizationView({
         </div>
       ) : (
         <div className="space-y-6 md:pb-6">
-          <div className="space-y-4">
+          <div className="space-y-4" data-cy="department-team-list">
             {children?.results?.length ? (
               children.results.map((org) => (
                 <OrganizationCard
