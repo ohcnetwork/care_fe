@@ -372,6 +372,9 @@ export default function ManageQuestionnaireTagsSheet({
               variant="outline"
               onClick={() => {
                 setSelectedTags(questionnaire.tags);
+                setNewTagName("");
+                setNewTagSlug("");
+                setIsCreateOpen(false);
                 setOpen(false);
               }}
             >

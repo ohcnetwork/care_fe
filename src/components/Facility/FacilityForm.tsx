@@ -91,7 +91,7 @@ export default function FacilityForm({
       phone_number: "",
       latitude: undefined,
       longitude: undefined,
-      is_public: false,
+      is_public: true,
     },
   });
 

@@ -187,7 +187,7 @@ export default function EditUserRoleSheet({
               {t("select_new_role")}
             </Label>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="h-12">
+              <SelectTrigger className="h-12" data-cy="select-updated-role">
                 <SelectValue placeholder={t("select_role")} />
               </SelectTrigger>
               <SelectContent className="w-[var(--radix-select-trigger-width)]">
@@ -212,13 +212,18 @@ export default function EditUserRoleSheet({
               className="w-full"
               onClick={handleUpdateRole}
               disabled={selectedRole === userRole.role.id}
+              data-cy="update-user-role"
             >
               {t("update_role")}
             </Button>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  data-cy="remove-user"
+                >
                   {t("remove_user")}
                 </Button>
               </AlertDialogTrigger>
@@ -239,6 +244,7 @@ export default function EditUserRoleSheet({
                   <AlertDialogAction
                     onClick={() => removeRole()}
                     className={cn(buttonVariants({ variant: "destructive" }))}
+                    data-cy="confirm-remove-user"
                   >
                     {t("remove")}
                   </AlertDialogAction>
