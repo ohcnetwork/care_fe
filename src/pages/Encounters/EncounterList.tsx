@@ -164,7 +164,6 @@ export function EncounterList({
     },
     {
       key: "encounter_id",
-      label: t("encounter_id"),
       type: "text" as const,
       placeholder: t("search_by_encounter_id"),
       value: encounter_id || "",
