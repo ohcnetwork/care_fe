@@ -51,7 +51,7 @@ export default function QuestionnairePreviewProperties({
                   variant="primary"
                   className="flex items-center gap-1"
                 >
-                  <Building className="h-3 w-3" />
+                  <Building className="size-3" />
                   {tag.name}
                 </Badge>
               ))}
