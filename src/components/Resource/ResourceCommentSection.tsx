@@ -73,7 +73,11 @@ const CommentSection = ({ id }: { id: string }) => {
         />
 
         <div className="flex w-full justify-end mt-2">
-          <Button variant="primary" onClick={submitComment}>
+          <Button
+            variant="primary"
+            onClick={submitComment}
+            disabled={!/\S+/.test(commentBox)}
+          >
             {t("post_your_comment")}
           </Button>
         </div>
