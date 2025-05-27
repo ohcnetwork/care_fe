@@ -42,6 +42,16 @@ const isChildActive = (link: NavigationLink, currentPath: string): boolean => {
   return false;
 };
 
+const isAnyHiddenChildActive = (
+  link: NavigationLink,
+  currentPath: string,
+): boolean => {
+  if (!link.children) return false;
+  return link.children
+    .filter((child) => child.hidden)
+    .some((child) => child.url && currentPath === child.url);
+};
+
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -51,7 +61,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
     <SidebarGroup>
       <SidebarMenu>
         {links
-          .filter((link) => link.visibility !== false)
+          .filter((link) => link.visibility !== false && !link.hidden)
           .map((link) => (
             <>
               {link.children ? (
@@ -74,12 +84,10 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
                             {
                               "group-data-collapsible:data-[active=true]:bg-white group-data-collapsible:data-[active=true]:text-green-700 group-collapsible:data-[active=true]:shadow":
-                                link.name === "Patients" &&
-                                /^\/facility\/[^/]+\/patient\/[^/]+(\/[^/]+)?$/.test(
-                                  currentPath,
-                                ),
+                                isAnyHiddenChildActive(link, currentPath),
                               "group-data-[state=closed]/collapsible:data-[active=true]:bg-white group-data-[state=closed]/collapsible:data-[active=true]:text-green-700 group-data-[state=closed]/collapsible:data-[active=true]:shadow":
-                                isChildActive(link, currentPath),
+                                isChildActive(link, currentPath) &&
+                                !link.hidden,
                             },
                           )}
                         >
@@ -99,30 +107,32 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <SidebarMenuSub>
-                          {link.children.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.name}>
-                              <SidebarMenuSubButton
-                                asChild
-                                data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
-                                className={cn(
-                                  "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700",
-                                  {
-                                    "bg-white text-green-700 shadow":
-                                      isChildActive(subItem, currentPath),
-                                  },
-                                )}
-                              >
-                                <ActiveLink
-                                  href={subItem.url}
-                                  className="w-full"
-                                  activeClass="bg-white text-green-700 shadow"
-                                  exactActiveClass="bg-white text-green-700 shadow"
+                          {link.children
+                            .filter((subItem) => !subItem.hidden)
+                            .map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.name}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
+                                  className={cn(
+                                    "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700",
+                                    {
+                                      "bg-white text-green-700 shadow":
+                                        isChildActive(subItem, currentPath),
+                                    },
+                                  )}
                                 >
-                                  {subItem.name}
-                                </ActiveLink>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          ))}
+                                  <ActiveLink
+                                    href={subItem.url}
+                                    className="w-full"
+                                    activeClass="bg-white text-green-700 shadow"
+                                    exactActiveClass="bg-white text-green-700 shadow"
+                                  >
+                                    {subItem.name}
+                                  </ActiveLink>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
                         </SidebarMenuSub>
                       </CollapsibleContent>
                     </SidebarMenuItem>

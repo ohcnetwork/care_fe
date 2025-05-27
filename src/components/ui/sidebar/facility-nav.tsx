@@ -23,6 +23,7 @@ export interface NavigationLink {
   icon?: React.ReactNode;
   visibility?: boolean;
   children?: NavigationLink[];
+  hidden?: boolean;
 }
 
 interface FacilityNavProps {
@@ -60,7 +61,7 @@ function generateFacilityLinks(
     },
     {
       name: t("patients"),
-      url: `${baseUrl}/patient/${patientId}`,
+      url: `${baseUrl}/patients`,
       icon: <CareIcon icon="d-patient" />,
       visibility:
         permissions.canCreateAppointment ||
@@ -84,6 +85,11 @@ function generateFacilityLinks(
         {
           name: t("locations"),
           url: `${baseUrl}/encounters/locations`,
+        },
+        {
+          name: t("patient"),
+          url: `${baseUrl}/patient/${patientId}`,
+          hidden: true,
         },
       ],
     },
