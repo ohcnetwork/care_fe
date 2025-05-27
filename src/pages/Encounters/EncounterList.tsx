@@ -170,7 +170,6 @@ export function EncounterList({
     },
     {
       key: "external_identifier",
-      label: t("external_id"),
       type: "text" as const,
       placeholder: t("search_by_external_id"),
       value: external_identifier || "",
