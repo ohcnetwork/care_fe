@@ -372,7 +372,7 @@ export default function LocationForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("name")}</FormLabel>
+              <FormLabel aria-required>{t("name")}</FormLabel>
               <FormControl>
                 <Input {...field} data-cy="location-name-input" />
               </FormControl>
@@ -553,9 +553,11 @@ export default function LocationForm({
 
         <Button
           type="submit"
-          disabled={Boolean(
-            isPending || (location?.id && !form.formState.isDirty),
-          )}
+          disabled={
+            isPending ||
+            !form.formState.isValid ||
+            (!!location?.id && !form.formState.isDirty)
+          }
         >
           {isPending ? (
             <>{isEditMode ? t("updating") : t("creating")}</>
