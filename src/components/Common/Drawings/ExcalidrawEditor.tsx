@@ -162,7 +162,7 @@ export default function ExcalidrawEditor({
           onClick={handleBack}
           className="shrink-0"
         >
-          <CareIcon icon="l-arrow-left" />
+          <CareIcon icon="l-arrow-left" className="text-xl" />
           <span className="hidden sm:inline">{t("back")}</span>
         </Button>
         {!drawingId ? (
