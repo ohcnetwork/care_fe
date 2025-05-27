@@ -344,10 +344,11 @@ export default function CreateEncounterForm({
                 {t("cancel")}
               </Button>
               <Button
+                data-cy="create-encounter-button"
                 type="submit"
                 disabled={isPending || !form.watch("organizations").length}
               >
-                {isPending ? t("creating") : t("create")}
+                {isPending ? t("creating") : t("create_encounter")}
               </Button>
             </div>
           </form>
