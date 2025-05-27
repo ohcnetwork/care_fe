@@ -392,7 +392,7 @@ export function CreateInvoicePage({
                       <TableHead className="border-y bg-gray-100 text-gray-700 text-right">
                         {t("unit_price")} ({t("inr")})
                       </TableHead>
-                      <TableHead className="border rounded-tr-md bg-gray-100 text-gray-700 text-right">
+                      <TableHead className="border rounded-tr-md bg-gray-100 text-gray-700 text-right font-semibold">
                         {t("amount")} ({t("inr")})
                       </TableHead>
                     </TableRow>
