@@ -214,7 +214,7 @@ export default function ValueSetSelect({
     <Command filter={() => 1} className="rounded-t-3xl">
       <div
         className={cn(
-          "px-3 border-b border-gray-200 flex justify-between items-center",
+          "px-3 pb-3 border-b border-gray-200 flex justify-between items-center",
           title && "py-3",
         )}
       >

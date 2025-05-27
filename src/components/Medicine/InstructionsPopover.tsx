@@ -164,7 +164,7 @@ export default function InstructionsPopover({
       <PopoverTrigger asChild>
         {TriggerButton(currentInstructions, disabledButton)}
       </PopoverTrigger>
-      <PopoverContent side="bottom" align="start" className="w-xl">
+      <PopoverContent side="bottom" align="start" className="w-xl p-0">
         <InstructionContentSection
           currentInstructions={currentInstructions}
           isReadOnly={isReadOnly}
