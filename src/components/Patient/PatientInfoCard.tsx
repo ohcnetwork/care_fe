@@ -326,7 +326,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       currentOrganizations={encounter.organizations}
                       facilityId={encounter.facility.id}
                       trigger={
-                        <div className="flex flex-wrap gap-2">
+                        <div
+                          className="flex flex-wrap gap-2"
+                          data-cy="add-organization-badge"
+                        >
                           {encounter.organizations.map((org) =>
                             organizationBadge(org),
                           )}
@@ -336,7 +339,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               variant="outline"
                             >
                               <Building className="size-4 text-blue-400" />
-                              Add Organizations
+                              {t("add_organization_other")}
                             </Badge>
                           )}
                         </div>
