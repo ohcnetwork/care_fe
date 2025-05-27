@@ -27,7 +27,7 @@ export function PatientHeader({ patient, facilityId }: PatientHeaderProps) {
 
   return (
     <div>
-      <div className="flex items-center gap-8 justify-start">
+      <div className="flex items-center gap-8 justify-start flex-wrap">
         <div className="flex flex-col">
           <div className="text-gray-600 text-sm font-medium">
             {t("patient") + " " + t("name")}

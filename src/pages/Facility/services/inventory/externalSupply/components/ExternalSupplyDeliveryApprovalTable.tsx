@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Select,
   SelectContent,
@@ -29,7 +30,6 @@ import {
 } from "@/components/ui/table";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/definition-list/EmptyState";
 
 import query from "@/Utils/request/query";
 import { SupplyDeliveryDetails } from "@/pages/Facility/services/supply/components/SupplyDeliveryDetails";

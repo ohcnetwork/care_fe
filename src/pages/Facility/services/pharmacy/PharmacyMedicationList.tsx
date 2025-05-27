@@ -3,8 +3,6 @@ import { ArrowLeftIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -74,13 +72,19 @@ export default function PharmacyMedicationList({
           )
         }
       >
-        <TabsList className="flex">
-          <TabsTrigger value="prescriptions" id="user-card-view">
-            <CareIcon icon="l-credit-card" className="text-lg" />
+        <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
+          <TabsTrigger
+            value="prescriptions"
+            id="user-card-view"
+            className="border-0 border-b-2 border-transparent px-4 text-base font-semibold data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none text-gray-600 hover:text-gray-900 gap-2"
+          >
             <span>{t("prescriptions")}</span>
           </TabsTrigger>
-          <TabsTrigger value="dispense" id="user-list-view">
-            <CareIcon icon="l-list-ul" className="text-lg" />
+          <TabsTrigger
+            value="dispense"
+            id="user-list-view"
+            className="border-0 border-b-2 border-transparent px-4 text-base font-semibold data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none text-gray-600 hover:text-gray-900 gap-2"
+          >
             <span>{t("dispense")}</span>
           </TabsTrigger>
         </TabsList>

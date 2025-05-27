@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { EmptyState } from "@/components/ui/empty-state";
 import { SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SelectItem } from "@/components/ui/select";
 import { Select } from "@/components/ui/select";
@@ -31,7 +32,6 @@ import {
 } from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/definition-list/EmptyState";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -70,21 +70,29 @@ function MedicationTable({
 }: MedicationTableProps) {
   const { t } = useTranslation();
 
+  const tableHeadClass =
+    "border-x p-3 text-gray-700 text-sm font-medium leading-5";
+  const tableCellClass = "border-x p-3 text-gray-950";
+
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border shadow-sm w-full bg-white overflow-hidden">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[50px]" />
-            <TableHead>{t("medicine")}</TableHead>
-            <TableHead>{t("dosage")}</TableHead>
-            <TableHead>{t("frequency")}</TableHead>
-            <TableHead>{t("status")}</TableHead>
-            <TableHead>{t("prepared_date")}</TableHead>
-            <TableHead>{t("payment_status")}</TableHead>
+        <TableHeader className="bg-gray-100">
+          <TableRow className="border-b">
+            <TableHead className={cn(tableHeadClass, "w-[50px]")} />
+            <TableHead className={tableHeadClass}>{t("medicine")}</TableHead>
+            <TableHead className={tableHeadClass}>{t("dosage")}</TableHead>
+            <TableHead className={tableHeadClass}>{t("frequency")}</TableHead>
+            <TableHead className={tableHeadClass}>{t("status")}</TableHead>
+            <TableHead className={tableHeadClass}>
+              {t("prepared_date")}
+            </TableHead>
+            <TableHead className={tableHeadClass}>
+              {t("payment_status")}
+            </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="bg-white">
           {medications.map((medication) => {
             const instruction = medication.dosage_instruction[0] ?? {};
             const frequency = instruction?.timing?.code;
@@ -95,8 +103,11 @@ function MedicationTable({
               medication.status === MedicationDispenseStatus.in_progress;
 
             return (
-              <TableRow key={medication.id}>
-                <TableCell>
+              <TableRow
+                key={medication.id}
+                className="border-b hover:bg-gray-50"
+              >
+                <TableCell className={tableCellClass}>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -125,13 +136,13 @@ function MedicationTable({
                     </Tooltip>
                   </TooltipProvider>
                 </TableCell>
-                <TableCell>
+                <TableCell className={cn(tableCellClass, "font-medium")}>
                   {medication.item.product.product_knowledge.name}
                 </TableCell>
-                <TableCell>
+                <TableCell className={tableCellClass}>
                   {dosage ? `${dosage.value} ${dosage.unit.display}` : "-"}
                 </TableCell>
-                <TableCell>
+                <TableCell className={tableCellClass}>
                   {instruction?.as_needed_boolean
                     ? `${t("as_needed_prn")} ${
                         instruction?.as_needed_for?.display
@@ -140,21 +151,22 @@ function MedicationTable({
                       }`
                     : frequency?.display || "-"}
                 </TableCell>
-                <TableCell>
-                  <span
-                    className={cn(
-                      "px-2 py-1 rounded-full text-xs font-medium",
-                      STATUS_COLORS[medication.status],
-                    )}
+                <TableCell className={tableCellClass}>
+                  <Badge
+                    variant="outline"
+                    className={STATUS_COLORS[medication.status]}
                   >
                     {t(medication.status)}
-                  </span>
+                  </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className={tableCellClass}>
                   {new Date(medication.when_prepared).toLocaleDateString()}
                 </TableCell>
-                <TableCell>
-                  <Badge variant={isPaid ? "primary" : "destructive"}>
+                <TableCell className={tableCellClass}>
+                  <Badge
+                    variant={isPaid ? "outline" : "destructive"}
+                    className={isPaid ? "bg-green-100 text-green-700" : ""}
+                  >
                     {isPaid ? t("paid") : t("unpaid")}
                   </Badge>
                 </TableCell>
@@ -236,7 +248,7 @@ export default function DispensedMedicationList({
   };
 
   return (
-    <div className="container mx-auto">
+    <div>
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center justify-between w-full">
@@ -264,6 +276,7 @@ export default function DispensedMedicationList({
       </div>
       <div className="mb-4">
         {/* Desktop Tabs */}
+        {/* Todo: Use extracted FilterTabs component */}
         <Tabs
           value={qParams.status ?? "all"}
           onValueChange={(value) =>
@@ -283,6 +296,7 @@ export default function DispensedMedicationList({
           </TabsList>
         </Tabs>
         {/* Mobile Select */}
+        {/* Todo: Use extracted FilterSelect component */}
         <Select
           value={qParams.status ?? "all"}
           onValueChange={(value) =>

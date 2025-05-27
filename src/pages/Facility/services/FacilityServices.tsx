@@ -8,10 +8,10 @@ import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 import Page from "@/components/Common/Page";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/definition-list/EmptyState";
 
 import useFilters from "@/hooks/useFilters";
 

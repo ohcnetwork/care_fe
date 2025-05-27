@@ -42,13 +42,14 @@ export function CreateInvoiceSheet({
           <SheetTitle>{t("create_invoice")}</SheetTitle>
           <SheetDescription>{t("create_invoice_description")}</SheetDescription>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
+        <ScrollArea className="h-[calc(100vh-8rem)] mt-6 -mx-4">
           <CreateInvoicePage
             facilityId={facilityId}
             accountId={accountId}
             preSelectedChargeItems={preSelectedChargeItems}
             redirectInNewTab={true}
             onSuccess={onSuccess}
+            showHeader={false}
           />
         </ScrollArea>
       </SheetContent>

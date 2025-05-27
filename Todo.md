@@ -16,7 +16,7 @@ x : Done
 - [x] Add pagination where it's missing - Jeevan
 - [x] Add a warning colour for low stock items in the inventory item list - Jeevan
 - [-] Edit page of the supply delivery details is crashing - Khavin
-- [ ] Medications added from our product cannot be administered due to missing code
+- [-] Medications added from our product cannot be administered due to missing code - Jeevan/Vignesh; Medication Administration API needs support for product knowledge
 - [-] Each modification to the pre-filled quantity in bill medication triggers a component re-render, which disrupts the editing experience. - Khavin
 - [x] Remove unknown from Specimen Definition Status - Jeevan
 
@@ -26,12 +26,11 @@ x : Done
 - [-] All instance level tax codes should be shown as an option in the charge item def creator - Check with Vignesh
 - [-] Add support for information components in chargeDef and Charge Item. - Rithvik
 - [-] Consider disabling onWheelChange for input[type=number] fields. - [hold till @bodhi confirms]
-- [ ] When creating a charge item in questionnaire we should allow users to pick discount and tax and quantitiy
 - [x] Remove -- in the end date column if the billing account still ongoing - Amjith
 - [-] Change default account name to {patient-name} + date to keep it a little bit unique and searchable in billing account dashboard - Amjith, Vignesh
 - [ ] When a billing account of a patient is on hold, we should restrict users from creating any charge item to the patient, as per doc, but our platform will be creating a new wallet by ignoring the on-hold account
 - [ ] Allow only one active billing account for a patient at a time , Take a product suggestion before working on this
-- [ ] When we click past account button in the account details page, it should redirect to the patient account overview page, rather than the entire hospital account overview page
+- [x] When we click past account button in the account details page, it should redirect to the patient account overview page, rather than the entire hospital account overview page - Jeevan
 - [ ] When attempting to close a billing account with pending charge items that haven't been invoiced, disable the 'Close Account' button in the pop-up and display a message stating: 'You cannot close an account with pending charge items.
 - [x] Disable record payment button in billing account details page, if the account status is not active - Amjith
 - [ ] Display the negative balance in the 'Amount Due' section as well to indicate that the user has overpaid beyond their actual bill.
@@ -57,7 +56,7 @@ x : Done
 - [ ] SR details page - fix decimal points to two and round off amounts in charge items.
 - [x] SR details page — In the Add Charge Item slide over, display the final amount after discount and tax, and the amount split when hovering over the (!) icon. -> We can't show the total here as backend deos not return the total for CID and we decided to not do any manual calculations in FE, see item below: - Yash
 - [x] Add info on Charge Item created on SR show (This includes total from BE). - Yash
-- [ ] SR details page- Remove the back button from the sample identification QR print preview pop-up. / adjust the behavior to only close the pop-up
+- [-] SR details page- Remove the back button from the sample identification QR print preview pop-up. / adjust the behavior to only close the pop-up - Manyu
 - [ ] SR details page - Specimen ID cannot be hidden in the Service Request QR
 - [ ] SR details page - Add a hyperlink to the payment page, for better UX
 - [ ] SR Details page - Disable the process step once the report generation is done | Confirm with Bodhi before working on this

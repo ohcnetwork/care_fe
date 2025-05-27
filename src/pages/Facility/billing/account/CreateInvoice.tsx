@@ -4,7 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -12,8 +12,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -41,7 +41,6 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
-  CHARGE_ITEM_STATUS_STYLES,
   ChargeItemRead,
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
@@ -71,6 +70,7 @@ interface CreateInvoicePageProps {
   preSelectedChargeItems?: ChargeItemRead[];
   redirectInNewTab?: boolean;
   onSuccess?: () => void;
+  showHeader?: boolean;
 }
 
 interface PriceComponentRowProps {
@@ -97,11 +97,11 @@ function PriceComponentRow({
           <TableCell>
             {component.code && `${component.code.display} `}({label})
           </TableCell>
-          <TableCell>
+          <TableCell></TableCell>
+          <TableCell className="text-right">
             <MonetaryDisplay {...component} />
           </TableCell>
-          <TableCell></TableCell>
-          <TableCell>
+          <TableCell className="text-right">
             {component.monetary_component_type ===
             MonetaryComponentType.discount
               ? "- "
@@ -120,6 +120,7 @@ export function CreateInvoicePage({
   preSelectedChargeItems,
   redirectInNewTab = false,
   onSuccess,
+  showHeader = true,
 }: CreateInvoicePageProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -267,26 +268,28 @@ export function CreateInvoicePage({
     [];
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">{t("create_invoice")}</h1>
-        <Link
-          href={`/facility/${facilityId}/billing/account/${accountId}`}
-          className="text-sm text-gray-500 hover:text-gray-700"
-        >
-          ← {t("back_to_account")}
-        </Link>
-      </div>
+    <div className="container mx-auto md:px-4 pb-6">
+      {showHeader && (
+        <div className="mb-6">
+          <Link
+            href={`/facility/${facilityId}/billing/account/${accountId}`}
+            className="text-xs text-gray-500 hover:text-gray-700"
+          >
+            ← {t("back_to_account")}
+          </Link>
+          <h3 className="pt-2">{t("create_invoice")}</h3>
+        </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="space-y-6">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("title")}</FormLabel>
+                  <FormLabel>{t("invoice title")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -298,48 +301,49 @@ export function CreateInvoicePage({
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="payment_terms"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("payment_terms")}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        disabled={createMutation.isPending}
+                        placeholder={t("payment_terms_placeholder")}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="payment_terms"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("payment_terms")}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      disabled={createMutation.isPending}
-                      placeholder={t("payment_terms_placeholder")}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="note"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("note")}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      disabled={createMutation.isPending}
-                      placeholder={t("invoice_note_placeholder")}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="note"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("note")}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        disabled={createMutation.isPending}
+                        placeholder={t("invoice_note_placeholder")}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">
+          <div className="pb-2">
+            <div className="text-sm font-medium text-gray-950">
               {t("billable_charge_items")}
-            </h3>
+            </div>
             {isLoading ? (
               <TableSkeleton count={3} />
             ) : !chargeItems || chargeItems.length === 0 ? (
@@ -347,72 +351,108 @@ export function CreateInvoicePage({
                 {t("no_billable_items")}
               </div>
             ) : (
-              <div className="rounded-md border">
-                <Table>
+              <div className="pr-1">
+                <Table className="border-separate border-spacing-y-2 border-spacing-x-0">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[50px]"></TableHead>
-                      <TableHead>{t("title")}</TableHead>
-                      <TableHead>{t("unit_price")}</TableHead>
-                      <TableHead>{t("quantity")}</TableHead>
-                      <TableHead>{t("total")}</TableHead>
-                      <TableHead>{t("status")}</TableHead>
+                      <TableHead className="w-[50px] border-y border-l rounded-tl-md bg-gray-100 align-middle">
+                        <div className="flex items-center p-1">
+                          <Checkbox
+                            checked={
+                              chargeItems.length > 0 &&
+                              chargeItems.every((item) => selectedRows[item.id])
+                            }
+                            onCheckedChange={(_checked) => {
+                              const newSelection = { ...selectedRows };
+                              const allSelected = chargeItems.every(
+                                (item) => selectedRows[item.id],
+                              );
+
+                              chargeItems.forEach((item) => {
+                                newSelection[item.id] = !allSelected;
+                              });
+
+                              setSelectedRows(newSelection);
+                              form.setValue(
+                                "charge_items",
+                                Object.entries(newSelection)
+                                  .filter(([_, selected]) => selected)
+                                  .map(([id]) => id),
+                              );
+                            }}
+                          />
+                        </div>
+                      </TableHead>
+                      <TableHead className="border-y bg-gray-100 text-gray-700">
+                        {t("medicine")}
+                      </TableHead>
+                      <TableHead className="border bg-gray-100 text-gray-700">
+                        {t("quantity")}
+                      </TableHead>
+                      <TableHead className="border-y bg-gray-100 text-gray-700 text-right">
+                        {t("unit_price")} ({t("inr")})
+                      </TableHead>
+                      <TableHead className="border rounded-tr-md bg-gray-100 text-gray-700 text-right font-semibold">
+                        {t("amount")} ({t("inr")})
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
+                  <TableBody className="bg-white">
                     {chargeItems.filter(Boolean).flatMap((item) => {
                       const isExpanded = expandedItems[item.id] || false;
                       const baseComponent = getBaseComponent(item);
                       const baseAmount = baseComponent?.amount || 0;
 
                       const mainRow = (
-                        <TableRow key={item.id} className="hover:bg-muted/50">
-                          <TableCell className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedRows[item.id] || false}
-                              onChange={() => handleRowSelection(item.id)}
-                              className="h-4 w-4 rounded border-gray-300"
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => toggleItemExpand(item.id)}
-                            >
-                              {isExpanded ? (
-                                <ChevronUp className="h-4 w-4" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {item.title}
-                            <div className="text-xs text-gray-500">
-                              {item.id}
+                        <TableRow
+                          key={item.id}
+                          className="hover:bg-gray-50 divide-x"
+                        >
+                          <TableCell className="border-l border-y rounded-tl-md align-middle">
+                            <div className="flex items-center gap-2 p-1">
+                              <Checkbox
+                                checked={selectedRows[item.id] || false}
+                                onCheckedChange={() =>
+                                  handleRowSelection(item.id)
+                                }
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="size-6"
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  event.stopPropagation();
+                                  toggleItemExpand(item.id);
+                                }}
+                                type="button"
+                              >
+                                {isExpanded ? (
+                                  <ChevronUp className="size-4" />
+                                ) : (
+                                  <ChevronDown className="size-4" />
+                                )}
+                              </Button>
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="font-medium text-base border-y text-gray-950">
+                            {item.title}
+                          </TableCell>
+                          <TableCell className="font-medium text-base border-y text-gray-950">
+                            {item.quantity}
+                          </TableCell>
+                          <TableCell className="font-medium text-base border-y text-gray-950 text-right">
                             <MonetaryDisplay amount={baseAmount} />
                           </TableCell>
-                          <TableCell>{item.quantity}</TableCell>
-                          <TableCell>
-                            <MonetaryDisplay amount={item.total_price} />
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={CHARGE_ITEM_STATUS_STYLES[item.status]}
-                            >
-                              {t(item.status)}
-                            </Badge>
+                          <TableCell className="border-y border-r p-0 overflow-hidden rounded-tr-md">
+                            <div className="bg-gray-100 border border-white rounded-md p-4 text-right font-semibold text-base text-gray-950">
+                              <MonetaryDisplay amount={item.total_price} />
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
 
                       if (!isExpanded) return [mainRow];
-
                       const detailRows = [
                         <PriceComponentRow
                           key={`${item.id}-discounts`}
@@ -443,16 +483,15 @@ export function CreateInvoicePage({
                       const summaryRow = (
                         <TableRow
                           key={`${item.id}-summary`}
-                          className="bg-muted/30 font-medium"
+                          className="bg-muted/30 font-medium border"
                         >
                           <TableCell></TableCell>
-                          <TableCell>{t("total")}</TableCell>
+                          <TableCell>{t("amount")}</TableCell>
                           <TableCell></TableCell>
                           <TableCell></TableCell>
-                          <TableCell>
+                          <TableCell className="text-right">
                             <MonetaryDisplay amount={item.total_price} />
                           </TableCell>
-                          <TableCell></TableCell>
                         </TableRow>
                       );
 
@@ -464,6 +503,19 @@ export function CreateInvoicePage({
                 </Table>
               </div>
             )}
+            <FormField
+              control={form.control}
+              name="charge_items"
+              render={({ field }) => (
+                <FormMessage className="text-xs text-gray-950 italic">
+                  {field.value.length > 0
+                    ? `${t("selected_items_count", {
+                        count: field.value.length,
+                      })}`
+                    : t("no_items_selected")}
+                </FormMessage>
+              )}
+            />
             {hasNextPage && (
               <div className="mt-4 flex justify-center">
                 <Button
@@ -476,36 +528,33 @@ export function CreateInvoicePage({
                 </Button>
               </div>
             )}
-            <FormField
-              control={form.control}
-              name="charge_items"
-              render={({ field }) => (
-                <FormMessage>
-                  {field.value.length > 0
-                    ? `${t("selected_items_count")} ${field.value.length}`
-                    : t("no_items_selected")}
-                </FormMessage>
-              )}
-            />
           </div>
 
           <div className="flex justify-end space-x-4">
             <Button
               type="button"
-              variant="outline"
+              variant="link"
+              className="text-base font-semibold underline"
               onClick={() => window.history.back()}
               disabled={createMutation.isPending}
             >
               {t("cancel")}
             </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
+            <Button
+              type="submit"
+              variant="primary_gradient"
+              disabled={createMutation.isPending}
+            >
               {createMutation.isPending ? (
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                   {t("creating")}
                 </div>
               ) : (
-                t("create_invoice")
+                <div className="flex items-center gap-2">
+                  <PlusIcon className="size-4" />
+                  {t("create_invoice")}
+                </div>
               )}
             </Button>
           </div>

@@ -28,7 +28,7 @@ export function FilterSelect({
 }: FilterSelectProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex overflow-hidden rounded-lg border">
+    <div className="flex overflow-hidden rounded-lg border border-gray-400">
       <Select
         value={value}
         onValueChange={(newValue) => onValueChange(newValue || undefined)}

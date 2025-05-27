@@ -82,13 +82,14 @@ function OrganizationTreeNode({
               onToggleExpand(organization.id);
             }
           }}
+          data-cy="organization-tree-node-parent"
           className="flex items-center flex-1 text-sm gap-2 cursor-pointer"
         >
           <span className="truncate">{organization.name}</span>
         </div>
       </div>
       {isExpanded && children?.results && children.results.length > 0 && (
-        <div className="pl-2">
+        <div className="pl-2" data-cy="organization-tree-node-children">
           {children.results.map((child) => (
             <OrganizationTreeNode
               key={child.id}

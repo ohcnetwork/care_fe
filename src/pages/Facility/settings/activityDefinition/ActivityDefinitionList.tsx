@@ -7,6 +7,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -22,8 +24,6 @@ import {
   CardGridSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/definition-list/EmptyState";
-import { FilterSelect } from "@/components/definition-list/FilterSelect";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -185,7 +185,7 @@ export default function ActivityDefinitionList({
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:hidden">
               <CardGridSkeleton count={4} />
             </div>
-            <div className="phidden md:block">
+            <div className="hidden md:block">
               <TableSkeleton count={5} />
             </div>
           </>

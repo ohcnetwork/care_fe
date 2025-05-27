@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { getEncounterStatusColor } from "@/types/emr/encounter";
 import { Encounter } from "@/types/emr/encounter";
 
 export interface EncounterInfoCardProps {
@@ -23,21 +24,6 @@ export interface EncounterInfoCardProps {
   facilityId: string;
   hideBorder?: boolean;
 }
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "planned":
-      return "bg-blue-100 text-blue-800";
-    case "in_progress":
-      return "bg-yellow-100 text-yellow-800";
-    case "completed":
-      return "bg-green-100 text-green-800";
-    case "cancelled":
-      return "bg-red-100 text-red-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
@@ -96,7 +82,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           <div className="flex flex-wrap items-center gap-2">
             <Badge
               data-cy="encounter-status-badge"
-              className={getStatusColor(encounter.status)}
+              className={getEncounterStatusColor(encounter.status)}
               variant="outline"
             >
               {t(`encounter_status__${encounter.status}`)}

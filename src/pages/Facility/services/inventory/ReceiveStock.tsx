@@ -10,6 +10,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Form,
   FormControl,
@@ -30,7 +31,6 @@ import {
 } from "@/components/ui/table";
 
 import Page from "@/components/Common/Page";
-import { EmptyState } from "@/components/definition-list/EmptyState";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -14,7 +15,6 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import { FilterSelect } from "@/components/definition-list/FilterSelect";
 
 import useFilters from "@/hooks/useFilters";
 

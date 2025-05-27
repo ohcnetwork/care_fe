@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { EyeIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -22,6 +23,7 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { getEncounterStatusColor } from "@/types/emr/encounter";
 import { MedicationDispenseSummary } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
@@ -37,6 +39,10 @@ export default function MedicationDispenseHistory({
     limit: 14,
     disableCache: true,
   });
+
+  const tableHeadClass =
+    "border-x p-3 text-gray-700 text-sm font-medium leading-5";
+  const tableCellClass = "border-x p-3 text-gray-950";
 
   const { data: prescriptionQueue, isLoading } = useQuery<
     PaginatedResponse<MedicationDispenseSummary>
@@ -56,8 +62,8 @@ export default function MedicationDispenseHistory({
   });
 
   return (
-    <Page title={t("medication_dispense")} className="p-4">
-      <div className="flex items-center gap-4 mb-4">
+    <Page title={t("medication_dispense")} className="space-y-6">
+      <div className="flex items-center gap-4 mb-6">
         <div className="flex-1">
           <Input
             placeholder={t("Search by patient name, ID, or prescription...")}
@@ -68,75 +74,94 @@ export default function MedicationDispenseHistory({
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border shadow-sm w-full bg-white overflow-hidden">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("patient")}</TableHead>
-              <TableHead>{t("category")}</TableHead>
-              <TableHead>{t("encounter_status")}</TableHead>
-              <TableHead className="text-right">{t("medications")}</TableHead>
-              <TableHead className="w-[100px]">{t("actions")}</TableHead>
+          <TableHeader className="bg-gray-100">
+            <TableRow className="border-b">
+              <TableHead className={tableHeadClass}>{t("patient")}</TableHead>
+              <TableHead className={tableHeadClass}>{t("category")}</TableHead>
+              <TableHead className={tableHeadClass}>
+                {t("encounter_status")}
+              </TableHead>
+              <TableHead className={cn(tableHeadClass, "text-right")}>
+                {t("medications")}
+              </TableHead>
+              <TableHead className={cn(tableHeadClass, "w-[100px]")}>
+                {t("actions")}
+              </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="bg-white">
             {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+              <TableRow className="border-b hover:bg-gray-50">
+                <TableCell
+                  colSpan={5}
+                  className={cn(tableCellClass, "text-center py-8")}
+                >
                   {t("Loading...")}
                 </TableCell>
               </TableRow>
             ) : prescriptionQueue?.results?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+              <TableRow className="border-b hover:bg-gray-50">
+                <TableCell
+                  colSpan={5}
+                  className={cn(tableCellClass, "text-center py-8")}
+                >
                   {t("No prescriptions found")}
                 </TableCell>
               </TableRow>
             ) : (
               prescriptionQueue?.results?.map(
                 (item: MedicationDispenseSummary) => (
-                  <TableRow key={item.encounter.id}>
-                    <TableCell>
-                      <div className="font-medium">
+                  <TableRow
+                    key={item.encounter.id}
+                    className="border-b hover:bg-gray-50"
+                  >
+                    <TableCell className={tableCellClass}>
+                      <div className="font-medium text-base">
                         {item.encounter.patient.name}
                       </div>
                       <div className="text-sm text-gray-500">
                         {item.encounter.patient.id}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={tableCellClass}>
                       <Badge
                         variant="outline"
-                        className={cn(
-                          "px-2 py-1 rounded-full text-xs font-medium",
-                        )}
+                        className="bg-gray-100 text-gray-700 border-gray-200"
                       >
                         {t(
                           `encounter_class__${item.encounter.encounter_class}`,
                         )}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={tableCellClass}>
                       <Badge
                         variant="outline"
-                        className={cn(
-                          "px-2 py-1 rounded-full text-xs font-medium",
+                        className={getEncounterStatusColor(
+                          item.encounter.status,
                         )}
                       >
                         {t(`encounter_status__${item.encounter.status}`)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">{item.count}</TableCell>
-                    <TableCell>
+                    <TableCell
+                      className={cn(tableCellClass, "text-right font-semibold")}
+                    >
+                      {item.count}
+                    </TableCell>
+                    <TableCell className={tableCellClass}>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
+                        className="border-gray-400 shadow-sm bg-white text-gray-950 font-medium"
                         onClick={() => {
                           navigate(
                             `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/dispense`,
                           );
                         }}
                       >
+                        <EyeIcon className="size-4" />
                         {t("view")}
                       </Button>
                     </TableCell>
