@@ -4,10 +4,10 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
+import SearchInput from "@/components/Common/SearchInput";
 import {
   CardGridSkeleton,
   TableSkeleton,
@@ -85,12 +85,20 @@ export default function FacilityUsers(props: { facilityId: string }) {
     >
       <hr className="mt-4 border-gray-200" />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 m-5 ml-0">
-        <Input
-          id="search-by-username"
-          name="username"
-          onChange={(e) => updateQuery({ username: e.target.value })}
-          value={qParams.username}
-          placeholder={t("search_by_username")}
+        <SearchInput
+          options={[
+            {
+              key: "username",
+              type: "text",
+              placeholder: t("search_by_username"),
+              value: qParams.username || "",
+            },
+          ]}
+          onSearch={(key, value) =>
+            updateQuery({
+              [key]: value || undefined,
+            })
+          }
           className="w-full max-w-sm"
         />
         <Tabs

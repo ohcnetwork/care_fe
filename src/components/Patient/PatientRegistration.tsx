@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { InfoIcon } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
@@ -56,7 +57,7 @@ import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { PatientModel } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
 interface PatientRegistrationPageProps {
@@ -183,13 +184,13 @@ export default function PatientRegistration(
       same_phone_number: false,
       same_address: true,
     },
-    mode: "onChange",
+    mode: "onSubmit",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
     mutationFn: mutate(routes.addPatient),
-    onSuccess: (resp: PatientModel) => {
+    onSuccess: (resp: Patient) => {
       toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
       navigate(`/facility/${facilityId}/patients/verify`, {
@@ -627,7 +628,10 @@ export default function PatientRegistration(
                                 {t("invalid_age")}
                               </span>
                             ) : (
-                              <span className="text-violet-600">
+                              <span
+                                className="text-violet-600"
+                                data-cy="year-of-birth"
+                              >
                                 {t("year_of_birth")}:{" "}
                                 {new Date().getFullYear() -
                                   Number(form.getValues("age"))}
@@ -695,9 +699,18 @@ export default function PatientRegistration(
                             <Input
                               type="datetime-local"
                               {...field}
-                              value={field.value ?? ""}
+                              value={
+                                field.value
+                                  ? format(
+                                      new Date(field.value),
+                                      "yyyy-MM-dd'T'HH:mm",
+                                    )
+                                  : ""
+                              }
                               onChange={(e) => {
-                                const value = e.target.value || undefined;
+                                const value = e.target.value
+                                  ? dayjs(e.target.value).toISOString()
+                                  : undefined;
                                 field.onChange(value);
                                 setIsDeceased(!!value);
                               }}
@@ -854,7 +867,7 @@ export default function PatientRegistration(
                             onChange={(value) =>
                               form.setValue("geo_organization", value, {
                                 shouldDirty: true,
-                                shouldValidate: true,
+                                shouldValidate: form.formState.isSubmitted,
                               })
                             }
                           />

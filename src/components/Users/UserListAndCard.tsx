@@ -102,7 +102,9 @@ export function UserCard(props: UserCardProps) {
             <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
               <div>
                 <div className="text-gray-500">{t("role")}</div>
-                <div className="font-medium truncate">{roleName}</div>
+                <div className="font-medium truncate" data-cy="user-role">
+                  {roleName}
+                </div>
               </div>
               <div>
                 <div className="text-gray-500">{t("phone_number")}</div>
