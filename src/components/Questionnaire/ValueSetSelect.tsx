@@ -215,7 +215,7 @@ export default function ValueSetSelect({
       <div
         className={cn(
           "px-3 pb-3 border-b border-gray-200 flex justify-between items-center",
-          title && "py-3",
+          title && "pt-3",
         )}
       >
         {title && <h3 className="text-base font-semibold">{title}</h3>}
