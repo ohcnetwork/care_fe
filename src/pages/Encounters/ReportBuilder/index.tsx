@@ -74,36 +74,21 @@ export default function ReportBuilderList({
         ) : !reportTemplateData?.results ||
           reportTemplateData?.results?.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-10 border border-dashed border-gray-300 rounded-lg bg-gray-50 my-4">
-            <div className="text-center space-y-5 max-w-md">
-              <div className="mx-auto bg-white p-4 rounded-full size-16 flex items-center justify-center border border-gray-200 shadow-sm">
-                <CareIcon
-                  icon="l-file-medical"
-                  className="text-blue-500 text-3xl"
-                />
-              </div>
-              <div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-2">
+            <div className="text-center max-w-md">
+              <div className="flex flex-row items-center justify-center gap-2">
+                <div className="bg-gray-50 p-2 rounded-full size-10 flex items-center justify-center border border-gray-200 shadow-sm">
+                  <CareIcon
+                    icon="l-file-medical"
+                    className="text-green-500 text-2xl"
+                  />
+                </div>
+                <h4 className="text-xl font-normal text-gray-800">
                   {t("no_templates_found")}
                 </h4>
-                <p className="text-gray-600 mb-6">
-                  {t("report_template_description")}
-                </p>
               </div>
-              {canManageTemplate ? (
-                <Button variant="default" className="w-full sm:w-auto" asChild>
-                  <Link
-                    href={`/reportbuilder/new`}
-                    className="flex items-center gap-2"
-                  >
-                    <CareIcon icon="l-plus" />
-                    {t("create_new_report")}
-                  </Link>
-                </Button>
-              ) : (
-                <p className="text-sm text-amber-700 bg-amber-50 p-3 rounded-md border border-amber-200">
-                  {t("template_permission_notice")}
-                </p>
-              )}
+              <p className="text-gray-600 text-sm mt-4">
+                {t("report_template_description")}
+              </p>
             </div>
           </div>
         ) : (
