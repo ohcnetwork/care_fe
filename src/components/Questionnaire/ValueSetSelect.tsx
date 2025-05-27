@@ -214,8 +214,8 @@ export default function ValueSetSelect({
     <Command filter={() => 1} className="rounded-t-3xl">
       <div
         className={cn(
-          "px-3 pb-3 border-b border-gray-200 flex justify-between items-center",
-          title && "pt-3",
+          "p-3 border-b border-gray-200 flex justify-between items-center",
+          !title && "p-0",
         )}
       >
         {title && <h3 className="text-base font-semibold">{title}</h3>}
@@ -224,7 +224,7 @@ export default function ValueSetSelect({
           onValueChange={(value) => {
             setActiveTab(Number(value));
           }}
-          className="md:hidden"
+          className={cn("md:hidden", !title && "p-2 w-full")}
         >
           <TabsList className="flex w-full">
             <TabsTrigger value={"0"} className="flex-1">

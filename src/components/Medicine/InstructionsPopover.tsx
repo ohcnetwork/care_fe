@@ -49,7 +49,7 @@ function InstructionContentSection({
   return (
     <div className="space-y-3">
       {currentInstructions.length > 0 && (
-        <div className="max-h-32 overflow-y-auto pr-1">
+        <div className="max-h-32 overflow-y-auto p-1">
           <div className="flex flex-wrap gap-2 mb-1">
             {currentInstructions.map((instruction) => (
               <Badge
