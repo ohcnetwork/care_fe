@@ -788,48 +788,50 @@ function HeaderRow({
             column.length === 0 && "justify-end",
           )}
         >
-          {column.length > 0 && (
-            <div className="flex flex-col sm:flex-row justify-start gap-2">
-              <Select
-                value={`${activeElement}`}
-                onValueChange={(value) => toggleElement(Number(value))}
-              >
-                <SelectTrigger className="bg-green-100">
-                  <SelectValue placeholder={t("add_element")}>
-                    <CareIcon
-                      icon={getElementIcon(column[activeElement].type)}
-                      className="w-4 h-4 text-green-900"
-                    />
-                    <span className="text-sm text-green-900">
-                      {activeElement}
-                      {". "}
-                      {t(`${column[activeElement].type}`)}
-                    </span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {column.map((element, elementIndex) => (
-                    <SelectItem
-                      key={elementIndex}
-                      value={elementIndex.toString()}
-                    >
-                      {t(`${element.type}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => onRemoveElement(rowIndex, activeElement)}
-              >
-                <span className="text-sm">
-                  {t(`remove_${column[activeElement].type}`)}
-                </span>
-                <Trash2Icon className="size-3" />
-              </Button>
-            </div>
-          )}
+          {column.length > 0 &&
+            activeElement !== undefined &&
+            column[activeElement] && (
+              <div className="flex flex-col sm:flex-row justify-start gap-2">
+                <Select
+                  value={`${activeElement}`}
+                  onValueChange={(value) => toggleElement(Number(value))}
+                >
+                  <SelectTrigger className="bg-green-100">
+                    <SelectValue placeholder={t("add_element")}>
+                      <CareIcon
+                        icon={getElementIcon(column[activeElement].type)}
+                        className="w-4 h-4 text-green-900"
+                      />
+                      <span className="text-sm text-green-900">
+                        {activeElement}
+                        {". "}
+                        {t(`${column[activeElement].type}`)}
+                      </span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {column.map((element, elementIndex) => (
+                      <SelectItem
+                        key={elementIndex}
+                        value={elementIndex.toString()}
+                      >
+                        {t(`${element.type}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => onRemoveElement(rowIndex, activeElement)}
+                >
+                  <span className="text-sm">
+                    {t(`remove_${column[activeElement].type}`)}
+                  </span>
+                  <Trash2Icon className="size-3" />
+                </Button>
+              </div>
+            )}
           <Button
             type="button"
             size={"sm"}
@@ -849,7 +851,7 @@ function HeaderRow({
         <CardContent>
           {/* Element Content */}
           {column.length > 0 &&
-            activeElement !== null &&
+            activeElement !== undefined &&
             column[activeElement] && (
               <div className="p-4">
                 <HeaderElement
@@ -979,22 +981,22 @@ export default function HeaderBuilder({
     });
     remove(rowIndex);
     setActiveElements(newActiveElements);
-    let newActiveRowIndex: number | null = null;
     // If there will be no fields after removal
     if (fields.length <= 1) {
-      newActiveRowIndex = null;
+      setActiveRow(null);
+      return;
     }
-    // removing the first row and there are more rows
-    else if (rowIndex === 0) {
-      newActiveRowIndex = 0; // Next row will become first
-    }
-    // removing a row in the middle
-    else if (rowIndex < fields.length - 1) {
-      newActiveRowIndex = rowIndex; // Keep same index as next row will shift up
-    }
-    // removing last row
-    else {
-      newActiveRowIndex = rowIndex - 1; // Set to previous row
+    // Calculate new active row index
+    let newActiveRowIndex: number;
+    if (rowIndex === 0) {
+      // If removing first row, set active to the new first row (0)
+      newActiveRowIndex = 0;
+    } else if (rowIndex === fields.length - 1) {
+      // If removing last row, set active to the new last row
+      newActiveRowIndex = fields.length - 2;
+    } else {
+      // If removing a middle row, keep the same index as the next row will shift up
+      newActiveRowIndex = rowIndex;
     }
     setActiveRow(newActiveRowIndex);
   };
