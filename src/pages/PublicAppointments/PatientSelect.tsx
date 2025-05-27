@@ -118,11 +118,8 @@ export default function PatientSelect({
           return JSON.parse(
             decodeURIComponent(params.selectedSlot),
           ) as TokenSlot;
-        } catch (error) {
-          console.error(
-            t("error_to_parse_selectedSlot_from_URL_parameters"),
-            error,
-          );
+        } catch (_error) {
+          toast.error(t("error_to_parse_selectedSlot_from_URL_parameters"));
           return undefined;
         }
       })()
