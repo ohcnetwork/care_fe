@@ -99,7 +99,7 @@ export default function ErrorPage({
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center md:justify-center bg-white text-black p-4 rounded-lg">
+    <div className="h-[calc(100vh-7rem)] sm:h-[calc(100vh-5rem)] flex flex-col items-center md:justify-center bg-white text-black p-4 rounded-lg overflow-hidden ">
       <div
         className="relative scale-75 md:scale-100 rounded-xl transition border-6 border-yellow-950 duration-300 ease-in-out"
         ref={containerRef}
