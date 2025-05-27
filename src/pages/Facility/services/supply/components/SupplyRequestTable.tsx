@@ -73,28 +73,36 @@ export default function SupplyRequestTable({
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md overflow-hidden border-2 border-white shadow-md">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t("item")}</TableHead>
-            <TableHead>{t("quantity")}</TableHead>
-            <TableHead>{t("deliver_from")}</TableHead>
-            <TableHead>{t("deliver_to")}</TableHead>
-            <TableHead>{t("status")}</TableHead>
-            <TableHead>{t("priority")}</TableHead>
-            <TableHead className="w-[100px]">{t("actions")}</TableHead>
+        <TableHeader className="bg-gray-100">
+          <TableRow className="divide-x">
+            <TableHead className="text-gray-700">{t("item")}</TableHead>
+            <TableHead className="text-gray-700">{t("quantity")}</TableHead>
+            <TableHead className="text-gray-700">{t("deliver_from")}</TableHead>
+            <TableHead className="text-gray-700">{t("deliver_to")}</TableHead>
+            <TableHead className="text-gray-700">{t("status")}</TableHead>
+            <TableHead className="text-gray-700">{t("priority")}</TableHead>
+            <TableHead className="w-[100px] text-gray-700">
+              {t("actions")}
+            </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="bg-white">
           {requests.map((request: SupplyRequestRead) => (
-            <TableRow key={request.id}>
-              <TableCell>{request.item.name}</TableCell>
-              <TableCell>{request.quantity}</TableCell>
-              <TableCell>
+            <TableRow key={request.id} className="divide-x">
+              <TableCell className="font-semibold text-gray-950">
+                {request.item.name}
+              </TableCell>
+              <TableCell className="font-medium text-gray-950">
+                {request.quantity}
+              </TableCell>
+              <TableCell className="font-medium text-gray-950">
                 {request.deliver_from?.name || t("not_specified")}
               </TableCell>
-              <TableCell>{request.deliver_to.name}</TableCell>
+              <TableCell className="font-medium text-gray-950">
+                {request.deliver_to.name}
+              </TableCell>
               <TableCell>
                 <Badge
                   className={STATUS_COLORS[request.status]}
@@ -113,8 +121,9 @@ export default function SupplyRequestTable({
               </TableCell>
               <TableCell>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
+                  className="font-semibold text-gray-950"
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/locations/${locationId}/${baseUrl}/${request.id}`,
@@ -122,6 +131,7 @@ export default function SupplyRequestTable({
                   }
                 >
                   <CareIcon icon="l-eye" className="size-4" />
+                  {t("view_details")}
                 </Button>
               </TableCell>
             </TableRow>
