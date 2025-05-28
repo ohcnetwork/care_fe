@@ -96,9 +96,6 @@ export class PatientEncounter {
           "Remove Allergy",
         );
       });
-    cy.get('[data-cy="allergy-options"]').last().scrollIntoView();
-    cy.get('[data-cy="allergy-options"]').last().click();
-    cy.get('[data-cy="remove-allergy"]').click();
 
     return this;
   }
