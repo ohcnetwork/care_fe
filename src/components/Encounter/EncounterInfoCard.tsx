@@ -69,7 +69,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
       <CardHeader className="space-y-1 pb-2">
         <div className="flex items-center justify-between">
           <Link
-            href={`/facility/${facilityId}/patient/${encounter.patient.id}`}
+            href={`/facility/${facilityId}/patient/${encounter.patient.id}/demography`}
             className="hover:text-primary"
           >
             <CardTitle className="group-hover:text-primary transition-colors">

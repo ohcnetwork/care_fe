@@ -152,7 +152,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     encounterId?: string;
   };
   const paramPatients = usePathParams(
-    "/facility/:facilityId/patient/:patientId",
+    "/facility/:facilityId/patient/:patientId/*",
   );
   const patientId = paramsEncouters?.patientId || paramPatients?.patientId;
   const encounterId = paramsEncouters?.encounterId;

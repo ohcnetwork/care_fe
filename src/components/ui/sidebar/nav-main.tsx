@@ -49,7 +49,14 @@ const isAnyHiddenChildActive = (
   if (!link.children) return false;
   return link.children
     .filter((child) => child.hidden)
-    .some((child) => child.url && currentPath === child.url);
+    .some(
+      (child) =>
+        (child.url &&
+          (currentPath === child.url ||
+            currentPath.startsWith(child.url + "/")) &&
+          !currentPath.includes("/encounter")) ||
+        currentPath.includes("encounters"),
+    );
 };
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
