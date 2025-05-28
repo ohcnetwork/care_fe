@@ -9,6 +9,7 @@ import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetail
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
+import { VitalsList } from "@/components/Patient/vitals/list";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
 import { getPermissions } from "@/common/Permissions";
@@ -117,6 +118,15 @@ export const EncounterOverviewTab = ({
           {/* Diagnoses Section */}
           <div>
             <DiagnosisList
+              patientId={patient.id}
+              encounterId={encounter.id}
+              readOnly={!canEdit}
+            />
+          </div>
+
+          {/* Vitals Section */}
+          <div>
+            <VitalsList
               patientId={patient.id}
               encounterId={encounter.id}
               readOnly={!canEdit}
