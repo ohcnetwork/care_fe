@@ -191,7 +191,7 @@ export default function FacilityOrganizationFormSheet({
               name="name"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>{t("name")}</FormLabel>
+                  <FormLabel aria-required>{t("name")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -261,7 +261,7 @@ export default function FacilityOrganizationFormSheet({
               </Button>
               <Button
                 type="submit"
-                disabled={isPending}
+                disabled={isPending || !form.formState.isValid}
                 data-cy={
                   isEditMode
                     ? "update-organization-button"
