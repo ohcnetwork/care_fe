@@ -114,7 +114,19 @@ const MEDICATION_STATEMENT_FIELDS: FieldDefinitions = {
     required: true,
     validate: (value: unknown) => {
       const period = value as { start?: string; end?: string };
-      return !!period?.start;
+      if (!period?.start) {
+        return "start_date_required";
+      }
+
+      if (period.end) {
+        const startDate = new Date(period.start);
+        const endDate = new Date(period.end);
+        if (endDate <= startDate) {
+          return "end_date_after_start";
+        }
+      }
+
+      return true;
     },
   },
 } as const;

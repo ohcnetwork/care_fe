@@ -5,7 +5,7 @@ import { QuestionValidationError } from "@/types/questionnaire/batch";
 export interface FieldMetadata<T = unknown> {
   key: string;
   required: boolean;
-  validate?: (value: T) => boolean;
+  validate?: (value: T) => boolean | string;
 }
 
 export type FieldDefinitions = {
@@ -87,14 +87,17 @@ export function validateFields(
           field_key: field.key,
           index,
         });
-      } else if (hasField && field.validate && !field.validate(fieldValue)) {
-        errors.push({
-          question_id: questionId,
-          error: t("invalid_value"),
-          type: "validation_error",
-          field_key: field.key,
-          index,
-        });
+      } else if (hasField && field.validate) {
+        const validationResult = field.validate(fieldValue);
+        if (validationResult !== true) {
+          errors.push({
+            question_id: questionId,
+            error: t(validationResult || "invalid_value"),
+            type: "validation_error",
+            field_key: field.key,
+            index,
+          });
+        }
       }
       return errors;
     },
