@@ -18,12 +18,12 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { parseSelectedSlotParam } from "@/Utils/utils";
 import { Patient } from "@/types/emr/patient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
   AppointmentCreateRequest,
-  TokenSlot,
 } from "@/types/scheduling/schedule";
 
 interface PatientCardProps {
@@ -112,18 +112,9 @@ export default function PatientSelect({
 }) {
   const { t } = useTranslation();
   const [params] = useQueryParams();
-  const selectedSlot = params.selectedSlot
-    ? (() => {
-        try {
-          return JSON.parse(
-            decodeURIComponent(params.selectedSlot),
-          ) as TokenSlot;
-        } catch (_error) {
-          toast.error(t("error_to_parse_selectedSlot_from_URL_parameters"));
-          return undefined;
-        }
-      })()
-    : undefined;
+  const selectedSlot = parseSelectedSlotParam(params.selectedSlot, () =>
+    toast.error(t("error_to_parse_selectedSlot_from_URL_parameters")),
+  );
   const reason = params.reason || "";
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
