@@ -28,11 +28,11 @@ export interface DurationSpec {
 }
 
 export interface ContainerSpec {
-  description?: string | null;
+  description?: string;
   capacity?: QuantitySpec | null;
-  minimum_volume?: MinimumVolumeSpec | null;
-  cap?: Code | null;
-  preparation?: string | null;
+  minimum_volume?: MinimumVolumeSpec;
+  cap?: Code;
+  preparation?: string;
 }
 
 export const SPECIMEN_DEFINITION_UNITS_CODES = [
@@ -72,8 +72,8 @@ export interface TypeTestedSpec {
   is_derived: boolean;
   preference: Preference;
   container?: ContainerSpec | null;
-  requirement?: string | null;
-  retention_time?: DurationSpec | null;
+  requirement?: string;
+  retention_time?: DurationSpec;
   single_use?: boolean | null;
 }
 
@@ -81,17 +81,17 @@ export interface SpecimenDefinition {
   id: string;
   title: string;
   slug: string;
-  derived_from_uri?: string | null;
+  derived_from_uri?: string;
   status: SpecimenDefinitionStatus;
   description: string;
   type_collected: Code;
   patient_preparation?: Code[];
-  collection?: Code | null;
+  collection?: Code;
 }
 
 export interface SpecimenDefinitionCreate
   extends Omit<SpecimenDefinition, "id" | "facility"> {
-  type_tested: TypeTestedSpec | null;
+  type_tested?: TypeTestedSpec;
 }
 
 export interface SpecimenDefinitionRead extends SpecimenDefinition {
@@ -99,5 +99,5 @@ export interface SpecimenDefinitionRead extends SpecimenDefinition {
   updated_by: UserBase;
   created_at: string;
   updated_at: string;
-  type_tested: TypeTestedSpec | null;
+  type_tested?: TypeTestedSpec;
 }

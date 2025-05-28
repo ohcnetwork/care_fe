@@ -25,8 +25,8 @@ import {
 import { QuantitySpec } from "@/types/emr/specimenDefinition/specimenDefinition";
 
 interface Props {
-  quantity?: DosageQuantity | QuantitySpec;
-  onChange: (quantity: DosageQuantity | QuantitySpec) => void;
+  quantity?: DosageQuantity | QuantitySpec | null;
+  onChange: (quantity: DosageQuantity | QuantitySpec | null) => void;
   disabled?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
@@ -60,6 +60,9 @@ export function ComboboxQuantityInput({
       setInputValue(value);
       setOpen(true);
       setActiveIndex(0);
+      if (value === "") {
+        onChange(null);
+      }
       if (value && selectedUnit && value !== ".") {
         const parsedValue = parseFloat(value);
         if (!isNaN(parsedValue)) {
