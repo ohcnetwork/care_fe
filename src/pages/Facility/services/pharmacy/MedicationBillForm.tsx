@@ -1176,17 +1176,15 @@ const AddDosageInstructionPopover = ({
                         localDosageInstruction?.dose_and_rate?.dose_quantity
                       }
                       onChange={(value) => {
-                        if (!value.value || !value.unit) return;
-                        handleUpdateDosageInstruction({
-                          dose_and_rate: {
-                            type: "ordered",
-                            dose_quantity: {
-                              value: value.value,
-                              unit: value.unit,
+                        if (value) {
+                          handleUpdateDosageInstruction({
+                            dose_and_rate: {
+                              type: "ordered",
+                              dose_quantity: value,
+                              dose_range: undefined,
                             },
-                            dose_range: undefined,
-                          },
-                        });
+                          });
+                        }
                       }}
                     />
                   </div>
@@ -1503,14 +1501,16 @@ const DosageDialog: React.FC<DosageDialogProps> = ({
         <ComboboxQuantityInput
           quantity={localDoseRange.low}
           onChange={(value) => {
-            setLocalDoseRange((prev) => ({
-              ...prev,
-              low: value,
-              high: {
-                ...prev.high,
-                unit: value.unit,
-              },
-            }));
+            if (value) {
+              setLocalDoseRange((prev) => ({
+                ...prev,
+                low: value,
+                high: {
+                  ...prev.high,
+                  unit: value.unit,
+                },
+              }));
+            }
           }}
         />
       </div>
@@ -1519,14 +1519,16 @@ const DosageDialog: React.FC<DosageDialogProps> = ({
         <ComboboxQuantityInput
           quantity={localDoseRange.high}
           onChange={(value) => {
-            setLocalDoseRange((prev) => ({
-              ...prev,
-              high: value,
-              low: {
-                ...prev.low,
-                unit: value.unit,
-              },
-            }));
+            if (value) {
+              setLocalDoseRange((prev) => ({
+                ...prev,
+                high: value,
+                low: {
+                  ...prev.low,
+                  unit: value.unit,
+                },
+              }));
+            }
           }}
         />
       </div>

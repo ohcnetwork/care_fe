@@ -84,12 +84,8 @@ import { validateFields } from "@/types/questionnaire/validation";
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
 
-  const formatValue = (value?: number | null) =>
-    value != null
-      ? value.toString().includes(".")
-        ? value.toFixed(2)
-        : value.toString()
-      : "";
+  const formatValue = (value: number) =>
+    value.toString().includes(".") ? value.toFixed(2) : value.toString();
 
   return `${formatValue(range.low?.value)} → ${formatValue(range.high?.value)} ${range.high?.unit?.display}`;
 }
@@ -847,14 +843,16 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           <ComboboxQuantityInput
             quantity={localDoseRange.low}
             onChange={(value) => {
-              setLocalDoseRange((prev) => ({
-                ...prev,
-                low: value,
-                high: {
-                  ...prev.high,
-                  unit: value.unit,
-                },
-              }));
+              if (value) {
+                setLocalDoseRange((prev) => ({
+                  ...prev,
+                  low: value,
+                  high: {
+                    ...prev.high,
+                    unit: value.unit || prev.high.unit,
+                  },
+                }));
+              }
             }}
             disabled={disabled || isReadOnly}
             className="lg:max-w-[200px]"
@@ -865,14 +863,16 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           <ComboboxQuantityInput
             quantity={localDoseRange.high}
             onChange={(value) => {
-              setLocalDoseRange((prev) => ({
-                ...prev,
-                high: value,
-                low: {
-                  ...prev.low,
-                  unit: value.unit,
-                },
-              }));
+              if (value) {
+                setLocalDoseRange((prev) => ({
+                  ...prev,
+                  high: value,
+                  low: {
+                    ...prev.low,
+                    unit: value.unit || prev.low.unit,
+                  },
+                }));
+              }
             }}
             disabled={disabled || !localDoseRange.low.value || isReadOnly}
             className="lg:max-w-[200px]"
@@ -992,17 +992,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   data-cy="dosage-input"
                   quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
                   onChange={(value) => {
-                    if (!value.value || !value.unit) return;
-                    handleUpdateDosageInstruction({
-                      dose_and_rate: {
-                        type: "ordered",
-                        dose_quantity: {
-                          value: value.value,
-                          unit: value.unit,
+                    if (value?.value && value?.unit) {
+                      handleUpdateDosageInstruction({
+                        dose_and_rate: {
+                          type: "ordered",
+                          dose_quantity: value,
+                          dose_range: undefined,
                         },
-                        dose_range: undefined,
-                      },
-                    });
+                      });
+                    }
                   }}
                   disabled={disabled || isReadOnly}
                   className="lg:max-w-[200px]"
