@@ -76,13 +76,19 @@ export default function FileUploadDialog({
                 <div key={index} className="space-y-2">
                   <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
                     <span
-                      className="flex items-center truncate"
+                      className="flex items-center text-sm truncate"
                       title={file.name}
                     >
                       <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
-                      <span className="truncate">
-                        {file.name.length > 40
-                          ? `${file.name.substring(0, 30)}...`
+                      <span className="truncate hidden md:block">
+                        {file.name.length > 25
+                          ? `${file.name.substring(0, 25)}...`
+                          : file.name}
+                      </span>
+
+                      <span className="truncate block md:hidden">
+                        {file.name.length > 6
+                          ? `${file.name.substring(0, 6)}...`
                           : file.name}
                       </span>
                     </span>
@@ -131,76 +137,76 @@ export default function FileUploadDialog({
                 key={index}
                 className="rounded-lg p-4 shadow-md border-2 border-primary-500 relative"
               >
-                {fileUpload.files.length > 1 && (
-                  <div className="absolute top-0 left-0 bg-primary-500 text-white px-3 py-1 text-sm font-bold rounded-tl-lg -mt-px -ml-px">
-                    {t("file")} {index + 1}
-                  </div>
-                )}
-
-                <div
-                  className={cn(
-                    "flex items-center justify-between w-full gap-2 rounded-md bg-secondary-200 px-4 py-2 border border-gray-200",
-                    fileUpload.files.length > 1 ? "mb-4 mt-6" : "mb-4",
+                <div className="flex gap-4 items-start w-full">
+                  {file.type.startsWith("image/") && previewUrls[index] && (
+                    <div className="flex items-center justify-center mt-2 md:mt-0 rounded-lg border border-gray-300 shadow-md overflow-hidden">
+                      <img
+                        src={previewUrls[index]}
+                        alt="Preview"
+                        className="w-20 h-15 md:w-22 md:h-24 object-fit"
+                      />
+                    </div>
                   )}
-                >
-                  <span
-                    className="flex items-center truncate"
-                    title={file.name}
-                  >
-                    <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
-                    <span className="truncate">
-                      {file.name.length > 40
-                        ? `${file.name.substring(0, 30)}...`
-                        : file.name}
-                    </span>
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => fileUpload.removeFile(index)}
-                    disabled={fileUpload.uploading}
-                  >
-                    <CareIcon icon="l-times" />
-                  </Button>
-                </div>
-                {file.type.startsWith("image/") && previewUrls[index] && (
-                  <div className="mb-4 w-full max-w-md overflow-hidden rounded-lg border border-gray-300 shadow-md hover:shadow-lg transition-shadow duration-200">
-                    <img
-                      src={previewUrls[index]}
-                      alt="Preview"
-                      className="w-full h-auto object-cover"
-                    />
-                  </div>
-                )}
 
-                <div className="rounded-lg p-4 bg-gray-50 border border-gray-200">
-                  <Label
-                    htmlFor={`upload-file-name-${index}`}
-                    className="block text-sm font-bold text-gray-700 mb-2"
-                  >
-                    {fileUpload.files.length > 1
-                      ? `${t("enter_file_name")} ${index + 1}`
-                      : t("enter_file_name")}
-                  </Label>
-                  <Input
-                    name={`file_name_${index}`}
-                    type="text"
-                    id={`upload-file-name-${index}`}
-                    data-cy={`upload-file-name-${index}`}
-                    required
-                    value={fileUpload.fileNames[index] || ""}
-                    disabled={fileUpload.uploading}
-                    onChange={(e) => {
-                      fileUpload.setFileName(e.target.value, index);
-                      fileUpload.setError(null);
-                    }}
-                    className="border border-gray-300 focus:border-gray-400 rounded-md px-3 py-1.5 w-full"
-                  />
-                  {fileUpload.error && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {fileUpload.error}
-                    </p>
-                  )}
+                  <div className="flex flex-col gap-2 flex-1">
+                    <div
+                      className={cn(
+                        "flex items-center justify-between gap-2 rounded-md bg-secondary-200 md:p-2 border border-gray-200",
+                      )}
+                    >
+                      <span
+                        className="flex items-center text-sm truncate"
+                        title={file.name}
+                      >
+                        <CareIcon
+                          icon="l-paperclip"
+                          className="pl-2 pr-2 shrink-0"
+                        />
+                        <span className="truncate hidden md:block">
+                          {file.name.length > 25
+                            ? `${file.name.substring(0, 25)}...`
+                            : file.name}
+                        </span>
+
+                        <span className="truncate block md:hidden">
+                          {file.name.length > 6
+                            ? `${file.name.substring(0, 6)}...`
+                            : file.name}
+                        </span>
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => fileUpload.removeFile(index)}
+                        disabled={fileUpload.uploading}
+                      >
+                        <CareIcon icon="l-times" />
+                      </Button>
+                    </div>
+
+                    <div className="rounded-lg">
+                      <Input
+                        name={`file_name_${index}`}
+                        type="text"
+                        id={`upload-file-name-${index}`}
+                        data-cy={`upload-file-name-${index}`}
+                        required
+                        value={fileUpload.fileNames[index] || ""}
+                        disabled={fileUpload.uploading}
+                        onChange={(e) => {
+                          fileUpload.setFileName(e.target.value, index);
+                          fileUpload.setError(null);
+                        }}
+                        placeholder={t("enter_file_name")}
+                        className="border border-gray-300 focus:border-gray-400 rounded-md px-3 py-2 w-full text-sm"
+                      />
+                      {fileUpload.error && (
+                        <p className="mt-2 text-sm text-red-600">
+                          {fileUpload.error}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))
@@ -221,7 +227,7 @@ export default function FileUploadDialog({
           </div>
         )}
 
-        <div className="flex items-center gap-2 mt-4">
+        <div className="flex justify-end gap-2 mr-4">
           <Button
             variant="destructive"
             onClick={fileUpload.clearFiles}
