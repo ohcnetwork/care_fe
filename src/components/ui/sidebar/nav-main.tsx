@@ -51,11 +51,10 @@ const isAnyHiddenChildActive = (
     .filter((child) => child.hidden)
     .some(
       (child) =>
-        (child.url &&
-          (currentPath === child.url ||
-            currentPath.startsWith(child.url + "/")) &&
-          !currentPath.includes("/encounter")) ||
-        currentPath.includes("encounters"),
+        child.url &&
+        (currentPath === child.url ||
+          currentPath.startsWith(child.url + "/")) &&
+        !currentPath.includes("/encounter"),
     );
 };
 
@@ -88,7 +87,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                           tooltip={link.name}
                           isActive={isChildActive(link, currentPath)}
                           className={cn(
-                            "cursor-pointer hover:bg-gray-200 hover:text-green-700",
+                            "cursor-pointer hover:!bg-gray-200 hover:!text-green-700",
                             {
                               "group-data-collapsible:data-[active=true]:bg-white group-data-collapsible:data-[active=true]:text-green-700 group-collapsible:data-[active=true]:shadow":
                                 isAnyHiddenChildActive(link, currentPath),
