@@ -126,11 +126,7 @@ export const EncounterOverviewTab = ({
 
           {/* Vitals Section */}
           <div>
-            <VitalsList
-              patientId={patient.id}
-              encounterId={encounter.id}
-              readOnly={!canEdit}
-            />
+            <VitalsList patientId={patient.id} encounterId={encounter.id} />
           </div>
 
           {/* Questionnaire Responses Section */}
