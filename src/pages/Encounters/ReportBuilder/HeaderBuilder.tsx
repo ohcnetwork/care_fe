@@ -944,7 +944,7 @@ export default function HeaderBuilder({
         rows.reduce((acc, _, index) => ({ ...acc, [index]: 0 }), {}),
       );
     }
-  }, [rows, activeElements]);
+  }, [rows]);
 
   const handleAddRow = () => {
     const rowLength = rows.length;
