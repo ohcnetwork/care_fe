@@ -190,7 +190,7 @@ export const DrawingPage = ({
   return (
     <div className="p-4 -ml-4 -mt-2">
       <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
-        <div className="relative flex-1 min-w-72 max-w-96 ml-2">
+        <div className="relative flex-1 min-w-72 max-w-96">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
             id="search-by-name"
