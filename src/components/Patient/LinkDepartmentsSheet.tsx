@@ -166,6 +166,7 @@ function DeleteOrganizationButton({
       size="icon"
       onClick={() => removeOrganization(organizationId)}
       disabled={isPending}
+      data-cy="delete-organization-button"
     >
       {isPending ? (
         <Loader2 className="size-4 animate-spin" />
@@ -304,6 +305,7 @@ export default function LinkDepartmentsSheet({
 
               <Button
                 className="w-full"
+                data-cy="add-organization"
                 onClick={handleAddOrganizations}
                 disabled={!selectedOrgs?.length || isAdding}
               >
@@ -329,7 +331,12 @@ export default function LinkDepartmentsSheet({
                     <div className="flex items-center space-x-2">
                       <Building className="size-4 text-blue-400" />
                       <div className="flex flex-col">
-                        <span className="font-medium">{org.name}</span>
+                        <span
+                          className="font-medium"
+                          data-cy="link-organisation-name"
+                        >
+                          {org.name}
+                        </span>
                         {org.description && (
                           <span className="text-xs text-gray-500">
                             {org.description}

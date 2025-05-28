@@ -5,6 +5,7 @@ import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -43,8 +44,8 @@ import {
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
+import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { MultiValueSetSelect } from "@/components/Medicine/MultiValueSetSelect";
 import { formatDosage } from "@/components/Medicine/utils";
 import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
@@ -778,6 +779,32 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   const isReadOnly = !!medication.id;
   const { hasError } = useFieldError(questionId, errors, index);
 
+  const [currentInstructions, setCurrentInstructions] = useState<Code[]>(
+    dosageInstruction?.additional_instruction || [],
+  );
+
+  const updateInstructions = (instructions: Code[]) => {
+    setCurrentInstructions(instructions);
+    handleUpdateDosageInstruction({
+      additional_instruction:
+        instructions.length > 0 ? instructions : undefined,
+    });
+  };
+
+  const addInstruction = (instruction: Code) => {
+    if (!currentInstructions.some((item) => item.code === instruction.code)) {
+      updateInstructions([...currentInstructions, instruction]);
+    } else {
+      toast.warning(`${instruction.display} ${t("is_already_selected")}`);
+    }
+  };
+
+  const removeInstruction = (instructionCode: string) => {
+    updateInstructions(
+      currentInstructions.filter((item) => item.code !== instructionCode),
+    );
+  };
+
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
   ) => {
@@ -1166,54 +1193,40 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Instructions */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="instructions"
-      >
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("instructions")}
         </Label>
         {dosageInstruction?.as_needed_boolean ? (
-          <MultiValueSetSelect
-            options={[
-              {
-                system: "system-as-needed-reason",
-                value: dosageInstruction?.as_needed_for || null,
-                label: t("prn_reason"),
-                placeholder: t("select_prn_reason"),
-                onSelect: (value: Code | null) => {
-                  handleUpdateDosageInstruction({
-                    as_needed_for: value || undefined,
-                  });
-                },
-              },
-              {
-                system: "system-additional-instruction",
-                value: dosageInstruction?.additional_instruction?.[0] || null,
-                label: t("additional_instructions"),
-                placeholder: t("select_additional_instructions"),
-                onSelect: (value: Code | null) => {
-                  handleUpdateDosageInstruction({
-                    additional_instruction: value ? [value] : undefined,
-                  });
-                },
-              },
-            ]}
-            disabled={disabled || isReadOnly}
-          />
+          <div className="space-y-2">
+            <ValueSetSelect
+              system="system-as-needed-reason"
+              value={dosageInstruction?.as_needed_for || null}
+              placeholder={t("select_prn_reason")}
+              onSelect={(value) => {
+                handleUpdateDosageInstruction({
+                  as_needed_for: value || undefined,
+                });
+              }}
+              disabled={disabled || isReadOnly}
+              asSheet
+            />
+
+            <InstructionsPopover
+              currentInstructions={currentInstructions}
+              removeInstruction={removeInstruction}
+              addInstruction={addInstruction}
+              isReadOnly={isReadOnly}
+              disabled={disabled}
+            />
+          </div>
         ) : (
-          <ValueSetSelect
-            system="system-additional-instruction"
-            value={dosageInstruction?.additional_instruction?.[0]}
-            onSelect={(instruction) =>
-              handleUpdateDosageInstruction({
-                additional_instruction: instruction ? [instruction] : undefined,
-              })
-            }
-            placeholder={t("select_additional_instructions")}
-            disabled={disabled || isReadOnly}
-            data-cy="medication-instructions"
-            wrapTextForSmallScreen
+          <InstructionsPopover
+            currentInstructions={currentInstructions}
+            removeInstruction={removeInstruction}
+            addInstruction={addInstruction}
+            isReadOnly={isReadOnly}
+            disabled={disabled}
           />
         )}
       </div>
@@ -1229,6 +1242,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(route) => handleUpdateDosageInstruction({ route })}
           placeholder={t("select_route")}
           disabled={disabled || isReadOnly}
+          asSheet
         />
       </div>
       {/* Site */}
@@ -1244,6 +1258,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_site")}
           disabled={disabled || isReadOnly}
           wrapTextForSmallScreen={true}
+          asSheet
         />
       </div>
       {/* Method */}
@@ -1259,6 +1274,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_method")}
           disabled={disabled || isReadOnly}
           count={20}
+          asSheet
         />
       </div>
       {/* Intent */}

@@ -90,6 +90,7 @@ const AvatarEditModal = ({
   const [constraint, setConstraint] = useState<IVideoConstraint>(
     VideoConstraints.user,
   );
+  const [currentStream, setCurrentStream] = useState<MediaStream | null>(null);
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const { requestPermission } = useMediaDevicePermission();
@@ -152,6 +153,20 @@ const AvatarEditModal = ({
       setIsCameraOpen(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!open || !isCameraOpen) {
+      if (currentStream) {
+        currentStream.getTracks().forEach((track) => track.stop());
+        setCurrentStream(null);
+      }
+      if (webRef.current?.stream) {
+        const tracks = webRef.current.stream.getTracks();
+        tracks.forEach((track) => track.stop());
+      }
+    }
+  }, [open, isCameraOpen, currentStream]);
+
   const closeModal = () => {
     setPreview(undefined);
     setIsProcessing(false);
@@ -371,9 +386,13 @@ const AvatarEditModal = ({
                   </div>
                   <Button
                     variant="primary"
-                    onClick={() => {
+                    onClick={async () => {
                       setConstraint(() => VideoConstraints.user);
-                      setIsCameraOpen(true);
+                      const result = await requestPermission("user");
+                      if (result.hasPermission && result.mediaStream) {
+                        setCurrentStream(result.mediaStream);
+                        setIsCameraOpen(true);
+                      }
                     }}
                   >
                     {`${t("open_camera")}`}
