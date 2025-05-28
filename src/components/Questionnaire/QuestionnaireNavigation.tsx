@@ -1,5 +1,7 @@
 import { t } from "i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { Question } from "@/types/questionnaire/question";
@@ -47,9 +49,12 @@ export default function QuestionnaireNavigation({
                       }
                     }
                   }}
-                  className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                    expandedQuestions?.has(question.id) ? "bg-accent" : ""
-                  }`}
+                  className={cn(
+                    "w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2",
+                    {
+                      "bg-accent": expandedQuestions?.has(question.id),
+                    },
+                  )}
                 >
                   <span className="font-medium text-gray-500">
                     {index + 1}.

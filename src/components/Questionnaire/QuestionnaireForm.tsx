@@ -779,7 +779,10 @@ export function QuestionnaireForm({
           >
             <div className="flex justify-between items-center max-w-4xl p-2">
               <div
-                className={`${encounterId === "preview" && "space-y-5 border-2 border-gray-100 rounded-lg w-full shadow-sm p-3"}`}
+                className={cn({
+                  "space-y-5 border-2 border-gray-100 rounded-lg w-full shadow-sm p-3":
+                    encounterId === "preview",
+                })}
               >
                 <div className="space-y-1">
                   <h2 className="text-xl font-semibold">
