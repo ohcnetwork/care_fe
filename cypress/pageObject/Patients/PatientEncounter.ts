@@ -85,6 +85,17 @@ export class PatientEncounter {
   }
 
   deleteAllergy() {
+    cy.get('[data-cy="allergy-options"]')
+      .last()
+      .scrollIntoView()
+      .should("be.visible")
+      .then(($el) => {
+        cy.wrap($el).click();
+        cy.verifyAndClickElement(
+          '[data-cy="remove-allergy"]',
+          "Remove Allergy",
+        );
+      });
     cy.get('[data-cy="allergy-options"]').last().scrollIntoView();
     cy.get('[data-cy="allergy-options"]').last().click();
     cy.get('[data-cy="remove-allergy"]').click();
@@ -168,9 +179,17 @@ export class PatientEncounter {
   }
 
   deleteSymptom() {
-    cy.get('[data-cy="symptom-options"]').last().scrollIntoView();
-    cy.get('[data-cy="symptom-options"]').last().click();
-    cy.get('[data-cy="remove-symptom"]').click();
+    cy.get('[data-cy="symptom-options"]')
+      .last()
+      .scrollIntoView()
+      .should("be.visible")
+      .then(($el) => {
+        cy.wrap($el).click();
+        cy.verifyAndClickElement(
+          '[data-cy="remove-symptom"]',
+          "Remove Symptom",
+        );
+      });
     return this;
   }
 
@@ -250,9 +269,17 @@ export class PatientEncounter {
   }
 
   deleteDiagnosis() {
-    cy.get('[data-cy="diagnosis-options"]').last().scrollIntoView();
-    cy.get('[data-cy="diagnosis-options"]').last().click();
-    cy.get('[data-cy="remove-diagnosis"]').click();
+    cy.get('[data-cy="diagnosis-options"]')
+      .last()
+      .scrollIntoView()
+      .should("be.visible")
+      .then(($el) => {
+        cy.wrap($el).click();
+        cy.verifyAndClickElement(
+          '[data-cy="remove-diagnosis"]',
+          "Remove Diagnosis",
+        );
+      });
     return this;
   }
 
