@@ -92,7 +92,7 @@ export default function EditScheduleTemplateSheet({
       <SheetTrigger asChild>
         {trigger || <Button variant="outline" size="sm"></Button>}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit">
+      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit max-w-screen-lg">
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
