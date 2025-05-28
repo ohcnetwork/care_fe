@@ -592,7 +592,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       title: mappedData.title || "",
       slug: mappedData.slug || "",
       description: mappedData.description || "",
+      questions: mappedData.questions || [],
     });
+
+    form.trigger();
 
     setShowImportDialog(false);
     setImportUrl("");
