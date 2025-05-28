@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -90,9 +92,25 @@ export default function ReportBuilderSheet({
         <div className="space-y-4 mt-6">
           {isReportTemplateLoading ? (
             <CardGridSkeleton count={5} />
-          ) : reportTemplateData?.results?.length === 0 ? (
-            <div className="text-center text-gray-500 p-5">
-              {t("no_templates_found")}
+          ) : !reportTemplateData?.results ||
+            reportTemplateData?.results?.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-10 border border-dashed border-gray-300 rounded-lg bg-gray-50 my-4">
+              <div className="text-center max-w-md">
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <div className="bg-gray-50 p-2 rounded-full size-10 flex items-center justify-center border border-gray-200 shadow-sm">
+                    <CareIcon
+                      icon="l-file-medical"
+                      className="text-green-500 text-2xl"
+                    />
+                  </div>
+                  <h4 className="text-xl font-normal text-gray-800">
+                    {t("no_templates_found")}
+                  </h4>
+                </div>
+                <p className="text-gray-600 text-sm mt-4">
+                  {t("report_template_description")}
+                </p>
+              </div>
             </div>
           ) : (
             <ScrollArea className="h-[calc(100vh-10rem)]">

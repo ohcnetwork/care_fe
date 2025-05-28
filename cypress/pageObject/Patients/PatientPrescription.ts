@@ -56,9 +56,15 @@ export class PatientPrescription {
     }
 
     if (instructions) {
-      cy.clickAndSelectOption('[data-cy="instructions"]', instructions, {
-        position: "last",
-      });
+      cy.get('[data-cy="instructions"]').click();
+      cy.clickAndSelectOption(
+        '[data-cy="medication-instructions-dropdown"]',
+        instructions,
+        {
+          position: "last",
+        },
+      );
+      cy.get('[data-cy="instructions"]').click();
     }
 
     if (notes) {
