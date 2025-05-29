@@ -34,6 +34,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import {
+  ContainerSpec,
   Preference,
   RETENTION_TIME_UNITS,
   SPECIMEN_DEFINITION_UNITS_CODES,
@@ -175,20 +176,54 @@ export function SpecimenDefinitionForm({
     form.setValue("patient_preparation", newPreparations);
   };
 
+  const cleanContainerData = (container: ContainerSpec | null | undefined) => {
+    if (!container) return undefined;
+
+    const hasContent =
+      container.description ||
+      container.preparation ||
+      container.capacity ||
+      container.cap ||
+      container.minimum_volume?.quantity ||
+      container.minimum_volume?.string;
+
+    if (!hasContent) return undefined;
+
+    const cleanedContainer = { ...container };
+    if (
+      container.minimum_volume &&
+      !container.minimum_volume.quantity &&
+      !container.minimum_volume.string
+    ) {
+      delete cleanedContainer.minimum_volume;
+    }
+
+    return cleanedContainer;
+  };
+
+  const handleSubmit = (data: SpecimenDefinitionCreate) => {
+    onSubmit({
+      ...data,
+      patient_preparation:
+        data.patient_preparation?.filter((item) => item && item.code) || [],
+      type_tested: data.type_tested
+        ? {
+            ...data.type_tested,
+            container: cleanContainerData(data.type_tested.container),
+          }
+        : undefined,
+    });
+  };
+
   return (
     <Form {...form}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          form.handleSubmit(
-            (data) => {
-              onSubmit(data);
-            },
-            (errors) => {
-              console.log("Form submission failed with errors:", errors);
-            },
-          )();
+          form.handleSubmit(handleSubmit, (errors) => {
+            console.log("Form submission failed with errors:", errors);
+          })();
         }}
         className="space-y-4"
       >
