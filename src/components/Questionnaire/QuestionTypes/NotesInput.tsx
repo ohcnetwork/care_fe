@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -28,6 +28,23 @@ export function NotesInput({
   const [open, setOpen] = useState(false);
   const notes = questionnaireResponse.note || "";
   const hasNotes = notes.length > 0;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      // Use a small delay to ensure the textarea is fully rendered and ready
+      const timeoutId = setTimeout(() => {
+        if (textareaRef.current) {
+          const length = textareaRef.current.value.length || 0;
+          textareaRef.current.setSelectionRange(length, length);
+          textareaRef.current.focus();
+        }
+      }, 50); // Using a 50ms delay as a balance
+
+      // Clean up the timeout if the popover closes before the timeout fires
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open]);
 
   return (
     <div className={cn("space-y-2 rounded-md flex items-center", className)}>
@@ -56,6 +73,7 @@ export function NotesInput({
             placeholder="Add notes..."
             disabled={disabled}
             data-cy="notes-textarea"
+            ref={textareaRef}
           />
         </PopoverContent>
       </Popover>
