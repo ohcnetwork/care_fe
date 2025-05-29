@@ -68,8 +68,8 @@ const consentFormSchema = (isEdit: boolean) =>
       status: z.enum(CONSENT_STATUSES).default("active"),
       date: tzAwareDateTime,
       period: z.object({
-        start: tzAwareDateTime,
-        end: tzAwareDateTime,
+        start: tzAwareDateTime.optional(),
+        end: z.union([tzAwareDateTime, z.undefined()]).optional(),
       }),
       note: z.string().optional(),
       fileEntries: z
@@ -145,7 +145,7 @@ export default function ConsentFormSheet({
       date: new Date().toISOString(),
       period: {
         start: new Date().toISOString(),
-        end: "",
+        end: undefined,
       },
       note: "",
       fileEntries: [],
@@ -335,9 +335,7 @@ export default function ConsentFormSheet({
                       <DateTimeInput
                         {...field}
                         value={field.value}
-                        onChange={(val) => {
-                          field.onChange(val);
-                        }}
+                        onDateChange={(val) => field.onChange(val)}
                       />
                       <FormMessage />
                     </FormItem>
@@ -354,8 +352,8 @@ export default function ConsentFormSheet({
                         <DateTimeInput
                           {...field}
                           value={field.value ?? ""}
-                          onChange={(val) => {
-                            field.onChange(val);
+                          onDateChange={(val) => {
+                            field.onChange(val ?? null);
                           }}
                         />
                         <FormMessage />
@@ -371,9 +369,9 @@ export default function ConsentFormSheet({
                         <FormLabel>{t("consent_valid_until")}</FormLabel>
                         <DateTimeInput
                           {...field}
-                          value={field.value ?? undefined}
-                          onChange={(val) => {
-                            field.onChange(val);
+                          value={field.value ?? ""}
+                          onDateChange={(val) => {
+                            field.onChange(val ?? null);
                           }}
                         />
                         <FormMessage />
