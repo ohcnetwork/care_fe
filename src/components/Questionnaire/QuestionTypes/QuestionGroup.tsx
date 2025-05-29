@@ -43,15 +43,29 @@ function isQuestionEnabled(
     )?.values[0];
 
     // Early return if no dependent value exists
-    if (!dependentValue?.value) return false;
+    if (dependentValue?.value == null) return false;
+
+    function normalizeValue(value: unknown): unknown {
+      if (typeof value === "boolean") {
+        return value ? "Yes" : "No";
+      }
+
+      if (typeof value === "number") {
+        return value.toString();
+      }
+
+      return value;
+    }
 
     switch (enableWhen.operator) {
       case "exists":
         return dependentValue !== undefined && dependentValue !== null;
-      case "equals":
-        return dependentValue.value === enableWhen.answer;
-      case "not_equals":
-        return dependentValue.value !== enableWhen.answer;
+      case "equals": {
+        return normalizeValue(dependentValue.value) === enableWhen.answer;
+      }
+      case "not_equals": {
+        return normalizeValue(dependentValue.value) !== enableWhen.answer;
+      }
       case "greater":
         return (
           typeof dependentValue.value === "number" &&
