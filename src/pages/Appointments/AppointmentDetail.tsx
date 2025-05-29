@@ -166,15 +166,22 @@ export default function AppointmentDetail(props: Props) {
             facility={facilityData}
           />
           <div className="mt-3">
-            <div id="section-to-print" className="print:w-[400px] print:pt-4">
-              <div id="appointment-token-card" className="bg-gray-50 md:p-4">
-                <AppointmentTokenCard
-                  appointment={appointment}
-                  facility={facilityData}
-                />
+            <div
+              id="section-to-print"
+              className="print:w-[400px] print:pt-4 -mx-6 md:-mx-6 lg:mx-0"
+            >
+              <div className="flex justify-center">
+                <div className="md:p-4">
+                  <div id="appointment-token-card" className="bg-gray-50">
+                    <AppointmentTokenCard
+                      appointment={appointment}
+                      facility={facilityData}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex gap-2 justify-end px-6 mt-4 md:mt-0">
+            <div className="flex gap-2 justify-center px-6 mt-4 md:mt-0">
               <Button variant="outline" onClick={() => print()}>
                 <PrinterIcon className="size-4 mr-2" />
                 <span>{t("print")}</span>
