@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -26,8 +26,14 @@ export function NotesInput({
   className,
 }: NotesInputProps) {
   const [open, setOpen] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const notes = questionnaireResponse.note || "";
   const hasNotes = notes.length > 0;
+
+  const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    const len = e.target.value.length;
+    e.target.setSelectionRange(len, len);
+  };
 
   return (
     <div className={cn("space-y-2 rounded-md flex items-center", className)}>
@@ -50,12 +56,15 @@ export function NotesInput({
         </PopoverTrigger>
         <PopoverContent className="bg-yellow-100 border border-yellow-200 text-gray-900 shadow-lg p-2">
           <Textarea
+            ref={textareaRef}
             value={notes}
             onChange={(e) => handleUpdateNote(e.target.value)}
             className=" border-yellow-200 focus-visible:border-yellow-300 focus-visible:ring-yellow-300"
             placeholder="Add notes..."
             disabled={disabled}
             data-cy="notes-textarea"
+            autoFocus
+            onFocus={handleFocus}
           />
         </PopoverContent>
       </Popover>
