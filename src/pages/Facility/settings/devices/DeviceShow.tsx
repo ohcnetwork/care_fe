@@ -443,7 +443,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between gap-4 rounded-md border p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-4">
               <div className="space-y-1">
                 <h3 className="text-sm font-medium">
                   {t("delete_this_device")}
@@ -454,7 +454,11 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" data-cy="delete-device-button">
+                  <Button
+                    variant="destructive"
+                    data-cy="delete-device-button"
+                    className="w-fit"
+                  >
                     {t("delete")}
                   </Button>
                 </AlertDialogTrigger>
