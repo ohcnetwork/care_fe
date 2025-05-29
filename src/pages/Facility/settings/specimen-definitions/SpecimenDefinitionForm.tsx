@@ -226,11 +226,9 @@ export function SpecimenDefinitionForm({
         }}
         className="space-y-4"
       >
-        <Card data-cy="specimen-definition-form-card">
+        <Card>
           <CardHeader>
-            <CardTitle data-cy="specimen-definition-form-heading">
-              {t("specimen_definition")}
-            </CardTitle>
+            <CardTitle>{t("specimen_definition")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Basic Information */}
@@ -242,15 +240,11 @@ export function SpecimenDefinitionForm({
                   name="title"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel data-cy="label-title">
+                      <FormLabel>
                         {t("title")} <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          data-cy="specimen-definition-form-title"
-                          placeholder={t("title")}
-                          {...field}
-                        />
+                        <Input placeholder={t("title")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -262,12 +256,11 @@ export function SpecimenDefinitionForm({
                   name="slug"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel data-cy="label-slug">
+                      <FormLabel>
                         {t("slug")} <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
-                          data-cy="specimen-definition-form-slug"
                           placeholder={t("unique_identifier")}
                           {...field}
                           value={field.value || ""}
@@ -285,30 +278,22 @@ export function SpecimenDefinitionForm({
                   name="status"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel data-cy="label-status">
+                      <FormLabel>
                         {t("status")} <span className="text-red-500">*</span>
                       </FormLabel>
                       <Select
-                        data-cy="select-status"
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger data-cy="specimen-definition-form-status">
-                            <SelectValue
-                              data-cy="value-status"
-                              placeholder={t("select_status")}
-                            />
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("select_status")} />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent data-cy="content-status">
+                        <SelectContent>
                           {Object.values(SpecimenDefinitionStatus).map(
                             (status) => (
-                              <SelectItem
-                                key={status}
-                                value={status}
-                                data-cy={`item-status-${status}`}
-                              >
+                              <SelectItem key={status} value={status}>
                                 {t(status)}
                               </SelectItem>
                             ),
@@ -325,12 +310,9 @@ export function SpecimenDefinitionForm({
                   name="derived_from_uri"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel data-cy="label-derived-from-uri">
-                        {t("derived_from_uri")}
-                      </FormLabel>
+                      <FormLabel>{t("derived_from_uri")}</FormLabel>
                       <FormControl>
                         <Input
-                          data-cy="specimen-definition-form-derived-from-uri"
                           placeholder={t("uri")}
                           {...field}
                           value={field.value || ""}
@@ -347,15 +329,11 @@ export function SpecimenDefinitionForm({
                 name="description"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel data-cy="label-description">
+                    <FormLabel>
                       {t("description")} <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Textarea
-                        data-cy="specimen-definition-form-description"
-                        placeholder={t("description")}
-                        {...field}
-                      />
+                      <Textarea placeholder={t("description")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -371,17 +349,13 @@ export function SpecimenDefinitionForm({
                   control={form.control}
                   name="type_collected"
                   render={({ field }) => (
-                    <FormItem
-                      className="flex flex-col"
-                      data-cy="specimen-definition-form-type-collected"
-                    >
+                    <FormItem className="flex flex-col">
                       <FormLabel>
                         {t("type_collected")}{" "}
                         <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <ValueSetSelect
-                          data-cy="select-type-collected"
                           system="system-specimen_type-code"
                           placeholder={t("select_type_collected")}
                           onSelect={handleTypeCollectedSelect}
@@ -398,14 +372,10 @@ export function SpecimenDefinitionForm({
                   control={form.control}
                   name="collection"
                   render={({ field }) => (
-                    <FormItem
-                      className="flex flex-col"
-                      data-cy="specimen-definition-form-collection"
-                    >
+                    <FormItem className="flex flex-col">
                       <FormLabel>{t("collection")}</FormLabel>
                       <FormControl>
                         <ValueSetSelect
-                          data-cy="select-collection"
                           system="system-specimen_collection_code"
                           placeholder={t("select_collection")}
                           onSelect={handleCollectionMethodSelect}
@@ -424,20 +394,12 @@ export function SpecimenDefinitionForm({
                 name="patient_preparation"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel data-cy="label-patient-preparation">
-                      {t("patient_preparation")}
-                    </FormLabel>
+                    <FormLabel>{t("patient_preparation")}</FormLabel>
                     <div className="space-y-2">
                       {field.value.map(
                         (preparation: Code | null, index: number) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-2"
-                            data-cy="select-patient-preparation"
-                          >
-                            <FormControl
-                              data-cy={`specimen-definition-form-patient-preparation-${index}`}
-                            >
+                          <div key={index} className="flex items-center gap-2">
+                            <FormControl>
                               <ValueSetSelect
                                 system="system-prepare_patient_prior_specimen_code"
                                 placeholder={t("select_patient_preparation")}
@@ -450,7 +412,6 @@ export function SpecimenDefinitionForm({
                             </FormControl>
                             {field.value.length > 1 && (
                               <Button
-                                data-cy="remove-patient-preparation"
                                 type="button"
                                 variant="ghost"
                                 size="icon"
@@ -464,7 +425,6 @@ export function SpecimenDefinitionForm({
                         ),
                       )}
                       <Button
-                        data-cy="add-patient-preparation"
                         type="button"
                         variant="outline"
                         onClick={addPatientPreparation}
@@ -482,10 +442,7 @@ export function SpecimenDefinitionForm({
 
             {/* Type Tested Information */}
             <div className="space-y-4 rounded-md border bg-gray-50 px-2 py-4">
-              <h3
-                className="text-base font-medium"
-                data-cy="type-tested-information-title"
-              >
+              <h3 className="text-base font-medium">
                 {t("type_tested_information")}
               </h3>
 
@@ -496,13 +453,10 @@ export function SpecimenDefinitionForm({
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between border p-2 rounded-md">
                       <div className="space-y-0.5">
-                        <FormLabel data-cy="label-is-derived">
-                          {t("is_derived")}
-                        </FormLabel>
+                        <FormLabel>{t("is_derived")}</FormLabel>
                       </div>
                       <FormControl>
                         <Switch
-                          data-cy="switch-is-derived"
                           checked={field.value || false}
                           onCheckedChange={field.onChange}
                         />
@@ -516,13 +470,10 @@ export function SpecimenDefinitionForm({
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between border p-2 rounded-md">
                       <div className="space-y-0.5">
-                        <FormLabel data-cy="label-single-use">
-                          {t("single_use")}
-                        </FormLabel>
+                        <FormLabel>{t("single_use")}</FormLabel>
                       </div>
                       <FormControl>
                         <Switch
-                          data-cy="switch-single-use"
                           checked={field.value || false}
                           onCheckedChange={field.onChange}
                         />
@@ -536,33 +487,21 @@ export function SpecimenDefinitionForm({
                   name="type_tested.preference"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel data-cy="label-preference">
-                        {t("preference")}
-                      </FormLabel>
+                      <FormLabel>{t("preference")}</FormLabel>
                       <Select
-                        data-cy="select-preference"
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger data-cy="tested-preference">
-                            <SelectValue
-                              data-cy="value-preference"
-                              placeholder={t("select_preference")}
-                            />
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("select_preference")} />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent data-cy="content-preference">
-                          <SelectItem
-                            value="preferred"
-                            data-cy="item-preference-preferred"
-                          >
+                        <SelectContent>
+                          <SelectItem value="preferred">
                             {t("preferred")}
                           </SelectItem>
-                          <SelectItem
-                            value="alternate"
-                            data-cy="item-preference-alternate"
-                          >
+                          <SelectItem value="alternate">
                             {t("alternate")}
                           </SelectItem>
                         </SelectContent>
@@ -576,16 +515,10 @@ export function SpecimenDefinitionForm({
                     control={form.control}
                     name="type_tested.retention_time"
                     render={({ field }) => (
-                      <FormItem
-                        className="flex flex-col"
-                        data-cy="specimen-definition-form-retention-time"
-                      >
-                        <FormLabel data-cy="label-retention-time">
-                          {t("retention_time")}
-                        </FormLabel>
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("retention_time")}</FormLabel>
                         <FormControl>
                           <ComboboxQuantityInput
-                            data-cy="specimen-definition-form-retention-time"
                             quantity={
                               field.value
                                 ? {
@@ -616,12 +549,9 @@ export function SpecimenDefinitionForm({
                   name="type_tested.requirement"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel data-cy="label-requirement">
-                        {t("requirement")}
-                      </FormLabel>
+                      <FormLabel>{t("requirement")}</FormLabel>
                       <FormControl>
                         <Textarea
-                          data-cy="specimen-definition-form-requirement"
                           placeholder={t("requirement")}
                           {...field}
                           value={field.value || ""}
@@ -634,10 +564,7 @@ export function SpecimenDefinitionForm({
               </div>
 
               <div className="space-y-4 rounded-md border bg-gray-50 shadow-sm p-2">
-                <h4
-                  className="text-sm font-medium"
-                  data-cy="container-information-title"
-                >
+                <h4 className="text-sm font-medium">
                   {t("container_information")}
                 </h4>
                 <FormField
@@ -645,9 +572,7 @@ export function SpecimenDefinitionForm({
                   name="type_tested.container.description"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel data-cy="label-container-description">
-                        {t("description")}
-                      </FormLabel>
+                      <FormLabel>{t("description")}</FormLabel>
                       <FormControl>
                         <Textarea
                           data-cy="specimen-definition-form-container-description"
@@ -667,14 +592,10 @@ export function SpecimenDefinitionForm({
                       control={form.control}
                       name="type_tested.container.cap"
                       render={({ field }) => (
-                        <FormItem
-                          className="flex flex-col"
-                          data-cy="specimen-definition-form-cap"
-                        >
-                          <FormLabel data-cy="label-cap">{t("cap")}</FormLabel>
+                        <FormItem className="flex flex-col">
+                          <FormLabel>{t("cap")}</FormLabel>
                           <FormControl>
                             <ValueSetSelect
-                              data-cy="select-cap"
                               system="system-container_cap-code"
                               placeholder={t("select_cap")}
                               onSelect={handleCapTypeSelect}
@@ -692,16 +613,10 @@ export function SpecimenDefinitionForm({
                       control={form.control}
                       name="type_tested.container.capacity"
                       render={({ field }) => (
-                        <FormItem
-                          className="flex flex-col"
-                          data-cy="specimen-definition-form-capacity"
-                        >
-                          <FormLabel data-cy="label-capacity">
-                            {t("capacity")}
-                          </FormLabel>
+                        <FormItem className="flex flex-col">
+                          <FormLabel>{t("capacity")}</FormLabel>
                           <FormControl>
                             <ComboboxQuantityInput
-                              data-cy="input-capacity"
                               quantity={
                                 field.value
                                   ? {
@@ -728,12 +643,9 @@ export function SpecimenDefinitionForm({
 
                 <div className="space-y-4">
                   <div className="flex flex-col gap-2">
-                    <FormLabel data-cy="label-minimum-volume">
-                      {t("minimum_volume")}
-                    </FormLabel>
+                    <FormLabel>{t("minimum_volume")}</FormLabel>
                     <Tabs
                       className="w-full"
-                      data-cy="tabs-minimum-volume"
                       defaultValue={
                         form.watch(
                           "type_tested.container.minimum_volume.quantity",
@@ -743,27 +655,13 @@ export function SpecimenDefinitionForm({
                       }
                       onValueChange={handleMinimumVolumeTypeChange}
                     >
-                      <TabsList
-                        className="grid w-full grid-cols-2"
-                        data-cy="tabslist-minimum-volume"
-                      >
-                        <TabsTrigger
-                          value="quantity"
-                          data-cy="tab-minimum-volume-quantity"
-                        >
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="quantity">
                           {t("quantity")}
                         </TabsTrigger>
-                        <TabsTrigger
-                          value="text"
-                          data-cy="tab-minimum-volume-text"
-                        >
-                          {t("text")}
-                        </TabsTrigger>
+                        <TabsTrigger value="text">{t("text")}</TabsTrigger>
                       </TabsList>
-                      <TabsContent
-                        value="quantity"
-                        data-cy="tabcontent-minimum-volume-quantity"
-                      >
+                      <TabsContent value="quantity">
                         <FormField
                           control={form.control}
                           name="type_tested.container.minimum_volume.quantity"
@@ -771,7 +669,6 @@ export function SpecimenDefinitionForm({
                             <FormItem className="flex flex-col">
                               <FormControl>
                                 <ComboboxQuantityInput
-                                  data-cy="input-minimum-volume-quantity"
                                   quantity={
                                     field.value
                                       ? {
@@ -793,10 +690,7 @@ export function SpecimenDefinitionForm({
                           )}
                         />
                       </TabsContent>
-                      <TabsContent
-                        value="text"
-                        data-cy="tabcontent-minimum-volume-text"
-                      >
+                      <TabsContent value="text">
                         <FormField
                           control={form.control}
                           name="type_tested.container.minimum_volume.string"
@@ -829,9 +723,7 @@ export function SpecimenDefinitionForm({
                   name="type_tested.container.preparation"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel data-cy="label-preparation">
-                        {t("preparation")}
-                      </FormLabel>
+                      <FormLabel>{t("preparation")}</FormLabel>
                       <FormControl>
                         <Textarea
                           data-cy="specimen-definition-form-preparation"
@@ -851,7 +743,6 @@ export function SpecimenDefinitionForm({
 
         <div className="flex justify-between">
           <Button
-            data-cy="cancel-button"
             type="button"
             variant="outline"
             onClick={() =>
@@ -860,7 +751,7 @@ export function SpecimenDefinitionForm({
           >
             {t("cancel")}
           </Button>
-          <Button type="submit" data-cy="save-button" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading}>
             {t("save")}
           </Button>
         </div>

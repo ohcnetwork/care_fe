@@ -18,95 +18,45 @@ export interface SpecimenDefinitionData {
 }
 
 export class FacilitySpecimen {
-  // Organize selectors by feature
-  private readonly selectors = {
-    navigation: {
-      settings: '[data-cy="nav-settings"]',
-      specimenDefinitions: '[data-cy="nav-specimen-definitions"]',
-    },
-    list: {
-      addButton: '[data-cy="add-specimen-definition-btn"]',
-      searchInput: '[data-cy="specimen-definition-search-input"]',
-      statusFilter: '[data-cy="specimen-definition-filters"]',
-      titleCell: '[data-cy="specimen-definition-title-cell"]',
-      detailsButton: '[data-cy="specimen-definition-see-details-btn"]',
-      tableContainer: '[data-cy="specimen-definition-table-container"]',
-    },
-    detail: {
-      container: '[data-cy="specimen-definition-detail-page"]',
-      editButton: '[data-cy="specimen-definition-edit-btn"]',
-      deleteButton: '[data-cy="specimen-definition-delete-btn"]',
-      deleteConfirmButton: '[data-cy="specimen-definition-delete-confirm-btn"]',
-    },
-    form: {
-      title: '[data-cy="specimen-definition-form-title"]',
-      slug: '[data-cy="specimen-definition-form-slug"]',
-      description: '[data-cy="specimen-definition-form-description"]',
-      status: '[data-cy="specimen-definition-form-status"]',
-      derivedFromUri: '[data-cy="specimen-definition-form-derived-from-uri"]',
-      typeCollected: '[data-cy="specimen-definition-form-type-collected"]',
-      collection: '[data-cy="specimen-definition-form-collection"]',
-      addPatientPreparation: '[data-cy="add-patient-preparation"]',
-      selectPatientPreparation: '[data-cy="select-patient-preparation"]',
-      testedPreference: '[data-cy="tested-preference"]',
-      retentionTime: '[data-cy="specimen-definition-form-retention-time"]',
-      requirement: '[data-cy="specimen-definition-form-requirement"]',
-      containerDescription:
-        '[data-cy="specimen-definition-form-container-description"]',
-      cap: '[data-cy="specimen-definition-form-cap"]',
-      capacity: '[data-cy="specimen-definition-form-capacity"]',
-      minimumVolume:
-        '[data-cy="specimen-definition-form-minimum-volume-string"]',
-      preparation: '[data-cy="specimen-definition-form-preparation"]',
-      saveButton: '[data-cy="save-button"]',
-    },
-  };
-
-  // Navigation methods
   navigateToSpecimenDefinitions() {
-    cy.get(this.selectors.navigation.settings).click();
-    cy.verifyAndClickElement(
-      this.selectors.navigation.specimenDefinitions,
-      "Specimen Definitions",
-    );
+    cy.get('[data-sidebar="menu-button"]').contains("Settings").click();
+    cy.get('[data-sidebar="menu-sub-button"]')
+      .contains("Specimen Definitions")
+      .click();
     cy.url().should("include", "/settings/specimen_definitions");
     return this;
   }
 
   // List page methods
   clickAddDefinition() {
-    cy.verifyAndClickElement(this.selectors.list.addButton, "Add Definition");
+    cy.clickButton("Add Definition");
     cy.url().should("include", "/settings/specimen_definitions/new");
     return this;
   }
 
   searchSpecimen(title: string) {
-    cy.typeIntoField(this.selectors.list.searchInput, title);
+    cy.typeIntoInputByPlaceholder("Search definitions", title);
     return this;
   }
 
   filterByStatus(status: string) {
-    cy.clickAndSelectOption(this.selectors.list.statusFilter, status);
+    cy.clickSelectTrigger("Status", status);
     return this;
   }
 
   verifySpecimenInList(title: string) {
-    cy.get(this.selectors.list.titleCell).should("contain", title);
+    cy.verifyContentPresenceV2("table", [title]);
     return this;
   }
 
   openSpecimenDetails() {
-    cy.get(this.selectors.list.tableContainer)
-      .find(this.selectors.list.detailsButton)
-      .first()
-      .click();
+    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
     return this;
   }
 
   // Detail page methods
   verifySpecimenDetails(data: Partial<SpecimenDefinitionData>) {
     const detailsToVerify = [
-      data.title,
       data.description,
       data.status,
       data.typeCollected,
@@ -114,12 +64,12 @@ export class FacilitySpecimen {
       data.cap,
     ].filter(Boolean);
 
-    cy.verifyContentPresence(this.selectors.detail.container, detailsToVerify);
+    cy.verifyContentPresenceV2("card", detailsToVerify);
     return this;
   }
 
   clickEditSpecimen() {
-    cy.verifyAndClickElement(this.selectors.detail.editButton, "Edit");
+    cy.clickButton("Edit");
     return this;
   }
 
@@ -138,77 +88,78 @@ export class FacilitySpecimen {
   }
 
   fillSpecimenDefinitionForm(data: SpecimenDefinitionData) {
-    const { form } = this.selectors;
-
     if (data.title) {
-      cy.typeIntoField(form.title, data.title, { clearBeforeTyping: true });
+      cy.typeIntoLabeledField("Title", data.title, true);
     }
-    cy.typeIntoField(form.slug, data.slug, { clearBeforeTyping: true });
+    cy.typeIntoLabeledField("Slug", data.slug);
 
     if (data.description) {
-      cy.typeIntoField(form.description, data.description, {
-        clearBeforeTyping: true,
-      });
+      cy.typeIntoLabeledField("Description", data.description, true);
     }
     if (data.status) {
-      cy.clickAndSelectOption(form.status, data.status);
+      cy.clickAndSelectOptionV2("Status", data.status);
     }
     if (data.derivedFromUri) {
-      cy.typeIntoField(form.derivedFromUri, data.derivedFromUri, {
-        clearBeforeTyping: true,
-      });
+      cy.typeIntoLabeledField("Derived From URI", data.derivedFromUri, true);
     }
     if (data.typeCollected) {
-      cy.typeAndSelectOption(form.typeCollected, data.typeCollected);
+      cy.typeAndSelectOptionV2("Type Collected", data.typeCollected);
     }
     if (data.collection) {
-      cy.typeAndSelectOption(form.collection, data.collection);
+      cy.typeAndSelectOptionV2("Collection", data.collection);
     }
     if (data.patientPreparation) {
-      cy.verifyAndClickElement(form.addPatientPreparation, "Add");
-      cy.typeAndSelectOption(
-        form.selectPatientPreparation,
-        data.patientPreparation,
-      );
+      cy.clickButton("Add");
+      cy.typeAndSelectOptionV2("Patient Preparation", data.patientPreparation);
     }
     if (data.testedPreference) {
-      cy.clickAndSelectOption(form.testedPreference, data.testedPreference);
+      cy.clickAndSelectOptionV2("Preference", data.testedPreference);
     }
     if (data.retentionTime) {
-      cy.selectComboboxDropdown(form.retentionTime, data.retentionTime);
+      cy.selectComboboxDropdown("Retention time", data.retentionTime);
     }
     if (data.requirement) {
-      cy.typeIntoField(form.requirement, data.requirement, {
-        clearBeforeTyping: true,
-      });
+      cy.typeIntoLabeledField("Requirement", data.requirement, true);
     }
     if (data.containerDescription) {
-      cy.typeIntoField(form.containerDescription, data.containerDescription, {
-        clearBeforeTyping: true,
-      });
+      cy.typeIntoField(
+        '[data-cy="specimen-definition-form-container-description"]',
+        data.containerDescription,
+        {
+          clearBeforeTyping: true,
+        },
+      );
     }
     if (data.cap) {
-      cy.typeAndSelectOption(form.cap, data.cap);
+      cy.typeAndSelectOptionV2("Cap", data.cap);
     }
     if (data.capacity) {
-      cy.selectComboboxDropdown(form.capacity, data.capacity);
+      cy.selectComboboxDropdown("Capacity", data.capacity);
     }
     if (data.minimumVolume) {
-      cy.typeIntoField(form.minimumVolume, data.minimumVolume, {
-        clearBeforeTyping: true,
-      });
+      cy.typeIntoField(
+        '[data-cy="specimen-definition-form-minimum-volume-string"]',
+        data.minimumVolume,
+        {
+          clearBeforeTyping: true,
+        },
+      );
     }
     if (data.preparation) {
-      cy.typeIntoField(form.preparation, data.preparation, {
-        clearBeforeTyping: true,
-      });
+      cy.typeIntoField(
+        '[data-cy="specimen-definition-form-preparation"]',
+        data.preparation,
+        {
+          clearBeforeTyping: true,
+        },
+      );
     }
 
     return this;
   }
 
   saveSpecimenDefinition() {
-    cy.verifyAndClickElement(this.selectors.form.saveButton, "Save");
+    cy.clickButton("Save");
     return this;
   }
 
@@ -228,15 +179,12 @@ export class FacilitySpecimen {
   }
 
   clickDeleteSpecimen() {
-    cy.verifyAndClickElement(this.selectors.detail.deleteButton, "Delete");
+    cy.clickButton("Delete");
     return this;
   }
 
   confirmDeleteSpecimen() {
-    cy.verifyAndClickElement(
-      this.selectors.detail.deleteConfirmButton,
-      "Confirm",
-    );
+    cy.clickButton("Confirm");
     return this;
   }
 

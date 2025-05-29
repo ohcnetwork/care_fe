@@ -56,21 +56,12 @@ function SpecimenDefinitionCard({
                   SPECIMEN_DEFINITION_STATUS_COLORS[definition.status] ||
                   "bg-gray-100 text-gray-700"
                 }
-                data-cy="specimen-definition-status-badge"
               >
                 {t(definition.status)}
               </Badge>
             </div>
-            <h3
-              className="font-medium text-gray-900"
-              data-cy="specimen-definition-title"
-            >
-              {definition.title}
-            </h3>
-            <p
-              className="mt-1 text-sm text-gray-500"
-              data-cy="specimen-definition-description"
-            >
+            <h3 className="font-medium text-gray-900">{definition.title}</h3>
+            <p className="mt-1 text-sm text-gray-500">
               {definition.description}
             </p>
           </div>
@@ -82,7 +73,6 @@ function SpecimenDefinitionCard({
                 `/facility/${facilityId}/settings/specimen_definitions/${definition.id}`,
               )
             }
-            data-cy="specimen-definition-see-details-btn"
           >
             <CareIcon icon="l-edit" className="size-4" />
             {t("see_details")}
@@ -125,18 +115,12 @@ export function SpecimenDefinitionsList({
     <Page title={t("specimen_definitions")} hideTitleOnPage>
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1
-            className="text-2xl font-bold text-gray-700"
-            data-cy="specimen-definitions-title"
-          >
+          <h1 className="text-2xl font-bold text-gray-700">
             {t("specimen_definitions")}
           </h1>
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <p
-                className="text-gray-600 text-sm"
-                data-cy="specimen-definitions-subtitle"
-              >
+              <p className="text-gray-600 text-sm">
                 {t("manage_specimen_definitions")}
               </p>
             </div>
@@ -146,7 +130,6 @@ export function SpecimenDefinitionsList({
                   `/facility/${facilityId}/settings/specimen_definitions/new`,
                 )
               }
-              data-cy="add-specimen-definition-btn"
             >
               <CareIcon icon="l-plus" className="mr-2" />
               {t("add_definition")}
@@ -156,10 +139,7 @@ export function SpecimenDefinitionsList({
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
             <div className="w-full md:w-auto">
               <div className="relative w-full md:w-auto">
-                <span
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  data-cy="specimen-definition-search-icon"
-                >
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                   <CareIcon icon="l-search" className="size-5" />
                 </span>
                 <Input
@@ -169,14 +149,10 @@ export function SpecimenDefinitionsList({
                     updateQuery({ search: e.target.value || undefined })
                   }
                   className="w-full md:w-[300px] pl-10"
-                  data-cy="specimen-definition-search-input"
                 />
               </div>
             </div>
-            <div
-              className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto"
-              data-cy="specimen-definition-filters"
-            >
+            <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
               <div className="flex-1 sm:flex-initial sm:w-auto">
                 <FilterSelect
                   value={qParams.status || ""}
@@ -184,7 +160,6 @@ export function SpecimenDefinitionsList({
                   options={Object.values(SpecimenDefinitionStatus)}
                   label="status"
                   onClear={() => updateQuery({ status: undefined })}
-                  data-cy="specimen-definition-status-filter"
                 />
               </div>
             </div>
@@ -193,10 +168,7 @@ export function SpecimenDefinitionsList({
 
         {isLoading ? (
           <>
-            <div
-              className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:hidden"
-              data-cy="specimen-definition-mobile-loading"
-            >
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:hidden">
               <CardGridSkeleton count={4} />
             </div>
             <div className="hidden md:block">
@@ -208,62 +180,36 @@ export function SpecimenDefinitionsList({
             icon="l-folder-open"
             title={t("no_definitions_found")}
             description={t("adjust_filters")}
-            data-cy="specimen-definition-empty-state"
           />
         ) : (
           <>
-            <div
-              className="grid gap-4 md:hidden"
-              data-cy="specimen-definition-mobile-grid"
-            >
+            <div className="grid gap-4 md:hidden">
               {specimenDefinitions.map((definition) => (
                 <SpecimenDefinitionCard
                   key={definition.id}
                   definition={definition}
                   facilityId={facilityId}
-                  data-cy={`specimen-definition-card-${definition.id}`}
                 />
               ))}
             </div>
-            <div
-              className="hidden md:block"
-              data-cy="specimen-definition-table-container"
-            >
+            <div className="hidden md:block">
               <div className="rounded-lg border">
                 <Table>
                   <TableHeader className="bg-gray-100">
                     <TableRow>
-                      <TableHead data-cy="specimen-definition-table-header-title">
-                        {t("title")}
-                      </TableHead>
-                      <TableHead data-cy="specimen-definition-table-header-status">
-                        {t("status")}
-                      </TableHead>
-                      <TableHead data-cy="specimen-definition-table-header-description">
-                        {t("description")}
-                      </TableHead>
-                      <TableHead data-cy="specimen-definition-table-header-actions">
-                        {t("actions")}
-                      </TableHead>
+                      <TableHead>{t("title")}</TableHead>
+                      <TableHead>{t("status")}</TableHead>
+                      <TableHead>{t("description")}</TableHead>
+                      <TableHead>{t("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody
-                    className="bg-white"
-                    data-cy="specimen-definition-table-body"
-                  >
+                  <TableBody className="bg-white">
                     {specimenDefinitions.map((definition) => (
-                      <TableRow
-                        key={definition.id}
-                        className="divide-x"
-                        data-cy="specimen-definition-table-row"
-                      >
-                        <TableCell
-                          className="font-medium"
-                          data-cy="specimen-definition-title-cell"
-                        >
+                      <TableRow key={definition.id} className="divide-x">
+                        <TableCell className="font-medium">
                           {definition.title}
                         </TableCell>
-                        <TableCell data-cy="specimen-definition-status-cell">
+                        <TableCell>
                           <Badge
                             variant="outline"
                             className={
@@ -271,15 +217,11 @@ export function SpecimenDefinitionsList({
                                 definition.status
                               ] || "bg-gray-100 text-gray-700"
                             }
-                            data-cy="specimen-definition-status-badge"
                           >
                             {t(definition.status)}
                           </Badge>
                         </TableCell>
-                        <TableCell
-                          className="whitespace-pre-wrap"
-                          data-cy="specimen-definition-description-cell"
-                        >
+                        <TableCell className="whitespace-pre-wrap">
                           {definition.description}
                         </TableCell>
                         <TableCell>
@@ -291,7 +233,6 @@ export function SpecimenDefinitionsList({
                                 `/facility/${facilityId}/settings/specimen_definitions/${definition.id}`,
                               )
                             }
-                            data-cy="specimen-definition-see-details-btn"
                           >
                             <CareIcon icon="l-edit" className="size-4" />
                             {t("see_details")}
@@ -306,10 +247,7 @@ export function SpecimenDefinitionsList({
           </>
         )}
 
-        <div
-          className="mt-4 flex justify-center"
-          data-cy="specimen-definition-pagination"
-        >
+        <div className="mt-4 flex justify-center">
           <Pagination totalCount={response?.count || 0} />
         </div>
       </div>

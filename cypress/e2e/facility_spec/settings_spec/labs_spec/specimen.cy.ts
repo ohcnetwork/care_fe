@@ -21,9 +21,7 @@ const PATIENT_PREPARATIONS = [
 const TESTED_PREFERENCES = ["Preferred", "Alternate"] as const;
 const CAP_COLORS = ["black", "red", "blue", "green"] as const;
 
-let slugCounter = 0;
-const generateUniqueSlug = () =>
-  `spec_${faker.string.alphanumeric(4)}_${++slugCounter}`;
+const generateUniqueSlug = () => faker.string.uuid();
 
 const generateMandatoryFields = () => ({
   title: faker.science.chemicalElement().name,
@@ -58,30 +56,6 @@ describe("Facility Specimen Management", () => {
   beforeEach(() => {
     cy.loginByApi("facility_admin");
     cy.visit("/");
-  });
-
-  it("Create specimen with mandatory fields and confirm deletion of specimen", () => {
-    facilityCreation.selectFirstRandomFacility();
-
-    // Use mandatory fields data
-    const specimenData = generateTestData().mandatoryOnly;
-
-    facilitySpecimen
-      .navigateToSpecimenDefinitions()
-      .clickAddDefinition()
-      .fillSpecimenDefinitionForm(specimenData)
-      .saveSpecimenDefinition()
-      .verifySpecimenDefinitionsUrl()
-      .verifySpecimenCreatedNotification();
-
-    // Search for created specimen
-    facilitySpecimen
-      .searchSpecimen(specimenData.title)
-      .verifySpecimenInList(specimenData.title)
-      .openSpecimenDetails()
-      .clickDeleteSpecimen()
-      .confirmDeleteSpecimen()
-      .verifySpecimenRetiredNotification();
   });
 
   it("Create a new specimen definition with mandatory fields only & Search | Edit | Status filter", () => {
@@ -148,5 +122,29 @@ describe("Facility Specimen Management", () => {
       .saveSpecimenDefinition()
       .verifySpecimenDefinitionsUrl()
       .verifySpecimenCreatedNotification();
+  });
+
+  it("Create specimen with mandatory fields and confirm deletion of specimen", () => {
+    facilityCreation.selectFirstRandomFacility();
+
+    // Use mandatory fields data with fixed Active status
+    const specimenData = {
+      ...generateTestData().mandatoryOnly,
+      status: "Active",
+    };
+
+    facilitySpecimen.navigateToSpecimenDefinitions().clickAddDefinition();
+
+    facilitySpecimen
+      .fillSpecimenDefinitionForm(specimenData)
+      .saveSpecimenDefinition()
+      .verifySpecimenDefinitionsUrl()
+      .verifySpecimenCreatedNotification()
+      .searchSpecimen(specimenData.title)
+      .verifySpecimenInList(specimenData.title)
+      .openSpecimenDetails()
+      .clickDeleteSpecimen()
+      .confirmDeleteSpecimen()
+      .verifySpecimenRetiredNotification();
   });
 });
