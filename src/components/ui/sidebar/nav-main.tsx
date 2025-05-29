@@ -49,13 +49,17 @@ const isAnyHiddenChildActive = (
   if (!link.children) return false;
   return link.children
     .filter((child) => child.hidden)
-    .some(
-      (child) =>
-        child.url &&
-        (currentPath === child.url ||
-          currentPath.startsWith(child.url + "/")) &&
-        !currentPath.includes("/encounter"),
-    );
+    .some((child) => {
+      if (!child.url) return false;
+      if (currentPath === child.url) return true;
+      if (currentPath.startsWith(child.url + "/")) {
+        const nextSegment = currentPath
+          .slice(child.url.length + 1)
+          .split("/")[0];
+        return nextSegment !== "encounter";
+      }
+      return false;
+    });
 };
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
