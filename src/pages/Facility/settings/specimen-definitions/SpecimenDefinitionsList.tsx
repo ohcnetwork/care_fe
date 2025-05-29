@@ -183,6 +183,7 @@ export function SpecimenDefinitionsList({
           />
         ) : (
           <>
+            {/* Mobile Card View */}
             <div className="grid gap-4 md:hidden">
               {specimenDefinitions.map((definition) => (
                 <SpecimenDefinitionCard
@@ -192,6 +193,7 @@ export function SpecimenDefinitionsList({
                 />
               ))}
             </div>
+            {/* Desktop Table View */}
             <div className="hidden md:block">
               <div className="rounded-lg border">
                 <Table>
