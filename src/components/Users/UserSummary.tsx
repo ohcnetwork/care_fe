@@ -215,7 +215,7 @@ export default function UserSummaryTab({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between gap-4 rounded-md border p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-4">
                 <div className="space-y-1">
                   <h3 className="text-sm font-medium">{t("delete_account")}</h3>
                   <p className="text-sm text-gray-700">
@@ -227,6 +227,7 @@ export default function UserSummaryTab({
                   variant="destructive"
                   data-testid="user-delete-button"
                   disabled={isDeleting}
+                  className="w-fit"
                 >
                   <CareIcon icon="l-trash" className="h-4 mr-2" />
                   {t("delete")}
