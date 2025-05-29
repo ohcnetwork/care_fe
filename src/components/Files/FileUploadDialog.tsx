@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -149,11 +147,7 @@ export default function FileUploadDialog({
                   )}
 
                   <div className="flex flex-col gap-2 flex-1">
-                    <div
-                      className={cn(
-                        "flex items-center justify-between gap-2 rounded-md bg-secondary-200 md:p-2 border border-gray-200",
-                      )}
-                    >
+                    <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-200 md:p-2 border border-gray-200">
                       <span
                         className="flex items-center text-sm truncate"
                         title={file.name}
