@@ -713,7 +713,7 @@ export function AllergyQuestion({
                     expandedAllergyIndex === index ? null : index,
                   );
                 }}
-                className="mb-2 "
+                className="mb-2"
               >
                 <Card
                   className={cn(
