@@ -63,19 +63,21 @@ const typeTestedSchema = z.object({
             })
             .optional()
             .nullable(),
-          string: z.string().optional().nullable(),
+          string: z.string().optional(),
         })
         .optional(),
       cap: CodeSchema.optional(),
       preparation: z.string().optional(),
     })
-    .nullable(),
+    .nullable()
+    .optional(),
   requirement: z.string().optional(),
   retention_time: z
     .object({
       value: z.number().int({ message: t("valid_integer_required") }),
       unit: CodeSchema,
     })
+    .nullable()
     .optional(),
   single_use: z.boolean().nullable(),
 });
@@ -134,7 +136,7 @@ export function SpecimenDefinitionForm({
           preparation: initialData?.type_tested?.container?.preparation,
         },
         requirement: initialData?.type_tested?.requirement,
-        retention_time: initialData?.type_tested?.retention_time ?? undefined,
+        retention_time: initialData?.type_tested?.retention_time,
         single_use: false,
       },
     },
@@ -573,7 +575,7 @@ export function SpecimenDefinitionForm({
                                       value: field.value.value,
                                       unit: field.value.unit,
                                     }
-                                  : null
+                                  : undefined
                               }
                               onChange={field.onChange}
                               disabled={isLoading}
@@ -621,13 +623,13 @@ export function SpecimenDefinitionForm({
                                           value: field.value.value,
                                           unit: field.value.unit,
                                         }
-                                      : null
+                                      : undefined
                                   }
                                   onChange={(value) => {
                                     field.onChange(value);
                                     form.setValue(
                                       "type_tested.container.minimum_volume.string",
-                                      null,
+                                      undefined,
                                     );
                                   }}
                                   disabled={isLoading}
@@ -650,13 +652,12 @@ export function SpecimenDefinitionForm({
                                 <Input
                                   placeholder={t("enter_minimum_volume")}
                                   {...field}
-                                  value={field.value || ""}
                                   disabled={isLoading}
                                   onChange={(e) => {
                                     field.onChange(e.target.value);
                                     form.setValue(
                                       "type_tested.container.minimum_volume.quantity",
-                                      null,
+                                      undefined,
                                     );
                                   }}
                                 />

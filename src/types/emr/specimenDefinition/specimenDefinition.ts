@@ -19,7 +19,7 @@ export interface QuantitySpec {
 
 export interface MinimumVolumeSpec {
   quantity?: QuantitySpec | null;
-  string?: string | null;
+  string?: string;
 }
 
 export interface DurationSpec {
@@ -73,7 +73,7 @@ export interface TypeTestedSpec {
   preference: Preference;
   container?: ContainerSpec | null;
   requirement?: string;
-  retention_time?: DurationSpec;
+  retention_time?: DurationSpec | null;
   single_use?: boolean | null;
 }
 
