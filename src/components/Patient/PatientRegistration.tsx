@@ -107,7 +107,7 @@ export default function PatientRegistration(
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
             }, t("enter_valid_dob"))
             .optional(),
-          deceased_datetime: tzAwareDateTime,
+          deceased_datetime: tzAwareDateTime.optional(),
           age: z
             .number()
             .int()

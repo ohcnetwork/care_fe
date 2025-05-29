@@ -114,12 +114,12 @@ export function LocationCardWrapper({
                       editingState.timeConfig.end?.toISOString() ??
                       new Date().toISOString()
                     }
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onDateChange={(newISO) =>
                       setEditingState((prev) => ({
                         ...prev,
                         timeConfig: {
                           ...prev.timeConfig,
-                          end: new Date(e.target.value),
+                          end: newISO ? new Date(newISO) : undefined,
                         },
                       }))
                     }
