@@ -10,9 +10,13 @@ import {
   isTomorrow,
   isYesterday,
   subDays,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
 } from "date-fns";
 import dayjs from "dayjs";
-import { Edit3Icon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, Edit3Icon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -375,6 +379,32 @@ export default function AppointmentsPage({
     return <Loading />;
   }
 
+  const handlePreviousMonthClick = () => {
+    const currentDate = qParams.date_from
+      ? new Date(qParams.date_from)
+      : new Date();
+    const firstDayPrevMonth = startOfMonth(subMonths(currentDate, 1));
+    const lastDayPrevMonth = endOfMonth(firstDayPrevMonth);
+    updateQuery({
+      date_from: dateQueryString(firstDayPrevMonth),
+      date_to: dateQueryString(lastDayPrevMonth),
+      slot: null,
+    });
+  };
+
+  const handleNextMonthClick = () => {
+    const currentDate = qParams.date_from
+      ? new Date(qParams.date_from)
+      : new Date();
+    const firstDayNextMonth = startOfMonth(addMonths(currentDate, 1));
+    const lastDayNextMonth = endOfMonth(firstDayNextMonth);
+    updateQuery({
+      date_from: dateQueryString(firstDayNextMonth),
+      date_to: dateQueryString(lastDayNextMonth),
+      slot: null,
+    });
+  };
+
   return (
     <Page
       title={t("appointments")}
@@ -431,6 +461,25 @@ export default function AppointmentsPage({
                 </PopoverTrigger>
                 <PopoverContent className="w-auto" align="start">
                   <div className="flex flex-col gap-4">
+                    <div className="flex justify-between items-center py-2">
+                      <Button
+                        variant="link"
+                        size="xs"
+                        onClick={handlePreviousMonthClick}
+                      >
+                        <ChevronLeftIcon className="mr-1 h-4 w-4" />
+                        {t("prev_month")}
+                      </Button>
+                      {/* Optional: Display current month/year here */}
+                      <Button
+                        variant="link"
+                        size="xs"
+                        onClick={handleNextMonthClick}
+                      >
+                        {t("next_month")}
+                        <ChevronRightIcon className="ml-1 h-4 w-4" />
+                      </Button>
+                    </div>
                     <div className="flex justify-between">
                       <Button
                         variant="link"
