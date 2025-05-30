@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import {
   Table,
@@ -21,6 +21,7 @@ interface VitalsTableProps {
 }
 
 export function VitalsTable({ vitals }: VitalsTableProps) {
+  const { t } = useTranslation();
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>
@@ -51,20 +52,22 @@ export function VitalsTable({ vitals }: VitalsTableProps) {
             className={`rounded-md overflow-hidden bg-gray-50`}
             key={idx}
           >
-            <TableCell className="font-medium ">
+            <TableCell className="font-medium text-center">
               {vital.bodyTemperature}
             </TableCell>
-            <TableCell className="font-medium">{vital.heartRate}</TableCell>
-            <TableCell className="font-medium">
+            <TableCell className="font-medium text-center">
+              {vital.heartRate}
+            </TableCell>
+            <TableCell className="font-medium text-center">
               {vital.diastolicBloodPressure}
             </TableCell>
-            <TableCell className="font-medium">
+            <TableCell className="font-medium text-center">
               {vital.systolicBloodPressure}
             </TableCell>
-            <TableCell className="font-medium">
+            <TableCell className="font-medium text-center">
               {vital.oxygenSaturation}
             </TableCell>
-            <TableCell className="font-medium">
+            <TableCell className="font-medium text-center">
               {vital.respiratoryRate}
             </TableCell>
           </TableRow>
