@@ -99,12 +99,26 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
 
           const precedentUnit = unit ? unit : question.unit;
 
+          const isUrl =
+            question.type === "url" && typeof value === "string" && value;
           return (
             <div
               key={index}
               className="text-sm font-medium whitespace-pre-wrap"
             >
-              {formatValue(value, question.type)}
+              {isUrl ? (
+                <a
+                  href={value}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline break-all hover:text-blue-800"
+                >
+                  {value}
+                </a>
+              ) : (
+                formatValue(value, question.type)
+              )}
+
               {precedentUnit && (
                 <span className="ml-1 text-xs">{precedentUnit.code}</span>
               )}
