@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, PanelRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -149,11 +149,11 @@ export function WorkflowProgress({
       <Sheet>
         <SheetTrigger asChild>
           <Button
-            variant="link"
-            className="w-fit flex items-center gap-0.5 underline"
+            variant="outline"
+            size="icon"
+            className="border border-gray-400"
           >
-            <CareIcon icon="l-file-check-alt" className="text-lg stroke-2" />
-            View Workflow Progress
+            <PanelRight />
           </Button>
         </SheetTrigger>
         <SheetContent

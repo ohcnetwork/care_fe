@@ -12,6 +12,17 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -30,6 +41,7 @@ import query from "@/Utils/request/query";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
+import { Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import {
   SpecimenRead,
@@ -133,6 +145,23 @@ export default function ServiceRequestShow({
     onError: () => {
       toast.error(t("specimen_draft_create_error"));
       setIsPrintingAllQRCodes(false);
+    },
+  });
+
+  const { mutate: markAsComplete } = useMutation({
+    mutationFn: () => {
+      return mutate(serviceRequestApi.updateServiceRequest, {
+        pathParams: { facilityId, serviceRequestId },
+      })({
+        ...request,
+        status: Status.completed,
+      });
+    },
+    onSuccess: () => {
+      toast.success(t("service_request_completed"));
+      queryClient.invalidateQueries({
+        queryKey: ["serviceRequest", serviceRequestId],
+      });
     },
   });
 
@@ -305,11 +334,59 @@ export default function ServiceRequestShow({
                 }
               >
                 <ArrowLeftIcon className="size-4" />
-                Back to encounter
+                {t("back_to_encounter")}
               </Button>
             )}
 
-            {isMobile && <WorkflowProgress request={request} variant="sheet" />}
+            <div className="flex items-end gap-2">
+              {request?.diagnostic_reports?.[0]?.status ===
+                DiagnosticReportStatus.final && (
+                <div className="flex items-center gap-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        disabled={request.status === Status.completed}
+                        className="font-semibold border border-gray-400"
+                      >
+                        {t("mark_as_complete")}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          {t("confirm_completion")}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {t("service_request_completion_confirmation")}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => markAsComplete()}>
+                          {t("confirm")}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <Button
+                    variant="primary"
+                    className="font-semibold"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
+                      )
+                    }
+                  >
+                    {t("view") + " " + t("report")}
+                  </Button>
+                </div>
+              )}
+
+              {isMobile && (
+                <WorkflowProgress request={request} variant="sheet" />
+              )}
+            </div>
           </div>
           <div className="px-2">
             <PatientHeader
@@ -439,7 +516,7 @@ export default function ServiceRequestShow({
             <Card className="shadow-lg border-t-4 border-t-primary">
               <CardHeader className="pb-0 flex flex-row justify-between items-center">
                 <CardTitle>
-                  Collect Specimen: {selectedSpecimenDefinition?.title}
+                  {t("collect_specimen")}: {selectedSpecimenDefinition?.title}
                 </CardTitle>
                 <Button
                   variant="ghost"

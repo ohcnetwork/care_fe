@@ -38,8 +38,8 @@ x : Done
 - [ ] SR details page - fix decimal points to two and round off amounts in charge items.
 - [x] SR details page - Specimen ID cannot be hidden in the Service Request QR - Manyu
 - [ ] SR details page - Add a hyperlink to the payment page, for better UX
-- [ ] SR Details page - Disable the process step once the report generation is done | Confirm with Bodhi before working on this
-- [-] SR overview page - Show the current status of the service request. Upon completion, update the status from active to complete - Manyu
+- [ ] SR Details page - Disable the process step once the report generation is done | Confirm with Bodhi before working on this - Backend
+- [-] SR overview page - Show the current status of the service request. Upon completion, update the status from active to complete - Manyu [ Backend change pending]
 
 - [x] Fix the explicit type casting and add proper types to SDF - Yash
 
