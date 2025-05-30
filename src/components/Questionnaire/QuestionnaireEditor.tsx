@@ -1232,7 +1232,7 @@ function QuestionEditor({
     return parentId ? `${parentId}-${question.id}` : question.id;
   };
 
-  const UNIT_TYPES = ["quantity", "choice", "decimal", "integer", "string"];
+  const UNIT_TYPES = ["quantity", "choice", "decimal", "integer"];
 
   return (
     <Collapsible
