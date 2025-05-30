@@ -933,6 +933,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           setExpandedQuestions(
                             (prev) => new Set([...prev, newQuestion.id]),
                           );
+                          setTimeout(() => {
+                            const element = document.getElementById(
+                              `question-${newQuestion.id}`,
+                            );
+                            if (element) {
+                              element.scrollIntoView();
+                            }
+                          }, 100);
                         }}
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
@@ -1387,7 +1395,7 @@ function QuestionEditor({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>{t("type")}</Label>
+                <Label className="mb-2">{t("type")}</Label>
                 <Select
                   value={type}
                   onValueChange={(val: QuestionType) => {
@@ -1423,7 +1431,7 @@ function QuestionEditor({
 
               {type === "structured" && (
                 <div>
-                  <Label>{t("structured_type")}</Label>
+                  <Label className="mb-2">{t("structured_type")}</Label>
                   <Select
                     value={structured_type || ""}
                     onValueChange={(val: StructuredQuestionType) => {
@@ -1455,39 +1463,39 @@ function QuestionEditor({
               )}
             </div>
 
+            {type === "quantity" && (
+              <FormField
+                control={form.control}
+                name={`questions.${index}.unit`}
+                render={({ field }) => (
+                  <FormItem className="pb-4">
+                    <FormLabel>{t("unit")}</FormLabel>
+                    <FormControl>
+                      <ValueSetSelect
+                        {...field}
+                        system="system-ucum-units"
+                        placeholder={t("add_unit")}
+                        value={unit}
+                        onSelect={(code) => {
+                          updateField("unit", code);
+                          form.setValue(`questions.${index}.unit`, code, {
+                            shouldValidate: true,
+                          });
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             {type !== "structured" && (
-              <div className="flex flex-col gap-4">
-                <FormField
-                  control={form.control}
-                  name={`questions.${index}.unit`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("unit")}</FormLabel>
-                      <FormControl>
-                        <ValueSetSelect
-                          {...field}
-                          system="system-ucum-units"
-                          placeholder={t("add_unit")}
-                          value={unit}
-                          onSelect={(code) => {
-                            updateField("unit", code);
-                            form.setValue(`questions.${index}.unit`, code, {
-                              shouldValidate: true,
-                            });
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <CodingEditor
-                  code={code}
-                  form={form}
-                  questionIndex={index}
-                  onChange={(newCode) => updateField("code", newCode)}
-                />
-              </div>
+              <CodingEditor
+                code={code}
+                form={form}
+                questionIndex={index}
+                onChange={(newCode) => updateField("code", newCode)}
+              />
             )}
           </div>
 

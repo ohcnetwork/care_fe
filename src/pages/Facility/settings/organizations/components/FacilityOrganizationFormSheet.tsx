@@ -251,17 +251,21 @@ export default function FacilityOrganizationFormSheet({
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
+                variant="outline"
                 onClick={() => {
                   setOpen(false);
                   form.reset();
                 }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
               >
                 {t("cancel")}
               </Button>
               <Button
                 type="submit"
-                disabled={isPending || !form.formState.isValid}
+                disabled={
+                  isPending ||
+                  !form.formState.isValid ||
+                  !form.formState.isDirty
+                }
                 data-cy={
                   isEditMode
                     ? "update-organization-button"
