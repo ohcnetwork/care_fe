@@ -1328,7 +1328,7 @@ function QuestionEditor({
               const newConditions = [...(question.enable_when || [])];
               newConditions[index] = {
                 question: condition.question,
-                operator: "exists" as const,
+                operator: condition.operator as "equals" | "not_equals",
                 answer: val === "true",
               };
               updateField("enable_when", newConditions);
@@ -1351,7 +1351,7 @@ function QuestionEditor({
               const newConditions = [...(question.enable_when || [])];
               newConditions[index] = {
                 question: condition.question,
-                operator: "equals" as const,
+                operator: condition.operator as "equals" | "not_equals",
                 answer: val,
               };
               updateField("enable_when", newConditions);
