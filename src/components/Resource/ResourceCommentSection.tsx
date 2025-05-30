@@ -76,7 +76,7 @@ const CommentSection = ({ id }: { id: string }) => {
           <Button
             variant="primary"
             onClick={submitComment}
-            disabled={!/\S+/.test(commentBox)}
+            disabled={commentBox.trim().length == 0}
           >
             {t("post_your_comment")}
           </Button>
