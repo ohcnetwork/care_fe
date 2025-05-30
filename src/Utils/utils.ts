@@ -5,6 +5,7 @@ import { toPng } from "html-to-image";
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
 import { Patient } from "@/types/emr/patient";
+import { TokenSlot } from "@/types/scheduling/schedule";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -334,7 +335,7 @@ export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
 export function parseSelectedSlotParam(
   selectedSlotParam: string | undefined,
   onError?: (error: unknown) => void,
-): import("@/types/scheduling/schedule").TokenSlot | undefined {
+): TokenSlot | undefined {
   if (!selectedSlotParam) return undefined;
   try {
     return JSON.parse(decodeURIComponent(selectedSlotParam));
