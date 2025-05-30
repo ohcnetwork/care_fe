@@ -1599,6 +1599,7 @@
   "interpretation": "Interpretation",
   "invalid_age": "Invalid age",
   "invalid_asset_id_msg": "Oops! The asset ID you entered does not appear to be valid.",
+  "invalid_date": "Invalid date",
   "invalid_date_format": "Invalid date format, expected {{format}}",
   "invalid_email": "Please enter a valid email address",
   "invalid_email_address": "Invalid email address",
