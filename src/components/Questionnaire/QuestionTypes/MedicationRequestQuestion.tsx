@@ -514,9 +514,7 @@ export function MedicationRequestQuestion({
         <div
           className={cn(
             "md:overflow-x-auto w-auto",
-            isSidebarOpen
-              ? "lg:w-[calc(100vw-44rem)]"
-              : "lg:w-[calc(100vw-30rem)]",
+            isSidebarOpen ? "lg:max-w-4xl" : "lg:max-w-6xl",
           )}
         >
           <div className="min-w-fit">
