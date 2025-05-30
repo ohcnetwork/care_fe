@@ -1193,8 +1193,8 @@ function QuestionEditor({
     new Set(),
   );
   const [enableWhenQuestionAnswers, setEnableWhenQuestionAnswers] = useState<
-    Question[]
-  >([]);
+    Record<number, Question[]>
+  >({});
 
   const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
   const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
@@ -1230,6 +1230,184 @@ function QuestionEditor({
 
   const getQuestionPath = () => {
     return parentId ? `${parentId}-${question.id}` : question.id;
+  };
+
+  const findQuestionPath = (
+    questions: Question[],
+    targetId: string,
+  ): Question[] | null => {
+    const pathStack: [Question, Question[]][] = questions.map((q) => [q, []]);
+
+    while (pathStack.length > 0) {
+      const [current, path] = pathStack.pop()!;
+
+      if (current.link_id === targetId) {
+        return [...path, current];
+      }
+
+      if (
+        current.type === "group" &&
+        current.questions &&
+        current.questions.length > 0
+      ) {
+        current.questions.forEach((q) => {
+          pathStack.push([q, [...path, current]]);
+        });
+      }
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    if (question.enable_when && question.enable_when.length > 0) {
+      question.enable_when.forEach((condition, idx) => {
+        const path = findQuestionPath(rootQuestions, condition.question);
+        if (path) {
+          setEnableWhenQuestionAnswers((prev) => ({
+            ...prev,
+            [idx]: path,
+          }));
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question.enable_when]);
+
+  const getQuestionNumber = (question: Question) => {
+    const linkId = question.link_id.split(".");
+    linkId[1] = (Number(linkId[1]) + 1).toString();
+    return linkId.join(".");
+  };
+
+  const getOperatorChoices = (index: number) => {
+    const currentEnableWhenArr = enableWhenQuestionAnswers[index];
+    const currentEnableWhen =
+      currentEnableWhenArr?.[currentEnableWhenArr.length - 1];
+
+    switch (currentEnableWhen?.type) {
+      case "boolean":
+      case "text":
+      case "string":
+      case "url":
+      case "choice":
+        return ["equals", "not_equals"];
+      default:
+        return [
+          "equals",
+          "not_equals",
+          "exists",
+          "greater",
+          "less",
+          "greater_or_equals",
+          "less_or_equals",
+        ];
+    }
+  };
+
+  const getAnswerChoices = (index: number, condition: EnableWhen) => {
+    const currentEnableWhenArr = enableWhenQuestionAnswers[index];
+    const currentEnableWhen =
+      currentEnableWhenArr?.[currentEnableWhenArr.length - 1];
+    switch (currentEnableWhen?.type) {
+      case "boolean":
+        return (
+          <Select
+            value={condition.answer.toString()}
+            onValueChange={(val) => {
+              const newConditions = [...(question.enable_when || [])];
+              newConditions[index] = {
+                question: condition.question,
+                operator: "exists" as const,
+                answer: val === "true",
+              };
+              updateField("enable_when", newConditions);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a value" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="true">True</SelectItem>
+              <SelectItem value="false">False</SelectItem>
+            </SelectContent>
+          </Select>
+        );
+      case "choice":
+        return (
+          <Select
+            value={condition.answer.toString()}
+            onValueChange={(val) => {
+              const newConditions = [...(question.enable_when || [])];
+              newConditions[index] = {
+                question: condition.question,
+                operator: "equals" as const,
+                answer: val,
+              };
+              updateField("enable_when", newConditions);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a value" />
+            </SelectTrigger>
+            <SelectContent>
+              {currentEnableWhen.answer_option?.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.value}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      default:
+        return (
+          <Input
+            value={condition.answer?.toString() ?? ""}
+            type={
+              [
+                "greater",
+                "less",
+                "greater_or_equals",
+                "less_or_equals",
+              ].includes(condition.operator)
+                ? "number"
+                : "text"
+            }
+            onChange={(e) => {
+              const newConditions = [...(question.enable_when || [])];
+              const value = e.target.value;
+              let newCondition;
+              if (
+                [
+                  "greater",
+                  "less",
+                  "greater_or_equals",
+                  "less_or_equals",
+                ].includes(condition.operator)
+              ) {
+                newCondition = {
+                  question: condition.question,
+                  operator: condition.operator as
+                    | "greater"
+                    | "less"
+                    | "greater_or_equals"
+                    | "less_or_equals",
+                  answer: Number(value),
+                };
+              } else {
+                newCondition = {
+                  question: condition.question,
+                  operator: condition.operator as "equals" | "not_equals",
+                  answer: value,
+                };
+              }
+
+              newConditions[index] = newCondition;
+              updateField("enable_when", newConditions);
+            }}
+            placeholder="Answer value"
+          />
+        );
+    }
   };
 
   return (
@@ -2028,8 +2206,10 @@ function QuestionEditor({
                       <div className="grid grid-cols-2 gap-2 justify-around">
                         <Select
                           value={
-                            enableWhenQuestionAnswers.length > 0
-                              ? (enableWhenQuestionAnswers[0]?.link_id ?? "")
+                            enableWhenQuestionAnswers[idx] &&
+                            enableWhenQuestionAnswers[idx].length > 0
+                              ? (enableWhenQuestionAnswers[idx][0]?.link_id ??
+                                "")
                               : undefined
                           }
                           onValueChange={(val: string) => {
@@ -2037,7 +2217,10 @@ function QuestionEditor({
                               (q) => q.link_id === val,
                             );
                             if (selectedQuestion) {
-                              setEnableWhenQuestionAnswers([selectedQuestion]);
+                              setEnableWhenQuestionAnswers((prev) => ({
+                                ...prev,
+                                [idx]: [selectedQuestion],
+                              }));
 
                               if (selectedQuestion.type !== "group") {
                                 const newConditions = [
@@ -2063,12 +2246,12 @@ function QuestionEditor({
                                   key={question.id}
                                   value={question.link_id}
                                 >
-                                  {question.link_id}. {question.text}
+                                  {getQuestionNumber(question)}. {question.text}
                                 </SelectItem>
                               ))}
                           </SelectContent>
                         </Select>
-                        {enableWhenQuestionAnswers.map((q, index) => {
+                        {enableWhenQuestionAnswers[idx]?.map((q, index) => {
                           if (q.type !== "group" || q.questions?.length === 0) {
                             return null;
                           }
@@ -2076,8 +2259,8 @@ function QuestionEditor({
                             <Select
                               key={q.id}
                               value={
-                                enableWhenQuestionAnswers[index + 1]?.link_id ??
-                                undefined
+                                enableWhenQuestionAnswers[idx][index + 1]
+                                  ?.link_id ?? undefined
                               }
                               onValueChange={(val: string) => {
                                 const selectedSubQuestion = q.questions?.find(
@@ -2085,10 +2268,13 @@ function QuestionEditor({
                                 );
                                 if (selectedSubQuestion) {
                                   setEnableWhenQuestionAnswers((prev) => {
-                                    const newAnswers = [
-                                      ...prev.slice(0, index + 1),
-                                      selectedSubQuestion,
-                                    ];
+                                    const newAnswers = {
+                                      ...prev,
+                                      [idx]: [
+                                        ...prev[idx].slice(0, index + 1),
+                                        selectedSubQuestion,
+                                      ],
+                                    };
                                     return newAnswers;
                                   });
 
@@ -2114,7 +2300,8 @@ function QuestionEditor({
                                     key={question.id}
                                     value={question.link_id}
                                   >
-                                    {question.link_id}. {question.text}
+                                    {getQuestionNumber(question)}.{" "}
+                                    {question.text}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -2176,17 +2363,11 @@ function QuestionEditor({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="equals">Equals</SelectItem>
-                          <SelectItem value="not_equals">Not Equals</SelectItem>
-                          <SelectItem value="greater">Greater Than</SelectItem>
-                          <SelectItem value="less">Less Than</SelectItem>
-                          <SelectItem value="greater_or_equals">
-                            Greater Than or Equal
-                          </SelectItem>
-                          <SelectItem value="less_or_equals">
-                            Less Than or Equal
-                          </SelectItem>
-                          <SelectItem value="exists">Exists</SelectItem>
+                          {getOperatorChoices(idx).map((operator) => (
+                            <SelectItem key={operator} value={operator}>
+                              {t(operator)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -2219,57 +2400,7 @@ function QuestionEditor({
                             </SelectContent>
                           </Select>
                         ) : (
-                          <Input
-                            value={condition.answer?.toString() ?? ""}
-                            type={
-                              [
-                                "greater",
-                                "less",
-                                "greater_or_equals",
-                                "less_or_equals",
-                              ].includes(condition.operator)
-                                ? "number"
-                                : "text"
-                            }
-                            onChange={(e) => {
-                              const newConditions = [
-                                ...(question.enable_when || []),
-                              ];
-                              const value = e.target.value;
-                              let newCondition;
-
-                              if (
-                                [
-                                  "greater",
-                                  "less",
-                                  "greater_or_equals",
-                                  "less_or_equals",
-                                ].includes(condition.operator)
-                              ) {
-                                newCondition = {
-                                  question: condition.question,
-                                  operator: condition.operator as
-                                    | "greater"
-                                    | "less"
-                                    | "greater_or_equals"
-                                    | "less_or_equals",
-                                  answer: Number(value),
-                                };
-                              } else {
-                                newCondition = {
-                                  question: condition.question,
-                                  operator: condition.operator as
-                                    | "equals"
-                                    | "not_equals",
-                                  answer: value,
-                                };
-                              }
-
-                              newConditions[idx] = newCondition;
-                              updateField("enable_when", newConditions);
-                            }}
-                            placeholder="Answer value"
-                          />
+                          getAnswerChoices(idx, condition)
                         )}
                       </div>
                     </div>
