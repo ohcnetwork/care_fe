@@ -213,14 +213,12 @@ const AvatarEditModal = ({
           setPreview(undefined);
         },
         () => {
-          setPreview(undefined);
           setPreviewImage(null);
           setIsCaptureImgBeingUploaded(false);
           setIsProcessing(false);
         },
       );
     } finally {
-      setPreview(undefined);
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
       setSelectedFile(undefined);
