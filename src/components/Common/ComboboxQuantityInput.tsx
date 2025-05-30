@@ -63,10 +63,10 @@ export function ComboboxQuantityInput({
       if (value === "") {
         onChange(null);
       }
-      if (value && selectedUnit && value !== ".") {
+      if (value && value !== ".") {
         const parsedValue = parseFloat(value);
         if (!isNaN(parsedValue)) {
-          onChange({ value: parsedValue, unit: selectedUnit });
+          onChange({ value: parsedValue, unit: selectedUnit || units[0] });
         }
       }
     }
