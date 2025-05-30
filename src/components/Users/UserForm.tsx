@@ -532,11 +532,12 @@ export default function UserForm({
                       className="space-y-3"
                     >
                       <div
-                        className={`flex items-start space-x-3 rounded-md border p-3 ${
+                        className={cn(
+                          "flex items-start space-x-3 rounded-md border p-3",
                           field.value === "immediate"
                             ? "bg-white border-primary"
-                            : "bg-transparent  border-gray-200"
-                        }`}
+                            : "bg-transparent  border-gray-200",
+                        )}
                       >
                         <RadioGroupItem
                           value="immediate"
@@ -558,11 +559,12 @@ export default function UserForm({
                       </div>
 
                       <div
-                        className={`flex items-start space-x-3 rounded-md border p-3 ${
+                        className={cn(
+                          "flex items-start space-x-3 rounded-md border p-3",
                           field.value === "email"
                             ? "bg-white border-primary"
-                            : "bg-transparent  border-gray-200"
-                        }`}
+                            : "bg-transparent  border-gray-200",
+                        )}
                       >
                         <RadioGroupItem
                           value="email"
