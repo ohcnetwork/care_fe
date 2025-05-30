@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns from "@/components/Common/UserColumns";
@@ -207,26 +208,33 @@ export default function UserSummaryTab({
           </>
         )}
         {canEditUser && (
-          <div className="mt-3 flex flex-col items-center gap-5 border-t-2 pt-5 sm:flex-row">
-            <div className="sm:w-1/4">
-              <div className="my-1 text-sm leading-5">
-                <p className="mb-2 font-semibold">{t("delete_account")}</p>
-                <p className="text-secondary-600">{t("delete_account_note")}</p>
+          <Card className="border-red-500">
+            <CardHeader>
+              <CardTitle className="text-destructive">
+                {t("danger_zone")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-4">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium">{t("delete_account")}</h3>
+                  <p className="text-sm text-gray-700">
+                    {t("delete_account_note")}
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setShowDeleteDialog(true)}
+                  variant="destructive"
+                  data-testid="user-delete-button"
+                  disabled={isDeleting}
+                  className="w-fit"
+                >
+                  <CareIcon icon="l-trash" className="h-4 mr-2" />
+                  {t("delete")}
+                </Button>
               </div>
-            </div>
-            <div className="w-3/4">
-              <Button
-                onClick={() => setShowDeleteDialog(true)}
-                variant="destructive"
-                data-testid="user-delete-button"
-                className="my-1 inline-flex"
-                disabled={isDeleting}
-              >
-                <CareIcon icon="l-trash" className="h-4" />
-                <span className="">{t("delete_account_btn")}</span>
-              </Button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </>

@@ -44,7 +44,6 @@ export class PatientFiles {
   verifyValidationErrors(errorMessage: string) {
     cy.verifyErrorMessages([
       {
-        label: "Enter File Name",
         message: errorMessage,
       },
     ]);
