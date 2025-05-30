@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -442,54 +444,54 @@ export default function UserForm({
                       />
                     </div>
                   </FormControl>
-                  {isUsernameFieldFocused ? (
-                    <>
-                      <div
-                        className="text-small mt-2 pl-2 text-secondary-500"
-                        aria-live="polite"
-                      >
-                        {(isUsernameChecking || !isUsernameTaken) && (
-                          <ValidationHelper
-                            isInputEmpty={!field.value}
-                            successMessage={t("username_success_message")}
-                            validations={[
-                              {
-                                description: "username_min_length_validation",
-                                fulfilled: (field.value || "").length >= 4,
-                              },
-                              {
-                                description: "username_max_length_validation",
-                                fulfilled: (field.value || "").length <= 16,
-                              },
-                              {
-                                description: "username_characters_validation",
-                                fulfilled: /^[a-z0-9._-]*$/.test(
-                                  field.value || "",
-                                ),
-                              },
-                              {
-                                description: "username_start_end_validation",
-                                fulfilled: /^[a-z0-9].*[a-z0-9]$/.test(
-                                  field.value || "",
-                                ),
-                              },
-                              {
-                                description: "username_consecutive_validation",
-                                fulfilled: !/(?:[._-]{2,})/.test(
-                                  field.value || "",
-                                ),
-                              },
-                            ]}
-                          />
-                        )}
-                      </div>
-                      <div className="pl-2">
-                        {renderUsernameFeedback(usernameInput || "")}
-                      </div>
-                    </>
-                  ) : (
+
+                  <div className={cn(!isUsernameFieldFocused && "hidden")}>
+                    <div
+                      className="text-small pl-2 text-secondary-500"
+                      aria-live="polite"
+                    >
+                      {(isUsernameChecking || !isUsernameTaken) && (
+                        <ValidationHelper
+                          isInputEmpty={!field.value}
+                          successMessage={t("username_success_message")}
+                          validations={[
+                            {
+                              description: "username_min_length_validation",
+                              fulfilled: (field.value || "").length >= 4,
+                            },
+                            {
+                              description: "username_max_length_validation",
+                              fulfilled: (field.value || "").length <= 16,
+                            },
+                            {
+                              description: "username_characters_validation",
+                              fulfilled: /^[a-z0-9._-]*$/.test(
+                                field.value || "",
+                              ),
+                            },
+                            {
+                              description: "username_start_end_validation",
+                              fulfilled: /^[a-z0-9].*[a-z0-9]$/.test(
+                                field.value || "",
+                              ),
+                            },
+                            {
+                              description: "username_consecutive_validation",
+                              fulfilled: !/(?:[._-]{2,})/.test(
+                                field.value || "",
+                              ),
+                            },
+                          ]}
+                        />
+                      )}
+                    </div>
+                    <div className="pl-2">
+                      {renderUsernameFeedback(usernameInput || "")}
+                    </div>
+                  </div>
+                  <div className={cn(isUsernameFieldFocused && "hidden")}>
                     <FormMessage />
-                  )}
+                  </div>
                 </FormItem>
               )}
             />
@@ -606,37 +608,46 @@ export default function UserForm({
                           />
                         </div>
                       </FormControl>
-                      {isPasswordFieldFocused ? (
-                        <div
-                          className="text-small mt-2 pl-2 text-secondary-500"
-                          aria-live="polite"
-                        >
-                          <ValidationHelper
-                            isInputEmpty={!field.value}
-                            successMessage={t("password_success_message")}
-                            validations={[
-                              {
-                                description: "password_length_validation",
-                                fulfilled: (field.value || "").length >= 8,
-                              },
-                              {
-                                description: "password_lowercase_validation",
-                                fulfilled: /[a-z]/.test(field.value || ""),
-                              },
-                              {
-                                description: "password_uppercase_validation",
-                                fulfilled: /[A-Z]/.test(field.value || ""),
-                              },
-                              {
-                                description: "password_number_validation",
-                                fulfilled: /\d/.test(field.value || ""),
-                              },
-                            ]}
-                          />
-                        </div>
-                      ) : (
+
+                      <div
+                        className={cn(
+                          "text-small pl-2 text-secondary-500",
+                          !isPasswordFieldFocused && "hidden",
+                        )}
+                        aria-live="polite"
+                      >
+                        <ValidationHelper
+                          isInputEmpty={!field.value}
+                          successMessage={t("password_success_message")}
+                          validations={[
+                            {
+                              description: "password_length_validation",
+                              fulfilled: (field.value || "").length >= 8,
+                            },
+                            {
+                              description: "password_lowercase_validation",
+                              fulfilled: /[a-z]/.test(field.value || ""),
+                            },
+                            {
+                              description: "password_uppercase_validation",
+                              fulfilled: /[A-Z]/.test(field.value || ""),
+                            },
+                            {
+                              description: "password_number_validation",
+                              fulfilled: /\d/.test(field.value || ""),
+                            },
+                          ]}
+                        />
+                      </div>
+
+                      <div
+                        className={cn(
+                          "text-small mt-2 pl-2 text-secondary-500",
+                          isPasswordFieldFocused && "hidden",
+                        )}
+                      >
                         <FormMessage />
-                      )}
+                      </div>
                     </FormItem>
                   )}
                 />
