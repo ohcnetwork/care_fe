@@ -64,7 +64,7 @@ export default function FacilityOrganizationSelector(
   const [alreadySelected, setAlreadySelected] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
   const { data: rootOrganizations, isLoading: isLoadingRoot } = useQuery({
-    queryKey: ["organizations-root", facilityOrgSearch, showAllOrgs],
+    queryKey: ["facilityOrganization", facilityOrgSearch, showAllOrgs],
     queryFn: query.debounced(
       showAllOrgs
         ? facilityOrganizationApi.list
@@ -340,8 +340,12 @@ export default function FacilityOrganizationSelector(
         className="w-full sm:w-auto"
       >
         <TabsList className="grid w-full grid-cols-2 sm:w-[300px]">
-          <TabsTrigger value="mine">{t("my_organizations")}</TabsTrigger>
-          <TabsTrigger value="all">{t("all_organizations")}</TabsTrigger>
+          <TabsTrigger value="mine" data-cy="my-organizations-tab">
+            {t("my_organizations")}
+          </TabsTrigger>
+          <TabsTrigger value="all" data-cy="all-organizations-tab">
+            {t("all_organizations")}
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
