@@ -54,6 +54,7 @@ interface Props {
   hideTrigger?: boolean;
   controlledOpen?: boolean;
   title?: string;
+  asSheet?: boolean;
 }
 
 const Item = ({
@@ -103,6 +104,7 @@ export default function ValueSetSelect({
   hideTrigger = false,
   controlledOpen = false,
   title,
+  asSheet = false,
 }: Props) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -210,14 +212,19 @@ export default function ValueSetSelect({
 
   const content = (
     <Command filter={() => 1} className="rounded-t-3xl">
-      <div className="py-3 px-3 border-b border-gray-200 flex justify-between items-center">
+      <div
+        className={cn(
+          "p-3 border-b border-gray-200 flex justify-between items-center",
+          !title && "p-0",
+        )}
+      >
         {title && <h3 className="text-base font-semibold">{title}</h3>}
         <Tabs
           value={activeTab.toString()}
           onValueChange={(value) => {
             setActiveTab(Number(value));
           }}
-          className="md:hidden"
+          className={cn("md:hidden", !title && "p-2 w-full")}
         >
           <TabsList className="flex w-full">
             <TabsTrigger value={"0"} className="flex-1">
@@ -382,14 +389,7 @@ export default function ValueSetSelect({
     </AlertDialog>
   );
 
-  if (
-    isMobile &&
-    !hideTrigger &&
-    (system === "system-additional-instruction" ||
-      system === "system-route" ||
-      system === "system-body-site" ||
-      system === "system-administration-method")
-  ) {
+  if (isMobile && !hideTrigger && asSheet) {
     return (
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
