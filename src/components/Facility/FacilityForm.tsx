@@ -6,10 +6,19 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
 import {
   Form,
   FormControl,
@@ -28,10 +37,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
 import LocationPicker from "@/components/Common/GeoLocationPicker";
 import { FacilityModel } from "@/components/Facility/models";
+
+import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
 import { validatePincode } from "@/common/validation";
@@ -61,6 +79,8 @@ export default function FacilityForm({
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const geoOrganizationRef = useRef<HTMLDivElement>(null);
+  const [facilityTypeSheetOpen, setFacilityTypeSheetOpen] = useState(false);
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const facilityFormSchema = z.object({
     facility_type: z.string().min(1, t("facility_type_required")),
@@ -241,27 +261,105 @@ export default function FacilityForm({
               render={({ field }) => (
                 <FormItem className="max-w-full">
                   <FormLabel aria-required>{t("facility_type")}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger
-                        data-cy="facility-type"
-                        className="max-w-full truncate"
-                      >
-                        <SelectValue placeholder={t("select_facility_type")} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {FACILITY_TYPES.map((type) => (
-                        <SelectItem
-                          key={type.text}
-                          value={type.text}
-                          data-cy="facility-type-option"
+                  {isMobile ? (
+                    <Sheet
+                      open={facilityTypeSheetOpen}
+                      onOpenChange={setFacilityTypeSheetOpen}
+                    >
+                      <SheetTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={facilityTypeSheetOpen}
+                          className="w-full justify-between"
+                          data-cy="facility-type"
                         >
-                          {type.text}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                          <span className="truncate">
+                            {field.value
+                              ? FACILITY_TYPES.find(
+                                  (type) => type.text === field.value,
+                                )?.text
+                              : t("select_facility_type")}
+                          </span>
+                          <CareIcon
+                            icon="l-angle-down"
+                            className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                          />
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent
+                        side="bottom"
+                        className="h-[50vh]"
+                        aria-description={t("select_facility_type_description")}
+                      >
+                        <SheetHeader>
+                          <SheetTitle>{t("select_facility_type")}</SheetTitle>
+                        </SheetHeader>
+                        <Command className="mt-4">
+                          <CommandInput
+                            placeholder={t("search_facility_type")}
+                            className="px-4 py-3"
+                          />
+                          <CommandEmpty>
+                            {t("no_facility_type_found")}
+                          </CommandEmpty>
+                          <CommandGroup className="max-h-[30vh] overflow-y-auto">
+                            {FACILITY_TYPES.map((type) => (
+                              <CommandItem
+                                key={type.text}
+                                value={type.text}
+                                onSelect={() => {
+                                  field.onChange(type.text);
+                                  setFacilityTypeSheetOpen(false);
+                                }}
+                                className="cursor-pointer"
+                              >
+                                <span
+                                  className={cn(
+                                    "mr-2",
+                                    field.value === type.text &&
+                                      "text-primary font-medium",
+                                  )}
+                                >
+                                  {type.text}
+                                </span>
+                                {field.value === type.text && (
+                                  <CareIcon
+                                    icon="l-check"
+                                    className="ml-auto h-4 w-4"
+                                  />
+                                )}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      </SheetContent>
+                    </Sheet>
+                  ) : (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger
+                          data-cy="facility-type"
+                          className="max-w-full truncate"
+                        >
+                          <SelectValue
+                            placeholder={t("select_facility_type")}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {FACILITY_TYPES.map((type) => (
+                          <SelectItem
+                            key={type.text}
+                            value={type.text}
+                            data-cy="facility-type-option"
+                          >
+                            {type.text}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
