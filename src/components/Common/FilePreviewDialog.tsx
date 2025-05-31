@@ -466,7 +466,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         label: t("reset"),
                         icon: "l-minus-circle",
                         action: () =>
-                          setFileState((prev) => ({ ...prev, rotation: 0 })),
+                          setFileState((prev) => ({
+                            ...prev,
+                            rotation: 0,
+                            zoom: 4,
+                          })),
                         disabled: false,
                       },
                       {
