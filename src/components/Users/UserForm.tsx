@@ -642,12 +642,7 @@ export default function UserForm({
                         />
                       </div>
 
-                      <div
-                        className={cn(
-                          "text-small mt-2 pl-2 text-secondary-500",
-                          isPasswordFieldFocused && "hidden",
-                        )}
-                      >
+                      <div className={cn(isPasswordFieldFocused && "hidden")}>
                         <FormMessage />
                       </div>
                     </FormItem>
