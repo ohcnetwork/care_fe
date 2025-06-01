@@ -388,6 +388,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         getRotationClass(file_state.rotation),
                       )}
                       draggable={false}
+                      loading="lazy"
                     />
                   </div>
                 ) : file_state.extension === "pdf" ? (
