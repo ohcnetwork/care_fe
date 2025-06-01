@@ -832,7 +832,6 @@ function HeaderRow({
           )}
           <Button
             type="button"
-            size={"sm"}
             variant="destructive"
             onClick={() =>
               setRemoveRowDialog({
@@ -840,7 +839,6 @@ function HeaderRow({
                 rowIndex: rowIndex,
               })
             }
-            className="self-end"
           >
             <Trash2Icon className="size-3" />
             <span className="text-sm">{t("remove_row")}</span>
