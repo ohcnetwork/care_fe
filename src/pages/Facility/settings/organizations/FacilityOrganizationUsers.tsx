@@ -84,12 +84,13 @@ export default function FacilityOrganizationUsers({
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
           />
           <Input
-            placeholder={t("search_by_user_name")}
+            placeholder={t("search_by_username")}
             value={qParams.search || ""}
             onChange={(e) => {
               updateQuery({ search: e.target.value || undefined });
             }}
             className="w-full pl-8"
+            data-cy="search-by-username"
           />
         </div>
         <div className="flex gap-2 w-full md:w-auto justify-end">
@@ -148,7 +149,11 @@ export default function FacilityOrganizationUsers({
                         organizationId={id}
                         userRole={userRole}
                         trigger={
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            data-cy="edit-user-role"
+                          >
                             <span>{t("edit_role")}</span>
                           </Button>
                         }

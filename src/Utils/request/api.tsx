@@ -457,11 +457,6 @@ const routes = {
       TRes: Type<Encounter>(),
       TBody: Type<{ organization: string }>(),
     },
-    generateDischargeSummary: {
-      path: "/api/v1/encounter/{encounterId}/generate_discharge_summary/",
-      method: "POST",
-      TRes: Type<{ detail: string }>(),
-    },
   },
 
   // New Patient Routes

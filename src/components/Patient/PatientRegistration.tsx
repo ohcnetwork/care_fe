@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { InfoIcon } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
@@ -698,9 +699,18 @@ export default function PatientRegistration(
                             <Input
                               type="datetime-local"
                               {...field}
-                              value={field.value ?? ""}
+                              value={
+                                field.value
+                                  ? format(
+                                      new Date(field.value),
+                                      "yyyy-MM-dd'T'HH:mm",
+                                    )
+                                  : ""
+                              }
                               onChange={(e) => {
-                                const value = e.target.value || undefined;
+                                const value = e.target.value
+                                  ? dayjs(e.target.value).toISOString()
+                                  : undefined;
                                 field.onChange(value);
                                 setIsDeceased(!!value);
                               }}
