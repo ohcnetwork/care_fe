@@ -281,6 +281,7 @@ export default function FacilityOrganizationSelector(
                 size="sm"
                 className="h-8 gap-2"
                 onClick={() => {
+                  if (!currentSelection) return;
                   const index = selectedOrganizations.findIndex(
                     (org) => org.id === currentSelection.id,
                   );
