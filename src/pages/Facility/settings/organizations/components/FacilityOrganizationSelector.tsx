@@ -280,16 +280,7 @@ export default function FacilityOrganizationSelector(
                 variant="ghost"
                 size="sm"
                 className="h-8 gap-2"
-                onClick={() => {
-                  const index = selectedOrganizations.findIndex(
-                    (org) => org.id === currentSelection.id,
-                  );
-                  if (index !== -1) {
-                    handleRemoveOrganization(index);
-                  }
-                  setCurrentSelection(null);
-                  setAlreadySelected(false);
-                }}
+                disabled={alreadySelected}
                 data-cy="confirm-organization"
               >
                 <span>{t("already_selected")}</span>
