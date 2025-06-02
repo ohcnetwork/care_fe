@@ -67,8 +67,6 @@ import {
   ResponseValue,
 } from "@/types/questionnaire/form";
 
-import { isRecordEnteredInError } from "./utils";
-
 interface SymptomQuestionProps {
   patientId: string;
   encounterId: string;
@@ -169,12 +167,12 @@ function SeveritySelect({
 function VerificationStatusSelect({
   status,
   onValueChange,
-  isRecordNew,
+  isExistingRecord,
   disabled,
 }: {
   status: string;
   onValueChange: (value: string) => void;
-  isRecordNew: boolean;
+  isExistingRecord?: boolean;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -184,16 +182,14 @@ function VerificationStatusSelect({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {(isRecordNew
-          ? SYMPTOM_VERIFICATION_STATUS.filter(
-              (val) => val !== "entered_in_error",
-            )
-          : SYMPTOM_VERIFICATION_STATUS
-        ).map((status) => (
-          <SelectItem key={status} value={status}>
-            {t(status)}
-          </SelectItem>
-        ))}
+        {SYMPTOM_VERIFICATION_STATUS.map(
+          (value) =>
+            (isExistingRecord || value !== "entered_in_error") && (
+              <SelectItem key={value} value={value}>
+                {t(value)}
+              </SelectItem>
+            ),
+        )}
       </SelectContent>
     </Select>
   );
@@ -405,7 +401,7 @@ const SymptomRow = React.memo(function SymptomRow({
             status={symptom.verification_status}
             onValueChange={handleVerificationStatusChange}
             disabled={disabled}
-            isRecordNew={!symptom.id}
+            isExistingRecord={!!symptom.id}
           />
         </div>
         <div>
@@ -547,7 +543,7 @@ const SymptomRow = React.memo(function SymptomRow({
                     status={symptom.verification_status}
                     onValueChange={handleVerificationStatusChange}
                     disabled={disabled}
-                    isRecordNew={!symptom.id}
+                    isExistingRecord={!!symptom.id}
                   />
                 </div>
                 <div>
@@ -605,7 +601,7 @@ const SymptomRow = React.memo(function SymptomRow({
             status={symptom.verification_status}
             onValueChange={handleVerificationStatusChange}
             disabled={disabled}
-            isRecordNew={!symptom.id}
+            isExistingRecord={!!symptom.id}
           />
         </TableCell>
         <TableCell className="text-center">
@@ -891,10 +887,8 @@ export function SymptomQuestion({
                       index={index}
                       disabled={
                         disabled ||
-                        isRecordEnteredInError(
-                          patientSymptoms,
-                          symptom.id as string,
-                        )
+                        patientSymptoms?.results[index]?.verification_status ===
+                          "entered_in_error"
                       }
                       onUpdate={handleUpdateSymptom}
                       onRemove={handleRemoveSymptom}
@@ -917,10 +911,8 @@ export function SymptomQuestion({
                   index={index}
                   disabled={
                     disabled ||
-                    isRecordEnteredInError(
-                      patientSymptoms,
-                      symptom.id as string,
-                    )
+                    patientSymptoms?.results[index]?.verification_status ===
+                      "entered_in_error"
                   }
                   onUpdate={handleUpdateSymptom}
                   onRemove={handleRemoveSymptom}

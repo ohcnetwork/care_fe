@@ -68,8 +68,6 @@ import {
   ResponseValue,
 } from "@/types/questionnaire/form";
 
-import { isRecordEnteredInError } from "./utils";
-
 interface DiagnosisQuestionProps {
   patientId: string;
   encounterId: string;
@@ -148,12 +146,12 @@ function ClinicalStatusSelect({
 function VerificationStatusSelect({
   status,
   onValueChange,
-  isRecordNew,
+  isExistingRecord,
   disabled,
 }: {
   status: string;
   onValueChange: (value: string) => void;
-  isRecordNew: boolean;
+  isExistingRecord?: boolean;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -169,16 +167,14 @@ function VerificationStatusSelect({
         />
       </SelectTrigger>
       <SelectContent>
-        {(isRecordNew
-          ? DIAGNOSIS_VERIFICATION_STATUS.filter(
-              (val) => val !== "entered_in_error",
-            )
-          : DIAGNOSIS_VERIFICATION_STATUS
-        ).map((status) => (
-          <SelectItem key={status} value={status} className="capitalize">
-            {t(status)}
-          </SelectItem>
-        ))}
+        {DIAGNOSIS_VERIFICATION_STATUS.map(
+          (status) =>
+            (isExistingRecord || status !== "entered_in_error") && (
+              <SelectItem key={status} value={status} className="capitalize">
+                {t(status)}
+              </SelectItem>
+            ),
+        )}
       </SelectContent>
     </Select>
   );
@@ -253,7 +249,7 @@ function DiagnosisDetailsForm({
                 value as DiagnosisRequest["verification_status"],
             })
           }
-          isRecordNew={!diagnosis.id}
+          isExistingRecord={!!diagnosis.id}
           disabled={disabled}
         />
       </div>
@@ -598,10 +594,8 @@ export function DiagnosisQuestion({
                     diagnosis={diagnosis}
                     disabled={
                       disabled ||
-                      isRecordEnteredInError(
-                        patientDiagnoses,
-                        diagnosis.id as string,
-                      )
+                      patientDiagnoses?.results[index]?.verification_status ===
+                        "entered_in_error"
                     }
                     onUpdate={(updates) =>
                       handleUpdateDiagnosis(index, updates)
@@ -623,10 +617,8 @@ export function DiagnosisQuestion({
                 diagnosis={diagnosis}
                 disabled={
                   disabled ||
-                  isRecordEnteredInError(
-                    patientDiagnoses,
-                    diagnosis.id as string,
-                  )
+                  patientDiagnoses?.results[index]?.verification_status ===
+                    "entered_in_error"
                 }
                 onUpdate={(updates) => handleUpdateDiagnosis(index, updates)}
                 onRemove={() => handleRemoveDiagnosis(index)}
@@ -730,7 +722,7 @@ const DiagnosisTableRow = ({
                   value as DiagnosisRequest["verification_status"],
               })
             }
-            isRecordNew={!diagnosis.id}
+            isExistingRecord={!!diagnosis.id}
             disabled={disabled}
           />
         </TableCell>

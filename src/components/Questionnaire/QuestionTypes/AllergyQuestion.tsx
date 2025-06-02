@@ -179,12 +179,12 @@ function StatusSelect({
   verificationStatus,
   onValueChange,
   disabled,
-  isNewEntry,
+  isExistingRecord,
 }: {
   verificationStatus: string;
   onValueChange: (value: string) => void;
   disabled?: boolean;
-  isNewEntry?: boolean;
+  isExistingRecord?: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -199,9 +199,9 @@ function StatusSelect({
       <SelectContent>
         {Object.entries(ALLERGY_VERIFICATION_STATUS).map(
           ([value, label]) =>
-            !(isNewEntry && value == "entered_in_error") && (
+            (isExistingRecord || value !== "entered_in_error") && (
               <SelectItem key={value} value={value}>
-                {label}
+                {t(label)}
               </SelectItem>
             ),
         )}
@@ -372,7 +372,7 @@ const AllergyItem = ({
                   verification_status: value as AllergyVerificationStatus,
                 });
               }}
-              isNewEntry={!allergy.id}
+              isExistingRecord={!!allergy.id}
               disabled={disabled}
             />
           </TableCell>
@@ -513,7 +513,7 @@ const AllergyItem = ({
             });
           }}
           disabled={disabled}
-          isNewEntry={!allergy.id}
+          isExistingRecord={!!allergy.id}
         />
       </div>
 

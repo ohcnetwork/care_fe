@@ -75,7 +75,6 @@ import {
 } from "@/types/questionnaire/validation";
 
 import { FieldError } from "./FieldError";
-import { isRecordEnteredInError } from "./utils";
 
 interface MedicationStatementQuestionProps {
   patientId: string;
@@ -599,10 +598,8 @@ export function MedicationStatementQuestion({
                                 medication={medication}
                                 disabled={
                                   disabled ||
-                                  isRecordEnteredInError(
-                                    patientMedications,
-                                    medication.id as string,
-                                  )
+                                  patientMedications?.results[index]?.status ===
+                                    "entered_in_error"
                                 }
                                 onUpdate={(updates) =>
                                   handleUpdateMedication(index, updates)
@@ -621,10 +618,8 @@ export function MedicationStatementQuestion({
                         medication={medication}
                         disabled={
                           disabled ||
-                          isRecordEnteredInError(
-                            patientMedications,
-                            medication.id as string,
-                          )
+                          patientMedications?.results[index]?.status ===
+                            "entered_in_error"
                         }
                         onUpdate={(updates) =>
                           handleUpdateMedication(index, updates)
@@ -799,11 +794,14 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {MEDICATION_STATEMENT_STATUS.map((status) => (
-              <SelectItem key={status} value={status}>
-                {t(`medication_status_${status}`)}
-              </SelectItem>
-            ))}
+            {MEDICATION_STATEMENT_STATUS.map(
+              (status) =>
+                (medication.id || status !== "entered_in_error") && (
+                  <SelectItem key={status} value={status}>
+                    {t(`medication_status_${status}`)}
+                  </SelectItem>
+                ),
+            )}
           </SelectContent>
         </Select>
       </div>
