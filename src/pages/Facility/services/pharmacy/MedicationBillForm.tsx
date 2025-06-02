@@ -524,6 +524,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                     <TableHead>{t("unit_price")}</TableHead>
                     <TableHead>{t("discount")}</TableHead>
                     <TableHead>{t("amount")}</TableHead>
+                    <TableHead>{t("all_dispensed")}?</TableHead>
                     <TableHead>{t("actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -913,6 +914,26 @@ export default function MedicationBillForm({ patientId }: Props) {
                             })}
                         </TableCell>
                         <TableCell>
+                          {field.medication ? (
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.isFullyDispensed`}
+                              render={({ field: formField }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={formField.value}
+                                      onCheckedChange={formField.onChange}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <div className="flex gap-2">
                             <Button
                               variant="outline"
@@ -1043,7 +1064,7 @@ export default function MedicationBillForm({ patientId }: Props) {
             onSuccess={() => {
               setIsInvoiceSheetOpen(false);
               navigate(
-                `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/dispense`,
+                `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`,
               );
             }}
           />

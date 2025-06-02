@@ -9,12 +9,13 @@ import { ApproveExternalSupplyDelivery } from "@/pages/Facility/services/invento
 import { IncomingDeliveries } from "@/pages/Facility/services/inventory/externalSupply/IncomingDeliveries";
 import { PurchaseOrderForm } from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrderForm";
 import { PurchaseOrders } from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrders";
+import DispensesView from "@/pages/Facility/services/pharmacy/DispensesView";
 import MedicationBillForm from "@/pages/Facility/services/pharmacy/MedicationBillForm";
 import MedicationDispenseHistory from "@/pages/Facility/services/pharmacy/MedicationDispenseHistory";
 import MedicationRequestList from "@/pages/Facility/services/pharmacy/MedicationRequestList";
-import PharmacyMedicationList, {
+import PrescriptionsView, {
   PharmacyMedicationTab,
-} from "@/pages/Facility/services/pharmacy/PharmacyMedicationList";
+} from "@/pages/Facility/services/pharmacy/PrescriptionsView";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
 import SupplyDeliveryForm from "@/pages/Facility/services/supply/SupplyDeliveryForm";
@@ -27,6 +28,7 @@ import SupplyRequestList, {
   SupplyRequestTab,
 } from "@/pages/Facility/services/supply/SupplyRequestList";
 import SupplyRequestView from "@/pages/Facility/services/supply/SupplyRequestView";
+import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 
 interface LocationLayoutProps {
   facilityId: string;
@@ -175,31 +177,44 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     patientId: string;
   }) => (
     <Redirect
-      to={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/prescriptions`}
+      to={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/pending`}
     />
   ),
 
-  "/medication_requests/patient/:patientId/prescriptions": ({
+  "/medication_requests/patient/:patientId/pending": ({
     patientId,
   }: {
     patientId: string;
   }) => (
-    <PharmacyMedicationList
+    <PrescriptionsView
       facilityId={facilityId}
       patientId={patientId}
-      tab={PharmacyMedicationTab.PRESCRIPTIONS}
+      tab={PharmacyMedicationTab.PENDING}
     />
   ),
-
-  "/medication_requests/patient/:patientId/dispense": ({
+  "/medication_requests/patient/:patientId/partial": ({
     patientId,
   }: {
     patientId: string;
   }) => (
-    <PharmacyMedicationList
+    <PrescriptionsView
       facilityId={facilityId}
       patientId={patientId}
-      tab={PharmacyMedicationTab.DISPENSE}
+      tab={PharmacyMedicationTab.PARTIAL}
+    />
+  ),
+
+  "/medication_dispense/patient/:patientId/:status": ({
+    patientId,
+    status,
+  }: {
+    patientId: string;
+    status: string;
+  }) => (
+    <DispensesView
+      facilityId={facilityId}
+      patientId={patientId}
+      status={status as MedicationDispenseStatus}
     />
   ),
 

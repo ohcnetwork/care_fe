@@ -9,10 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
-import { SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SelectItem } from "@/components/ui/select";
-import { Select } from "@/components/ui/select";
-import { SelectContent } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -21,9 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TabsTrigger } from "@/components/ui/tabs";
-import { TabsList } from "@/components/ui/tabs";
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -37,7 +31,6 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import ViewDefaultAccountButton from "@/pages/Facility/billing/account/ViewDefaultAccountButton";
-import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import {
   MedicationDispenseCategory,
   MedicationDispenseRead,
@@ -61,12 +54,14 @@ interface MedicationTableProps {
   medications: MedicationDispenseRead[];
   selectedMedications: string[];
   onSelectionChange: (id: string) => void;
+  showCheckbox?: boolean;
 }
 
 function MedicationTable({
   medications,
   selectedMedications,
   onSelectionChange,
+  showCheckbox = true,
 }: MedicationTableProps) {
   const { t } = useTranslation();
 
@@ -98,9 +93,10 @@ function MedicationTable({
             const frequency = instruction?.timing?.code;
             const dosage = instruction?.dose_and_rate?.dose_quantity;
             const isPaid = medication.charge_item.paid_invoice;
-            const showCheckbox =
-              medication.status === MedicationDispenseStatus.preparation ||
-              medication.status === MedicationDispenseStatus.in_progress;
+            const shouldShowCheckbox =
+              showCheckbox &&
+              (medication.status === MedicationDispenseStatus.preparation ||
+                medication.status === MedicationDispenseStatus.in_progress);
 
             return (
               <TableRow
@@ -112,7 +108,7 @@ function MedicationTable({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>
-                          {showCheckbox && (
+                          {shouldShowCheckbox && isPaid && (
                             <Checkbox
                               checked={selectedMedications.includes(
                                 medication.id,
@@ -120,15 +116,11 @@ function MedicationTable({
                               onCheckedChange={() =>
                                 onSelectionChange(medication.id)
                               }
-                              disabled={!isPaid}
-                              className={
-                                !isPaid ? "cursor-not-allowed opacity-50" : ""
-                              }
                             />
                           )}
                         </span>
                       </TooltipTrigger>
-                      {!isPaid && (
+                      {shouldShowCheckbox && !isPaid && (
                         <TooltipContent>
                           <p>{t("cannot_complete_unpaid_medication")}</p>
                         </TooltipContent>
@@ -182,28 +174,31 @@ function MedicationTable({
 interface Props {
   facilityId: string;
   patientId: string;
+  status?: MedicationDispenseStatus;
 }
 
 export default function DispensedMedicationList({
   facilityId,
   patientId,
+  status,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+  const [paymentFilter, setPaymentFilter] = useState<"paid" | "unpaid">("paid");
+  const { qParams, Pagination, resultsPerPage } = useFilters({
     limit: 100,
     disableCache: true,
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["medication_dispense", qParams, patientId],
+    queryKey: ["medication_dispense", qParams, patientId, status],
     queryFn: query(medicationDispenseApi.list, {
       queryParams: {
         facility: facilityId,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        status: qParams.status,
+        status: status ?? qParams.status,
         patient: patientId,
       },
     }),
@@ -247,6 +242,12 @@ export default function DispensedMedicationList({
     );
   };
 
+  const filteredMedications = response?.results?.filter((med) => {
+    if (paymentFilter === "paid") return med.charge_item.paid_invoice;
+    if (paymentFilter === "unpaid") return !med.charge_item.paid_invoice;
+    return true;
+  });
+
   return (
     <div>
       <div className="mb-6">
@@ -274,54 +275,27 @@ export default function DispensedMedicationList({
           )}
         </div>
       </div>
-      <div className="mb-4">
-        {/* Desktop Tabs */}
-        {/* Todo: Use extracted FilterTabs component */}
-        <Tabs
-          value={qParams.status ?? "all"}
-          onValueChange={(value) =>
-            updateQuery({
-              status: value === "all" ? undefined : value,
-            })
-          }
-          className="max-sm:hidden"
-        >
-          <TabsList>
-            <TabsTrigger value="all">{t("all")}</TabsTrigger>
-            {Object.values(MedicationDispenseStatus).map((status) => (
-              <TabsTrigger key={status} value={status}>
-                {t(status)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        {/* Mobile Select */}
-        {/* Todo: Use extracted FilterSelect component */}
-        <Select
-          value={qParams.status ?? "all"}
-          onValueChange={(value) =>
-            updateQuery({
-              status: value === "all" ? undefined : value,
-            })
-          }
-        >
-          <SelectTrigger className="sm:hidden w-full">
-            <SelectValue placeholder={t("filter_by_status")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("all")}</SelectItem>
-            {Object.values(ChargeItemStatus).map((status) => (
-              <SelectItem key={status} value={status}>
-                {t(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+
+      {status === MedicationDispenseStatus.preparation && (
+        <div className="mb-4">
+          <Tabs
+            value={paymentFilter}
+            onValueChange={(value) =>
+              setPaymentFilter(value as typeof paymentFilter)
+            }
+            className="w-full"
+          >
+            <TabsList>
+              <TabsTrigger value="paid">{t("paid")}</TabsTrigger>
+              <TabsTrigger value="unpaid">{t("unpaid")}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      )}
 
       {isLoading ? (
         <TableSkeleton count={5} />
-      ) : !response?.results?.length ? (
+      ) : !filteredMedications?.length ? (
         <EmptyState
           title={t("no_medications_found")}
           description={t("no_medications_found_description")}
@@ -331,9 +305,10 @@ export default function DispensedMedicationList({
         <div className="space-y-8">
           <div>
             <MedicationTable
-              medications={response.results}
+              medications={filteredMedications}
               selectedMedications={selectedMedications}
               onSelectionChange={handleSelectionChange}
+              showCheckbox={paymentFilter !== "unpaid"}
             />
           </div>
 

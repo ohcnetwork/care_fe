@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRightSquare, ChevronDown, NotepadText } from "lucide-react";
 import { navigate } from "raviger";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -31,11 +31,7 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import {
-  ENCOUNTER_CLASS,
-  ENCOUNTER_CLASSES_ICONS,
-  EncounterClass,
-} from "@/types/emr/encounter";
+import { ENCOUNTER_CLASSES_ICONS, EncounterClass } from "@/types/emr/encounter";
 import {
   MedicationPriority,
   MedicationRequestSummary,
@@ -122,32 +118,8 @@ export default function MedicationRequestList({
     "hh",
   ]);
 
-  // Load last selected tab from localStorage
-  useEffect(() => {
-    const lastSelected = localStorage.getItem(
-      "lastSelectedEncounterClass",
-    ) as EncounterClass | null;
-    if (lastSelected && ENCOUNTER_CLASS.includes(lastSelected)) {
-      // If the last selected tab is in dropdown, swap it with the last visible tab
-      if (dropdownItems.includes(lastSelected)) {
-        const newVisibleTabs = [...visibleTabs.slice(0, -1), lastSelected];
-        const newDropdownItems = [
-          ...dropdownItems.filter((item) => item !== lastSelected),
-          visibleTabs[visibleTabs.length - 1] as EncounterClass,
-        ];
-        setVisibleTabs(newVisibleTabs);
-        setDropdownItems(newDropdownItems);
-      }
-      updateQuery({ encounter_class: lastSelected });
-    }
-  }, []);
-
   // Handle tab selection
   const handleTabSelect = (value: string) => {
-    // Save selected value to localStorage
-    if (value !== "all") {
-      localStorage.setItem("lastSelectedEncounterClass", value);
-    }
     updateQuery({
       encounter_class: value === "all" ? undefined : value,
     });

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { ArrowRightIcon, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -6,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { FilterTabs } from "@/components/ui/filter-tabs";
@@ -19,9 +21,11 @@ import {
 } from "@/components/ui/table";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { PrescriptionPreview } from "@/components/Prescription/PrescriptionPreview";
 
 import useFilters from "@/hooks/useFilters";
 
+import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import {
@@ -121,11 +125,13 @@ function MedicationTable({ medications }: MedicationTableProps) {
 interface Props {
   facilityId: string;
   patientId: string;
+  partial?: boolean;
 }
 
 export default function MedicationDispenseList({
   facilityId,
   patientId,
+  partial = false,
 }: Props) {
   const { t } = useTranslation();
   const { locationId } = useCurrentLocation();
@@ -144,8 +150,18 @@ export default function MedicationDispenseList({
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: qParams.status,
         priority: qParams.priority,
+        dispense_status: partial ? "partial" : undefined,
+        dispense_status_isnull: !partial ? true : undefined,
       },
     }),
+  });
+
+  const { data: patient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.getPatient, {
+      pathParams: { id: patientId || "" },
+    }),
+    enabled: !!patientId,
   });
 
   const medications = response?.results || [];
@@ -180,7 +196,26 @@ export default function MedicationDispenseList({
               />
             </div>
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto border-gray-400 font-semibold"
+                >
+                  <PrinterIcon className="size-4" />
+                  {t("print_prescriptions")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="md:max-w-4xl max-h-screen overflow-auto">
+                {patient && medications.length > 0 && (
+                  <PrescriptionPreview
+                    medications={medications}
+                    patient={patient}
+                  />
+                )}
+              </DialogContent>
+            </Dialog>
             <Button
               onClick={() =>
                 navigate(
@@ -189,7 +224,8 @@ export default function MedicationDispenseList({
               }
               className="w-full sm:w-auto"
             >
-              {t("bill_medications")}
+              {t("start_billing")}
+              <ArrowRightIcon className="size-4" />
             </Button>
           </div>
         </div>
@@ -214,7 +250,7 @@ export default function MedicationDispenseList({
             </div>
           )}
 
-          {otherMedications.length > 0 && (
+          {!partial && otherMedications.length > 0 && (
             <div className="space-y-2">
               <h2 className="text-lg font-semibold text-gray-900">
                 {t("other_medications")}
