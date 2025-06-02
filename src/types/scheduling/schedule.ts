@@ -1,7 +1,7 @@
 import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 
 import { Time } from "@/Utils/types";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserBase } from "@/types/user/user";
 

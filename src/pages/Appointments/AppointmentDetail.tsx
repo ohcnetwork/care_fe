@@ -471,10 +471,12 @@ const AppointmentActions = ({
       {canCreateAppointment && (
         <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="lg">
-              <CalendarIcon className="size-4 mr-2" />
-              {t("reschedule")}
-            </Button>
+            {appointment.status !== "in_consultation" && (
+              <Button variant="outline" size="lg">
+                <CalendarIcon className="size-4 mr-2" />
+                {t("reschedule")}
+              </Button>
+            )}
           </SheetTrigger>
           <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
             <SheetHeader>
@@ -563,40 +565,42 @@ const AppointmentActions = ({
         </Button>
       )}
 
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="outline" size="lg">
-            <BanIcon className="size-4 mr-2" />
-            {t("cancel_appointment")}
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              <Alert variant="destructive" className="mt-4">
-                <AlertTitle>{t("warning")}</AlertTitle>
-                <AlertDescription>
-                  {t("cancel_appointment_warning")}
-                </AlertDescription>
-              </Alert>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => cancelAppointment({ reason: "cancelled" })}
-              className={cn(buttonVariants({ variant: "destructive" }))}
-            >
-              {isCancelling ? (
-                <Loader2 className="size-4 animate-spin mr-2" />
-              ) : (
-                t("confirm")
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {appointment.status !== "in_consultation" && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" size="lg">
+              <BanIcon className="size-4 mr-2" />
+              {t("cancel_appointment")}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                <Alert variant="destructive" className="mt-4">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("cancel_appointment_warning")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => cancelAppointment({ reason: "cancelled" })}
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                {isCancelling ? (
+                  <Loader2 className="size-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
 
       <AlertDialog>
         <AlertDialogTrigger asChild>

@@ -72,6 +72,24 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add(
+  "typeAndVerifyOptionNotPresent",
+  (selector: string, value: string, emptyMessage: string) => {
+    cy.get(selector)
+      .click()
+      .then(() => {
+        cy.get("[cmdk-input]")
+          .should("be.visible")
+          .type(value)
+          .then(() => {
+            cy.get("[cmdk-empty]")
+              .should("be.visible")
+              .and("contain", emptyMessage);
+          });
+      });
+  },
+);
+
+Cypress.Commands.add(
   "clickAndMultiSelectOption",
   (selector: string, options: string | string[]) => {
     const optionArray = Array.isArray(options) ? options : [options];
@@ -150,14 +168,16 @@ Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
 });
 
 export interface ErrorMessageItem {
-  label: string;
+  label?: string;
   message: string;
 }
 
 Cypress.Commands.add("verifyErrorMessages", (errors: ErrorMessageItem[]) => {
   errors.forEach(({ label, message }) => {
-    // Verify the label is present
-    cy.contains(label).scrollIntoView().should("be.visible");
+    if (label) {
+      // Verify the label is present if provided
+      cy.contains(label).scrollIntoView().should("be.visible");
+    }
     // Verify the error message is present
     cy.contains(message).scrollIntoView().should("be.visible");
   });
