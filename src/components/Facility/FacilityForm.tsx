@@ -246,7 +246,7 @@ export default function FacilityForm({
         is_public: facilityData.is_public,
       });
     }
-  }, [facilityData]);
+  }, [facilityData, form]);
 
   return (
     <Form {...form}>
