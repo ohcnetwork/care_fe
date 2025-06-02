@@ -1235,6 +1235,8 @@ function QuestionEditor({
     return parentId ? `${parentId}-${question.id}` : question.id;
   };
 
+  const UNIT_TYPES = ["quantity", "choice", "decimal", "integer"];
+
   return (
     <Collapsible
       open={isExpanded}
@@ -1466,7 +1468,7 @@ function QuestionEditor({
               )}
             </div>
 
-            {type === "quantity" && (
+            {UNIT_TYPES.includes(type) && (
               <FormField
                 control={form.control}
                 name={`questions.${index}.unit`}
