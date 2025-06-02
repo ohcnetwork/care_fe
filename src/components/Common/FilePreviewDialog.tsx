@@ -389,6 +389,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       )}
                       draggable={false}
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 ) : file_state.extension === "pdf" ? (
