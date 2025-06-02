@@ -289,21 +289,23 @@ export default function FacilityForm({
                       </SheetTrigger>
                       <SheetContent
                         side="bottom"
-                        className="h-[50vh]"
+                        className="h-[50vh] p-6"
                         aria-description={t("select_facility_type_description")}
                       >
-                        <SheetHeader>
-                          <SheetTitle>{t("select_facility_type")}</SheetTitle>
+                        <SheetHeader className="mb-6">
+                          <SheetTitle className="text-xl">
+                            {t("select_facility_type")}
+                          </SheetTitle>
                         </SheetHeader>
-                        <Command className="mt-4">
+                        <Command className="rounded-lg">
                           <CommandInput
                             placeholder={t("search_facility_type")}
-                            className="px-4 py-3"
+                            className="h-12 px-4 border-0 focus:ring-0 focus-visible:ring-0"
                           />
-                          <CommandEmpty>
+                          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
                             {t("no_facility_type_found")}
                           </CommandEmpty>
-                          <CommandGroup className="max-h-[30vh] overflow-y-auto">
+                          <CommandGroup className="max-h-[30vh] overflow-y-auto p-2">
                             {FACILITY_TYPES.map((type) => (
                               <CommandItem
                                 key={type.text}
@@ -312,11 +314,11 @@ export default function FacilityForm({
                                   field.onChange(type.text);
                                   setFacilityTypeSheetOpen(false);
                                 }}
-                                className="cursor-pointer"
+                                className="cursor-pointer rounded-md px-4 py-3 hover:bg-accent"
                               >
                                 <span
                                   className={cn(
-                                    "mr-2",
+                                    "mr-2 text-base",
                                     field.value === type.text &&
                                       "text-primary font-medium",
                                   )}
@@ -326,7 +328,7 @@ export default function FacilityForm({
                                 {field.value === type.text && (
                                   <CareIcon
                                     icon="l-check"
-                                    className="ml-auto h-4 w-4"
+                                    className="ml-auto h-5 w-5"
                                   />
                                 )}
                               </CommandItem>
