@@ -287,9 +287,9 @@ export default function FacilityOrganizationSelector(
                   );
                   if (index !== -1) {
                     handleRemoveOrganization(index);
+                    setCurrentSelection(null);
+                    setAlreadySelected(false);
                   }
-                  setCurrentSelection(null);
-                  setAlreadySelected(false);
                 }}
                 data-cy="confirm-organization"
               >
