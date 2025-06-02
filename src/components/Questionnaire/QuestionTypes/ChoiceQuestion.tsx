@@ -120,29 +120,32 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
             className="flex flex-col gap-3"
             value={currentValue}
           >
-            {options.map((option: AnswerOption) => (
-              <Label
-                htmlFor={`${question.id}-${option.value.toString()}`}
-                className="cursor-pointer"
-                key={`${question.id}-${option.value.toString()}`}
-              >
-                <Card
-                  className="shadow-none rounded-md border-1 border-gray-400 bg-gray-50 p-2 transition-all hover:bg-gray-50/50 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary-300 [&:has([data-state=checked])]:shadow-sm w-full"
-                  role="presentation"
+            {options.map((option: AnswerOption) => {
+              const inputId = `${question.id}-${index}-${option.value.toString()}`;
+              return (
+                <Label
+                  htmlFor={inputId}
+                  className="cursor-pointer"
+                  key={inputId}
                 >
-                  <div className="flex flex-row items-center gap-2">
-                    <RadioGroupItem
-                      value={option.value.toString()}
-                      id={`${question.id}-${option.value.toString()}`}
-                      className="sr-only"
-                    />
-                    <div className="font-medium leading-5">
-                      {properCase(option.display || option.value)}
+                  <Card
+                    className="shadow-none rounded-md border-1 border-gray-400 bg-gray-50 p-2 transition-all hover:bg-gray-50/50 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary-300 [&:has([data-state=checked])]:shadow-sm w-full"
+                    role="presentation"
+                  >
+                    <div className="flex flex-row items-center gap-2">
+                      <RadioGroupItem
+                        value={option.value.toString()}
+                        id={inputId}
+                        className="sr-only"
+                      />
+                      <div className="font-medium leading-5">
+                        {properCase(option.display || option.value)}
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              </Label>
-            ))}
+                  </Card>
+                </Label>
+              );
+            })}
           </RadioGroup>
         </div>
       )}
