@@ -823,7 +823,7 @@ function HeaderRow({
                 variant="secondary"
                 onClick={() => onRemoveElement(rowIndex, activeElement)}
               >
-                <span className="text-sm">{t(`remove`)}</span>
+                <span className="text-sm">{t("remove")}</span>
                 <Trash2Icon className="size-3" />
               </Button>
             </div>
