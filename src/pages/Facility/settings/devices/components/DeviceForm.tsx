@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isBefore, startOfTomorrow } from "date-fns";
+import { isFuture } from "date-fns";
 import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -73,7 +73,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         .date()
         .optional()
         .refine(
-          (date) => !date || isBefore(date, startOfTomorrow()),
+          (date) => !date || !isFuture(date),
           t("manufacture_date_cannot_be_in_future"),
         ),
       expiration_date: z.date().optional(),
