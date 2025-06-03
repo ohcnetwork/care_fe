@@ -46,7 +46,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   };
 
   useEffect(() => {
-    if (!open) return;
+    let localStream: MediaStream | null = null;
 
     const getCameraStream = async () => {
       const hasPermission = await requestPermission(cameraFacingMode);
@@ -58,21 +58,26 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       try {
         const mediaStream = hasPermission.mediaStream;
         setStream(mediaStream);
+        localStream = mediaStream;
       } catch (error) {
         console.error("Error accessing camera:", error);
       }
     };
 
-    getCameraStream();
+    if (open) {
+      getCameraStream();
+    }
 
     return () => {
+      if (localStream) {
+        localStream.getTracks().forEach((track) => track.stop());
+      }
       if (stream) {
-        stream.getTracks().forEach((track) => {
-          track.stop();
-        });
+        stream.getTracks().forEach((track) => track.stop());
+        setStream(null);
       }
     };
-  }, [open, cameraFacingMode, onOpenChange]);
+  }, [open, cameraFacingMode]);
 
   const handleSwitchCamera = useCallback(async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
