@@ -924,7 +924,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           e.preventDefault();
                           const newQuestion: Question = {
                             id: crypto.randomUUID(),
-                            link_id: `${questionnaire.questions.length + 1}`,
+                            link_id: `Q-${Date.now()}`,
                             text: "New Question",
                             type: "string",
                             questions: [],
@@ -1511,33 +1511,6 @@ function QuestionEditor({
                             { shouldValidate: true },
                           );
                         }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex-1">
-              <FormField
-                control={form.control}
-                name={`questions.${index}.link_id`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("link_id")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        value={question.link_id}
-                        onChange={(e) => {
-                          updateField("link_id", e.target.value);
-                          form.setValue(
-                            `questions.${index}.link_id`,
-                            e.target.value,
-                            { shouldValidate: true },
-                          );
-                        }}
-                        placeholder={t("link_id_placeholder")}
                       />
                     </FormControl>
                     <FormMessage />
