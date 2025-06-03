@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Building, FolderOpen, PenLine } from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -8,6 +9,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -43,43 +58,60 @@ function OrganizationCard({
 
   return (
     <Card key={org.id}>
-      <CardContent className="p-4">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between flex-wrap">
-            <div className="space-y-1 mb-2">
-              <h3 className="text-lg font-semibold">{org.name}</h3>
-              <div className="flex items-center gap-2 capitalize">
-                <Badge
-                  variant="primary"
-                  className=" border border-transparent text-indigo-800 bg-indigo-100 px-2 py-1"
+      <CardContent className="p-4 space-y-4">
+        <div className="flex items-center gap-2">
+          <Building className="size-4" />
+          <span className="text-lg font-semibold hover:underline hover:decoration-green-600 hover:text-green-600">
+            {org.name}
+          </span>
+          {org.has_children && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help">
+                    <FolderOpen className="size-3 text-gray-400" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>{t("has_child_orgs")}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+
+        <Badge
+          variant="primary"
+          className="w-fit border border-transparent text-indigo-800 bg-indigo-100 px-2 py-1 capitalize"
+        >
+          {t(`facility_organization_type__${org.org_type}`)}
+        </Badge>
+
+        <div className="flex gap-2 flex-wrap justify-end">
+          {canWrite && org.org_type !== "root" && (
+            <FacilityOrganizationFormSheet
+              facilityId={facilityId}
+              parentId={parentId}
+              org={org}
+              editTrigger={
+                <Button
+                  data-cy="edit-department-team"
+                  variant="white"
+                  size="sm"
+                  className="font-semibold"
                 >
-                  {t(`facility_organization_type__${org.org_type}`)}
-                </Badge>
-              </div>
-            </div>
-            <div className="flex flex-row gap-2">
-              {canWrite && org.org_type !== "root" && (
-                <FacilityOrganizationFormSheet
-                  facilityId={facilityId}
-                  parentId={parentId}
-                  org={org}
-                />
-              )}
-              <Button
-                variant="white"
-                size="sm"
-                className="font-semibold"
-                asChild
-              >
-                <Link
-                  href={`/departments/${org.id}/departments`}
-                  data-cy="view-department-team"
-                >
-                  {t("see_details")}
-                </Link>
-              </Button>
-            </div>
-          </div>
+                  {t("edit")}
+                </Button>
+              }
+            />
+          )}
+
+          <Button variant="white" size="sm" className="font-semibold" asChild>
+            <Link
+              href={`/departments/${org.id}/departments`}
+              data-cy="view-department-team"
+            >
+              {t("see_details")}
+            </Link>
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -161,25 +193,109 @@ export default function FacilityOrganizationView({
         </div>
       ) : (
         <div className="space-y-6 md:pb-6">
-          <div className="space-y-4" data-cy="department-team-list">
-            {children?.results?.length ? (
-              children.results.map((org) => (
-                <OrganizationCard
-                  key={org.id}
-                  org={org}
-                  canWrite={canManageFacilityOrganization}
-                  facilityId={facilityId}
-                  parentId={id}
-                />
-              ))
-            ) : (
-              <Card className="col-span-full">
-                <CardContent className="p-6 text-center text-gray-500">
-                  {t("no_departments_teams_found")}
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          {children?.results?.length ? (
+            <>
+              <div
+                className="hidden sm:block rounded-lg border"
+                data-cy="department-team-list"
+              >
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t("name")}</TableHead>
+                      <TableHead>{t("type")}</TableHead>
+                      <TableHead className="text-right">
+                        {t("actions")}
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {children.results.map((org) => (
+                      <TableRow
+                        key={org.id}
+                        onClick={() =>
+                          navigate(
+                            `/facility/${facilityId}/settings/departments/${org.id}/departments`,
+                          )
+                        }
+                        className="hover:cursor-pointer group"
+                      >
+                        <TableCell>
+                          <div className="font-medium flex items-center gap-2 py-2">
+                            <Building className="size-4" />
+                            <span className="group-hover:underline group-hover:text-primary">
+                              {org.name}
+                            </span>
+                            {org.has_children && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="cursor-help">
+                                      <FolderOpen className="size-3 text-gray-400" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {t("has_child_orgs")}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {" "}
+                          <Badge
+                            variant="primary"
+                            className=" border border-transparent text-indigo-800 bg-indigo-100 px-2 py-1"
+                          >
+                            {t(`facility_organization_type__${org.org_type}`)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell
+                          className="text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {canManageFacilityOrganization &&
+                            org.org_type !== "root" && (
+                              <FacilityOrganizationFormSheet
+                                facilityId={facilityId}
+                                parentId={id}
+                                org={org}
+                                editTrigger={
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    data-cy="edit-department-button"
+                                  >
+                                    <PenLine className="size-4" />
+                                  </Button>
+                                }
+                              />
+                            )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="block sm:hidden space-y-4">
+                {children.results.map((org) => (
+                  <OrganizationCard
+                    key={org.id}
+                    org={org}
+                    facilityId={facilityId}
+                    canWrite={canManageFacilityOrganization}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <Card className="col-span-full">
+              <CardContent className="p-6 text-center text-gray-500">
+                {t("no_departments_teams_found")}
+              </CardContent>
+            </Card>
+          )}
           {children && children.count > resultsPerPage && (
             <div className="flex justify-center">
               <Pagination totalCount={children.count} />

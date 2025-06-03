@@ -47,6 +47,8 @@ interface Props {
   facilityId: string;
   parentId?: string;
   org?: FacilityOrganization;
+
+  editTrigger?: React.ReactNode;
 }
 
 const ORG_TYPES = [
@@ -60,6 +62,7 @@ export default function FacilityOrganizationFormSheet({
   facilityId,
   parentId,
   org,
+  editTrigger,
 }: Props) {
   const { t } = useTranslation();
 
@@ -153,14 +156,7 @@ export default function FacilityOrganizationFormSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         {isEditMode ? (
-          <Button
-            data-cy="edit-department-team"
-            variant="white"
-            size="sm"
-            className="font-semibold"
-          >
-            {t("edit")}
-          </Button>
+          editTrigger
         ) : (
           <Button data-cy="add-department/team-button">
             <CareIcon icon="l-plus" className="mr-2 size-4" />
