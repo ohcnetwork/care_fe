@@ -91,7 +91,7 @@ function OrganizationCard({
               facilityId={facilityId}
               parentId={parentId}
               org={org}
-              editTrigger={
+              trigger={
                 <Button
                   data-cy="edit-department-team"
                   variant="white"
@@ -181,6 +181,12 @@ export default function FacilityOrganizationView({
               <FacilityOrganizationFormSheet
                 facilityId={facilityId}
                 parentId={id}
+                trigger={
+                  <Button data-cy="add-department/team-button">
+                    <CareIcon icon="l-plus" className="mr-2 size-4" />
+                    {t("add_department_team")}
+                  </Button>
+                }
               />
             )}
           </div>
@@ -261,7 +267,7 @@ export default function FacilityOrganizationView({
                                 facilityId={facilityId}
                                 parentId={id}
                                 org={org}
-                                editTrigger={
+                                trigger={
                                   <Button
                                     variant="ghost"
                                     size="icon"

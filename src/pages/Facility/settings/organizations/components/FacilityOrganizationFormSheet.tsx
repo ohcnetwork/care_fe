@@ -6,8 +6,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -48,7 +46,7 @@ interface Props {
   parentId?: string;
   org?: FacilityOrganization;
 
-  editTrigger?: React.ReactNode;
+  trigger: React.ReactNode;
 }
 
 const ORG_TYPES = [
@@ -62,7 +60,7 @@ export default function FacilityOrganizationFormSheet({
   facilityId,
   parentId,
   org,
-  editTrigger,
+  trigger,
 }: Props) {
   const { t } = useTranslation();
 
@@ -154,16 +152,7 @@ export default function FacilityOrganizationFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        {isEditMode ? (
-          editTrigger
-        ) : (
-          <Button data-cy="add-department/team-button">
-            <CareIcon icon="l-plus" className="mr-2 size-4" />
-            {t("add_department_team")}
-          </Button>
-        )}
-      </SheetTrigger>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>
