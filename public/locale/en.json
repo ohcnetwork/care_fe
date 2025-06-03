@@ -1114,6 +1114,7 @@
   "draw": "Draw",
   "drawing_saved_successfully": "Drawing saved successfully",
   "drawings": "Drawings",
+  "drop_file_here": "Drop file here",
   "duplicate_contact_values_not_allowed": "Duplicate contact values are not allowed across different contact types",
   "duplicate_patient_record_birth_unknown": "Please contact your district care coordinator, the shifting facility or the patient themselves if you are not sure about the patient's year of birth.",
   "duplicate_patient_record_confirmation": "Admit the patient record to your facility by adding the year of birth",
