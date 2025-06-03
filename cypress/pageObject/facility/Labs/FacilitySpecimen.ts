@@ -18,43 +18,6 @@ export interface SpecimenDefinitionData {
 }
 
 export class FacilitySpecimen {
-  navigateToSpecimenDefinitions() {
-    cy.get('[data-sidebar="menu-button"]').contains("Settings").click();
-    cy.get('[data-sidebar="menu-sub-button"]')
-      .contains("Specimen Definitions")
-      .click();
-    cy.url().should("include", "/settings/specimen_definitions");
-    return this;
-  }
-
-  // List page methods
-  clickAddDefinition() {
-    cy.clickButton("Add Definition");
-    cy.url().should("include", "/settings/specimen_definitions/new");
-    return this;
-  }
-
-  searchSpecimen(title: string) {
-    cy.typeIntoInputByPlaceholder("Search definitions", title);
-    return this;
-  }
-
-  filterByStatus(status: string) {
-    cy.clickSelectTrigger("Status", status);
-    return this;
-  }
-
-  verifySpecimenInList(title: string) {
-    cy.verifyContentPresenceV2("table", [title]);
-    return this;
-  }
-
-  openSpecimenDetails() {
-    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
-    return this;
-  }
-
-  // Detail page methods
   verifySpecimenDetails(data: Partial<SpecimenDefinitionData>) {
     const detailsToVerify = [
       data.description,
@@ -65,25 +28,6 @@ export class FacilitySpecimen {
     ].filter(Boolean);
 
     cy.verifyContentPresenceV2("card", detailsToVerify);
-    return this;
-  }
-
-  clickEditSpecimen() {
-    cy.clickButton("Edit");
-    return this;
-  }
-
-  // Form methods
-  verifyRequiredFieldErrors() {
-    cy.verifyErrorMessages([
-      { message: "Title is required", label: "Title" },
-      { message: "Slug is required", label: "Slug" },
-      {
-        message: "String must contain at least 1 character(s)",
-        label: "Description",
-      },
-      { message: "Required", label: "Type Collected" },
-    ]);
     return this;
   }
 
@@ -155,41 +99,6 @@ export class FacilitySpecimen {
       );
     }
 
-    return this;
-  }
-
-  saveSpecimenDefinition() {
-    cy.clickButton("Save");
-    return this;
-  }
-
-  verifySpecimenDefinitionsUrl() {
-    cy.url().should("include", "/settings/specimen_definitions");
-    return this;
-  }
-
-  verifySpecimenCreatedNotification() {
-    cy.verifyNotification("Specimen definition created");
-    return this;
-  }
-
-  verifySpecimenUpdatedNotification() {
-    cy.verifyNotification("Specimen Definition updated");
-    return this;
-  }
-
-  clickDeleteSpecimen() {
-    cy.clickButton("Delete");
-    return this;
-  }
-
-  confirmDeleteSpecimen() {
-    cy.clickButton("Confirm");
-    return this;
-  }
-
-  verifySpecimenRetiredNotification() {
-    cy.verifyNotification("Specimen definition retired successfully");
     return this;
   }
 }
