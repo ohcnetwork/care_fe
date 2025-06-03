@@ -1218,12 +1218,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   icon="l-cloud-upload"
                   className="size-12 text-gray-400"
                 />
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 select-none">
                   {dragOver
                     ? t("drop_file_here")
                     : t("drag_and_drop_or_click_to_select")}
                 </p>
-                <p className="text-xs text-gray-400">{t("json_files_only")}</p>
+                <p className="text-xs text-gray-400 select-none">
+                  {t("json_files_only")}
+                </p>
               </div>
             </div>
             {selectedImportFile && (
