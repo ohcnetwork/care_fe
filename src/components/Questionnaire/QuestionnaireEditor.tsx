@@ -1115,7 +1115,16 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </Card>
         </TabsContent>
       </Tabs>
-      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+      <Dialog
+        open={showImportDialog}
+        onOpenChange={(open) => {
+          setShowImportDialog(open);
+          if (!open) {
+            setImportUrl("");
+            setImportedData(null);
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("import_questionnaire")}</DialogTitle>
@@ -1263,6 +1272,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     setImportedData(data);
                     setShowFileImportDialog(false);
                     setShowImportDialog(true);
+                    setSelectedImportFile(null);
                   } catch (_error) {
                     toast.error(t("failed_to_import_questionnaire"));
                   }
