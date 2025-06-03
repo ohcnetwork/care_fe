@@ -396,7 +396,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           description: "",
           status: "draft",
           version: "1.0",
-          subject_type: "patient",
+          subject_type: "encounter",
           questions: [],
           slug: "",
           tags: [],
