@@ -72,7 +72,7 @@ function OrganizationCard({
                     <FolderOpen className="size-3 text-gray-400" />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>{t("has_child_orgs")}</TooltipContent>
+                <TooltipContent>{t("has_child_organizations")}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
@@ -80,7 +80,7 @@ function OrganizationCard({
 
         <Badge
           variant="primary"
-          className="w-fit border border-transparent text-indigo-800 bg-indigo-100 px-2 py-1 capitalize"
+          className="w-fit border border-transparent text-indigo-800 bg-indigo-100 px-2 py-1"
         >
           {t(`facility_organization_type__${org.org_type}`)}
         </Badge>
@@ -241,7 +241,7 @@ export default function FacilityOrganizationView({
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    {t("has_child_orgs")}
+                                    {t("has_child_organizations")}
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
