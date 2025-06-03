@@ -575,7 +575,6 @@ export function SpecimenDefinitionForm({
                       <FormLabel>{t("description")}</FormLabel>
                       <FormControl>
                         <Textarea
-                          data-cy="specimen-definition-form-container-description"
                           placeholder={t("description")}
                           {...field}
                           value={field.value || ""}
@@ -698,7 +697,6 @@ export function SpecimenDefinitionForm({
                             <FormItem className="flex flex-col">
                               <FormControl>
                                 <Input
-                                  data-cy="specimen-definition-form-minimum-volume-string"
                                   placeholder={t("enter_minimum_volume")}
                                   {...field}
                                   value={field.value || ""}
@@ -726,7 +724,6 @@ export function SpecimenDefinitionForm({
                       <FormLabel>{t("preparation")}</FormLabel>
                       <FormControl>
                         <Textarea
-                          data-cy="specimen-definition-form-preparation"
                           placeholder={t("preparation")}
                           {...field}
                           value={field.value || ""}
