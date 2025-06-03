@@ -1284,12 +1284,6 @@ function QuestionEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.enable_when]);
 
-  const getQuestionNumber = (question: Question) => {
-    const linkId = question.link_id.split(".");
-    linkId[1] = (Number(linkId[1]) + 1).toString();
-    return linkId.join(".");
-  };
-
   const getOperatorChoices = (index: number) => {
     const currentEnableWhenArr = enableWhenQuestionAnswers[index];
     const currentEnableWhen =
@@ -2253,12 +2247,12 @@ function QuestionEditor({
                           <SelectContent>
                             {(rootQuestions || [])
                               .filter((q) => q.id !== question.id)
-                              .map((question) => (
+                              .map((question, index) => (
                                 <SelectItem
                                   key={question.id}
                                   value={question.link_id}
                                 >
-                                  {getQuestionNumber(question)}. {question.text}
+                                  {index + 1}. {question.text}
                                 </SelectItem>
                               ))}
                           </SelectContent>
@@ -2307,13 +2301,12 @@ function QuestionEditor({
                                 <SelectValue placeholder="Select a sub-question" />
                               </SelectTrigger>
                               <SelectContent>
-                                {q.questions?.map((question) => (
+                                {q.questions?.map((question, index) => (
                                   <SelectItem
                                     key={question.id}
                                     value={question.link_id}
                                   >
-                                    {getQuestionNumber(question)}.{" "}
-                                    {question.text}
+                                    {index + 1}. {question.text}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
