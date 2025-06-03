@@ -90,7 +90,9 @@ export default function UserForm({
       c_password: z.string().optional(),
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
-      email: z.string().email(t("invalid_email_address")),
+      email: isEditMode
+        ? z.string().optional()
+        : z.string().email(t("invalid_email_address")),
       phone_number: validators().phoneNumber.required,
       gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
       prefix: z.string().optional(),
