@@ -251,68 +251,6 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add(
-  "clickButton",
-  (
-    buttonText: string,
-    options?: {
-      timeout?: number;
-      urlPath?: string;
-    },
-  ) => {
-    const { timeout = 4000, urlPath } = options || {};
-
-    if (urlPath) {
-      cy.url().should("include", urlPath);
-    }
-
-    return cy
-      .get("button", { timeout })
-      .contains(buttonText)
-      .scrollIntoView()
-      .should("be.visible")
-      .click()
-      .then(($el) => $el[0] as Element);
-  },
-);
-
-Cypress.Commands.add(
-  "typeIntoLabeledField",
-  (labelText: string, value: string, clearBeforeType: boolean = false) => {
-    const input = cy
-      .contains("label", labelText)
-      .parent('[data-slot="form-item"]')
-      .find('[data-slot="form-control"]');
-
-    if (clearBeforeType) {
-      input.clear();
-    }
-
-    input.type(value);
-  },
-);
-
-Cypress.Commands.add(
-  "typeIntoInputByPlaceholder",
-  (
-    placeholderText: string,
-    value: string,
-    clearBeforeType: boolean = false,
-  ) => {
-    const input = cy
-      .get(`[data-slot="input"][placeholder="${placeholderText}"]`)
-      .scrollIntoView()
-      .should("be.visible")
-      .click();
-
-    if (clearBeforeType) {
-      input.clear();
-    }
-
-    input.type(value);
-  },
-);
-
-Cypress.Commands.add(
   "clickAndSelectOptionV2",
   (labelText: string, reference: string) => {
     cy.contains("label", labelText)
@@ -345,38 +283,5 @@ Cypress.Commands.add(
               .click();
           });
       });
-  },
-);
-
-Cypress.Commands.add(
-  "verifyAndClickElementV2",
-  (labelText: string, reference: string) => {
-    cy.contains("span, label", labelText)
-      .closest('[role="combobox"], [data-slot="form-item"]')
-      .find('[role="combobox"]')
-      .click();
-    cy.get('[role="option"]').contains(reference).click();
-  },
-);
-
-Cypress.Commands.add(
-  "verifyContentPresenceV2",
-  (dataSlot: string, texts: string[]) => {
-    cy.get(`[data-slot="${dataSlot}"]`).then(($el) => {
-      texts.forEach((text) => {
-        cy.wrap($el).should("contain", text);
-      });
-    });
-  },
-);
-
-Cypress.Commands.add(
-  "clickSelectTrigger",
-  (buttonText: string, reference: string) => {
-    cy.get('button[data-slot="select-trigger"]')
-      .contains(buttonText)
-      .should("be.visible")
-      .click();
-    cy.get('[role="option"]').contains(reference).click();
   },
 );

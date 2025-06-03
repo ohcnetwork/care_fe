@@ -63,25 +63,6 @@ declare global {
           urlPath?: string;
         },
       ): Chainable<Element>;
-      typeIntoFormField(
-        value: string,
-        options?: {
-          clearBeforeTyping?: boolean;
-          skipVerification?: boolean;
-          delay?: number;
-          position?: "first" | "last";
-        },
-      ): Chainable<Element>;
-      typeIntoLabeledField(
-        labelText: string,
-        value: string,
-        clearBeforeType?: boolean,
-      ): Chainable<Element>;
-      typeIntoInputByPlaceholder(
-        placeholderText: string,
-        value: string,
-        clearBeforeType?: boolean,
-      ): Chainable<Element>;
       clickAndSelectOptionV2(
         selector: string,
         reference: string,
@@ -89,18 +70,6 @@ declare global {
       typeAndSelectOptionV2(
         labelText: string,
         value: string,
-      ): Chainable<Element>;
-      verifyAndClickElementV2(
-        labelText: string,
-        reference: string,
-      ): Chainable<Element>;
-      verifyContentPresenceV2(
-        dataSlot?: string,
-        texts?: string[],
-      ): Chainable<Element>;
-      clickSelectTrigger(
-        buttonText: string,
-        reference: string,
       ): Chainable<Element>;
     }
   }

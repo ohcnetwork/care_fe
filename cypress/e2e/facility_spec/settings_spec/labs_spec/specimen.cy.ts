@@ -62,6 +62,93 @@ describe("Facility Specimen Management", () => {
     cy.visit("/");
   });
 
+  it("Create specimen and verify status filter functionality", () => {
+    facilityCreation.selectFirstRandomFacility();
+
+    const specimenData = generateTestData().mandatoryOnly;
+
+    cy.url().then((url) => {
+      const facilityId = url.split("/facility/")[1].split("/")[0];
+      cy.visit(`/facility/${facilityId}/settings/specimen_definitions`);
+    });
+
+    cy.get("button").contains("Add Definition").click();
+    facilitySpecimen.fillSpecimenDefinitionForm(specimenData);
+
+    cy.intercept("POST", "**/api/v1/facility/**/specimen_definition").as(
+      "createSpecimen",
+    );
+    cy.get("button").contains("Save").click();
+    cy.wait("@createSpecimen").its("response.statusCode").should("eq", 200);
+    cy.verifyNotification("Specimen definition created");
+
+    // Test status filter
+    cy.get("input[placeholder='Search definitions']").type(specimenData.title);
+    cy.clickAndSelectOption("button:contains('Status')", specimenData.status);
+    cy.verifyContentPresence('[data-slot="table"]', [specimenData.title]);
+
+    // Verify details
+    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
+    facilitySpecimen.verifySpecimenDetails(specimenData);
+  });
+
+  it("Create specimen with all fields and verify edit functionality", () => {
+    facilityCreation.selectFirstRandomFacility();
+
+    const specimenData = generateTestData().default;
+
+    cy.url().then((url) => {
+      const facilityId = url.split("/facility/")[1].split("/")[0];
+      cy.visit(`/facility/${facilityId}/settings/specimen_definitions`);
+    });
+
+    cy.get("button").contains("Add Definition").click();
+    facilitySpecimen.fillSpecimenDefinitionForm(specimenData);
+
+    cy.intercept("POST", "**/api/v1/facility/**/specimen_definition").as(
+      "createSpecimen",
+    );
+    cy.get("button").contains("Save").click();
+    cy.wait("@createSpecimen").its("response.statusCode").should("eq", 200);
+    cy.verifyNotification("Specimen definition created");
+
+    // Search for the created specimen
+    cy.get("input[placeholder='Search definitions']").type(specimenData.title);
+    cy.verifyContentPresence('[data-slot="table"]', [specimenData.title]);
+    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
+
+    // Edit specimen
+    cy.get("button").contains("Edit").click();
+
+    // Update with new data
+    const updatedData: Partial<SpecimenDefinitionData> = {
+      title: faker.science.chemicalElement().name,
+      derivedFromUri: faker.internet.url(),
+      status: faker.helpers.arrayElement(SPECIMEN_STATUS),
+      cap: faker.helpers.arrayElement(CAP_COLORS),
+      slug: generateUniqueSlug(),
+      description: faker.lorem.sentence(),
+      typeCollected: faker.helpers.arrayElement(SPECIMEN_TYPES),
+    };
+
+    facilitySpecimen.fillSpecimenDefinitionForm(
+      updatedData as SpecimenDefinitionData,
+    );
+
+    cy.intercept("PUT", "**/api/v1/facility/**/specimen_definition/**").as(
+      "updateSpecimen",
+    );
+    cy.get("button").contains("Save").click();
+    cy.wait("@updateSpecimen").its("response.statusCode").should("eq", 200);
+    cy.verifyNotification("Specimen Definition updated");
+
+    // Verify updated data
+    cy.get("input[placeholder='Search definitions']").type(updatedData.title);
+    cy.verifyContentPresence('[data-slot="table"]', [updatedData.title]);
+    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
+    facilitySpecimen.verifySpecimenDetails(updatedData);
+  });
+
   it("Create specimen with mandatory fields and confirm deletion of specimen", () => {
     facilityCreation.selectFirstRandomFacility();
 
@@ -88,10 +175,10 @@ describe("Facility Specimen Management", () => {
     cy.verifyNotification("Specimen definition created");
 
     cy.get("input[placeholder='Search definitions']").type(specimenData.title);
-    cy.verifyContentPresenceV2("table", [specimenData.title]);
+    cy.verifyContentPresence('[data-slot="table"]', [specimenData.title]);
     cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
 
-    cy.clickButton("Delete");
+    cy.get("button").contains("Delete").click();
 
     cy.intercept("PUT", "**/api/v1/facility/**/specimen_definition/**").as(
       "deleteSpecimen",
@@ -110,8 +197,7 @@ describe("Facility Specimen Management", () => {
     });
 
     cy.get("button").contains("Add Definition").click();
-
-    cy.clickButton("Save");
+    cy.get("button").contains("Save").click();
 
     cy.verifyErrorMessages([
       { message: "Title is required", label: "Title" },
@@ -122,92 +208,5 @@ describe("Facility Specimen Management", () => {
       },
       { message: "Required", label: "Type Collected" },
     ]);
-  });
-
-  it("Create specimen and verify status filter functionality", () => {
-    facilityCreation.selectFirstRandomFacility();
-
-    const specimenData = generateTestData().mandatoryOnly;
-
-    cy.url().then((url) => {
-      const facilityId = url.split("/facility/")[1].split("/")[0];
-      cy.visit(`/facility/${facilityId}/settings/specimen_definitions`);
-    });
-
-    cy.get("button").contains("Add Definition").click();
-    facilitySpecimen.fillSpecimenDefinitionForm(specimenData);
-
-    cy.intercept("POST", "**/api/v1/facility/**/specimen_definition").as(
-      "createSpecimen",
-    );
-    cy.get("button").contains("Save").click();
-    cy.wait("@createSpecimen").its("response.statusCode").should("eq", 200);
-    cy.verifyNotification("Specimen definition created");
-
-    // Test status filter
-    cy.get("input[placeholder='Search definitions']").type(specimenData.title);
-    cy.clickSelectTrigger("Status", specimenData.status);
-    cy.verifyContentPresenceV2("table", [specimenData.title]);
-
-    // Verify details
-    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
-    facilitySpecimen.verifySpecimenDetails(specimenData);
-  });
-
-  it("Create specimen and verify edit functionality", () => {
-    facilityCreation.selectFirstRandomFacility();
-
-    const specimenData = generateTestData().mandatoryOnly;
-
-    cy.url().then((url) => {
-      const facilityId = url.split("/facility/")[1].split("/")[0];
-      cy.visit(`/facility/${facilityId}/settings/specimen_definitions`);
-    });
-
-    cy.get("button").contains("Add Definition").click();
-    facilitySpecimen.fillSpecimenDefinitionForm(specimenData);
-
-    cy.intercept("POST", "**/api/v1/facility/**/specimen_definition").as(
-      "createSpecimen",
-    );
-    cy.get("button").contains("Save").click();
-    cy.wait("@createSpecimen").its("response.statusCode").should("eq", 200);
-    cy.verifyNotification("Specimen definition created");
-
-    // Search for the created specimen
-    cy.get("input[placeholder='Search definitions']").type(specimenData.title);
-    cy.verifyContentPresenceV2("table", [specimenData.title]);
-    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
-
-    // Edit specimen
-    cy.clickButton("Edit");
-
-    // Update with new data
-    const updatedData: Partial<SpecimenDefinitionData> = {
-      title: faker.science.chemicalElement().name,
-      derivedFromUri: faker.internet.url(),
-      status: faker.helpers.arrayElement(SPECIMEN_STATUS),
-      cap: faker.helpers.arrayElement(CAP_COLORS),
-      slug: generateUniqueSlug(),
-      description: faker.lorem.sentence(),
-      typeCollected: faker.helpers.arrayElement(SPECIMEN_TYPES),
-    };
-
-    facilitySpecimen.fillSpecimenDefinitionForm(
-      updatedData as SpecimenDefinitionData,
-    );
-
-    cy.intercept("PUT", "**/api/v1/facility/**/specimen_definition/**").as(
-      "updateSpecimen",
-    );
-    cy.get("button").contains("Save").click();
-    cy.wait("@updateSpecimen").its("response.statusCode").should("eq", 200);
-    cy.verifyNotification("Specimen Definition updated");
-
-    // Verify updated data
-    cy.get("input[placeholder='Search definitions']").type(updatedData.title);
-    cy.verifyContentPresenceV2("table", [updatedData.title]);
-    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
-    facilitySpecimen.verifySpecimenDetails(updatedData);
   });
 });

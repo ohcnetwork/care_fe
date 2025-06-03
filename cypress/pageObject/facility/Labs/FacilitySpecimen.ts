@@ -27,24 +27,32 @@ export class FacilitySpecimen {
       data.cap,
     ].filter(Boolean);
 
-    cy.verifyContentPresenceV2("card", detailsToVerify);
+    cy.verifyContentPresence('[data-slot="card"]', detailsToVerify);
     return this;
   }
 
   fillSpecimenDefinitionForm(data: SpecimenDefinitionData) {
     if (data.title) {
-      cy.typeIntoLabeledField("Title", data.title, true);
+      cy.typeIntoField('input[name="title"]', data.title, {
+        clearBeforeTyping: true,
+      });
     }
-    cy.typeIntoLabeledField("Slug", data.slug);
+    cy.typeIntoField('input[name="slug"]', data.slug, {
+      clearBeforeTyping: true,
+    });
 
     if (data.description) {
-      cy.typeIntoLabeledField("Description", data.description, true);
+      cy.typeIntoField('textarea[name="description"]', data.description, {
+        clearBeforeTyping: true,
+      });
     }
     if (data.status) {
       cy.clickAndSelectOptionV2("Status", data.status);
     }
     if (data.derivedFromUri) {
-      cy.typeIntoLabeledField("Derived From URI", data.derivedFromUri, true);
+      cy.typeIntoField('input[name="derived_from_uri"]', data.derivedFromUri, {
+        clearBeforeTyping: true,
+      });
     }
     if (data.typeCollected) {
       cy.typeAndSelectOptionV2("Type Collected", data.typeCollected);
@@ -53,7 +61,7 @@ export class FacilitySpecimen {
       cy.typeAndSelectOptionV2("Collection", data.collection);
     }
     if (data.patientPreparation) {
-      cy.clickButton("Add");
+      cy.get("button").contains("Add").click();
       cy.typeAndSelectOptionV2("Patient Preparation", data.patientPreparation);
     }
     if (data.testedPreference) {
@@ -63,11 +71,17 @@ export class FacilitySpecimen {
       cy.selectComboboxDropdown("Retention time", data.retentionTime);
     }
     if (data.requirement) {
-      cy.typeIntoLabeledField("Requirement", data.requirement, true);
+      cy.typeIntoField(
+        'textarea[name="type_tested.requirement"]',
+        data.requirement,
+        {
+          clearBeforeTyping: true,
+        },
+      );
     }
     if (data.containerDescription) {
       cy.typeIntoField(
-        '[data-cy="specimen-definition-form-container-description"]',
+        'textarea[name="type_tested.container.description"]',
         data.containerDescription,
         {
           clearBeforeTyping: true,
@@ -82,7 +96,7 @@ export class FacilitySpecimen {
     }
     if (data.minimumVolume) {
       cy.typeIntoField(
-        '[data-cy="specimen-definition-form-minimum-volume-string"]',
+        'input[name="type_tested.container.minimum_volume.string"]',
         data.minimumVolume,
         {
           clearBeforeTyping: true,
@@ -91,7 +105,7 @@ export class FacilitySpecimen {
     }
     if (data.preparation) {
       cy.typeIntoField(
-        '[data-cy="specimen-definition-form-preparation"]',
+        'textarea[name="type_tested.container.preparation"]',
         data.preparation,
         {
           clearBeforeTyping: true,
