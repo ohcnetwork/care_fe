@@ -679,7 +679,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </Button>
           )}
           {!id && (
-            <Button variant="outline" onClick={() => setShowImportDialog(true)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowImportDialog(true)}
+              disabled={isCreating || isUpdating}
+            >
               <CareIcon icon="l-import" className="mr-1 size-4" />
               {t("import_from_url")}
             </Button>
