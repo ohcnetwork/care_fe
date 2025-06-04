@@ -141,26 +141,29 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
     <div className="space-y-2">
       <div className="rounded-lg">
         <Tabs defaultValue="prescriptions">
-          <TabsList className="w-full h-full sm:w-fit flex flex-wrap">
-            <TabsTrigger
-              value="prescriptions"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("prescriptions")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="ongoing"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("ongoing_medicines")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="administration"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("medicine_administration")}
-            </TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full">
+            <TabsList className="w-fit">
+              <TabsTrigger
+                value="prescriptions"
+                className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              >
+                {t("prescriptions")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="ongoing"
+                className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              >
+                {t("ongoing_medicines")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="administration"
+                className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              >
+                {t("medicine_administration")}
+              </TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <TabsContent value="prescriptions">
             <div className="flex flex-col gap-2">
