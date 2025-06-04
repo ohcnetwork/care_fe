@@ -242,7 +242,21 @@ export default function FileUploadDialog({
           </Button>
         </div>
         {!!fileUpload.progress && (
-          <Progress value={fileUpload.progress} className="mt-4" />
+          <div className="mt-6 border rounded-md px-4 py-3 bg-secondary-100 shadow-inner space-y-2">
+            <div className="flex justify-between items-center text-sm font-medium text-gray-800">
+              <span>{t("overall_progress")}</span>
+              <span>
+                {fileUpload.progress
+                  ? `${Math.round(fileUpload.progress)}%`
+                  : "0%"}
+              </span>
+            </div>
+            <div className="text-xs text-gray-600">{t("uploading")}</div>
+            <Progress
+              value={fileUpload.progress}
+              className="h-3 bg-gray-200 [&>div]:bg-black-600 rounded-full transition-all"
+            />
+          </div>
         )}
       </DialogContent>
     </Dialog>
