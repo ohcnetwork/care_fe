@@ -64,7 +64,6 @@ function StandardLayout({
   form,
   index,
   fieldName,
-  availableFieldsAndColumns,
   isEnabled,
   addButtonText,
   selectPlaceholder,
@@ -83,18 +82,11 @@ function StandardLayout({
           <FormItem>
             <FormControl>
               <div className="flex flex-col w-full justify-between mb-4 gap-2">
-                <Select value={selectedField} onValueChange={setSelectedField}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={selectPlaceholder} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableFieldsAndColumns?.map((field) => (
-                      <SelectItem key={field} value={field}>
-                        {t(field)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  placeholder={selectPlaceholder}
+                  value={selectedField}
+                  onChange={(e) => setSelectedField(e.target.value)}
+                />
                 <Button
                   type="button"
                   variant="outline"
@@ -102,8 +94,10 @@ function StandardLayout({
                   className="w-full sm:w-auto"
                   disabled={!selectedField}
                   onClick={() => {
-                    onChange([...items, selectedField]);
-                    setSelectedField("");
+                    if (!items.includes(selectedField)) {
+                      onChange([...items, selectedField]);
+                      setSelectedField("");
+                    }
                   }}
                 >
                   <Plus className="size-2 mr-2" />
@@ -453,7 +447,7 @@ function SectionFieldsAndColumns({
           availableFieldsAndColumns={availableFieldsAndColumns}
           isEnabled={isEnabled}
           addButtonText={t("add_column")}
-          selectPlaceholder={t("select_column")}
+          selectPlaceholder={t("add_column")}
           emptyText={t("no_columns")}
         />
       ) : (
@@ -464,7 +458,7 @@ function SectionFieldsAndColumns({
           availableFieldsAndColumns={availableFieldsAndColumns}
           isEnabled={isEnabled}
           addButtonText={t("add_field")}
-          selectPlaceholder={t("select_field")}
+          selectPlaceholder={t("add_field")}
           emptyText={t("no_fields")}
         />
       )}
