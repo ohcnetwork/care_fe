@@ -172,11 +172,11 @@ export default function FacilityOrganizationView({
                 onChange={(e) => {
                   updateQuery({ search: e.target.value || undefined });
                 }}
-                className="w-full pl-8"
+                className="w-2xl max-w-full pl-8"
               />
             </div>
           </div>
-          <div className="w-auto">
+          <div className="w-full flex justify-center sm:w-auto">
             {canCreateFacilityOrganization && (
               <FacilityOrganizationFormSheet
                 facilityId={facilityId}
