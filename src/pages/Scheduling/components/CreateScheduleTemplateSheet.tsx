@@ -317,6 +317,7 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        ref={field.ref}
                       />
                       <FormMessage />
                     </FormItem>
@@ -332,6 +333,7 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        ref={field.ref}
                       />
                       <FormMessage />
                     </FormItem>
@@ -357,6 +359,7 @@ export default function CreateScheduleTemplateSheet({
                             value={field.value}
                             onChange={field.onChange}
                             format={weekdayFormat}
+                            ref={field.ref}
                           />
                         </FormControl>
                         <FormMessage />

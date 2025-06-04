@@ -247,6 +247,7 @@ export default function CreateScheduleExceptionSheet({
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
+                          ref={field.ref}
                         />
                         <FormMessage />
                       </FormItem>
@@ -262,6 +263,7 @@ export default function CreateScheduleExceptionSheet({
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
+                          ref={field.ref}
                         />
                         <FormMessage />
                       </FormItem>

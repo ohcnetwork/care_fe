@@ -252,6 +252,7 @@ const ScheduleTemplateEditor = ({
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
+                    ref={field.ref}
                   />
                   <FormMessage />
                 </FormItem>
@@ -267,6 +268,7 @@ const ScheduleTemplateEditor = ({
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
+                    ref={field.ref}
                   />
                   <FormMessage />
                 </FormItem>
@@ -937,6 +939,7 @@ const NewAvailabilityCard = ({
                   <WeekdayCheckbox
                     value={field.value}
                     onChange={field.onChange}
+                    ref={field.ref}
                   />
                 </FormControl>
                 <FormMessage />
