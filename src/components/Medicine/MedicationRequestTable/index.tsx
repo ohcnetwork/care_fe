@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
+import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -148,6 +149,12 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
               {t("prescriptions")}
             </TabsTrigger>
             <TabsTrigger
+              value="ongoing"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            >
+              {t("ongoing_medicines")}
+            </TabsTrigger>
+            <TabsTrigger
               value="administration"
               className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
             >
@@ -246,6 +253,13 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
                 </ScrollArea>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="ongoing">
+            <MedicationStatementList
+              patientId={patientId}
+              canAccess={canAccess}
+            />
           </TabsContent>
 
           <TabsContent value="administration">
