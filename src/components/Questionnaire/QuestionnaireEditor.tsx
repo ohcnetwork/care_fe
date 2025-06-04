@@ -663,6 +663,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             type="button"
             variant="outline"
             onClick={handleCancel}
+            disabled={isCreating || isUpdating}
             data-cy="cancel-questionnaire-form"
           >
             {t("cancel")}
