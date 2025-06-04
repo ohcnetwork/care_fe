@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/table";
 
 import Loading from "@/components/Common/Loading";
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import SearchInput from "@/components/Common/SearchInput";
 
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
@@ -41,7 +41,7 @@ import { GENDER_TYPES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { PartialPatientModel } from "@/types/emr/newPatient";
+import { PartialPatientModel } from "@/types/emr/patient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
@@ -100,15 +100,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       </Button>
     );
   }
-
-  const searchOptions = [
-    {
-      key: "phone_number",
-      type: "phone" as const,
-      placeholder: t("search_by_phone_number"),
-      value: phoneNumber,
-    },
-  ];
 
   const handleSearch = useCallback((key: string, value: string) => {
     if (key === "phone_number") {
@@ -171,10 +162,16 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
           <div>
             <div className="space-y-6">
-              <SearchByMultipleFields
-                initialOptionIndex={0}
-                id="patient-search"
-                options={searchOptions}
+              <SearchInput
+                data-cy="patient-search"
+                options={[
+                  {
+                    key: "phone_number",
+                    type: "phone",
+                    placeholder: t("search_by_phone_number"),
+                    value: phoneNumber,
+                  },
+                ]}
                 onSearch={handleSearch}
                 className="w-full"
                 autoFocus

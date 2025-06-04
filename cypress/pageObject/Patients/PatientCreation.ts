@@ -28,7 +28,7 @@ export class PatientCreation {
   // Selectors
   private selectors = {
     patientsButton: '[data-cy="patients-button"]',
-    searchInput: "#patient-search",
+    searchInput: '[data-cy="patient-search"]',
     patientCard: "#patient-search-results",
     createNewPatientButton: '[data-cy="create-new-patient-button"]',
     nameInput: '[data-cy="patient-name-input"]',
@@ -73,7 +73,6 @@ export class PatientCreation {
   }
 
   clickSearchPatients() {
-    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
     cy.verifyAndClickElement(
       '[data-cy="nav-search-patients"]',
       "Search Patients",
@@ -211,6 +210,11 @@ export class PatientCreation {
 
   selectPatientFromResults(patientName: string) {
     cy.verifyAndClickElement(this.selectors.patientCard, patientName);
+    return this;
+  }
+
+  expandPatientNav() {
+    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
     return this;
   }
 

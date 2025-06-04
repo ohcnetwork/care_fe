@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import dayjs from "dayjs";
 
 import { Input } from "@/components/ui/input";
 
@@ -45,7 +46,11 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
           ? format(new Date(values[0]), "yyyy-MM-dd'T'HH:mm")
           : undefined
       }
-      onChange={(e) => handleUpdate(e.target.value || "")}
+      max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+      onChange={(e) => {
+        const value = e.target.value ? dayjs(e.target.value).toISOString() : "";
+        handleUpdate(value);
+      }}
       disabled={props.disabled}
     />
   );

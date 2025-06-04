@@ -134,6 +134,14 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                 ref={webRef}
                 videoConstraints={{
                   ...videoConstraints,
+                  width: {
+                    ...videoConstraints.width,
+                    ideal: window.innerWidth,
+                  },
+                  height: {
+                    ...videoConstraints.height,
+                    ideal: window.innerHeight,
+                  },
                   facingMode: cameraFacingMode,
                 }}
               />

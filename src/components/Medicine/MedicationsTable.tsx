@@ -96,9 +96,11 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
                   {instruction?.as_needed_boolean
                     ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display})`
                     : frequency?.meaning}
-                  {instruction?.additional_instruction?.[0]?.display && (
-                    <div className="text-sm text-gray-600">
-                      {instruction.additional_instruction[0].display}
+                  {(instruction?.additional_instruction ?? []).length > 0 && (
+                    <div className="text-sm text-gray-600 space-y-1">
+                      {instruction.additional_instruction?.map(
+                        (item, index) => <div key={index}>{item.display}</div>,
+                      )}
                     </div>
                   )}
                 </TableCell>

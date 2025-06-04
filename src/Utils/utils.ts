@@ -1,11 +1,11 @@
 import careConfig from "@careConfig";
 import { differenceInMinutes, format } from "date-fns";
 import { toPng } from "html-to-image";
+import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
-import { Patient } from "@/types/emr/newPatient";
-import { PatientModel } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -34,9 +34,17 @@ export const formatTimeShort = (time: Time) => {
 
 export const relativeDate = (date: DateLike, withoutSuffix = false) => {
   const obj = dayjs(date);
-  return `${obj.fromNow(withoutSuffix)}${
-    withoutSuffix ? " ago " : ""
-  } at ${obj.format(TIME_FORMAT)}`;
+  const isToday = obj.isSame(dayjs(), "day");
+
+  const relative = obj.fromNow(withoutSuffix);
+
+  const hasTime = !!(obj.hour() || obj.minute() || obj.second());
+
+  if (isToday && !hasTime) {
+    return t("today");
+  }
+
+  return `${relative}`;
 };
 
 export const formatName = (
@@ -122,10 +130,7 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   };
 };
 
-export const formatPatientAge = (
-  obj: PatientModel | Patient,
-  abbreviated = false,
-) => {
+export const formatPatientAge = (obj: Patient, abbreviated = false) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth

@@ -184,6 +184,7 @@ export function MedicineAdminSheet({
     onOpenChange(false);
     setSelectedMedicines(new Set());
     setAdministrationRequests({});
+    setSearch("");
   };
 
   const handleAdministrationChange = useCallback(
