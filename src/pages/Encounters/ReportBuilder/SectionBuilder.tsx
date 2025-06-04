@@ -53,7 +53,6 @@ interface StandardLayoutProps {
   form: UseFormReturn<ReportTemplateFormData>;
   index: number;
   fieldName: `config.sections.${number}.options.${"fields" | "columns"}`;
-  availableFieldsAndColumns?: string[];
   isEnabled: boolean;
   addButtonText: string;
   selectPlaceholder: string;
@@ -406,7 +405,6 @@ function CustomTableAndFields({
 function SectionFieldsAndColumns({
   form,
   index,
-  availableSections,
   isEnabled,
   isTable,
 }: {
@@ -427,7 +425,6 @@ function SectionFieldsAndColumns({
   }) as "list" | "text" | undefined;
 
   const isCustomSection = section === "custom_section";
-  const availableFieldsAndColumns = availableSections?.[section];
 
   return (
     <div className="space-y-4">
@@ -444,7 +441,6 @@ function SectionFieldsAndColumns({
           form={form}
           index={index}
           fieldName={`config.sections.${index}.options.columns`}
-          availableFieldsAndColumns={availableFieldsAndColumns}
           isEnabled={isEnabled}
           addButtonText={t("add_column")}
           selectPlaceholder={t("add_column")}
@@ -455,7 +451,6 @@ function SectionFieldsAndColumns({
           form={form}
           index={index}
           fieldName={`config.sections.${index}.options.fields`}
-          availableFieldsAndColumns={availableFieldsAndColumns}
           isEnabled={isEnabled}
           addButtonText={t("add_field")}
           selectPlaceholder={t("add_field")}
