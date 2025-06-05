@@ -92,7 +92,7 @@ export function ComboboxQuantityInput({
         setOpen(false);
         setActiveIndex(-1);
         const parsedValue = parseFloat(inputValue);
-        if (!isNaN(parsedValue)) {
+        if (!isNaN(parsedValue) && inputValue.trim() !== "") {
           onChange({ value: parsedValue, unit });
         }
       }
@@ -153,7 +153,10 @@ export function ComboboxQuantityInput({
                       setOpen(false);
                       setActiveIndex(-1);
                       inputRef.current?.focus();
-                      onChange({ value: parseFloat(inputValue), unit });
+                      const parsedValue = parseFloat(inputValue);
+                      if (!isNaN(parsedValue) && inputValue.trim() !== "") {
+                        onChange({ value: parsedValue, unit });
+                      }
                     }}
                     className={cn(
                       "flex items-center gap-2",
