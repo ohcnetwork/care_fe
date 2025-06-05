@@ -756,6 +756,7 @@ export default function MedicationBillForm({ patientId }: Props) {
           queryParams: {
             limit: 100,
             product_knowledge: productKnowledgeId,
+            net_content_gt: 0,
           },
         })({ signal: new AbortController().signal });
 
