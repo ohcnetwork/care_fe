@@ -213,11 +213,7 @@ export default function UserAvailabilityTab({
           <div className="flex bg-gray-100 rounded-lg p-0 md:p-1 gap-1 max-w-min">
             <Button
               variant={view === "schedule" ? "outline" : "ghost"}
-              onClick={() =>
-                setQParams({
-                  tab: "schedule",
-                })
-              }
+              onClick={() => setQParams({ tab: "schedule" })}
               className={cn(
                 view === "schedule" && "shadow-sm",
                 "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
@@ -227,11 +223,7 @@ export default function UserAvailabilityTab({
             </Button>
             <Button
               variant={view === "exceptions" ? "outline" : "ghost"}
-              onClick={() =>
-                setQParams({
-                  tab: "exceptions",
-                })
-              }
+              onClick={() => setQParams({ tab: "exceptions" })}
               className={cn(
                 view === "exceptions" && "shadow-sm",
                 "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
