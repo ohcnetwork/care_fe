@@ -32,6 +32,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import mutate from "@/Utils/request/mutate";
 import {
@@ -47,6 +52,8 @@ interface Props {
   org?: FacilityOrganization;
 
   trigger: React.ReactNode;
+
+  tooltip?: string;
 }
 
 const ORG_TYPES = [
@@ -61,6 +68,7 @@ export default function FacilityOrganizationFormSheet({
   parentId,
   org,
   trigger,
+  tooltip,
 }: Props) {
   const { t } = useTranslation();
 
@@ -152,8 +160,17 @@ export default function FacilityOrganizationFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent>
+      {tooltip ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SheetTrigger asChild>{trigger}</SheetTrigger>
+          </TooltipTrigger>
+          <TooltipContent>{tooltip}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <SheetTrigger asChild>{trigger}</SheetTrigger>
+      )}
+      <SheetContent onCloseAutoFocus={(event) => event.preventDefault()}>
         <SheetHeader>
           <SheetTitle>
             {isEditMode

@@ -267,6 +267,7 @@ export default function FacilityOrganizationView({
                                 facilityId={facilityId}
                                 parentId={id}
                                 org={org}
+                                tooltip={t("edit")}
                                 trigger={
                                   <Button
                                     variant="ghost"
