@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Select,
   SelectContent,
@@ -95,23 +96,34 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
           <TableSkeleton count={10} />
         </div>
       ) : !data?.results?.length ? (
-        <EmptyState />
+        <EmptyState
+          icon="l-box"
+          title={t("no_inventory")}
+          description={t("no_inventory_description")}
+        />
       ) : (
-        <div className="rounded-md border overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-100">
-                <TableHead>{t("product")}</TableHead>
-                <TableHead>{t("net_content")}</TableHead>
-                <TableHead>{t("status")}</TableHead>
-                <TableHead>{t("expiration_date")}</TableHead>
-                <TableHead>{t("batch")}</TableHead>
+        <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
+          <Table className="rounded-md">
+            <TableHeader className=" bg-gray-100 text-gray-700">
+              <TableRow className="divide-x">
+                <TableHead className="text-gray-700">{t("product")}</TableHead>
+                <TableHead className="text-gray-700">
+                  {t("net_content")}
+                </TableHead>
+                <TableHead className="text-gray-700">{t("status")}</TableHead>
+                <TableHead className="text-gray-700">
+                  {t("expiration_date")}
+                </TableHead>
+                <TableHead className="text-gray-700">{t("batch")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
               {data?.results?.map((inventory) => (
-                <TableRow key={inventory.id} className="hover:bg-gray-50">
-                  <TableCell className="font-medium">
+                <TableRow
+                  key={inventory.id}
+                  className="hover:bg-gray-50 divide-x"
+                >
+                  <TableCell className="font-semibold text-gray-950">
                     <Link
                       href={`/facility/${facilityId}/settings/product_knowledge/${inventory.product.product_knowledge.id}`}
                       basePath="/"
@@ -126,12 +138,14 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                   </TableCell>
                   <TableCell
                     className={cn(
+                      "font-medium",
+                      "text-gray-950",
                       inventory.net_content < 10 && "text-yellow-600",
                     )}
                   >
                     {inventory.net_content}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium">
                     <Badge
                       variant="secondary"
                       className={cn(
@@ -146,14 +160,14 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                       {t(inventory.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium text-gray-950">
                     {inventory.product.expiration_date
                       ? new Date(
                           inventory.product.expiration_date,
                         ).toLocaleDateString()
                       : "-"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium text-gray-950">
                     {inventory.product.batch?.lot_number || "-"}
                   </TableCell>
                 </TableRow>
@@ -167,19 +181,5 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         <Pagination totalCount={data?.count || 0} />
       </div>
     </Page>
-  );
-}
-
-function EmptyState() {
-  const { t } = useTranslation();
-  return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-      <h3 className="mt-2 text-sm font-semibold text-gray-900">
-        {t("no_inventory")}
-      </h3>
-      <p className="mt-1 text-sm text-gray-500">
-        {t("no_inventory_description")}
-      </p>
-    </div>
   );
 }

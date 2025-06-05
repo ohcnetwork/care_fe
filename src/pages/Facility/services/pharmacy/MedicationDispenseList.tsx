@@ -3,8 +3,6 @@ import { ArrowRightIcon, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -46,21 +44,17 @@ interface MedicationTableProps {
 function MedicationTable({ medications }: MedicationTableProps) {
   const { t } = useTranslation();
 
-  const tableHeadClass =
-    "border-x p-3 text-gray-700 text-sm font-medium leading-5";
-  const tableCellClass = "border-x p-3 text-gray-950";
-
   return (
-    <div className="rounded-md border shadow-sm w-full bg-white overflow-hidden">
-      <Table>
-        <TableHeader className="bg-gray-100">
-          <TableRow className="border-b">
-            <TableHead className={tableHeadClass}>{t("medicine")}</TableHead>
-            <TableHead className={tableHeadClass}>{t("dosage")}</TableHead>
-            <TableHead className={tableHeadClass}>{t("frequency")}</TableHead>
-            <TableHead className={tableHeadClass}>{t("duration")}</TableHead>
-            <TableHead className={tableHeadClass}>{t("priority")}</TableHead>
-            <TableHead className={tableHeadClass}>{t("status")}</TableHead>
+    <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
+      <Table className="rounded-md">
+        <TableHeader className=" bg-gray-100 text-gray-700">
+          <TableRow className="divide-x">
+            <TableHead className="text-gray-700">{t("medicine")}</TableHead>
+            <TableHead className="text-gray-700">{t("dosage")}</TableHead>
+            <TableHead className="text-gray-700">{t("frequency")}</TableHead>
+            <TableHead className="text-gray-700">{t("duration")}</TableHead>
+            <TableHead className="text-gray-700">{t("priority")}</TableHead>
+            <TableHead className="text-gray-700">{t("status")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -73,15 +67,15 @@ function MedicationTable({ medications }: MedicationTableProps) {
             return (
               <TableRow
                 key={medication.id}
-                className="border-b hover:bg-gray-50"
+                className="hover:bg-gray-50 divide-x"
               >
-                <TableCell className={cn(tableCellClass, "font-medium")}>
+                <TableCell className="font-semibold text-gray-950">
                   {displayMedicationName(medication)}
                 </TableCell>
-                <TableCell className={tableCellClass}>
+                <TableCell className="text-gray-950 font-medium">
                   {dosage ? `${dosage.value} ${dosage.unit.display}` : "-"}
                 </TableCell>
-                <TableCell className={tableCellClass}>
+                <TableCell className="text-gray-950 font-medium">
                   {instruction?.as_needed_boolean
                     ? `${t("as_needed_prn")} ${
                         instruction?.as_needed_for?.display
@@ -90,10 +84,10 @@ function MedicationTable({ medications }: MedicationTableProps) {
                       }`
                     : frequency?.display || "-"}
                 </TableCell>
-                <TableCell className={tableCellClass}>
+                <TableCell className="text-gray-950 font-medium">
                   {duration ? `${duration.value} ${duration.unit}` : "-"}
                 </TableCell>
-                <TableCell className={tableCellClass}>
+                <TableCell>
                   <Badge
                     variant="outline"
                     className={
@@ -103,7 +97,7 @@ function MedicationTable({ medications }: MedicationTableProps) {
                     {t(medication.priority)}
                   </Badge>
                 </TableCell>
-                <TableCell className={tableCellClass}>
+                <TableCell>
                   <Badge
                     variant="outline"
                     className={

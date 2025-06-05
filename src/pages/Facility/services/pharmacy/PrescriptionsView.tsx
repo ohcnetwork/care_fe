@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -48,14 +48,15 @@ export default function PrescriptionsView({
         <Button
           variant="outline"
           className="text-gray-950 font-semibold border-gray-300 mb-4"
+          size="sm"
           onClick={() =>
             navigate(
               `/facility/${facilityId}/locations/${locationId}/medication_requests/`,
             )
           }
         >
-          <ArrowLeftIcon className="size-4" />
-          Back to Prescription Queue
+          <ArrowLeft />
+          {t("back_to_prescription_queue")}
         </Button>
       </div>
       {patientData && (
@@ -71,18 +72,18 @@ export default function PrescriptionsView({
           )
         }
       >
-        <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
+        <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
           <TabsTrigger
             value="pending"
             id="user-card-view"
-            className="border-0 border-b-2 border-transparent px-4 text-base font-semibold data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none text-gray-600 hover:text-gray-900 gap-2"
+            className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
           >
             <span>{t("billing_pending")}</span>
           </TabsTrigger>
           <TabsTrigger
             value="partial"
             id="user-card-view"
-            className="border-0 border-b-2 border-transparent px-4 text-base font-semibold data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none text-gray-600 hover:text-gray-900 gap-2"
+            className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
           >
             <span>{t("partially_billed")}</span>
           </TabsTrigger>
