@@ -291,6 +291,7 @@ function NotesInput({
       onChange={onChange}
       disabled={disabled}
       className="mt-1 lg:mt-0.5"
+      data-cy="allergy-notes"
     />
   );
 }
@@ -355,14 +356,28 @@ const AllergyItem = ({
           <TableCell className="font-medium py-1 pl-1">
             {allergy.code.display}
           </TableCell>
-          <TableCell className="py-1 px-0.5">
+          <TableCell
+            className="py-1 px-0.5"
+            data-cy={
+              allergy.verification_status !== "entered_in_error"
+                ? "allergy-criticality"
+                : undefined
+            }
+          >
             <CriticalitySelect
               criticality={allergy.criticality}
               onValueChange={(value) => onUpdate?.({ criticality: value })}
               disabled={disabled}
             />
           </TableCell>
-          <TableCell className="py-1 px-0.5">
+          <TableCell
+            className="py-1 px-0.5"
+            data-cy={
+              allergy.verification_status !== "entered_in_error"
+                ? "allergy-status"
+                : undefined
+            }
+          >
             <StatusSelect
               verificationStatus={allergy.verification_status}
               onValueChange={(value) => {
@@ -392,12 +407,24 @@ const AllergyItem = ({
                   size="icon"
                   disabled={disabled}
                   className="size-8"
+                  data-cy={
+                    allergy.verification_status !== "entered_in_error"
+                      ? "allergy-options"
+                      : undefined
+                  }
                 >
                   <DotsVerticalIcon className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowNotes((n) => !n)}>
+                <DropdownMenuItem
+                  onClick={() => setShowNotes((n) => !n)}
+                  data-cy={
+                    allergy.verification_status !== "entered_in_error"
+                      ? "add-allergy-notes"
+                      : undefined
+                  }
+                >
                   <Pencil2Icon className="size-4 mr-2" />
                   {showNotes
                     ? t("hide_notes")
@@ -450,6 +477,11 @@ const AllergyItem = ({
                   className="text-destructive focus:text-destructive"
                   onClick={onRemove}
                   disabled={allergy.verification_status === "entered_in_error"}
+                  data-cy={
+                    allergy.verification_status !== "entered_in_error"
+                      ? "remove-allergy"
+                      : undefined
+                  }
                 >
                   <MinusCircledIcon className="size-4 mr-2" />
                   {allergy.verification_status === "entered_in_error"
@@ -834,7 +866,7 @@ export function AllergyQuestion({
           </div>
         </div>
       )}
-      
+
       {isMobile ? (
         <EntitySelectionSheet
           open={!!newAllergyInSheet}
@@ -871,12 +903,14 @@ export function AllergyQuestion({
           </div>
         </EntitySelectionSheet>
       ) : (
-        <ValueSetSelect
-          system="system-allergy-code"
-          placeholder={addAllergyPlaceholder}
-          onSelect={handleAddAllergy}
-          disabled={disabled}
-        />
+        <div data-cy="add-allergy">
+          <ValueSetSelect
+            system="system-allergy-code"
+            placeholder={addAllergyPlaceholder}
+            onSelect={handleAddAllergy}
+            disabled={disabled}
+          />
+        </div>
       )}
     </div>
   );

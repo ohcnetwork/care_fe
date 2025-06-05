@@ -737,7 +737,14 @@ const DiagnosisTableRow = ({
           />
         </TableCell>
 
-        <TableCell className="py-1" data-cy="diagnosis-status">
+        <TableCell
+          className="py-1"
+          data-cy={
+            diagnosis.verification_status !== "entered_in_error"
+              ? "diagnosis-status"
+              : undefined
+          }
+        >
           <ClinicalStatusSelect
             status={diagnosis.clinical_status}
             onValueChange={(value) =>
@@ -749,7 +756,14 @@ const DiagnosisTableRow = ({
           />
         </TableCell>
 
-        <TableCell className="py-1" data-cy="diagnosis-verification">
+        <TableCell
+          className="py-1"
+          data-cy={
+            diagnosis.verification_status !== "entered_in_error"
+              ? "diagnosis-verification"
+              : undefined
+          }
+        >
           <VerificationStatusSelect
             status={diagnosis.verification_status}
             onValueChange={(value) =>
@@ -769,7 +783,11 @@ const DiagnosisTableRow = ({
                 size="icon"
                 disabled={disabled}
                 className="size-9"
-                data-cy="diagnosis-options"
+                data-cy={
+                  diagnosis.verification_status !== "entered_in_error"
+                    ? "diagnosis-options"
+                    : undefined
+                }
               >
                 <DotsVerticalIcon className="size-4" />
               </Button>
@@ -777,7 +795,11 @@ const DiagnosisTableRow = ({
             <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={() => setShowNotes(!showNotes)}
-                data-cy="add-diagnosis-notes"
+                data-cy={
+                  diagnosis.verification_status !== "entered_in_error"
+                    ? "add-diagnosis-notes"
+                    : undefined
+                }
               >
                 <Pencil2Icon className="size-4 mr-2" />
                 {showNotes
@@ -790,7 +812,11 @@ const DiagnosisTableRow = ({
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onClick={onRemove}
-                data-cy="remove-diagnosis"
+                data-cy={
+                  diagnosis.verification_status !== "entered_in_error"
+                    ? "remove-diagnosis"
+                    : undefined
+                }
               >
                 <MinusCircledIcon className="size-4 mr-2" />
                 {t("remove_diagnosis")}
@@ -804,7 +830,11 @@ const DiagnosisTableRow = ({
           <TableCell
             colSpan={5}
             className="px-4 py-2"
-            data-cy="diagnosis-notes"
+            data-cy={
+              diagnosis.verification_status !== "entered_in_error"
+                ? "diagnosis-notes"
+                : undefined
+            }
           >
             <DiagnosisNotesInput
               note={diagnosis.note}

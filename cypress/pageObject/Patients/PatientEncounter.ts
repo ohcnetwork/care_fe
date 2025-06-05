@@ -62,6 +62,7 @@ export class PatientEncounter {
 
   updateAllergy(details: AllergyDetails) {
     const { criticality, status, notes } = details;
+    cy.wait(200);
     if (criticality) {
       cy.get('[data-cy="allergy-criticality"]').first().scrollIntoView();
       cy.clickAndSelectOption('[data-cy="allergy-criticality"]', criticality, {
@@ -85,6 +86,7 @@ export class PatientEncounter {
   }
 
   deleteAllergy() {
+    cy.wait(300);
     cy.get('[data-cy="allergy-options"]')
       .last()
       .scrollIntoView()
@@ -151,6 +153,7 @@ export class PatientEncounter {
   }
   updateSymptom(details: SymptomDetails) {
     const { severity, status, notes } = details;
+    cy.wait(200);
     if (severity) {
       cy.get('[data-cy="symptom-severity"]').last().scrollIntoView();
       cy.clickAndSelectOption('[data-cy="symptom-severity"]', severity, {
@@ -176,6 +179,7 @@ export class PatientEncounter {
   }
 
   deleteSymptom() {
+    cy.wait(300);
     cy.get('[data-cy="symptom-options"]')
       .last()
       .scrollIntoView()
@@ -237,6 +241,7 @@ export class PatientEncounter {
 
   updateDiagnosis(details: DiagnosisDetails) {
     const { verification, status, notes } = details;
+    cy.wait(200);
     if (verification) {
       cy.get('[data-cy="diagnosis-verification"]').last().scrollIntoView();
       cy.clickAndSelectOption(
@@ -266,6 +271,7 @@ export class PatientEncounter {
   }
 
   deleteDiagnosis() {
+    cy.wait(300);
     cy.get('[data-cy="diagnosis-options"]')
       .last()
       .scrollIntoView()
