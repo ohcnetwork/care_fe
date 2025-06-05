@@ -77,10 +77,12 @@ function QuestionGroup({
   group,
   responses,
   parentTitle = "",
+  isSingleGroup = false,
 }: {
   group: Question;
   responses: QuestionnaireResponse["responses"];
   parentTitle?: string;
+  isSingleGroup?: boolean;
 }) {
   const hasResponses = group.questions?.some((q) => {
     if (q.type === "group") {
@@ -102,21 +104,22 @@ function QuestionGroup({
       <h3 className="text-base font-medium text-gray-900 border-b border-gray-200 pb-2 mb-4">
         {group.text}
       </h3>
-      <div className="space-y-2">
+      <div
+        className={cn(
+          isSingleGroup ? "grid grid-cols-2 gap-x-8 gap-y-1" : "space-y-1",
+        )}
+      >
         {group.questions?.map((question, index) => {
           if (question.type === "structured") return null;
 
           if (question.type === "group") {
             return (
-              <>
-                <QuestionGroup
-                  key={index}
-                  group={question}
-                  responses={responses}
-                  parentTitle={currentTitle}
-                />
-                <div className="my-4" />
-              </>
+              <QuestionGroup
+                key={index}
+                group={question}
+                responses={responses}
+                parentTitle={currentTitle}
+              />
             );
           }
 
@@ -130,19 +133,12 @@ function QuestionGroup({
           if (!value && !coding) return null;
 
           return (
-            <div key={index} className="flex justify-between items-baseline">
+            <div
+              key={index}
+              className="flex justify-between items-baseline py-1"
+            >
               <div className="text-sm text-gray-600">{question.text}</div>
-              <div
-                className={cn(
-                  "text-sm font-medium",
-                  value === "Satisfactory" && "text-green-600",
-                  value === "No Issues" && "text-green-600",
-                  value === "No Difficulty" && "text-green-600",
-                  value === "Reduced" && "text-amber-600",
-                  value === "Mild" && "text-amber-600",
-                  typeof value === "number" && value > 95 && "text-green-600",
-                )}
-              >
+              <div className="text-sm font-medium">
                 {formatValue(value, question.type)}
                 {unit && (
                   <span className="ml-1 text-gray-600">{unit.code}</span>
@@ -288,7 +284,11 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
         flushNonGroupQuestions();
         result.push(
           <React.Fragment key={`group-${index}`}>
-            <QuestionGroup group={question} responses={item.responses} />
+            <QuestionGroup
+              group={question}
+              responses={item.responses}
+              isSingleGroup={groups.length === 1 && question.type === "group"}
+            />
           </React.Fragment>,
         );
       } else {
