@@ -88,15 +88,29 @@ export function validateFields(
           index,
         });
       } else if (hasField && field.validate) {
-        const validationResult = field.validate(fieldValue);
-        if (validationResult !== true) {
-          errors.push({
-            question_id: questionId,
-            error: t(validationResult || "invalid_value"),
-            type: "validation_error",
-            field_key: field.key,
-            index,
-          });
+        try {
+          const validationResult = field.validate(fieldValue);
+          if (validationResult !== true) {
+            errors.push({
+              question_id: questionId,
+              error: t(validationResult || "invalid_value"),
+              type: "validation_error",
+              field_key: field.key,
+              index,
+            });
+          }
+        } catch (error) {
+          if (error instanceof Error) {
+            errors.push({
+              question_id: questionId,
+              error: t(error.message || "invalid_value"),
+              type: "validation_error",
+              field_key: field.key,
+              index,
+            });
+          } else {
+            throw error;
+          }
         }
       }
       return errors;
