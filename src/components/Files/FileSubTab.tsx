@@ -19,7 +19,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -370,38 +369,34 @@ export const FilesPage = ({
               e.preventDefault();
             }}
           >
-            <Label
+            <label
               htmlFor={`file_upload_${type}`}
-              className="py-1 flex flex-row items-center cursor-pointer text-primary-900  w-full"
               data-cy="choose-file-option"
+              className="flex items-center gap-1 w-full text-primary-900"
             >
               <CareIcon icon="l-file-upload-alt" className="mr-1" />
               <span>{t("choose_file")}</span>
-            </Label>
+            </label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Button
-              size="sm"
-              variant="ghost"
+            <div
               onClick={() => fileUpload.handleCameraCapture()}
-              className="flex flex-row justify-stretch items-center w-full text-primary-900"
+              className="text-primary-900"
             >
               <CareIcon icon="l-camera" />
               <span>{t("open_camera")}</span>
-            </Button>
+            </div>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => fileUpload.handleAudioCapture()}
-              className="flex flex-row justify-stretch items-center w-full text-primary-900"
+            <div
               data-cy="record-audio-button"
+              onClick={() => fileUpload.handleAudioCapture()}
+              className="text-primary-900"
             >
               <CareIcon icon="l-microphone" />
               <span>{t("record")}</span>
-            </Button>
+            </div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
