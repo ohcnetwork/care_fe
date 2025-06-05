@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useMediaStream } from "@/hooks/useMediaStream";
 
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
@@ -31,8 +32,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const { open, onOpenChange, onCapture, onResetCapture, setPreview } = props;
   const isLaptopScreen = useBreakpoints({ lg: true, default: false });
   const { requestPermission } = useMediaDevicePermission();
-  const [stream, setStream] = useState<MediaStream | null>(null);
-
   const [cameraFacingMode, setCameraFacingMode] = useState(
     isLaptopScreen ? "user" : "environment",
   );
@@ -45,39 +44,12 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     facingMode: cameraFacingMode,
   };
 
-  useEffect(() => {
-    let localStream: MediaStream | null = null;
-
-    const getCameraStream = async () => {
-      const hasPermission = await requestPermission(cameraFacingMode);
-      if (!hasPermission.hasPermission) {
-        onOpenChange(false);
-        return;
-      }
-
-      try {
-        const mediaStream = hasPermission.mediaStream;
-        setStream(mediaStream);
-        localStream = mediaStream;
-      } catch (error) {
-        console.error("Error accessing camera:", error);
-      }
-    };
-
-    if (open) {
-      getCameraStream();
-    }
-
-    return () => {
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
-      }
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-        setStream(null);
-      }
-    };
-  }, [open, cameraFacingMode]);
+  const _stream = useMediaStream({
+    open,
+    cameraFacingMode,
+    onOpenChange,
+    requestPermission,
+  });
 
   const handleSwitchCamera = useCallback(async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
