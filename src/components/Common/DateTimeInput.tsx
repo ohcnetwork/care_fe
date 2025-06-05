@@ -26,10 +26,8 @@ export function DateTimeInput({
   onDateChange,
   ...props
 }: DateTimeInputProps & React.ComponentProps<"input">) {
-  const localValue = React.useMemo(() => {
-    if (!value || typeof value !== "string") return "";
-    return toLocalDateTimeString(value);
-  }, [value]);
+  const localValue =
+    !value || typeof value !== "string" ? "" : toLocalDateTimeString(value);
 
   return (
     <Input
@@ -37,15 +35,7 @@ export function DateTimeInput({
       type="datetime-local"
       value={localValue}
       onChange={(e) => {
-        const newLocalVal = e.target.value;
-        if (onDateChange) {
-          const iso = toISOWithTimezone(newLocalVal);
-          if (iso) {
-            onDateChange(iso);
-          } else {
-            onDateChange("");
-          }
-        }
+        onDateChange?.(toISOWithTimezone(e.target.value) || "");
       }}
     />
   );
