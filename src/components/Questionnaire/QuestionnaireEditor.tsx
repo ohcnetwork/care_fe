@@ -689,7 +689,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           {!id && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" disabled={isCreating || isUpdating}>
                   <CareIcon icon="l-import" className="mr-1 size-4" />
                   {t("import")}
                 </Button>
