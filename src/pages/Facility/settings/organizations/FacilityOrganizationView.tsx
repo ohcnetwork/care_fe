@@ -157,42 +157,38 @@ export default function FacilityOrganizationView({
 
   return (
     <div className="space-y-6 mx-auto max-w-4xl md:pt-3">
-      <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
-        <div className="flex flex-col items-start md:flex-row sm:items-center gap-4 w-full lg:justify-between">
-          <div className="w-full lg:w-1/3 relative">
-            <div className="relative">
-              <CareIcon
-                icon="l-search"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
-              />
-              <Input
-                placeholder={t("search_by_department_team_name")}
-                value={qParams.search || ""}
-                data-cy="search-department-team"
-                onChange={(e) => {
-                  updateQuery({ search: e.target.value || undefined });
-                }}
-                className="w-2xl max-w-full pl-8"
-              />
-            </div>
-          </div>
-          <div className="w-full flex justify-center sm:w-auto">
-            {canCreateFacilityOrganization && (
-              <FacilityOrganizationFormSheet
-                facilityId={facilityId}
-                parentId={id}
-                trigger={
-                  <Button data-cy="add-department/team-button">
-                    <CareIcon icon="l-plus" className="mr-2 size-4" />
-                    {t("add_department_team")}
-                  </Button>
-                }
-              />
-            )}
-          </div>
+      <div className="flex flex-col flex-wrap sm:flex-row sm:items-center sm:justify-between w-full gap-4">
+        <div className="relative w-full sm:w-[18rem] max-w-full">
+          <CareIcon
+            icon="l-search"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+          />
+          <Input
+            placeholder={t("search_by_department_team_name")}
+            value={qParams.search || ""}
+            data-cy="search-department-team"
+            onChange={(e) => {
+              updateQuery({ search: e.target.value || undefined });
+            }}
+            className="w-full pl-8"
+          />
         </div>
-      </div>
 
+        {canCreateFacilityOrganization && (
+          <div className="w-full sm:w-auto flex justify-center sm:justify-start">
+            <FacilityOrganizationFormSheet
+              facilityId={facilityId}
+              parentId={id}
+              trigger={
+                <Button className="w-full" data-cy="add-department/team-button">
+                  <CareIcon icon="l-plus" className="mr-2 size-4" />
+                  {t("add_department_team")}
+                </Button>
+              }
+            />
+          </div>
+        )}
+      </div>
       {isLoading ? (
         <div className="grid grid-cols-1  gap-3">
           <CardListSkeleton count={4} />
