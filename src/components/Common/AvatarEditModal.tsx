@@ -101,10 +101,7 @@ const AvatarEditModal = ({
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [croppedPreview, setCroppedPreview] = useState<string | null>(null);
-  const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
-    useState(false);
   const [constraint, setConstraint] = useState<IVideoConstraint>(
     VideoConstraints.user,
   );
@@ -113,6 +110,8 @@ const AvatarEditModal = ({
   const [isDragging, setIsDragging] = useState(false);
   const { requestPermission } = useMediaDevicePermission();
   const [showCroppedPreview, setShowCroppedPreview] = useState(false);
+  const [showCameraPreview, setShowCameraPreview] = useState(false);
+
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
       constraint.facingMode === "user"
@@ -139,7 +138,8 @@ const AvatarEditModal = ({
       context.drawImage(video, 0, 0, width, height);
 
       const imageData = canvas.toDataURL("image/jpeg");
-      setPreviewImage(imageData);
+      setPreview(imageData);
+      setShowCameraPreview(true);
 
       canvas.toBlob(
         (blob) => {
@@ -191,10 +191,10 @@ const AvatarEditModal = ({
     setIsProcessing(false);
     setSelectedFile(undefined);
     setIsCameraOpen(false);
-    setPreviewImage(null);
     setCroppedAreaPixels(null);
     setCroppedPreview(null);
     setShowCroppedPreview(false);
+    setShowCameraPreview(false);
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     onOpenChange(false);
@@ -204,10 +204,13 @@ const AvatarEditModal = ({
     if (!isImageFile(selectedFile)) {
       return;
     }
-    const objectUrl = URL.createObjectURL(selectedFile!);
-    setPreview(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [selectedFile]);
+    // Only create object URL for file uploads, not camera captures
+    if (!showCameraPreview) {
+      const objectUrl = URL.createObjectURL(selectedFile!);
+      setPreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+  }, [selectedFile, showCameraPreview]);
 
   const onSelectFile: ChangeEventHandler<HTMLInputElement> = (e) => {
     if (!e.target.files || e.target.files.length === 0) {
@@ -223,6 +226,7 @@ const AvatarEditModal = ({
     }
     setSelectedFile(file);
     setShowCroppedPreview(false);
+    setShowCameraPreview(false);
   };
 
   const cropImage = async () => {
@@ -254,7 +258,6 @@ const AvatarEditModal = ({
       }
 
       setIsProcessing(true);
-      setIsCaptureImgBeingUploaded(true);
 
       await handleUpload(
         selectedFile,
@@ -264,13 +267,10 @@ const AvatarEditModal = ({
         },
         () => {
           setPreview(undefined);
-          setPreviewImage(null);
-          setIsCaptureImgBeingUploaded(false);
           setIsProcessing(false);
         },
       );
     } finally {
-      setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
       setPreview(undefined);
     }
@@ -282,7 +282,6 @@ const AvatarEditModal = ({
       () => {
         setIsProcessing(false);
         setPreview(undefined);
-        setPreviewImage(null);
         closeModal();
       },
       () => setIsProcessing(false),
@@ -305,6 +304,7 @@ const AvatarEditModal = ({
     }
 
     setSelectedFile(droppedFile);
+    setShowCameraPreview(false);
   };
 
   const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -355,7 +355,7 @@ const AvatarEditModal = ({
                             image={
                               preview && preview.startsWith("blob:")
                                 ? DOMPurify.sanitize(preview)
-                                : imageUrl
+                                : preview || imageUrl
                             }
                             crop={crop}
                             zoom={zoom}
@@ -374,7 +374,9 @@ const AvatarEditModal = ({
                           />
                         </div>
                         <p className="text-center font-medium text-secondary-700 mt-2">
-                          {hintMessage}
+                          {showCameraPreview
+                            ? t("adjust_crop_area_for_captured_image")
+                            : hintMessage}
                         </p>
                       </>
                     ) : (
@@ -565,86 +567,44 @@ const AvatarEditModal = ({
             ) : (
               <>
                 <div className="flex flex-1 items-center justify-center">
-                  {!previewImage ? (
-                    <>
-                      <Webcam
-                        audio={false}
-                        screenshotFormat="image/jpeg"
-                        ref={webRef}
-                        videoConstraints={{
-                          ...constraint,
-                          width: {
-                            ...constraint.width,
-                            ideal: window.innerWidth,
-                          },
-                          height: {
-                            ...constraint.height,
-                            ideal: window.innerHeight,
-                          },
-                        }}
-                        onUserMediaError={async () => {
-                          const requestValue = await requestPermission("user");
-                          if (!requestValue.hasPermission) {
-                            setIsCameraOpen(false);
-                          }
-                        }}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <img
-                        src={previewImage || "/placeholder.svg"}
-                        alt="Captured preview"
-                      />
-                    </>
-                  )}
+                  <Webcam
+                    audio={false}
+                    screenshotFormat="image/jpeg"
+                    ref={webRef}
+                    videoConstraints={{
+                      ...constraint,
+                      width: {
+                        ...constraint.width,
+                        ideal: window.innerWidth,
+                      },
+                      height: {
+                        ...constraint.height,
+                        ideal: window.innerHeight,
+                      },
+                    }}
+                    onUserMediaError={async () => {
+                      const requestValue = await requestPermission("user");
+                      if (!requestValue.hasPermission) {
+                        setIsCameraOpen(false);
+                      }
+                    }}
+                  />
                 </div>
                 <div className="flex flex-col gap-2 pt-4 sm:flex-row">
-                  {!previewImage ? (
-                    <>
-                      <Button variant="primary" onClick={handleSwitchCamera}>
-                        <CareIcon icon="l-camera-change" className="text-lg" />
-                        {`${t("switch")} ${t("camera")}`}
-                      </Button>
-                      <Button
-                        variant="primary"
-                        onClick={() => {
-                          captureImage();
-                        }}
-                      >
-                        <CareIcon icon="l-capture" className="text-lg" />
-                        {t("capture")}
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        variant="primary"
-                        onClick={() => {
-                          setPreviewImage(null);
-                        }}
-                      >
-                        {t("retake")}
-                      </Button>
-                      <Button
-                        variant="primary"
-                        disabled={isProcessing}
-                        onClick={uploadAvatar}
-                      >
-                        {isCaptureImgBeingUploaded ? (
-                          <>
-                            <CareIcon
-                              icon="l-spinner"
-                              className="animate-spin text-lg"
-                            />
-                            {`${t("submitting")}...`}
-                          </>
-                        ) : (
-                          <> {t("submit")}</>
-                        )}
-                      </Button>
-                    </>
-                  )}
+                  <Button variant="primary" onClick={handleSwitchCamera}>
+                    <CareIcon icon="l-camera-change" className="text-lg" />
+                    {`${t("switch")} ${t("camera")}`}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      captureImage();
+                      setIsCameraOpen(false);
+                    }}
+                  >
+                    <CareIcon icon="l-capture" className="text-lg" />
+                    {t("capture")}
+                  </Button>
                   <div className="sm:flex-1"></div>
                   <Button
                     type="button"
