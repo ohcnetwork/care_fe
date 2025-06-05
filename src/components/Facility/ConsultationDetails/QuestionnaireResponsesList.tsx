@@ -226,10 +226,13 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
         item.responses.some((r) => r.question_id === q.id),
     ) || [];
 
-  // Split groups into two columns
-  const midPoint = Math.ceil(groups.length / 2);
+  // Split groups into two columns only if there are enough items
+  const shouldUseTwoColumns = groups.length > 3;
+  const midPoint = shouldUseTwoColumns
+    ? Math.ceil(groups.length / 2)
+    : groups.length;
   const leftGroups = groups.slice(0, midPoint);
-  const rightGroups = groups.slice(midPoint);
+  const rightGroups = shouldUseTwoColumns ? groups.slice(midPoint) : [];
 
   // Helper function to render a question
   const renderQuestion = (
@@ -307,12 +310,19 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
 
   return (
     <div className="w-full p-3">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div
+        className={cn(
+          "grid gap-6",
+          shouldUseTwoColumns ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1",
+        )}
+      >
         {/* Left Column */}
         <div className="space-y-3">{renderColumn(leftGroups)}</div>
 
         {/* Right Column */}
-        <div className="space-y-3">{renderColumn(rightGroups)}</div>
+        {shouldUseTwoColumns && (
+          <div className="space-y-3">{renderColumn(rightGroups)}</div>
+        )}
       </div>
 
       <div className="flex items-center justify-between border-t border-gray-200 mt-8 pt-4 text-sm text-gray-500">
