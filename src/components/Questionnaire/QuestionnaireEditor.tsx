@@ -192,6 +192,8 @@ function LayoutOptionCard({
   );
 }
 
+const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "group", "display"];
+
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -1525,16 +1527,18 @@ function QuestionEditor({
                     </Label>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={repeats ?? false}
-                      onCheckedChange={(val) => updateField("repeats", val)}
-                      id={`repeats-${getQuestionPath()}`}
-                    />
-                    <Label htmlFor={`repeats-${getQuestionPath()}`}>
-                      {t("repeatable")}
-                    </Label>
-                  </div>
+                  {!HIDE_REPEATABLE_QUESTION_TYPES.includes(question.type) && (
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={repeats ?? false}
+                        onCheckedChange={(val) => updateField("repeats", val)}
+                        id={`repeats-${getQuestionPath()}`}
+                      />
+                      <Label htmlFor={`repeats-${getQuestionPath()}`}>
+                        {t("repeatable")}
+                      </Label>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2">
                     <Switch
