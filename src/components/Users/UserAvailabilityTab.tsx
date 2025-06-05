@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 import dayjs from "dayjs";
 import { ExternalLinkIcon } from "lucide-react";
 import { Link, usePathParams, useQueryParams } from "raviger";
@@ -73,22 +74,42 @@ export default function UserAvailabilityTab({
   const { hasPermission } = usePermissions();
   const { canViewSchedule } = getPermissions(hasPermission, permissions ?? []);
 
+  const from_date =
+    qParams.valid_from ??
+    format(startOfMonth(new Date()), "yyyy-MM-dd'T'HH:mm");
+  const to_date =
+    qParams.valid_to ?? format(endOfMonth(new Date()), "yyyy-MM-dd'T'HH:mm");
+
   const { facilityId } = usePathParams("/facility/:facilityId/*")!;
 
   const templatesQuery = useQuery({
-    queryKey: ["user-schedule-templates", { facilityId, userId: user.id }],
+    queryKey: [
+      "user-schedule-templates",
+      { facilityId, userId: user.id, from_date, to_date },
+    ],
     queryFn: query(scheduleApis.templates.list, {
       pathParams: { facility_id: facilityId! },
-      queryParams: { user: user.id },
+      queryParams: {
+        user: user.id,
+        valid_from: from_date,
+        valid_to: to_date,
+      },
     }),
     enabled: !!facilityId && canViewSchedule,
   });
 
   const exceptionsQuery = useQuery({
-    queryKey: ["user-schedule-exceptions", { facilityId, userId: user.id }],
+    queryKey: [
+      "user-schedule-exceptions",
+      { facilityId, userId: user.id, from_date, to_date },
+    ],
     queryFn: query(scheduleApis.exceptions.list, {
       pathParams: { facility_id: facilityId! },
-      queryParams: { user: user.id },
+      queryParams: {
+        user: user.id,
+        valid_from: from_date,
+        valid_to: to_date,
+      },
     }),
     enabled: !!facilityId && canViewSchedule,
   });
@@ -107,7 +128,12 @@ export default function UserAvailabilityTab({
       <Calendar
         className="lg:order-last"
         month={month}
-        onMonthChange={setMonth}
+        onMonthChange={(newMonth) => {
+          setMonth(newMonth);
+          const start = format(startOfMonth(newMonth), "yyyy-MM-dd'T'HH:mm");
+          const end = format(endOfMonth(newMonth), "yyyy-MM-dd'T'HH:mm");
+          setQParams({ valid_from: start, valid_to: end });
+        }}
         renderDay={(date: Date) => {
           const isToday = date.toDateString() === new Date().toDateString();
 
@@ -198,7 +224,13 @@ export default function UserAvailabilityTab({
           <div className="flex bg-gray-100 rounded-lg p-0 md:p-1 gap-1 max-w-min">
             <Button
               variant={view === "schedule" ? "outline" : "ghost"}
-              onClick={() => setQParams({ tab: "schedule" })}
+              onClick={() =>
+                setQParams({
+                  tab: "schedule",
+                  valid_from: from_date,
+                  valid_to: to_date,
+                })
+              }
               className={cn(
                 view === "schedule" && "shadow-sm",
                 "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
@@ -208,7 +240,13 @@ export default function UserAvailabilityTab({
             </Button>
             <Button
               variant={view === "exceptions" ? "outline" : "ghost"}
-              onClick={() => setQParams({ tab: "exceptions" })}
+              onClick={() =>
+                setQParams({
+                  tab: "exceptions",
+                  valid_from: from_date,
+                  valid_to: to_date,
+                })
+              }
               className={cn(
                 view === "exceptions" && "shadow-sm",
                 "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
