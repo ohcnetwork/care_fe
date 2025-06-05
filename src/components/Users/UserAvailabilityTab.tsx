@@ -74,25 +74,19 @@ export default function UserAvailabilityTab({
   const { hasPermission } = usePermissions();
   const { canViewSchedule } = getPermissions(hasPermission, permissions ?? []);
 
-  const from_date =
-    qParams.valid_from ??
-    format(startOfMonth(new Date()), "yyyy-MM-dd'T'HH:mm");
-  const to_date =
-    qParams.valid_to ?? format(endOfMonth(new Date()), "yyyy-MM-dd'T'HH:mm");
-
   const { facilityId } = usePathParams("/facility/:facilityId/*")!;
 
   const templatesQuery = useQuery({
     queryKey: [
       "user-schedule-templates",
-      { facilityId, userId: user.id, from_date, to_date },
+      { facilityId, userId: user.id, month },
     ],
     queryFn: query(scheduleApis.templates.list, {
       pathParams: { facility_id: facilityId! },
       queryParams: {
         user: user.id,
-        valid_from: from_date,
-        valid_to: to_date,
+        valid_from: format(startOfMonth(month), "yyyy-MM-dd'T'HH:mm"),
+        valid_to: format(endOfMonth(month), "yyyy-MM-dd'T'HH:mm"),
       },
     }),
     enabled: !!facilityId && canViewSchedule,
@@ -101,14 +95,14 @@ export default function UserAvailabilityTab({
   const exceptionsQuery = useQuery({
     queryKey: [
       "user-schedule-exceptions",
-      { facilityId, userId: user.id, from_date, to_date },
+      { facilityId, userId: user.id, month },
     ],
     queryFn: query(scheduleApis.exceptions.list, {
       pathParams: { facility_id: facilityId! },
       queryParams: {
         user: user.id,
-        valid_from: from_date,
-        valid_to: to_date,
+        valid_from: format(startOfMonth(month), "yyyy-MM-dd"),
+        valid_to: format(endOfMonth(month), "yyyy-MM-dd"),
       },
     }),
     enabled: !!facilityId && canViewSchedule,
@@ -128,12 +122,7 @@ export default function UserAvailabilityTab({
       <Calendar
         className="lg:order-last"
         month={month}
-        onMonthChange={(newMonth) => {
-          setMonth(newMonth);
-          const start = format(startOfMonth(newMonth), "yyyy-MM-dd'T'HH:mm");
-          const end = format(endOfMonth(newMonth), "yyyy-MM-dd'T'HH:mm");
-          setQParams({ valid_from: start, valid_to: end });
-        }}
+        onMonthChange={setMonth}
         renderDay={(date: Date) => {
           const isToday = date.toDateString() === new Date().toDateString();
 
@@ -227,8 +216,6 @@ export default function UserAvailabilityTab({
               onClick={() =>
                 setQParams({
                   tab: "schedule",
-                  valid_from: from_date,
-                  valid_to: to_date,
                 })
               }
               className={cn(
@@ -243,8 +230,6 @@ export default function UserAvailabilityTab({
               onClick={() =>
                 setQParams({
                   tab: "exceptions",
-                  valid_from: from_date,
-                  valid_to: to_date,
                 })
               }
               className={cn(
