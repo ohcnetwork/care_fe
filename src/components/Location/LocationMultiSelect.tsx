@@ -289,11 +289,11 @@ export default function LocationMultiSelect({
         </>
       )}
       <div className="relative w-full px-3 pt-1">
-        <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
+        <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 size-4" />
         <input
           type="text"
           placeholder={t("search_locations")}
-          className="w-full rounded-md border border-input bg-background pl-8 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="w-full rounded-md border border-input bg-background pl-8 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />

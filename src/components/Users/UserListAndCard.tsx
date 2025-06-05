@@ -2,6 +2,8 @@ import { Link, navigate, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
+import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
+import { formatName, isUserOnline } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
 interface UserCardProps {
@@ -36,12 +39,7 @@ export const UserStatusIndicator = ({
   const { t } = useTranslation();
 
   return (
-    <span
-      title={
-        user.last_login ? new Date(user.last_login).toLocaleString() : undefined
-      }
-      className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}
-    >
+    <span className={cn(addPadding ? "px-3 py-1" : "py-px", className)}>
       {isUserOnline(user) || isAuthUser ? (
         <Badge variant="outline" className="bg-green-100 whitespace-nowrap">
           <span className="inline-block size-2 shrink-0 rounded-full bg-green-500 mr-2" />
@@ -50,9 +48,11 @@ export const UserStatusIndicator = ({
       ) : user.last_login ? (
         <Badge variant="outline" className="bg-yellow-100 whitespace-nowrap">
           <span className="inline-block size-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
-          <span className="text-xs text-yellow-700">
-            {relativeTime(user.last_login)}
-          </span>
+
+          <RelativeDateTooltip
+            date={user.last_login}
+            className="text-xs text-yellow-700"
+          />
         </Badge>
       ) : (
         <Badge
@@ -73,10 +73,7 @@ export function UserCard(props: UserCardProps) {
   const { t } = useTranslation();
 
   return (
-    <Card
-      key={user.id}
-      className={`h-full ${user.deleted ? "opacity-60" : ""}`}
-    >
+    <Card key={user.id} className={cn("h-full", user.deleted && "opacity-60")}>
       <CardContent className="p-4 flex flex-col h-full justify-between">
         <div className="flex items-start gap-3">
           <Avatar

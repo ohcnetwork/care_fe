@@ -5,11 +5,11 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import {
   getTabs,
   patientTabs as tabs,
@@ -20,7 +20,7 @@ import { getPermissions } from "@/common/Permissions";
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatPatientAge, relativeTime } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 
 export const PatientHome = (props: {
@@ -210,11 +210,7 @@ export const PatientHome = (props: {
 
                   <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.modified_date ? (
-                      <TooltipComponent
-                        content={formatDateTime(patientData.modified_date)}
-                      >
-                        <span>{relativeTime(patientData.modified_date)}</span>
-                      </TooltipComponent>
+                      <RelativeDateTooltip date={patientData.modified_date} />
                     ) : (
                       "--:--"
                     )}
@@ -231,11 +227,7 @@ export const PatientHome = (props: {
                   </div>
                   <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.created_date ? (
-                      <TooltipComponent
-                        content={formatDateTime(patientData.created_date)}
-                      >
-                        <span>{relativeTime(patientData.created_date)}</span>
-                      </TooltipComponent>
+                      <RelativeDateTooltip date={patientData.created_date} />
                     ) : (
                       "--:--"
                     )}

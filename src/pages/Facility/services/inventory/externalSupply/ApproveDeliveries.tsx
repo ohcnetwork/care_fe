@@ -52,6 +52,8 @@ export function ApproveExternalSupplyDelivery({
     queryKey: [
       "externalSupplyDeliveries",
       "pendingApprovals",
+      facilityId,
+      locationId,
       { selectedSupplier, selectedProduct },
     ],
     queryFn: query(supplyDeliveryApi.listSupplyDelivery, {

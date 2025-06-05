@@ -148,7 +148,7 @@ export default function MedicationDispenseList({
         facility: facilityId,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        status: qParams.status,
+        status: qParams.status || "active",
         priority: qParams.priority,
         dispense_status: partial ? "partial" : undefined,
         dispense_status_isnull: !partial ? true : undefined,
@@ -185,7 +185,7 @@ export default function MedicationDispenseList({
           <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
             <div className="flex-1 sm:flex-initial sm:w-auto">
               <FilterSelect
-                value={qParams.status || ""}
+                value={qParams.status || "active"}
                 onValueChange={(value) => updateQuery({ status: value })}
                 options={[
                   ...ACTIVE_MEDICATION_STATUSES,

@@ -90,7 +90,7 @@ export default function ServiceRequestShow({
     useState<SpecimenDefinitionRead | null>(null);
 
   const { data: request, isLoading: isLoadingRequest } = useQuery({
-    queryKey: ["serviceRequest", serviceRequestId],
+    queryKey: ["serviceRequest", facilityId, serviceRequestId],
     queryFn: query(serviceRequestApi.retrieveServiceRequest, {
       pathParams: {
         facilityId: facilityId,
@@ -100,7 +100,7 @@ export default function ServiceRequestShow({
   });
 
   const { data: chargeItems, isLoading: _isLoadingChargeItems } = useQuery({
-    queryKey: ["chargeItems", serviceRequestId],
+    queryKey: ["chargeItems", facilityId, serviceRequestId],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: {
         facilityId: facilityId,
@@ -125,7 +125,7 @@ export default function ServiceRequestShow({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", serviceRequestId],
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
     },
     onError: () => {
@@ -137,7 +137,7 @@ export default function ServiceRequestShow({
     mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", serviceRequestId],
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
       setIsPrintingAllQRCodes(false);
       setIsQRCodeSheetOpen(true);
@@ -160,7 +160,7 @@ export default function ServiceRequestShow({
     onSuccess: () => {
       toast.success(t("service_request_completed"));
       queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", serviceRequestId],
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
     },
   });
@@ -426,7 +426,7 @@ export default function ServiceRequestShow({
             serviceRequestId={serviceRequestId}
             onChargeItemsAdded={() => {
               queryClient.invalidateQueries({
-                queryKey: ["chargeItems", serviceRequestId],
+                queryKey: ["chargeItems", facilityId, serviceRequestId],
               });
             }}
           />

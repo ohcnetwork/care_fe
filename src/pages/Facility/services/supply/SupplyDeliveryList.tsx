@@ -49,7 +49,7 @@ export default function SupplyDeliveryList({
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["supplyDeliveries", qParams, tab],
+    queryKey: ["supplyDeliveries", facilityId, locationId, qParams, tab],
     queryFn: query.debounced(supplyDeliveryApi.listSupplyDelivery, {
       queryParams: {
         facility: facilityId,

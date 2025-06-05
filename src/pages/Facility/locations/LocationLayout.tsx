@@ -136,13 +136,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       supplyDeliveryId={id}
     />
   ),
-  "/supply_deliveries/:id/edit": ({ id }: { id: string }) => (
-    <SupplyDeliveryForm
-      facilityId={facilityId}
-      locationId={locationId}
-      supplyDeliveryId={id}
-    />
-  ),
 
   // Inventory - External Supply
   "/external_supply/purchase_orders": () => (

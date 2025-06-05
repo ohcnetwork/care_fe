@@ -67,10 +67,7 @@ export function TaxComponentSettings() {
           <TableBody className="bg-white">
             {filteredComponents.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={3}
-                  className="text-center text-muted-foreground h-24"
-                >
+                <TableCell colSpan={3} className="text-center h-24">
                   {search
                     ? t("no_matching_tax_components")
                     : t("no_tax_components")}

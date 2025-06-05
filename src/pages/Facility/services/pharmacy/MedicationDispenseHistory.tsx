@@ -3,8 +3,6 @@ import { EyeIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -23,7 +22,10 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { getEncounterStatusColor } from "@/types/emr/encounter";
+import {
+  CATEGORY_BADGE_COLORS,
+  getEncounterStatusColor,
+} from "@/types/emr/encounter";
 import { MedicationDispenseSummary } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
@@ -40,14 +42,10 @@ export default function MedicationDispenseHistory({
     disableCache: true,
   });
 
-  const tableHeadClass =
-    "border-x p-3 text-gray-700 text-sm font-medium leading-5";
-  const tableCellClass = "border-x p-3 text-gray-950";
-
   const { data: prescriptionQueue, isLoading } = useQuery<
     PaginatedResponse<MedicationDispenseSummary>
   >({
-    queryKey: ["medicationDispenseSummary", qParams],
+    queryKey: ["medicationDispenseSummary", facilityId, qParams],
     queryFn: query.debounced(medicationDispenseApi.summary, {
       pathParams: { facilityId },
       queryParams: {
@@ -56,13 +54,44 @@ export default function MedicationDispenseHistory({
         encounter_class: qParams.category,
         limit: qParams.limit,
         offset: ((qParams.page ?? 1) - 1) * (qParams.limit ?? 14),
-        exclude_dispense_status: "complete",
+        status:
+          qParams.exclude_status === "history"
+            ? "completed,cancelled,entered_in_error,stopped,declined"
+            : "preparation,in_progress,on_hold",
       },
     }),
   });
 
+  const DISPENSE_STATUS_OPTIONS = {
+    pending: {
+      label: "pending",
+    },
+    history: {
+      label: "history",
+    },
+  } as const;
+
   return (
-    <Page title={t("medication_dispense")} className="space-y-6">
+    <Page title={t("medication_dispense")}>
+      <div className="mb-4 pt-6">
+        <Tabs
+          value={qParams.exclude_status || "pending"}
+          onValueChange={(value) => updateQuery({ exclude_status: value })}
+          className="w-full"
+        >
+          <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
+            {Object.entries(DISPENSE_STATUS_OPTIONS).map(([key, { label }]) => (
+              <TabsTrigger
+                key={key}
+                value={key}
+                className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+              >
+                {t(label)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </div>
       <div className="flex items-center gap-4 mb-6">
         <div className="flex-1">
           <Input
@@ -74,40 +103,34 @@ export default function MedicationDispenseHistory({
         </div>
       </div>
 
-      <div className="rounded-md border shadow-sm w-full bg-white overflow-hidden">
-        <Table>
-          <TableHeader className="bg-gray-100">
-            <TableRow className="border-b">
-              <TableHead className={tableHeadClass}>{t("patient")}</TableHead>
-              <TableHead className={tableHeadClass}>{t("category")}</TableHead>
-              <TableHead className={tableHeadClass}>
+      <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
+        <Table className="rounded-md">
+          <TableHeader className=" bg-gray-100 text-gray-700">
+            <TableRow className="divide-x">
+              <TableHead className="text-gray-700">
+                {t("patient_name")}
+              </TableHead>
+              <TableHead className="text-gray-700">{t("category")}</TableHead>
+              <TableHead className="text-gray-700">
                 {t("encounter_status")}
               </TableHead>
-              <TableHead className={cn(tableHeadClass, "text-right")}>
+              <TableHead className="text-gray-700">
                 {t("medications")}
               </TableHead>
-              <TableHead className={cn(tableHeadClass, "w-[100px]")}>
-                {t("actions")}
-              </TableHead>
+              <TableHead className="text-gray-700">{t("action")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="bg-white">
             {isLoading ? (
-              <TableRow className="border-b hover:bg-gray-50">
-                <TableCell
-                  colSpan={5}
-                  className={cn(tableCellClass, "text-center py-8")}
-                >
-                  {t("Loading...")}
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8">
+                  {t("loading")}
                 </TableCell>
               </TableRow>
             ) : prescriptionQueue?.results?.length === 0 ? (
-              <TableRow className="border-b hover:bg-gray-50">
-                <TableCell
-                  colSpan={5}
-                  className={cn(tableCellClass, "text-center py-8")}
-                >
-                  {t("No prescriptions found")}
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8">
+                  {t("no_prescriptions_found")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -115,27 +138,26 @@ export default function MedicationDispenseHistory({
                 (item: MedicationDispenseSummary) => (
                   <TableRow
                     key={item.encounter.id}
-                    className="border-b hover:bg-gray-50"
+                    className="hover:bg-gray-50 divide-x"
                   >
-                    <TableCell className={tableCellClass}>
-                      <div className="font-medium text-base">
-                        {item.encounter.patient.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {item.encounter.patient.id}
-                      </div>
+                    <TableCell className="font-semibold text-gray-950">
+                      {item.encounter.patient.name}
                     </TableCell>
-                    <TableCell className={tableCellClass}>
+                    <TableCell>
                       <Badge
                         variant="outline"
-                        className="bg-gray-100 text-gray-700 border-gray-200"
+                        className={
+                          CATEGORY_BADGE_COLORS[
+                            item.encounter.encounter_class
+                          ] || "bg-gray-100 text-gray-800"
+                        }
                       >
                         {t(
                           `encounter_class__${item.encounter.encounter_class}`,
                         )}
                       </Badge>
                     </TableCell>
-                    <TableCell className={tableCellClass}>
+                    <TableCell>
                       <Badge
                         variant="outline"
                         className={getEncounterStatusColor(
@@ -145,23 +167,21 @@ export default function MedicationDispenseHistory({
                         {t(`encounter_status__${item.encounter.status}`)}
                       </Badge>
                     </TableCell>
-                    <TableCell
-                      className={cn(tableCellClass, "text-right font-semibold")}
-                    >
+                    <TableCell className="font-medium text-gray-950">
                       {item.count}
                     </TableCell>
-                    <TableCell className={tableCellClass}>
+                    <TableCell>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-gray-400 shadow-sm bg-white text-gray-950 font-medium"
+                        className="w-auto font-semibold text-gray-950 border-gray-400"
                         onClick={() => {
                           navigate(
                             `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${item.encounter.patient.id}/preparation`,
                           );
                         }}
                       >
-                        <EyeIcon className="size-4" />
+                        <EyeIcon />
                         {t("view")}
                       </Button>
                     </TableCell>

@@ -46,6 +46,7 @@ interface Props {
   controlledOpen?: boolean;
   showCode?: boolean;
   title?: string;
+  asSheet?: boolean;
 }
 
 export default function ValueSetSelect({
@@ -61,6 +62,7 @@ export default function ValueSetSelect({
   controlledOpen = false,
   showCode = false,
   title,
+  asSheet = false,
 }: Props) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -127,14 +129,7 @@ export default function ValueSetSelect({
     </AlertDialog>
   );
 
-  if (
-    isMobile &&
-    !hideTrigger &&
-    (system === "system-additional-instruction" ||
-      system === "system-route" ||
-      system === "system-body-site" ||
-      system === "system-administration-method")
-  ) {
+  if (isMobile && !hideTrigger && asSheet) {
     return (
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>

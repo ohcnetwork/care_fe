@@ -12,6 +12,7 @@ x : Done
 - [-] Edit page of the supply delivery details is crashing - Khavin
 - [-] Medications added from our product cannot be administered due to missing code - Jeevan/Vignesh; Medication Administration API needs support for product knowledge
 - [-] Each modification to the pre-filled quantity in bill medication triggers a component re-render, which disrupts the editing experience. - Khavin
+- [ ] Supply Request - Add supplier[] after backend done - Rithvik
 
 ## Billing
 
@@ -57,6 +58,7 @@ x : Done
 - [ ] Spec for Ingredients, Nutrients, Drug_characteristic are incomplete in Product Knowledge
 - [ ] Find which location a product is in within a facility
 - [ ] Medication Administration API needs support for product knowledge
+- [ ] Supply Request - Add supplier[]
 
 # Archived
 

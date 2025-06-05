@@ -151,7 +151,7 @@ export default function RequirementsSelector({
           >
             <div className="flex items-center gap-2 truncate">
               {value.length === 0 ? (
-                <span className="text-muted-foreground">{placeholder}</span>
+                <span>{placeholder}</span>
               ) : (
                 <span className="flex items-center gap-2">
                   <span className="font-medium">{value.length}</span>

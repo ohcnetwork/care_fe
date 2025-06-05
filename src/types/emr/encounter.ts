@@ -1,10 +1,10 @@
 import {
   Ambulance,
   BedDouble,
-  Building2,
   Home,
   LucideIcon,
   MonitorSmartphone,
+  Siren,
   Stethoscope,
 } from "lucide-react";
 
@@ -94,10 +94,19 @@ export const ENCOUNTER_CLASSES_ICONS = {
   imp: BedDouble,
   amb: Ambulance,
   obsenc: Stethoscope,
-  emer: Building2,
+  emer: Siren,
   vr: MonitorSmartphone,
   hh: Home,
 } as const satisfies Record<EncounterClass, LucideIcon>;
+
+export const CATEGORY_BADGE_COLORS = {
+  imp: "bg-blue-100 text-blue-900", // Inpatient
+  emer: "bg-red-600 text-white", // Emergency
+  amb: "bg-green-100 text-green-900", // Outpatient/Ambulatory
+  obsenc: "bg-gray-100 text-gray-900", // Observation
+  vr: "bg-gray-100 text-gray-900", // Virtual
+  hh: "bg-teal-100 text-teal-900", // Home Health
+} as const satisfies Record<EncounterClass, string>;
 
 export type EncounterAdmitSources = (typeof ENCOUNTER_ADMIT_SOURCE)[number];
 

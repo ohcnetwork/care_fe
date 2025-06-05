@@ -300,7 +300,7 @@ export default function ServiceRequestList({
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["serviceRequests", qParams],
+    queryKey: ["serviceRequests", facilityId, locationId, qParams],
     queryFn: query.debounced(serviceRequestApi.listServiceRequest, {
       pathParams: { facilityId },
       queryParams: {

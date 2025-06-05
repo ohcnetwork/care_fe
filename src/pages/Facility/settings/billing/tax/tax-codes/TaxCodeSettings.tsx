@@ -59,10 +59,7 @@ export function TaxCodeSettings() {
           <TableBody className="bg-white">
             {filteredCodes.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={2}
-                  className="text-center text-muted-foreground h-24"
-                >
+                <TableCell colSpan={2} className="text-center h-24">
                   {search ? t("no_matching_tax_codes") : t("no_tax_codes")}
                 </TableCell>
               </TableRow>

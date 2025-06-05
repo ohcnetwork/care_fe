@@ -31,7 +31,11 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { ENCOUNTER_CLASSES_ICONS, EncounterClass } from "@/types/emr/encounter";
+import {
+  CATEGORY_BADGE_COLORS,
+  ENCOUNTER_CLASSES_ICONS,
+  EncounterClass,
+} from "@/types/emr/encounter";
 import {
   MedicationPriority,
   MedicationRequestSummary,
@@ -71,25 +75,6 @@ const BILLING_STATUS_OPTIONS = {
   partial: {
     label: "partially_billed",
   },
-} as const;
-
-// Add a mapping for encounter class labels
-const ENCOUNTER_CLASS_LABELS = {
-  imp: "encounter_class__imp", // Inpatient
-  amb: "encounter_class__amb", // Ambulatory
-  obsenc: "encounter_class__obsenc", // Observation
-  emer: "encounter_class__emer", // Emergency
-  vr: "encounter_class__vr", // Virtual
-  hh: "encounter_class__hh", // Home Health
-} as const;
-
-const CATEGORY_BADGE_COLORS = {
-  imp: "bg-blue-100 text-blue-900", // Inpatient
-  emer: "bg-red-600 text-white", // Emergency
-  amb: "bg-green-100 text-green-900", // Outpatient/Ambulatory
-  obsenc: "bg-gray-100 text-gray-900", // Observation
-  vr: "bg-gray-100 text-gray-900", // Virtual
-  hh: "bg-teal-100 text-teal-900", // Home Health
 } as const;
 
 export default function MedicationRequestList({
@@ -143,7 +128,7 @@ export default function MedicationRequestList({
   const { data: prescriptionQueue, isLoading } = useQuery<
     PaginatedResponse<MedicationRequestSummary>
   >({
-    queryKey: ["prescriptionQueue", qParams],
+    queryKey: ["prescriptionQueue", facilityId, qParams],
     queryFn: query.debounced(medicationRequestApi.summary, {
       pathParams: { facilityId },
       queryParams: {
@@ -209,7 +194,7 @@ export default function MedicationRequestList({
                         className: "size-4 text-gray-500",
                       },
                     )}
-                    {t(ENCOUNTER_CLASS_LABELS[key as EncounterClass])}
+                    {t(`encounter_class__${key as EncounterClass}`)}
                   </span>
                 </TabsTrigger>
               ))}
@@ -239,7 +224,7 @@ export default function MedicationRequestList({
                           {React.createElement(ENCOUNTER_CLASSES_ICONS[key], {
                             className: "size-4",
                           })}
-                          {t(ENCOUNTER_CLASS_LABELS[key])}
+                          {t(`encounter_class__${key}`)}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
@@ -270,7 +255,7 @@ export default function MedicationRequestList({
       <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
         <Table className="rounded-md">
           <TableHeader className=" bg-gray-100 text-gray-700">
-            <TableRow>
+            <TableRow className="divide-x">
               <TableHead className="text-gray-700">
                 {t("patient_name")}
               </TableHead>
@@ -337,7 +322,7 @@ export default function MedicationRequestList({
                         className="w-auto font-semibold text-gray-950 border-gray-400"
                         onClick={() => {
                           navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}`,
+                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}${qParams.billing_status === "partial" ? "/partial" : ""}`,
                           );
                         }}
                       >

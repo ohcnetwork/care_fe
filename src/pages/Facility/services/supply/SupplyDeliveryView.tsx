@@ -123,17 +123,6 @@ export default function SupplyDeliveryView({
               >
                 {t("back_to_list")}
               </Button>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/locations/${locationId}/supply_deliveries/${supplyDeliveryId}/edit`,
-                  )
-                }
-              >
-                <CareIcon icon="l-pen" className="mr-2 size-4" />
-                {t("edit")}
-              </Button>
             </div>
           </div>
         </div>

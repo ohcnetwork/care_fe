@@ -94,9 +94,7 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
     <Card>
       <CardHeader>
         <CardTitle>{t("layout")}</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {t("layout_description")}
-        </p>
+        <p className="text-sm">{t("layout_description")}</p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Page Size */}
