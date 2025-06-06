@@ -58,8 +58,8 @@ export const EncounterOverviewTab = ({
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
         <div className="flex-1 space-y-4" data-cy="encounter-overview">
           {canEdit && (
-            <div className="flex flex-col justify-between md:flex-row gap-2">
-              <div className="grid grid-cols-2 sm:grid-cols-3 w-full sm:w-auto gap-2 mx-auto md:mx-0">
+            <div className="flex flex-row justify-between md:flex-row gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3  sm:w-auto gap-2 justify-start">
                 {actionLinks.map((link) => {
                   return (
                     <Button
@@ -81,7 +81,7 @@ export const EncounterOverviewTab = ({
                   );
                 })}
               </div>
-              <div>
+              <div className=" md:block hidden">
                 <QuestionnaireSearch
                   size="sm"
                   onSelect={(selected) =>
