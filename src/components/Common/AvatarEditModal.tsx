@@ -355,7 +355,7 @@ const AvatarEditModal = ({
                             image={
                               preview && preview.startsWith("blob:")
                                 ? DOMPurify.sanitize(preview)
-                                : preview || imageUrl
+                                : preview
                             }
                             crop={crop}
                             zoom={zoom}
@@ -518,7 +518,7 @@ const AvatarEditModal = ({
                   >
                     {t("cancel")}
                   </Button>
-                  {imageUrl && (
+                  {imageUrl && !preview && (
                     <Button
                       variant="destructive"
                       onClick={deleteAvatar}
@@ -533,7 +533,7 @@ const AvatarEditModal = ({
                     variant="outline"
                     onClick={showCroppedPreview ? uploadAvatar : cropImage}
                     disabled={
-                      !!imageUrl ||
+                      (!!imageUrl && !preview) ||
                       isProcessing ||
                       !selectedFile ||
                       (!croppedAreaPixels && !showCroppedPreview)
