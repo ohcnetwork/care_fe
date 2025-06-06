@@ -368,6 +368,7 @@ export const FilesPage = ({
             onSelect={(e) => {
               e.preventDefault();
             }}
+            aria-label={t("choose_file")}
           >
             <label
               htmlFor={`file_upload_${type}`}
@@ -379,26 +380,22 @@ export const FilesPage = ({
             </label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <div
-              role="button"
-              onClick={() => fileUpload.handleCameraCapture()}
-              className="text-primary-900"
-            >
-              <CareIcon icon="l-camera" />
-              <span>{t("open_camera")}</span>
-            </div>
+          <DropdownMenuItem
+            onSelect={() => fileUpload.handleCameraCapture()}
+            className="text-primary-900"
+            aria-label={t("open_camera")}
+          >
+            <CareIcon icon="l-camera" />
+            <span>{t("open_camera")}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <div
-              role="button"
-              data-cy="record-audio-button"
-              onClick={() => fileUpload.handleAudioCapture()}
-              className="text-primary-900"
-            >
-              <CareIcon icon="l-microphone" />
-              <span>{t("record")}</span>
-            </div>
+          <DropdownMenuItem
+            onSelect={() => fileUpload.handleAudioCapture()}
+            className="text-primary-900"
+            data-cy="record-audio-button"
+            aria-label={t("record")}
+          >
+            <CareIcon icon="l-microphone" />
+            <span>{t("record")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
