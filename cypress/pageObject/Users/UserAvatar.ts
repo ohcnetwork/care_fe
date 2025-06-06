@@ -35,7 +35,7 @@ export class UserAvatar {
   }
 
   clickCropAvatar() {
-    cy.verifyAndClickElement('[data-cy="crop-cover-image"]', "crop");
+    cy.verifyAndClickElement('[data-cy="crop-cover-image"]', "Crop");
     return this;
   }
 
