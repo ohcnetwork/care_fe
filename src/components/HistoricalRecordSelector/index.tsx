@@ -334,18 +334,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   );
 
   return (
-    <Sheet
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (open) {
-          resetState();
-          setActiveType(structuredTypes[0]?.type || "");
-          setIsOpen(true);
-        } else {
-          setIsOpen(false);
-        }
-      }}
-    >
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button
           variant="outline"

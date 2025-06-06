@@ -124,6 +124,10 @@ function generateFacilityLinks(
           name: t("devices"),
           url: `${baseUrl}/settings/devices`,
         },
+        {
+          name: t("report_builder"),
+          url: `${baseUrl}/settings/reportbuilder/`,
+        },
       ],
     },
   ];

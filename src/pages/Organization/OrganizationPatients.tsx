@@ -8,16 +8,15 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { formatDateTime, relativeTime } from "@/Utils/utils";
 import { Patient } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -42,13 +41,13 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     {
       key: "name",
       type: "text" as const,
-      placeholder: "Search by name",
+      placeholder: t("search_by_patient_name"),
       value: qParams.name || "",
     },
     {
       key: "phone_number",
       type: "phone" as const,
-      placeholder: "Search by phone number",
+      placeholder: t("search_by_phone_number"),
       value: qParams.phone_number || "",
     },
   ];
@@ -112,13 +111,9 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
               </div>
             </div>
 
-            <SearchByMultipleFields
-              id="patient-search"
+            <SearchInput
+              data-cy="patient-search"
               options={searchOptions}
-              initialOptionIndex={Math.max(
-                searchOptions.findIndex((option) => option.value !== ""),
-                0,
-              )}
               onSearch={handleSearch}
               onFieldChange={handleFieldChange}
             />
@@ -198,13 +193,10 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                           <div className="mt-4 pt-4 border-t border-gray-200">
                             <div className="text-sm text-gray-500">
                               {t("last_modified")}{" "}
-                              <TooltipComponent
-                                content={formatDateTime(patient.modified_date)}
-                              >
-                                <span className="underline underline-offset-2">
-                                  {relativeTime(patient.modified_date)}
-                                </span>
-                              </TooltipComponent>
+                              <RelativeDateTooltip
+                                className="underline underline-offset-2"
+                                date={patient.modified_date}
+                              />
                             </div>
                           </div>
                         </div>

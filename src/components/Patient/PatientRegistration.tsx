@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { InfoIcon } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
@@ -9,6 +10,8 @@ import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import { tzAwareDateTime } from "@/lib/validators";
 
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
@@ -38,6 +41,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
@@ -103,7 +107,7 @@ export default function PatientRegistration(
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
             }, t("enter_valid_dob"))
             .optional(),
-          deceased_datetime: z.string().nullable().optional(),
+          deceased_datetime: tzAwareDateTime.optional(),
           age: z
             .number()
             .int()
@@ -491,7 +495,7 @@ export default function PatientRegistration(
                       <RadioGroup
                         {...field}
                         onValueChange={field.onChange}
-                        value={field.value}
+                        value={field.value ?? undefined}
                         className="flex gap-5 flex-wrap"
                       >
                         {GENDER_TYPES.map((g) => (
@@ -665,7 +669,7 @@ export default function PatientRegistration(
                         setIsDeceased(checked as boolean);
                         form.setValue(
                           "deceased_datetime",
-                          checked ? form.getValues("deceased_datetime") : null,
+                          checked ? form.getValues("deceased_datetime") : "",
                         );
                       }}
                       data-cy="is-deceased-checkbox"
@@ -695,18 +699,15 @@ export default function PatientRegistration(
                         <FormItem>
                           <FormLabel>{t("date_and_time_of_death")}</FormLabel>
                           <FormControl>
-                            <Input
-                              type="datetime-local"
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) => {
-                                const value = e.target.value || undefined;
-                                field.onChange(value);
-                                setIsDeceased(!!value);
-                              }}
-                              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                            <DateTimeInput
                               id="death-datetime"
                               data-cy="death-datetime-input"
+                              value={field.value ?? ""}
+                              onDateChange={(val) => {
+                                field.onChange(val);
+                                setIsDeceased(!!val);
+                              }}
+                              max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                             />
                           </FormControl>
                           <FormMessage />

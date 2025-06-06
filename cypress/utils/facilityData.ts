@@ -1,3 +1,6 @@
+/**
+ * Represents the test data structure for a healthcare facility
+ */
 interface FacilityTestData {
   name: string;
   type: string;
@@ -11,6 +14,21 @@ interface FacilityTestData {
   features: string[];
 }
 
+/**
+ * Represents a location with its coordinates and pincode
+ */
+interface Location {
+  name: string;
+  pincode: string;
+  coordinates: {
+    latitude: string;
+    longitude: string;
+  };
+}
+
+/**
+ * Available facility features that can be assigned to a facility
+ */
 const FACILITY_FEATURES = [
   "CT Scan",
   "Maternity Care",
@@ -19,28 +37,34 @@ const FACILITY_FEATURES = [
   "Operation Theater",
   "Blood Bank",
   "Emergency Services",
-];
+] as const;
 
-// Facility type prefixes
-const facilityPrefixes = [
+/**
+ * Facility type prefixes with their meanings
+ */
+const FACILITY_PREFIXES = [
   "GHC", // Government Hospital
   "PHC", // Primary Health Center
   "CHC", // Community Health Center
   "THC", // Taluk Hospital
   "DH", // District Hospital
-];
+] as const;
 
-// Special institution prefixes
-const specialPrefixes = [
+/**
+ * Special institution prefixes for religious/private hospitals
+ */
+const SPECIAL_PREFIXES = [
   "Saint Maria",
   "Holy Cross",
   "Little Flower",
   "Mar Sleeva",
   "Saint Thomas",
-];
+] as const;
 
-// Ernakulam district locations with real coordinates
-const locations = [
+/**
+ * Ernakulam district locations with real coordinates
+ */
+const LOCATIONS: Location[] = [
   {
     name: "Aluva",
     pincode: "683101",
@@ -143,32 +167,44 @@ const locations = [
   },
 ];
 
+/**
+ * Generates a unique facility name using a combination of prefixes and locations
+ * @returns {string} A unique facility name
+ */
 function generateFacilityName(): string {
   // Use crypto.getRandomValues for secure random selection
-  const randomBytes = new Uint8Array(2);
+  const randomBytes = new Uint8Array(3); // Increased size to 3 bytes
   crypto.getRandomValues(randomBytes);
 
   const useSpecialPrefix = randomBytes[0] % 5 === 0; // 20% chance
-  const locationIndex = randomBytes[1] % locations.length;
-  const location = locations[locationIndex];
+  const locationIndex = randomBytes[1] % LOCATIONS.length;
+  const location = LOCATIONS[locationIndex];
+
+  // Add timestamp and random suffix to ensure uniqueness
+  const timestamp = Date.now();
+  const uniqueSuffix = randomBytes[2].toString(36).padStart(2, "0");
 
   if (useSpecialPrefix) {
-    const specialPrefixIndex = randomBytes[0] % specialPrefixes.length;
-    const specialPrefix = specialPrefixes[specialPrefixIndex];
-    return `${specialPrefix} GHC ${location.name}`;
+    const specialPrefixIndex = randomBytes[0] % SPECIAL_PREFIXES.length;
+    const specialPrefix = SPECIAL_PREFIXES[specialPrefixIndex];
+    return `${specialPrefix} GHC ${location.name} ${timestamp}${uniqueSuffix}`;
   } else {
-    const prefixIndex = randomBytes[0] % facilityPrefixes.length;
-    const prefix = facilityPrefixes[prefixIndex];
-    return `${prefix} ${location.name}`;
+    const prefixIndex = randomBytes[0] % FACILITY_PREFIXES.length;
+    const prefix = FACILITY_PREFIXES[prefixIndex];
+    return `${prefix} ${location.name} ${timestamp}${uniqueSuffix}`;
   }
 }
 
+/**
+ * Generates complete facility test data with random features and unique name
+ * @returns {FacilityTestData} A complete facility test data object
+ */
 export function generateFacilityData(): FacilityTestData {
   const randomBytes = new Uint8Array(2);
   crypto.getRandomValues(randomBytes);
 
-  const locationIndex = randomBytes[0] % locations.length;
-  const location = locations[locationIndex];
+  const locationIndex = randomBytes[0] % LOCATIONS.length;
+  const location = LOCATIONS[locationIndex];
   const name = generateFacilityName();
 
   // Generate number of features (2-4)
