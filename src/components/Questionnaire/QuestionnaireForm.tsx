@@ -278,10 +278,18 @@ function ValidationErrorDisplay({
 }
 
 const STRUCTURED_TYPE_VALIDATORS = {
-  appointment: (response: ResponseValue | undefined, questionId: string) => {
+  appointment: (
+    response: ResponseValue | undefined,
+    questionId: string,
+    required?: boolean,
+  ) => {
     const appointmentData =
       (response?.value as CreateAppointmentQuestion[]) || [];
-    return validateAppointmentQuestion(appointmentData[0], questionId);
+    return validateAppointmentQuestion(
+      appointmentData[0],
+      questionId,
+      required ?? false,
+    );
   },
   medication_statement: (
     response: ResponseValue | undefined,
@@ -584,7 +592,12 @@ export function QuestionnaireForm({
             ];
 
           if (validator) {
-            const validationErrors = validator(response?.values?.[0], q.id);
+            let validationErrors: QuestionValidationError[] = [];
+            validationErrors = validator(
+              response?.values?.[0],
+              q.id,
+              q.required,
+            );
             errors.push(...validationErrors);
             if (validationErrors.length > 0) {
               firstErrorId = firstErrorId ? firstErrorId : q.id;
