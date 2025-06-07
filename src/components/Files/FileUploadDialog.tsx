@@ -241,7 +241,7 @@ export default function FileUploadDialog({
             {t("upload")}
           </Button>
         </div>
-        {!!fileUpload.progress && (
+        {fileUpload.uploading && (
           <div className="mt-6 border rounded-md px-4 py-3 bg-secondary-100 shadow-inner space-y-2">
             <div className="flex justify-between items-center text-sm font-medium text-gray-800">
               <span>{t("overall_progress")}</span>
