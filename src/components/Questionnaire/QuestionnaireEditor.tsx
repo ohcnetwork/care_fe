@@ -167,7 +167,7 @@ function LayoutOptionCard({
 }: LayoutOptionProps) {
   const optionId = `${questionId}-${option.id}`;
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 w-full max-w-xs">
       <RadioGroupItem
         value={option.value}
         id={optionId}
@@ -176,12 +176,12 @@ function LayoutOptionCard({
       <Label
         htmlFor={optionId}
         className={cn(
-          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          "flex flex-col items-center justify-start text-left rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
           isSelected && "border-primary",
         )}
       >
         {option.preview}
-        <span className="block w-full text-center text-sm font-medium mt-2">
+        <span className="block w-auto text-center text-sm font-small mt-2 break-normal">
           {option.label}
         </span>
       </Label>
@@ -1015,7 +1015,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>{t("questionnaire_json_url")}</Label>
+              <Label className="block mb-1">
+                {t("questionnaire_json_url")}
+              </Label>
               <Input
                 value={importUrl}
                 onChange={(e) => setImportUrl(e.target.value)}
@@ -1024,7 +1026,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </div>
             {importedData && (
               <div className="space-y-2">
-                <Label>{t("preview")}</Label>
+                <Label className="block mb-1">{t("preview")}</Label>
                 <div className="p-4 border rounded-lg">
                   <p className="font-medium">{importedData.title}</p>
                   <p className="text-sm text-gray-500">
@@ -1224,14 +1226,14 @@ function QuestionEditor({
         <div className="p-2 pt-0 space-y-4 mt-2">
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label>{t("question_text")}</Label>
+              <Label className="block mb-1">{t("question_text")}</Label>
               <Input
                 value={text}
                 onChange={(e) => updateField("text", e.target.value)}
               />
             </div>
             <div className="flex-1">
-              <Label>{t("link_id")}</Label>
+              <Label className="block mb-1">{t("link_id")}</Label>
               <Input
                 value={question.link_id}
                 onChange={(e) => updateField("link_id", e.target.value)}
@@ -1241,7 +1243,7 @@ function QuestionEditor({
           </div>
 
           <div>
-            <Label>{t("description")}</Label>
+            <Label className="block mb-1">{t("description")}</Label>
             <Textarea
               value={question.description || ""}
               onChange={(e) => updateField("description", e.target.value)}
@@ -1253,7 +1255,7 @@ function QuestionEditor({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>{t("type")}</Label>
+                <Label className="block mb-1">{t("type")}</Label>
                 <Select
                   value={type}
                   onValueChange={(val: QuestionType) => {
@@ -1289,7 +1291,7 @@ function QuestionEditor({
 
               {type === "structured" && (
                 <div>
-                  <Label>{t("structured_type")}</Label>
+                  <Label className="block mb-1">{t("structured_type")}</Label>
                   <Select
                     value={structured_type || ""}
                     onValueChange={(val: StructuredQuestionType) => {
@@ -1560,7 +1562,7 @@ function QuestionEditor({
                       >
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label>Value</Label>
+                            <Label className="block mb-1">Value</Label>
                             <Input
                               value={opt.value}
                               onChange={(e) => {
@@ -1578,7 +1580,7 @@ function QuestionEditor({
                           </div>
                           <div className="flex gap-2">
                             <div className="flex-1">
-                              <Label>Display Text</Label>
+                              <Label className="block mb-1">Display Text</Label>
                               <Input
                                 value={opt.display || ""}
                                 onChange={(e) => {

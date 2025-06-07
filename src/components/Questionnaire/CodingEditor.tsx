@@ -72,7 +72,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center w-full justify-between">
-          <Label className="text-base font-medium">Coding Details</Label>
+          <Label className="text-base font-medium mb-1">Coding Details</Label>
           <Button
             variant="ghost"
             size="sm"
@@ -88,7 +88,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
 
       <CardContent className="space-y-4">
         <div>
-          <Label>System</Label>
+          <Label className="block mb-1">System</Label>
           <Select
             value={code.system}
             onValueChange={(value) => {
@@ -115,7 +115,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
 
         <div className="grid grid-cols-[1fr_1fr_auto] gap-4 items-start">
           <div>
-            <Label>Code</Label>
+            <Label className="block mb-1">Code</Label>
             <Input
               value={code.code}
               onChange={(e) => {
@@ -129,7 +129,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
             />
           </div>
           <div>
-            <Label>Display</Label>
+            <Label className="block mb-1">Display</Label>
             <Input
               value={code.display}
               placeholder="Unverified"
