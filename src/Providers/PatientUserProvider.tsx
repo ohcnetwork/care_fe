@@ -7,7 +7,7 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { TokenData } from "@/types/auth/otp";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 export type PatientUserContextType = {
   patients?: Patient[];

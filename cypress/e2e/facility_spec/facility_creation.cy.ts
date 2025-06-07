@@ -3,80 +3,81 @@ import { generatePhoneNumber } from "@/utils/commonUtils";
 import { generateFacilityData } from "@/utils/facilityData";
 import { viewPort } from "@/utils/viewPort";
 
-const LOCATION_HIERARCHY = {
-  state: "Kerala",
-  district: "Ernakulam",
-  localBody: "Aluva",
-  ward: "4",
-};
+const FACILITY_TYPES = [
+  "Primary Health Centres",
+  "Family Health Centres",
+  "Community Health Centres",
+  "Women and Child Health Centres",
+  "Taluk Hospitals",
+  "District Hospitals",
+  "Govt Medical College Hospitals",
+  "Govt Labs",
+  "Private Labs",
+  "TeleMedicine",
+  "Private Hospital",
+  "Autonomous healthcare facility",
+  "Shifting Centre",
+  "Request Approving Center",
+  "Request Fulfilment Center",
+  "Other",
+  "Clinical Non Governmental Organization",
+  "Non Clinical Non Governmental Organization",
+  "Community Based Organization",
+];
 
 describe("Facility Management", () => {
   const facilityPage = new FacilityCreation();
-  const facilityType = "Primary Health Centre";
 
   beforeEach(() => {
     cy.viewport(viewPort.desktop2k.width, viewPort.desktop2k.height);
-    cy.loginByApi("nurse");
+    cy.loginByApi("administrator");
     cy.visit("/");
   });
 
-  it("Create a new facility using the admin role and verify validation errors", () => {
-    const testFacility = generateFacilityData();
-    const phoneNumber = generatePhoneNumber();
-
-    facilityPage.navigateToGovernance("Kerala");
+  // Test validation errors first
+  it("Verify validation errors when submitting empty facility form", () => {
+    facilityPage.navigateToGovernance("Government");
     facilityPage.navigateToFacilitiesList();
     facilityPage.clickAddFacility();
     facilityPage.submitFacilityCreationForm();
     facilityPage.verifyValidationErrors();
+  });
 
-    // Fill form
-    facilityPage.fillBasicDetails(
-      testFacility.name,
-      facilityType,
-      testFacility.description,
-    );
+  // Test facility creation for each facility type
+  FACILITY_TYPES.forEach((facilityType) => {
+    it(`Create a new ${facilityType} facility and verify creation`, () => {
+      const testFacility = generateFacilityData();
+      const phoneNumber = generatePhoneNumber();
 
-    facilityPage.selectFeatures(testFacility.features);
+      facilityPage.navigateToGovernance("Government");
+      facilityPage.navigateToFacilitiesList();
+      facilityPage.clickAddFacility();
 
-    facilityPage.fillContactDetails(
-      phoneNumber,
-      testFacility.pincode,
-      testFacility.address,
-    );
-
-    // Test incomplete location hierarchy combinations
-    // 1. Only state
-    facilityPage.submitFacilityCreationForm();
-
-    // 2. State and district only
-    facilityPage.fillLocationHierarchy({
-      district: LOCATION_HIERARCHY.district,
+      // Fill form
+      facilityPage
+        .fillBasicDetails(
+          testFacility.name,
+          facilityType,
+          testFacility.description,
+        )
+        .selectFeatures(testFacility.features)
+        .fillContactDetails(
+          phoneNumber,
+          testFacility.pincode,
+          testFacility.address,
+        )
+        .fillLocationDetails("Ernakulam")
+        .interceptFacilityCreation()
+        .submitFacilityCreationForm()
+        .verifyFacilityCreation()
+        .waitForFacilityCardsToLoad()
+        .searchFacility(testFacility.name)
+        .verifyFacilityNameInCard(testFacility.name)
+        .verifyFacilityDetails(
+          testFacility.name,
+          facilityType,
+          testFacility.address,
+        );
     });
-    facilityPage.submitFacilityCreationForm();
-    // 3. State, district and local body only
-    facilityPage.fillLocationHierarchy({
-      localBody: LOCATION_HIERARCHY.localBody,
-    });
-    facilityPage.submitFacilityCreationForm();
-
-    // Fill complete location hierarchy
-    facilityPage.fillLocationHierarchy({
-      ward: LOCATION_HIERARCHY.ward,
-    });
-    facilityPage.fillLocationDetails("Ernakulam");
-
-    // Submit and verify
-    facilityPage.makePublicFacility();
-    facilityPage.interceptFacilityCreation();
-    facilityPage.submitFacilityCreationForm();
-    facilityPage.verifyFacilityCreation();
-
-    // Wait for facility cards to load
-    facilityPage.waitForFacilityCardsToLoad();
-
-    // Search for the facility and verify in card
-    facilityPage.searchFacility(testFacility.name);
-    facilityPage.verifyFacilityNameInCard(testFacility.name);
   });
 });

@@ -4,6 +4,7 @@ import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -24,7 +25,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,7 +42,11 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
-import { MultiValueSetSelect } from "@/components/Medicine/MultiValueSetSelect";
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
+import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
+import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
+import { formatDosage } from "@/components/Medicine/utils";
 import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -50,6 +54,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import {
   DoseRange,
   INACTIVE_MEDICATION_STATUSES,
@@ -58,10 +63,13 @@ import {
   MedicationRequest,
   MedicationRequestDosageInstruction,
   MedicationRequestIntent,
+  MedicationRequestRead,
   UCUM_TIME_UNITS,
   parseMedicationStringToRequest,
 } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { MedicationStatementRead } from "@/types/emr/medicationStatement";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
 import {
@@ -197,7 +205,7 @@ export function MedicationRequestQuestion({
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
 
   const { data: patientMedications } = useQuery({
-    queryKey: ["medication_requests", patientId],
+    queryKey: ["medication_requests", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -257,6 +265,39 @@ export function MedicationRequestQuestion({
   const handleConfirmMedicationInSheet = () => {
     if (!newMedicationInSheet) return;
     addNewMedication(newMedicationInSheet);
+  };
+
+  const handleAddHistoricalMedications = (
+    selected: (MedicationRequest | MedicationStatementRead)[],
+  ) => {
+    // Filter and convert MedicationStatement to MedicationRequest if needed
+    const medicationRequests = selected.map((record) => {
+      if ("dosage_instruction" in record) {
+        const { id: _id, ...request } = record as MedicationRequest;
+        return request;
+      } else {
+        const statement = record as MedicationStatementRead;
+        return {
+          ...parseMedicationStringToRequest(statement.medication),
+          authored_on: new Date().toISOString(),
+          note: statement.note,
+        } as MedicationRequest;
+      }
+    });
+    const newMedications: MedicationRequest[] = [
+      ...medications,
+      ...medicationRequests,
+    ];
+    updateQuestionnaireResponseCB(
+      [
+        {
+          type: "medication_request",
+          value: newMedications,
+        },
+      ],
+      questionnaireResponse.question_id,
+    );
+    setExpandedMedicationIndex(medications.length);
   };
 
   const handleRemoveMedication = (index: number) => {
@@ -360,7 +401,113 @@ export function MedicationRequestQuestion({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
+        structuredTypes={[
+          {
+            type: t("past_prescriptions"),
+            displayFields: [
+              {
+                key: "medication",
+                label: t("medicine"),
+                render: (med) => med?.display,
+              },
+              {
+                key: "dosage_instruction",
+                label: t("dosage"),
+                render: (instructions) => {
+                  const dosage = formatDosage(instructions[0]) || "";
 
+                  const frequency =
+                    getFrequencyDisplay(instructions[0]?.timing)?.meaning || "";
+
+                  const duration = instructions?.[0]?.timing?.repeat
+                    ?.bounds_duration
+                    ? `${instructions[0].timing.repeat.bounds_duration.value} ${instructions[0].timing.repeat.bounds_duration.unit}`
+                    : "";
+
+                  return `${dosage}\n${frequency}\n${duration}`;
+                },
+              },
+              {
+                key: "dosage_instruction",
+                label: t("instructions"),
+                render: (instructions) =>
+                  instructions?.[0]?.additional_instruction?.[0]?.display,
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note,
+              },
+              {
+                key: "created_by",
+                label: t("prescribed_by"),
+                render: (created_by) => formatName(created_by),
+              },
+            ],
+            queryKey: ["medication_requests", patientId],
+            queryFn: async (limit: number, offset: number) => {
+              const response = await query(medicationRequestApi.list, {
+                pathParams: { patientId },
+                queryParams: {
+                  limit,
+                  offset,
+                  status:
+                    "active,on-hold,draft,unknown,ended,completed,cancelled",
+                  ordering: "-created_date",
+                },
+              })({ signal: new AbortController().signal });
+              return response;
+            },
+          },
+          {
+            type: t("medication_statements"),
+            displayFields: [
+              {
+                key: "medication",
+                label: t("medicine"),
+                render: (med) => med?.display,
+              },
+              {
+                key: "dosage_text",
+                label: t("dosage"),
+                render: (dosage) => dosage,
+              },
+              {
+                key: "status",
+                label: t("status"),
+                render: (status) => t(status),
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note || "-",
+              },
+              {
+                key: "created_by",
+                label: t("prescribed_by"),
+                render: (created_by) => formatName(created_by),
+              },
+            ],
+            queryKey: ["medication_statements", patientId],
+            queryFn: async (limit: number, offset: number) => {
+              const response = await query(medicationStatementApi.list, {
+                pathParams: { patientId },
+                queryParams: {
+                  limit,
+                  offset,
+                  status:
+                    "active,on_hold,completed,stopped,unknown,not_taken,intended",
+                  ordering: "-created_date",
+                },
+              })({ signal: new AbortController().signal });
+              return response;
+            },
+          },
+        ]}
+        buttonLabel={t("medication_history")}
+        onAddSelected={handleAddHistoricalMedications}
+      />
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto">
           <div className="min-w-fit">
@@ -373,7 +520,7 @@ export function MedicationRequestQuestion({
               )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_200px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
@@ -632,6 +779,32 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   const isReadOnly = !!medication.id;
   const { hasError } = useFieldError(questionId, errors, index);
 
+  const [currentInstructions, setCurrentInstructions] = useState<Code[]>(
+    dosageInstruction?.additional_instruction || [],
+  );
+
+  const updateInstructions = (instructions: Code[]) => {
+    setCurrentInstructions(instructions);
+    handleUpdateDosageInstruction({
+      additional_instruction:
+        instructions.length > 0 ? instructions : undefined,
+    });
+  };
+
+  const addInstruction = (instruction: Code) => {
+    if (!currentInstructions.some((item) => item.code === instruction.code)) {
+      updateInstructions([...currentInstructions, instruction]);
+    } else {
+      toast.warning(`${instruction.display} ${t("is_already_selected")}`);
+    }
+  };
+
+  const removeInstruction = (instructionCode: string) => {
+    updateInstructions(
+      currentInstructions.filter((item) => item.code !== instructionCode),
+    );
+  };
+
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
   ) => {
@@ -743,7 +916,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_200px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
+        "grid grid-cols-1 lg:grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         {
           "opacity-40 pointer-events-none": disabled,
         },
@@ -1020,54 +1193,40 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Instructions */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="instructions"
-      >
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("instructions")}
         </Label>
         {dosageInstruction?.as_needed_boolean ? (
-          <MultiValueSetSelect
-            options={[
-              {
-                system: "system-as-needed-reason",
-                value: dosageInstruction?.as_needed_for || null,
-                label: t("prn_reason"),
-                placeholder: t("select_prn_reason"),
-                onSelect: (value: Code | null) => {
-                  handleUpdateDosageInstruction({
-                    as_needed_for: value || undefined,
-                  });
-                },
-              },
-              {
-                system: "system-additional-instruction",
-                value: dosageInstruction?.additional_instruction?.[0] || null,
-                label: t("additional_instructions"),
-                placeholder: t("select_additional_instructions"),
-                onSelect: (value: Code | null) => {
-                  handleUpdateDosageInstruction({
-                    additional_instruction: value ? [value] : undefined,
-                  });
-                },
-              },
-            ]}
-            disabled={disabled || isReadOnly}
-          />
+          <div className="space-y-2">
+            <ValueSetSelect
+              system="system-as-needed-reason"
+              value={dosageInstruction?.as_needed_for || null}
+              placeholder={t("select_prn_reason")}
+              onSelect={(value) => {
+                handleUpdateDosageInstruction({
+                  as_needed_for: value || undefined,
+                });
+              }}
+              disabled={disabled || isReadOnly}
+              asSheet
+            />
+
+            <InstructionsPopover
+              currentInstructions={currentInstructions}
+              removeInstruction={removeInstruction}
+              addInstruction={addInstruction}
+              isReadOnly={isReadOnly}
+              disabled={disabled}
+            />
+          </div>
         ) : (
-          <ValueSetSelect
-            system="system-additional-instruction"
-            value={dosageInstruction?.additional_instruction?.[0]}
-            onSelect={(instruction) =>
-              handleUpdateDosageInstruction({
-                additional_instruction: instruction ? [instruction] : undefined,
-              })
-            }
-            placeholder={t("select_additional_instructions")}
-            disabled={disabled || isReadOnly}
-            data-cy="medication-instructions"
-            wrapTextForSmallScreen
+          <InstructionsPopover
+            currentInstructions={currentInstructions}
+            removeInstruction={removeInstruction}
+            addInstruction={addInstruction}
+            isReadOnly={isReadOnly}
+            disabled={disabled}
           />
         )}
       </div>
@@ -1083,6 +1242,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(route) => handleUpdateDosageInstruction({ route })}
           placeholder={t("select_route")}
           disabled={disabled || isReadOnly}
+          asSheet
         />
       </div>
       {/* Site */}
@@ -1098,6 +1258,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_site")}
           disabled={disabled || isReadOnly}
           wrapTextForSmallScreen={true}
+          asSheet
         />
       </div>
       {/* Method */}
@@ -1113,6 +1274,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_method")}
           disabled={disabled || isReadOnly}
           count={20}
+          asSheet
         />
       </div>
       {/* Intent */}
@@ -1145,16 +1307,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("authored_on")}
         </Label>
-        <DateTimePicker
-          value={
-            medication.authored_on
-              ? new Date(medication.authored_on)
-              : undefined
-          }
-          onChange={(date) => {
-            if (!date) return;
-            onUpdate?.({ authored_on: date.toISOString() });
-          }}
+        <DateTimeInput
+          value={medication.authored_on}
+          onDateChange={(val) => onUpdate?.({ authored_on: val })}
           disabled={disabled || isReadOnly}
         />
       </div>

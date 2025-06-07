@@ -13,14 +13,18 @@ status = 200
 
 [[headers]]
 for = "/*"
-[headers.values]
-cache-control = "max-age=0, no-store"
-X-Frame-Options = "DENY"
-X-Content-Type-Options = "nosniff"
-Content-Security-Policy-Report-Only = '''
-      default-src 'self';
-      style-src 'self' 'unsafe-inline';
-      img-src 'self' https://cdn.ohc.network https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
-      object-src 'self' https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
-      report-uri https://csp-logger.ohc.network/
-      '''
+  [headers.values]
+  Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+  X-XSS-Protection = "1; mode=block"
+  X-Frame-Options = "SAMEORIGIN"
+  X-Content-Type-Options = "nosniff"
+  Referrer-Policy = "strict-origin-when-cross-origin"
+  Permissions-Policy = "geolocation=(self), microphone=()"
+  Cache-Control = "max-age=0, no-store"
+  Content-Security-Policy-Report-Only = '''
+    default-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' https://cdn.ohc.network https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
+    object-src 'self' https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
+    report-uri https://csp-logger.ohc.network/
+  '''

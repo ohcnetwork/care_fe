@@ -501,6 +501,11 @@ export default function TreatmentSummary({
                     ]}
                     rows={medications?.results.map((medication) => {
                       const instruction = medication.dosage_instruction[0];
+                      const additionalInstructions =
+                        instruction?.additional_instruction
+                          ?.map((item) => item.display)
+                          .filter(Boolean)
+                          .join(", ");
                       const frequency = getFrequencyDisplay(
                         instruction?.timing,
                       );
@@ -514,11 +519,15 @@ export default function TreatmentSummary({
                         status: t(`medication_status_${medication.status}`),
                         dosage: dosage,
                         frequency: instruction?.as_needed_boolean
-                          ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
-                          : (frequency?.meaning ?? "-") +
-                            (instruction?.additional_instruction?.[0]?.display
-                              ? `, ${instruction.additional_instruction[0].display}`
-                              : ""),
+                          ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})` +
+                            (instruction?.additional_instruction?.length
+                              ? `, ${additionalInstructions}`
+                              : "")
+                          : `${frequency?.meaning ?? "-"}${
+                              instruction?.additional_instruction?.length
+                                ? `, ${additionalInstructions}`
+                                : ""
+                            }`,
                         duration: duration
                           ? `${duration.value} ${duration.unit}`
                           : "-",
@@ -531,7 +540,7 @@ export default function TreatmentSummary({
 
               {/* Medication Statements */}
               {medicationStatement?.count != 0 && (
-                <SectionLayout title={t("ongoing_medications")}>
+                <SectionLayout title={t("medication_statements")}>
                   <PrintTable
                     headers={[
                       { key: "medication" },

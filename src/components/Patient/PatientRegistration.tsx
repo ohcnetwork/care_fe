@@ -1,5 +1,7 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { InfoIcon } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
@@ -8,6 +10,8 @@ import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import { tzAwareDateTime } from "@/lib/validators";
 
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
@@ -37,6 +41,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
@@ -55,7 +60,7 @@ import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { PatientModel } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
 interface PatientRegistrationPageProps {
@@ -74,6 +79,7 @@ export default function PatientRegistration(
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
+  const defaultCountry = careConfig.defaultCountry.name;
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
@@ -101,7 +107,7 @@ export default function PatientRegistration(
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
             }, t("enter_valid_dob"))
             .optional(),
-          deceased_datetime: z.string().nullable().optional(),
+          deceased_datetime: tzAwareDateTime.optional(),
           age: z
             .number()
             .int()
@@ -137,7 +143,9 @@ export default function PatientRegistration(
         })
         .refine(
           (data) =>
-            data.nationality === "India" ? !!data.geo_organization : true,
+            data.nationality === defaultCountry
+              ? !!data.geo_organization
+              : true,
           {
             message: t("geo_organization_required"),
             path: ["geo_organization"],
@@ -172,20 +180,20 @@ export default function PatientRegistration(
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nationality: "India",
+      nationality: defaultCountry,
       phone_number: phone_number || "",
       emergency_phone_number: "",
       age_or_dob: "dob",
       same_phone_number: false,
       same_address: true,
     },
-    mode: "onChange",
+    mode: "onSubmit",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
     mutationFn: mutate(routes.addPatient),
-    onSuccess: (resp: PatientModel) => {
+    onSuccess: (resp: Patient) => {
       toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
       navigate(`/facility/${facilityId}/patients/verify`, {
@@ -321,7 +329,7 @@ export default function PatientRegistration(
         address: patientQuery.data.address || "",
         permanent_address: patientQuery.data.permanent_address || "",
         pincode: patientQuery.data.pincode || undefined,
-        nationality: patientQuery.data.nationality || "India",
+        nationality: patientQuery.data.nationality || defaultCountry,
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
@@ -487,7 +495,7 @@ export default function PatientRegistration(
                       <RadioGroup
                         {...field}
                         onValueChange={field.onChange}
-                        value={field.value}
+                        value={field.value ?? undefined}
                         className="flex gap-5 flex-wrap"
                       >
                         {GENDER_TYPES.map((g) => (
@@ -623,7 +631,10 @@ export default function PatientRegistration(
                                 {t("invalid_age")}
                               </span>
                             ) : (
-                              <span className="text-violet-600">
+                              <span
+                                className="text-violet-600"
+                                data-cy="year-of-birth"
+                              >
                                 {t("year_of_birth")}:{" "}
                                 {new Date().getFullYear() -
                                   Number(form.getValues("age"))}
@@ -658,7 +669,7 @@ export default function PatientRegistration(
                         setIsDeceased(checked as boolean);
                         form.setValue(
                           "deceased_datetime",
-                          checked ? form.getValues("deceased_datetime") : null,
+                          checked ? form.getValues("deceased_datetime") : "",
                         );
                       }}
                       data-cy="is-deceased-checkbox"
@@ -688,18 +699,15 @@ export default function PatientRegistration(
                         <FormItem>
                           <FormLabel>{t("date_and_time_of_death")}</FormLabel>
                           <FormControl>
-                            <Input
-                              type="datetime-local"
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) => {
-                                const value = e.target.value || undefined;
-                                field.onChange(value);
-                                setIsDeceased(!!value);
-                              }}
-                              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                            <DateTimeInput
                               id="death-datetime"
                               data-cy="death-datetime-input"
+                              value={field.value ?? ""}
+                              onDateChange={(val) => {
+                                field.onChange(val);
+                                setIsDeceased(!!val);
+                              }}
+                              max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                             />
                           </FormControl>
                           <FormMessage />
@@ -835,7 +843,7 @@ export default function PatientRegistration(
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {form.watch("nationality") === "India" && (
+                {form.watch("nationality") === defaultCountry && (
                   <FormField
                     control={form.control}
                     name="geo_organization"
@@ -850,7 +858,7 @@ export default function PatientRegistration(
                             onChange={(value) =>
                               form.setValue("geo_organization", value, {
                                 shouldDirty: true,
-                                shouldValidate: true,
+                                shouldValidate: form.formState.isSubmitted,
                               })
                             }
                           />
