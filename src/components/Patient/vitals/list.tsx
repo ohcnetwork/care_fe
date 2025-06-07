@@ -20,7 +20,7 @@ interface VitalsListProps {
 interface GroupedObservations {
   [key: string]: Observation[];
 }
-
+const LIMIT = 30;
 function extractVitals(observations: Observation[]) {
   if (!observations || observations.length === 0) return [];
   // Group observations by effective_datetime
@@ -83,7 +83,7 @@ export const VitalsList = ({
     queryKey: ["vitals", patientId, encounterId],
     queryFn: query(routes.listObservations, {
       pathParams: { patientId },
-      queryParams: encounterId ? { encounter: encounterId } : undefined,
+      queryParams: { encounter: encounterId, limit: LIMIT },
     }),
     select: (data: PaginatedResponse<Observation>) =>
       extractVitals(data.results),
