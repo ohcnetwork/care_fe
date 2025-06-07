@@ -88,8 +88,8 @@ export default function UserForm({
               t("username_not_valid"),
             ),
       password_setup_method: z.enum(["immediate", "email"]).optional(),
-      password: z.string().optional(),
-      c_password: z.string().optional(),
+      password: z.string().min(8, t("field_required")),
+      c_password: z.string().min(1, t("field_required")),
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
       email: isEditMode
@@ -643,7 +643,6 @@ export default function UserForm({
                           ]}
                         />
                       </div>
-
                       <div className={cn(isPasswordFieldFocused && "hidden")}>
                         <FormMessage />
                       </div>
