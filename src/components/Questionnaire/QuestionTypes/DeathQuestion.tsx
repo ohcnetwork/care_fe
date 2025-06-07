@@ -1,7 +1,6 @@
 import { format } from "date-fns";
-import dayjs from "dayjs";
 
-import { Input } from "@/components/ui/input";
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
 
 import {
   QuestionnaireResponse,
@@ -39,18 +38,10 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
   };
 
   return (
-    <Input
-      type="datetime-local"
-      value={
-        values[0]
-          ? format(new Date(values[0]), "yyyy-MM-dd'T'HH:mm")
-          : undefined
-      }
+    <DateTimeInput
+      value={values[0]}
+      onDateChange={(val) => handleUpdate(val)}
       max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-      onChange={(e) => {
-        const value = e.target.value ? dayjs(e.target.value).toISOString() : "";
-        handleUpdate(value);
-      }}
       disabled={props.disabled}
     />
   );
