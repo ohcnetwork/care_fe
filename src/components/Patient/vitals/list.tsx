@@ -22,6 +22,8 @@ interface GroupedObservations {
 }
 
 function extractVitals(observations: Observation[]) {
+  if (!observations || observations.length === 0) return [];
+  // Group observations by effective_datetime
   const groupedObservations = observations.reduce(
     (groups: GroupedObservations, observation) => {
       const dateKey = new Date(observation.effective_datetime).toISOString();
@@ -33,30 +35,44 @@ function extractVitals(observations: Observation[]) {
     },
     {},
   );
+  const getVitalField = (observations: Observation[], displayName: string) => ({
+    value: observations.find(
+      (fields) => fields.main_code.display === displayName,
+    )?.value.value,
+    unit: observations.find(
+      (fields) => fields.main_code.display === displayName,
+    )?.value.unit?.code,
+  });
+  // Sort the grouped observations by date in descending order
+  // so that the most recent observations come first
   const orderedGroupedObservations = Object.keys(groupedObservations)
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
     .map((date) => groupedObservations[date]);
-
+  // Map the ordered observations to extract vital fields
+  // and return an array of vital objects
   const vitals = orderedGroupedObservations.map((ob) => ({
-    bodyTemperature: ob.find(
-      (fields) => fields.main_code.display === "Body temperature",
-    )?.value.value,
-    heartRate: ob.find((fields) => fields.main_code.display === "Heart rate")
-      ?.value.value,
-    diastolicBloodPressure: ob.find(
-      (fields) => fields.main_code.display === "Diastolic blood pressure",
-    )?.value.value,
-    systolicBloodPressure: ob.find(
-      (fields) => fields.main_code.display === "Systolic blood pressure",
-    )?.value.value,
-    oxygenSaturation: ob.find(
-      (fields) => fields.main_code.display === "Oxygen saturation in Blood",
-    )?.value.value,
-    respiratoryRate: ob.find(
-      (fields) => fields.main_code.display === "Respiratory rate",
-    )?.value.value,
+    bodyTemperature: getVitalField(ob, "Body temperature"),
+    heartRate: getVitalField(ob, "Heart rate"),
+    diastolicBloodPressure: getVitalField(ob, "Diastolic blood pressure"),
+    systolicBloodPressure: getVitalField(ob, "Systolic blood pressure"),
+    oxygenSaturation: getVitalField(
+      ob,
+      "Oxygen saturation in arterial blood by pulse oximetry",
+    ),
+    respiratoryRate: getVitalField(ob, "Respiratory rate"),
   }));
-  return vitals;
+  // Filter out vitals that have no values for all fields
+  if (vitals.length === 0) return [];
+  const filteredVitals = vitals.filter(
+    (vital) =>
+      vital.bodyTemperature.value ||
+      vital.heartRate.value ||
+      vital.diastolicBloodPressure.value ||
+      vital.systolicBloodPressure.value ||
+      vital.oxygenSaturation.value ||
+      vital.respiratoryRate.value,
+  );
+  return filteredVitals;
 }
 export const VitalsList = ({
   patientId,
