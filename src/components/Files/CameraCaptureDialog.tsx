@@ -16,8 +16,6 @@ import {
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useMediaStream } from "@/hooks/useMediaStream";
 
-import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
-
 export interface CameraCaptureDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -31,7 +29,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
 
   const { open, onOpenChange, onCapture, onResetCapture, setPreview } = props;
   const isLaptopScreen = useBreakpoints({ lg: true, default: false });
-  const { requestPermission } = useMediaDevicePermission();
   const [cameraFacingMode, setCameraFacingMode] = useState(
     isLaptopScreen ? "user" : "environment",
   );
@@ -44,11 +41,10 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     facingMode: cameraFacingMode,
   };
 
-  const _stream = useMediaStream({
+  useMediaStream({
     open,
-    cameraFacingMode,
-    onOpenChange,
-    requestPermission,
+    onOpenChange: onOpenChange,
+    facingMode: cameraFacingMode,
   });
 
   const handleSwitchCamera = useCallback(async () => {

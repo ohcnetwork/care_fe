@@ -1,58 +1,70 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-type UseMediaStreamProps = {
+import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
+
+interface useMediaStreamProps {
   open: boolean;
-  cameraFacingMode: string;
-  onOpenChange: (isOpen: boolean) => void;
-  requestPermission: (
-    facingMode: string,
-  ) => Promise<{ hasPermission: boolean; mediaStream?: MediaStream | null }>;
-};
-
+  onOpenChange: (open: boolean) => void;
+  facingMode: string;
+}
 export const useMediaStream = ({
   open,
-  cameraFacingMode,
+  facingMode,
   onOpenChange,
-  requestPermission,
-}: UseMediaStreamProps) => {
-  const [stream, setStream] = useState<MediaStream | null>(null);
+}: useMediaStreamProps) => {
+  const [isStreaming, setIsStreaming] = useState(false);
+  const streamRef = useRef<MediaStream | null>(null);
+  const { requestPermission } = useMediaDevicePermission();
+
+  const startStream = useCallback(async () => {
+    const hasPermission = await requestPermission(facingMode);
+    if (!hasPermission.hasPermission) {
+      onOpenChange(false);
+      return;
+    }
+    try {
+      const stream = hasPermission.mediaStream;
+      streamRef.current = stream;
+      setIsStreaming(true);
+    } catch (err) {
+      console.error("Error starting stream:", err);
+      setIsStreaming(false);
+    }
+  }, [facingMode]);
+
+  const stopStream = useCallback(() => {
+    try {
+      if (streamRef.current) {
+        const tracks = streamRef.current.getTracks();
+        tracks.forEach((track) => {
+          track.stop();
+          track.enabled = false;
+        });
+        streamRef.current = null;
+        setIsStreaming(false);
+      }
+    } catch (err) {
+      console.error("Error stopping stream:", err);
+    }
+  }, []);
 
   useEffect(() => {
-    let localStream: MediaStream | null = null;
-    const getCameraStream = async () => {
-      const hasPermission = await requestPermission(cameraFacingMode);
-      if (!hasPermission.hasPermission) {
-        onOpenChange(false);
-        return;
-      }
-
-      try {
-        const mediaStream = hasPermission.mediaStream!;
-        localStream = mediaStream;
-        setStream(mediaStream);
-      } catch (error) {
-        console.error("Error accessing camera:", error);
-      }
-    };
-
+    let timer: NodeJS.Timeout;
     if (open) {
-      getCameraStream();
+      timer = setTimeout(() => {
+        startStream();
+      }, 100);
     }
+
     return () => {
-      console.log("stopping");
-      if (open && localStream) {
-        console.log("inside local stopping");
-        localStream.getTracks().forEach((track) => track.stop());
-      }
-      console.log(stream);
-      if (open && stream) {
-        console.log("inside stopping");
-        stream.getTracks().forEach((track) => {
-          track.stop();
-        });
-        stream.getTracks().forEach((track) => track.stop());
-        setStream(null);
-      }
+      clearTimeout(timer);
+      stopStream();
     };
-  }, [open, cameraFacingMode]);
+  }, [open, startStream, stopStream]);
+
+  return {
+    isStreaming,
+    startStream,
+    stopStream,
+  };
 };
