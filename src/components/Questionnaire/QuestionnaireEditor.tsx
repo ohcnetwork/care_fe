@@ -1918,6 +1918,14 @@ function QuestionEditor({
                     setExpandedSubQuestions(
                       (prev) => new Set([...prev, newQuestion.id]),
                     );
+                    setTimeout(() => {
+                      const element = document.getElementById(
+                        `question-${newQuestion.id}`,
+                      );
+                      if (element) {
+                        element.scrollIntoView();
+                      }
+                    }, 100);
                   }}
                 >
                   <CareIcon icon="l-plus" className="size-4" />
