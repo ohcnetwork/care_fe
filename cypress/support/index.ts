@@ -71,6 +71,10 @@ declare global {
         labelText: string,
         value: string,
       ): Chainable<Element>;
+      clearAndTypeIntoField(
+        selector: string,
+        value: string,
+      ): Chainable<JQuery<HTMLElement>>;
     }
   }
 }

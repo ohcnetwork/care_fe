@@ -269,6 +269,7 @@ Cypress.Commands.add(
       .parent('[data-slot="form-item"]')
       .find("[data-slot='popover-trigger']")
       .click()
+      .scrollIntoView()
       .then(() => {
         // Type in the command input
         cy.get("[cmdk-input]")
@@ -283,5 +284,17 @@ Cypress.Commands.add(
               .click();
           });
       });
+  },
+);
+
+Cypress.Commands.add(
+  "clearAndTypeIntoField",
+  (selector: string, value: string) => {
+    cy.get(selector)
+      .should("be.visible")
+      .scrollIntoView()
+      .clear()
+      .click()
+      .type(value);
   },
 );
