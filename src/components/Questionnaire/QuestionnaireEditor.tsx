@@ -213,6 +213,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [structuredTypeErrors, setStructuredTypeErrors] = useState<
     Record<string, string | undefined>
   >({});
+  const [enableWhenDependencies, setEnableWhenDependencies] = useState<
+    Map<string, Set<{ question: Question; path: string[] }>>
+  >(new Map());
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -428,6 +431,51 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }
   }, [initialQuestionnaire]);
 
+  useEffect(() => {
+    if (!questionnaire) return;
+    const newEnableWhenDependencies = new Map<
+      string,
+      Set<{ question: Question; path: string[] }>
+    >();
+    const processQuestions = (
+      questions: Question[],
+      currentPath: string[] = [],
+    ) => {
+      questions.forEach((question) => {
+        question.enable_when?.forEach(({ question: dependentQuestionId }) => {
+          const deps =
+            newEnableWhenDependencies.get(dependentQuestionId) || new Set();
+          deps.add({
+            question: question,
+            path: [...currentPath, question.link_id],
+          });
+          newEnableWhenDependencies.set(dependentQuestionId, deps);
+        });
+        if (question.questions?.length) {
+          processQuestions(question.questions, [
+            ...currentPath,
+            question.link_id,
+          ]);
+        }
+      });
+    };
+
+    processQuestions(questionnaire.questions);
+    setEnableWhenDependencies(newEnableWhenDependencies);
+  }, [questionnaire]);
+
+  const handleEnableWhenDependentClick = (path: string[], targetId: string) => {
+    // Expand all parents in sequence
+    path.forEach((parentId) => {
+      toggleQuestionExpanded(parentId);
+    });
+    // Scroll to the target
+    setTimeout(() => {
+      const element = document.getElementById(`question-${targetId}`);
+      if (element) element.scrollIntoView();
+    }, 100);
+  };
+
   if (id && isLoading) return <Loading />;
 
   if (error) {
@@ -603,13 +651,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     toast.success(t("questionnaire_imported_successfully"));
   };
 
-  const toggleQuestionExpanded = (questionId: string) => {
+  const toggleQuestionExpanded = (questionLinkId: string) => {
     setExpandedQuestions((prev) => {
       const next = new Set(prev);
-      if (next.has(questionId)) {
-        next.delete(questionId);
+      if (next.has(questionLinkId)) {
+        next.delete(questionLinkId);
       } else {
-        next.add(questionId);
+        next.add(questionLinkId);
       }
       return next;
     });
@@ -723,19 +771,19 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         question.questions &&
                         question.questions.length > 0;
                       return (
-                        <div key={question.id} className="space-y-1">
+                        <div key={question.link_id} className="space-y-1">
                           <button
                             onClick={() => {
                               const element = document.getElementById(
-                                `question-${question.id}`,
+                                `question-${question.link_id}`,
                               );
                               if (element) {
                                 element.scrollIntoView();
-                                toggleQuestionExpanded(question.id);
+                                toggleQuestionExpanded(question.link_id);
                               }
                             }}
                             className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                              expandedQuestions.has(question.id)
+                              expandedQuestions.has(question.link_id)
                                 ? "bg-accent"
                                 : ""
                             }`}
@@ -754,12 +802,16 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   <button
                                     key={subQuestion.id}
                                     onClick={() => {
-                                      if (!expandedQuestions.has(question.id)) {
-                                        toggleQuestionExpanded(question.id);
+                                      if (
+                                        !expandedQuestions.has(question.link_id)
+                                      ) {
+                                        toggleQuestionExpanded(
+                                          question.link_id,
+                                        );
                                         setTimeout(() => {
                                           const element =
                                             document.getElementById(
-                                              `question-${subQuestion.id}`,
+                                              `question-${subQuestion.link_id}`,
                                             );
                                           if (element) {
                                             element.scrollIntoView();
@@ -767,7 +819,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                         }, 100);
                                       } else {
                                         const element = document.getElementById(
-                                          `question-${subQuestion.id}`,
+                                          `question-${subQuestion.link_id}`,
                                         );
                                         if (element) {
                                           element.scrollIntoView();
@@ -934,11 +986,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             newQuestion,
                           ]);
                           setExpandedQuestions(
-                            (prev) => new Set([...prev, newQuestion.id]),
+                            (prev) => new Set([...prev, newQuestion.link_id]),
                           );
                           setTimeout(() => {
                             const element = document.getElementById(
-                              `question-${newQuestion.id}`,
+                              `question-${newQuestion.link_id}`,
                             );
                             if (element) {
                               element.scrollIntoView();
@@ -955,13 +1007,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         {questionnaire.questions.map((question, index) => (
                           <div
                             key={question.id}
-                            id={`question-${question.id}`}
+                            id={`question-${question.link_id}`}
                             className="relative bg-white rounded-lg shadow-md"
                           >
                             <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
                             <QuestionEditor
                               index={index}
-                              key={question.id}
+                              key={question.link_id}
                               question={question}
                               form={form}
                               onChange={(updatedQuestion) => {
@@ -973,6 +1025,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   "questions",
                                   newQuestions,
                                 );
+                                form.setValue("questions", newQuestions, {
+                                  shouldValidate: true,
+                                });
                               }}
                               onDelete={() => {
                                 const newQuestions =
@@ -983,10 +1038,15 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   "questions",
                                   newQuestions,
                                 );
+                                form.setValue("questions", newQuestions, {
+                                  shouldValidate: true,
+                                });
                               }}
-                              isExpanded={expandedQuestions.has(question.id)}
+                              isExpanded={expandedQuestions.has(
+                                question.link_id,
+                              )}
                               onToggleExpand={() =>
-                                toggleQuestionExpanded(question.id)
+                                toggleQuestionExpanded(question.link_id)
                               }
                               depth={0}
                               onMoveUp={() => {
@@ -1000,6 +1060,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                     "questions",
                                     newQuestions,
                                   );
+                                  form.setValue("questions", newQuestions, {
+                                    shouldValidate: true,
+                                  });
                                 }
                               }}
                               onMoveDown={() => {
@@ -1016,6 +1079,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                     "questions",
                                     newQuestions,
                                   );
+                                  form.setValue("questions", newQuestions, {
+                                    shouldValidate: true,
+                                  });
                                 }
                               }}
                               isFirst={index === 0}
@@ -1031,6 +1097,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   [question.id]: error,
                                 }));
                               }}
+                              enableWhenDependencies={enableWhenDependencies}
+                              handleEnableWhenDependentClick={
+                                handleEnableWhenDependentClick
+                              }
                             />
                           </div>
                         ))}
@@ -1163,6 +1233,11 @@ interface QuestionEditorProps {
   isLast?: boolean;
   structuredTypeError?: string;
   setStructuredTypeError?: (error: string | undefined) => void;
+  enableWhenDependencies: Map<
+    string,
+    Set<{ question: Question; path: string[] }>
+  >;
+  handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
 }
 
 function QuestionEditor({
@@ -1181,6 +1256,8 @@ function QuestionEditor({
   index,
   structuredTypeError,
   setStructuredTypeError,
+  enableWhenDependencies,
+  handleEnableWhenDependentClick,
 }: QuestionEditorProps) {
   const { t } = useTranslation();
   const {
@@ -1227,13 +1304,13 @@ function QuestionEditor({
     onChange({ ...question, [field]: value, ...additionalFields });
   };
 
-  const toggleSubQuestionExpanded = (questionId: string) => {
+  const toggleSubQuestionExpanded = (questionLinkId: string) => {
     setExpandedSubQuestions((prev) => {
       const next = new Set(prev);
-      if (next.has(questionId)) {
-        next.delete(questionId);
+      if (next.has(questionLinkId)) {
+        next.delete(questionLinkId);
       } else {
-        next.add(questionId);
+        next.add(questionLinkId);
       }
       return next;
     });
@@ -1548,6 +1625,34 @@ function QuestionEditor({
               )}
             />
           </div>
+
+          {(enableWhenDependencies.get(question.link_id)?.size || 0) > 0 && (
+            <>
+              <div className="text-sm text-gray-500 flex flex-col gap-1">
+                {t("questionnaire_question_dependent")}
+                <div className="flex flex-wrap gap-2">
+                  {Array.from(
+                    enableWhenDependencies.get(question.link_id) || [],
+                  ).map(({ question, path }) => (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="xs"
+                      key={question.link_id}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleEnableWhenDependentClick(path, question.link_id);
+                      }}
+                      className="text-primary hover:underline"
+                    >
+                      {question.text}
+                    </Button>
+                  ))}
+                </div>
+                {t("ensure_conditions_are_valid")}
+              </div>
+            </>
+          )}
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -2063,7 +2168,7 @@ function QuestionEditor({
                       newQuestion,
                     ]);
                     setExpandedSubQuestions(
-                      (prev) => new Set([...prev, newQuestion.id]),
+                      (prev) => new Set([...prev, newQuestion.link_id]),
                     );
                   }}
                 >
@@ -2075,13 +2180,17 @@ function QuestionEditor({
                 {(questions || []).map((subQuestion, idx) => (
                   <div
                     key={subQuestion.id}
-                    id={`question-${subQuestion.id}`}
+                    id={`question-${subQuestion.link_id}`}
                     className="relative bg-white rounded-lg shadow-md"
                   >
                     <QuestionEditor
+                      handleEnableWhenDependentClick={
+                        handleEnableWhenDependentClick
+                      }
+                      enableWhenDependencies={enableWhenDependencies}
                       form={form}
                       index={idx}
-                      key={subQuestion.id}
+                      key={subQuestion.link_id}
                       question={subQuestion}
                       onChange={(updated) => {
                         const newQuestions = [...(questions || [])];
@@ -2094,9 +2203,9 @@ function QuestionEditor({
                         );
                         updateField("questions", newQuestions);
                       }}
-                      isExpanded={expandedSubQuestions.has(subQuestion.id)}
+                      isExpanded={expandedSubQuestions.has(subQuestion.link_id)}
                       onToggleExpand={() =>
-                        toggleSubQuestionExpanded(subQuestion.id)
+                        toggleSubQuestionExpanded(subQuestion.link_id)
                       }
                       depth={depth + 1}
                       parentId={getQuestionPath()}
