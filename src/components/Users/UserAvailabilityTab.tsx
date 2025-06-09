@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 import dayjs from "dayjs";
 import { ExternalLinkIcon } from "lucide-react";
 import { Link, usePathParams, useQueryParams } from "raviger";
@@ -76,19 +77,33 @@ export default function UserAvailabilityTab({
   const { facilityId } = usePathParams("/facility/:facilityId/*")!;
 
   const templatesQuery = useQuery({
-    queryKey: ["user-schedule-templates", { facilityId, userId: user.id }],
+    queryKey: [
+      "user-schedule-templates",
+      { facilityId, userId: user.id, month },
+    ],
     queryFn: query(scheduleApis.templates.list, {
       pathParams: { facility_id: facilityId! },
-      queryParams: { user: user.id },
+      queryParams: {
+        user: user.id,
+        valid_from: format(startOfMonth(month), "yyyy-MM-dd'T'HH:mm"),
+        valid_to: format(endOfMonth(month), "yyyy-MM-dd'T'HH:mm"),
+      },
     }),
     enabled: !!facilityId && canViewSchedule,
   });
 
   const exceptionsQuery = useQuery({
-    queryKey: ["user-schedule-exceptions", { facilityId, userId: user.id }],
+    queryKey: [
+      "user-schedule-exceptions",
+      { facilityId, userId: user.id, month },
+    ],
     queryFn: query(scheduleApis.exceptions.list, {
       pathParams: { facility_id: facilityId! },
-      queryParams: { user: user.id },
+      queryParams: {
+        user: user.id,
+        valid_from: format(startOfMonth(month), "yyyy-MM-dd"),
+        valid_to: format(endOfMonth(month), "yyyy-MM-dd"),
+      },
     }),
     enabled: !!facilityId && canViewSchedule,
   });
