@@ -164,11 +164,13 @@ function QuestionGroup({
           "grid md:grid-cols-2 grid-cols-1 gap-8": isSingleGroup,
         })}
       >
-        <div className="w-full">
-          <Table className="table-fixed w-full">
-            <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
-          </Table>
-        </div>
+        {leftQuestions.length > 0 && (
+          <div className="w-full">
+            <Table className="table-fixed w-full">
+              <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
+            </Table>
+          </div>
+        )}
 
         {isSingleGroup && rightQuestions.length > 0 && (
           <div className="w-full">
