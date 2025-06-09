@@ -160,7 +160,9 @@ function QuestionGroup({
         {group.text}
       </h3>
       <div
-        className={cn("w-full", { "grid grid-cols-2 gap-8": isSingleGroup })}
+        className={cn("w-full", {
+          "grid md:grid-cols-2 grid-cols-1 gap-8": isSingleGroup,
+        })}
       >
         <div className="w-full">
           <Table className="table-fixed w-full">
