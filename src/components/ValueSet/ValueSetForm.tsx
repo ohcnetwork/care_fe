@@ -387,7 +387,7 @@ export function ValueSetForm({
       <div className="flex justify-end">
         {!initialData?.id && (
           <ValueSetPreview
-            valueset={form.getValues()}
+            valueset={form.watch()}
             trigger={
               <Button variant="outline_primary">
                 <CareIcon icon={"l-eye"} className="h-4 w-4" />

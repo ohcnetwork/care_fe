@@ -13,11 +13,11 @@ import {
 
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
-import { CreateValuesetModel } from "@/types/valueset/valueset";
+import { ValuesetFormType } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface ValueSetPreviewProps {
-  valueset: CreateValuesetModel;
+  valueset: ValuesetFormType;
   trigger: React.ReactNode;
 }
 
@@ -41,7 +41,6 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             },
       },
     }),
-    enabled: search.length > 0,
   });
 
   return (
