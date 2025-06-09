@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
 import { SearchIcon } from "lucide-react";
@@ -46,22 +46,20 @@ import {
 } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
-import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder/ReportBuilderSheet";
-import { Encounter } from "@/types/emr/encounter";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
-  facilityId: string;
-  encounter: Encounter;
+  encounterId: string;
   canEdit: boolean | undefined;
 }
 
 export const DischargeTab = ({
   type,
-  facilityId,
-  encounter,
+  encounterId,
   canEdit,
 }: DischargeTabProps) => {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
@@ -76,16 +74,27 @@ export const DischargeTab = ({
     limit: 15,
   });
 
+  const { mutate: generateDischargeSummary, isPending: isGenerating } =
+    useMutation<{ detail: string }, HTTPError>({
+      mutationFn: mutate(routes.encounter.generateDischargeSummary, {
+        pathParams: { encounterId },
+      }),
+      onSuccess: (response) => {
+        toast.success(response.detail);
+        refetch();
+      },
+    });
+
   const {
     data: files,
     isLoading: filesLoading,
     refetch,
   } = useQuery({
-    queryKey: ["discharge_files", encounter.id, qParams],
+    queryKey: ["discharge_files", encounterId, qParams],
     queryFn: query.debounced(routes.viewUpload, {
       queryParams: {
         file_type: type,
-        associating_id: encounter.id,
+        associating_id: encounterId,
         name: qParams.name,
         file_category: "discharge_summary",
         limit: qParams.limit,
@@ -108,7 +117,7 @@ export const DischargeTab = ({
         .reverse()
         .map((file) => ({
           ...file,
-          associating_id: encounter.id,
+          associating_id: encounterId,
         })) || [],
   });
 
@@ -197,7 +206,7 @@ export const DischargeTab = ({
           {fileManager.isPreviewable(file) && (
             <Button
               variant="secondary"
-              onClick={() => fileManager.viewFile(file, encounter.id)}
+              onClick={() => fileManager.viewFile(file, encounterId)}
             >
               <span className="flex flex-row items-center gap-1">
                 <CareIcon icon="l-eye" />
@@ -215,7 +224,7 @@ export const DischargeTab = ({
               <DropdownMenuItem asChild className="text-primary-900">
                 <Button
                   size="sm"
-                  onClick={() => fileManager.downloadFile(file, encounter.id)}
+                  onClick={() => fileManager.downloadFile(file, encounterId)}
                   variant="ghost"
                   className="w-full flex flex-row justify-stretch items-center"
                 >
@@ -228,9 +237,7 @@ export const DischargeTab = ({
                   <DropdownMenuItem asChild className="text-primary-900">
                     <Button
                       size="sm"
-                      onClick={() =>
-                        fileManager.archiveFile(file, encounter.id)
-                      }
+                      onClick={() => fileManager.archiveFile(file, encounterId)}
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
                     >
@@ -241,7 +248,7 @@ export const DischargeTab = ({
                   <DropdownMenuItem asChild className="text-primary-900">
                     <Button
                       size="sm"
-                      onClick={() => fileManager.editFile(file, encounter.id)}
+                      onClick={() => fileManager.editFile(file, encounterId)}
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
                     >
@@ -569,7 +576,7 @@ export const DischargeTab = ({
           }}
           file={selectedAudioFile || null}
           type={type}
-          associatingId={encounter.id}
+          associatingId={encounterId}
         />
       </div>
       <ArchivedFileDialog
@@ -581,7 +588,7 @@ export const DischargeTab = ({
         open={openUploadDialog}
         onOpenChange={setOpenUploadDialog}
         fileUpload={fileUpload}
-        associatingId={encounter.id}
+        associatingId={encounterId}
         type={type}
       />
       <div className="flex flex-wrap items-center gap-2 -mt-2">
@@ -616,7 +623,16 @@ export const DischargeTab = ({
             <CareIcon icon="l-sync" className="mr-2" />
             {t("refresh")}
           </Button>
-          <ReportBuilderSheet
+          <Button
+            variant="primary"
+            className="min-w-24 sm:min-w-28"
+            onClick={() => generateDischargeSummary()}
+            disabled={isGenerating}
+          >
+            <CareIcon icon="l-file-medical" className="hidden sm:block mr-2" />
+            {isGenerating ? t("generating") : t("generate_discharge_summary")}
+          </Button>
+          {/* <ReportBuilderSheet
             facilityId={facilityId || ""}
             patientId={encounter?.patient.id || ""}
             encounterId={encounter?.id || ""}
@@ -642,7 +658,7 @@ export const DischargeTab = ({
                 queryKey: ["files"],
               });
             }}
-          />
+          /> */}
         </div>
 
         <div className="w-full sm:w-auto ml-auto">

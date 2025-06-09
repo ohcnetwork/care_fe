@@ -1,9 +1,8 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -50,7 +49,6 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder/ReportBuilderSheet";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/patient";
 
@@ -60,7 +58,6 @@ interface FilesTabProps {
   patient?: Patient;
   associatingId: string;
   canEdit: boolean | undefined;
-  facilityId: string;
 }
 
 export const FilesPage = ({
@@ -69,7 +66,6 @@ export const FilesPage = ({
   patient,
   encounter,
   canEdit,
-  facilityId,
 }: FilesTabProps) => {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
@@ -94,7 +90,6 @@ export const FilesPage = ({
     type === "encounter"
       ? canViewClinicalData || canViewEncounter
       : canViewClinicalData;
-  const queryClient = useQueryClient();
 
   const {
     data: files,
@@ -636,7 +631,7 @@ export const FilesPage = ({
 
         <div className="flex items-center gap-2">
           <FilterButton />
-          {type === "encounter" && (
+          {/* {type === "encounter" && (
             <>
               <Button
                 variant="outline_primary"
@@ -682,7 +677,7 @@ export const FilesPage = ({
                 }}
               />
             </>
-          )}
+          )} */}
         </div>
 
         <div className="ml-auto">
