@@ -2,6 +2,7 @@ import { t } from "i18next";
 
 import { cn } from "@/lib/utils";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { Question } from "@/types/questionnaire/question";
@@ -32,7 +33,8 @@ export default function QuestionnaireNavigation({
               question.questions.length > 0;
             return (
               <div key={question.id} className="space-y-1">
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => {
                     if (scrollToQuestion) {
                       scrollToQuestion(question.id);
@@ -62,11 +64,12 @@ export default function QuestionnaireNavigation({
                   <span className="flex-1 truncate">
                     {question.text || t("untitled_question")}
                   </span>
-                </button>
+                </Button>
                 {hasSubQuestions && question.questions && (
                   <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
                     {question.questions.map((subQuestion, subIndex) => (
-                      <button
+                      <Button
+                        variant="outline"
                         key={subQuestion.id}
                         onClick={() => {
                           if (scrollToQuestion) {
@@ -100,7 +103,7 @@ export default function QuestionnaireNavigation({
                         <span className="flex-1 truncate">
                           {subQuestion.text || "Untitled Question"}
                         </span>
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 )}
