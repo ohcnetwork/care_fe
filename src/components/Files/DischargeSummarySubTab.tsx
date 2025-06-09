@@ -50,16 +50,18 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
+import { Encounter } from "@/types/emr/encounter";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
-  encounterId: string;
+  // facilityId: string;
+  encounter: Encounter;
   canEdit: boolean | undefined;
 }
 
 export const DischargeTab = ({
   type,
-  encounterId,
+  encounter,
   canEdit,
 }: DischargeTabProps) => {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
@@ -77,7 +79,7 @@ export const DischargeTab = ({
   const { mutate: generateDischargeSummary, isPending: isGenerating } =
     useMutation<{ detail: string }, HTTPError>({
       mutationFn: mutate(routes.encounter.generateDischargeSummary, {
-        pathParams: { encounterId },
+        pathParams: { encounterId: encounter.id },
       }),
       onSuccess: (response) => {
         toast.success(response.detail);
@@ -85,16 +87,18 @@ export const DischargeTab = ({
       },
     });
 
+  // const queryClient = useQueryClient();
+
   const {
     data: files,
     isLoading: filesLoading,
     refetch,
   } = useQuery({
-    queryKey: ["discharge_files", encounterId, qParams],
+    queryKey: ["discharge_files", encounter.id, qParams],
     queryFn: query.debounced(routes.viewUpload, {
       queryParams: {
         file_type: type,
-        associating_id: encounterId,
+        associating_id: encounter.id,
         name: qParams.name,
         file_category: "discharge_summary",
         limit: qParams.limit,
@@ -117,7 +121,7 @@ export const DischargeTab = ({
         .reverse()
         .map((file) => ({
           ...file,
-          associating_id: encounterId,
+          associating_id: encounter.id,
         })) || [],
   });
 
@@ -206,7 +210,7 @@ export const DischargeTab = ({
           {fileManager.isPreviewable(file) && (
             <Button
               variant="secondary"
-              onClick={() => fileManager.viewFile(file, encounterId)}
+              onClick={() => fileManager.viewFile(file, encounter.id)}
             >
               <span className="flex flex-row items-center gap-1">
                 <CareIcon icon="l-eye" />
@@ -224,7 +228,7 @@ export const DischargeTab = ({
               <DropdownMenuItem asChild className="text-primary-900">
                 <Button
                   size="sm"
-                  onClick={() => fileManager.downloadFile(file, encounterId)}
+                  onClick={() => fileManager.downloadFile(file, encounter.id)}
                   variant="ghost"
                   className="w-full flex flex-row justify-stretch items-center"
                 >
@@ -237,7 +241,9 @@ export const DischargeTab = ({
                   <DropdownMenuItem asChild className="text-primary-900">
                     <Button
                       size="sm"
-                      onClick={() => fileManager.archiveFile(file, encounterId)}
+                      onClick={() =>
+                        fileManager.archiveFile(file, encounter.id)
+                      }
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
                     >
@@ -248,7 +254,7 @@ export const DischargeTab = ({
                   <DropdownMenuItem asChild className="text-primary-900">
                     <Button
                       size="sm"
-                      onClick={() => fileManager.editFile(file, encounterId)}
+                      onClick={() => fileManager.editFile(file, encounter.id)}
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
                     >
@@ -576,7 +582,7 @@ export const DischargeTab = ({
           }}
           file={selectedAudioFile || null}
           type={type}
-          associatingId={encounterId}
+          associatingId={encounter.id}
         />
       </div>
       <ArchivedFileDialog
@@ -588,7 +594,7 @@ export const DischargeTab = ({
         open={openUploadDialog}
         onOpenChange={setOpenUploadDialog}
         fileUpload={fileUpload}
-        associatingId={encounterId}
+        associatingId={encounter.id}
         type={type}
       />
       <div className="flex flex-wrap items-center gap-2 -mt-2">

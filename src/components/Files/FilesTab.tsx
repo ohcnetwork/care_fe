@@ -74,7 +74,7 @@ export const FilesTab = (props: FilesTabsProps) => {
           >
             {t("files")}
           </TabsTrigger>
-          {type === "encounter" && (
+          {type === "encounter" && encounter && (
             <TabsTrigger
               value="discharge_summary"
               className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
@@ -100,13 +100,9 @@ export const FilesTab = (props: FilesTabsProps) => {
           />
         </TabsContent>
 
-        {type === "encounter" && (
+        {type === "encounter" && encounter && (
           <TabsContent value="discharge_summary">
-            <DischargeTab
-              type={type}
-              encounterId={encounter?.id || ""}
-              canEdit={canEdit}
-            />
+            <DischargeTab type={type} encounter={encounter} canEdit={canEdit} />
           </TabsContent>
         )}
 
