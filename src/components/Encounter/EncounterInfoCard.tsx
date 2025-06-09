@@ -1,6 +1,6 @@
 import { Separator } from "@radix-ui/react-separator";
 import { format } from "date-fns";
-import { Link } from "raviger";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -68,22 +69,17 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
     >
       <CardHeader className="space-y-1 pb-2">
         <div className="flex items-center justify-between">
-          <Link
-            href={`/facility/${facilityId}/patient/${encounter.patient.id}`}
-            className="hover:text-primary"
-          >
-            <CardTitle className="group-hover:text-primary transition-colors">
-              {encounter.patient.name}
-              {encounter.patient.deceased_datetime && (
-                <Badge
-                  variant="destructive"
-                  className="ml-2 py-0 border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
-                >
-                  <h3 className="text-xs font-medium">{t("deceased")}</h3>
-                </Badge>
-              )}
-            </CardTitle>
-          </Link>
+          <CardTitle className="text-lg font-semibold">
+            {encounter.patient.name}
+            {encounter.patient.deceased_datetime && (
+              <Badge
+                variant="destructive"
+                className="ml-2 py-0 border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+              >
+                <h3 className="text-xs font-medium">{t("deceased")}</h3>
+              </Badge>
+            )}
+          </CardTitle>
         </div>
         <CardDescription className="flex items-center">
           <CareIcon icon="l-clock" className="mr-2 size-4" />
@@ -110,16 +106,51 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             >
               {t(`encounter_priority__${encounter.priority}`)}
             </Badge>
-          </div>
+          </div>{" "}
           <div>
-            <Separator className="my-2" />
-            <Link
-              href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
-              className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
-            >
-              {t("view_details")}
-              <CareIcon icon="l-arrow-right" className="ml-1 size-4" />
-            </Link>
+            <Separator className="my-3" />
+            <div className="grid grid-cols-2 gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/patient/${encounter.patient.id}`,
+                  )
+                }
+                className="flex items-center justify-center gap-0.5 text-[10px] sm:text-xs px-1.5 py-1 h-7 min-w-0"
+                data-cy="visit-patient-profile-button"
+                title={t("view_patient_profile")}
+              >
+                <CareIcon icon="l-user" className="size-3 flex-shrink-0" />
+                <span className="hidden xs:inline sm:hidden lg:inline ml-1 truncate">
+                  {t("profile")}
+                </span>
+                <span className="hidden sm:inline lg:hidden ml-1 truncate">
+                  {t("view_patient_profile")}
+                </span>
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`,
+                  )
+                }
+                className="flex items-center justify-center gap-0.5 text-[10px] sm:text-xs px-1.5 py-1 h-7 min-w-0"
+                data-cy="visit-encounter-details-button"
+                title={t("visit_encounter_details")}
+              >
+                <CareIcon icon="l-notes" className="size-3 flex-shrink-0" />
+                <span className="hidden xs:inline sm:hidden lg:inline ml-1 truncate">
+                  {t("view_details")}
+                </span>
+                <span className="hidden sm:inline lg:hidden ml-1 truncate">
+                  {t("visit_encounter_details")}
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
