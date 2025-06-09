@@ -397,6 +397,7 @@ const Login = (props: LoginProps) => {
                             name="username"
                             type="text"
                             data-cy="username"
+                            autoComplete="username"
                             value={form.username}
                             onChange={handleChange}
                             className={cn(
@@ -416,6 +417,7 @@ const Login = (props: LoginProps) => {
                             id="password"
                             name="password"
                             data-cy="password"
+                            autoComplete="current-password"
                             value={form.password}
                             onChange={handleChange}
                             className={cn(
