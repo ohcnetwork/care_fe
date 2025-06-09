@@ -48,7 +48,6 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { HTTPError } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 
@@ -77,7 +76,7 @@ export const DischargeTab = ({
   });
 
   const { mutate: generateDischargeSummary, isPending: isGenerating } =
-    useMutation<{ detail: string }, HTTPError>({
+    useMutation<{ detail: string }>({
       mutationFn: mutate(routes.encounter.generateDischargeSummary, {
         pathParams: { encounterId: encounter.id },
       }),
@@ -86,8 +85,6 @@ export const DischargeTab = ({
         refetch();
       },
     });
-
-  // const queryClient = useQueryClient();
 
   const {
     data: files,
