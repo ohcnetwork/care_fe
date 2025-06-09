@@ -717,12 +717,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsList>
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 md:w-60">
-              <QuestionnaireNavigation
-                questionnaire={questionnaire}
-                toggleQuestionExpanded={toggleQuestionExpanded}
-                expandedQuestions={expandedQuestions}
-              />
+            <div className="space-y-4 md:w-60 ">
+              <div className="sticky top-6 h-screen lg:block hidden">
+                <QuestionnaireNavigation
+                  questionnaire={questionnaire}
+                  toggleQuestionExpanded={toggleQuestionExpanded}
+                  expandedQuestions={expandedQuestions}
+                />
+              </div>
               <div className="space-y-4 max-w-sm lg:hidden">
                 <QuestionnaireProperties
                   questionnaire={questionnaire}
