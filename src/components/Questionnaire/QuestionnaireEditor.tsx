@@ -179,7 +179,7 @@ function LayoutOptionCard({
       <Label
         htmlFor={optionId}
         className={cn(
-          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-2 md:p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
           isSelected && "border-primary",
         )}
       >
