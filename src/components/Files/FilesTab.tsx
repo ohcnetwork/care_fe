@@ -102,7 +102,12 @@ export const FilesTab = (props: FilesTabsProps) => {
 
         {type === "encounter" && encounter && (
           <TabsContent value="discharge_summary">
-            <DischargeTab type={type} encounter={encounter} canEdit={canEdit} />
+            <DischargeTab
+              type={type}
+              encounter={encounter}
+              canEdit={canEdit}
+              // facilityId={facilityId || ""}
+            />
           </TabsContent>
         )}
 
