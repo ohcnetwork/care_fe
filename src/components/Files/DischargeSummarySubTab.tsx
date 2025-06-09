@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
 import { SearchIcon } from "lucide-react";
@@ -46,21 +46,20 @@ import {
 } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder/ReportBuilderSheet";
 import { Encounter } from "@/types/emr/encounter";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
-  facilityId: string;
+  // facilityId: string;
   encounter: Encounter;
   canEdit: boolean | undefined;
 }
 
 export const DischargeTab = ({
   type,
-  facilityId,
   encounter,
   canEdit,
 }: DischargeTabProps) => {
@@ -75,6 +74,17 @@ export const DischargeTab = ({
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
   });
+
+  const { mutate: generateDischargeSummary, isPending: isGenerating } =
+    useMutation<{ detail: string }>({
+      mutationFn: mutate(routes.encounter.generateDischargeSummary, {
+        pathParams: { encounterId: encounter.id },
+      }),
+      onSuccess: (response) => {
+        toast.success(response.detail);
+        refetch();
+      },
+    });
 
   const {
     data: files,
@@ -616,7 +626,16 @@ export const DischargeTab = ({
             <CareIcon icon="l-sync" className="mr-2" />
             {t("refresh")}
           </Button>
-          <ReportBuilderSheet
+          <Button
+            variant="primary"
+            className="min-w-24 sm:min-w-28"
+            onClick={() => generateDischargeSummary()}
+            disabled={isGenerating}
+          >
+            <CareIcon icon="l-file-medical" className="hidden sm:block mr-2" />
+            {isGenerating ? t("generating") : t("generate_discharge_summary")}
+          </Button>
+          {/* <ReportBuilderSheet
             facilityId={facilityId || ""}
             patientId={encounter?.patient.id || ""}
             encounterId={encounter?.id || ""}
@@ -642,7 +661,7 @@ export const DischargeTab = ({
                 queryKey: ["files"],
               });
             }}
-          />
+          /> */}
         </div>
 
         <div className="w-full sm:w-auto ml-auto">
