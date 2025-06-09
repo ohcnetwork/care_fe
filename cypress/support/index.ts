@@ -56,13 +56,6 @@ declare global {
         value: string,
         unit?: string,
       ): Chainable<Element>;
-      clickButton(
-        buttonText: string,
-        options?: {
-          timeout?: number;
-          urlPath?: string;
-        },
-      ): Chainable<Element>;
       clickAndSelectOptionV2(
         selector: string,
         reference: string,
