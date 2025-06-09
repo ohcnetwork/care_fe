@@ -118,12 +118,12 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                     `/facility/${facilityId}/patient/${encounter.patient.id}`,
                   )
                 }
-                className="flex flex-col items-center justify-center gap-0.5 sm:flex-row sm:gap-0.5 text-[9px] sm:text-xs px-1 py-1.5 sm:py-1 h-auto sm:h-7 min-w-0"
+                className="flex items-center justify-center gap-1.5 text-[9px] sm:text-xs px-1.5 py-1.5 sm:py-1 h-auto sm:h-7 min-w-0"
                 data-cy="visit-patient-profile-button"
                 title={t("view_patient_profile")}
               >
                 <CareIcon icon="l-user" className="size-2.5 flex-shrink-0" />
-                <span className="text-center leading-none sm:ml-1 truncate">
+                <span className="leading-none truncate">
                   {t("view_patient_profile")}
                 </span>
               </Button>
@@ -135,12 +135,12 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                     `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`,
                   )
                 }
-                className="flex flex-col items-center justify-center gap-0.5 sm:flex-row sm:gap-0.5 text-[9px] sm:text-xs px-1 py-1.5 sm:py-1 h-auto sm:h-7 min-w-0"
+                className="flex items-center justify-center gap-1.5 text-[9px] sm:text-xs px-1.5 py-1.5 sm:py-1 h-auto sm:h-7 min-w-0"
                 data-cy="visit-encounter-details-button"
                 title={t("visit_encounter_details")}
               >
                 <CareIcon icon="l-notes" className="size-2.5 flex-shrink-0" />
-                <span className="text-center leading-none sm:ml-1 truncate">
+                <span className="leading-none truncate">
                   {t("visit_encounter_details")}
                 </span>
               </Button>
