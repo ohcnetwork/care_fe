@@ -2011,7 +2011,7 @@ function QuestionEditor({
               {(question.enable_when || []).map((condition, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-[2fr_1fr_2fr] gap-2 items-start"
+                  className="grid grid-cols-1 md:grid-cols-[2fr_1fr_2fr] gap-2 items-start"
                 >
                   <div>
                     <Label className="text-xs">Question</Label>
