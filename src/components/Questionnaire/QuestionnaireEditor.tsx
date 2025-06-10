@@ -1220,7 +1220,7 @@ function QuestionEditor({
   const [expandedSubQuestions, setExpandedSubQuestions] = useState<Set<string>>(
     new Set(),
   );
-  const [inputValue, setInputValue] = useState("");
+  const [localInputValue, setLocalInputValue] = useState("");
   const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
   const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
     queryKey: ["valuesets", valueSetSearchQuery],
@@ -1821,7 +1821,9 @@ function QuestionEditor({
                                         </span>
                                         <span className="text-xs font-medium">
                                           {t("position")}{" "}
-                                          {inputValue ? inputValue : idx + 1}
+                                          {localInputValue
+                                            ? localInputValue
+                                            : idx + 1}
                                         </span>
                                       </div>
                                       <div className="border-b pb-2 mb-2">
@@ -1937,9 +1939,9 @@ function QuestionEditor({
                                             min={1}
                                             max={annotatedAnswerOptions.length}
                                             className="h-7 w-full text-sm"
-                                            value={inputValue}
+                                            value={localInputValue}
                                             onChange={(e) =>
-                                              setInputValue(e.target.value)
+                                              setLocalInputValue(e.target.value)
                                             }
                                             placeholder={t("enter_position")}
                                           />
@@ -1948,7 +1950,7 @@ function QuestionEditor({
                                             variant="secondary"
                                             onClick={() => {
                                               const newPosition =
-                                                parseInt(inputValue) - 1;
+                                                parseInt(localInputValue) - 1;
                                               if (
                                                 !isNaN(newPosition) &&
                                                 newPosition >= 0 &&
@@ -1971,7 +1973,7 @@ function QuestionEditor({
                                                   newArray,
                                                 );
                                               }
-                                              setInputValue("");
+                                              setLocalInputValue("");
                                             }}
                                             className="gap-2"
                                           >
@@ -2036,9 +2038,11 @@ function QuestionEditor({
                         size="sm"
                         className="ml-2  mt-2 sm:mt-0"
                         onClick={() => {
-                          const sorted = annotatedAnswerOptions?.sort((a, b) =>
-                            a.value.localeCompare(b.value),
-                          );
+                          const sorted = annotatedAnswerOptions
+                            ? [...annotatedAnswerOptions].sort((a, b) =>
+                                a.value.localeCompare(b.value),
+                              )
+                            : [];
                           updateField("answer_option", sorted);
                         }}
                       >
