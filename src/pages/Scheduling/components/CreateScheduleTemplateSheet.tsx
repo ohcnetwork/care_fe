@@ -342,7 +342,7 @@ export default function CreateScheduleTemplateSheet({
               </div>
 
               <div>
-                <FormLabel className="text-lg font-semibold">
+                <FormLabel aria-required className="text-lg font-semibold">
                   {t("weekly_schedule")}
                 </FormLabel>
                 <span className="block text-sm">
