@@ -288,6 +288,7 @@ export default function FacilityOrganizationView({
                     org={org}
                     facilityId={facilityId}
                     canWrite={canManageFacilityOrganization}
+                    parentId={id}
                   />
                 ))}
               </div>
