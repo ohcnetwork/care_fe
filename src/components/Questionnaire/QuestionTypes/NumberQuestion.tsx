@@ -15,6 +15,7 @@ interface NumberQuestionProps {
     note?: string,
   ) => void;
   disabled?: boolean;
+  index: number;
 }
 
 export function NumberQuestion({
@@ -22,19 +23,21 @@ export function NumberQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  index,
 }: NumberQuestionProps) {
   const handleChange = (value: string) => {
     const emptyValue = value === "";
     const numericValue =
       question.type === "decimal" ? parseFloat(value) : parseInt(value);
 
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "number",
+      value: emptyValue ? undefined : numericValue,
+    };
+
     updateQuestionnaireResponseCB(
-      [
-        {
-          type: "number",
-          value: emptyValue ? undefined : numericValue,
-        },
-      ],
+      newValues,
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );
@@ -43,7 +46,7 @@ export function NumberQuestion({
   return (
     <Input
       type="number"
-      value={questionnaireResponse.values[0]?.value?.toString() || ""}
+      value={questionnaireResponse.values[index]?.value?.toString() || ""}
       onChange={(e) => handleChange(e.target.value)}
       step={question.type === "decimal" ? "0.01" : "1"}
       disabled={disabled}

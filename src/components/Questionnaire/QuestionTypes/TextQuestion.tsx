@@ -17,6 +17,7 @@ interface TextQuestionProps {
   ) => void;
   disabled?: boolean;
   clearError: () => void;
+  index: number;
 }
 
 export function TextQuestion({
@@ -25,16 +26,18 @@ export function TextQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   clearError,
+  index,
 }: TextQuestionProps) {
   const handleChange = (value: string) => {
     clearError();
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "string",
+      value,
+    };
+
     updateQuestionnaireResponseCB(
-      [
-        {
-          type: "string",
-          value,
-        },
-      ],
+      newValues,
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );
@@ -44,7 +47,7 @@ export function TextQuestion({
     <>
       {question.type === "text" ? (
         <Textarea
-          value={questionnaireResponse.values[0]?.value?.toString() || ""}
+          value={questionnaireResponse.values[index]?.value?.toString() || ""}
           onChange={(e) => handleChange(e.target.value)}
           className="min-h-[100px]"
           disabled={disabled}
@@ -52,7 +55,7 @@ export function TextQuestion({
       ) : (
         <Input
           type="text"
-          value={questionnaireResponse.values[0]?.value?.toString() || ""}
+          value={questionnaireResponse.values[index]?.value?.toString() || ""}
           onChange={(e) => handleChange(e.target.value)}
           disabled={disabled}
         />
