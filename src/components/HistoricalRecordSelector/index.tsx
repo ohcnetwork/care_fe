@@ -356,11 +356,20 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
             className="w-full"
           >
             <TabsList className="w-full">
-              {structuredTypes.map(({ type }) => (
-                <TabsTrigger key={type} value={type} className="flex-1">
-                  {type}
-                </TabsTrigger>
-              ))}
+              {structuredTypes.map(({ type }) =>
+                structuredTypes.length > 1 ? (
+                  <TabsTrigger key={type} value={type} className="flex-1">
+                    {type}
+                  </TabsTrigger>
+                ) : (
+                  <div
+                    key={type}
+                    className="flex-1 cursor-default text-center py-1 text-sm text-black bg-white border border-gray-200 rounded-md"
+                  >
+                    {type}
+                  </div>
+                ),
+              )}
             </TabsList>
           </Tabs>
         </div>
