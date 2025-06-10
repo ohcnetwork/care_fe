@@ -1,12 +1,12 @@
-import { format } from "date-fns";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
 
 import { LocationHistory } from "@/types/emr/encounter";
 import { LocationAssociationStatus } from "@/types/location/association";
@@ -109,18 +109,17 @@ export function LocationCardWrapper({
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>{t("end_time")}</Label>
-                  <Input
-                    type="datetime-local"
-                    value={format(
-                      editingState.timeConfig.end || new Date(),
-                      "yyyy-MM-dd'T'HH:mm",
-                    )}
-                    onChange={(e) =>
+                  <DateTimeInput
+                    value={
+                      editingState.timeConfig.end?.toISOString() ??
+                      new Date().toISOString()
+                    }
+                    onDateChange={(newISO) =>
                       setEditingState((prev) => ({
                         ...prev,
                         timeConfig: {
                           ...prev.timeConfig,
-                          end: new Date(e.target.value),
+                          end: newISO ? new Date(newISO) : undefined,
                         },
                       }))
                     }
@@ -131,18 +130,14 @@ export function LocationCardWrapper({
               <>
                 <div className="space-y-2">
                   <Label>{t("start_time")}</Label>
-                  <Input
-                    type="datetime-local"
-                    value={format(
-                      editingState.timeConfig.start,
-                      "yyyy-MM-dd'T'HH:mm",
-                    )}
-                    onChange={(e) =>
+                  <DateTimeInput
+                    value={editingState.timeConfig.start?.toISOString()}
+                    onDateChange={(newISO) =>
                       setEditingState((prev) => ({
                         ...prev,
                         timeConfig: {
                           ...prev.timeConfig,
-                          start: new Date(e.target.value),
+                          start: new Date(newISO),
                         },
                       }))
                     }
@@ -152,24 +147,14 @@ export function LocationCardWrapper({
                   editingState.timeConfig.status !== "active" && (
                     <div className="space-y-2">
                       <Label>{t("end_time")}</Label>
-                      <Input
-                        type="datetime-local"
-                        value={
-                          editingState.timeConfig.end
-                            ? format(
-                                editingState.timeConfig.end,
-                                "yyyy-MM-dd'T'HH:mm",
-                              )
-                            : ""
-                        }
-                        onChange={(e) =>
+                      <DateTimeInput
+                        value={editingState.timeConfig.end?.toISOString()}
+                        onDateChange={(newISO) =>
                           setEditingState((prev) => ({
                             ...prev,
                             timeConfig: {
                               ...prev.timeConfig,
-                              end: e.target.value
-                                ? new Date(e.target.value)
-                                : undefined,
+                              end: newISO ? new Date(newISO) : undefined,
                             },
                           }))
                         }
