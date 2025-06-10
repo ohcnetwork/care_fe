@@ -1391,10 +1391,17 @@ function QuestionEditor({
     const currentEnableWhen =
       currentEnableWhenArr?.[currentEnableWhenArr.length - 1];
     switch (currentEnableWhen?.type) {
-      case "boolean":
+      case "boolean": {
+        // temp fix for boolean answers in existing questionnaires
+        let answer = condition.answer.toString().toLowerCase();
+        if (answer === "yes") {
+          answer = "true";
+        } else if (answer === "no") {
+          answer = "false";
+        }
         return (
           <Select
-            value={condition.answer.toString()}
+            value={answer}
             onValueChange={(val) => {
               const newConditions = [...(question.enable_when || [])];
               newConditions[index] = {
@@ -1414,6 +1421,7 @@ function QuestionEditor({
             </SelectContent>
           </Select>
         );
+      }
       case "choice":
         return (
           <Select
@@ -2327,16 +2335,17 @@ function QuestionEditor({
                             <SelectValue placeholder="Select a question" />
                           </SelectTrigger>
                           <SelectContent>
-                            {(rootQuestions || [])
-                              .filter((q) => q.id !== question.id)
-                              .map((question, index) => (
+                            {(rootQuestions || []).map((rootQn, index) => {
+                              if (rootQn.id === question.id) return null;
+                              return (
                                 <SelectItem
-                                  key={question.id}
-                                  value={question.link_id}
+                                  key={rootQn.id}
+                                  value={rootQn.link_id}
                                 >
-                                  {index + 1}. {question.text}
+                                  {index + 1}. {rootQn.text}
                                 </SelectItem>
-                              ))}
+                              );
+                            })}
                           </SelectContent>
                         </Select>
                         {enableWhenQuestionAnswers[idx]?.map((q, index) => {

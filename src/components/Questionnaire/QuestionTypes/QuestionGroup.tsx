@@ -42,49 +42,47 @@ function isQuestionEnabled(
       (v) => v.link_id === enableWhen.question,
     )?.values[0];
 
-    // Early return if no dependent value exists
-    if (dependentValue?.value == null) return false;
-
     function normalizeValue(value: unknown): unknown {
-      if (typeof value === "boolean") {
-        return value ? "Yes" : "No";
-      }
-
-      if (typeof value === "number") {
-        return value.toString();
-      }
-
-      return value;
+      return typeof value === "number" ? value.toString() : value;
     }
 
     switch (enableWhen.operator) {
       case "exists":
-        return dependentValue !== undefined && dependentValue !== null;
+        if (enableWhen.answer.toString().toLowerCase() === "true") {
+          return dependentValue !== undefined && dependentValue !== null;
+        } else {
+          return (
+            dependentValue === undefined ||
+            dependentValue === null ||
+            dependentValue.value === undefined ||
+            dependentValue.value === null
+          );
+        }
       case "equals": {
-        return normalizeValue(dependentValue.value) === enableWhen.answer;
+        return normalizeValue(dependentValue?.value) === enableWhen.answer;
       }
       case "not_equals": {
-        return normalizeValue(dependentValue.value) !== enableWhen.answer;
+        return normalizeValue(dependentValue?.value) !== enableWhen.answer;
       }
       case "greater":
         return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value > enableWhen.answer
+          typeof dependentValue?.value === "number" &&
+          dependentValue?.value > enableWhen.answer
         );
       case "less":
         return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value < enableWhen.answer
+          typeof dependentValue?.value === "number" &&
+          dependentValue?.value < enableWhen.answer
         );
       case "greater_or_equals":
         return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value >= enableWhen.answer
+          typeof dependentValue?.value === "number" &&
+          dependentValue?.value >= enableWhen.answer
         );
       case "less_or_equals":
         return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value <= enableWhen.answer
+          typeof dependentValue?.value === "number" &&
+          dependentValue?.value <= enableWhen.answer
         );
       default:
         return true;
