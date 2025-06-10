@@ -1206,6 +1206,8 @@ function QuestionEditor({
     unit,
   } = question;
 
+  // Memoize answer options to ensure unique IDs to avoid unnecessary re-renders in value field of AnwserOption
+
   const annotatedAnswerOptions = useMemo(() => {
     return (
       answer_option?.map((option: any) => ({
