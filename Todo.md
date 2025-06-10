@@ -37,7 +37,6 @@ x : Done
 - [ ] Encounter can be closed even if the SR is ACTIVE. But if encounter is closer SR cannot be marked as completed ( Showing error as encounter is already closed) - Fix can be not allow top close encounter if SR is open
 - [-] Not able to mark a SR as closed - Showing error location not found - Vignesh
 - [-] Roles access for Labs. Only users with lab role should have access to lab services - Vignesh
-- [-] If a long conclusion is given to a report, UI is breaking and text overflow outside the conclution column both in SR screen and Report page - Manyu
 
 ## Back End
 
@@ -170,6 +169,7 @@ x : Done
 - [x] After collecting specimen, the page needs to be refreshed to get status of collected specimen - Manyu
 - [x] SR overview page - Show the current status of the service request. Upon completion, update the status from active to complete - Manyu [Backend change pending]
 - [x] If no entries are given to a report and click on Save Result, it shows Conclusion updated successfully but report is not generated. Since report cant be blank, there should be validation and show error is no entries are there for result and conclusion. - Manyu
+- [x] If a long conclusion is given to a report, UI is breaking (Diagnostic Report) - Manyu
 
 ## Pharmacy
 
