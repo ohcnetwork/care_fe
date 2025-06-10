@@ -595,7 +595,7 @@ export const DischargeTab = ({
         type={type}
       />
       <div className="flex flex-wrap items-center gap-2 -mt-2">
-        <div className="relative flex-1 min-w-72 max-w-96 ml-2">
+        <div className="relative flex-1 min-w-72 max-w-96 sm:ml-2">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
             id="search-by-dischargefilename"
@@ -628,7 +628,7 @@ export const DischargeTab = ({
           </Button>
           <Button
             variant="primary"
-            className="min-w-24 sm:min-w-28"
+            className="w-full sm:w-auto min-w-24 sm:min-w-28"
             onClick={() => generateDischargeSummary()}
             disabled={isGenerating}
           >

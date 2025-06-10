@@ -1,6 +1,8 @@
 import { t } from "i18next";
 import { useQueryParams } from "raviger";
 
+import { cn } from "@/lib/utils";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { DischargeTab } from "@/components/Files/DischargeSummarySubTab";
@@ -67,24 +69,29 @@ export const FilesTab = (props: FilesTabsProps) => {
           setQParams({ file: value as TabType });
         }}
       >
-        <TabsList className={type != "encounter" ? "mt-2" : ""}>
+        <TabsList
+          className={cn(
+            type != "encounter" ? "mt-2" : "",
+            "flex-nowrap w-full pr-0.5 sm:w-fit",
+          )}
+        >
           <TabsTrigger
             value="all"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            className="flex-shrink-0 data-[state=active]:bg-white rounded-md font-semibold"
           >
             {t("files")}
           </TabsTrigger>
           {type === "encounter" && encounter && (
             <TabsTrigger
               value="discharge_summary"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              className="flex-shrink-0 data-[state=active]:bg-white rounded-md px-4 font-semibold"
             >
               {t("discharge_summary")}
             </TabsTrigger>
           )}
           <TabsTrigger
             value="drawings"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            className="flex-shrink-0 data-[state=active]:bg-white rounded-md px-4 font-semibold"
           >
             {t("drawings")}
           </TabsTrigger>
