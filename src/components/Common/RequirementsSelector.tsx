@@ -1,8 +1,9 @@
-import { ChevronDown, Plus, Trash2, X } from "lucide-react";
+import { ChevronDown, Plus, Search, Trash2, X } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Command,
   CommandEmpty,
@@ -19,7 +20,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 type RequirementItem = {
   value: string;
@@ -237,16 +238,29 @@ export default function RequirementsSelector({
             <CommandInput
               placeholder={t("search")}
               onValueChange={onSearch}
-              className="border-0"
+              className="border-0 focus:ring-0"
             />
-            <CommandEmpty className="py-6 text-center text-sm">
-              {t("no_results")}
-            </CommandEmpty>
+            {isLoading ? (
+              <div className="p-4">
+                <FormSkeleton rows={3} />
+              </div>
+            ) : (
+              <CommandEmpty className="text-center font-medium">
+                <Card className="flex flex-col items-center justify-center p-8 text-center border-none shadow-none ">
+                  <div className="rounded-full bg-primary/10 p-3 mb-2">
+                    <Search className="size-4 text-primary" />
+                  </div>
+                  <p className="text-sm sm:text-base font-medium text-gray-500">
+                    {t("no_results_found")}
+                  </p>
+                </Card>
+              </CommandEmpty>
+            )}
             <CommandGroup className="overflow-hidden p-0">
               <ScrollArea className="h-[calc(100vh-300px)]">
                 {isLoading ? (
                   <div className="p-4">
-                    <TableSkeleton count={5} />
+                    <FormSkeleton rows={5} />
                   </div>
                 ) : (
                   <div className="p-2">

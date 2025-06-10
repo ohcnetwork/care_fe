@@ -62,7 +62,10 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0">
         <Command>
-          <CommandInput placeholder={t("search_icons")} />
+          <CommandInput
+            placeholder={t("search_icons")}
+            className="border-0 focus:ring-0"
+          />
           <CommandEmpty>{t("no_icons_found")}</CommandEmpty>
           <CommandGroup className="max-h-[300px] overflow-auto">
             {iconNames.map((iconName) => (

@@ -223,7 +223,7 @@ function ActivityDefinitionFormContent({
         pathParams: { facilityId },
         queryParams: {
           limit: 100,
-          search: specimenSearch,
+          title: specimenSearch,
           status: SpecimenDefinitionStatus.active,
         },
       }),
@@ -239,7 +239,7 @@ function ActivityDefinitionFormContent({
           queryParams: {
             facility: facilityId,
             limit: 100,
-            search: observationSearch,
+            title: observationSearch,
           },
         },
       ),
@@ -254,7 +254,7 @@ function ActivityDefinitionFormContent({
       pathParams: { facilityId },
       queryParams: {
         limit: 100,
-        search: chargeItemSearch,
+        title: chargeItemSearch,
       },
     }),
   });
