@@ -659,10 +659,6 @@ interface HeaderRowProps {
   column: HeaderElementType[];
   form: UseFormReturn<ReportTemplateFormData>;
   onRemoveRow: (rowIndex: number) => void;
-  onAddElement: (rowIndex: number, type: HeaderElementType["type"]) => void;
-  onRemoveElement: (rowIndex: number, elementIndex: number) => void;
-  activeElement: number;
-  setActiveElement: (elementIndex: number) => void;
 }
 
 const RowButtons = ({
@@ -734,13 +730,9 @@ function HeaderRow({
   column: column,
   form,
   onRemoveRow,
-  onAddElement,
-  onRemoveElement,
-  activeElement,
-  setActiveElement,
 }: HeaderRowProps) {
   const { t } = useTranslation();
-
+  const [activeElement, setActiveElement] = useState<number | null>(null);
   const [removeRowDialog, setRemoveRowDialog] = useState<{
     display: boolean;
     rowIndex: number | null;
@@ -748,6 +740,13 @@ function HeaderRow({
     display: false,
     rowIndex: null,
   });
+
+  useEffect(() => {
+    if (column.length > 0 && activeElement === null) {
+      setActiveElement(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [column]);
 
   const toggleElement = (index: number) => {
     setActiveElement(index);
@@ -757,7 +756,103 @@ function HeaderRow({
     rowIndex: number,
     type: HeaderElementType["type"],
   ) => {
-    onAddElement(rowIndex, type);
+    const currentColumn =
+      form.getValues(`config.header.rows.${rowIndex}.columns`) || [];
+    const currentSizeRatio =
+      form.getValues(`config.header.rows.${rowIndex}.size_ratio`) || [];
+
+    const newSizeRatio = Array.from(
+      { length: currentSizeRatio.length + 1 },
+      () => 1,
+    );
+
+    let newElement: HeaderElementType;
+    switch (type) {
+      case "text":
+        newElement = {
+          type: "text",
+          text: t("new_text"),
+          size: "12pt",
+          weight: 400,
+          align: "left",
+        };
+        break;
+      case "image":
+        newElement = {
+          type: "image",
+          file_name: "",
+          url: "",
+          width: "100",
+          align: "center",
+        };
+        break;
+      case "rule":
+        newElement = {
+          type: "rule",
+          length: 100,
+          stroke: "#808080",
+          align: "center",
+        };
+        break;
+      case "datetime":
+        newElement = {
+          type: "datetime",
+          label: t("created_on"),
+          format: "[day]/[month]/[year]",
+          style: {
+            fill: "#808080",
+            weight: 400,
+          },
+          align: "right",
+        };
+        break;
+      default:
+        throw new Error(`Unsupported element type: ${type}`);
+    }
+
+    let updatedColumn = [...currentColumn];
+    if (activeElement === null) {
+      updatedColumn.push(newElement);
+    } else {
+      updatedColumn = [
+        ...currentColumn.slice(0, activeElement + 1),
+        newElement,
+        ...currentColumn.slice(activeElement + 1),
+      ];
+    }
+    const updatedRow = {
+      size_ratio: newSizeRatio,
+      columns: updatedColumn,
+    };
+    form.setValue(`config.header.rows.${rowIndex}`, updatedRow);
+    setActiveElement(
+      activeElement === null ? updatedColumn.length - 1 : activeElement + 1,
+    );
+  };
+
+  const handleRemoveElement = (rowIndex: number, elementIndex: number) => {
+    const currentRow = form.getValues(`config.header.rows.${rowIndex}`);
+    const currentColumn =
+      form.getValues(`config.header.rows.${rowIndex}.columns`) || [];
+    const updatedRow = {
+      size_ratio: currentRow.size_ratio?.filter(
+        (_, index) => index !== elementIndex,
+      ),
+      columns: currentColumn.filter((_, index) => index !== elementIndex),
+    };
+    form.setValue(`config.header.rows.${rowIndex}`, updatedRow);
+    const newColumnLength = updatedRow.columns.length;
+    if (newColumnLength === 0) {
+      setActiveElement(null);
+    } else {
+      if (elementIndex === 0) {
+        setActiveElement(0);
+      } else if (elementIndex === currentColumn.length - 1) {
+        setActiveElement(newColumnLength - 1);
+      } else {
+        setActiveElement(elementIndex - 1);
+      }
+    }
   };
 
   const getElementIcon = (type: HeaderElementType["type"]) => {
@@ -795,17 +890,19 @@ function HeaderRow({
                 onValueChange={(value) => toggleElement(Number(value))}
               >
                 <SelectTrigger className="bg-green-100">
-                  <SelectValue placeholder={t("add_element")}>
-                    <CareIcon
-                      icon={getElementIcon(column[activeElement].type)}
-                      className="w-4 h-4 text-green-900"
-                    />
-                    <span className="text-sm text-green-900">
-                      {activeElement}
-                      {". "}
-                      {t(`${column[activeElement].type}`)}
-                    </span>
-                  </SelectValue>
+                  {activeElement !== null && (
+                    <SelectValue placeholder={t("add_element")}>
+                      <CareIcon
+                        icon={getElementIcon(column[activeElement].type)}
+                        className="w-4 h-4 text-green-900"
+                      />
+                      <span className="text-sm text-green-900">
+                        {activeElement}
+                        {". "}
+                        {t(`${column[activeElement].type}`)}
+                      </span>
+                    </SelectValue>
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   {column.map((element, elementIndex) => (
@@ -818,16 +915,18 @@ function HeaderRow({
                   ))}
                 </SelectContent>
               </Select>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => onRemoveElement(rowIndex, activeElement)}
-              >
-                <span className="text-sm">
-                  {t(`remove_${column[activeElement].type}`)}
-                </span>
-                <Trash2Icon className="size-3" />
-              </Button>
+              {activeElement !== null && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => handleRemoveElement(rowIndex, activeElement)}
+                >
+                  <span className="text-sm">
+                    {t(`remove_${column[activeElement].type}`)}
+                  </span>
+                  <Trash2Icon className="size-3" />
+                </Button>
+              )}
             </div>
           )}
           <Button
@@ -927,24 +1026,13 @@ export default function HeaderBuilder({
   form: UseFormReturn<ReportTemplateFormData>;
 }) {
   const { t } = useTranslation();
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "config.header.rows",
   });
-  const [activeElements, setActiveElements] = useState<Record<number, number>>(
-    {},
-  );
   const [activeRow, setActiveRow] = useState<number | null>(null);
 
   const rows = form.watch("config.header.rows");
-
-  useEffect(() => {
-    if (Object.keys(activeElements).length === 0) {
-      setActiveElements(
-        rows.reduce((acc, _, index) => ({ ...acc, [index]: 0 }), {}),
-      );
-    }
-  }, [rows, activeElements]);
 
   const handleAddRow = () => {
     const rowLength = rows.length;
@@ -962,23 +1050,11 @@ export default function HeaderBuilder({
         ],
       },
     ]);
-    setActiveElements((prev) => ({ ...prev, [rowLength]: 0 }));
     setActiveRow(rowLength);
   };
 
   const handleRemoveRow = (rowIndex: number) => {
-    const currentActiveElements = { ...activeElements };
-    delete currentActiveElements[rowIndex];
-    const newActiveElements: Record<number, number> = {};
-    Object.entries(currentActiveElements).forEach(([oldIndex, value]) => {
-      const newIndex =
-        Number(oldIndex) > rowIndex
-          ? Number(oldIndex) - 1 // Decrease index for rows after the removed one
-          : Number(oldIndex); // Keep same index for rows before the removed one
-      newActiveElements[newIndex] = value;
-    });
     remove(rowIndex);
-    setActiveElements(newActiveElements);
     let newActiveRowIndex: number | null = null;
     // If there will be no fields after removal
     if (fields.length <= 1) {
@@ -997,93 +1073,6 @@ export default function HeaderBuilder({
       newActiveRowIndex = rowIndex - 1; // Set to previous row
     }
     setActiveRow(newActiveRowIndex);
-  };
-
-  const handleAddElement = (
-    rowIndex: number,
-    type: HeaderElementType["type"],
-  ) => {
-    const currentColumn =
-      form.getValues(`config.header.rows.${rowIndex}.columns`) || [];
-    const currentSizeRatio =
-      form.getValues(`config.header.rows.${rowIndex}.size_ratio`) || [];
-    const updatedColumn = [...currentColumn];
-    const newElementIndex = updatedColumn.length;
-    const newSizeRatio = Array.from(
-      { length: currentSizeRatio.length + 1 },
-      () => 1,
-    );
-
-    let newElement: HeaderElementType;
-    switch (type) {
-      case "text":
-        newElement = {
-          type: "text",
-          text: t("new_text"),
-          size: "12pt",
-          weight: 400,
-          align: "left",
-        };
-        break;
-      case "image":
-        newElement = {
-          type: "image",
-          file_name: "",
-          url: "",
-          width: "100",
-          align: "center",
-        };
-        break;
-      case "rule":
-        newElement = {
-          type: "rule",
-          length: 100,
-          stroke: "#808080",
-          align: "center",
-        };
-        break;
-      case "datetime":
-        newElement = {
-          type: "datetime",
-          label: t("created_on"),
-          format: "[day]/[month]/[year]",
-          style: {
-            fill: "#808080",
-            weight: 400,
-          },
-          align: "right",
-        };
-        break;
-      default:
-        throw new Error(`Unsupported element type: ${type}`);
-    }
-
-    updatedColumn.push(newElement);
-    const updatedRow = {
-      size_ratio: newSizeRatio,
-      columns: updatedColumn,
-    };
-    update(rowIndex, updatedRow);
-    setActiveElements((prev) => ({ ...prev, [rowIndex]: newElementIndex }));
-  };
-
-  const handleRemoveElement = (rowIndex: number, elementIndex: number) => {
-    const currentRow = form.getValues(`config.header.rows.${rowIndex}`);
-    const currentColumn =
-      form.getValues(`config.header.rows.${rowIndex}.columns`) || [];
-    const updatedRow = {
-      size_ratio: currentRow.size_ratio?.filter(
-        (_, index) => index !== elementIndex,
-      ),
-      columns: currentColumn.filter((_, index) => index !== elementIndex),
-    };
-    update(rowIndex, updatedRow);
-    if (updatedRow.columns.length !== 0) {
-      setActiveElements((prev) => ({
-        ...prev,
-        [rowIndex]: elementIndex > 0 ? elementIndex - 1 : elementIndex,
-      }));
-    }
   };
 
   const rowErrors = form.formState.errors?.config?.header?.rows;
@@ -1129,12 +1118,6 @@ export default function HeaderBuilder({
               column={rows[activeRow]?.columns || []}
               form={form}
               onRemoveRow={handleRemoveRow}
-              onAddElement={handleAddElement}
-              onRemoveElement={handleRemoveElement}
-              activeElement={activeElements[activeRow]}
-              setActiveElement={(index: number) =>
-                setActiveElements((prev) => ({ ...prev, [activeRow]: index }))
-              }
             />
             <RatioBuilder
               form={form}
