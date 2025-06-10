@@ -1,9 +1,12 @@
+import careConfig from "@careConfig";
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { usePathParams } from "raviger";
 import { Link, navigate } from "raviger";
 
 import { Button } from "@/components/ui/button";
 
+import { ObservationPlotConfig } from "@/components/Common/Charts/ObservationChart";
 import SideOverview from "@/components/Facility/ConsultationDetails/OverviewSideBar";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
@@ -51,6 +54,14 @@ export const EncounterOverviewTab = ({
     facilityIdExists &&
     canSubmitEncounterQuestionnaire &&
     !inactiveEncounterStatus.includes(encounter.status ?? "");
+
+  const { data: plotsConfig } = useQuery<ObservationPlotConfig>({
+    queryKey: ["plots-config"],
+    queryFn: () => fetch(careConfig.plotsConfigUrl).then((res) => res.json()),
+  });
+
+  const vitalGroups =
+    plotsConfig?.find((plot) => plot.id === "primary-parameters")?.groups || [];
 
   return (
     <div className="flex flex-col gap-4">
@@ -123,20 +134,23 @@ export const EncounterOverviewTab = ({
               readOnly={!canEdit}
             />
           </div>
-
           {/* Vitals Section */}
           <div>
-            <VitalsList patientId={patient.id} encounterId={encounter.id} />
-          </div>
-
-          {/* Questionnaire Responses Section */}
-          <div>
-            <QuestionnaireResponsesList
-              encounter={encounter}
+            <VitalsList
               patientId={patient.id}
-              canAccess={canAccess}
+              encounterId={encounter.id}
+              codeGroups={vitalGroups}
             />
           </div>
+        </div>
+
+        {/* Questionnaire Responses Section */}
+        <div>
+          <QuestionnaireResponsesList
+            encounter={encounter}
+            patientId={patient.id}
+            canAccess={canAccess}
+          />
         </div>
 
         {/* Right Column - Observations */}

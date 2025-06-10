@@ -1,5 +1,3 @@
-import { useTranslation } from "react-i18next";
-
 import {
   Table,
   TableBody,
@@ -9,23 +7,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface VitalsObservation {
+import { Code } from "@/types/questionnaire/code";
+
+export interface VitalsObservation {
   value: string | undefined;
   unit: string | undefined;
 }
 interface VitalsTableProps {
-  vitals: {
-    bodyTemperature: VitalsObservation;
-    heartRate: VitalsObservation;
-    diastolicBloodPressure: VitalsObservation;
-    systolicBloodPressure: VitalsObservation;
-    oxygenSaturation: VitalsObservation;
-    respiratoryRate: VitalsObservation;
-  }[];
+  vitals: Record<string, VitalsObservation>[];
+  vitalCodes?: Code[];
 }
 
-export function VitalsTable({ vitals }: VitalsTableProps) {
-  const { t } = useTranslation();
+export function VitalsTable({ vitals, vitalCodes }: VitalsTableProps) {
   const getVitalValue = (
     vital: VitalsTableProps["vitals"][number],
     field: keyof VitalsTableProps["vitals"][number],
@@ -38,24 +31,14 @@ export function VitalsTable({ vitals }: VitalsTableProps) {
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>
         <TableRow className="rounded-md overflow-hidden bg-gray-100">
-          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
-            {t("temperature")}
-          </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
-            {t("heart_rate")}
-          </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
-            {t("systolic_blood_pressure")}
-          </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
-            {t("diastolic_blood_pressure")}
-          </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
-            {t("oxygen_saturation")}
-          </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
-            {t("respiratory_rate")}
-          </TableHead>
+          {vitalCodes?.map((code) => (
+            <TableHead
+              key={code.code}
+              className="h-auto  py-1 px-2  text-gray-600 text-center"
+            >
+              {code.display || ""}
+            </TableHead>
+          ))}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -64,24 +47,11 @@ export function VitalsTable({ vitals }: VitalsTableProps) {
             className={`rounded-md overflow-hidden bg-gray-50`}
             key={idx}
           >
-            <TableCell className="font-medium text-center">
-              {getVitalValue(vital, "bodyTemperature")}
-            </TableCell>
-            <TableCell className="font-medium text-center">
-              {getVitalValue(vital, "heartRate")}
-            </TableCell>
-            <TableCell className="font-medium text-center">
-              {getVitalValue(vital, "systolicBloodPressure")}
-            </TableCell>
-            <TableCell className="font-medium text-center">
-              {getVitalValue(vital, "diastolicBloodPressure")}
-            </TableCell>
-            <TableCell className="font-medium text-center">
-              {getVitalValue(vital, "oxygenSaturation")}
-            </TableCell>
-            <TableCell className="font-medium text-center">
-              {getVitalValue(vital, "respiratoryRate")}
-            </TableCell>
+            {vitalCodes?.map((code) => (
+              <TableCell key={code.code} className="font-medium text-center">
+                {getVitalValue(vital, code.display || "")}
+              </TableCell>
+            ))}
           </TableRow>
         ))}
       </TableBody>

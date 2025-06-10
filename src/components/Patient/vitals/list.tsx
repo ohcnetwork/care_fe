@@ -8,20 +8,26 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Observation } from "@/types/emr/observation";
+import { Code } from "@/types/questionnaire/code";
 
-import { VitalsTable } from "./VitalsTable";
+import { VitalsObservation, VitalsTable } from "./VitalsTable";
 
+interface CodeGroup {
+  codes: Code[];
+  title: string;
+}
 interface VitalsListProps {
   patientId: string;
   encounterId: string;
   className?: string;
+  codeGroups?: CodeGroup[];
 }
 
 interface GroupedObservations {
   [key: string]: Observation[];
 }
-const LIMIT = 30;
-function extractVitals(observations: Observation[]) {
+const LIMIT = 100;
+function extractVitals(observations: Observation[], vitalCodes: Code[]) {
   if (!observations || observations.length === 0) return [];
   // Group observations by effective_datetime
   const groupedObservations = observations.reduce(
@@ -35,51 +41,51 @@ function extractVitals(observations: Observation[]) {
     },
     {},
   );
-  const getVitalField = (observations: Observation[], displayName: string) => {
-    const vitalField = observations.find(
-      (fields) => fields.main_code.display === displayName,
-    );
-    return {
-      value: vitalField?.value.value,
-      unit: vitalField?.value.unit?.code,
-    };
-  };
+
   // Sort the grouped observations by date in descending order
   // so that the most recent observations come first
   const orderedGroupedObservations = Object.keys(groupedObservations)
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
     .map((date) => groupedObservations[date]);
+
   // Map the ordered observations to extract vital fields
   // and return an array of vital objects
-  const vitals = orderedGroupedObservations.map((ob) => ({
-    bodyTemperature: getVitalField(ob, "Body temperature"),
-    heartRate: getVitalField(ob, "Heart rate"),
-    diastolicBloodPressure: getVitalField(ob, "Diastolic blood pressure"),
-    systolicBloodPressure: getVitalField(ob, "Systolic blood pressure"),
-    oxygenSaturation: getVitalField(
-      ob,
-      "Oxygen saturation in arterial blood by pulse oximetry",
-    ),
-    respiratoryRate: getVitalField(ob, "Respiratory rate"),
-  }));
-  // Filter out vitals that have no values for all fields
+  if (orderedGroupedObservations.length === 0) return [];
+
+  const vitals = orderedGroupedObservations.map((ob) => {
+    const vitalsObject: Record<string, VitalsObservation> = {};
+    vitalCodes.forEach((code) => {
+      if (code.display) {
+        const vitalField = ob.find(
+          (fields) => fields.main_code.code === code.code,
+        );
+        vitalsObject[code.display] = {
+          value: vitalField?.value.value,
+          unit: vitalField?.value.unit?.code,
+        };
+      }
+    });
+    return vitalsObject;
+  });
+  // Remove any vitals that are empty
   if (vitals.length === 0) return [];
-  const filteredVitals = vitals.filter(
-    (vital) =>
-      vital.bodyTemperature.value ||
-      vital.heartRate.value ||
-      vital.diastolicBloodPressure.value ||
-      vital.systolicBloodPressure.value ||
-      vital.oxygenSaturation.value ||
-      vital.respiratoryRate.value,
+  const filteredVitals = vitals.filter((vital) =>
+    Object.values(vital).some(
+      (field) => field.value !== undefined && field.value !== null,
+    ),
   );
   return filteredVitals;
 }
 export const VitalsList = ({
   patientId,
   encounterId,
+  codeGroups,
   className,
 }: VitalsListProps) => {
+  const vitalCodes =
+    codeGroups
+      ?.flatMap((group) => group.codes)
+      .filter((code) => code.display && code.display !== "FiO2") || [];
   const { data: vitals, isLoading } = useQuery({
     queryKey: ["vitals", patientId, encounterId],
     queryFn: query(routes.listObservations, {
@@ -87,7 +93,7 @@ export const VitalsList = ({
       queryParams: { encounter: encounterId, limit: LIMIT },
     }),
     select: (data: PaginatedResponse<Observation>) =>
-      extractVitals(data.results),
+      extractVitals(data.results, vitalCodes),
   });
 
   if (isLoading) {
@@ -110,7 +116,7 @@ export const VitalsList = ({
       readOnly={true}
       className={className}
     >
-      <VitalsTable vitals={vitals} />
+      <VitalsTable vitals={vitals} vitalCodes={vitalCodes} />
     </EncounterAccordionLayout>
   );
 };
