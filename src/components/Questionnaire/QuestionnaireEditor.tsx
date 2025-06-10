@@ -1220,7 +1220,7 @@ function QuestionEditor({
   const [expandedSubQuestions, setExpandedSubQuestions] = useState<Set<string>>(
     new Set(),
   );
-  const [localInputValue, setLocalInputValue] = useState("");
+  const [inputPosition, setInputPosition] = useState("");
   const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
   const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
     queryKey: ["valuesets", valueSetSearchQuery],
@@ -1753,11 +1753,8 @@ function QuestionEditor({
                   <CardContent className="sm:space-y-4 space-y-8">
                     {annotatedAnswerOptions &&
                       annotatedAnswerOptions.map((opt, idx) => (
-                        <AnimatedWrapper key={opt._id} keyValue={opt.value}>
-                          <div
-                            key={idx}
-                            className="space-y-4 pb-4 border-b border-gray-300 last:border-0 last:pb-0"
-                          >
+                        <AnimatedWrapper key={opt._id} keyValue={opt._id}>
+                          <div className="space-y-4 pb-4 border-b border-gray-300 last:border-0 last:pb-0">
                             <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
                               <div>
                                 <Label className="mb-2">
@@ -1821,8 +1818,8 @@ function QuestionEditor({
                                         </span>
                                         <span className="text-xs font-medium">
                                           {t("position")}{" "}
-                                          {localInputValue
-                                            ? localInputValue
+                                          {inputPosition
+                                            ? inputPosition
                                             : idx + 1}
                                         </span>
                                       </div>
@@ -1939,9 +1936,9 @@ function QuestionEditor({
                                             min={1}
                                             max={annotatedAnswerOptions.length}
                                             className="h-7 w-full text-sm"
-                                            value={localInputValue}
+                                            value={inputPosition}
                                             onChange={(e) =>
-                                              setLocalInputValue(e.target.value)
+                                              setInputPosition(e.target.value)
                                             }
                                             placeholder={t("enter_position")}
                                           />
@@ -1950,7 +1947,7 @@ function QuestionEditor({
                                             variant="secondary"
                                             onClick={() => {
                                               const newPosition =
-                                                parseInt(localInputValue) - 1;
+                                                parseInt(inputPosition) - 1;
                                               if (
                                                 !isNaN(newPosition) &&
                                                 newPosition >= 0 &&
@@ -1973,7 +1970,7 @@ function QuestionEditor({
                                                   newArray,
                                                 );
                                               }
-                                              setLocalInputValue("");
+                                              setInputPosition("");
                                             }}
                                             className="gap-2"
                                           >
@@ -2047,7 +2044,7 @@ function QuestionEditor({
                         }}
                       >
                         <AArrowDown className="size-4" />
-                        {t("sort_custom_options")}
+                        {t("sort_alphabetically")}
                       </Button>
                     </div>
                   </CardContent>
