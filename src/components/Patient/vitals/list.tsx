@@ -35,14 +35,15 @@ function extractVitals(observations: Observation[]) {
     },
     {},
   );
-  const getVitalField = (observations: Observation[], displayName: string) => ({
-    value: observations.find(
+  const getVitalField = (observations: Observation[], displayName: string) => {
+    const vitalField = observations.find(
       (fields) => fields.main_code.display === displayName,
-    )?.value.value,
-    unit: observations.find(
-      (fields) => fields.main_code.display === displayName,
-    )?.value.unit?.code,
-  });
+    );
+    return {
+      value: vitalField?.value.value,
+      unit: vitalField?.value.unit?.code,
+    };
+  };
   // Sort the grouped observations by date in descending order
   // so that the most recent observations come first
   const orderedGroupedObservations = Object.keys(groupedObservations)
@@ -92,7 +93,7 @@ export const VitalsList = ({
   if (isLoading) {
     return (
       <EncounterAccordionLayout
-        title="symptoms"
+        title="vitals"
         readOnly={true}
         className={className}
       >

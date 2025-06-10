@@ -9,26 +9,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+interface VitalsObservation {
+  value: string | undefined;
+  unit: string | undefined;
+}
 interface VitalsTableProps {
   vitals: {
-    bodyTemperature: { value: string | undefined; unit: string | undefined };
-    heartRate: { value: string | undefined; unit: string | undefined };
-    diastolicBloodPressure: {
-      value: string | undefined;
-      unit: string | undefined;
-    };
-    systolicBloodPressure: {
-      value: string | undefined;
-      unit: string | undefined;
-    };
-    oxygenSaturation: { value: string | undefined; unit: string | undefined };
-    respiratoryRate: { value: string | undefined; unit: string | undefined };
+    bodyTemperature: VitalsObservation;
+    heartRate: VitalsObservation;
+    diastolicBloodPressure: VitalsObservation;
+    systolicBloodPressure: VitalsObservation;
+    oxygenSaturation: VitalsObservation;
+    respiratoryRate: VitalsObservation;
   }[];
 }
 
 export function VitalsTable({ vitals }: VitalsTableProps) {
   const { t } = useTranslation();
-  const getVitalValue = (vital: any, field: string) => {
+  const getVitalValue = (
+    vital: VitalsTableProps["vitals"][number],
+    field: keyof VitalsTableProps["vitals"][number],
+  ) => {
     return vital[field]?.value
       ? `${vital[field].value} ${vital[field].unit || ""}`
       : "-";
