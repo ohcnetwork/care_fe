@@ -350,28 +350,32 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
           <SheetHeader className="p-0">
             <SheetTitle className="text-lg font-medium">{title}</SheetTitle>
           </SheetHeader>
-          <Tabs
-            value={activeType}
-            onValueChange={handleTabChange}
-            className="w-full"
-          >
-            <TabsList className="w-full">
-              {structuredTypes.map(({ type }) =>
-                structuredTypes.length > 1 ? (
+          {structuredTypes.length > 1 ? (
+            <Tabs
+              value={activeType}
+              onValueChange={handleTabChange}
+              className="w-full"
+            >
+              <TabsList className="w-full">
+                {structuredTypes.map(({ type }) => (
                   <TabsTrigger key={type} value={type} className="flex-1">
                     {type}
                   </TabsTrigger>
-                ) : (
-                  <div
-                    key={type}
-                    className="flex-1 cursor-default text-center py-1 text-sm text-black bg-white border border-gray-200 rounded-md"
-                  >
-                    {type}
-                  </div>
-                ),
-              )}
-            </TabsList>
-          </Tabs>
+                ))}
+              </TabsList>
+            </Tabs>
+          ) : (
+            <div className="w-full">
+              {structuredTypes.map(({ type }) => (
+                <div
+                  key={type}
+                  className="flex-1 cursor-default text-center py-1 text-sm text-black bg-white border border-gray-200 rounded-md shadow-sm"
+                >
+                  {type}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="space-y-0">
