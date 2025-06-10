@@ -335,6 +335,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <DatePicker
                   date={field.value}
                   onChange={(date) => field.onChange(date)}
+                  ref={field.ref}
                 />
                 <FormMessage />
               </FormItem>
@@ -350,6 +351,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <DatePicker
                   date={field.value}
                   onChange={(date) => field.onChange(date)}
+                  ref={field.ref}
                 />
                 <FormMessage />
               </FormItem>

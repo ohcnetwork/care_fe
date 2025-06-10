@@ -1,4 +1,3 @@
-import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -28,52 +27,53 @@ interface Props {
   value: DayOfWeek[] | null;
   onChange: (value: DayOfWeek[] | null) => void;
   format?: "alphabet" | "short" | "long";
+  ref?: React.RefCallback<HTMLDivElement>;
 }
 
-const WeekdayCheckbox = forwardRef<HTMLDivElement, Props>(
-  ({ value = [], onChange, format = "alphabet" }, ref) => {
-    const selectedDays = value ?? [];
-    const { t } = useTranslation();
+export default function WeekdayCheckbox({
+  value = [],
+  onChange,
+  format = "alphabet",
+  ref,
+}: Props) {
+  const selectedDays = value ?? [];
+  const { t } = useTranslation();
 
-    const handleDayToggle = (day: DayOfWeek) => {
-      if (!onChange) return;
+  const handleDayToggle = (day: DayOfWeek) => {
+    if (!onChange) return;
 
-      if (selectedDays.includes(day)) {
-        onChange(selectedDays.filter((d) => d !== day));
-      } else {
-        onChange([...selectedDays, day]);
-      }
-    };
+    if (selectedDays.includes(day)) {
+      onChange(selectedDays.filter((d) => d !== day));
+    } else {
+      onChange([...selectedDays, day]);
+    }
+  };
 
-    return (
-      <div className="flex gap-2 md:gap-4" ref={ref} tabIndex={-1}>
-        {dayOfWeekKeys.map((day) => {
-          const dow = DayOfWeek[day as keyof typeof DayOfWeek];
-          const isSelected = selectedDays.includes(dow);
+  return (
+    <div className="flex gap-2 md:gap-4" ref={ref} tabIndex={-1}>
+      {dayOfWeekKeys.map((day) => {
+        const dow = DayOfWeek[day as keyof typeof DayOfWeek];
+        const isSelected = selectedDays.includes(dow);
 
-          return (
-            <Button
-              key={dow}
-              type="button"
-              variant={isSelected ? "primary" : "outline"}
-              onClick={() => handleDayToggle(dow)}
-              size={format === "alphabet" ? "icon" : "default"}
-              aria-pressed={isSelected}
-              aria-checked={isSelected}
-              aria-label={t(`DAYS_OF_WEEK__${dow}`)}
-            >
-              {format === "alphabet"
-                ? day[0]
-                : format === "short"
-                  ? t(`DAYS_OF_WEEK_SHORT__${dow}`)
-                  : t(`DAYS_OF_WEEK__${dow}`)}
-            </Button>
-          );
-        })}
-      </div>
-    );
-  },
-);
-
-WeekdayCheckbox.displayName = "WeekdayCheckbox";
-export default WeekdayCheckbox;
+        return (
+          <Button
+            key={dow}
+            type="button"
+            variant={isSelected ? "primary" : "outline"}
+            onClick={() => handleDayToggle(dow)}
+            size={format === "alphabet" ? "icon" : "default"}
+            aria-pressed={isSelected}
+            aria-checked={isSelected}
+            aria-label={t(`DAYS_OF_WEEK__${dow}`)}
+          >
+            {format === "alphabet"
+              ? day[0]
+              : format === "short"
+                ? t(`DAYS_OF_WEEK_SHORT__${dow}`)
+                : t(`DAYS_OF_WEEK__${dow}`)}
+          </Button>
+        );
+      })}
+    </div>
+  );
+}
