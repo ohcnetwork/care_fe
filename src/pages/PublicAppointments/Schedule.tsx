@@ -342,7 +342,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                     }).toString();
 
                     navigate(
-                      `/facility/${facilityId}/appointments/${staffId}/patient-select?${params}`,
+                      `/facility/${facilityId}/appointments/${staffId}/patient-select`, { query: {...} }
                     );
                   }
                 }}
