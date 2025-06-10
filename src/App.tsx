@@ -1,10 +1,12 @@
+import careConfig from "@careConfig";
 import {
   MutationCache,
   QueryCache,
   QueryClient,
-  QueryClientProvider,
+  defaultShouldDehydrateQuery,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { useLocationChange } from "raviger";
 import { Suspense, useEffect } from "react";
 
@@ -21,6 +23,7 @@ import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import { handleHttpError } from "@/Utils/request/errorHandler";
 import { HTTPError } from "@/Utils/request/types";
 
+import { createUserPersister } from "./OfflineSupport/createUserPersister";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 const queryClient = new QueryClient({
@@ -36,6 +39,7 @@ const queryClient = new QueryClient({
         }
         return false;
       },
+      gcTime: careConfig.queryGcTime,
       refetchOnWindowFocus: false,
     },
   },
@@ -62,7 +66,18 @@ const App = () => {
 
   return (
     <>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister: createUserPersister(),
+          maxAge: careConfig.queryPersistMaxAge,
+          dehydrateOptions: {
+            shouldDehydrateQuery: (query) =>
+              defaultShouldDehydrateQuery(query) &&
+              Boolean(query.meta?.persist),
+          },
+        }}
+      >
         <ScrollToTop />
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
@@ -90,7 +105,7 @@ const App = () => {
 
         {/* Devtools are not included in production builds by default */}
         <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
       <Integrations.Sentry disabled={!import.meta.env.PROD} />
     </>
   );

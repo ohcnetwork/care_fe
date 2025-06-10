@@ -63,6 +63,8 @@ export function AppointmentSlotPicker({
         day: dateQueryString(selectedDate),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!resourceId && !!selectedDate,
   });
 
@@ -75,6 +77,8 @@ export function AppointmentSlotPicker({
         day: dateQueryString(new Date()),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!resourceId,
   });
 

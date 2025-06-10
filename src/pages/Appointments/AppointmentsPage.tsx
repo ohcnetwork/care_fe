@@ -278,6 +278,8 @@ export default function AppointmentsPage({
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const { canViewAppointments } = getPermissions(
@@ -290,6 +292,8 @@ export default function AppointmentsPage({
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const resources = schedulableUsersQuery.data?.users;
@@ -357,6 +361,8 @@ export default function AppointmentsPage({
         day: qParams.date_from ?? "",
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: slotsFilterEnabled,
   });
 
@@ -683,6 +689,8 @@ function AppointmentColumn(props: {
         date_before: props.date_to,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
   });
 
@@ -828,6 +836,8 @@ function AppointmentRow(props: {
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
   });
 

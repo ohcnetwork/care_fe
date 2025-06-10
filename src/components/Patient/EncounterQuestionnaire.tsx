@@ -42,6 +42,8 @@ export default function EncounterQuestionnaire({
       pathParams: { id: encounterId ?? "" },
       queryParams: { facility: facilityId! },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!encounterId,
   });
 

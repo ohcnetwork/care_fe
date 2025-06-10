@@ -36,6 +36,8 @@ export const ResourceRequests = (props: PatientProps) => {
         related_patient: patientId,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!patientId,
   });
 

@@ -34,6 +34,8 @@ export function DiagnosisList({
         ...(encounterId ? { encounter: encounterId } : {}),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   if (!diagnoses?.results.length) {

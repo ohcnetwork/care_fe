@@ -47,6 +47,8 @@ const EncounterHistory = (props: PatientProps) => {
         offset: ((qParams.page ?? 1) - 1) * 5,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: canViewPatients,
   });
 

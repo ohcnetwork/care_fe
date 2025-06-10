@@ -58,6 +58,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const { canCreatePatient } = getPermissions(
@@ -116,6 +118,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         phone_number: phoneNumber,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!isValidPhoneNumber(phoneNumber),
   });
 

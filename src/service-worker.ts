@@ -8,6 +8,8 @@
 import { clientsClaim } from "workbox-core";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { precacheAndRoute } from "workbox-precaching";
+import { registerRoute } from "workbox-routing";
+import { CacheFirst } from "workbox-strategies";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -66,3 +68,28 @@ self.addEventListener("notificationclick", (e) => {
     }),
   );
 });
+
+/// this is for runtime caching of ui as a temptorary solution as precaching of have some problem.
+registerRoute(
+  ({ request }) => request.mode === "navigate",
+  new CacheFirst({
+    cacheName: "pages-cache",
+    plugins: [],
+  }),
+);
+
+registerRoute(
+  ({ request }) =>
+    request.destination === "style" || request.destination === "script",
+  new CacheFirst({
+    cacheName: "static-resources",
+  }),
+);
+
+registerRoute(
+  ({ request }) => request.destination === "image",
+  new CacheFirst({
+    cacheName: "images-cache",
+    plugins: [],
+  }),
+);

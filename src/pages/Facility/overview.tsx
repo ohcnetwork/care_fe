@@ -34,6 +34,8 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const { canViewSchedule, canListEncounters } = getPermissions(

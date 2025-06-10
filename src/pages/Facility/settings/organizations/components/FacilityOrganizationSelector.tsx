@@ -1,4 +1,4 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { UseQueryOptions, useQueries, useQuery } from "@tanstack/react-query";
 import { Building, ChevronDown, ChevronRight, Loader2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,7 +28,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { HTTPError } from "@/Utils/request/types";
+import {
+  FacilityOrganization,
+  FacilityOrganizationResponse,
+} from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface FacilityOrganizationSelectorProps {
@@ -38,7 +42,14 @@ interface FacilityOrganizationSelectorProps {
   currentOrganizations?: FacilityOrganization[];
   singleSelection?: boolean;
 }
+type OrgKey = ["organizations", string, string];
 
+type OrgQueryOptions = UseQueryOptions<
+  FacilityOrganizationResponse, // TQueryFnData
+  HTTPError, // TError
+  FacilityOrganizationResponse, // TData
+  OrgKey // TQueryKey
+>;
 export default function FacilityOrganizationSelector(
   props: FacilityOrganizationSelectorProps,
 ) {
@@ -77,6 +88,8 @@ export default function FacilityOrganizationSelector(
         },
       },
     ),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const organizationQueries = useQueries({
@@ -89,8 +102,10 @@ export default function FacilityOrganizationSelector(
           name: facilityOrgSearch,
         },
       }),
+      meta: { persist: true },
+      networkMode: "online",
       enabled: !!level.id,
-    })),
+    })) as OrgQueryOptions[],
   });
 
   const handleSelect = (org: FacilityOrganization) => {

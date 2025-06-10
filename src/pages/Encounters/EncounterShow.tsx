@@ -79,6 +79,8 @@ export const EncounterShow = (props: Props) => {
             patient: patientId,
           },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!encounterId,
   });
 
@@ -89,6 +91,8 @@ export const EncounterShow = (props: Props) => {
         id: patientId,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !facilityIdFromProps && !!patientId,
   });
 
@@ -99,6 +103,8 @@ export const EncounterShow = (props: Props) => {
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId ?? "" },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!facilityId,
   });
 

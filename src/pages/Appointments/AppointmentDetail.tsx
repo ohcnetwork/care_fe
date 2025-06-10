@@ -91,6 +91,8 @@ export default function AppointmentDetail(props: Props) {
         id: props.facilityId,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const { canViewAppointments, canUpdateAppointment, canCreateAppointment } =
@@ -104,6 +106,8 @@ export default function AppointmentDetail(props: Props) {
         id: props.appointmentId,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: canViewAppointments,
   });
 

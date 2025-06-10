@@ -125,6 +125,8 @@ export function MedicationStatementList({
     queryFn: query(medicationStatementApi.list, {
       pathParams: { patientId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: canAccess,
   });
 

@@ -34,6 +34,8 @@ export function SymptomsList({
       pathParams: { patientId },
       queryParams: encounterId ? { encounter: encounterId } : undefined,
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   if (isLoading) {

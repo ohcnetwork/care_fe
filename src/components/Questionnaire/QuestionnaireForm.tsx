@@ -334,6 +334,8 @@ export function QuestionnaireForm({
     queryFn: query(questionnaireApi.detail, {
       pathParams: { id: questionnaireSlug ?? "" },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
 

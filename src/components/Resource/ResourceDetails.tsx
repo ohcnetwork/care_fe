@@ -116,6 +116,8 @@ export default function ResourceDetails({
     queryFn: query(routes.getResourceDetails, {
       pathParams: { id },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   if (isLoading || !data) {

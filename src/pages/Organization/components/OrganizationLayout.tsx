@@ -64,6 +64,8 @@ export default function OrganizationLayout({
     queryFn: query(organizationApi.get, {
       pathParams: { id },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!id,
   });
 

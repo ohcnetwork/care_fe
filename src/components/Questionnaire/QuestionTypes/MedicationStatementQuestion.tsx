@@ -168,6 +168,8 @@ export function MedicationStatementQuestion({
         encounter: encounterId,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !isPreview,
   });
 

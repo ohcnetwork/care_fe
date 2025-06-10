@@ -681,6 +681,8 @@ export function SymptomQuestion({
         encounter: encounterId,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !isPreview,
   });
 

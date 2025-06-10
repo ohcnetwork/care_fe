@@ -386,6 +386,8 @@ export default function QuestionnaireResponsesList({
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: canAccess,
   });
   return (

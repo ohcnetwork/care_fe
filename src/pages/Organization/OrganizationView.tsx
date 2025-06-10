@@ -43,6 +43,8 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
         name: qParams.name || undefined,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   // Hack for the sidebar to work

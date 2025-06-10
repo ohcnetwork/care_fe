@@ -66,6 +66,8 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   const { data: roles } = useQuery({
     queryKey: ["roles"],
     queryFn: query(roleApi.listRoles),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: open,
   });
 
@@ -240,6 +242,8 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
     queryFn: query(routes.patient.users.listUsers, {
       pathParams: { patientId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const { mutate: removeUser } = useMutation({

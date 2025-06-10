@@ -13,6 +13,8 @@ export const useIsUserSchedulableResource = (
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     select: (data: { users: UserBase[] }) =>
       data.users.some(({ id }) => id === userId),
   });

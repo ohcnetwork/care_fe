@@ -93,6 +93,8 @@ export function EncounterQuestion({
       pathParams: { id: encounterId },
       queryParams: { facility: facilityId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!encounterId,
   });
   const { t } = useTranslation();

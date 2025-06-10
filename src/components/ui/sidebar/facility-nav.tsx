@@ -139,6 +139,8 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: selectedFacility?.id ?? "" },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!selectedFacility?.id,
   });
 

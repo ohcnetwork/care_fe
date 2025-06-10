@@ -571,6 +571,8 @@ export function AllergyQuestion({
         limit: 100,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !isPreview,
   });
 

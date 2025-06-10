@@ -72,6 +72,8 @@ export function QuestionnaireSearch({
           status: "active",
         },
       }),
+      meta: { persist: true },
+      networkMode: "online",
     });
 
   useEffect(() => {

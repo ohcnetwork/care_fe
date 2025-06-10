@@ -54,6 +54,8 @@ export const Appointments = (props: PatientProps) => {
         queryParams: { patient: patientId, limit: 100 },
       },
     ),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   useEffect(() => {

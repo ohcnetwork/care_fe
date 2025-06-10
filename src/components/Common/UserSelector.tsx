@@ -91,6 +91,8 @@ export default function UserSelector({
       )({ signal: new AbortController().signal });
       return response;
     },
+    meta: { persist: true },
+    networkMode: "online",
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       const currentOffset = allPages.length * PAGE_LIMIT;

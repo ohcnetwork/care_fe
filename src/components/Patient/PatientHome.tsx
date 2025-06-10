@@ -41,6 +41,8 @@ export const PatientHome = (props: {
         id,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!id,
   });
 

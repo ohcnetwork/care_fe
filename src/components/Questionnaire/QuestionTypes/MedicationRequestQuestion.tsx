@@ -213,6 +213,8 @@ export function MedicationRequestQuestion({
         limit: 100,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !isPreview,
   });
 

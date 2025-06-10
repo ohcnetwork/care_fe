@@ -134,6 +134,8 @@ export function EncounterList({
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !propEncounters && !encounter_id,
   });
 
@@ -145,6 +147,8 @@ export function EncounterList({
         facility: facilityId,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!encounter_id,
   });
   const searchOptions = [

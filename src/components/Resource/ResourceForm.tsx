@@ -91,6 +91,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     queryFn: query(routes.patient.getPatient, {
       pathParams: { id: String(related_patient) },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!related_patient,
   });
 
@@ -99,6 +101,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     queryFn: query(routes.getResourceDetails, {
       pathParams: { id: String(id) },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!id,
   });
 
@@ -191,6 +195,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         limit: 50,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const facilityOptions = facilities?.results.map((facility) => ({

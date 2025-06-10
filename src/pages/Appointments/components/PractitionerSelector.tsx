@@ -50,6 +50,8 @@ export const PractitionerSelector = ({
     queryFn: query(scheduleApi.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   return (

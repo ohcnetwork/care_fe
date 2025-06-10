@@ -351,6 +351,8 @@ export function DiagnosisQuestion({
         exclude_verification_status: "entered_in_error",
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !isPreview,
   });
 

@@ -46,6 +46,8 @@ export function useGovtOrganizationLevel({
       },
       ...headers,
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const handleChange = (value: string) => {

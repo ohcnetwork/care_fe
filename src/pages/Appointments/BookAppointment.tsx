@@ -42,6 +42,8 @@ export default function BookAppointment(props: Props) {
         facility_id: props.facilityId,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
   const resource = resourcesQuery.data?.users.find((r) => r.id === resourceId);
 

@@ -40,6 +40,8 @@ const CommentSection = ({ id }: { id: string }) => {
       },
       pathParams: { id },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const { mutate: addComment } = useMutation({

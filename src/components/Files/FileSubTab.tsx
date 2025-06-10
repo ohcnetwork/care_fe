@@ -117,6 +117,8 @@ export const FilesPage = ({
         }),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: canAccess,
   });
 

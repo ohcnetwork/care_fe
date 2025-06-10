@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 
@@ -10,6 +10,7 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
+import { createUserPersister } from "@/OfflineSupport/createUserPersister";
 import routes, {
   JwtTokenObtainPair,
   LoginResponse,
@@ -52,17 +53,40 @@ export default function AuthUserProvider({
     ),
   );
 
-  const { data: user, isLoading } = useQuery({
+  const { data: onlineuser, isLoading } = useQuery({
     queryKey: ["currentUser", accessToken],
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
-  const setUser = useSetAtom(userAtom);
+  const { data: offlineUser } = useQuery({
+    queryKey: ["offlineCurrentUser"],
+    queryFn: async () => {
+      throw new Error("Should not fetch online");
+    },
+    enabled: false,
+  });
+
   useEffect(() => {
-    setUser(user);
-  }, [user, setUser]);
+    if (onlineuser) {
+      queryClient.setQueryData(["offlineCurrentUser"], onlineuser);
+    }
+  }, [onlineuser, queryClient]);
+
+  const setUser = useSetAtom(userAtom);
+  const user = useAtomValue(userAtom);
+  useEffect(() => {
+    if (
+      !navigator.onLine &&
+      localStorage.getItem(LocalStorageKeys.accessToken) &&
+      offlineUser
+    ) {
+      setUser(offlineUser);
+    } else {
+      setUser(onlineuser);
+    }
+  }, [onlineuser, offlineUser, setUser]);
   const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
 
   const tokenRefreshQuery = useQuery({
@@ -72,7 +96,7 @@ export default function AuthUserProvider({
     }),
     refetchIntervalInBackground: true,
     refetchInterval: careConfig.auth.tokenRefreshInterval,
-    enabled: !!refreshToken && !!user,
+    enabled: !!refreshToken && !!onlineuser,
   });
 
   useEffect(() => {
@@ -159,7 +183,7 @@ export default function AuthUserProvider({
     setPatientToken(null);
 
     await queryClient.resetQueries({ queryKey: ["currentUser"] });
-
+    await createUserPersister().removeClient();
     const redirectURL = getRedirectURL();
     navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");
   }, [queryClient]);

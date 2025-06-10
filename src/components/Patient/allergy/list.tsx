@@ -79,6 +79,8 @@ export function AllergyList({
           : undefined,
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   if (isLoading) {

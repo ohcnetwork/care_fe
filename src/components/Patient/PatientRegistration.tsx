@@ -297,6 +297,8 @@ export default function PatientRegistration(
     queryFn: query(routes.getPatient, {
       pathParams: { id: patientId || "" },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!patientId,
   });
 
