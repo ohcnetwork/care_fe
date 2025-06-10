@@ -22,6 +22,7 @@ interface ValueSetPreviewProps {
 }
 
 export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
+  const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
 
@@ -41,10 +42,11 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             },
       },
     }),
+    enabled: open,
   });
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">
