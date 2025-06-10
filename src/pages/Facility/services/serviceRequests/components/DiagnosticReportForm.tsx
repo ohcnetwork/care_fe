@@ -471,116 +471,136 @@ export function DiagnosticReportForm({
       return;
     }
 
-    const formattedObservations: ObservationFromDefinitionCreate[] =
-      Object.entries(observations)
-        .map(([definitionId, obsData]) => {
-          const observationDefinition = observationDefinitions.find(
-            (def) => def.id === definitionId,
-          );
+    try {
+      // Check if at least one observation has a value or component value
+      const hasObservationValue = Object.values(observations).some((obs) => {
+        const hasMainValue = obs.value.trim() !== "";
+        const hasComponentValue = Object.values(obs.components).some(
+          (comp) => comp.value.trim() !== "",
+        );
+        return hasMainValue || hasComponentValue;
+      });
 
-          // If it's a component-based observation (like blood pressure), we should check if components have values
-          const hasComponents =
-            observationDefinition?.component &&
-            observationDefinition.component.length > 0;
-          const hasComponentValues =
-            hasComponents &&
-            Object.values(obsData.components).some(
-              (comp) => comp.value.trim() !== "",
-            );
-
-          // For regular observations, skip if no value is entered
-          // For component-based observations, check component values
-          if (!hasComponents && !obsData.value.trim()) {
-            return null;
-          }
-
-          if (hasComponents && !hasComponentValues) {
-            return null;
-          }
-
-          const value: QuestionnaireSubmitResultValue = {
-            value: obsData.value,
-          };
-
-          if (obsData.unit && observationDefinition?.permitted_unit) {
-            value.unit = {
-              code: obsData.unit,
-              system: observationDefinition.permitted_unit.system,
-              display:
-                observationDefinition.permitted_unit.display || obsData.unit,
-            };
-          }
-
-          // Create observation components if they exist and have values
-          const components: ObservationComponent[] = [];
-
-          if (hasComponents && observationDefinition) {
-            observationDefinition.component.forEach(
-              (componentDef: ObservationDefinitionComponentSpec) => {
-                const componentCode = componentDef.code.code;
-                const componentData = obsData.components[componentCode];
-
-                if (componentData && componentData.value.trim()) {
-                  const componentValue: QuestionnaireSubmitResultValue = {
-                    value: componentData.value,
-                  };
-
-                  if (componentData.unit && componentDef.permitted_unit) {
-                    componentValue.unit = {
-                      code: componentData.unit,
-                      system: componentDef.permitted_unit.system,
-                      display:
-                        componentDef.permitted_unit.display ||
-                        componentData.unit,
-                    };
-                  }
-
-                  components.push({
-                    code: componentDef.code,
-                    value: componentValue,
-                    interpretation: componentData.isNormal
-                      ? "normal"
-                      : "abnormal",
-                  });
-                }
-              },
-            );
-          }
-
-          return {
-            ...(obsData.id
-              ? { observation_id: obsData.id }
-              : { observation_definition: definitionId }),
-            observation: {
-              status: ObservationStatus.FINAL,
-              subject_type: "patient",
-              value_type: observationDefinition?.permitted_data_type || "float",
-              effective_datetime: new Date().toISOString(),
-              value,
-              encounter: null,
-              interpretation: obsData.isNormal ? "normal" : "abnormal",
-              component: components.length > 0 ? components : undefined,
-            },
-          };
-        })
-        .filter(Boolean) as ObservationFromDefinitionCreate[];
-
-    if (fullReport) {
-      // Upsert observations
-      if (formattedObservations.length > 0) {
-        upsertObservations({
-          observations: formattedObservations,
-        });
+      // Check if either observations or conclusion is provided
+      if (!hasObservationValue && !conclusion.trim()) {
+        toast.error(t("at_least_one_result"));
+        return;
       }
 
-      updateDiagnosticReport({
-        id: fullReport.id,
-        status: fullReport.status,
-        category: fullReport.category,
-        code: fullReport.code,
-        note: fullReport.note,
-        conclusion,
-      });
+      const formattedObservations: ObservationFromDefinitionCreate[] =
+        Object.entries(observations)
+          .map(([definitionId, obsData]) => {
+            const observationDefinition = observationDefinitions.find(
+              (def) => def.id === definitionId,
+            );
+
+            // If it's a component-based observation (like blood pressure), we should check if components have values
+            const hasComponents =
+              observationDefinition?.component &&
+              observationDefinition.component.length > 0;
+            const hasComponentValues =
+              hasComponents &&
+              Object.values(obsData.components).some(
+                (comp) => comp.value.trim() !== "",
+              );
+
+            // For regular observations, skip if no value is entered
+            // For component-based observations, check component values
+            if (!hasComponents && !obsData.value.trim()) {
+              return null;
+            }
+
+            if (hasComponents && !hasComponentValues) {
+              return null;
+            }
+
+            const value: QuestionnaireSubmitResultValue = {
+              value: obsData.value,
+            };
+
+            if (obsData.unit && observationDefinition?.permitted_unit) {
+              value.unit = {
+                code: obsData.unit,
+                system: observationDefinition.permitted_unit.system,
+                display:
+                  observationDefinition.permitted_unit.display || obsData.unit,
+              };
+            }
+
+            // Create observation components if they exist and have values
+            const components: ObservationComponent[] = [];
+
+            if (hasComponents && observationDefinition) {
+              observationDefinition.component.forEach(
+                (componentDef: ObservationDefinitionComponentSpec) => {
+                  const componentCode = componentDef.code.code;
+                  const componentData = obsData.components[componentCode];
+
+                  if (componentData && componentData.value.trim()) {
+                    const componentValue: QuestionnaireSubmitResultValue = {
+                      value: componentData.value,
+                    };
+
+                    if (componentData.unit && componentDef.permitted_unit) {
+                      componentValue.unit = {
+                        code: componentData.unit,
+                        system: componentDef.permitted_unit.system,
+                        display:
+                          componentDef.permitted_unit.display ||
+                          componentData.unit,
+                      };
+                    }
+
+                    components.push({
+                      code: componentDef.code,
+                      value: componentValue,
+                      interpretation: componentData.isNormal
+                        ? "normal"
+                        : "abnormal",
+                    });
+                  }
+                },
+              );
+            }
+
+            return {
+              ...(obsData.id
+                ? { observation_id: obsData.id }
+                : { observation_definition: definitionId }),
+              observation: {
+                status: ObservationStatus.FINAL,
+                subject_type: "patient",
+                value_type:
+                  observationDefinition?.permitted_data_type || "float",
+                effective_datetime: new Date().toISOString(),
+                value,
+                encounter: null,
+                interpretation: obsData.isNormal ? "normal" : "abnormal",
+                component: components.length > 0 ? components : undefined,
+              },
+            };
+          })
+          .filter(Boolean) as ObservationFromDefinitionCreate[];
+
+      if (fullReport) {
+        // Upsert observations
+        if (formattedObservations.length > 0) {
+          upsertObservations({
+            observations: formattedObservations,
+          });
+        }
+
+        updateDiagnosticReport({
+          id: fullReport.id,
+          status: fullReport.status,
+          category: fullReport.category,
+          code: fullReport.code,
+          note: fullReport.note,
+          conclusion,
+        });
+      }
+    } catch (_error) {
+      toast.error(t("error_validating_form"));
     }
   }
 
