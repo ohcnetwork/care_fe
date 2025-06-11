@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
@@ -99,57 +100,98 @@ function QuestionGroup({
     ? `${parentTitle} - ${group.text}`
     : group.text;
 
+  // Filter out questions with responses and split them for two-column layout
+  const questionsWithResponses =
+    group.questions?.reduce((acc: Question[], question) => {
+      if (question.type === "structured") return acc;
+      if (question.type === "group") return acc;
+
+      const response = responses.find((r) => r.question_id === question.id);
+      if (!response) return acc;
+
+      const value = response.values[0]?.value;
+      if (!value && !response.values[0]?.coding) return acc;
+
+      acc.push(question);
+      return acc;
+    }, []) || [];
+
+  const midPoint = isSingleGroup
+    ? Math.ceil(questionsWithResponses.length / 2)
+    : questionsWithResponses.length;
+  const leftQuestions = questionsWithResponses.slice(0, midPoint);
+  const rightQuestions = isSingleGroup
+    ? questionsWithResponses.slice(midPoint)
+    : [];
+
+  const renderQuestionRow = (question: Question) => {
+    const response = responses.find((r) => r.question_id === question.id);
+    if (!response) return null;
+
+    const value = response.values[0]?.value;
+    const unit = response.values[0]?.unit || question.unit;
+    const coding = response.values[0]?.coding;
+
+    return (
+      <TableRow key={question.id}>
+        <TableCell className="py-1 pl-0 align-top">
+          <div className="text-sm text-gray-600 break-words whitespace-normal">
+            {question.text}
+          </div>
+        </TableCell>
+        <TableCell className="py-1 pr-0 align-top">
+          <div className="text-sm font-medium break-words whitespace-normal">
+            {formatValue(value, question.type)}
+            {unit && <span className="ml-1 text-gray-600">{unit.code}</span>}
+            {coding && (
+              <span className="ml-1 text-gray-600">
+                {coding.display} ({coding.code})
+              </span>
+            )}
+          </div>
+        </TableCell>
+      </TableRow>
+    );
+  };
+
   return (
     <div className="border border-gray-200 rounded-lg px-4 py-2">
-      <h3 className="text-base font-medium text-gray-900 border-b border-gray-200 pb-2 mb-4">
+      <h3 className="text-base font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
         {group.text}
       </h3>
       <div
-        className={cn(
-          isSingleGroup ? "grid grid-cols-2 gap-x-8 gap-y-1" : "space-y-1",
-        )}
+        className={cn("w-full", {
+          "grid md:grid-cols-2 grid-cols-1 gap-8": isSingleGroup,
+        })}
       >
-        {group.questions?.map((question, index) => {
-          if (question.type === "structured") return null;
+        {leftQuestions.length > 0 && (
+          <div className="w-full">
+            <Table className="table-fixed w-full">
+              <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
+            </Table>
+          </div>
+        )}
 
-          if (question.type === "group") {
-            return (
-              <QuestionGroup
-                key={index}
-                group={question}
-                responses={responses}
-                parentTitle={currentTitle}
-              />
-            );
-          }
+        {isSingleGroup && rightQuestions.length > 0 && (
+          <div className="w-full">
+            <Table className="table-fixed w-full">
+              <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
+            </Table>
+          </div>
+        )}
 
-          const response = responses.find((r) => r.question_id === question.id);
-          if (!response) return null;
-
-          const value = response.values[0]?.value;
-          const unit = response.values[0]?.unit || question.unit;
-          const coding = response.values[0]?.coding;
-
-          if (!value && !coding) return null;
+        {group.questions?.map((subQuestion, idx) => {
+          if (subQuestion.type === "structured" || !subQuestion.type)
+            return null;
+          if (subQuestion.type !== "group") return null;
 
           return (
-            <div
-              key={index}
-              className="flex justify-between items-baseline py-1"
-            >
-              <div className="text-sm text-gray-600">{question.text}</div>
-              <div className="text-sm font-medium">
-                {formatValue(value, question.type)}
-                {unit && (
-                  <span className="ml-1 text-gray-600">{unit.code}</span>
-                )}
-                {coding && (
-                  <span className="ml-1 text-gray-600">
-                    {coding.display} ({coding.code})
-                  </span>
-                )}
-              </div>
-            </div>
+            <QuestionGroup
+              key={idx}
+              group={subQuestion}
+              responses={responses}
+              parentTitle={currentTitle}
+            />
           );
         })}
       </div>
@@ -230,38 +272,10 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
   const leftGroups = groups.slice(0, midPoint);
   const rightGroups = shouldUseTwoColumns ? groups.slice(midPoint) : [];
 
-  // Helper function to render a question
-  const renderQuestion = (
-    question: Question,
-    response: QuestionnaireResponse["responses"][0],
-  ) => {
-    const value = response.values[0]?.value;
-    const unit = response.values[0]?.unit || question.unit;
-    const coding = response.values[0]?.coding;
-
-    return (
-      <div
-        key={question.id}
-        className="flex justify-between items-baseline py-1"
-      >
-        <div className="text-sm text-gray-600">{question.text}</div>
-        <div className="text-sm font-medium">
-          {formatValue(value, question.type)}
-          {unit && <span className="ml-1 text-gray-600">{unit.code}</span>}
-          {coding && (
-            <span className="ml-1 text-gray-600">
-              {coding.display} ({coding.code})
-            </span>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   // Helper function to render a column of questions
   const renderColumn = (questions: Question[]) => {
     const result: React.ReactElement[] = [];
-    let currentNonGroupQuestions: React.ReactElement[] = [];
+    let currentNonGroupQuestions: Question[] = [];
 
     const flushNonGroupQuestions = () => {
       if (currentNonGroupQuestions.length > 0) {
@@ -270,7 +284,49 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
             key={`group-${result.length}`}
             className="border border-gray-200 rounded-lg px-4 py-2"
           >
-            {currentNonGroupQuestions}
+            <div className="w-full">
+              <Table className="table-fixed w-full">
+                <TableBody>
+                  {currentNonGroupQuestions.map((question) => {
+                    const response = item.responses.find(
+                      (r) => r.question_id === question.id,
+                    );
+                    if (!response) return null;
+
+                    const value = response.values[0]?.value;
+                    const unit = response.values[0]?.unit || question.unit;
+                    const coding = response.values[0]?.coding;
+
+                    if (!value && !coding) return null;
+
+                    return (
+                      <TableRow key={question.id}>
+                        <TableCell className="py-1 pl-0 align-top">
+                          <div className="text-sm text-gray-600 break-words whitespace-normal">
+                            {question.text}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-1 pr-0 align-top">
+                          <div className="text-sm font-medium break-words whitespace-normal">
+                            {formatValue(value, question.type)}
+                            {unit && (
+                              <span className="ml-1 text-gray-600">
+                                {unit.code}
+                              </span>
+                            )}
+                            {coding && (
+                              <span className="ml-1 text-gray-600">
+                                {coding.display} ({coding.code})
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           </div>,
         );
         currentNonGroupQuestions = [];
@@ -292,15 +348,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
           </React.Fragment>,
         );
       } else {
-        const response = item.responses.find(
-          (r) => r.question_id === question.id,
-        );
-        if (!response) return;
-
-        const value = response.values[0]?.value;
-        if (!value && !response.values[0]?.coding) return;
-
-        currentNonGroupQuestions.push(renderQuestion(question, response));
+        currentNonGroupQuestions.push(question);
       }
     });
 
