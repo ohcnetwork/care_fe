@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
 
@@ -7,6 +7,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 
 import { useMediaStream } from "@/hooks/useMediaStream";
+
+import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
 const VideoConstraints = {
   user: {
@@ -39,9 +41,6 @@ type IVideoConstraint =
 interface CameraCaptureProps {
   isCameraOpen: boolean;
   previewImage: string | null;
-  requestPermission: (
-    facingMode: string,
-  ) => Promise<{ hasPermission: boolean }>;
   isProcessing: boolean;
   isCaptureImgBeingUploaded: boolean;
   uploadAvatar: () => void;
@@ -53,7 +52,6 @@ interface CameraCaptureProps {
 const CameraCapture: React.FC<CameraCaptureProps> = ({
   isCameraOpen,
   previewImage,
-  requestPermission,
   isProcessing,
   isCaptureImgBeingUploaded,
   uploadAvatar,
@@ -62,14 +60,13 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
   setSelectedFile,
 }) => {
   const { t } = useTranslation();
-  const webRef = useRef<any>(null);
+  const webRef = useRef<Webcam>(null);
   const [constraint, setConstraint] = useState<IVideoConstraint>(
     VideoConstraints.user,
   );
-  useMediaStream({
-    open: isCameraOpen,
-    onOpenChange: setIsCameraOpen,
-    facingMode: constraint.facingMode,
+  const { requestPermission } = useMediaDevicePermission();
+  const { startStream, stopStream } = useMediaStream({
+    constraints: { video: { facingMode: constraint.facingMode } },
   });
 
   const handleSwitchCamera = useCallback(() => {
@@ -83,7 +80,8 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     if (webRef.current) {
       setPreviewImage(webRef.current.getScreenshot());
       const canvas = webRef.current.getCanvas();
-      canvas?.toBlob((blob: Blob) => {
+      canvas?.toBlob((blob: Blob | null) => {
+        if (!blob) return;
         const extension = blob.type.split("/").pop();
         const myFile = new File([blob], `capture.${extension}`, {
           type: blob.type,
@@ -96,6 +94,19 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     setIsCameraOpen(false);
     setPreviewImage(null);
   };
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isCameraOpen) {
+      timer = setTimeout(() => {
+        startStream();
+      }, 100);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      stopStream();
+    };
+  }, [isCameraOpen]);
 
   return (
     <>
@@ -121,7 +132,9 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
             id="front-camera-webcam"
             title="Webcam - Front Camera"
             onUserMediaError={async () => {
-              const requestValue = await requestPermission("user");
+              const requestValue = await requestPermission({
+                video: { facingMode: "user" },
+              });
               if (!requestValue.hasPermission) {
                 handleClose();
               }

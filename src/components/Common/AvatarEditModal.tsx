@@ -17,8 +17,6 @@ import {
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
-import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
-
 import CameraCapture from "./CameraCapture";
 
 interface Props {
@@ -55,7 +53,6 @@ const AvatarEditModal = ({
     useState(false);
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
-  const { requestPermission } = useMediaDevicePermission();
 
   const closeModal = () => {
     setPreview(undefined);
@@ -183,7 +180,6 @@ const AvatarEditModal = ({
                 <CameraCapture
                   isCameraOpen={isCameraOpen}
                   previewImage={previewImage}
-                  requestPermission={requestPermission}
                   isProcessing={isProcessing}
                   isCaptureImgBeingUploaded={isCaptureImgBeingUploaded}
                   uploadAvatar={uploadAvatar}
@@ -292,11 +288,6 @@ const AvatarEditModal = ({
                     variant="primary"
                     onClick={() => {
                       setIsCameraOpen(true);
-                      // setConstraint(() => VideoConstraints.user);
-                      // const result = await requestPermission("user");
-                      // if (result.hasPermission && result.mediaStream) {
-                      //   setIsCameraOpen(true);
-                      // }
                     }}
                   >
                     {`${t("open_camera")}`}

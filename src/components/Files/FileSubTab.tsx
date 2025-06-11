@@ -48,6 +48,7 @@ import {
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder/ReportBuilderSheet";
@@ -79,6 +80,7 @@ export const FilesPage = ({
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
+  const { requestPermission } = useMediaDevicePermission();
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
   });
@@ -384,7 +386,12 @@ export const FilesPage = ({
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => fileUpload.handleCameraCapture()}
+              onClick={async () => {
+                const result = await requestPermission({ video: true });
+                if (result.hasPermission && result.mediaStream) {
+                  fileUpload.handleCameraCapture();
+                }
+              }}
               className="flex flex-row justify-stretch items-center w-full text-primary-900"
             >
               <CareIcon icon="l-camera" />

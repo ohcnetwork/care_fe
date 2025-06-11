@@ -1,70 +1,54 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
 interface useMediaStreamProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  facingMode: string;
+  constraints: {
+    video?: boolean | { facingMode: string };
+    audio?: boolean | MediaTrackConstraints;
+  };
+  onError?: () => void;
 }
+
 export const useMediaStream = ({
-  open,
-  facingMode,
-  onOpenChange,
+  constraints,
+  onError,
 }: useMediaStreamProps) => {
-  const [isStreaming, setIsStreaming] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
   const { requestPermission } = useMediaDevicePermission();
 
   const startStream = useCallback(async () => {
-    const hasPermission = await requestPermission(facingMode);
-    if (!hasPermission.hasPermission) {
-      onOpenChange(false);
-      return;
-    }
     try {
-      const stream = hasPermission.mediaStream;
-      streamRef.current = stream;
-      setIsStreaming(true);
+      const { hasPermission, mediaStream } =
+        await requestPermission(constraints);
+
+      if (!hasPermission || !mediaStream) {
+        onError?.();
+        return;
+      }
+
+      streamRef.current = mediaStream;
+
+      return mediaStream;
     } catch (err) {
       console.error("Error starting stream:", err);
-      setIsStreaming(false);
     }
-  }, [facingMode]);
+  }, [constraints, onError]);
 
   const stopStream = useCallback(() => {
+    if (!streamRef.current) return;
+
     try {
-      if (streamRef.current) {
-        const tracks = streamRef.current.getTracks();
-        tracks.forEach((track) => {
-          track.stop();
-          track.enabled = false;
-        });
-        streamRef.current = null;
-        setIsStreaming(false);
-      }
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
     } catch (err) {
       console.error("Error stopping stream:", err);
     }
   }, []);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (open) {
-      timer = setTimeout(() => {
-        startStream();
-      }, 100);
-    }
-
-    return () => {
-      clearTimeout(timer);
-      stopStream();
-    };
-  }, [open, startStream, stopStream]);
-
   return {
-    isStreaming,
     startStream,
     stopStream,
+    stream: streamRef.current,
   };
 };

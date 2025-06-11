@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
 import { toast } from "sonner";
@@ -32,8 +32,8 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const [cameraFacingMode, setCameraFacingMode] = useState(
     isLaptopScreen ? "user" : "environment",
   );
-  const [previewImage, setPreviewImage] = useState(null);
-  const webRef = useRef<any>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const webRef = useRef<Webcam>(null);
 
   const videoConstraints = {
     width: { ideal: 4096 },
@@ -41,10 +41,8 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     facingMode: cameraFacingMode,
   };
 
-  useMediaStream({
-    open,
-    onOpenChange: onOpenChange,
-    facingMode: cameraFacingMode,
+  const { startStream, stopStream } = useMediaStream({
+    constraints: { video: { facingMode: cameraFacingMode } },
   });
 
   const handleSwitchCamera = useCallback(async () => {
@@ -65,9 +63,12 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   }, []);
 
   const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
+    if (!webRef.current) return;
+    const screenshot = webRef.current.getScreenshot();
+    setPreviewImage(screenshot);
     const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
+    canvas?.toBlob((blob: Blob | null) => {
+      if (!blob) return;
       const extension = blob.type.split("/").pop();
       const myFile = new File([blob], `capture.${extension}`, {
         type: blob.type,
@@ -75,6 +76,20 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       onCapture(myFile, `capture.${extension}`);
     });
   };
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (open) {
+      timer = setTimeout(() => {
+        startStream();
+      }, 100);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      stopStream();
+    };
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
