@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "raviger";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -18,10 +18,10 @@ import { ValueSetForm } from "./ValueSetForm";
 
 interface ValueSetEditorProps {
   slug?: string; // If provided, we're editing an existing valueset
+  onSuccess?: (data: any) => void;
 }
 
-export function ValueSetEditor({ slug }: ValueSetEditorProps) {
-  const navigate = useNavigate();
+export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   // Fetch existing valueset if we're editing
@@ -36,9 +36,10 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: mutate(valuesetApi.create),
-    onSuccess: () => {
-      toast.success("ValueSet created successfully");
-      navigate(`/admin/valuesets`);
+    onSuccess: (data) => {
+      toast.success(t("valueset_created"));
+      queryClient.invalidateQueries({ queryKey: ["valuesets"] });
+      onSuccess?.(data);
     },
   });
 
@@ -48,7 +49,7 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
       pathParams: { slug: slug! },
     }),
     onSuccess: () => {
-      toast.success("ValueSet updated successfully");
+      toast.success(t("valueset_updated"));
       queryClient.removeQueries({ queryKey: ["valueset", slug] });
       navigate(`/admin/valuesets`);
     },

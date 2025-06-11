@@ -62,6 +62,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,6 +73,7 @@ import {
   STRUCTURED_QUESTIONS,
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
+import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
@@ -899,8 +901,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               </FormControl>
                               <FormMessage />
                               <p className="text-sm text-gray-500 mt-1">
-                                A unique URL-friendly identifier for this
-                                questionnaire
+                                {t("unique_url_for_questionnaire")}
                               </p>
                             </FormItem>
                           )}
@@ -1345,6 +1346,7 @@ function QuestionEditor({
   );
 
   const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
     queryKey: ["valuesets", valueSetSearchQuery],
     queryFn: query.debounced(valuesetApi.list, {
@@ -2010,24 +2012,50 @@ function QuestionEditor({
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <Autocomplete
-                      options={(valuesets ?? []).map((valueset) => ({
-                        label: valueset.name,
-                        value: valueset.slug,
-                      }))}
-                      value={
-                        question.answer_value_set === "valueset"
-                          ? ""
-                          : (question.answer_value_set ?? "")
-                      }
-                      onChange={(val: string) =>
-                        updateField("answer_value_set", val)
-                      }
-                      onSearch={setValueSetSearchQuery}
-                      placeholder={t("select_a_value_set")}
-                      isLoading={isFetchingValuesets}
-                      noOptionsMessage={t("no_valuesets_found")}
-                    />
+                    <div className="flex items-center gap-2 flex-col sm:flex-row">
+                      <div className="w-full">
+                        <Autocomplete
+                          options={(valuesets ?? []).map((valueset) => ({
+                            label: valueset.name,
+                            value: valueset.slug,
+                          }))}
+                          value={
+                            question.answer_value_set === "valueset"
+                              ? ""
+                              : (question.answer_value_set ?? "")
+                          }
+                          onChange={(val: string) =>
+                            updateField("answer_value_set", val)
+                          }
+                          onSearch={setValueSetSearchQuery}
+                          placeholder={t("select_a_value_set")}
+                          isLoading={isFetchingValuesets}
+                          noOptionsMessage={t("no_valuesets_found")}
+                        />
+                      </div>
+                      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                        <SheetTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="gap-2 w-full sm:w-auto"
+                          >
+                            <CareIcon icon="l-plus" />
+                            {t("create_valueset")}
+                          </Button>
+                        </SheetTrigger>
+                        <SheetContent
+                          side="right"
+                          className="w-full sm:max-w-2xl overflow-y-auto"
+                        >
+                          <ValueSetEditor
+                            onSuccess={(data) => {
+                              setIsSheetOpen(false);
+                              updateField("answer_value_set", data.slug);
+                            }}
+                          />
+                        </SheetContent>
+                      </Sheet>
+                    </div>
                   </CardContent>
                 )}
               </Card>
@@ -2179,7 +2207,7 @@ function QuestionEditor({
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">Operator</Label>
+                    <Label className="text-xs">{t("operator")}</Label>
                     <Select
                       value={condition.operator}
                       onValueChange={(
@@ -2229,15 +2257,19 @@ function QuestionEditor({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="equals">Equals</SelectItem>
-                        <SelectItem value="not_equals">Not Equals</SelectItem>
-                        <SelectItem value="greater">Greater Than</SelectItem>
-                        <SelectItem value="less">Less Than</SelectItem>
+                        <SelectItem value="equals">{t("equals")}</SelectItem>
+                        <SelectItem value="not_equals">
+                          {t("not_equals")}
+                        </SelectItem>
+                        <SelectItem value="greater">
+                          {t("greater_than")}
+                        </SelectItem>
+                        <SelectItem value="less">{t("less_than")}</SelectItem>
                         <SelectItem value="greater_or_equals">
-                          Greater Than or Equal
+                          {t("greater_than_or_equal")}
                         </SelectItem>
                         <SelectItem value="less_or_equals">
-                          Less Than or Equal
+                          {t("less_than_or_equal")}
                         </SelectItem>
                         <SelectItem value="exists">Exists</SelectItem>
                       </SelectContent>
@@ -2245,7 +2277,7 @@ function QuestionEditor({
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <Label className="text-xs">Answer</Label>
+                      <Label className="text-xs">{t("answer")}</Label>
                       {condition.operator === "exists" ? (
                         <Select
                           value={condition.answer ? "true" : "false"}
