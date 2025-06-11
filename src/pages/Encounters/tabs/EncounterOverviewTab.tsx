@@ -142,15 +142,14 @@ export const EncounterOverviewTab = ({
               codeGroups={vitalGroups}
             />
           </div>
-        </div>
-
-        {/* Questionnaire Responses Section */}
-        <div>
-          <QuestionnaireResponsesList
-            encounter={encounter}
-            patientId={patient.id}
-            canAccess={canAccess}
-          />
+          {/* Questionnaire Responses Section */}
+          <div>
+            <QuestionnaireResponsesList
+              encounter={encounter}
+              patientId={patient.id}
+              canAccess={canAccess}
+            />
+          </div>
         </div>
 
         {/* Right Column - Observations */}
