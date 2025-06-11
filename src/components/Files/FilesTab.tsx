@@ -71,7 +71,7 @@ export const FilesTab = (props: FilesTabsProps) => {
       >
         <TabsList
           className={cn(
-            type != "encounter" ? "mt-2" : "",
+            type != "encounter" && "mt-2",
             "flex-nowrap w-full pr-0.5 sm:w-fit",
           )}
         >
