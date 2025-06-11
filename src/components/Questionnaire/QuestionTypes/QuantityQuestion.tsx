@@ -92,11 +92,11 @@ export const QuantityQuestion = memo(function QuantityQuestion({
   };
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col sm:flex-row gap-4 sm:flex-wrap">
       {question.answer_value_set && (
         <div className="space-y-2">
           <Label htmlFor={`${question.id}-coding`}>Type</Label>
-          <div className="w-[200px]">
+          <div className="w-full sm:w-[200px]">
             <ValueSetSelect
               system={question.answer_value_set}
               value={currentCoding}

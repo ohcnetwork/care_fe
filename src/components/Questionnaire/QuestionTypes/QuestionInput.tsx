@@ -73,8 +73,13 @@ export function QuestionInput({
   }
 
   const handleAddValue = () => {
+    const newValues = [...questionnaireResponse.values];
+    if (newValues.length === 0) {
+      newValues.push({ type: "string", value: "" });
+    }
+    newValues.push({ type: "string", value: "" });
     updateQuestionnaireResponseCB(
-      [...questionnaireResponse.values, { type: "string", value: "" }],
+      newValues,
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );
