@@ -32,6 +32,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -71,6 +72,8 @@ import {
   STRUCTURED_QUESTIONS,
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
+
+import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -179,7 +182,7 @@ function LayoutOptionCard({
       <Label
         htmlFor={optionId}
         className={cn(
-          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-2 md:p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
           isSelected && "border-primary",
         )}
       >
@@ -191,6 +194,8 @@ function LayoutOptionCard({
     </div>
   );
 }
+
+const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "group", "display"];
 
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
@@ -206,6 +211,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [orgError, setOrgError] = useState<string | undefined>();
   const [importUrl, setImportUrl] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showFileImportDialog, setShowFileImportDialog] = useState(false);
+  const [selectedImportFile, setSelectedImportFile] = useState<File | null>(
+    null,
+  );
   const [importedData, setImportedData] = useState<QuestionnaireDetail | null>(
     null,
   );
@@ -213,6 +222,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [structuredTypeErrors, setStructuredTypeErrors] = useState<
     Record<string, string | undefined>
   >({});
+  const { dragOver, onDragOver, onDragLeave } = useDragAndDrop();
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -679,14 +689,24 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </Button>
           )}
           {!id && (
-            <Button
-              variant="outline"
-              onClick={() => setShowImportDialog(true)}
-              disabled={isCreating || isUpdating}
-            >
-              <CareIcon icon="l-import" className="mr-1 size-4" />
-              {t("import_from_url")}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={isCreating || isUpdating}>
+                  <CareIcon icon="l-import" className="mr-1 size-4" />
+                  {t("import")}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setShowImportDialog(true)}>
+                  <CareIcon icon="l-link" className="mr-2 size-4" />
+                  {t("import_from_url")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowFileImportDialog(true)}>
+                  <CareIcon icon="l-file" className="mr-2 size-4" />
+                  {t("import_from_file")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
           <Button
             onClick={handleSave}
@@ -1098,20 +1118,31 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </Card>
         </TabsContent>
       </Tabs>
-      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+      <Dialog
+        open={showImportDialog}
+        onOpenChange={(open) => {
+          setShowImportDialog(open);
+          if (!open) {
+            setImportUrl("");
+            setImportedData(null);
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("import_questionnaire")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>{t("questionnaire_json_url")}</Label>
-              <Input
-                value={importUrl}
-                onChange={(e) => setImportUrl(e.target.value)}
-                placeholder={t("questionnaire_json_url_placeholder")}
-              />
-            </div>
+            {!importedData && (
+              <div className="space-y-2">
+                <Label>{t("questionnaire_json_url")}</Label>
+                <Input
+                  value={importUrl}
+                  onChange={(e) => setImportUrl(e.target.value)}
+                  placeholder={t("questionnaire_json_url_placeholder")}
+                />
+              </div>
+            )}
             {importedData && (
               <div className="space-y-2">
                 <Label>{t("preview")}</Label>
@@ -1131,7 +1162,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setShowImportDialog(false)}
+              onClick={() => {
+                setShowImportDialog(false);
+                setImportUrl("");
+                setImportedData(null);
+              }}
             >
               {t("cancel")}
             </Button>
@@ -1145,6 +1180,111 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             ) : (
               <Button onClick={handleImportConfirm}>{t("import_form")}</Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={showFileImportDialog}
+        onOpenChange={setShowFileImportDialog}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("import_questionnaire")}</DialogTitle>
+            <DialogDescription>
+              {t("drag_and_drop_or_click_to_select")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div
+              className={cn(
+                "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+                dragOver
+                  ? "border-primary bg-primary/10"
+                  : "border-gray-200 hover:border-gray-300",
+              )}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={async (e) => {
+                e.preventDefault();
+                onDragLeave();
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                  setSelectedImportFile(file);
+                }
+              }}
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "application/json";
+                input.onchange = async (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (file) {
+                    setSelectedImportFile(file);
+                  }
+                };
+                input.click();
+              }}
+            >
+              <div className="flex flex-col items-center gap-2">
+                <CareIcon
+                  icon="l-cloud-upload"
+                  className="size-12 text-gray-400"
+                />
+                <p className="text-sm text-gray-500 select-none">
+                  {dragOver
+                    ? t("drop_file_here")
+                    : t("drag_and_drop_or_click_to_select")}
+                </p>
+                <p className="text-xs text-gray-400 select-none">
+                  {t("json_files_only")}
+                </p>
+              </div>
+            </div>
+            {selectedImportFile && (
+              <div className="flex items-center justify-between p-2 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CareIcon icon="l-file" className="size-4 text-gray-400" />
+                  <span className="text-sm">{selectedImportFile.name}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedImportFile(null)}
+                >
+                  <CareIcon icon="l-times" className="size-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowFileImportDialog(false);
+                setSelectedImportFile(null);
+              }}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={async () => {
+                if (selectedImportFile) {
+                  try {
+                    const content = await selectedImportFile.text();
+                    const data = JSON.parse(content);
+                    setImportedData(data);
+                    setShowFileImportDialog(false);
+                    setShowImportDialog(true);
+                    setSelectedImportFile(null);
+                  } catch (_error) {
+                    toast.error(t("failed_to_import_questionnaire"));
+                  }
+                }
+              }}
+              disabled={!selectedImportFile}
+            >
+              {t("continue")}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1530,16 +1670,18 @@ function QuestionEditor({
                     </Label>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={repeats ?? false}
-                      onCheckedChange={(val) => updateField("repeats", val)}
-                      id={`repeats-${getQuestionPath()}`}
-                    />
-                    <Label htmlFor={`repeats-${getQuestionPath()}`}>
-                      {t("repeatable")}
-                    </Label>
-                  </div>
+                  {!HIDE_REPEATABLE_QUESTION_TYPES.includes(question.type) && (
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={repeats ?? false}
+                        onCheckedChange={(val) => updateField("repeats", val)}
+                        id={`repeats-${getQuestionPath()}`}
+                      />
+                      <Label htmlFor={`repeats-${getQuestionPath()}`}>
+                        {t("repeatable")}
+                      </Label>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2">
                     <Switch
@@ -1741,7 +1883,7 @@ function QuestionEditor({
                         >
                           <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
                             <div>
-                              <Label>{t("value")}</Label>
+                              <Label className="mb-1">{t("value")}</Label>
                               <Input
                                 value={opt.value}
                                 onChange={(e) => {
@@ -1758,7 +1900,9 @@ function QuestionEditor({
                             </div>
                             <div className="flex gap-2">
                               <div className="flex-1">
-                                <Label>{t("display_text")}</Label>
+                                <Label className="mb-1">
+                                  {t("display_text")}
+                                </Label>
                                 <Input
                                   value={opt.display || ""}
                                   onChange={(e) => {
@@ -1918,6 +2062,14 @@ function QuestionEditor({
                     setExpandedSubQuestions(
                       (prev) => new Set([...prev, newQuestion.id]),
                     );
+                    setTimeout(() => {
+                      const element = document.getElementById(
+                        `question-${newQuestion.id}`,
+                      );
+                      if (element) {
+                        element.scrollIntoView();
+                      }
+                    }, 100);
                   }}
                 >
                   <CareIcon icon="l-plus" className="size-4" />
@@ -1987,7 +2139,7 @@ function QuestionEditor({
             <div className="space-y-2">
               {(question.enable_when || []).length > 0 && (
                 <div>
-                  <Label className="text-xs">{t("enable_behavior")}</Label>
+                  <Label className="text-xs mb-1">{t("enable_behavior")}</Label>
                   <Select
                     value={question.enable_behavior ?? "all"}
                     onValueChange={(val: "all" | "any") =>
@@ -2011,10 +2163,10 @@ function QuestionEditor({
               {(question.enable_when || []).map((condition, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-[2fr_1fr_2fr] gap-2 items-start"
+                  className="grid grid-cols-1 md:grid-cols-[2fr_1fr_2fr] gap-2 items-start"
                 >
                   <div>
-                    <Label className="text-xs">Question</Label>
+                    <Label className="text-xs mb-1">Question</Label>
                     <Input
                       value={condition.question}
                       onChange={(e) => {
@@ -2029,7 +2181,7 @@ function QuestionEditor({
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">Operator</Label>
+                    <Label className="text-xs mb-1">Operator</Label>
                     <Select
                       value={condition.operator}
                       onValueChange={(
@@ -2095,7 +2247,7 @@ function QuestionEditor({
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <Label className="text-xs">Answer</Label>
+                      <Label className="text-xs mb-1">Answer</Label>
                       {condition.operator === "exists" ? (
                         <Select
                           value={condition.answer ? "true" : "false"}

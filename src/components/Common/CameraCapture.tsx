@@ -141,7 +141,12 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
             }}
           />
         ) : (
-          <img src={previewImage} alt="Captured" />
+          <img
+            loading="lazy"
+            decoding="async"
+            src={previewImage}
+            alt="Captured"
+          />
         )}
       </div>
 

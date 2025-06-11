@@ -136,7 +136,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             </div>
           ) : (
             <div className="m-3">
-              <img src={previewImage} />
+              <img loading="lazy" decoding="async" src={previewImage} />
             </div>
           )}
         </div>
