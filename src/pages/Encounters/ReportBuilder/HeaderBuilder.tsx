@@ -921,9 +921,7 @@ function HeaderRow({
                   variant="secondary"
                   onClick={() => handleRemoveElement(rowIndex, activeElement)}
                 >
-                  <span className="text-sm">
-                    {t(`remove_${column[activeElement].type}`)}
-                  </span>
+                  <span className="text-sm">{t("remove")}</span>
                   <Trash2Icon className="size-3" />
                 </Button>
               )}
@@ -931,7 +929,6 @@ function HeaderRow({
           )}
           <Button
             type="button"
-            size={"sm"}
             variant="destructive"
             onClick={() =>
               setRemoveRowDialog({
@@ -939,10 +936,9 @@ function HeaderRow({
                 rowIndex: rowIndex,
               })
             }
-            className="self-end"
           >
-            <Trash2Icon className="size-3" />
             <span className="text-sm">{t("remove_row")}</span>
+            <Trash2Icon className="size-3" />
           </Button>
         </CardHeader>
         <CardContent>
