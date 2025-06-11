@@ -662,9 +662,10 @@ export function QuestionnaireForm({
                 if (value.type === "dateTime" && value.value) {
                   const date = new Date(value.value);
                   if (isNaN(date.getTime())) {
-                    return { value: "" };
+                    return { ...value, value: "" };
                   }
-                  const formattedDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+                  const formattedDate = date.toISOString().split("T")[0];
+                  console.log(formattedDate);
                   return {
                     ...value,
                     value: formattedDate,
