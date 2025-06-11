@@ -68,6 +68,7 @@ declare global {
         selector: string,
         value: string,
       ): Chainable<JQuery<HTMLElement>>;
+      getFacilityIdAndNavigate(path?: string): Chainable<string>;
     }
   }
 }

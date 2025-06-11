@@ -298,3 +298,13 @@ Cypress.Commands.add(
       .type(value);
   },
 );
+
+Cypress.Commands.add("getFacilityIdAndNavigate", (path?: string) => {
+  cy.url().then((url) => {
+    const facilityId = url.split("/facility/")[1].split("/")[0];
+    if (path) {
+      cy.visit(`/facility/${facilityId}/${path}`);
+    }
+    cy.wrap(facilityId);
+  });
+});

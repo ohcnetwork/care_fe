@@ -395,7 +395,7 @@ function ObservationDefinitionFormContent({
                     }}
                   />
 
-                  <div>
+                  <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("loinc_code")}</FormLabel>
                     <div className="mt-2">
                       <ValueSetSelect
@@ -415,7 +415,7 @@ function ObservationDefinitionFormContent({
                         {form.formState.errors.code?.message}
                       </FormMessage>
                     </div>
-                  </div>
+                  </FormItem>
                 </div>
               </div>
             </div>
@@ -438,7 +438,7 @@ function ObservationDefinitionFormContent({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
-                  <div>
+                  <FormItem className="flex flex-col">
                     <FormLabel>{t("body_site")}</FormLabel>
                     <ValueSetSelect
                       system="system-body-site"
@@ -453,9 +453,9 @@ function ObservationDefinitionFormContent({
                       }}
                       showCode={true}
                     />
-                  </div>
+                  </FormItem>
 
-                  <div>
+                  <FormItem className="flex flex-col">
                     <FormLabel>{t("method")}</FormLabel>
                     <ValueSetSelect
                       system="system-collection-method"
@@ -470,9 +470,9 @@ function ObservationDefinitionFormContent({
                       }}
                       showCode={true}
                     />
-                  </div>
+                  </FormItem>
 
-                  <div>
+                  <FormItem className="flex flex-col">
                     <FormLabel>{t("unit")}</FormLabel>
                     <ValueSetSelect
                       system="system-ucum-units"
@@ -487,7 +487,7 @@ function ObservationDefinitionFormContent({
                       }}
                       showCode={true}
                     />
-                  </div>
+                  </FormItem>
                 </div>
               </div>
             </div>
