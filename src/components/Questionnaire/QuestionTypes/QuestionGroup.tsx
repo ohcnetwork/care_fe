@@ -38,54 +38,52 @@ function isQuestionEnabled(
   if (!question.enable_when?.length) return true;
 
   const checkCondition = (enableWhen: EnableWhen) => {
-    const dependentValue = questionnaireResponses.find(
+    const dependentValues = questionnaireResponses.find(
       (v) => v.link_id === enableWhen.question,
-    )?.values[0];
+    )?.values;
 
-    // Early return if no dependent value exists
-    if (dependentValue?.value == null) return false;
+    if (!dependentValues || dependentValues.length === 0) return false;
 
     function normalizeValue(value: unknown): unknown {
-      if (typeof value === "boolean") {
-        return value ? "Yes" : "No";
-      }
-
-      if (typeof value === "number") {
-        return value.toString();
-      }
-
+      if (typeof value === "boolean") return value ? "Yes" : "No";
+      if (typeof value === "number") return value.toString();
       return value;
     }
 
+    const normalizedAnswers = dependentValues.map((v) =>
+      normalizeValue(v.value),
+    );
+
     switch (enableWhen.operator) {
       case "exists":
-        return dependentValue !== undefined && dependentValue !== null;
-      case "equals": {
-        return normalizeValue(dependentValue.value) === enableWhen.answer;
-      }
-      case "not_equals": {
-        return normalizeValue(dependentValue.value) !== enableWhen.answer;
-      }
+        return normalizedAnswers.length > 0;
+
+      case "equals":
+        return normalizedAnswers.includes(enableWhen.answer);
+
+      case "not_equals":
+        return !normalizedAnswers.includes(enableWhen.answer);
+
       case "greater":
-        return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value > enableWhen.answer
+        return normalizedAnswers.some(
+          (v) => !isNaN(Number(v)) && Number(v) > enableWhen.answer,
         );
+
       case "less":
-        return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value < enableWhen.answer
+        return normalizedAnswers.some(
+          (v) => !isNaN(Number(v)) && Number(v) < enableWhen.answer,
         );
+
       case "greater_or_equals":
-        return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value >= enableWhen.answer
+        return normalizedAnswers.some(
+          (v) => !isNaN(Number(v)) && Number(v) >= enableWhen.answer,
         );
+
       case "less_or_equals":
-        return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value <= enableWhen.answer
+        return normalizedAnswers.some(
+          (v) => !isNaN(Number(v)) && Number(v) <= enableWhen.answer,
         );
+
       default:
         return true;
     }
