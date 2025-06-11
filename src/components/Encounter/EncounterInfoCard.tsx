@@ -109,7 +109,8 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           </div>
           <div>
             <Separator className="my-3" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            <div className="flex flex-col gap-2">
+              {" "}
               <Button
                 variant="outline"
                 size="sm"
@@ -118,7 +119,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                     `/facility/${facilityId}/patient/${encounter.patient.id}`,
                   )
                 }
-                className="flex items-center justify-center gap-1.5 text-[9px] sm:text-xs px-1.5 py-1.5 sm:py-1 h-auto sm:h-7 min-w-0"
+                className="flex items-center justify-center gap-1.5 text-[9px] sm:text-xs px-1.5 py-2.5 h-auto sm:h-9 min-w-0"
                 data-cy="visit-patient-profile-button"
                 title={t("view_patient_profile")}
               >
@@ -135,7 +136,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                     `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`,
                   )
                 }
-                className="flex items-center justify-center gap-1.5 text-[9px] sm:text-xs px-1.5 py-1.5 sm:py-1 h-auto sm:h-7 min-w-0"
+                className="flex items-center justify-center gap-1.5 text-[9px] sm:text-xs px-1.5 py-2.5 h-auto sm:h-9 min-w-0"
                 data-cy="visit-encounter-details-button"
                 title={t("visit_encounter_details")}
               >
