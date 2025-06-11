@@ -123,6 +123,7 @@ export default function EditInvoiceSheet({
       note: values.note?.trim() || null,
       account: invoice.account.id,
       charge_items: chargeItemIds,
+      issue_date: invoice.issue_date,
     };
     updateInvoice(data);
   };

@@ -201,19 +201,41 @@ export function MultiQRCodePrintSheet({
                     </div>
                   </div>
 
-                  <div className="mt-4">
-                    <QRCodeSVG
-                      value={specimen.id}
-                      size={qrCodeSize}
-                      className="bg-white mx-auto"
-                      imageSettings={{
-                        src: "/images/care_logo_mark.svg",
-                        height: logoSize,
-                        width: logoSize,
-                        excavate: true,
-                      }}
-                      level="H"
-                    />
+                  <div
+                    className={cn(
+                      "mt-4",
+                      "flex",
+                      showDetails ? "gap-6" : "justify-center",
+                      "p-4 rounded-lg border border-gray-200",
+                    )}
+                  >
+                    <div className={cn("shrink-0", !showDetails && "mx-auto")}>
+                      <QRCodeSVG
+                        value={specimen.id}
+                        size={qrCodeSize}
+                        className="bg-white"
+                        imageSettings={{
+                          src: "/images/care_logo_mark.svg",
+                          height: logoSize,
+                          width: logoSize,
+                          excavate: true,
+                        }}
+                        level="H"
+                      />
+                    </div>
+                    {showDetails && (
+                      <div>
+                        <div className="text-lg font-semibold pt-2.5">
+                          {specimen.specimen_type?.display || t("specimen")}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {specimen.specimen_definition?.title}
+                        </div>
+                        <div className="font-semibold uppercase text-sm text-gray-700">
+                          {specimen.id}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

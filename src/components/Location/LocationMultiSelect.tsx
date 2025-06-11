@@ -48,33 +48,17 @@ function LocationTreeNode({
       queryParams: {
         parent: location.id,
         mode: "kind",
+        ordering: "sort_index",
       },
     }),
-    enabled: isExpanded,
+
     staleTime: 5 * 60 * 1000,
   });
 
-  // Check if location has children by making a separate query
-  const { data: hasChildrenData } = useQuery({
-    queryKey: ["locations", facilityId, "has-children", location.id],
-    queryFn: query(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        parent: location.id,
-        mode: "kind",
-        limit: 1,
-      },
-    }),
-    enabled: !isExpanded && !children,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const hasChildren = isExpanded
-    ? children?.results && children.results.length > 0
-    : hasChildrenData?.results && hasChildrenData.results.length > 0;
+  const hasChildren = children?.results && children.results.length > 0;
 
   // Filter children based on search query
-  const filteredChildren = children?.results.filter((child) =>
+  const filteredChildren = children?.results?.filter((child) =>
     child.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
@@ -96,12 +80,6 @@ function LocationTreeNode({
           "group flex items-center py-1 px-2 rounded-md hover:bg-gray-100 cursor-pointer",
         )}
         style={{ paddingLeft: `${level}rem` }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (hasChildren) {
-            onToggleExpand(location.id);
-          }
-        }}
       >
         {isLoading ? (
           <Button variant="ghost" size="icon" className="size-6">
@@ -232,8 +210,21 @@ export default function LocationMultiSelect({
   );
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch all locations data including nested ones
-  const { data: allLocations, isLoading: isLoadingLocations } = useQuery({
+  // Query for top-level locations
+  const { data: topLevelLocations, isLoading: isLoadingLocations } = useQuery({
+    queryKey: ["locations", facilityId, "top", "kind"],
+    queryFn: query(locationApi.list, {
+      pathParams: { facility_id: facilityId },
+      queryParams: {
+        parent: "",
+        mode: "kind",
+        ordering: "sort_index",
+      },
+    }),
+  });
+
+  // Query for all locations (needed for selected location details)
+  const { data: allLocations } = useQuery({
     queryKey: ["locations", facilityId, "all", "kind"],
     queryFn: query.paginated(locationApi.list, {
       pathParams: { facility_id: facilityId },
@@ -253,13 +244,6 @@ export default function LocationMultiSelect({
     });
     return map;
   }, [allLocations?.results]);
-
-  // Filter to get only top-level locations (no parent)
-  const topLevelLocations =
-    allLocations?.results?.filter(
-      (location) =>
-        !location.parent || Object.keys(location.parent).length === 0,
-    ) || [];
 
   const handleToggleExpand = (locationId: string) => {
     setExpandedLocations((prev) => {
@@ -305,11 +289,11 @@ export default function LocationMultiSelect({
         </>
       )}
       <div className="relative w-full px-3 pt-1">
-        <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
+        <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 size-4" />
         <input
           type="text"
           placeholder={t("search_locations")}
-          className="w-full rounded-md border border-input bg-background pl-8 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="w-full rounded-md border border-input bg-background pl-8 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -327,9 +311,10 @@ export default function LocationMultiSelect({
                 ))}
               </div>
             </div>
-          ) : topLevelLocations.length > 0 ? (
+          ) : topLevelLocations?.results &&
+            topLevelLocations.results.length > 0 ? (
             <>
-              {topLevelLocations.map((location) => (
+              {topLevelLocations.results.map((location) => (
                 <LocationTreeNode
                   key={location.id}
                   location={location}

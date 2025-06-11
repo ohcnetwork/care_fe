@@ -126,7 +126,11 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-500">{t("invoice_date")}</span>
-              <span>{format(new Date(), "dd MMM yyyy")}</span>
+              <span>
+                {invoice.issue_date
+                  ? format(new Date(invoice.issue_date), "dd MMM, yyyy h:mm a")
+                  : "-"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">{t("invoice_number")}</span>

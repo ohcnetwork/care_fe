@@ -14,6 +14,8 @@ import { Separator } from "@/components/ui/separator";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
 import query from "@/Utils/request/query";
 import {
   PaymentReconciliationOutcome,
@@ -75,6 +77,7 @@ export function PaymentReconciliationShow({
   paymentReconciliationId: string;
 }) {
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
 
   const { data: payment, isLoading } = useQuery({
     queryKey: ["paymentReconciliation", paymentReconciliationId],
@@ -109,10 +112,12 @@ export function PaymentReconciliationShow({
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" asChild className="p-2 h-auto">
-            <Link href={`/facility/${facilityId}/billing/payments`}>
-              <CareIcon icon="l-arrow-left" className="size-5" />
-            </Link>
+          <Button
+            variant="ghost"
+            className="p-2 h-auto"
+            onClick={() => goBack(`/facility/${facilityId}/billing/payments`)}
+          >
+            <CareIcon icon="l-arrow-left" className="size-5" />
           </Button>
           <div>
             <h1 className="text-2xl font-bold flex items-center flex-wrap gap-2">
@@ -393,11 +398,15 @@ export function PaymentReconciliationShow({
                     </Link>
                   </Button>
                 )}
-                <Button className="w-full" variant="outline" asChild>
-                  <Link href={`/facility/${facilityId}/billing/payments`}>
-                    <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
-                    {t("back_to_payments")}
-                  </Link>
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  onClick={() =>
+                    goBack(`/facility/${facilityId}/billing/payments`)
+                  }
+                >
+                  <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
+                  {t("back_to_payments")}
                 </Button>
               </div>
             </CardContent>

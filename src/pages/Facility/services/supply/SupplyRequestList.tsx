@@ -52,7 +52,7 @@ export default function SupplyRequestList({
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["supplyRequests", qParams, tab],
+    queryKey: ["supplyRequests", facilityId, locationId, qParams, tab],
     queryFn: query.debounced(supplyRequestApi.listSupplyRequest, {
       queryParams: {
         facility: facilityId,

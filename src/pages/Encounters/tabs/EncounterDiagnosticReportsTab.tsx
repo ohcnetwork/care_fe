@@ -101,11 +101,6 @@ export const EncounterDiagnosticReportsTab = ({
                                     )}
                                   </div>
                                 </div>
-                                {report.conclusion && (
-                                  <div className="text-xs space-x-3">
-                                    {report.conclusion}
-                                  </div>
-                                )}
                               </div>
                             </Link>
                           </TableCell>

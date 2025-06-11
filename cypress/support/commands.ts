@@ -168,14 +168,16 @@ Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
 });
 
 export interface ErrorMessageItem {
-  label: string;
+  label?: string;
   message: string;
 }
 
 Cypress.Commands.add("verifyErrorMessages", (errors: ErrorMessageItem[]) => {
   errors.forEach(({ label, message }) => {
-    // Verify the label is present
-    cy.contains(label).scrollIntoView().should("be.visible");
+    if (label) {
+      // Verify the label is present if provided
+      cy.contains(label).scrollIntoView().should("be.visible");
+    }
     // Verify the error message is present
     cy.contains(message).scrollIntoView().should("be.visible");
   });

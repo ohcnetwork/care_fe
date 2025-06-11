@@ -57,6 +57,7 @@ import {
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import dayjs from "@/Utils/dayjs";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
@@ -247,6 +248,10 @@ export function InvoiceShow({
         note: invoice?.note,
         account: invoice?.account.id || "",
         charge_items: invoice?.charge_items.map((item) => item.id) || [],
+        issue_date:
+          status === InvoiceStatus.issued
+            ? dayjs().toISOString()
+            : invoice?.issue_date,
       };
 
       updateInvoice(data);
@@ -264,6 +269,7 @@ export function InvoiceShow({
         note: invoice?.note,
         account: invoice?.account.id || "",
         charge_items: invoice?.charge_items.map((item) => item.id) || [],
+        issue_date: invoice?.issue_date,
       });
     } else {
       cancelInvoice({ reason: selectedStatus });
@@ -473,7 +479,12 @@ export function InvoiceShow({
                     {t("issue_date")}:
                   </div>
                   <p className="font-medium text-gray-950 text-sm">
-                    {/* {formatDate(invoice.created_at, "MM/dd/yyyy")} */}
+                    {invoice.issue_date
+                      ? format(
+                          new Date(invoice.issue_date),
+                          "dd MMM, yyyy h:mm a",
+                        )
+                      : "-"}
                   </p>
                 </div>
               </div>
@@ -927,10 +938,7 @@ export function InvoiceShow({
                   title: t("invoice_created"),
                 });
 
-                if (
-                  invoice.status === InvoiceStatus.issued ||
-                  invoice.status === InvoiceStatus.balanced
-                ) {
+                if (invoice.issue_date) {
                   events.push({
                     icon: <FileCheck className="size-5" />,
                     title: t("invoice_issued"),

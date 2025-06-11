@@ -6,6 +6,7 @@ import {
   ExternalLink,
   FileCheck2,
 } from "lucide-react";
+import { Info } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -34,6 +35,12 @@ import {
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Tooltip } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { FileListTable } from "@/components/Files/FileListTable";
@@ -58,7 +65,6 @@ interface DiagnosticReportReviewProps {
 
 export function DiagnosticReportReview({
   facilityId,
-  serviceRequestId,
   diagnosticReports,
 }: DiagnosticReportReviewProps) {
   const { t } = useTranslation();
@@ -109,12 +115,15 @@ export function DiagnosticReportReview({
       }),
       onSuccess: () => {
         toast.success("Diagnostic report approved successfully");
+        // Invalidate all related queries to update workflow status
         queryClient.invalidateQueries({
-          queryKey: ["serviceRequest", serviceRequestId],
+          queryKey: ["serviceRequest"],
         });
-        // Fetch the updated report
         queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport", latestReport?.id],
+          queryKey: ["diagnosticReport"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["files"],
         });
       },
       onError: (err: any) => {
@@ -177,15 +186,23 @@ export function DiagnosticReportReview({
                   <p className="flex items-center gap-1.5">
                     <FileCheck2 className="size-[24px] text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
                     {fullReport?.code ? (
-                      <p className="flex flex-col gap-1">
-                        {fullReport?.code?.display} <br />
-                        {isExpanded && (
-                          <span className="text-sm text-gray-500">
-                            {fullReport?.code?.system} {", "}{" "}
-                            {fullReport?.code?.code}
-                          </span>
-                        )}
-                      </p>
+                      <>
+                        {fullReport?.code?.display}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="size-4 text-gray-600 inline-block cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {fullReport?.code?.system}
+                                {", "}
+                                {fullReport?.code?.code}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </>
                     ) : (
                       <span className="text-base/9 text-gray-950 font-medium">
                         {t("result_review")}

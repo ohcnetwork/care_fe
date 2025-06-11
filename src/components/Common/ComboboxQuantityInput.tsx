@@ -25,8 +25,8 @@ import {
 import { QuantitySpec } from "@/types/emr/specimenDefinition/specimenDefinition";
 
 interface Props {
-  quantity?: DosageQuantity | QuantitySpec;
-  onChange: (quantity: DosageQuantity | QuantitySpec) => void;
+  quantity?: DosageQuantity | QuantitySpec | null;
+  onChange: (quantity: DosageQuantity | QuantitySpec | null) => void;
   disabled?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
@@ -60,10 +60,13 @@ export function ComboboxQuantityInput({
       setInputValue(value);
       setOpen(true);
       setActiveIndex(0);
-      if (value && selectedUnit && value !== ".") {
+      if (value === "") {
+        onChange(null);
+      }
+      if (value && value !== ".") {
         const parsedValue = parseFloat(value);
         if (!isNaN(parsedValue)) {
-          onChange({ value: parsedValue, unit: selectedUnit });
+          onChange({ value: parsedValue, unit: selectedUnit || units[0] });
         }
       }
     }
@@ -89,7 +92,7 @@ export function ComboboxQuantityInput({
         setOpen(false);
         setActiveIndex(-1);
         const parsedValue = parseFloat(inputValue);
-        if (!isNaN(parsedValue)) {
+        if (!isNaN(parsedValue) && inputValue.trim() !== "") {
           onChange({ value: parsedValue, unit });
         }
       }
@@ -150,7 +153,10 @@ export function ComboboxQuantityInput({
                       setOpen(false);
                       setActiveIndex(-1);
                       inputRef.current?.focus();
-                      onChange({ value: parseFloat(inputValue), unit });
+                      const parsedValue = parseFloat(inputValue);
+                      if (!isNaN(parsedValue) && inputValue.trim() !== "") {
+                        onChange({ value: parsedValue, unit });
+                      }
                     }}
                     className={cn(
                       "flex items-center gap-2",

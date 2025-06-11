@@ -9,6 +9,8 @@ import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
 import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
 import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
+import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
+import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 
 import ActivityDefinitionForm from "./activityDefinition/ActivityDefinitionForm";
 import ActivityDefinitionList from "./activityDefinition/ActivityDefinitionList";
@@ -171,6 +173,18 @@ const getRoutes = (facilityId: string) => ({
       facilityId={facilityId}
       reportTemplateId={reportTemplateId}
     />
+  ),
+  "/patient_identifier_config": () => (
+    <PatientIdentifierConfigList facilityId={facilityId} />
+  ),
+  "/patient_identifier_config/new": () => (
+    <PatientIdentifierConfigForm facilityId={facilityId} />
+  ),
+  "/patient_identifier_config/:id": ({ id }: { id: string }) => (
+    <PatientIdentifierConfigForm facilityId={facilityId} configId={id} />
+  ),
+  "/patient_identifier_config/:id/edit": ({ id }: { id: string }) => (
+    <PatientIdentifierConfigForm facilityId={facilityId} configId={id} />
   ),
   "*": () => <ErrorPage />,
 });

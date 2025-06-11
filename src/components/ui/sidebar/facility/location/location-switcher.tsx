@@ -25,8 +25,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
 
+import PaginationComponent from "@/components/Common/Pagination";
+
 import useAppHistory from "@/hooks/useAppHistory";
-import useFilters from "@/hooks/useFilters";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
@@ -118,10 +121,8 @@ function LocationSelectorDialog({
   const { t } = useTranslation();
   const [locationLevel, setLocationLevel] = useState<LocationList[]>([]);
   const [searchValue, setSearchValue] = useState("");
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 14,
-    disableCache: true,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const resultsPerPage = RESULTS_PER_PAGE_LIMIT;
   const path = usePath();
   const subPath =
     path?.match(/\/facility\/[^/]+\/locations\/[^/]+\/(.*)/)?.[1] || "";
@@ -135,8 +136,8 @@ function LocationSelectorDialog({
       "locations",
       facilityId,
       currentParentId,
-      qParams.locationSearch,
-      qParams.page,
+      searchValue,
+      currentPage,
     ],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
@@ -146,9 +147,9 @@ function LocationSelectorDialog({
           mode: "kind",
         }),
         ordering: "sort_index",
-        ...(qParams.locationSearch && { name: qParams.locationSearch }),
+        ...(searchValue && { name: searchValue }),
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: (currentPage - 1) * resultsPerPage,
       },
     }),
     enabled: open,
@@ -161,7 +162,7 @@ function LocationSelectorDialog({
       handleConfirmSelection(location);
     }
     setSearchValue("");
-    updateQuery({ locationSearch: "" });
+    setCurrentPage(1);
   };
 
   const handleConfirmSelection = (newLocation: LocationList) => {
@@ -170,7 +171,7 @@ function LocationSelectorDialog({
     setLocationLevel([]);
     setOpen(false);
     setSearchValue("");
-    updateQuery({ locationSearch: "" });
+    setCurrentPage(1);
     if (newLocation.id !== oldLocationId) {
       navigate(
         `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
@@ -187,7 +188,7 @@ function LocationSelectorDialog({
     }
     setLocationLevel(locationList);
     setSearchValue("");
-    updateQuery({ locationSearch: "" });
+    setCurrentPage(1);
   };
 
   useKeyboardShortcut(["Shift", "Enter"], () => {
@@ -245,7 +246,7 @@ function LocationSelectorDialog({
         setOpen(open);
         if (!open) {
           setSearchValue("");
-          updateQuery({ locationSearch: "" });
+          setCurrentPage(1);
         }
       }}
     >
@@ -290,7 +291,7 @@ function LocationSelectorDialog({
                 onClick={() => {
                   setLocationLevel([]);
                   setSearchValue("");
-                  updateQuery({ locationSearch: "" });
+                  setCurrentPage(1);
                 }}
               >
                 <CareIcon icon="l-multiply" />
@@ -323,7 +324,7 @@ function LocationSelectorDialog({
               placeholder={t("search")}
               onValueChange={(value) => {
                 setSearchValue(value);
-                updateQuery({ locationSearch: value });
+                setCurrentPage(1);
               }}
               value={searchValue}
             />
@@ -358,7 +359,14 @@ function LocationSelectorDialog({
             </CommandList>
           </div>
         </Command>
-        <Pagination totalCount={locations?.count || 0} />
+        <div className="flex w-full justify-center mt-4">
+          <PaginationComponent
+            cPage={currentPage}
+            defaultPerPage={resultsPerPage}
+            data={{ totalCount: locations?.count || 0 }}
+            onChange={(page: number) => setCurrentPage(page)}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

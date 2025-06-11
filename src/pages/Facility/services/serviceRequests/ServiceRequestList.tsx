@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ScanQrCode, X } from "lucide-react";
+import { ChevronDown, ScanQrCode, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -24,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import {
@@ -292,6 +299,30 @@ export default function ServiceRequestList({
   });
   const [isBarcodeOpen, setBarcodeOpen] = useState(false);
 
+  const allStatuses = Object.values(Status);
+  const [visibleTabs, setVisibleTabs] = useState<Status[]>([
+    Status.active,
+    Status.on_hold,
+    Status.completed,
+    Status.draft,
+  ]);
+  const [dropdownItems, setDropdownItems] = useState<Status[]>(
+    allStatuses.filter((status) => !visibleTabs.includes(status)),
+  );
+
+  const handleDropdownSelect = (value: Status) => {
+    const lastVisibleTab = visibleTabs[visibleTabs.length - 1];
+    const newVisibleTabs = [...visibleTabs.slice(0, -1), value];
+    const newDropdownItems = [
+      ...dropdownItems.filter((item) => item !== value),
+      lastVisibleTab,
+    ];
+
+    setVisibleTabs(newVisibleTabs);
+    setDropdownItems(newDropdownItems);
+    updateQuery({ status: value });
+  };
+
   const { data: location } = useQuery({
     queryKey: ["location", facilityId, locationId],
     queryFn: query(locationApi.get, {
@@ -300,7 +331,7 @@ export default function ServiceRequestList({
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["serviceRequests", qParams],
+    queryKey: ["serviceRequests", facilityId, locationId, qParams],
     queryFn: query.debounced(serviceRequestApi.listServiceRequest, {
       pathParams: { facilityId },
       queryParams: {
@@ -316,43 +347,77 @@ export default function ServiceRequestList({
 
   const serviceRequests = response?.results || [];
 
-  const handleClearStatus = () => {
-    updateQuery({ status: undefined });
-  };
-
   const handleClearPriority = () => {
     updateQuery({ priority: undefined });
   };
 
-  const handleClearAll = () => {
-    updateQuery({ status: undefined, priority: undefined });
-  };
-
   return (
     <Page title={t("service_requests")} hideTitleOnPage>
-      <div className="flex justify-between items-center gap-4 mb-4">
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setBarcodeOpen(true)}
-        >
-          <ScanQrCode className="size-4" />
-          {t("scan_qr")}
-        </Button>
-      </div>
       <SpecimenIDScanDialog
         open={isBarcodeOpen}
         onOpenChange={setBarcodeOpen}
         facilityId={facilityId}
         locationId={locationId}
       />
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto pb-8">
         <div className="mb-8">
           <div className="mb-4">
             <p className="text-sm text-gray-600">{location?.name}</p>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              {t("service_requests")}
-            </h1>
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+              <h1 className="text-2xl font-semibold text-gray-900">
+                {t("service_requests")}
+              </h1>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setBarcodeOpen(true)}
+              >
+                <ScanQrCode className="size-4" />
+                {t("scan_qr")}
+              </Button>
+            </div>
+          </div>
+          <div className="w-full mb-4">
+            <Tabs
+              value={qParams.status || Status.active}
+              onValueChange={(value) => updateQuery({ status: value })}
+            >
+              <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
+                {visibleTabs.map((statusValue) => (
+                  <TabsTrigger
+                    key={statusValue}
+                    value={statusValue}
+                    className="border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                  >
+                    {t(statusValue)}
+                  </TabsTrigger>
+                ))}
+                {dropdownItems.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="text-gray-500 font-semibold hover:text-gray-900 hover:bg-transparent pb-2.5 px-2.5"
+                      >
+                        {t("more")}
+                        <ChevronDown />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {dropdownItems.map((statusValue) => (
+                        <DropdownMenuItem
+                          key={statusValue}
+                          onClick={() => handleDropdownSelect(statusValue)}
+                          className="text-gray-950 font-medium text-sm"
+                        >
+                          {t(statusValue)}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </TabsList>
+            </Tabs>
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -374,31 +439,12 @@ export default function ServiceRequestList({
             <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
               <div className="flex-1 sm:flex-initial sm:w-auto">
                 <FilterSelect
-                  value={qParams.status || ""}
-                  onValueChange={(value) => updateQuery({ status: value })}
-                  options={Object.values(Status)}
-                  isStatus
-                  onClear={handleClearStatus}
-                />
-              </div>
-              <div className="flex-1 sm:flex-initial sm:w-auto">
-                <FilterSelect
                   value={qParams.priority || ""}
                   onValueChange={(value) => updateQuery({ priority: value })}
                   options={Object.values(Priority)}
                   onClear={handleClearPriority}
                 />
               </div>
-              {qParams.status && qParams.priority && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearAll}
-                  className="text-sm font-medium"
-                >
-                  {t("clear")}
-                </Button>
-              )}
             </div>
           </div>
         </div>

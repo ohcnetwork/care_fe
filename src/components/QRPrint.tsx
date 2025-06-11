@@ -27,7 +27,7 @@ export function QRPrint({
   const logoSize = Math.floor(size * 0.25);
 
   return (
-    <PrintPreview title={title || t("qr_code")}>
+    <PrintPreview title={title || t("qr_code")} showBackButton={false}>
       <div className="h-full py-2 max-w-sm mx-auto">
         <div className="space-y-6">
           {/* Header */}
@@ -47,7 +47,7 @@ export function QRPrint({
           </div>
 
           {/* QR Code Content */}
-          <div className="flex gap-6">
+          <div className="flex gap-4">
             <div className="shrink-0">
               <QRCodeSVG
                 value={value}

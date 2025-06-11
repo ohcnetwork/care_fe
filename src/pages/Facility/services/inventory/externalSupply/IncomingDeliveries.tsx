@@ -29,7 +29,7 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["externalSupplyDeliveries", qParams],
+    queryKey: ["externalSupplyDeliveries", facilityId, locationId, qParams],
     queryFn: query.debounced(supplyDeliveryApi.listSupplyDelivery, {
       queryParams: {
         facility: facilityId,

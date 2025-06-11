@@ -34,6 +34,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import {
+  ContainerSpec,
   Preference,
   RETENTION_TIME_UNITS,
   SPECIMEN_DEFINITION_UNITS_CODES,
@@ -46,14 +47,14 @@ const typeTestedSchema = z.object({
   preference: z.nativeEnum(Preference),
   container: z
     .object({
-      description: z.string().nullable(),
+      description: z.string().optional(),
       capacity: z
         .object({
           value: z.number(),
           unit: CodeSchema,
         })
-        .optional()
-        .nullable(),
+        .nullable()
+        .optional(),
       minimum_volume: z
         .object({
           quantity: z
@@ -63,21 +64,22 @@ const typeTestedSchema = z.object({
             })
             .optional()
             .nullable(),
-          string: z.string().optional().nullable(),
+          string: z.string().optional(),
         })
-        .nullable(),
-      cap: CodeSchema.optional().nullable(),
-      preparation: z.string().nullable(),
+        .optional(),
+      cap: CodeSchema.optional(),
+      preparation: z.string().optional(),
     })
-    .nullable(),
-  requirement: z.string().nullable(),
+    .nullable()
+    .optional(),
+  requirement: z.string().optional(),
   retention_time: z
     .object({
       value: z.number().int({ message: t("valid_integer_required") }),
       unit: CodeSchema,
     })
-    .optional()
-    .nullable(),
+    .nullable()
+    .optional(),
   single_use: z.boolean().nullable(),
 });
 
@@ -89,11 +91,11 @@ const formSchema = z.object({
   derived_from_uri: z
     .string()
     .url({ message: "Please enter a valid URL" })
-    .nullable(),
+    .optional(),
   type_collected: CodeSchema,
   patient_preparation: z.array(CodeSchema).min(0),
-  collection: CodeSchema.nullable(),
-  type_tested: typeTestedSchema.nullable(),
+  collection: CodeSchema.optional(),
+  type_tested: typeTestedSchema.optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -116,32 +118,25 @@ export function SpecimenDefinitionForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: initialData?.title || "",
-      slug: initialData?.slug || "",
-      status: initialData?.status || SpecimenDefinitionStatus.active,
-      description: initialData?.description || "",
-      derived_from_uri: initialData?.derived_from_uri || null,
+      title: initialData?.title,
+      slug: initialData?.slug,
+      status: initialData?.status ?? SpecimenDefinitionStatus.active,
+      description: initialData?.description,
+      derived_from_uri: initialData?.derived_from_uri ?? undefined,
       type_collected: initialData?.type_collected,
-      patient_preparation: initialData?.patient_preparation || [],
-      collection: initialData?.collection || null,
-      type_tested: initialData?.type_tested || {
+      patient_preparation: initialData?.patient_preparation ?? [],
+      collection: initialData?.collection ?? undefined,
+      type_tested: initialData?.type_tested ?? {
         is_derived: false,
         preference: Preference.preferred,
         container: {
-          description: "",
+          description: initialData?.type_tested?.container?.description,
           capacity: initialData?.type_tested?.container?.capacity,
-          minimum_volume: {
-            quantity:
-              initialData?.type_tested?.container?.minimum_volume?.quantity ||
-              null,
-            string:
-              initialData?.type_tested?.container?.minimum_volume?.string ||
-              null,
-          },
+          minimum_volume: initialData?.type_tested?.container?.minimum_volume,
           cap: initialData?.type_tested?.container?.cap,
-          preparation: "",
+          preparation: initialData?.type_tested?.container?.preparation,
         },
-        requirement: "",
+        requirement: initialData?.type_tested?.requirement,
         retention_time: initialData?.type_tested?.retention_time,
         single_use: false,
       },
@@ -181,31 +176,42 @@ export function SpecimenDefinitionForm({
     form.setValue("patient_preparation", newPreparations);
   };
 
-  const handleMinimumVolumeTypeChange = (type: string) => {
-    form.setValue("type_tested.container.minimum_volume", {
-      quantity:
-        type === "quantity"
-          ? { value: 0, unit: SPECIMEN_DEFINITION_UNITS_CODES[0] }
-          : null,
-      string: type === "text" ? "" : null,
-    });
+  const cleanContainerData = (container: ContainerSpec | null | undefined) => {
+    if (!container) return undefined;
+
+    const hasContent =
+      container.description ||
+      container.preparation ||
+      container.capacity ||
+      container.cap ||
+      container.minimum_volume?.quantity ||
+      container.minimum_volume?.string;
+
+    if (!hasContent) return undefined;
+
+    const cleanedContainer = { ...container };
+    if (
+      container.minimum_volume &&
+      !container.minimum_volume.quantity &&
+      !container.minimum_volume.string
+    ) {
+      delete cleanedContainer.minimum_volume;
+    }
+
+    return cleanedContainer;
   };
 
-  const handleMinimumVolumeQuantityChange = (value: {
-    value: number | null;
-    unit: Code;
-  }) => {
-    form.setValue("type_tested.container.minimum_volume", {
-      quantity:
-        value.value !== null ? { value: value.value, unit: value.unit } : null,
-      string: null,
-    });
-  };
-
-  const handleMinimumVolumeStringChange = (value: string) => {
-    form.setValue("type_tested.container.minimum_volume", {
-      quantity: null,
-      string: value,
+  const handleSubmit = (data: SpecimenDefinitionCreate) => {
+    onSubmit({
+      ...data,
+      patient_preparation:
+        data.patient_preparation?.filter((item) => item && item.code) || [],
+      type_tested: data.type_tested
+        ? {
+            ...data.type_tested,
+            container: cleanContainerData(data.type_tested.container),
+          }
+        : undefined,
     });
   };
 
@@ -215,14 +221,9 @@ export function SpecimenDefinitionForm({
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          form.handleSubmit(
-            (data) => {
-              onSubmit(data);
-            },
-            (errors) => {
-              console.log("Form submission failed with errors:", errors);
-            },
-          )();
+          form.handleSubmit(handleSubmit, (errors) => {
+            console.log("Form submission failed with errors:", errors);
+          })();
         }}
         className="space-y-4"
       >
@@ -263,7 +264,6 @@ export function SpecimenDefinitionForm({
                         <Input
                           placeholder={t("unique_identifier")}
                           {...field}
-                          value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />
@@ -312,11 +312,7 @@ export function SpecimenDefinitionForm({
                     <FormItem className="flex flex-col">
                       <FormLabel>{t("derived_from_uri")}</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder={t("uri")}
-                          {...field}
-                          value={field.value || ""}
-                        />
+                        <Input placeholder={t("uri")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -522,10 +518,10 @@ export function SpecimenDefinitionForm({
                             quantity={
                               field.value
                                 ? {
-                                    value: field.value.value || null,
+                                    value: field.value.value,
                                     unit: field.value.unit,
                                   }
-                                : { value: null, unit: RETENTION_TIME_UNITS[0] }
+                                : null
                             }
                             onChange={field.onChange}
                             disabled={isLoading}
@@ -551,11 +547,7 @@ export function SpecimenDefinitionForm({
                     <FormItem className="flex flex-col">
                       <FormLabel>{t("requirement")}</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder={t("requirement")}
-                          {...field}
-                          value={field.value || ""}
-                        />
+                        <Textarea placeholder={t("requirement")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -574,11 +566,7 @@ export function SpecimenDefinitionForm({
                     <FormItem className="flex flex-col">
                       <FormLabel>{t("description")}</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder={t("description")}
-                          {...field}
-                          value={field.value || ""}
-                        />
+                        <Textarea placeholder={t("description")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -619,13 +607,10 @@ export function SpecimenDefinitionForm({
                               quantity={
                                 field.value
                                   ? {
-                                      value: field.value.value || null,
+                                      value: field.value.value,
                                       unit: field.value.unit,
                                     }
-                                  : {
-                                      value: null,
-                                      unit: SPECIMEN_DEFINITION_UNITS_CODES[0],
-                                    }
+                                  : undefined
                               }
                               onChange={field.onChange}
                               disabled={isLoading}
@@ -652,7 +637,6 @@ export function SpecimenDefinitionForm({
                           ? "quantity"
                           : "text"
                       }
-                      onValueChange={handleMinimumVolumeTypeChange}
                     >
                       <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="quantity">
@@ -676,9 +660,13 @@ export function SpecimenDefinitionForm({
                                         }
                                       : undefined
                                   }
-                                  onChange={(value) =>
-                                    handleMinimumVolumeQuantityChange(value)
-                                  }
+                                  onChange={(value) => {
+                                    field.onChange(value);
+                                    form.setValue(
+                                      "type_tested.container.minimum_volume.string",
+                                      undefined,
+                                    );
+                                  }}
                                   disabled={isLoading}
                                   placeholder={t("enter_minimum_volume")}
                                   units={SPECIMEN_DEFINITION_UNITS_CODES}
@@ -699,13 +687,14 @@ export function SpecimenDefinitionForm({
                                 <Input
                                   placeholder={t("enter_minimum_volume")}
                                   {...field}
-                                  value={field.value || ""}
                                   disabled={isLoading}
-                                  onChange={(e) =>
-                                    handleMinimumVolumeStringChange(
-                                      e.target.value,
-                                    )
-                                  }
+                                  onChange={(e) => {
+                                    field.onChange(e.target.value);
+                                    form.setValue(
+                                      "type_tested.container.minimum_volume.quantity",
+                                      undefined,
+                                    );
+                                  }}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -723,11 +712,7 @@ export function SpecimenDefinitionForm({
                     <FormItem className="flex flex-col">
                       <FormLabel>{t("preparation")}</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder={t("preparation")}
-                          {...field}
-                          value={field.value || ""}
-                        />
+                        <Textarea placeholder={t("preparation")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

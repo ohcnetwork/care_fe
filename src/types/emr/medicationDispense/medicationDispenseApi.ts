@@ -4,6 +4,7 @@ import {
   MedicationDispenseCreate,
   MedicationDispenseRead,
   MedicationDispenseSummary,
+  MedicationDispenseUpdate,
   MedicationDispenseUpsert,
 } from "@/types/emr/medicationDispense/medicationDispense";
 
@@ -29,5 +30,11 @@ export default {
     path: "/api/v1/medication/dispense/summary/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<MedicationDispenseSummary>>(),
+  },
+  update: {
+    path: "/api/v1/medication/dispense/{id}/",
+    method: HttpMethod.PUT,
+    TRes: Type<MedicationDispenseRead>(),
+    TBody: Type<MedicationDispenseUpdate>(),
   },
 };

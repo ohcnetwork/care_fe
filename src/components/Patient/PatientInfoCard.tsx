@@ -35,6 +35,7 @@ import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 import { AccountSheetButton } from "@/components/Patient/AccountSheet";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
+import PatientIdentifierSheet from "@/components/Patient/PatientIdentifierSheet";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
@@ -472,6 +473,21 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             className="size-4 text-green-600"
                           />
                           {t("account")}
+                        </div>
+                      }
+                      canWrite={canWrite}
+                    />
+                  </Badge>
+                  <Badge variant="outline">
+                    <PatientIdentifierSheet
+                      patientId={patient.id}
+                      trigger={
+                        <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100 capitalize">
+                          <CareIcon
+                            icon="l-setting"
+                            className="size-4 text-blue-600"
+                          />
+                          {t("identifiers")}
                         </div>
                       }
                       canWrite={canWrite}

@@ -50,7 +50,7 @@
     "sort-locales": "node ./scripts/sort-locales.js"
   },
   "dependencies": {
-    "@excalidraw/excalidraw": "^0.18.0",
+    "@excalidraw/excalidraw": "^0.18.0-a18b139",
     "@fontsource/figtree": "^5.1.1",
     "@fontsource/libre-barcode-128-text": "^5.2.5",
     "@hookform/resolvers": "^5.0.1",

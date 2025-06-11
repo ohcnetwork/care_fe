@@ -93,10 +93,10 @@ export function SpecimenForm({
     }),
     onSuccess: () => {
       toast.success(t("specimen_collected"));
-      onCancel();
       queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", serviceRequestId],
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
+      onCancel();
     },
     onError: () => {
       toast.error(t("specimen_update_error"));

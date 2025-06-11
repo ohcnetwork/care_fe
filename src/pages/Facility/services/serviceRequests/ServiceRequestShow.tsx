@@ -1,10 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeftIcon,
-  MoreVertical,
-  PlusIcon,
-  PrinterIcon,
-} from "lucide-react";
+import { ArrowLeft, MoreVertical, PlusIcon, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,6 +7,17 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import routes from "@/Utils/request/api";
@@ -30,6 +37,7 @@ import query from "@/Utils/request/query";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
+import { Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import {
   SpecimenRead,
@@ -55,17 +63,15 @@ interface ServiceRequestShowProps {
   facilityId: string;
   serviceRequestId: string;
   locationId?: string;
-  serviceId?: string;
 }
 
 export default function ServiceRequestShow({
   facilityId,
   serviceRequestId,
-  locationId,
-  serviceId,
 }: ServiceRequestShowProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { goBack } = useAppHistory();
   const isMobile = useBreakpoints({
     default: true,
     lg: false,
@@ -78,7 +84,7 @@ export default function ServiceRequestShow({
     useState<SpecimenDefinitionRead | null>(null);
 
   const { data: request, isLoading: isLoadingRequest } = useQuery({
-    queryKey: ["serviceRequest", serviceRequestId],
+    queryKey: ["serviceRequest", facilityId, serviceRequestId],
     queryFn: query(serviceRequestApi.retrieveServiceRequest, {
       pathParams: {
         facilityId: facilityId,
@@ -88,7 +94,7 @@ export default function ServiceRequestShow({
   });
 
   const { data: chargeItems, isLoading: _isLoadingChargeItems } = useQuery({
-    queryKey: ["chargeItems", serviceRequestId],
+    queryKey: ["chargeItems", facilityId, serviceRequestId],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: {
         facilityId: facilityId,
@@ -113,7 +119,7 @@ export default function ServiceRequestShow({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", serviceRequestId],
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
     },
     onError: () => {
@@ -125,7 +131,7 @@ export default function ServiceRequestShow({
     mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", serviceRequestId],
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
       setIsPrintingAllQRCodes(false);
       setIsQRCodeSheetOpen(true);
@@ -133,6 +139,23 @@ export default function ServiceRequestShow({
     onError: () => {
       toast.error(t("specimen_draft_create_error"));
       setIsPrintingAllQRCodes(false);
+    },
+  });
+
+  const { mutate: markAsComplete } = useMutation({
+    mutationFn: () => {
+      return mutate(serviceRequestApi.updateServiceRequest, {
+        pathParams: { facilityId, serviceRequestId },
+      })({
+        ...request,
+        status: Status.completed,
+      });
+    },
+    onSuccess: () => {
+      toast.success(t("service_request_completed"));
+      queryClient.invalidateQueries({
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
+      });
     },
   });
 
@@ -281,35 +304,65 @@ export default function ServiceRequestShow({
       <div className="flex-1 p-4 max-w-6xl mx-auto">
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-2">
-            {locationId && serviceId ? (
-              <Button
-                variant="link"
-                className="underline underline-offset-2 text-gray-950 font-semibold pl-0"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/services/${serviceId}/requests/locations/${locationId}`,
-                  )
-                }
-              >
-                <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
-                Back
-              </Button>
-            ) : (
-              <Button
-                variant="link"
-                className="underline underline-offset-2 text-gray-950 font-semibold pl-0 cursor-pointer"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/patient/${request.encounter.patient.id}/encounter/${request.encounter.id}/service_requests`,
-                  )
-                }
-              >
-                <ArrowLeftIcon className="size-4" />
-                Back to encounter
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => goBack()}
+              className="font-semibold border border-gray-400 text-gray-950 underline underline-offset-2"
+            >
+              <ArrowLeft />
+              {t("back")}
+            </Button>
 
-            {isMobile && <WorkflowProgress request={request} variant="sheet" />}
+            <div className="flex items-end gap-2">
+              {request?.diagnostic_reports?.[0]?.status ===
+                DiagnosticReportStatus.final && (
+                <div className="flex items-center gap-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        disabled={request.status === Status.completed}
+                        className="font-semibold border border-gray-400"
+                      >
+                        {t("mark_as_complete")}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          {t("confirm_completion")}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {t("service_request_completion_confirmation")}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => markAsComplete()}>
+                          {t("confirm")}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <Button
+                    variant="primary"
+                    className="font-semibold"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
+                      )
+                    }
+                  >
+                    {t("view") + " " + t("report")}
+                  </Button>
+                </div>
+              )}
+
+              {isMobile && (
+                <WorkflowProgress request={request} variant="sheet" />
+              )}
+            </div>
           </div>
           <div className="px-2">
             <PatientHeader
@@ -349,7 +402,7 @@ export default function ServiceRequestShow({
             serviceRequestId={serviceRequestId}
             onChargeItemsAdded={() => {
               queryClient.invalidateQueries({
-                queryKey: ["chargeItems", serviceRequestId],
+                queryKey: ["chargeItems", facilityId, serviceRequestId],
               });
             }}
           />
@@ -439,7 +492,7 @@ export default function ServiceRequestShow({
             <Card className="shadow-lg border-t-4 border-t-primary">
               <CardHeader className="pb-0 flex flex-row justify-between items-center">
                 <CardTitle>
-                  Collect Specimen: {selectedSpecimenDefinition?.title}
+                  {t("collect_specimen")}: {selectedSpecimenDefinition?.title}
                 </CardTitle>
                 <Button
                   variant="ghost"
@@ -475,6 +528,7 @@ export default function ServiceRequestShow({
                   observationDefinitions={observationRequirements}
                   diagnosticReports={diagnosticReports}
                   activityDefinition={activityDefinition}
+                  specimens={request.specimens || []}
                 />
               )}
             </div>

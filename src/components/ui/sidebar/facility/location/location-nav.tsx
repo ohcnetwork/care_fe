@@ -44,7 +44,7 @@ export function LocationNav() {
               url: `${baseUrl}/medication_requests`,
             },
             {
-              name: t("dispense"),
+              name: "℞ " + t("dispense"),
               url: `${baseUrl}/medication_dispense`,
             },
           ],

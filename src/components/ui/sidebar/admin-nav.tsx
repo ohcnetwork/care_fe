@@ -19,6 +19,16 @@ function generateAdminLinks(t: TFunction) {
       icon: <CareIcon icon="l-list-ol-alt" />,
     },
     {
+      name: "Patient Identifier Config",
+      url: `${baseUrl}/patient_identifier_config`,
+      icon: <CareIcon icon="l-setting" />,
+    },
+    {
+      name: "Tag Config",
+      url: `${baseUrl}/tag_config`,
+      icon: <CareIcon icon="l-tag-alt" />,
+    },
+    {
       name: "Roles",
       url: `${baseUrl}/roles`,
       icon: <CareIcon icon="d-people" />,

@@ -1,10 +1,10 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -42,9 +42,10 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
+import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { MultiValueSetSelect } from "@/components/Medicine/MultiValueSetSelect";
 import { formatDosage } from "@/components/Medicine/utils";
 import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
@@ -84,12 +85,8 @@ import { validateFields } from "@/types/questionnaire/validation";
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
 
-  const formatValue = (value?: number | null) =>
-    value != null
-      ? value.toString().includes(".")
-        ? value.toFixed(2)
-        : value.toString()
-      : "";
+  const formatValue = (value: number) =>
+    value.toString().includes(".") ? value.toFixed(2) : value.toString();
 
   return `${formatValue(range.low?.value)} → ${formatValue(range.high?.value)} ${range.high?.unit?.display}`;
 }
@@ -823,6 +820,32 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   const isReadOnly = !!medication.id;
   const { hasError } = useFieldError(questionId, errors, index);
 
+  const [currentInstructions, setCurrentInstructions] = useState<Code[]>(
+    dosageInstruction?.additional_instruction || [],
+  );
+
+  const updateInstructions = (instructions: Code[]) => {
+    setCurrentInstructions(instructions);
+    handleUpdateDosageInstruction({
+      additional_instruction:
+        instructions.length > 0 ? instructions : undefined,
+    });
+  };
+
+  const addInstruction = (instruction: Code) => {
+    if (!currentInstructions.some((item) => item.code === instruction.code)) {
+      updateInstructions([...currentInstructions, instruction]);
+    } else {
+      toast.warning(`${instruction.display} ${t("is_already_selected")}`);
+    }
+  };
+
+  const removeInstruction = (instructionCode: string) => {
+    updateInstructions(
+      currentInstructions.filter((item) => item.code !== instructionCode),
+    );
+  };
+
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
   ) => {
@@ -847,14 +870,16 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           <ComboboxQuantityInput
             quantity={localDoseRange.low}
             onChange={(value) => {
-              setLocalDoseRange((prev) => ({
-                ...prev,
-                low: value,
-                high: {
-                  ...prev.high,
-                  unit: value.unit,
-                },
-              }));
+              if (value) {
+                setLocalDoseRange((prev) => ({
+                  ...prev,
+                  low: value,
+                  high: {
+                    ...prev.high,
+                    unit: value.unit || prev.high.unit,
+                  },
+                }));
+              }
             }}
             disabled={disabled || isReadOnly}
             className="lg:max-w-[200px]"
@@ -865,14 +890,16 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           <ComboboxQuantityInput
             quantity={localDoseRange.high}
             onChange={(value) => {
-              setLocalDoseRange((prev) => ({
-                ...prev,
-                high: value,
-                low: {
-                  ...prev.low,
-                  unit: value.unit,
-                },
-              }));
+              if (value) {
+                setLocalDoseRange((prev) => ({
+                  ...prev,
+                  high: value,
+                  low: {
+                    ...prev.low,
+                    unit: value.unit || prev.low.unit,
+                  },
+                }));
+              }
             }}
             disabled={disabled || !localDoseRange.low.value || isReadOnly}
             className="lg:max-w-[200px]"
@@ -992,17 +1019,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   data-cy="dosage-input"
                   quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
                   onChange={(value) => {
-                    if (!value.value || !value.unit) return;
-                    handleUpdateDosageInstruction({
-                      dose_and_rate: {
-                        type: "ordered",
-                        dose_quantity: {
-                          value: value.value,
-                          unit: value.unit,
+                    if (value?.value && value?.unit) {
+                      handleUpdateDosageInstruction({
+                        dose_and_rate: {
+                          type: "ordered",
+                          dose_quantity: value,
+                          dose_range: undefined,
                         },
-                        dose_range: undefined,
-                      },
-                    });
+                      });
+                    }
                   }}
                   disabled={disabled || isReadOnly}
                   className="lg:max-w-[200px]"
@@ -1214,54 +1239,40 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Instructions */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="instructions"
-      >
+      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("instructions")}
         </Label>
         {dosageInstruction?.as_needed_boolean ? (
-          <MultiValueSetSelect
-            options={[
-              {
-                system: "system-as-needed-reason",
-                value: dosageInstruction?.as_needed_for || null,
-                label: t("prn_reason"),
-                placeholder: t("select_prn_reason"),
-                onSelect: (value: Code | null) => {
-                  handleUpdateDosageInstruction({
-                    as_needed_for: value || undefined,
-                  });
-                },
-              },
-              {
-                system: "system-additional-instruction",
-                value: dosageInstruction?.additional_instruction?.[0] || null,
-                label: t("additional_instructions"),
-                placeholder: t("select_additional_instructions"),
-                onSelect: (value: Code | null) => {
-                  handleUpdateDosageInstruction({
-                    additional_instruction: value ? [value] : undefined,
-                  });
-                },
-              },
-            ]}
-            disabled={disabled || isReadOnly}
-          />
+          <div className="space-y-2">
+            <ValueSetSelect
+              system="system-as-needed-reason"
+              value={dosageInstruction?.as_needed_for || null}
+              placeholder={t("select_prn_reason")}
+              onSelect={(value) => {
+                handleUpdateDosageInstruction({
+                  as_needed_for: value || undefined,
+                });
+              }}
+              disabled={disabled || isReadOnly}
+              asSheet
+            />
+
+            <InstructionsPopover
+              currentInstructions={currentInstructions}
+              removeInstruction={removeInstruction}
+              addInstruction={addInstruction}
+              isReadOnly={isReadOnly}
+              disabled={disabled}
+            />
+          </div>
         ) : (
-          <ValueSetSelect
-            system="system-additional-instruction"
-            value={dosageInstruction?.additional_instruction?.[0]}
-            onSelect={(instruction) =>
-              handleUpdateDosageInstruction({
-                additional_instruction: instruction ? [instruction] : undefined,
-              })
-            }
-            placeholder={t("select_additional_instructions")}
-            disabled={disabled || isReadOnly}
-            data-cy="medication-instructions"
-            wrapTextForSmallScreen
+          <InstructionsPopover
+            currentInstructions={currentInstructions}
+            removeInstruction={removeInstruction}
+            addInstruction={addInstruction}
+            isReadOnly={isReadOnly}
+            disabled={disabled}
           />
         )}
       </div>
@@ -1277,6 +1288,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(route) => handleUpdateDosageInstruction({ route })}
           placeholder={t("select_route")}
           disabled={disabled || isReadOnly}
+          asSheet
         />
       </div>
       {/* Site */}
@@ -1292,6 +1304,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_site")}
           disabled={disabled || isReadOnly}
           wrapTextForSmallScreen={true}
+          asSheet
         />
       </div>
       {/* Method */}
@@ -1307,6 +1320,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_method")}
           disabled={disabled || isReadOnly}
           count={20}
+          asSheet
         />
       </div>
       {/* Intent */}
@@ -1339,14 +1353,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("authored_on")}
         </Label>
-        <Input
-          type="datetime-local"
-          value={
-            medication.authored_on
-              ? format(new Date(medication.authored_on), "yyyy-MM-dd'T'HH:mm")
-              : undefined
-          }
-          onChange={(e) => onUpdate?.({ authored_on: e.target.value })}
+        <DateTimeInput
+          value={medication.authored_on}
+          onDateChange={(val) => onUpdate?.({ authored_on: val })}
           disabled={disabled || isReadOnly}
         />
       </div>

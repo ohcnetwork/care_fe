@@ -33,7 +33,7 @@ export function PurchaseOrders({ facilityId, locationId }: Props) {
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["purchaseOrders", qParams],
+    queryKey: ["purchaseOrders", locationId, qParams],
     queryFn: query.debounced(supplyRequestApi.listSupplyRequest, {
       queryParams: {
         limit: resultsPerPage,

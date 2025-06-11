@@ -133,10 +133,7 @@ export function DiscountComponentSettings() {
             <TableBody className="bg-white">
               {filteredComponents.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center text-muted-foreground h-24"
-                  >
+                  <TableCell colSpan={5} className="text-center h-24">
                     {search
                       ? t("no_matching_discount_components")
                       : t("no_discount_components")}
@@ -163,7 +160,7 @@ export function DiscountComponentSettings() {
                           <code className="px-2 py-1 rounded bg-gray-100 text-sm">
                             {component.code.code}
                           </code>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm">
                             • {component.code.display}
                           </span>
                         </div>

@@ -372,12 +372,7 @@ export function ProductFormContent({
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={
-                            !field.value ? "text-muted-foreground" : ""
-                          }
-                        >
+                        <Button variant={"outline"}>
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (

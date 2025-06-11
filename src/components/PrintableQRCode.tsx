@@ -77,7 +77,7 @@ export function PrintableQRCode({
       </div>
 
       <Dialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
-        <DialogContent className="min-w-4xl overflow-x-auto">
+        <DialogContent className="md:min-w-4xl w-auto overflow-x-auto md:overflow-hidden">
           <QRPrint
             value={value}
             title={title}

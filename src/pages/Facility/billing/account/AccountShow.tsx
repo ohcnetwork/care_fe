@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +48,8 @@ import {
   statusColorMap,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
+import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
+import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
 import AccountSheet from "./AccountSheet";
 import ChargeItemsTable from "./components/ChargeItemsTable";
@@ -93,6 +97,21 @@ export function AccountShow({
       pathParams: { facilityId, accountId },
     }),
   });
+
+  const { data: billableChargeItems } = useQuery({
+    queryKey: ["billableChargeItems", accountId],
+    queryFn: query(chargeItemApi.listChargeItem, {
+      pathParams: { facilityId },
+      queryParams: {
+        account: accountId,
+        status: ChargeItemStatus.billable,
+        limit: 1,
+      },
+    }),
+    enabled: !!accountId && closeAccountStatus.sheetOpen,
+  });
+
+  const hasBillableItems = (billableChargeItems?.count ?? 0) > 0;
 
   const isAccountBillingClosed =
     account?.billing_status === AccountBillingStatus.closed_baddebt ||
@@ -354,16 +373,19 @@ export function AccountShow({
                 {t("amount_due")}
               </p>
               <div className="flex items-end">
-                <p className="text-3xl font-bold text-red-500">
-                  <MonetaryDisplay
-                    amount={
-                      account.total_balance > 0 ? account.total_balance : 0
-                    }
-                  />
+                <p
+                  className={cn("text-3xl font-bold", {
+                    "text-red-500": account.total_balance > 0,
+                    "text-green-700": account.total_balance <= 0,
+                  })}
+                >
+                  <MonetaryDisplay amount={account.total_balance} />
                 </p>
               </div>
               <p className="text-xs text-gray-500">
-                {t("pending_from_patient")}
+                {account.total_balance >= 0
+                  ? t("pending_from_patient")
+                  : t("overpaid_amount")}
               </p>
             </div>
           </div>
@@ -531,7 +553,16 @@ export function AccountShow({
             </SelectContent>
           </Select>
           <ClosedCallout balance={account.total_balance} />
-          <Button variant="destructive" onClick={handleCloseAccount}>
+          {hasBillableItems && (
+            <span className="text-red-500 bg-red-50 text-xs p-2 rounded block -mt-3">
+              {t("cannot_close_account_with_pending_items")}
+            </span>
+          )}
+          <Button
+            variant="destructive"
+            onClick={handleCloseAccount}
+            disabled={hasBillableItems}
+          >
             {t("close_account")}
           </Button>
         </DialogContent>

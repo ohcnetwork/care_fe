@@ -1,6 +1,7 @@
 import { UserBareMinimum } from "@/components/Users/models";
 
 import { Organization } from "@/types/organization/organization";
+import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 export type BloodGroupChoices =
   | "A_negative"
@@ -36,6 +37,12 @@ export interface Patient {
   permissions: string[];
   nationality?: string;
   partial_id: string;
+}
+
+export interface PatientRead extends Patient {
+  instance_tags: string[];
+  facility_tags: string[];
+  instance_identifiers: PatientIdentifier[];
 }
 
 export interface PartialPatientModel {

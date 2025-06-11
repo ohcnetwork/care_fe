@@ -50,6 +50,7 @@ import {
   SupplyRequestStatus,
 } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
+import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 const supplyRequestSchema = z.object({
@@ -170,6 +171,9 @@ export function SupplyRequestFormContent({
       queryParams: { search: searchDeliveryFrom, limit: 100 },
     }),
     enabled: type === "internal",
+    select: (data: { results: LocationList[] }) => {
+      return data.results.filter((location) => location.id !== locationId);
+    },
   });
 
   const { data: products, isLoading: isLoadingProducts } = useQuery({
@@ -184,7 +188,7 @@ export function SupplyRequestFormContent({
   });
 
   const deliveryFromOptions =
-    deliveryFromLocations?.results.map((location) => ({
+    deliveryFromLocations?.map((location) => ({
       label: location.name,
       value: location.id,
     })) || [];
@@ -219,7 +223,10 @@ export function SupplyRequestFormContent({
               {
                 status: SupplyRequestStatus.active,
                 intent: SupplyRequestIntent.order,
-                category: SupplyRequestCategory.central,
+                category:
+                  type === "internal"
+                    ? SupplyRequestCategory.central
+                    : SupplyRequestCategory.nonstock,
                 priority: SupplyRequestPriority.routine,
                 reason: SupplyRequestReason.ward_stock,
                 quantity: 1,
@@ -355,89 +362,61 @@ export function SupplyRequestFormContent({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="requests.0.category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("category")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("select_category")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Object.values(SupplyRequestCategory).map(
-                          (category) => (
-                            <SelectItem key={category} value={category}>
-                              {t(category)}
+              {type === "internal" && (
+                <FormField
+                  control={form.control}
+                  name="requests.0.reason"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("reason")}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("select_reason")} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(SupplyRequestReason).map((reason) => (
+                            <SelectItem key={reason} value={reason}>
+                              {t(reason)}
                             </SelectItem>
-                          ),
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
-              <FormField
-                control={form.control}
-                name="requests.0.reason"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("reason")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+              {type === "internal" && (
+                <FormField
+                  control={form.control}
+                  name="requests.0.deliver_from"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("deliver_from")}</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("select_reason")} />
-                        </SelectTrigger>
+                        <Autocomplete
+                          options={deliveryFromOptions}
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          isLoading={isLoadingDeliveryFromLocations}
+                          onSearch={setSearchDeliveryFrom}
+                          placeholder={t("select_location")}
+                          inputPlaceholder={t("search_location")}
+                          noOptionsMessage={t("no_locations_found")}
+                        />
                       </FormControl>
-                      <SelectContent>
-                        {Object.values(SupplyRequestReason).map((reason) => (
-                          <SelectItem key={reason} value={reason}>
-                            {t(reason)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
-
-            {type === "internal" && (
-              <FormField
-                control={form.control}
-                name="requests.0.deliver_from"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("deliver_from")}</FormLabel>
-                    <FormControl>
-                      <Autocomplete
-                        options={deliveryFromOptions}
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                        isLoading={isLoadingDeliveryFromLocations}
-                        onSearch={setSearchDeliveryFrom}
-                        placeholder={t("select_location")}
-                        inputPlaceholder={t("search_location")}
-                        noOptionsMessage={t("no_locations_found")}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
           </CardContent>
         </Card>
 

@@ -3,6 +3,7 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   CloudUpload,
+  Info,
   NotepadText,
   PlusCircle,
   Save,
@@ -34,6 +35,12 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { FileListTable } from "@/components/Files/FileListTable";
@@ -61,6 +68,7 @@ import {
   ObservationDefinitionComponentSpec,
   ObservationDefinitionReadSpec,
 } from "@/types/emr/observationDefinition/observationDefinition";
+import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
 
 interface DiagnosticReportFormProps {
   facilityId: string;
@@ -71,6 +79,7 @@ interface DiagnosticReportFormProps {
     diagnostic_report_codes?: Code[];
     category?: string;
   };
+  specimens: SpecimenRead[];
 }
 
 // Interface for component values
@@ -95,6 +104,7 @@ export function DiagnosticReportForm({
   observationDefinitions,
   diagnosticReports,
   activityDefinition,
+  specimens,
 }: DiagnosticReportFormProps) {
   const { t } = useTranslation();
   const [observations, setObservations] = useState<
@@ -114,6 +124,11 @@ export function DiagnosticReportForm({
   const latestReport =
     diagnosticReports.length > 0 ? diagnosticReports[0] : null;
   const hasReport = !!latestReport;
+
+  // Check if all required specimens are collected
+  const hasCollectedSpecimens =
+    activityDefinition?.category !== "laboratory" ||
+    specimens.some((specimen) => specimen.status === SpecimenStatus.available);
 
   // Fetch the full diagnostic report to get observations
   const { data: fullReport, isLoading: isLoadingReport } = useQuery({
@@ -150,14 +165,14 @@ export function DiagnosticReportForm({
           facility_external_id: facilityId,
         },
       }),
-      onSuccess: (data: DiagnosticReportRead) => {
+      onSuccess: () => {
         toast.success("Diagnostic report created successfully");
         queryClient.invalidateQueries({
-          queryKey: ["serviceRequest", serviceRequestId],
+          queryKey: ["serviceRequest"],
         });
         // Fetch the newly created report
         queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport", data.id],
+          queryKey: ["diagnosticReport"],
         });
       },
       onError: (err: any) => {
@@ -166,6 +181,25 @@ export function DiagnosticReportForm({
         );
       },
     });
+
+  // Effect to handle diagnostic reports changes
+  useEffect(() => {
+    const latestReport = diagnosticReports[0];
+    if (latestReport) {
+      // If we have a new report, update the UI accordingly
+      setSelectedReportCode(latestReport.code || null);
+      setIsExpanded(true);
+    }
+  }, [diagnosticReports]);
+
+  // Effect to handle fullReport changes
+  useEffect(() => {
+    if (fullReport) {
+      // When we get the full report details, ensure UI is in correct state
+      setSelectedReportCode(fullReport.code || null);
+      setIsExpanded(true);
+    }
+  }, [fullReport]);
 
   // Upserting observations for a diagnostic report
   const { mutate: upsertObservations, isPending: isUpsertingObservations } =
@@ -410,6 +444,11 @@ export function DiagnosticReportForm({
   function handleCreateReport() {
     // Only create a new report if no reports exist
     if (!hasReport) {
+      if (!hasCollectedSpecimens) {
+        toast.error(t("specimen_collection_required"));
+        return;
+      }
+
       const category: Code = {
         code: "LAB",
         display: "Laboratory",
@@ -432,116 +471,136 @@ export function DiagnosticReportForm({
       return;
     }
 
-    const formattedObservations: ObservationFromDefinitionCreate[] =
-      Object.entries(observations)
-        .map(([definitionId, obsData]) => {
-          const observationDefinition = observationDefinitions.find(
-            (def) => def.id === definitionId,
-          );
+    try {
+      // Check if at least one observation has a value or component value
+      const hasObservationValue = Object.values(observations).some((obs) => {
+        const hasMainValue = obs.value.trim() !== "";
+        const hasComponentValue = Object.values(obs.components).some(
+          (comp) => comp.value.trim() !== "",
+        );
+        return hasMainValue || hasComponentValue;
+      });
 
-          // If it's a component-based observation (like blood pressure), we should check if components have values
-          const hasComponents =
-            observationDefinition?.component &&
-            observationDefinition.component.length > 0;
-          const hasComponentValues =
-            hasComponents &&
-            Object.values(obsData.components).some(
-              (comp) => comp.value.trim() !== "",
-            );
-
-          // For regular observations, skip if no value is entered
-          // For component-based observations, check component values
-          if (!hasComponents && !obsData.value.trim()) {
-            return null;
-          }
-
-          if (hasComponents && !hasComponentValues) {
-            return null;
-          }
-
-          const value: QuestionnaireSubmitResultValue = {
-            value: obsData.value,
-          };
-
-          if (obsData.unit && observationDefinition?.permitted_unit) {
-            value.unit = {
-              code: obsData.unit,
-              system: observationDefinition.permitted_unit.system,
-              display:
-                observationDefinition.permitted_unit.display || obsData.unit,
-            };
-          }
-
-          // Create observation components if they exist and have values
-          const components: ObservationComponent[] = [];
-
-          if (hasComponents && observationDefinition) {
-            observationDefinition.component.forEach(
-              (componentDef: ObservationDefinitionComponentSpec) => {
-                const componentCode = componentDef.code.code;
-                const componentData = obsData.components[componentCode];
-
-                if (componentData && componentData.value.trim()) {
-                  const componentValue: QuestionnaireSubmitResultValue = {
-                    value: componentData.value,
-                  };
-
-                  if (componentData.unit && componentDef.permitted_unit) {
-                    componentValue.unit = {
-                      code: componentData.unit,
-                      system: componentDef.permitted_unit.system,
-                      display:
-                        componentDef.permitted_unit.display ||
-                        componentData.unit,
-                    };
-                  }
-
-                  components.push({
-                    code: componentDef.code,
-                    value: componentValue,
-                    interpretation: componentData.isNormal
-                      ? "normal"
-                      : "abnormal",
-                  });
-                }
-              },
-            );
-          }
-
-          return {
-            ...(obsData.id
-              ? { observation_id: obsData.id }
-              : { observation_definition: definitionId }),
-            observation: {
-              status: ObservationStatus.FINAL,
-              subject_type: "patient",
-              value_type: observationDefinition?.permitted_data_type || "float",
-              effective_datetime: new Date().toISOString(),
-              value,
-              encounter: null,
-              interpretation: obsData.isNormal ? "normal" : "abnormal",
-              component: components.length > 0 ? components : undefined,
-            },
-          };
-        })
-        .filter(Boolean) as ObservationFromDefinitionCreate[];
-
-    if (fullReport) {
-      // Upsert observations
-      if (formattedObservations.length > 0) {
-        upsertObservations({
-          observations: formattedObservations,
-        });
+      // Check if either observations or conclusion is provided
+      if (!hasObservationValue && !conclusion.trim()) {
+        toast.error(t("at_least_one_result"));
+        return;
       }
 
-      updateDiagnosticReport({
-        id: fullReport.id,
-        status: fullReport.status,
-        category: fullReport.category,
-        code: fullReport.code,
-        note: fullReport.note,
-        conclusion,
-      });
+      const formattedObservations: ObservationFromDefinitionCreate[] =
+        Object.entries(observations)
+          .map(([definitionId, obsData]) => {
+            const observationDefinition = observationDefinitions.find(
+              (def) => def.id === definitionId,
+            );
+
+            // If it's a component-based observation (like blood pressure), we should check if components have values
+            const hasComponents =
+              observationDefinition?.component &&
+              observationDefinition.component.length > 0;
+            const hasComponentValues =
+              hasComponents &&
+              Object.values(obsData.components).some(
+                (comp) => comp.value.trim() !== "",
+              );
+
+            // For regular observations, skip if no value is entered
+            // For component-based observations, check component values
+            if (!hasComponents && !obsData.value.trim()) {
+              return null;
+            }
+
+            if (hasComponents && !hasComponentValues) {
+              return null;
+            }
+
+            const value: QuestionnaireSubmitResultValue = {
+              value: obsData.value,
+            };
+
+            if (obsData.unit && observationDefinition?.permitted_unit) {
+              value.unit = {
+                code: obsData.unit,
+                system: observationDefinition.permitted_unit.system,
+                display:
+                  observationDefinition.permitted_unit.display || obsData.unit,
+              };
+            }
+
+            // Create observation components if they exist and have values
+            const components: ObservationComponent[] = [];
+
+            if (hasComponents && observationDefinition) {
+              observationDefinition.component.forEach(
+                (componentDef: ObservationDefinitionComponentSpec) => {
+                  const componentCode = componentDef.code.code;
+                  const componentData = obsData.components[componentCode];
+
+                  if (componentData && componentData.value.trim()) {
+                    const componentValue: QuestionnaireSubmitResultValue = {
+                      value: componentData.value,
+                    };
+
+                    if (componentData.unit && componentDef.permitted_unit) {
+                      componentValue.unit = {
+                        code: componentData.unit,
+                        system: componentDef.permitted_unit.system,
+                        display:
+                          componentDef.permitted_unit.display ||
+                          componentData.unit,
+                      };
+                    }
+
+                    components.push({
+                      code: componentDef.code,
+                      value: componentValue,
+                      interpretation: componentData.isNormal
+                        ? "normal"
+                        : "abnormal",
+                    });
+                  }
+                },
+              );
+            }
+
+            return {
+              ...(obsData.id
+                ? { observation_id: obsData.id }
+                : { observation_definition: definitionId }),
+              observation: {
+                status: ObservationStatus.FINAL,
+                subject_type: "patient",
+                value_type:
+                  observationDefinition?.permitted_data_type || "float",
+                effective_datetime: new Date().toISOString(),
+                value,
+                encounter: null,
+                interpretation: obsData.isNormal ? "normal" : "abnormal",
+                component: components.length > 0 ? components : undefined,
+              },
+            };
+          })
+          .filter(Boolean) as ObservationFromDefinitionCreate[];
+
+      if (fullReport) {
+        // Upsert observations
+        if (formattedObservations.length > 0) {
+          upsertObservations({
+            observations: formattedObservations,
+          });
+        }
+
+        updateDiagnosticReport({
+          id: fullReport.id,
+          status: fullReport.status,
+          category: fullReport.category,
+          code: fullReport.code,
+          note: fullReport.note,
+          conclusion,
+        });
+      }
+    } catch (_error) {
+      toast.error(t("error_validating_form"));
     }
   }
 
@@ -695,15 +754,23 @@ export function DiagnosticReportForm({
                   <p className="flex items-center gap-1.5">
                     <NotepadText className="size-[24px] text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
                     {fullReport?.code ? (
-                      <p className="flex flex-col gap-1">
-                        {fullReport?.code?.display} <br />
-                        {isExpanded && (
-                          <span className="text-sm text-gray-500">
-                            {fullReport?.code?.system} {", "}{" "}
-                            {fullReport?.code?.code}
-                          </span>
-                        )}
-                      </p>
+                      <>
+                        {fullReport?.code?.display}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="size-4 text-gray-600 inline-block cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {fullReport?.code?.system}
+                                {", "}
+                                {fullReport?.code?.code}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </>
                     ) : (
                       <span className="text-base/9 text-gray-950 font-medium">
                         {t("test_results_entry")}
@@ -985,8 +1052,9 @@ export function DiagnosticReportForm({
                 <div className="text-gray-500 flex justify-center items-center">
                   <p></p>
                   <p className="mt-2 text-sm text-gray-500">
-                    No test results have been recorded yet. Click "Create
-                    Report" to add test results.
+                    {!hasCollectedSpecimens
+                      ? t("collect_specimen_before_report")
+                      : t("no_test_results_recorded")}
                   </p>
                 </div>
                 <div className="flex items-center justify-center gap-4 p-1">
@@ -1002,6 +1070,7 @@ export function DiagnosticReportForm({
                               );
                             setSelectedReportCode(code || null);
                           }}
+                          disabled={!hasCollectedSpecimens}
                         >
                           <SelectTrigger>
                             <SelectValue
@@ -1028,13 +1097,14 @@ export function DiagnosticReportForm({
                     onClick={handleCreateReport}
                     disabled={
                       isCreatingReport ||
+                      !hasCollectedSpecimens ||
                       (!!activityDefinition?.diagnostic_report_codes?.length &&
                         !selectedReportCode)
                     }
                     className="shrink-0"
                   >
                     <PlusCircle className="h-4 w-4 mr-2" />
-                    Create Report
+                    {t("create_report")}
                   </Button>
                 </div>
               </div>

@@ -26,6 +26,7 @@ export interface InvoiceBase {
   cancelled_reason?: (typeof INVOICE_CANCEL_REASONS)[number] | null;
   payment_terms?: string | null;
   note?: string | null;
+  issue_date?: string | null;
 }
 
 export interface InvoiceCreate extends Omit<InvoiceBase, "id"> {

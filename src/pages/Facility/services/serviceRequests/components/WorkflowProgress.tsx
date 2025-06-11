@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, PanelRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -37,18 +37,36 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
       <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
         <div className="absolute w-px bg-gray-200 h-full top-4 group-last:hidden" />
         <div
-          className={
-            "size-6 rounded-full flex items-center justify-center bg-green-100"
-          }
+          className={cn(
+            "size-6 rounded-full flex items-center justify-center",
+            event.status === "completed" && "bg-green-100",
+            event.status === "in_progress" && "bg-blue-100",
+            event.status === "pending" && "bg-gray-100",
+          )}
         >
-          <CheckCircle2 className="size-4 text-green-600" />
+          {event.status === "completed" && (
+            <CheckCircle2 className="size-4 text-green-600" />
+          )}
+          {event.status === "in_progress" && (
+            <div className="size-2 rounded-full bg-blue-600 animate-pulse" />
+          )}
+          {event.status === "pending" && (
+            <div className="size-2 rounded-full bg-gray-400" />
+          )}
         </div>
         {!event.status && <div className="flex-1 w-px bg-gray-200" />}
       </div>
       <div className="flex flex-col gap-1 pb-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="font-medium text-base text-gray-900">
+            <h3
+              className={cn(
+                "font-medium text-base",
+                event.status === "completed" && "text-gray-900",
+                event.status === "in_progress" && "text-blue-900",
+                event.status === "pending" && "text-gray-500",
+              )}
+            >
               {event.title}
             </h3>
             <p className="text-sm text-gray-500">{event.description}</p>
@@ -132,8 +150,14 @@ export function WorkflowProgress({
   // Add diagnostic report events
   request.diagnostic_reports?.forEach((report: DiagnosticReportRead) => {
     events.push({
-      title: "Diagnostic Report Generated",
-      description: `Diagnostic report created`,
+      title:
+        report.status === "final"
+          ? "Diagnostic Report Approved"
+          : "Diagnostic Report In Progress",
+      description:
+        report.status === "final"
+          ? `Report approved and finalized`
+          : `Report created and pending approval`,
       timestamp: report.created_date,
       status: report.status === "final" ? "completed" : "in_progress",
     });
@@ -149,11 +173,11 @@ export function WorkflowProgress({
       <Sheet>
         <SheetTrigger asChild>
           <Button
-            variant="link"
-            className="w-fit flex items-center gap-0.5 underline"
+            variant="outline"
+            size="icon"
+            className="border border-gray-400"
           >
-            <CareIcon icon="l-file-check-alt" className="text-lg stroke-2" />
-            View Workflow Progress
+            <PanelRight />
           </Button>
         </SheetTrigger>
         <SheetContent

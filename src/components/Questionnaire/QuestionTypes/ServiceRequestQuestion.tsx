@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Trash2 } from "lucide-react";
+import { ChevronDown, Info, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -216,17 +217,12 @@ function ServiceRequestForm({
             <p className="text-sm font-semibold text-gray-900">
               {serviceRequest.service_request.title}
             </p>
-            <Badge
-              variant="outline"
-              className="bg-primary-50 text-primary-700 border-primary-200"
+            <TooltipComponent
+              content={`${serviceRequest.service_request.code.code} | ${serviceRequest.service_request.code.display} \n${serviceRequest.service_request.code.system}`}
             >
-              {serviceRequest.service_request.code.code}
-            </Badge>
+              <Info className="size-4 text-gray-600 cursor-help" />
+            </TooltipComponent>
           </div>
-          <span className="text-sm text-gray-500">
-            {serviceRequest.service_request.code.display} {" | "}
-            {serviceRequest.service_request.code.system}
-          </span>
           {renderInfoSection()}
           <div className="flex w-full justify-end items-center mt-2 gap-2">
             {onRemove && (
@@ -326,17 +322,12 @@ function ServiceRequestForm({
             <p className="text-sm font-semibold text-gray-900">
               {serviceRequest.service_request.title}
             </p>
-            <Badge
-              variant="outline"
-              className="bg-primary-50 text-primary-700 border-primary-200"
+            <TooltipComponent
+              content={`${serviceRequest.service_request.code.code} | ${serviceRequest.service_request.code.display} \n${serviceRequest.service_request.code.system}`}
             >
-              {serviceRequest.service_request.code.code}
-            </Badge>
+              <Info className="size-4 text-gray-600 cursor-help" />
+            </TooltipComponent>
           </div>
-          <span className="text-sm text-gray-500">
-            {serviceRequest.service_request.code.display} {" | "}
-            {serviceRequest.service_request.code.system}
-          </span>
           {renderInfoSection()}
           <div className="flex w-full justify-end items-center mt-2 gap-2">
             {onRemove && (

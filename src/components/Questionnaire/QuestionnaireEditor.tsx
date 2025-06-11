@@ -592,7 +592,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       title: mappedData.title || "",
       slug: mappedData.slug || "",
       description: mappedData.description || "",
+      questions: mappedData.questions || [],
     });
+
+    form.trigger();
 
     setShowImportDialog(false);
     setImportUrl("");
@@ -660,6 +663,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             type="button"
             variant="outline"
             onClick={handleCancel}
+            disabled={isCreating || isUpdating}
             data-cy="cancel-questionnaire-form"
           >
             {t("cancel")}
@@ -675,7 +679,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </Button>
           )}
           {!id && (
-            <Button variant="outline" onClick={() => setShowImportDialog(true)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowImportDialog(true)}
+              disabled={isCreating || isUpdating}
+            >
               <CareIcon icon="l-import" className="mr-1 size-4" />
               {t("import_from_url")}
             </Button>
@@ -933,6 +941,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           setExpandedQuestions(
                             (prev) => new Set([...prev, newQuestion.id]),
                           );
+                          setTimeout(() => {
+                            const element = document.getElementById(
+                              `question-${newQuestion.id}`,
+                            );
+                            if (element) {
+                              element.scrollIntoView();
+                            }
+                          }, 100);
                         }}
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
@@ -1224,6 +1240,8 @@ function QuestionEditor({
     return parentId ? `${parentId}-${question.id}` : question.id;
   };
 
+  const UNIT_TYPES = ["quantity", "choice", "decimal", "integer"];
+
   return (
     <Collapsible
       open={isExpanded}
@@ -1387,7 +1405,7 @@ function QuestionEditor({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>{t("type")}</Label>
+                <Label className="mb-2">{t("type")}</Label>
                 <Select
                   value={type}
                   onValueChange={(val: QuestionType) => {
@@ -1423,7 +1441,7 @@ function QuestionEditor({
 
               {type === "structured" && (
                 <div>
-                  <Label>{t("structured_type")}</Label>
+                  <Label className="mb-2">{t("structured_type")}</Label>
                   <Select
                     value={structured_type || ""}
                     onValueChange={(val: StructuredQuestionType) => {
@@ -1455,39 +1473,39 @@ function QuestionEditor({
               )}
             </div>
 
+            {UNIT_TYPES.includes(type) && (
+              <FormField
+                control={form.control}
+                name={`questions.${index}.unit`}
+                render={({ field }) => (
+                  <FormItem className="pb-4">
+                    <FormLabel>{t("unit")}</FormLabel>
+                    <FormControl>
+                      <ValueSetSelect
+                        {...field}
+                        system="system-ucum-units"
+                        placeholder={t("add_unit")}
+                        value={unit}
+                        onSelect={(code) => {
+                          updateField("unit", code);
+                          form.setValue(`questions.${index}.unit`, code, {
+                            shouldValidate: true,
+                          });
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             {type !== "structured" && (
-              <div className="flex flex-col gap-4">
-                <FormField
-                  control={form.control}
-                  name={`questions.${index}.unit`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("unit")}</FormLabel>
-                      <FormControl>
-                        <ValueSetSelect
-                          {...field}
-                          system="system-ucum-units"
-                          placeholder={t("add_unit")}
-                          value={unit}
-                          onSelect={(code) => {
-                            updateField("unit", code);
-                            form.setValue(`questions.${index}.unit`, code, {
-                              shouldValidate: true,
-                            });
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <CodingEditor
-                  code={code}
-                  form={form}
-                  questionIndex={index}
-                  onChange={(newCode) => updateField("code", newCode)}
-                />
-              </div>
+              <CodingEditor
+                code={code}
+                form={form}
+                questionIndex={index}
+                onChange={(newCode) => updateField("code", newCode)}
+              />
             )}
           </div>
 

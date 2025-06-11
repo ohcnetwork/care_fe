@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { ArrowRightIcon, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { FilterTabs } from "@/components/ui/filter-tabs";
@@ -19,9 +19,11 @@ import {
 } from "@/components/ui/table";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { PrescriptionPreview } from "@/components/Prescription/PrescriptionPreview";
 
 import useFilters from "@/hooks/useFilters";
 
+import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import {
@@ -42,21 +44,17 @@ interface MedicationTableProps {
 function MedicationTable({ medications }: MedicationTableProps) {
   const { t } = useTranslation();
 
-  const tableHeadClass =
-    "border-x p-3 text-gray-700 text-sm font-medium leading-5";
-  const tableCellClass = "border-x p-3 text-gray-950";
-
   return (
-    <div className="rounded-md border shadow-sm w-full bg-white overflow-hidden">
-      <Table>
-        <TableHeader className="bg-gray-100">
-          <TableRow className="border-b">
-            <TableHead className={tableHeadClass}>{t("medicine")}</TableHead>
-            <TableHead className={tableHeadClass}>{t("dosage")}</TableHead>
-            <TableHead className={tableHeadClass}>{t("frequency")}</TableHead>
-            <TableHead className={tableHeadClass}>{t("duration")}</TableHead>
-            <TableHead className={tableHeadClass}>{t("priority")}</TableHead>
-            <TableHead className={tableHeadClass}>{t("status")}</TableHead>
+    <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
+      <Table className="rounded-md">
+        <TableHeader className=" bg-gray-100 text-gray-700">
+          <TableRow className="divide-x">
+            <TableHead className="text-gray-700">{t("medicine")}</TableHead>
+            <TableHead className="text-gray-700">{t("dosage")}</TableHead>
+            <TableHead className="text-gray-700">{t("frequency")}</TableHead>
+            <TableHead className="text-gray-700">{t("duration")}</TableHead>
+            <TableHead className="text-gray-700">{t("priority")}</TableHead>
+            <TableHead className="text-gray-700">{t("status")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -69,15 +67,15 @@ function MedicationTable({ medications }: MedicationTableProps) {
             return (
               <TableRow
                 key={medication.id}
-                className="border-b hover:bg-gray-50"
+                className="hover:bg-gray-50 divide-x"
               >
-                <TableCell className={cn(tableCellClass, "font-medium")}>
+                <TableCell className="font-semibold text-gray-950">
                   {displayMedicationName(medication)}
                 </TableCell>
-                <TableCell className={tableCellClass}>
+                <TableCell className="text-gray-950 font-medium">
                   {dosage ? `${dosage.value} ${dosage.unit.display}` : "-"}
                 </TableCell>
-                <TableCell className={tableCellClass}>
+                <TableCell className="text-gray-950 font-medium">
                   {instruction?.as_needed_boolean
                     ? `${t("as_needed_prn")} ${
                         instruction?.as_needed_for?.display
@@ -86,10 +84,10 @@ function MedicationTable({ medications }: MedicationTableProps) {
                       }`
                     : frequency?.display || "-"}
                 </TableCell>
-                <TableCell className={tableCellClass}>
+                <TableCell className="text-gray-950 font-medium">
                   {duration ? `${duration.value} ${duration.unit}` : "-"}
                 </TableCell>
-                <TableCell className={tableCellClass}>
+                <TableCell>
                   <Badge
                     variant="outline"
                     className={
@@ -99,7 +97,7 @@ function MedicationTable({ medications }: MedicationTableProps) {
                     {t(medication.priority)}
                   </Badge>
                 </TableCell>
-                <TableCell className={tableCellClass}>
+                <TableCell>
                   <Badge
                     variant="outline"
                     className={
@@ -121,11 +119,13 @@ function MedicationTable({ medications }: MedicationTableProps) {
 interface Props {
   facilityId: string;
   patientId: string;
+  partial?: boolean;
 }
 
 export default function MedicationDispenseList({
   facilityId,
   patientId,
+  partial = false,
 }: Props) {
   const { t } = useTranslation();
   const { locationId } = useCurrentLocation();
@@ -142,10 +142,20 @@ export default function MedicationDispenseList({
         facility: facilityId,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        status: qParams.status,
+        status: qParams.status || "active",
         priority: qParams.priority,
+        dispense_status: partial ? "partial" : undefined,
+        dispense_status_isnull: !partial ? true : undefined,
       },
     }),
+  });
+
+  const { data: patient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.getPatient, {
+      pathParams: { id: patientId || "" },
+    }),
+    enabled: !!patientId,
   });
 
   const medications = response?.results || [];
@@ -169,7 +179,7 @@ export default function MedicationDispenseList({
           <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
             <div className="flex-1 sm:flex-initial sm:w-auto">
               <FilterSelect
-                value={qParams.status || ""}
+                value={qParams.status || "active"}
                 onValueChange={(value) => updateQuery({ status: value })}
                 options={[
                   ...ACTIVE_MEDICATION_STATUSES,
@@ -180,7 +190,26 @@ export default function MedicationDispenseList({
               />
             </div>
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto border-gray-400 font-semibold"
+                >
+                  <PrinterIcon className="size-4" />
+                  {t("print_prescriptions")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="md:max-w-4xl max-h-screen overflow-auto">
+                {patient && medications.length > 0 && (
+                  <PrescriptionPreview
+                    medications={medications}
+                    patient={patient}
+                  />
+                )}
+              </DialogContent>
+            </Dialog>
             <Button
               onClick={() =>
                 navigate(
@@ -189,7 +218,8 @@ export default function MedicationDispenseList({
               }
               className="w-full sm:w-auto"
             >
-              {t("bill_medications")}
+              {t("start_billing")}
+              <ArrowRightIcon className="size-4" />
             </Button>
           </div>
         </div>
@@ -214,7 +244,7 @@ export default function MedicationDispenseList({
             </div>
           )}
 
-          {otherMedications.length > 0 && (
+          {!partial && otherMedications.length > 0 && (
             <div className="space-y-2">
               <h2 className="text-lg font-semibold text-gray-900">
                 {t("other_medications")}

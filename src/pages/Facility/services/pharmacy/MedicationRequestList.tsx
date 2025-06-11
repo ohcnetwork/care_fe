@@ -1,12 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRightSquare, NotepadText } from "lucide-react";
+import { ArrowUpRightSquare, ChevronDown, NotepadText } from "lucide-react";
 import { navigate } from "raviger";
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -24,8 +32,9 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
-  ENCOUNTER_CLASS,
+  CATEGORY_BADGE_COLORS,
   ENCOUNTER_CLASSES_ICONS,
+  EncounterClass,
 } from "@/types/emr/encounter";
 import {
   MedicationPriority,
@@ -59,23 +68,13 @@ const PRIORITY_BADGES: Record<
   },
 } as const;
 
-// Add a mapping for encounter class labels
-const ENCOUNTER_CLASS_LABELS = {
-  imp: "encounter_class__imp", // Inpatient
-  amb: "encounter_class__amb", // Ambulatory
-  obsenc: "encounter_class__obsenc", // Observation
-  emer: "encounter_class__emer", // Emergency
-  vr: "encounter_class__vr", // Virtual
-  hh: "encounter_class__hh", // Home Health
-} as const;
-
-const CATEGORY_BADGE_COLORS = {
-  imp: "bg-blue-100 text-blue-900", // Inpatient
-  emer: "bg-red-600 text-white", // Emergency
-  amb: "bg-green-100 text-green-900", // Outpatient/Ambulatory
-  obsenc: "bg-gray-100 text-gray-900", // Observation
-  vr: "bg-gray-100 text-gray-900", // Virtual
-  hh: "bg-teal-100 text-teal-900", // Home Health
+const BILLING_STATUS_OPTIONS = {
+  pending: {
+    label: "billing_pending",
+  },
+  partial: {
+    label: "partially_billed",
+  },
 } as const;
 
 export default function MedicationRequestList({
@@ -91,51 +90,77 @@ export default function MedicationRequestList({
     disableCache: true,
   });
 
+  // State for visible tabs and dropdown items
+  const [visibleTabs, setVisibleTabs] = useState<("all" | EncounterClass)[]>([
+    "all",
+    "imp",
+    "amb",
+    "emer",
+  ]);
+  const [dropdownItems, setDropdownItems] = useState<EncounterClass[]>([
+    "obsenc",
+    "vr",
+    "hh",
+  ]);
+
+  // Handle tab selection
+  const handleTabSelect = (value: string) => {
+    updateQuery({
+      encounter_class: value === "all" ? undefined : value,
+    });
+  };
+
+  // Handle dropdown item selection
+  const handleDropdownSelect = (value: EncounterClass) => {
+    // Swap the selected dropdown item with the last visible tab
+    const lastVisibleTab = visibleTabs[visibleTabs.length - 1];
+    const newVisibleTabs = [...visibleTabs.slice(0, -1), value];
+    const newDropdownItems = [
+      ...dropdownItems.filter((item) => item !== value),
+      lastVisibleTab as EncounterClass,
+    ];
+
+    setVisibleTabs(newVisibleTabs);
+    setDropdownItems(newDropdownItems);
+    handleTabSelect(value);
+  };
+
   const { data: prescriptionQueue, isLoading } = useQuery<
     PaginatedResponse<MedicationRequestSummary>
   >({
-    queryKey: ["prescriptionQueue", qParams],
+    queryKey: ["prescriptionQueue", facilityId, qParams],
     queryFn: query.debounced(medicationRequestApi.summary, {
       pathParams: { facilityId },
       queryParams: {
-        name: qParams.search,
+        patient: qParams.search,
         priority: qParams.priority,
         encounter_class: qParams.encounter_class,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        exclude_dispense_status: "complete",
+        dispense_status:
+          qParams.billing_status === "partial" ? "partial" : undefined,
+        dispense_status_isnull: qParams.billing_status !== "partial",
       },
     }),
   });
-
-  // Priority tab keys in order
-  const priorityKeys = [
-    "all",
-    MedicationPriority.STAT,
-    MedicationPriority.URGENT,
-    MedicationPriority.ASAP,
-    MedicationPriority.ROUTINE,
-  ] as const;
 
   return (
     <Page title={t("prescription_queue")}>
       {/* Priority tabs with original styling */}
       <div className="mb-4 pt-6">
         <Tabs
-          value={qParams.priority || "all"}
-          onValueChange={(value) =>
-            updateQuery({ priority: value === "all" ? undefined : value })
-          }
+          value={qParams.billing_status || "pending"}
+          onValueChange={(value) => updateQuery({ billing_status: value })}
           className="w-full"
         >
-          <TabsList className="w-full justify-evenly sm:justify-start border-b  rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-            {priorityKeys.map((key) => (
+          <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
+            {Object.entries(BILLING_STATUS_OPTIONS).map(([key, { label }]) => (
               <TabsTrigger
                 key={key}
                 value={key}
                 className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
               >
-                {t(PRIORITY_BADGES[key].label)}
+                {t(label)}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -143,39 +168,78 @@ export default function MedicationRequestList({
       </div>
 
       {/* Category tabs and search */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-6 mb-6">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center justify-between lg:gap-6 mb-6">
         <div className="flex flex-wrap gap-2">
           {/* Encounter Class Tabs */}
           <Tabs
             value={qParams.encounter_class || "all"}
-            onValueChange={(value) =>
-              updateQuery({
-                encounter_class: value === "all" ? undefined : value,
-              })
-            }
+            onValueChange={handleTabSelect}
             className="overflow-y-auto text-gray-950"
           >
-            <TabsList>
+            <TabsList className="flex items-center">
               <TabsTrigger value="all">
-                <span className="text-gray-950 font-medium text-sm flex items-center gap-2">
+                <span className="text-gray-950 font-medium text-sm flex items-center gap-1">
                   {React.createElement(NotepadText, {
-                    className: "size-4",
+                    className: "size-4 text-gray-500",
                   })}
                   {t("all_prescriptions")}
                 </span>
               </TabsTrigger>
-              {ENCOUNTER_CLASS.map((key) => (
+              {visibleTabs.slice(1).map((key) => (
                 <TabsTrigger key={key} value={key}>
-                  <span className="text-gray-950 font-medium text-sm flex items-center gap-2">
-                    {React.createElement(ENCOUNTER_CLASSES_ICONS[key], {
-                      className: "size-4",
-                    })}
-                    {t(ENCOUNTER_CLASS_LABELS[key])}
+                  <span className="text-gray-950 font-medium text-sm flex items-center gap-1">
+                    {React.createElement(
+                      ENCOUNTER_CLASSES_ICONS[key as EncounterClass],
+                      {
+                        className: "size-4 text-gray-500",
+                      },
+                    )}
+                    {t(`encounter_class__${key as EncounterClass}`)}
                   </span>
                 </TabsTrigger>
               ))}
+              {dropdownItems.length > 0 && (
+                <>
+                  <Separator
+                    orientation="vertical"
+                    className="bg-gray-300 ml-2"
+                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="text-gray-950 font-medium text-sm px-3 flex items-center"
+                      >
+                        {t("more")}
+                        <ChevronDown />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      {dropdownItems.map((key) => (
+                        <DropdownMenuItem
+                          key={key}
+                          onClick={() => handleDropdownSelect(key)}
+                          className="text-gray-950 font-medium text-sm flex items-center gap-1"
+                        >
+                          {React.createElement(ENCOUNTER_CLASSES_ICONS[key], {
+                            className: "size-4",
+                          })}
+                          {t(`encounter_class__${key}`)}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              )}
             </TabsList>
           </Tabs>
+          <FilterSelect
+            value={qParams.priority || ""}
+            onValueChange={(value) => updateQuery({ priority: value })}
+            options={Object.values(MedicationPriority)}
+            label="priority"
+            onClear={() => updateQuery({ priority: undefined })}
+          />
         </div>
         <div className="w-full lg:max-w-sm">
           <Input
@@ -191,7 +255,7 @@ export default function MedicationRequestList({
       <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
         <Table className="rounded-md">
           <TableHeader className=" bg-gray-100 text-gray-700">
-            <TableRow>
+            <TableRow className="divide-x">
               <TableHead className="text-gray-700">
                 {t("patient_name")}
               </TableHead>
@@ -258,7 +322,7 @@ export default function MedicationRequestList({
                         className="w-auto font-semibold text-gray-950 border-gray-400"
                         onClick={() => {
                           navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}`,
+                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}${qParams.billing_status === "partial" ? "/partial" : ""}`,
                           );
                         }}
                       >

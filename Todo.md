@@ -8,64 +8,35 @@ x : Done
 
 ## Pharmacy
 
-- [x] Add option to archive suppliers - Yash
-- [-] Add status based filters for product knowledge - Yash
-- [ ] Undo absolute net quantity after video recorded
-- [x] Healthcare Service Details View page : Hide the unwanted metadata details page & add translation for extra_details - Jeevan
 - [-] Add facility-based filter & pagination in the inventory items list - Jeevan. Vignesh will add filter queryset by facility later
-- [x] Add pagination where it's missing - Jeevan
-- [x] Add a warning colour for low stock items in the inventory item list - Jeevan
-- [-] Edit page of the supply delivery details is crashing - Khavin
-- [-] Medications added from our product cannot be administered due to missing code - Jeevan/Vignesh; Medication Administration API needs support for product knowledge
-- [-] Each modification to the pre-filled quantity in bill medication triggers a component re-render, which disrupts the editing experience. - Khavin
-- [x] Remove unknown from Specimen Definition Status - Jeevan
+- [ ] Supply Request - Add supplier[] after backend done - Rithvik
 
 ## Billing
 
 - [-] Replace Charge Item Create with ChargeItemDef to ChargeItem API - Vignesh
-- [-] All instance level tax codes should be shown as an option in the charge item def creator - Check with Vignesh
+- [x] All instance level tax codes should be shown as an option in the charge item def creator - Check with Vignesh
 - [-] Add support for information components in chargeDef and Charge Item. - Rithvik
 - [-] Consider disabling onWheelChange for input[type=number] fields. - [hold till @bodhi confirms]
-- [x] Remove -- in the end date column if the billing account still ongoing - Amjith
 - [-] Change default account name to {patient-name} + date to keep it a little bit unique and searchable in billing account dashboard - Amjith, Vignesh
-- [ ] When a billing account of a patient is on hold, we should restrict users from creating any charge item to the patient, as per doc, but our platform will be creating a new wallet by ignoring the on-hold account
+- [-] When a billing account of a patient is on hold, we should restrict users from creating any charge item to the patient, as per doc, but our platform will be creating a new wallet by ignoring the on-hold account (BE) - Vignesh
 - [ ] Allow only one active billing account for a patient at a time , Take a product suggestion before working on this
-- [x] When we click past account button in the account details page, it should redirect to the patient account overview page, rather than the entire hospital account overview page - Jeevan
-- [ ] When attempting to close a billing account with pending charge items that haven't been invoiced, disable the 'Close Account' button in the pop-up and display a message stating: 'You cannot close an account with pending charge items.
-- [x] Disable record payment button in billing account details page, if the account status is not active - Amjith
-- [ ] Display the negative balance in the 'Amount Due' section as well to indicate that the user has overpaid beyond their actual bill.
-- [ ] When an invoice is marked as 'entered in error' the transaction details should be removed from the balance summary (total amount due, net payable, etc.)
-- [ ] Add support to edit discount code & search in the billing section
+- [-] When an invoice is marked as 'entered in error' the transaction details should be removed from the balance summary (total amount due, net payable, etc.) - Jeevan/Vignesh
 
 ## Labs
 
 - [-] Add support for multiple diagnostic report for a service request - [hold till @bodhi confirms]
 - [-] Service Request - Show specimen.collection.collector details instead of UUID (After BE change) - Vignesh
 - [-] Service Request - Show specimen.processing.performer details instead of UUID (After BE change) - Vignesh
-
-- [ ] Healthcare Service edit - Location expand missing in sheet
-
-- [ ] Specimen Definition - Add \* for required fields and frontend validation for Retention Time, Capacity, Minimum Volume, Type Collected, Title, and Slug
 - [ ] Specimen Definition - Add frontend permission check for the Specimen Definition page at the facility level.
-- [ ] In the Specimen Definition edit form, removing data from optional fields is not working.
-- [x] Charge Item - Add an asterisk to the Title field. - Jeevan
-- [x] Charge Item - Add asterisk and frontend validation for the Base Price field. - Jeevan
-- [x] Charge Item - Remove the ? from the discount dropdown - Jeevan - Nothing to be done, data was just saved that way.
-- [x] Charge Item - Removing prefilled data from the Discount and Tax fields causes the field state to freeze, requiring a manual page reload. - Jeevan
-- [x] Charge Item - Limit the discount and tax field input to 100 max - Jeevan
+- [-] In the Specimen Definition edit form, removing data from optional fields is not working and Fix some types and cleanup in Specimen Definition Form. - Manyu & Yash
 - [ ] SR details page - fix decimal points to two and round off amounts in charge items.
-- [x] SR details page — In the Add Charge Item slide over, display the final amount after discount and tax, and the amount split when hovering over the (!) icon. -> We can't show the total here as backend deos not return the total for CID and we decided to not do any manual calculations in FE, see item below: - Yash
-- [x] Add info on Charge Item created on SR show (This includes total from BE). - Yash
-- [-] SR details page- Remove the back button from the sample identification QR print preview pop-up. / adjust the behavior to only close the pop-up - Manyu
-- [ ] SR details page - Specimen ID cannot be hidden in the Service Request QR
 - [ ] SR details page - Add a hyperlink to the payment page, for better UX
-- [ ] SR Details page - Disable the process step once the report generation is done | Confirm with Bodhi before working on this
-- [ ] SR overview page - Show the current status of the service request. Upon completion, update the status from active to complete
-- [x] SR Questionnaire - Investigate placement of Priority and Urgent text fields, as the text field appears in Overview and the request in the SR tab upon submission. Currently, Priority is recorded both as structured data and plain text in the same question. - This was a mistake in Questionnaire - Amjith
-- [x] Pass only the active and draft specimens to multi QR print - Yash
-- [x] Get all matching specimens for a requierment so that draftspecimen creation works as expected, -> when there are multiple specimens for a requirement -> when a previous specimen is discarded - Yash
-- [-] Fix the explicit type casting and add proper types to SDF - Yash
-- [x] Fix the draft badge in SR show - Amjith & Yash
+- [ ] SR Details page - Disable the process step once the report generation is done | Confirm with Bodhi before working on this - Backend
+
+- [-] New service request should be shown first within the list - Vignesh
+- [-] Encounter can be closed even if the SR is ACTIVE. But if encounter is closer SR cannot be marked as completed ( Showing error as encounter is already closed) - Fix can be not allow top close encounter if SR is open - Vignesh
+- [-] Not able to mark a SR as closed - Showing error location not found - Vignesh
+- [-] Roles access for Labs. Only users with lab role should have access to lab services - Vignesh
 
 ## Back End
 
@@ -80,6 +51,12 @@ x : Done
 - [ ] Observation Interpretation
 - [ ] Spec for Ingredients, Nutrients, Drug_characteristic are incomplete in Product Knowledge
 - [ ] Find which location a product is in within a facility
+- [ ] Medication Administration API needs support for product knowledge
+- [ ] Supply Request - Add supplier[]
+- [ ] Not able to mark a SR as closed - Showing error location not found 
+- [ ] New service request should be shown first within the list 
+- [ ] Roles access for Labs. Only users with lab role should have access to lab services
+- [ ] Encounter can be closed even if the SR is ACTIVE. But if encounter is closer SR cannot be marked as completed ( Showing error as encounter is already closed) - Fix can be not allow top close encounter if SR is open
 
 # Archived
 
@@ -121,8 +98,14 @@ x : Done
 - [x] Allow serch for discount codes - Rithvik
 - [x] When Creating charge item in questionnaire we should display applicable discounts and tax and amounts from the charge item def as read-only - Yaswanth
 - [x] Move account as a pill in the encounter, it should only fetch the account if its clicked, show the account details in a sheet and show option to navigate to the accounts page (Sheet - Render account details/Create account button) - Yash
-
 - [x] Start date is missing for the automatically created billing account - Amjith
+- [x] Remove -- in the end date column if the billing account still ongoing - Amjith
+- [x] When we click past account button in the account details page, it should redirect to the patient account overview page, rather than the entire hospital account overview page - Jeevan
+- [x] Disable record payment button in billing account details page, if the account status is not active - Amjith
+- [x] Wire the issue date and update the invoice activity timeline to use it - Yaswanth
+- [x] Display the negative balance in the 'Amount Due' section as well to indicate that the user has overpaid beyond their actual bill. - Manyu
+- [x] Modify back button links in Payment details page (back to accountId/payments if navigating from there) - Jeevan
+- [x] When attempting to close a billing account with pending charge items that haven't been invoiced, disable the 'Close Account' button in the pop-up and display a message stating: 'You cannot close an account with pending charge items. - Manyu.
 
 ## Labs
 
@@ -150,7 +133,8 @@ x : Done
 - [x] Print all Barcodes button for a service request with page setup - Yaswanth
 - [x] Make Activity Definiton search inside the service request question working
 - [x] Specimen Definition - Remove 0 prefilled value in Retention time, capacity, and minimum value - Yash
-
+- [x] Healthcare Service edit - Location expand missing in sheet - Manyu
+- [x] Specimen Definition - Add \* for required fields and frontend validation for Retention Time, Capacity, Minimum Volume, Type Collected, Title, and Slug
 - [x] Specimen Definition - The cancel button in the form is not working - Amjith
 - [x] Specimen Definition - Increase the width of retention time and capacity to full width in the edit page - Jeevan
 - [x] Specimen Definition - Add URL validation to the field Derived from URL - Jeevan
@@ -162,6 +146,31 @@ x : Done
 - [x] Active Definition - Add asterisk and frontend validation for code field - Amjith
 - [x] Active Definition - In the questionnaire of SR, change the autocomplete border colour from blue to keep them consistent - Amjith
 - [x] Specimen Definition - The 2x2 grid UI breaks when the error message is triggered and only one of the fields/columns is filled - Amjith
+- [x] Charge Item - Add an asterisk to the Title field. - Jeevan
+- [x] Charge Item - Add asterisk and frontend validation for the Base Price field. - Jeevan
+- [x] Charge Item - Remove the ? from the discount dropdown - Jeevan - Nothing to be done, data was just saved that way.
+- [x] Charge Item - Removing prefilled data from the Discount and Tax fields causes the field state to freeze, requiring a manual page reload. - Jeevan
+- [x] Charge Item - Limit the discount and tax field input to 100 max - Jeevan
+- [x] SR details page — In the Add Charge Item slide over, display the final amount after discount and tax, and the amount split when hovering over the (!) icon. -> We can't show the total here as backend deos not return the total for CID and we decided to not do any manual calculations in FE, see item below: - Yash
+- [x] Add info on Charge Item created on SR show (This includes total from BE). - Yash
+- [x] SR Questionnaire - Investigate placement of Priority and Urgent text fields, as the text field appears in Overview and the request in the SR tab upon submission. Currently, Priority is recorded both as structured data and plain text in the same question. - This was a mistake in Questionnaire - Amjith
+- [x] Pass only the active and draft specimens to multi QR print - Yash
+- [x] Get all matching specimens for a requierment so that draftspecimen creation works as expected, -> when there are multiple specimens for a requirement -> when a previous specimen is discarded - Yash
+- [x] Fix the draft badge in SR show - Amjith & Yash
+- [x] SR details page- Remove the back button from the sample identification QR print preview pop-up. / adjust the behavior to only close the pop-up - Manyu
+- [x] SR details page - Specimen ID cannot be hidden in the Service Request QR - Manyu
+- [x] Fix the explicit type casting and add proper types to SDF - Yash
+- [x] In the service request questionnaire, additional details can be added within an information button Eg. "Snomed code", Fasting blood glucose measurement | http://snomed.info/sct. - Manyu
+- [x] Back to encounter button in service request should be browser back and not to the encounter back. Coz if encounter is closed, it will show error - Manyu
+- [x] From the SR screen, clicking on back button take to the care dashboard and not the SR listing page. - Manyu [this happens when you relogin after timeout]
+- [x] SR listing page should have tabs to identify SRs in different status. Eg Prescription queue - Manyu
+- [x] In the Test Results, additional details can be added within an information button Eg. http://loinc.org,1558-6. - Manyu
+- [x] Able to generate report even without collecting sample - Manyu
+- [x] When create report is pressed, report gets generated but need to reload the page to get report and only after refresh the timeline gets updated - Manyu
+- [x] After collecting specimen, the page needs to be refreshed to get status of collected specimen - Manyu
+- [x] SR overview page - Show the current status of the service request. Upon completion, update the status from active to complete - Manyu [Backend change pending]
+- [x] If no entries are given to a report and click on Save Result, it shows Conclusion updated successfully but report is not generated. Since report cant be blank, there should be validation and show error is no entries are there for result and conclusion. - Manyu
+- [x] If a long conclusion is given to a report, UI is breaking (Diagnostic Report) - Manyu
 
 ## Pharmacy
 
@@ -173,3 +182,14 @@ x : Done
 - [x] Charge item inside Product (Select and Create new)
 - [x] Inventory list
 - [x] Fix search, navigation and scroll for Suppliers page - Yash
+- [x] Add option to archive suppliers - Yash
+- [x] Add status based filters for product knowledge - Amjith
+- [x] Undo absolute net quantity after video recorded - Amjith
+- [x] Healthcare Service Details View page : Hide the unwanted metadata details page & add translation for extra_details - Jeevan
+- [x] Add pagination where it's missing - Jeevan
+- [x] Add a warning colour for low stock items in the inventory item list - Jeevan
+- [x] Remove unknown from Specimen Definition Status - Jeevan
+- [x] Edit page of the supply delivery details is crashing - Khavin
+- [x] Medications added from our product cannot be administered due to missing code - Jeevan/Vignesh; Medication Administration API needs support for product knowledge
+- [x] Each modification to the pre-filled quantity in bill medication triggers a component re-render, which disrupts the editing experience. - Khavin
+- [x] Supply Request - Disallow selecting current location - Jeevan

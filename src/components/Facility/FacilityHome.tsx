@@ -425,7 +425,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
-                            className="cursor-pointer font-semibold"
+                            className="cursor-pointer font-semibold w-fit"
                             variant="destructive"
                             size="sm"
                           >
