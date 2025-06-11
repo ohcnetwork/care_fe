@@ -66,9 +66,9 @@ export function formatValue(
       return properCase(value.toString());
     case "decimal":
     case "integer":
-      return value.toString();
+      return typeof value === "number" ? value.toString() : value.toString();
     case "boolean":
-      return value === true || value === "true" ? t("yes") : t("no");
+      return value === "true" ? t("yes") : t("no");
     case "time":
       return value.toString().slice(0, 5);
     default:
