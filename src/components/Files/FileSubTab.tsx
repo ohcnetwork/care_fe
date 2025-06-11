@@ -370,16 +370,16 @@ export const FilesPage = ({
             <Label
               htmlFor={`file_upload_${type}`}
               data-cy="choose-file-option"
-              className="flex items-center gap-1 w-full text-primary-900 hover:text-black"
+              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-normal"
             >
-              <CareIcon icon="l-file-upload-alt" className="mr-1" />
-              <span>{t("choose_file")}</span>
+              <CareIcon icon="l-file-upload-alt" />
+              <span>{t("choose_files")}</span>
             </Label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => fileUpload.handleCameraCapture()}
-            className="text-primary-900"
+            className="flex items-center text-primary-900 font-normal"
             aria-label={t("open_camera")}
           >
             <CareIcon icon="l-camera" />
@@ -387,7 +387,7 @@ export const FilesPage = ({
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => fileUpload.handleAudioCapture()}
-            className="text-primary-900"
+            className="flex items-center text-primary-900 font-normal"
             data-cy="record-audio-button"
             aria-label={t("record")}
           >
