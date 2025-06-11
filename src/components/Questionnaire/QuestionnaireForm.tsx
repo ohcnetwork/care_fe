@@ -660,9 +660,14 @@ export function QuestionnaireForm({
               question_id: response.question_id,
               values: response.values.map((value) => {
                 if (value.type === "dateTime" && value.value) {
+                  const date = new Date(value.value);
+                  if (isNaN(date.getTime())) {
+                    return { value: "" };
+                  }
+                  const formattedDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
                   return {
                     ...value,
-                    value: value.value.toISOString(),
+                    value: formattedDate,
                   };
                 }
                 if (value.unit) {
