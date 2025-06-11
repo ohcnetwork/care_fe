@@ -386,6 +386,8 @@ const AvatarEditModal = ({
                             <img
                               src={croppedPreview || "/placeholder.svg"}
                               alt="Cropped preview"
+                              loading="lazy"
+                              decoding="async"
                               className={cn(
                                 "max-w-full max-h-full object-contain rounded-lg",
                                 aspectRatio === "1:1"
@@ -411,6 +413,8 @@ const AvatarEditModal = ({
                   <img
                     src={imageUrl || "/placeholder.svg"}
                     alt="saved-photo"
+                    loading="lazy"
+                    decoding="async"
                     className={cn(
                       "w-full max-w-[400px] max-h-[400px] mx-auto object-cover",
                       aspectRatio === "1:1" ? "aspect-square" : "aspect-video",

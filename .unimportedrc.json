@@ -6,6 +6,7 @@
   "ignoreUnimported": [
     "src/Locale/update_locale.js",
     "src/PluginRegistry.ts",
+    "src/pages/Encounters/ReportBuilder/ReportBuilderSheet.tsx",
     "src/pluginTypes.ts",
     "src/service-worker.ts"
   ],
