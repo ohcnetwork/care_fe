@@ -297,11 +297,21 @@ export class CommunityQuestionnaireForm {
 
   saveQuestionnaireId() {
     cy.wait("@batchSubmit").then((interception) => {
+      if (!interception.response || interception.response.statusCode !== 200) {
+        throw new Error(
+          `Batch submit failed with status: ${interception.response?.statusCode}`,
+        );
+      }
+
       const { body } = interception.response || {};
       const results = body?.results || [];
 
       const responseId =
         results.length > 0 ? results[results.length - 1]?.data?.id : undefined;
+
+      if (!responseId) {
+        throw new Error("Failed to extract questionnaire ID from response");
+      }
 
       cy.wrap(responseId).as("questionnaireId");
     });

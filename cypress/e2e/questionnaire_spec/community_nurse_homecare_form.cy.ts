@@ -8,7 +8,7 @@ import { getRandomMedicineName } from "@/utils/commonUtils";
 import { viewPort } from "@/utils/viewPort";
 
 const QUESTIONNAIRE_NAME = "Community Nurse Homecare Form";
-const PRACTITIONER = "Mr. Bodhish Thomas Sr.";
+const PRACTITIONER = "Admin Admin";
 
 const MEDICINE_NAME = getRandomMedicineName();
 

@@ -127,7 +127,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   if (selectType === "dropdown") {
     return (
       <Autocomplete
-        data-cy="choice-question-item"
+        data-cy="choice-question-input"
         value={currentValue || ""}
         onChange={handleValueChange}
         options={options.map((option) => ({
