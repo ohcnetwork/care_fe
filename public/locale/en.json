@@ -1387,6 +1387,7 @@
   "exception_for_non_schedulable_resource_warning": "Exceptions can be created only after creating a schedule",
   "exceptions": "Exceptions",
   "exclude_rules": "Exclude rules",
+  "exists": "Exists",
   "expand_all": "Expand All",
   "expand_sidebar": "Expand Sidebar",
   "expected_burn_rate": "Expected Burn Rate",
