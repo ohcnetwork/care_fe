@@ -504,6 +504,7 @@ const AppointmentActions = ({
                 resourceId={selectedPractitioner?.id}
                 selectedSlotId={selectedSlotId}
                 onSlotSelect={setSelectedSlotId}
+                currentAppointment={appointment}
               />
 
               <div className="flex justify-end gap-2 mt-6">

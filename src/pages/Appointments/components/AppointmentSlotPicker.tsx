@@ -26,7 +26,7 @@ import {
   groupSlotsByAvailability,
   useAvailabilityHeatmap,
 } from "@/pages/Appointments/utils";
-import { TokenSlot } from "@/types/scheduling/schedule";
+import { Appointment, TokenSlot } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface AppointmentSlotPickerProps {
@@ -35,6 +35,11 @@ interface AppointmentSlotPickerProps {
   onSlotSelect: (slotId: string | undefined) => void;
   selectedSlotId?: string;
   onSlotDetailsChange?: (slot: TokenSlot) => void;
+  currentAppointment?: Appointment;
+}
+
+interface SlotsResponse {
+  results: TokenSlot[];
 }
 
 export function AppointmentSlotPicker({
@@ -43,6 +48,7 @@ export function AppointmentSlotPicker({
   onSlotSelect,
   selectedSlotId,
   onSlotDetailsChange,
+  currentAppointment,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -64,6 +70,17 @@ export function AppointmentSlotPicker({
       },
     }),
     enabled: !!resourceId && !!selectedDate,
+    select: (data: SlotsResponse) => {
+      if (currentAppointment) {
+        return {
+          ...data,
+          results: data.results.filter(
+            (slot: TokenSlot) => slot.id !== currentAppointment.token_slot.id,
+          ),
+        };
+      }
+      return data;
+    },
   });
 
   const slotsTodayQuery = useQuery({
@@ -76,6 +93,17 @@ export function AppointmentSlotPicker({
       },
     }),
     enabled: !!resourceId,
+    select: (data: SlotsResponse) => {
+      if (currentAppointment) {
+        return {
+          ...data,
+          results: data.results.filter(
+            (slot: TokenSlot) => slot.id !== currentAppointment.token_slot.id,
+          ),
+        };
+      }
+      return data;
+    },
   });
 
   // Update slot details when a slot is selected

@@ -123,10 +123,17 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     }),
     select: (data: { results: TokenSlot[] }) => {
       return data.results.filter((slot) => {
-        return !isWithinInterval(new Date(), {
+        // Filter out slots that are happening right now
+        const isCurrentlyActive = isWithinInterval(new Date(), {
           start: slot.start_datetime,
           end: slot.end_datetime,
         });
+
+        // Filter out the current appointment's slot when rescheduling
+        const isCurrentAppointmentSlot =
+          appointment && slot.id === appointment.token_slot.id;
+
+        return !isCurrentlyActive && !isCurrentAppointmentSlot;
       });
     },
     enabled: !!selectedDate && !!tokenData.token,
