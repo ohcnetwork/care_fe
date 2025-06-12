@@ -5,7 +5,6 @@ import { toPng } from "html-to-image";
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
 import { Patient } from "@/types/emr/patient";
-import { TokenSlot } from "@/types/scheduling/schedule";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -324,23 +323,4 @@ export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
   }
 
   return intervals;
-}
-
-/**
- * Parses a selectedSlot param (URL-encoded JSON string) into a TokenSlot object.
- * Returns undefined if parsing fails.
- * @param selectedSlotParam The URL param value (string or undefined)
- * @param onError Optional error callback (e.g., for toast)
- */
-export function parseSelectedSlotParam(
-  selectedSlotParam: string | undefined,
-  onError?: (error: unknown) => void,
-): TokenSlot | undefined {
-  if (!selectedSlotParam) return undefined;
-  try {
-    return JSON.parse(decodeURIComponent(selectedSlotParam));
-  } catch (error) {
-    if (onError) onError(error);
-    return undefined;
-  }
 }

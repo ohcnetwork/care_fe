@@ -29,7 +29,7 @@ import { validateName, validatePincode } from "@/common/validation";
 import { usePubSub } from "@/Utils/pubsubContext";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import { dateQueryString, parseSelectedSlotParam } from "@/Utils/utils";
+import { dateQueryString } from "@/Utils/utils";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Patient } from "@/types/emr/patient";
@@ -37,6 +37,7 @@ import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
   AppointmentCreateRequest,
+  TokenSlot,
 } from "@/types/scheduling/schedule";
 
 type PatientRegistrationProps = {
@@ -48,9 +49,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   const { staffId } = props;
   const { t } = useTranslation();
   const [params] = useQueryParams();
-  const selectedSlot = parseSelectedSlotParam(params.selectedSlot, () =>
-    toast.error(t("error_to_parse_selectedSlot_from_URL_parameters")),
-  );
+  const selectedSlot = JSON.parse(params.selectedSlot) as TokenSlot;
   const reason = params.reason || "";
 
   const queryClient = useQueryClient();

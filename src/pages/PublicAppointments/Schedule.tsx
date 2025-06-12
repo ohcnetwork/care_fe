@@ -334,15 +334,14 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   if (appointmentId && appointment) {
                     handleRescheduleAppointment(appointment);
                   } else {
-                    const params = new URLSearchParams({
-                      selectedSlot: encodeURIComponent(
-                        JSON.stringify(selectedSlot),
-                      ),
+                    const params = {
+                      selectedSlot: JSON.stringify(selectedSlot),
                       reason: reason,
-                    }).toString();
+                    };
 
                     navigate(
-                      `/facility/${facilityId}/appointments/${staffId}/patient-select?${params}`,
+                      `/facility/${facilityId}/appointments/${staffId}/patient-select`,
+                      { query: params },
                     );
                   }
                 }}
