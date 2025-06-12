@@ -55,7 +55,7 @@ export function QuestionnaireSearch({
   onSelect = (selected) => navigate(`questionnaire/${selected.slug}`),
   subjectType,
   disabled,
-  "data-cy": dataCy,
+  "data-cy": dataCy = "add-questionnaire-button",
 }: QuestionnaireSearchProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
