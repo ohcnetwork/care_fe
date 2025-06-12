@@ -340,7 +340,8 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                     };
 
                     navigate(
-                      `/facility/${facilityId}/appointments/${staffId}/patient-select?${params}`,
+                      `/facility/${facilityId}/appointments/${staffId}/patient-select`,
+                      { query: params },
                     );
                   }
                 }}
