@@ -294,7 +294,6 @@ export default function useFileUpload(
         });
 
         if (data) {
-          // Custom progress handler for this file
           let lastFilePercent = 0;
           await new Promise<void>((resolve, reject) => {
             uploadFile(
