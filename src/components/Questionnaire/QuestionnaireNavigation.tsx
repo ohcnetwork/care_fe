@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,7 @@ export default function QuestionnaireNavigation({
   expandedQuestions?: Set<string>;
   scrollToQuestion?: (questionId: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
       <CardHeader className="p-0">
