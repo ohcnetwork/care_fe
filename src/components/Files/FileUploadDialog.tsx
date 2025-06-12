@@ -206,7 +206,7 @@ export default function FileUploadDialog({
             ))
           )}
         </div>
-        {fileUpload.files.length > 1 && (
+        {fileUpload.files.length > 1 && !fileUpload.uploading && (
           <div className="flex items-center gap-2 mt-4">
             <Checkbox
               id={`file_upload_${type}`}
@@ -221,26 +221,28 @@ export default function FileUploadDialog({
           </div>
         )}
 
-        <div className="flex justify-end gap-2 mr-4">
-          <Button
-            variant="destructive"
-            onClick={fileUpload.clearFiles}
-            disabled={fileUpload.uploading}
-          >
-            <CareIcon icon="l-trash-alt" className="mr-1" />
-            {t("discard")}
-          </Button>
-          <Button
-            variant="outline_primary"
-            onClick={() => fileUpload.handleFileUpload(associatingId, isPdf)}
-            disabled={fileUpload.uploading}
-            id="upload_file_button"
-            data-cy="upload-files-button"
-          >
-            <CareIcon icon="l-check" className="mr-1" />
-            {t("upload")}
-          </Button>
-        </div>
+        {!fileUpload.uploading && (
+          <div className="flex justify-end gap-2 mr-4">
+            <Button
+              variant="destructive"
+              onClick={fileUpload.clearFiles}
+              disabled={fileUpload.uploading}
+            >
+              <CareIcon icon="l-trash-alt" className="mr-1" />
+              {t("discard")}
+            </Button>
+            <Button
+              variant="outline_primary"
+              onClick={() => fileUpload.handleFileUpload(associatingId, isPdf)}
+              disabled={fileUpload.uploading}
+              id="upload_file_button"
+              data-cy="upload-files-button"
+            >
+              <CareIcon icon="l-check" className="mr-1" />
+              {t("upload")}
+            </Button>
+          </div>
+        )}
         {fileUpload.uploading && (
           <div className="mt-6 border rounded-md px-4 py-3 bg-secondary-100 shadow-inner space-y-2">
             <div className="flex justify-between items-center text-sm font-medium text-gray-800">
@@ -256,6 +258,16 @@ export default function FileUploadDialog({
               value={fileUpload.progress}
               className="h-3 bg-gray-200 [&>div]:bg-black-600 rounded-full transition-all"
             />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>
+                {`${fileUpload.files.length - fileUpload.files.filter((f) => f.size > 0).length + Math.floor((fileUpload.progress ?? 0) / (100 / fileUpload.files.length))}/${fileUpload.files.length} ${t("files_uploaded")}`}
+              </span>
+              <span>
+                {(fileUpload.progress ?? 0) < 100
+                  ? t("uploading")
+                  : t("all_files_uploaded")}
+              </span>
+            </div>
           </div>
         )}
       </DialogContent>

@@ -134,7 +134,7 @@ export default function useFileUpload(
       return null;
     }
   };
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
     if (!e.target.files?.length) {
       return;
     }
@@ -197,72 +197,22 @@ export default function useFileUpload(
     }
     return true;
   };
-  const { mutateAsync: markUploadComplete, error: markUploadCompleteError } =
-    useMutation({
-      mutationFn: (body: {
-        data: CreateFileResponse;
-        associating_id: string;
-      }) =>
-        mutate(routes.markUploadCompleted, {
-          pathParams: {
-            id: body.data.id,
-          },
-        })(body),
-      onSuccess: (_, { data, associating_id }) => {
-        queryClient.invalidateQueries({
-          queryKey: ["files", fileType, associating_id],
-        });
-        toast.success(t("file_uploaded"));
-        setError(null);
-        onUpload?.(data);
-      },
-    });
-
-  const uploadfile = async (
-    data: CreateFileResponse,
-    file: File,
-    associating_id: string,
-  ) => {
-    const url = data.signed_url;
-    const internal_name = data.internal_name;
-    const newFile = new File([file], `${internal_name}`);
-
-    return new Promise<void>((resolve, reject) => {
-      uploadFile(
-        url,
-        newFile,
-        "PUT",
-        { "Content-Type": file.type },
-        async (xhr: XMLHttpRequest) => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            setProgress(null);
-            await markUploadComplete({
-              data,
-              associating_id: associating_id,
-            });
-            if (markUploadCompleteError) {
-              toast.error(t("file_error__mark_complete_failed"));
-              reject();
-              return;
-            }
-            resolve();
-          } else {
-            toast.error(
-              t("file_error__dynamic", { statusText: xhr.statusText }),
-            );
-            setProgress(null);
-            reject();
-          }
+  const { mutateAsync: markUploadComplete } = useMutation({
+    mutationFn: (body: { data: CreateFileResponse; associating_id: string }) =>
+      mutate(routes.markUploadCompleted, {
+        pathParams: {
+          id: body.data.id,
         },
-        setProgress as any,
-        () => {
-          toast.error(t("file_error__network"));
-          setProgress(null);
-          reject();
-        },
-      );
-    });
-  };
+      })(body),
+    onSuccess: (_, { data, associating_id }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["files", fileType, associating_id],
+      });
+      toast.success(t("file_uploaded"));
+      setError(null);
+      onUpload?.(data);
+    },
+  });
 
   const { mutateAsync: createUpload } = useMutation({
     mutationFn: (body: {
@@ -295,6 +245,8 @@ export default function useFileUpload(
     if (!validateFileUpload()) return;
 
     setProgress(0);
+    const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+    let bytesUploadedSoFar = 0;
     const errors: File[] = [];
     if (combineToPDF) {
       if (!uploadFileNames.length || !uploadFileNames[0]) {
@@ -342,7 +294,55 @@ export default function useFileUpload(
         });
 
         if (data) {
-          await uploadfile(data, file, associating_id);
+          // Custom progress handler for this file
+          let lastFilePercent = 0;
+          await new Promise<void>((resolve, reject) => {
+            uploadFile(
+              data.signed_url,
+              new File([file], `${data.internal_name}`),
+              "PUT",
+              { "Content-Type": file.type },
+              async (xhr: XMLHttpRequest) => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                  bytesUploadedSoFar +=
+                    file.size - Math.round((lastFilePercent / 100) * file.size);
+                  setProgress(
+                    totalBytes > 0
+                      ? (bytesUploadedSoFar / totalBytes) * 100
+                      : 0,
+                  );
+                  await markUploadComplete({
+                    data,
+                    associating_id: associating_id,
+                  });
+                  resolve();
+                } else {
+                  toast.error(
+                    t("file_error__dynamic", { statusText: xhr.statusText }),
+                  );
+                  reject();
+                }
+              },
+              (percent: number | ((prev: number) => number)) => {
+                if (typeof percent === "number") {
+                  bytesUploadedSoFar -= Math.round(
+                    (lastFilePercent / 100) * file.size,
+                  );
+                  bytesUploadedSoFar += Math.round((percent / 100) * file.size);
+                  lastFilePercent = percent;
+                  setProgress(
+                    totalBytes > 0
+                      ? (bytesUploadedSoFar / totalBytes) * 100
+                      : 0,
+                  );
+                }
+              },
+              () => {
+                toast.error(t("file_error__network"));
+                reject();
+              },
+            );
+          });
         }
       } catch {
         errors.push(file);
