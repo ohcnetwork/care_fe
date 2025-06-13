@@ -388,7 +388,7 @@ export default function AvatarEditModal({
                                   ? "aspect-square"
                                   : aspectRatio === 16 / 9
                                     ? "aspect-video"
-                                    : `aspect-[${aspectRatio}]`,
+                                    : "",
                               )}
                             />
                           ) : (
@@ -417,7 +417,7 @@ export default function AvatarEditModal({
                         ? "aspect-square"
                         : aspectRatio === 16 / 9
                           ? "aspect-video"
-                          : `aspect-[${aspectRatio}]`,
+                          : "",
                     )}
                   />
                 ) : (
