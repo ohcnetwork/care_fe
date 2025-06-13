@@ -1030,29 +1030,28 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
         <TabsContent value="preview">
           <div className="flex flex-col md:flex-row gap-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("preview")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4 border-2 border-gray-100 rounded-lg w-full shadow-sm p-3 lg:hidden">
-                  <QuestionnairePreviewProperties
-                    questionnaire={questionnaire}
-                  />
-                </div>
-                <div className="max-w-fit">
-                  <QuestionnaireForm
-                    questionnaireSlug={id}
-                    patientId="preview"
-                    subjectType={questionnaire.subject_type}
-                    encounterId="preview"
-                    facilityId="preview"
-                    organizations={organizations?.results}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-            <div className="space-y-4 min-w-60 hidden lg:block">
+            <div className="flex-1">
+              <Card>
+                <CardContent>
+                  <div className="space-y-4 border-2 border-gray-100 rounded-lg w-full shadow-sm p-3 lg:hidden">
+                    <QuestionnairePreviewProperties
+                      questionnaire={questionnaire}
+                    />
+                  </div>
+                  <div className="max-w-5xl">
+                    <QuestionnaireForm
+                      questionnaireSlug={id}
+                      patientId="preview"
+                      subjectType={questionnaire.subject_type}
+                      encounterId="preview"
+                      facilityId="preview"
+                      organizations={organizations?.results}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="lg:block space-y-4 w-60 hidden">
               <QuestionnairePreviewProperties questionnaire={questionnaire} />
             </div>
           </div>

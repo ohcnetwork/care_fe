@@ -20,7 +20,7 @@ export default function QuestionnairePreviewProperties({
       </CardHeader>
       <CardContent className="space-y-6 p-0">
         <div className="flex flex-col gap-8">
-          <div className="flex flex-row lg:gap-2 justify-between">
+          <div className="flex flex-wrap lg:gap-3 justify-between">
             <div className="flex flex-col gap-0.5">
               <Label className="text-xs text-gray-500">{t("status")}</Label>
               <div className="text-sm font-semibold">
