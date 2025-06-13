@@ -527,7 +527,6 @@ export default function AvatarEditModal({
                       variant="destructive"
                       onClick={deleteAvatar}
                       disabled={isProcessing}
-                      data-cy="delete-avatar"
                     >
                       {t("delete")}
                     </Button>
@@ -541,11 +540,6 @@ export default function AvatarEditModal({
                       isProcessing ||
                       !selectedFile ||
                       (!croppedAreaPixels && !showCroppedPreview)
-                    }
-                    data-cy={
-                      showCroppedPreview
-                        ? "upload-cover-image"
-                        : "crop-cover-image"
                     }
                   >
                     {isProcessing ? (
