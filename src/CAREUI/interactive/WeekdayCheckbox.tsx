@@ -34,8 +34,8 @@ export default function WeekdayCheckbox({
   value = [],
   onChange,
   format = "alphabet",
-  ref,
-}: Props) {
+  ...props
+}: Props & React.ComponentProps<"div">) {
   const selectedDays = value ?? [];
   const { t } = useTranslation();
 
@@ -50,7 +50,7 @@ export default function WeekdayCheckbox({
   };
 
   return (
-    <div className="flex gap-2 md:gap-4" ref={ref} tabIndex={-1}>
+    <div className="flex gap-2 md:gap-4" {...props} tabIndex={-1}>
       {dayOfWeekKeys.map((day) => {
         const dow = DayOfWeek[day as keyof typeof DayOfWeek];
         const isSelected = selectedDays.includes(dow);
