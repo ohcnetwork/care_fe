@@ -10,6 +10,7 @@ import query from "@/Utils/request/query";
 import {
   CreateValuesetModel,
   UpdateValuesetModel,
+  ValuesetBase,
   ValuesetFormType,
 } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
@@ -18,7 +19,7 @@ import { ValueSetForm } from "./ValueSetForm";
 
 interface ValueSetEditorProps {
   slug?: string; // If provided, we're editing an existing valueset
-  onSuccess?: (data: any) => void;
+  onSuccess?: (data: ValuesetBase) => void;
 }
 
 export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
@@ -36,7 +37,7 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: mutate(valuesetApi.create),
-    onSuccess: (data) => {
+    onSuccess: (data: ValuesetBase) => {
       toast.success(t("valueset_created"));
       queryClient.invalidateQueries({ queryKey: ["valuesets"] });
       onSuccess?.(data);
@@ -48,9 +49,10 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
     mutationFn: mutate(valuesetApi.update, {
       pathParams: { slug: slug! },
     }),
-    onSuccess: () => {
+    onSuccess: (data: ValuesetBase) => {
       toast.success(t("valueset_updated"));
       queryClient.removeQueries({ queryKey: ["valueset", slug] });
+      onSuccess?.(data);
       navigate(`/admin/valuesets`);
     },
   });

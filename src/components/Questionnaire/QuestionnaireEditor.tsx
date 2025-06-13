@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,7 +67,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,7 +78,6 @@ import {
   STRUCTURED_QUESTIONS,
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
-import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
@@ -102,6 +99,7 @@ import { ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 import { CodingEditor } from "./CodingEditor";
+import { CreateValueSet } from "./CreateValueSet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
 import ValueSetSelect from "./ValueSetSelect";
@@ -1363,7 +1361,6 @@ function QuestionEditor({
   );
   const [inputPosition, setInputPosition] = useState("");
   const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
     queryKey: ["valuesets", valueSetSearchQuery],
     queryFn: query.debounced(valuesetApi.list, {
@@ -1382,6 +1379,12 @@ function QuestionEditor({
   ) => {
     onChange({ ...question, [field]: value, ...additionalFields });
   };
+
+  const valueSetOptions =
+    valuesets?.map((vs) => ({
+      label: vs.name,
+      value: vs.slug,
+    })) || [];
 
   const toggleSubQuestionExpanded = (questionId: string) => {
     setExpandedSubQuestions((prev) => {
@@ -2196,50 +2199,25 @@ function QuestionEditor({
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <div className="flex items-center gap-2 flex-col sm:flex-row">
-                      <div className="w-full">
-                        <Autocomplete
-                          options={(valuesets ?? []).map((valueset) => ({
-                            label: valueset.name,
-                            value: valueset.slug,
-                          }))}
-                          value={
-                            question.answer_value_set === "valueset"
-                              ? ""
-                              : (question.answer_value_set ?? "")
-                          }
-                          onChange={(val: string) =>
-                            updateField("answer_value_set", val)
-                          }
-                          onSearch={setValueSetSearchQuery}
-                          placeholder={t("select_a_value_set")}
-                          isLoading={isFetchingValuesets}
-                          noOptionsMessage={t("no_valuesets_found")}
-                        />
-                      </div>
-                      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                        <SheetTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="gap-2 w-full sm:w-auto"
-                          >
-                            <CareIcon icon="l-plus" />
-                            {t("create_valueset")}
-                          </Button>
-                        </SheetTrigger>
-                        <SheetContent
-                          side="right"
-                          className="w-full sm:max-w-2xl overflow-y-auto"
-                        >
-                          <ValueSetEditor
-                            onSuccess={(data) => {
-                              setIsSheetOpen(false);
-                              updateField("answer_value_set", data.slug);
-                            }}
-                          />
-                        </SheetContent>
-                      </Sheet>
-                    </div>
+                    <CreateValueSet
+                      onValueSetChange={(val) =>
+                        updateField("answer_value_set", val)
+                      }
+                      valuesets={valueSetOptions}
+                      onSearch={setValueSetSearchQuery}
+                      isLoading={isFetchingValuesets}
+                      selectedValueSet={
+                        question.answer_value_set
+                          ? {
+                              id: question.answer_value_set,
+                              display:
+                                valuesets?.find(
+                                  (v) => v.id === question.answer_value_set,
+                                )?.name || question.answer_value_set,
+                            }
+                          : undefined
+                      }
+                    />
                   </CardContent>
                 )}
               </Card>
