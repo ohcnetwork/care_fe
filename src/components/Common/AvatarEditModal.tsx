@@ -43,7 +43,7 @@ interface Props {
   ) => Promise<void>;
   handleDelete: (onSuccess: () => void, onError: () => void) => Promise<void>;
   hint?: React.ReactNode;
-  aspectRatio: keyof typeof ASPECT_RATIOS;
+  aspectRatio: number;
 }
 
 const VideoConstraints = {
@@ -71,11 +71,6 @@ const VideoConstraints = {
   },
 } as const;
 
-const ASPECT_RATIOS = {
-  "1:1": 1,
-  "16:9": 16 / 9,
-} as const;
-
 const MAX_FILE_SIZE = careConfig.imageUploadMaxSizeInMB * 1024 * 1024; // 2MB
 
 const isImageFile = (file?: File) => file?.type.split("/")[0] === "image";
@@ -83,7 +78,7 @@ const isImageFile = (file?: File) => file?.type.split("/")[0] === "image";
 type IVideoConstraint =
   (typeof VideoConstraints)[keyof typeof VideoConstraints];
 
-const AvatarEditModal = ({
+export default function AvatarEditModal({
   title,
   open,
   onOpenChange,
@@ -91,8 +86,8 @@ const AvatarEditModal = ({
   handleUpload,
   handleDelete,
   hint,
-  aspectRatio = "1:1",
-}: Props) => {
+  aspectRatio = 1,
+}: Props) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
@@ -237,7 +232,7 @@ const AvatarEditModal = ({
       const { file, previewUrl } = await getCroppedImg(
         preview,
         croppedAreaPixels,
-        ASPECT_RATIOS[aspectRatio],
+        aspectRatio,
       );
       setSelectedFile(file);
       setCroppedPreview(previewUrl);
@@ -359,7 +354,7 @@ const AvatarEditModal = ({
                             }
                             crop={crop}
                             zoom={zoom}
-                            aspect={ASPECT_RATIOS[aspectRatio]}
+                            aspect={aspectRatio}
                             onCropChange={setCrop}
                             onCropComplete={(
                               croppedArea: Area,
@@ -370,7 +365,6 @@ const AvatarEditModal = ({
                             onZoomChange={setZoom}
                             minZoom={0.1}
                             maxZoom={3}
-                            cropShape={aspectRatio === "1:1" ? "rect" : "rect"}
                           />
                         </div>
                         <p className="text-center font-medium text-secondary-700 mt-2">
@@ -390,9 +384,11 @@ const AvatarEditModal = ({
                               decoding="async"
                               className={cn(
                                 "max-w-full max-h-full object-contain rounded-lg",
-                                aspectRatio === "1:1"
+                                aspectRatio === 1
                                   ? "aspect-square"
-                                  : "aspect-video",
+                                  : aspectRatio === 16 / 9
+                                    ? "aspect-video"
+                                    : `aspect-[${aspectRatio}]`,
                               )}
                             />
                           ) : (
@@ -417,7 +413,11 @@ const AvatarEditModal = ({
                     decoding="async"
                     className={cn(
                       "w-full max-w-[400px] max-h-[400px] mx-auto object-cover",
-                      aspectRatio === "1:1" ? "aspect-square" : "aspect-video",
+                      aspectRatio === 1
+                        ? "aspect-square"
+                        : aspectRatio === 16 / 9
+                          ? "aspect-video"
+                          : `aspect-[${aspectRatio}]`,
                     )}
                   />
                 ) : (
@@ -629,6 +629,4 @@ const AvatarEditModal = ({
       </DialogContent>
     </Dialog>
   );
-};
-
-export default AvatarEditModal;
+}
