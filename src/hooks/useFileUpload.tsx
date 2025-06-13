@@ -197,22 +197,26 @@ export default function useFileUpload(
     }
     return true;
   };
-  const { mutateAsync: markUploadComplete } = useMutation({
-    mutationFn: (body: { data: CreateFileResponse; associating_id: string }) =>
-      mutate(routes.markUploadCompleted, {
-        pathParams: {
-          id: body.data.id,
-        },
-      })(body),
-    onSuccess: (_, { data, associating_id }) => {
-      queryClient.invalidateQueries({
-        queryKey: ["files", fileType, associating_id],
-      });
-      toast.success(t("file_uploaded"));
-      setError(null);
-      onUpload?.(data);
-    },
-  });
+  const { mutateAsync: markUploadComplete, error: markUploadCompleteError } =
+    useMutation({
+      mutationFn: (body: {
+        data: CreateFileResponse;
+        associating_id: string;
+      }) =>
+        mutate(routes.markUploadCompleted, {
+          pathParams: {
+            id: body.data.id,
+          },
+        })(body),
+      onSuccess: (_, { data, associating_id }) => {
+        queryClient.invalidateQueries({
+          queryKey: ["files", fileType, associating_id],
+        });
+        toast.success(t("file_uploaded"));
+        setError(null);
+        onUpload?.(data);
+      },
+    });
 
   const { mutateAsync: createUpload } = useMutation({
     mutationFn: (body: {
@@ -314,6 +318,11 @@ export default function useFileUpload(
                     data,
                     associating_id: associating_id,
                   });
+                  if (markUploadCompleteError) {
+                    toast.error(t("file_error__mark_complete_failed"));
+                    reject();
+                    return;
+                  }
                   resolve();
                 } else {
                   toast.error(
