@@ -288,6 +288,7 @@ export function QuestionnaireForm({
   >([]);
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -627,6 +628,7 @@ export function QuestionnaireForm({
       <div className="w-64 border-r p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         {questionnaireForms.map((form) => (
           <div key={form.questionnaire.id} className="space-y-2">
+            {/* Questionnaire Title */}
             <button
               className={cn(
                 "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
@@ -638,25 +640,58 @@ export function QuestionnaireForm({
             >
               {form.questionnaire.title}
             </button>
+
             <div className="pl-4 space-y-1">
               {form.questionnaire.questions
                 .filter((q) => q.type === "group")
                 .map((group) => (
-                  <button
-                    key={group.id}
-                    className={cn(
-                      "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
-                      activeGroupId === group.id &&
-                        "bg-gray-100 text-green-600",
+                  <div key={group.id}>
+                    {/* Group Title Button */}
+                    <button
+                      className={cn(
+                        "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
+                        activeGroupId === group.id &&
+                          "bg-gray-100 text-green-600",
+                      )}
+                      onClick={() => {
+                        setActiveQuestionnaireId(form.questionnaire.id);
+                        setActiveGroupId(group.id);
+                      }}
+                      disabled={isPending}
+                    >
+                      {group.text}
+                    </button>
+
+                    {/* Sub-Questions */}
+                    {(group.questions ?? []).length > 0 && (
+                      <div className="pl-4 space-y-1">
+                        {group.questions?.map((sub) => (
+                          <button
+                            key={sub.id}
+                            className={cn(
+                              "w-full text-left px-2 py-1 rounded text-xs hover:bg-gray-100",
+                              activeQuestionId === sub.id &&
+                                "bg-blue-100 text-blue-600",
+                            )}
+                            onClick={() => {
+                              setActiveQuestionnaireId(form.questionnaire.id);
+                              setActiveGroupId(group.id);
+                              setActiveQuestionId(sub.id);
+                              document
+                                .getElementById(`question-${sub.id}`)
+                                ?.scrollIntoView({
+                                  behavior: "smooth",
+                                  block: "center",
+                                });
+                            }}
+                            disabled={isPending}
+                          >
+                            {sub.text}
+                          </button>
+                        ))}
+                      </div>
                     )}
-                    onClick={() => {
-                      setActiveQuestionnaireId(form.questionnaire.id);
-                      setActiveGroupId(group.id);
-                    }}
-                    disabled={isPending}
-                  >
-                    {group.text}
-                  </button>
+                  </div>
                 ))}
             </div>
           </div>
@@ -731,6 +766,8 @@ export function QuestionnaireForm({
                 if (!isDirty) {
                   setIsDirty(true);
                 }
+
+                setActiveQuestionId(questionId);
               }}
               disabled={isPending}
               activeGroupId={activeGroupId}
