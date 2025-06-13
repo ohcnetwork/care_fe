@@ -99,7 +99,7 @@ import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
-import { CreateValueSet } from "./SelectOrCreateValueset";
+import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
 
 interface QuestionnaireEditorProps {
@@ -2180,7 +2180,7 @@ function QuestionEditor({
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <CreateValueSet
+                    <SelectOrCreateValueset
                       onValueSetChange={(val) =>
                         updateField("answer_value_set", val)
                       }

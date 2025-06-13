@@ -21,25 +21,23 @@ interface CreateValueSetProps {
   value?: string;
 }
 
-export function CreateValueSet({
+export function SelectOrCreateValueset({
   onValueSetChange,
   value,
 }: CreateValueSetProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [currentValueSet, setCurrentValueSet] = useState<ValuesetBase>();
-  const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleValueSetChange = (val: string) => {
-    if (onValueSetChange) {
-      onValueSetChange(val);
-    }
+    onValueSetChange?.(val);
   };
 
   const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
-    queryKey: ["valuesets", valueSetSearchQuery],
+    queryKey: ["valuesets", searchQuery],
     queryFn: query.debounced(valuesetApi.list, {
       queryParams: {
-        name: valueSetSearchQuery,
+        name: searchQuery,
         status: "active",
       },
     }),
@@ -67,7 +65,7 @@ export function CreateValueSet({
           )}
           value={value ?? ""}
           onChange={handleValueSetChange}
-          onSearch={setValueSetSearchQuery}
+          onSearch={setSearchQuery}
           placeholder={t("select_a_value_set")}
           isLoading={isFetchingValuesets}
           noOptionsMessage={t("no_valuesets_found")}
