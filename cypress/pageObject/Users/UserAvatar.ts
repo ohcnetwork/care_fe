@@ -53,7 +53,11 @@ export class UserAvatar {
   }
 
   clickDeleteAvatarButton() {
-    cy.get("button").contains("Delete").click({ force: true });
+    cy.get("button")
+      .scrollIntoView()
+      .contains("Delete")
+      .should("be.visible")
+      .click();
     return this;
   }
 
