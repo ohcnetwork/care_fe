@@ -51,10 +51,6 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
   REASON: {
     key: "reason_for_visit",
     required: true,
-    validate: (value: unknown) => {
-      const str = value as string;
-      return !!str?.trim();
-    },
   },
   SLOT: {
     key: "slot_id",
@@ -96,11 +92,21 @@ export function AppointmentQuestion({
   const value = values[0] ?? {};
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
-    updateQuestionnaireResponseCB(
-      [{ type: "appointment", value: [{ ...value, ...updates }] }],
-      questionnaireResponse.question_id,
-      questionnaireResponse.note,
-    );
+    const updatedValue = { ...value, ...updates };
+
+    if (!updatedValue.reason_for_visit && !updatedValue.slot_id) {
+      updateQuestionnaireResponseCB(
+        [],
+        questionnaireResponse.question_id,
+        questionnaireResponse.note,
+      );
+    } else {
+      updateQuestionnaireResponseCB(
+        [{ type: "appointment", value: [updatedValue] }],
+        questionnaireResponse.question_id,
+        questionnaireResponse.note,
+      );
+    }
   };
 
   // Query to get slot details for display
@@ -125,7 +131,11 @@ export function AppointmentQuestion({
         <Textarea
           placeholder={t("reason_for_visit_placeholder")}
           value={value.reason_for_visit || ""}
-          onChange={(e) => handleUpdate({ reason_for_visit: e.target.value })}
+          onChange={(e) =>
+            handleUpdate({
+              reason_for_visit: e.target.value.trim() || undefined,
+            })
+          }
           disabled={disabled}
           className={cn(
             hasError(APPOINTMENT_FIELDS.REASON.key) && "border-red-500",
