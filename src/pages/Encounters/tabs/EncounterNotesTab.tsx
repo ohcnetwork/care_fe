@@ -215,6 +215,11 @@ const NewThreadDialog = ({
 }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
+  useEffect(() => {
+    if (isOpen) {
+      setTitle("");
+    }
+  }, [isOpen]);
 
   return (
     <Dialog
