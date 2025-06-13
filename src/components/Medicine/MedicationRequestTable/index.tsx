@@ -98,6 +98,8 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
         status: ["active", "on-hold", "draft", "unknown"].join(","),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!patientId && canAccess,
   });
 
@@ -113,6 +115,8 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
         ),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!patientId && canAccess,
   });
 

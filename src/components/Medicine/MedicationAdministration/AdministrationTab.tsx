@@ -439,6 +439,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: ACTIVE_MEDICATION_STATUSES.join(","),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!patientId && canAccess,
   });
 
@@ -452,6 +454,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: INACTIVE_MEDICATION_STATUSES.join(","),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!patientId && canAccess,
   });
 
@@ -480,6 +484,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         }),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!patientId && !!visibleSlots?.length && canAccess,
   });
 

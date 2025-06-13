@@ -1,6 +1,12 @@
 import careConfig from "@careConfig";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAtomValue, useSetAtom } from "jotai";
+import {
+  onlineManager,
+  useIsRestoring,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useSetAtom } from "jotai";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 
@@ -43,6 +49,7 @@ export default function AuthUserProvider({
   unauthorized,
   otpAuthorized,
 }: Props) {
+  const isrestoring = useIsRestoring();
   const queryClient = useQueryClient();
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
@@ -57,6 +64,8 @@ export default function AuthUserProvider({
     queryKey: ["currentUser", accessToken],
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
@@ -65,6 +74,8 @@ export default function AuthUserProvider({
     queryFn: async () => {
       throw new Error("Should not fetch online");
     },
+    meta: { persist: true },
+    networkMode: "online",
     enabled: false,
   });
 
@@ -75,10 +86,9 @@ export default function AuthUserProvider({
   }, [onlineuser, queryClient]);
 
   const setUser = useSetAtom(userAtom);
-  const user = useAtomValue(userAtom);
   useEffect(() => {
     if (
-      !navigator.onLine &&
+      !onlineManager.isOnline() &&
       localStorage.getItem(LocalStorageKeys.accessToken) &&
       offlineUser
     ) {
@@ -94,6 +104,8 @@ export default function AuthUserProvider({
     queryFn: query(routes.token_refresh, {
       body: { refresh: refreshToken || "" },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     refetchIntervalInBackground: true,
     refetchInterval: careConfig.auth.tokenRefreshInterval,
     enabled: !!refreshToken && !!onlineuser,
@@ -210,8 +222,8 @@ export default function AuthUserProvider({
       removeEventListener("storage", listener);
     };
   }, [signOut]);
-
-  if (isLoading) {
+  console.log(isLoading, isrestoring, onlineManager.isOnline(), accessToken);
+  if (isLoading || isrestoring) {
     return <Loading />;
   }
 
@@ -223,12 +235,16 @@ export default function AuthUserProvider({
         verifyMFA,
         isAuthenticating,
         isVerifyingMFA,
-        user,
+        user: onlineManager.isOnline() ? onlineuser : offlineUser,
         patientLogin,
         patientToken,
       }}
     >
-      {user ? children : patientToken?.token ? otpAuthorized : unauthorized}
+      {(onlineManager.isOnline() ? onlineuser : offlineUser)
+        ? children
+        : patientToken?.token
+          ? otpAuthorized
+          : unauthorized}
     </AuthUserContext.Provider>
   );
 }

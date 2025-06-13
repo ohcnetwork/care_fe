@@ -1,4 +1,9 @@
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  onlineManager,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { AlertCircle, CalendarIcon } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useEffect } from "react";
@@ -44,19 +49,22 @@ interface SearchPatientParams {
   partial_id: string;
 }
 
-// Ensure queryClient is available for cache access
-const queryClient = new QueryClient();
 export default function VerifyPatient(props: { facilityId: string }) {
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
   const { phone_number, year_of_birth, partial_id } = qParams;
   const { goBack } = useAppHistory();
   const { hasPermission } = usePermissions();
-
-  const getSearchKey = (variables: SearchPatientParams) => [
-    "PatientVerification",
-    variables,
-  ];
+  const queryClient = useQueryClient();
+  const { data: patientverificationdata } = useQuery({
+    queryKey: ["PatientVerification", phone_number, year_of_birth, partial_id],
+    queryFn: async () => {
+      throw new Error("Should not fetch online");
+    },
+    meta: { persist: true },
+    networkMode: "online",
+    enabled: false,
+  });
 
   const { data: facilityData, isLoading: facilityLoading } = useQuery({
     queryKey: ["facility", props.facilityId],
@@ -72,33 +80,16 @@ export default function VerifyPatient(props: { facilityId: string }) {
 
   const {
     mutate: verifyPatient,
-    data: patientData,
+    data: onlinepatientData,
     isPending: isVerifyingPatient,
     isError,
   } = useMutation<Patient, HTTPError, SearchPatientParams>({
-    mutationFn: async (variables) => {
-      const key = getSearchKey(variables);
-
-      if (!navigator.onLine) {
-        const cachedData = queryClient.getQueryData<Patient>(key);
-        if (cachedData) {
-          console.log("Returning cached data");
-          return cachedData;
-        }
-        throw new HTTPError({
-          message: "You are offline and no cached data is available.",
-          status: 503,
-          silent: false,
-          cause: { offline: true },
-        });
-      }
-
-      const apiCall = mutate(routes.patient.search_retrieve);
-      return apiCall(variables);
-    },
-    onSuccess: (data, variables) => {
-      const key = getSearchKey(variables);
-      queryClient.setQueryData(key, data);
+    mutationFn: mutate(routes.patient.search_retrieve),
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        ["PatientVerification", phone_number, year_of_birth, partial_id],
+        data,
+      );
     },
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string[] } };
@@ -107,6 +98,10 @@ export default function VerifyPatient(props: { facilityId: string }) {
       });
     },
   });
+
+  const patientData = onlineManager.isOnline()
+    ? onlinepatientData
+    : patientverificationdata;
 
   const { data: encounters, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounters", patientData?.id],
@@ -123,7 +118,12 @@ export default function VerifyPatient(props: { facilityId: string }) {
   });
 
   useEffect(() => {
-    if (phone_number && year_of_birth && partial_id) {
+    if (
+      onlineManager.isOnline() &&
+      phone_number &&
+      year_of_birth &&
+      partial_id
+    ) {
       verifyPatient({
         phone_number,
         year_of_birth,

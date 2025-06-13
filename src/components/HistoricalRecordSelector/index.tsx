@@ -179,6 +179,8 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
         count: response.count,
       };
     },
+    meta: { persist: true },
+    networkMode: "online",
     enabled: isOpen,
     staleTime: 0,
   });

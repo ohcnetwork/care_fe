@@ -6,17 +6,13 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 import { clientsClaim } from "workbox-core";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { precacheAndRoute } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
-import { CacheFirst } from "workbox-strategies";
+import { NavigationRoute } from "workbox-routing/NavigationRoute";
 
 declare const self: ServiceWorkerGlobalScope;
-
-const _ignored = self.__WB_MANIFEST.map((_) => {
-  return _;
-});
-
+const precacheFiles = self.__WB_MANIFEST || [];
+precacheAndRoute(precacheFiles);
 clientsClaim();
 
 // This allows the web app to trigger skipWaiting via
@@ -68,28 +64,20 @@ self.addEventListener("notificationclick", (e) => {
     }),
   );
 });
-
-/// this is for runtime caching of ui as a temptorary solution as precaching of have some problem.
 registerRoute(
-  ({ request }) => request.mode === "navigate",
-  new CacheFirst({
-    cacheName: "pages-cache",
-    plugins: [],
-  }),
-);
+  new NavigationRoute(async ({ request }) => {
+    const cachedResponse = await caches.match("/index.html");
+    if (cachedResponse) {
+      return cachedResponse;
+    }
 
-registerRoute(
-  ({ request }) =>
-    request.destination === "style" || request.destination === "script",
-  new CacheFirst({
-    cacheName: "static-resources",
-  }),
-);
-
-registerRoute(
-  ({ request }) => request.destination === "image",
-  new CacheFirst({
-    cacheName: "images-cache",
-    plugins: [],
+    try {
+      return await fetch(request);
+    } catch {
+      return new Response("Offline and no cached version available.", {
+        status: 503,
+        headers: { "Content-Type": "text/html" },
+      });
+    }
   }),
 );

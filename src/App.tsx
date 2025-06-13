@@ -24,6 +24,7 @@ import { handleHttpError } from "@/Utils/request/errorHandler";
 import { HTTPError } from "@/Utils/request/types";
 
 import { createUserPersister } from "./OfflineSupport/createUserPersister";
+import useNetworkStatus from "./Utils/networkstatus";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 const queryClient = new QueryClient({
@@ -41,6 +42,7 @@ const queryClient = new QueryClient({
       },
       gcTime: careConfig.queryGcTime,
       refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
     },
   },
   queryCache: new QueryCache({
@@ -58,20 +60,26 @@ const ScrollToTop = () => {
 
   return null;
 };
+const userPersister = createUserPersister();
 
 const App = () => {
   useEffect(() => {
     displayCareConsoleArt();
   }, []);
 
+  const { isOnline, isChecked } = useNetworkStatus();
+  console.log("Network status:", { isOnline, isChecked });
+  if (!isChecked) return <Loading />;
+
   return (
     <>
       <PersistQueryClientProvider
         client={queryClient}
         persistOptions={{
-          persister: createUserPersister(),
+          persister: userPersister,
           maxAge: careConfig.queryPersistMaxAge,
           dehydrateOptions: {
+            shouldDehydrateMutation: () => false,
             shouldDehydrateQuery: (query) =>
               defaultShouldDehydrateQuery(query) &&
               Boolean(query.meta?.persist),
