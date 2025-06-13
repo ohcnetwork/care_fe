@@ -1893,24 +1893,26 @@ function QuestionEditor({
 
                 {question.type === "choice" && !question.answer_value_set ? (
                   <CardContent className="sm:space-y-4 space-y-3">
-                    <div className="flex justify-end">
-                      <Button
-                        variant="outline"
-                        type="button"
-                        size="sm"
-                        onClick={() => {
-                          const sorted = annotatedAnswerOptions
-                            ? [...annotatedAnswerOptions].sort((a, b) =>
-                                a.value.localeCompare(b.value),
-                              )
-                            : [];
-                          updateField("answer_option", sorted);
-                        }}
-                      >
-                        <AArrowDown className="size-4" />
-                        {t("sort_alphabetically")}
-                      </Button>
-                    </div>
+                    {annotatedAnswerOptions.length !== 0 && (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="outline"
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                            const sorted = annotatedAnswerOptions
+                              ? [...annotatedAnswerOptions].sort((a, b) =>
+                                  a.value.localeCompare(b.value),
+                                )
+                              : [];
+                            updateField("answer_option", sorted);
+                          }}
+                        >
+                          <AArrowDown className="size-4" />
+                          {t("sort_alphabetically")}
+                        </Button>
+                      </div>
+                    )}
                     {annotatedAnswerOptions &&
                       annotatedAnswerOptions.map((opt, idx) => (
                         <AnimatedWrapper key={opt._id} keyValue={opt._id}>
