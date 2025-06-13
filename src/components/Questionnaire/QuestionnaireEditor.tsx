@@ -83,7 +83,7 @@ import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
+import { HTTPError } from "@/Utils/request/types";
 import { swapElements } from "@/Utils/request/utils";
 import organizationApi from "@/types/organization/organizationApi";
 import {
@@ -95,13 +95,11 @@ import {
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
-import { ValuesetBase } from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
 
 import { CodingEditor } from "./CodingEditor";
-import { CreateValueSet } from "./CreateValueSet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
+import { CreateValueSet } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
 
 interface QuestionnaireEditorProps {
@@ -1360,17 +1358,6 @@ function QuestionEditor({
     new Set(),
   );
   const [inputPosition, setInputPosition] = useState("");
-  const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
-  const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
-    queryKey: ["valuesets", valueSetSearchQuery],
-    queryFn: query.debounced(valuesetApi.list, {
-      queryParams: {
-        name: valueSetSearchQuery,
-        status: "active",
-      },
-    }),
-    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
-  });
 
   const updateField = <K extends keyof Question>(
     field: K,
@@ -1379,12 +1366,6 @@ function QuestionEditor({
   ) => {
     onChange({ ...question, [field]: value, ...additionalFields });
   };
-
-  const valueSetOptions =
-    valuesets?.map((vs) => ({
-      label: vs.name,
-      value: vs.slug,
-    })) || [];
 
   const toggleSubQuestionExpanded = (questionId: string) => {
     setExpandedSubQuestions((prev) => {
@@ -2203,19 +2184,10 @@ function QuestionEditor({
                       onValueSetChange={(val) =>
                         updateField("answer_value_set", val)
                       }
-                      valuesets={valueSetOptions}
-                      onSearch={setValueSetSearchQuery}
-                      isLoading={isFetchingValuesets}
-                      selectedValueSet={
-                        question.answer_value_set
-                          ? {
-                              id: question.answer_value_set,
-                              display:
-                                valuesets?.find(
-                                  (v) => v.id === question.answer_value_set,
-                                )?.name || question.answer_value_set,
-                            }
-                          : undefined
+                      value={
+                        question.answer_value_set === "valueset"
+                          ? ""
+                          : (question.answer_value_set ?? "")
                       }
                     />
                   </CardContent>
@@ -2419,27 +2391,24 @@ function QuestionEditor({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="equals">{t("equals")}</SelectItem>
-                        <SelectItem value="not_equals">
-                          {t("not_equals")}
-                        </SelectItem>
-                        <SelectItem value="greater">
-                          {t("greater_than")}
-                        </SelectItem>
-                        <SelectItem value="less">{t("less_than")}</SelectItem>
+                        <SelectItem value="equals">Equals</SelectItem>
+                        <SelectItem value="not_equals">Not Equals</SelectItem>
+                        <SelectItem value="greater">Greater Than</SelectItem>
+                        <SelectItem value="less">Less Than</SelectItem>
                         <SelectItem value="greater_or_equals">
-                          {t("greater_than_or_equal")}
+                          Greater Than or Equal
                         </SelectItem>
                         <SelectItem value="less_or_equals">
-                          {t("less_than_or_equal")}
+                          Less Than or Equal
                         </SelectItem>
-                        <SelectItem value="exists">{t("exists")}</SelectItem>
+                        Exists
+                        <SelectItem value="exists"></SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <Label className="text-xs mb-1">{t("answer")}</Label>
+                      <Label className="text-xs mb-1">Answer</Label>
                       {condition.operator === "exists" ? (
                         <Select
                           value={condition.answer ? "true" : "false"}

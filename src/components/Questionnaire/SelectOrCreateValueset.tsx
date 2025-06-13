@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -9,57 +10,66 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
+import { ValuesetBase } from "@/types/valueset/valueset";
+import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface CreateValueSetProps {
-  valuesets: {
-    label: string;
-    value: string;
-  }[];
   onValueSetChange?: (valueSet: string) => void;
-  onSearch: (query: string) => void;
-  isLoading?: boolean;
-  selectedValueSet?: {
-    id: string;
-    display: string;
-  };
+  value?: string;
 }
 
 export function CreateValueSet({
-  valuesets = [],
   onValueSetChange,
-  onSearch,
-  isLoading = false,
-  selectedValueSet,
+  value,
 }: CreateValueSetProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [currentValueSet, setCurrentValueSet] = useState<string | undefined>();
+  const [currentValueSet, setCurrentValueSet] = useState<ValuesetBase>();
+  const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
 
   const handleValueSetChange = (val: string) => {
-    setCurrentValueSet(val);
     if (onValueSetChange) {
       onValueSetChange(val);
     }
   };
+
+  const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
+    queryKey: ["valuesets", valueSetSearchQuery],
+    queryFn: query.debounced(valuesetApi.list, {
+      queryParams: {
+        name: valueSetSearchQuery,
+        status: "active",
+      },
+    }),
+    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
+  });
+
+  const valueSetOptions =
+    valuesets?.map((vs) => ({
+      label: vs.name,
+      value: vs.slug,
+    })) || [];
 
   return (
     <div className="flex items-center gap-2 flex-col sm:flex-row">
       <div className="w-full">
         <Autocomplete
           options={mergeAutocompleteOptions(
-            valuesets,
-            selectedValueSet
+            valueSetOptions,
+            currentValueSet
               ? {
-                  label: selectedValueSet.display,
-                  value: selectedValueSet.id,
+                  label: currentValueSet.name,
+                  value: currentValueSet.slug,
                 }
               : undefined,
           )}
-          value={currentValueSet || ""}
+          value={value ?? ""}
           onChange={handleValueSetChange}
-          onSearch={onSearch}
+          onSearch={setValueSetSearchQuery}
           placeholder={t("select_a_value_set")}
-          isLoading={isLoading}
+          isLoading={isFetchingValuesets}
           noOptionsMessage={t("no_valuesets_found")}
         />
       </div>
@@ -77,7 +87,8 @@ export function CreateValueSet({
           <ValueSetEditor
             onSuccess={(data) => {
               setIsSheetOpen(false);
-              handleValueSetChange(data.name);
+              handleValueSetChange(data.slug);
+              setCurrentValueSet(data);
             }}
           />
         </SheetContent>
