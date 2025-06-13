@@ -93,7 +93,7 @@ export function validateFields(
           if (validationResult !== true) {
             errors.push({
               question_id: questionId,
-              error: t(validationResult || "invalid_value"),
+              error: validationResult || t("invalid_value"),
               type: "validation_error",
               field_key: field.key,
               index,
