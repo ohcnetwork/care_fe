@@ -301,6 +301,8 @@ const AvatarEditModal = ({
                         }
                         alt="cover-photo"
                         className="h-full w-full object-contain"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                     <p className="text-center font-medium text-secondary-700">
@@ -470,7 +472,7 @@ const AvatarEditModal = ({
                     </>
                   ) : (
                     <>
-                      <img src={previewImage} />
+                      <img loading="lazy" decoding="async" src={previewImage} />
                     </>
                   )}
                 </div>
