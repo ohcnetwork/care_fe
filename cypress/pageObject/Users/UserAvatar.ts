@@ -53,11 +53,12 @@ export class UserAvatar {
   }
 
   clickDeleteAvatarButton() {
-    cy.get("button")
-      .contains("Delete")
-      .scrollIntoView()
-      .should("be.visible")
-      .click();
+    cy.get('[role="dialog"], .modal')
+      .should("exist")
+      .within(() => {
+        cy.contains("button", "Delete").should("be.visible").click();
+      });
+
     return this;
   }
 
