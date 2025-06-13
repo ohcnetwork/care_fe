@@ -38,13 +38,8 @@ export const useMediaDevicePermission = () => {
       } catch (_error) {
         if (!toastShownRef.current) {
           toastShownRef.current = true;
-          const deviceType =
-            options.video && options.audio
-              ? "camera and microphone"
-              : options.video
-                ? "camera"
-                : "microphone";
-          toast.warning(t("device_permission_denied", { device: deviceType }));
+          const deviceType = options.video ? "camera" : "microphone";
+          toast.warning(t(`${deviceType}_permission_denied`));
         }
         return { hasPermission: false, mediaStream: null };
       }
