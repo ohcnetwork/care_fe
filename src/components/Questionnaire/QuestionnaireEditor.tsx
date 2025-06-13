@@ -1892,7 +1892,25 @@ function QuestionEditor({
                 )}
 
                 {question.type === "choice" && !question.answer_value_set ? (
-                  <CardContent className="sm:space-y-4 space-y-8">
+                  <CardContent className="sm:space-y-4 space-y-3">
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          const sorted = annotatedAnswerOptions
+                            ? [...annotatedAnswerOptions].sort((a, b) =>
+                                a.value.localeCompare(b.value),
+                              )
+                            : [];
+                          updateField("answer_option", sorted);
+                        }}
+                      >
+                        <AArrowDown className="size-4" />
+                        {t("sort_alphabetically")}
+                      </Button>
+                    </div>
                     {annotatedAnswerOptions &&
                       annotatedAnswerOptions.map((opt, idx) => (
                         <AnimatedWrapper key={opt._id} keyValue={opt._id}>
@@ -2155,40 +2173,22 @@ function QuestionEditor({
                           </div>
                         </AnimatedWrapper>
                       ))}
-                    <div className="flex flex-col sm:flex-row">
-                      <Button
-                        variant="outline"
-                        type="button"
-                        size="sm"
-                        onClick={() => {
-                          const newOption = { value: "" };
-                          const newOptions = annotatedAnswerOptions
-                            ? [...annotatedAnswerOptions, newOption]
-                            : [newOption];
-                          updateField("answer_option", newOptions);
-                        }}
-                      >
-                        <CareIcon icon="l-plus" className="size-4" />
-                        {t("add_option")}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        type="button"
-                        size="sm"
-                        className="ml-2  mt-2 sm:mt-0"
-                        onClick={() => {
-                          const sorted = annotatedAnswerOptions
-                            ? [...annotatedAnswerOptions].sort((a, b) =>
-                                a.value.localeCompare(b.value),
-                              )
-                            : [];
-                          updateField("answer_option", sorted);
-                        }}
-                      >
-                        <AArrowDown className="size-4" />
-                        {t("sort_alphabetically")}
-                      </Button>
-                    </div>
+
+                    <Button
+                      variant="outline"
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        const newOption = { value: "" };
+                        const newOptions = annotatedAnswerOptions
+                          ? [...annotatedAnswerOptions, newOption]
+                          : [newOption];
+                        updateField("answer_option", newOptions);
+                      }}
+                    >
+                      <CareIcon icon="l-plus" className="size-4" />
+                      {t("add_option")}
+                    </Button>
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
