@@ -207,13 +207,19 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     form.setValue(
       "referring_facility_contact_name",
       `${authUser.first_name} ${authUser.last_name}`.trim(),
-      { shouldDirty: true },
+      {
+        shouldDirty: true,
+        shouldValidate: true,
+      },
     );
     if (authUser.phone_number) {
       form.setValue(
         "referring_facility_contact_number",
         authUser.phone_number,
-        { shouldDirty: true },
+        {
+          shouldDirty: true,
+          shouldValidate: true,
+        },
       );
     }
   };
@@ -290,6 +296,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           if (facility) {
                             form.setValue("assigned_facility", facility, {
                               shouldDirty: true,
+                              shouldValidate: true,
                             });
                           } else {
                             form.resetField("assigned_facility");

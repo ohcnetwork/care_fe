@@ -381,13 +381,15 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   >
                     <img
                       src={fileUrl}
-                      alt="file"
+                      alt={fileName}
                       className={cn(
                         "max-h-full max-w-full select-none object-contain",
                         zoom_values[file_state.zoom - 1],
                         getRotationClass(file_state.rotation),
                       )}
                       draggable={false}
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 ) : file_state.extension === "pdf" ? (
@@ -466,7 +468,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         label: t("reset"),
                         icon: "l-minus-circle",
                         action: () =>
-                          setFileState((prev) => ({ ...prev, rotation: 0 })),
+                          setFileState((prev) => ({
+                            ...prev,
+                            rotation: 0,
+                            zoom: 4,
+                          })),
                         disabled: false,
                       },
                       {

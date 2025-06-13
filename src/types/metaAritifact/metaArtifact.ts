@@ -1,4 +1,4 @@
-import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
 
 import { UserBase } from "@/types/user/user";
 
