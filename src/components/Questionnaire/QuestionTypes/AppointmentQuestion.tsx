@@ -34,8 +34,6 @@ import {
 } from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
-import { FieldError } from "./FieldError";
-
 interface AppointmentQuestionProps {
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
@@ -69,9 +67,12 @@ export function validateAppointmentQuestion(
   questionId: string,
   required: boolean,
 ): QuestionValidationError[] {
+  const reasonRequired = required || (value && value.slot_id !== undefined);
+  const slotRequired =
+    required || (value && value.reason_for_visit !== undefined);
   const dynamicFields: FieldDefinitions = {
-    REASON: { ...APPOINTMENT_FIELDS.REASON, required },
-    SLOT: { ...APPOINTMENT_FIELDS.SLOT, required },
+    REASON: { ...APPOINTMENT_FIELDS.REASON, required: reasonRequired },
+    SLOT: { ...APPOINTMENT_FIELDS.SLOT, required: slotRequired },
   };
   return validateFields(value, questionId, dynamicFields);
 }
@@ -129,11 +130,6 @@ export function AppointmentQuestion({
           className={cn(
             hasError(APPOINTMENT_FIELDS.REASON.key) && "border-red-500",
           )}
-        />
-        <FieldError
-          fieldKey={APPOINTMENT_FIELDS.REASON.key}
-          questionId={question.id}
-          errors={errors}
         />
       </div>
 
