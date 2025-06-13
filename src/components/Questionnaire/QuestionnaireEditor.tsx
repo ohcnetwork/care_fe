@@ -226,6 +226,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [enableWhenDependencies, setEnableWhenDependencies] = useState<
     Map<string, Set<{ question: Question; path: string[] }>>
   >(new Map());
+  const [expandPath, setExpandPath] = useState<string[]>([]);
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -475,14 +476,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   }, [questionnaire]);
 
   const handleEnableWhenDependentClick = (path: string[], targetId: string) => {
-    // Expand all parents in sequence
-    path.forEach((parentId) => {
-      toggleQuestionExpanded(parentId);
-    });
-    // Scroll to the target
+    const rootQuestionId = path[0];
+    toggleQuestionExpanded(rootQuestionId, false);
+    setExpandPath(path.slice(1));
     setTimeout(() => {
       const element = document.getElementById(`question-${targetId}`);
       if (element) element.scrollIntoView();
+      setExpandPath([]);
     }, 100);
   };
 
@@ -661,10 +661,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     toast.success(t("questionnaire_imported_successfully"));
   };
 
-  const toggleQuestionExpanded = (questionLinkId: string) => {
+  const toggleQuestionExpanded = (
+    questionLinkId: string,
+    allowCollapse: boolean = true,
+  ) => {
     setExpandedQuestions((prev) => {
       const next = new Set(prev);
-      if (next.has(questionLinkId)) {
+      if (next.has(questionLinkId) && allowCollapse) {
         next.delete(questionLinkId);
       } else {
         next.add(questionLinkId);
@@ -1126,6 +1129,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               handleEnableWhenDependentClick={
                                 handleEnableWhenDependentClick
                               }
+                              expandPath={expandPath}
                             />
                           </div>
                         ))}
@@ -1383,6 +1387,7 @@ interface QuestionEditorProps {
     Set<{ question: Question; path: string[] }>
   >;
   handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
+  expandPath?: string[];
 }
 
 function QuestionEditor({
@@ -1403,7 +1408,8 @@ function QuestionEditor({
   setStructuredTypeError,
   enableWhenDependencies,
   handleEnableWhenDependentClick,
-}: QuestionEditorProps) {
+  expandPath,
+}: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
     text,
@@ -1449,10 +1455,13 @@ function QuestionEditor({
     onChange({ ...question, [field]: value, ...additionalFields });
   };
 
-  const toggleSubQuestionExpanded = (questionLinkId: string) => {
+  const toggleSubQuestionExpanded = (
+    questionLinkId: string,
+    allowCollapse: boolean = true,
+  ) => {
     setExpandedSubQuestions((prev) => {
       const next = new Set(prev);
-      if (next.has(questionLinkId)) {
+      if (next.has(questionLinkId) && allowCollapse) {
         next.delete(questionLinkId);
       } else {
         next.add(questionLinkId);
@@ -1505,6 +1514,22 @@ function QuestionEditor({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.enable_when]);
+
+  useEffect(() => {
+    if (
+      expandPath?.length &&
+      expandPath.length > 0 &&
+      type === "group" &&
+      questions
+    ) {
+      const nextQuestionId = expandPath[0];
+      const hasQuestion = questions.some((q) => q.link_id === nextQuestionId);
+      if (hasQuestion) {
+        toggleSubQuestionExpanded(nextQuestionId, false);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandPath]);
 
   const getOperatorChoices = (index: number) => {
     const currentEnableWhenArr = enableWhenQuestionAnswers[index];
@@ -2394,6 +2419,7 @@ function QuestionEditor({
                       }}
                       isFirst={idx === 0}
                       isLast={idx === (questions?.length || 0) - 1}
+                      expandPath={expandPath?.slice(1)}
                     />
                   </div>
                 ))}
