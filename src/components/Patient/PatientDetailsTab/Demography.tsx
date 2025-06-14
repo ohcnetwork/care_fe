@@ -87,12 +87,9 @@ export const Demography = (props: PatientProps) => {
   const renderTextWithLinks = (text: string): React.ReactNode => {
     if (!text) return null;
 
-    const rendered = DOMPurify.sanitize(
-      md.render(text).replace(/<\/?p>/g, ""),
-      {
-        ALLOWED_ATTR: ["href", "target", "rel", "class"],
-      },
-    );
+    const rendered = DOMPurify.sanitize(md.renderInline(text), {
+      ALLOWED_ATTR: ["href", "target", "rel", "class"],
+    });
     return <span dangerouslySetInnerHTML={{ __html: rendered }} />;
   };
 
