@@ -720,7 +720,7 @@ export const EncounterNotesTab = ({
                                 }
                               }
                             }}
-                            className="flex-1 min-h-20 max-h-[50vh]"
+                            className="flex-1 min-h-10 max-h-[50vh]"
                           />
                           <Button
                             data-cy="send-chat-message-button"
