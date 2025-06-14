@@ -718,12 +718,7 @@ export const EncounterNotesTab = ({
                               if (e.key === "Enter" && e.shiftKey) {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                const canSend =
-                                  newMessage.trim() &&
-                                  !createMessageMutation.isPending;
-                                if (canSend) {
-                                  handleSendMessage(e);
-                                }
+                                handleSendMessage(e);
                               }
                             }}
                             className="flex-1 min-h-20 max-h-[50vh]"
