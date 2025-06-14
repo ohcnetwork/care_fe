@@ -58,7 +58,7 @@ export const EncounterOverviewTab = ({
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
         <div className="flex-1 space-y-4" data-cy="encounter-overview">
           {canEdit && (
-            <div className="flex flex-row justify-between gap-2">
+            <div className="flex justify-between gap-2">
               <div className="flex flex-wrap gap-2 justify-start">
                 {actionLinks.map((link) => {
                   return (
