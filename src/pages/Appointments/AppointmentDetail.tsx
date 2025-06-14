@@ -392,9 +392,11 @@ const AppointmentDetails = ({
       </Card>
 
       <div className="text-sm text-gray-600">
-        {t("booked_by")} {appointment.booked_by?.first_name}{" "}
-        {appointment.booked_by?.last_name} {t("on")}{" "}
-        {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
+        {t("booked_by")}{" "}
+        {appointment.booked_by
+          ? formatName(appointment.booked_by)
+          : `${appointment.patient.name} (${t("patient")})`}{" "}
+        {t("on")} {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
       </div>
     </div>
   );
