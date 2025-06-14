@@ -36,7 +36,7 @@ export const createUserPersister =
       },
       async removeClient() {
         try {
-          await db.querycache.delete(CACHE_KEY);
+          await db.querycache.clear();
         } catch (error) {
           console.error(
             "[removeClient] Failed to remove cached query client",

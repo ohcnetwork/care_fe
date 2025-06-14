@@ -64,7 +64,6 @@ export default function AuthUserProvider({
     queryKey: ["currentUser", accessToken],
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
-    meta: { persist: true },
     networkMode: "online",
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
@@ -195,6 +194,7 @@ export default function AuthUserProvider({
     setPatientToken(null);
 
     await queryClient.resetQueries({ queryKey: ["currentUser"] });
+    queryClient.clear();
     await createUserPersister().removeClient();
     const redirectURL = getRedirectURL();
     navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");

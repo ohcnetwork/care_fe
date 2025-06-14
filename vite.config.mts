@@ -325,5 +325,8 @@ export default defineConfig(({ mode }) => {
       },
       port: 4000,
     },
+    json: {
+      namedExports: false,
+    },
   };
 });
