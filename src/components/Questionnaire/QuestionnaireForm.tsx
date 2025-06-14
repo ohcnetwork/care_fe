@@ -642,57 +642,84 @@ export function QuestionnaireForm({
             </button>
 
             <div className="pl-4 space-y-1">
-              {form.questionnaire.questions
-                .filter((q) => q.type === "group")
-                .map((group) => (
-                  <div key={group.id}>
-                    {/* Group Title Button */}
-                    <button
-                      className={cn(
-                        "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
-                        activeGroupId === group.id &&
-                          "bg-gray-100 text-green-600",
-                      )}
-                      onClick={() => {
-                        setActiveQuestionnaireId(form.questionnaire.id);
-                        setActiveGroupId(group.id);
-                      }}
-                      disabled={isPending}
-                    >
-                      {group.text}
-                    </button>
+              {form.questionnaire.questions.map((question, index) => {
+                if (question.type === "group") {
+                  return (
+                    <div key={question.id}>
+                      {/* Group Title */}
+                      <button
+                        className={cn(
+                          "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
+                          activeGroupId === question.id && "text-green-600",
+                        )}
+                        onClick={() => {
+                          setActiveQuestionnaireId(form.questionnaire.id);
+                          setActiveGroupId(question.id);
+                        }}
+                        disabled={isPending}
+                      >
+                        {`${index + 1}. ${question.text}`}
+                      </button>
 
-                    {/* Sub-Questions */}
-                    {(group.questions ?? []).length > 0 && (
-                      <div className="pl-4 space-y-1">
-                        {group.questions?.map((sub) => (
-                          <button
-                            key={sub.id}
-                            className={cn(
-                              "w-full text-left px-2 py-1 rounded text-xs hover:bg-gray-100",
-                              activeQuestionId === sub.id &&
-                                "bg-blue-100 text-blue-600",
-                            )}
-                            onClick={() => {
-                              setActiveQuestionnaireId(form.questionnaire.id);
-                              setActiveGroupId(group.id);
-                              setActiveQuestionId(sub.id);
-                              document
-                                .getElementById(`question-${sub.id}`)
-                                ?.scrollIntoView({
-                                  behavior: "smooth",
-                                  block: "center",
-                                });
-                            }}
-                            disabled={isPending}
-                          >
-                            {sub.text}
-                          </button>
-                        ))}
-                      </div>
+                      {/* Sub-Questions */}
+                      {question.questions && question.questions.length > 0 && (
+                        <div className="pl-4 space-y-1">
+                          {question.questions.map((sub, subIndex) => (
+                            <button
+                              key={sub.id}
+                              className={cn(
+                                "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
+                                activeQuestionId === sub.id &&
+                                  "border  text-green-600 bg-white shadow-sm",
+                              )}
+                              onClick={() => {
+                                setActiveQuestionnaireId(form.questionnaire.id);
+                                setActiveGroupId(question.id);
+                                setActiveQuestionId(sub.id);
+                                document
+                                  .getElementById(`question-${sub.id}`)
+                                  ?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center",
+                                  });
+                              }}
+                              disabled={isPending}
+                            >
+                              {`${index + 1}.${subIndex + 1} ${sub.text}`}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                // Non-group questions
+                return (
+                  <button
+                    key={question.id}
+                    className={cn(
+                      "w-full text-left px-2 py-1 rounded hover:bg-gray-100",
+                      activeQuestionId === question.id &&
+                        "border  text-green-600 bg-white shadow-sm",
                     )}
-                  </div>
-                ))}
+                    onClick={() => {
+                      setActiveQuestionnaireId(form.questionnaire.id);
+                      setActiveQuestionId(question.id);
+                      setActiveGroupId(undefined);
+                      document
+                        .getElementById(`question-${question.id}`)
+                        ?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center",
+                        });
+                    }}
+                    disabled={isPending}
+                  >
+                    {`${index + 1}. ${question.text}`}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ))}
