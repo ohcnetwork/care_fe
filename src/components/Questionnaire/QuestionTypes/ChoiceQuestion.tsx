@@ -45,6 +45,19 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       : "radio";
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
   const currentCoding = questionnaireResponse.values[index]?.coding;
+
+  const selectedValues = question.repeats
+    ? questionnaireResponse.values
+        .map((v) => v.value?.toString())
+        .filter((v, i) => i !== index && v)
+    : [];
+
+  const availableOptions = question.repeats
+    ? options.filter(
+        (option) => !selectedValues.includes(option.value.toString()),
+      )
+    : options;
+
   const handleValueChange = (newValue: string) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
@@ -90,7 +103,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         <Autocomplete
           value={currentValue || ""}
           onChange={handleValueChange}
-          options={options.map((option) => ({
+          options={availableOptions.map((option) => ({
             label: properCase(option.display || option.value),
             value: option.value.toString(),
           }))}
@@ -105,7 +118,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
             className="flex flex-col gap-3"
             value={currentValue}
           >
-            {options.map((option: AnswerOption) => (
+            {availableOptions.map((option: AnswerOption) => (
               <Label
                 htmlFor={`${question.id}-${option.value.toString()}`}
                 className="cursor-pointer"
