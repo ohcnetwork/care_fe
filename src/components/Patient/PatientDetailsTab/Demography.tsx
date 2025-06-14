@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import MarkdownIt from "markdown-it";
 import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -37,6 +38,27 @@ export const Demography = (props: PatientProps) => {
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,
   )?.text;
+
+  // Initialize markdown parser with linkify plugin
+  const md = new MarkdownIt({
+    linkify: true,
+    breaks: true,
+  });
+
+  // Configure link rendering with security and styling
+  md.renderer.rules.link_open = (tokens, idx) => {
+    const token = tokens[idx];
+    const href = token.attrGet("href");
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline break-all">`;
+  };
+
+  // Simple utility function to render text with clickable URLs using markdown-it
+  const renderTextWithLinks = (text: string) => {
+    if (!text) return "";
+
+    const rendered = md.renderInline(text);
+    return <span dangerouslySetInnerHTML={{ __html: rendered }} />;
+  };
 
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
@@ -160,7 +182,7 @@ export const Demography = (props: PatientProps) => {
                 className="text-sm font-normal text-sky-600 hover:text-sky-300"
                 rel="noreferrer"
               >
-                <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
+                <CareIcon icon="l-whatsapp" /> {t("chat_on_whatsapp")}
               </a>
             </div>
           ),
@@ -192,11 +214,11 @@ export const Demography = (props: PatientProps) => {
         />,
         {
           label: t("current_address"),
-          value: patientData.address,
+          value: renderTextWithLinks(patientData.address || ""),
         },
         {
           label: t("permanent_address"),
-          value: patientData.permanent_address,
+          value: renderTextWithLinks(patientData.permanent_address || ""),
         },
         ...getGeoOrgDetails(patientData.geo_organization),
       ],
