@@ -114,7 +114,7 @@ function generateFacilityLinks(
           url: `${baseUrl}/settings/departments`,
         },
         {
-          key: "locations",
+          key: "location",
           name: t("locations"),
           url: `${baseUrl}/settings/locations`,
         },
