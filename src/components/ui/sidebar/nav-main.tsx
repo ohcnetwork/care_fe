@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import { ActiveLink, usePath } from "raviger";
 import { useState } from "react";
+import React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -27,61 +28,35 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { resolveTabKey } from "@/Utils/activetabs";
+
 import { NavigationLink } from "./facility-nav";
-
-const isChildActive = (link: NavigationLink, currentPath: string): boolean => {
-  if (
-    link.url &&
-    (currentPath === link.url || currentPath.startsWith(link.url))
-  ) {
-    return true;
-  }
-  if (link.children) {
-    return link.children.some((child) => isChildActive(child, currentPath));
-  }
-  return false;
-};
-
-const isAnyHiddenChildActive = (
-  link: NavigationLink,
-  currentPath: string,
-): boolean => {
-  if (!link.children) return false;
-  return link.children
-    .filter((child) => child.hidden)
-    .some((child) => {
-      if (!child.url) return false;
-      if (currentPath === child.url) return true;
-      if (currentPath.startsWith(child.url + "/")) {
-        const nextSegment = currentPath
-          .slice(child.url.length + 1)
-          .split("/")[0];
-        return nextSegment !== "encounter";
-      }
-      return false;
-    });
-};
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const currentPath = usePath() || "";
+  const tabKey = resolveTabKey(currentPath);
+  const activeParent = tabKey?.parent;
+  const activeChild = tabKey?.child;
 
   return (
     <SidebarGroup>
       <SidebarMenu>
         {links
-          .filter((link) => link.visibility !== false && !link.hidden)
+          .filter((link) => link.visibility !== false)
           .map((link) => (
-            <>
+            <React.Fragment key={link.name}>
               {link.children ? (
                 isCollapsed ? (
-                  <PopoverMenu key={link.name} link={link} />
+                  <PopoverMenu link={link} />
                 ) : (
                   <Collapsible
-                    key={link.name}
                     asChild
-                    defaultOpen={isChildActive(link, currentPath)}
+                    defaultOpen={
+                      link.key === activeParent ||
+                      link.children?.some((child) => child.key === activeChild)
+                    }
                     className="group/collapsible"
                   >
                     <SidebarMenuItem>
@@ -89,15 +64,26 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                         <SidebarMenuButton
                           data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                           tooltip={link.name}
-                          isActive={isChildActive(link, currentPath)}
+                          isActive={
+                            link.key === activeParent ||
+                            link.children?.some(
+                              (child) => child.key === activeChild,
+                            )
+                          }
                           className={cn(
-                            "cursor-pointer hover:!bg-gray-200 hover:!text-green-700",
+                            "cursor-pointer hover:bg-gray-200 hover:text-green-700",
                             {
                               "group-data-collapsible:data-[active=true]:bg-white group-data-collapsible:data-[active=true]:text-green-700 group-collapsible:data-[active=true]:shadow":
-                                isAnyHiddenChildActive(link, currentPath),
+                                link.key === activeParent &&
+                                (!link.children ||
+                                  !link.children.some(
+                                    (child) => child.key === activeChild,
+                                  )),
                               "group-data-[state=closed]/collapsible:data-[active=true]:bg-white group-data-[state=closed]/collapsible:data-[active=true]:text-green-700 group-data-[state=closed]/collapsible:data-[active=true]:shadow":
-                                isChildActive(link, currentPath) &&
-                                !link.hidden,
+                                link.key === activeParent ||
+                                link.children?.some(
+                                  (child) => child.key === activeChild,
+                                ),
                             },
                           )}
                         >
@@ -117,32 +103,30 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <SidebarMenuSub>
-                          {link.children
-                            .filter((subItem) => !subItem.hidden)
-                            .map((subItem) => (
-                              <SidebarMenuSubItem key={subItem.name}>
-                                <SidebarMenuSubButton
-                                  asChild
-                                  data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
-                                  className={cn(
-                                    "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700",
-                                    {
-                                      "bg-white text-green-700 shadow":
-                                        isChildActive(subItem, currentPath),
-                                    },
-                                  )}
+                          {link.children.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.name}>
+                              <SidebarMenuSubButton
+                                asChild
+                                data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
+                                className={cn(
+                                  "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700",
+                                  {
+                                    "bg-white text-green-700 shadow":
+                                      subItem.key === activeChild,
+                                  },
+                                )}
+                              >
+                                <ActiveLink
+                                  href={subItem.url}
+                                  className="w-full"
+                                  activeClass="bg-white text-green-700 shadow"
+                                  exactActiveClass="bg-white text-green-700 shadow"
                                 >
-                                  <ActiveLink
-                                    href={subItem.url}
-                                    className="w-full"
-                                    activeClass="bg-white text-green-700 shadow"
-                                    exactActiveClass="bg-white text-green-700 shadow"
-                                  >
-                                    {subItem.name}
-                                  </ActiveLink>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
+                                  {subItem.name}
+                                </ActiveLink>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
                         </SidebarMenuSub>
                       </CollapsibleContent>
                     </SidebarMenuItem>
@@ -179,7 +163,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
-            </>
+            </React.Fragment>
           ))}
       </SidebarMenu>
     </SidebarGroup>
@@ -189,6 +173,8 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
 function PopoverMenu({ link }: { link: NavigationLink }) {
   const [open, setOpen] = useState(false);
   const currentPath = usePath() || "";
+  const tabKey = resolveTabKey(currentPath);
+  const activeParent = tabKey?.parent;
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -197,10 +183,7 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
           className={cn(
             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
             {
-              "bg-white text-green-700 shadow": isChildActive(
-                link,
-                currentPath,
-              ),
+              "bg-white text-green-700 shadow": link.key === activeParent,
             },
           )}
         >

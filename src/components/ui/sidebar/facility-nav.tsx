@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { TFunction } from "i18next";
-import { usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -23,7 +22,7 @@ export interface NavigationLink {
   icon?: React.ReactNode;
   visibility?: boolean;
   children?: NavigationLink[];
-  hidden?: boolean;
+  key?: string;
 }
 
 interface FacilityNavProps {
@@ -41,25 +40,26 @@ function generateFacilityLinks(
     canViewEncounter: boolean;
   },
   pluginLinks: NavigationLink[],
-  patientId?: string,
-  encounterId?: string,
 ) {
   if (!selectedFacility) return [];
 
   const baseUrl = `/facility/${selectedFacility.id}`;
   const links: NavigationLink[] = [
     {
+      key: "overview",
       name: t("overview"),
       url: `${baseUrl}/overview`,
       icon: <CareIcon icon="d-hospital" />,
     },
     {
+      key: "appointments",
       name: t("appointments"),
       url: `${baseUrl}/appointments`,
       icon: <CareIcon icon="d-calendar" />,
       visibility: permissions.canViewAppointments,
     },
     {
+      key: "patients",
       name: t("patients"),
       url: `${baseUrl}/patients`,
       icon: <CareIcon icon="d-patient" />,
@@ -69,62 +69,62 @@ function generateFacilityLinks(
         permissions.canCreateEncounter,
       children: [
         {
+          key: "search_patients",
           name: t("search_patients"),
-          url: `${baseUrl}/patients`,
+          url: `${baseUrl}/patients/search`,
         },
         {
+          key: "encounters",
           name: t("encounters"),
           url: `${baseUrl}/encounters/patients`,
-          children: [
-            {
-              name: t("encounter"),
-              url: `${baseUrl}/patient/${patientId}/encounter/${encounterId}`,
-            },
-          ],
         },
         {
+          key: "locations",
           name: t("locations"),
           url: `${baseUrl}/encounters/locations`,
-        },
-        {
-          name: t("patient"),
-          url: `${baseUrl}/patient/${patientId}`,
-          hidden: true,
         },
       ],
     },
     {
+      key: "resource",
       name: t("resource"),
       url: `${baseUrl}/resource`,
       icon: <CareIcon icon="d-book-open" />,
     },
     {
+      key: "users",
       name: t("users"),
       url: `${baseUrl}/users`,
       icon: <CareIcon icon="d-people" />,
     },
     {
+      key: "settings",
       name: t("settings"),
       url: `${baseUrl}/settings/general`,
       icon: <CareIcon icon="l-setting" />,
       children: [
         {
+          key: "general",
           name: t("general"),
           url: `${baseUrl}/settings/general`,
         },
         {
+          key: "departments",
           name: t("departments"),
           url: `${baseUrl}/settings/departments`,
         },
         {
+          key: "locations",
           name: t("locations"),
           url: `${baseUrl}/settings/locations`,
         },
         {
+          key: "devices",
           name: t("devices"),
           url: `${baseUrl}/settings/devices`,
         },
         {
+          key: "report builder",
           name: t("report_builder"),
           url: `${baseUrl}/settings/reportbuilder/`,
         },
@@ -148,24 +148,6 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const pluginNavItems = careApps
     .filter((c) => !!c.navItems)
     .flatMap((c) => c.navItems) as NavigationLink[];
-
-  const paramsEncouters = (usePathParams(
-    "/facility/:facilityId/patient/:patientId/encounter/:encounterId/*",
-  ) ?? {}) as {
-    patientId?: string;
-    encounterId?: string;
-  };
-  const paramPatient = usePathParams(
-    "/facility/:facilityId/patient/:patientId",
-  );
-  const paramPatients = usePathParams(
-    "/facility/:facilityId/patient/:patientId/*",
-  );
-  const patientId =
-    paramsEncouters?.patientId ||
-    paramPatients?.patientId ||
-    paramPatient?.patientId;
-  const encounterId = paramsEncouters?.encounterId;
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", selectedFacility?.id],
@@ -196,8 +178,6 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
         t,
         permissions,
         pluginNavItems,
-        patientId,
-        encounterId,
       )}
     />
   );
