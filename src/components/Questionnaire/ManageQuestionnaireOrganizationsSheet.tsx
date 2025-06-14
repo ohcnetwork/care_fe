@@ -86,6 +86,7 @@ export function OrgSelectorPopover({
     >
       <PopoverTrigger asChild>
         <Button
+          data-cy="manage-organisation-search"
           variant="outline"
           className={cn(
             "w-full justify-start text-left font-normal",
@@ -297,7 +298,11 @@ export default function ManageQuestionnaireOrganizationsSheet({
             >
               {t("cancel")}
             </Button>
-            <Button onClick={handleSave} disabled={isUpdating || !hasChanges}>
+            <Button
+              onClick={handleSave}
+              disabled={isUpdating || !hasChanges}
+              data-cy="save-manage-organization"
+            >
               {isUpdating ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />

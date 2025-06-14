@@ -146,7 +146,9 @@ export default function UserAvatar({ username }: { username: string }) {
               )}
 
               <p className="text-xs leading-5 text-gray-500">
-                {t("change_avatar_note")}
+                {t("change_avatar_note", {
+                  maxSize: careConfig.imageUploadMaxSizeInMB,
+                })}
               </p>
             </div>
           </div>

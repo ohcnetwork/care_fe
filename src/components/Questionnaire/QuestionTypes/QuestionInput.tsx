@@ -73,8 +73,13 @@ export function QuestionInput({
   }
 
   const handleAddValue = () => {
+    const newValues = [...questionnaireResponse.values];
+    if (newValues.length === 0) {
+      newValues.push({ type: "string", value: "" });
+    }
+    newValues.push({ type: "string", value: "" });
     updateQuestionnaireResponseCB(
-      [...questionnaireResponse.values, { type: "string", value: "" }],
+      newValues,
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );
@@ -249,10 +254,17 @@ export function QuestionInput({
                 data-question-id={question.id}
               >
                 {index === 0 && (
-                  <QuestionLabel
-                    question={question}
-                    isSubQuestion={isSubQuestion}
-                  />
+                  <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
+                    <QuestionLabel
+                      question={question}
+                      isSubQuestion={isSubQuestion}
+                    />
+                    {question.description && (
+                      <p className="text-sm text-gray-500">
+                        {question.description}
+                      </p>
+                    )}
+                  </div>
                 )}
                 <div
                   className={cn("w-full", {

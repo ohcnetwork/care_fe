@@ -3,12 +3,12 @@ import { Suspense, lazy } from "react";
 
 import Loading from "@/components/Common/Loading";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
-import { PatientDrawingTab } from "@/components/Patient/PatientDetailsTab/PatientDrawingsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import VerifyPatient from "@/pages/Patients/VerifyPatient";
 
@@ -36,6 +36,15 @@ const PatientRoutes: AppRoutes = {
       locationId={locationId}
     />
   ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId":
+    ({ facilityId, patientId, encounterId, consentId }) => (
+      <ConsentDetailPage
+        facilityId={facilityId}
+        patientId={patientId}
+        encounterId={encounterId}
+        consentId={consentId}
+      />
+    ),
   "/facility/:facilityId/patients/verify": ({ facilityId }) => (
     <VerifyPatient facilityId={facilityId} />
   ),
@@ -84,9 +93,6 @@ const PatientRoutes: AppRoutes = {
         drawingId={drawingId}
       />
     </Suspense>
-  ),
-  "/patient/:patientId/drawings": ({ patientId }) => (
-    <PatientDrawingTab patientId={patientId} />
   ),
 
   "/patient/:patientId/drawings/new": ({ patientId }) => {

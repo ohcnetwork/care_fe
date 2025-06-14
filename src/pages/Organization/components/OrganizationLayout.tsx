@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import {
   Breadcrumb,
@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
+import { NavigationLink } from "@/components/ui/sidebar/facility-nav";
 
 import Page from "@/components/Common/Page";
 
@@ -41,13 +42,6 @@ interface Props {
   id: string;
   children: (props: { orgPermissions: string[] }) => React.ReactNode;
   setOrganization?: (org: Organization) => void;
-}
-
-interface NavItem {
-  path: string;
-  title: string;
-  icon: IconName;
-  visibility: boolean;
 }
 
 export default function OrganizationLayout({
@@ -87,35 +81,35 @@ export default function OrganizationLayout({
     return <div>{t("organization_not_found")}</div>;
   }
 
-  const navItems: NavItem[] = [
+  const navItems: NavigationLink[] = [
     {
-      path: `${baseUrl}/${id}`,
-      title: "Organizations",
-      icon: "d-hospital",
+      url: `${baseUrl}/${id}`,
+      name: "Organizations",
+      icon: <CareIcon icon="d-hospital" />,
       visibility: hasPermission("can_view_organization", org.permissions),
     },
     {
-      path: `${baseUrl}/${id}/users`,
-      title: "Users",
-      icon: "d-people",
+      url: `${baseUrl}/${id}/users`,
+      name: "Users",
+      icon: <CareIcon icon="d-people" />,
       visibility: hasPermission("can_list_organization_users", org.permissions),
     },
     {
-      path: `${baseUrl}/${id}/patients`,
-      title: "Patients",
-      icon: "d-patient",
+      url: `${baseUrl}/${id}/patients`,
+      name: "Patients",
+      icon: <CareIcon icon="d-people" />,
       visibility: hasPermission("can_list_patients", org.permissions),
     },
     {
-      path: `${baseUrl}/${id}/facilities`,
-      title: "Facilities",
-      icon: "d-hospital",
+      url: `${baseUrl}/${id}/facilities`,
+      name: "Facilities",
+      icon: <CareIcon icon="d-hospital" />,
       visibility: hasPermission("can_read_facility", org.permissions),
     },
   ];
 
   const visibleNavItems = navItems.filter((item) => item.visibility);
-  const activeNavItem = visibleNavItems.find((item) => path === item.path);
+  const activeNavItem = visibleNavItems.find((item) => path === item.url);
 
   const orgParents: OrganizationParent[] = [];
   let currentParent = org.parent;
@@ -165,19 +159,19 @@ export default function OrganizationLayout({
           {navItems
             .filter((item) => item.visibility)
             .map((item) => (
-              <MenubarMenu key={item.path}>
+              <MenubarMenu key={item.url}>
                 <MenubarTrigger
-                  data-cy={`org-nav-${item.title.toLowerCase()}`}
+                  data-cy={`org-nav-${item.name.toLowerCase()}`}
                   className={`${
-                    path === item.path
+                    path === item.url
                       ? "font-medium text-primary-700 bg-gray-100"
                       : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
                   }`}
                   asChild
                 >
-                  <Link href={item.path} className="cursor-pointer">
-                    <CareIcon icon={item.icon} className="mr-2 size-4" />
-                    {item.title}
+                  <Link href={item.url} className="cursor-pointer">
+                    <div className="mr-2">{item.icon}</div>
+                    {item.name}
                   </Link>
                 </MenubarTrigger>
               </MenubarMenu>
@@ -199,13 +193,10 @@ export default function OrganizationLayout({
               >
                 <div className="flex items-center py-2">
                   {activeNavItem && (
-                    <CareIcon
-                      icon={activeNavItem.icon}
-                      className="mr-2 size-5"
-                    />
+                    <div className="mr-2 size-5">{activeNavItem.icon}</div>
                   )}
                   <span className="font-medium text-base">
-                    {activeNavItem ? activeNavItem.title : t("navigation")}
+                    {activeNavItem ? activeNavItem.name : t("navigation")}
                   </span>
                 </div>
                 <CareIcon
@@ -221,25 +212,25 @@ export default function OrganizationLayout({
             >
               {visibleNavItems.map((item) => (
                 <DropdownMenuItem
-                  key={item.path}
+                  key={item.url}
                   className={cn(
                     "flex justify-between items-center py-3",
-                    path === item.path
+                    path === item.url
                       ? "font-medium text-primary-700 bg-gray-100"
                       : "text-gray-700",
                   )}
                   asChild
                 >
                   <Link
-                    href={item.path}
+                    href={item.url}
                     className="flex items-center w-full"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <div className="flex items-center text-base">
-                      <CareIcon icon={item.icon} className="mr-2 size-4" />
-                      {item.title}
+                      <div className="mr-2">{item.icon}</div>
+                      {item.name}
                     </div>
-                    {path === item.path && (
+                    {path === item.url && (
                       <DropdownMenuCheckboxItem
                         checked
                         className="pointer-events-none pr-1"

@@ -94,8 +94,9 @@ function StatusSelector({
           >
             <RadioGroupItem value={status} id={`status-${status}`} />
             <Label
+              data-cy={`questionnaire-status-${status}`}
               htmlFor={`status-${status}`}
-              className="text-sm font-normal text-gray-950"
+              className="text-sm mx-1 font-normal text-gray-950"
             >
               {t(status)}
             </Label>
@@ -141,7 +142,7 @@ function SubjectTypeSelector({
             />
             <Label
               htmlFor={`subject-type-${type.value}`}
-              className="text-sm font-normal text-gray-950"
+              className="text-sm mx-1 font-normal text-gray-950"
             >
               {t(type.label)}
             </Label>
@@ -184,7 +185,11 @@ function OrganizationSelector({
         <ManageQuestionnaireOrganizationsSheet
           questionnaireId={id}
           trigger={
-            <Button variant="outline" className="w-full justify-start">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              data-cy="manage-organisation-questionnaire"
+            >
               <Building className="mr-2 size-4" />
               {t("manage_organization_one")}
             </Button>

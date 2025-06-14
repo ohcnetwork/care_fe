@@ -1,5 +1,5 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
-import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
 import "@excalidraw/excalidraw/index.css";
 import {
   hashKey,
@@ -7,7 +7,6 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -30,6 +29,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import Loading from "@/components/Common/Loading";
+
+import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -54,6 +55,7 @@ export default function ExcalidrawEditor({
   const [name, setName] = useState("");
   const [isDirty, setIsDirty] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const { goBack } = useAppHistory();
 
   const { mutate: saveDrawing } = useMutation({
     mutationFn: mutate(metaArtifactApi.upsert),
@@ -61,7 +63,7 @@ export default function ExcalidrawEditor({
       queryClient.invalidateQueries({
         queryKey: ["drawing", drawingId, associatingId],
       });
-      navigate("../drawings");
+      goBack();
     },
   });
 
@@ -113,7 +115,7 @@ export default function ExcalidrawEditor({
     if (isDirty) {
       setIsAlertOpen(true);
     } else {
-      navigate("../drawings");
+      goBack();
     }
   };
 
@@ -142,7 +144,7 @@ export default function ExcalidrawEditor({
               className="bg-red-500 text-gray-50 shadow-xs hover:bg-red-500/90"
               onClick={() => {
                 setIsAlertOpen(false);
-                navigate("../drawings");
+                goBack();
               }}
             >
               {t("discard_changes")}
@@ -153,31 +155,38 @@ export default function ExcalidrawEditor({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <div className="flex flex-row items-center justify-between ml-0 mx-2 my-3">
-        <Button variant="ghost" size="sm" onClick={handleBack}>
-          <CareIcon icon="l-arrow-left" />
-          {t("back")}
+      <div className="flex flex-row items-center justify-between ml-0 mx-2 my-3 gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBack}
+          className="shrink-0"
+        >
+          <CareIcon icon="l-arrow-left" className="text-xl" />
+          <span className="hidden sm:inline">{t("back")}</span>
         </Button>
         {!drawingId ? (
           <Input
             type="text"
-            className="max-w-xs text-center"
+            className="flex-1 min-w-0 max-w-xs text-center mx-2"
             value={name}
             placeholder={t("enter_drawing_name")}
             onChange={(e) => setName(e.target.value)}
           />
         ) : (
-          <h1 className="text-base font-semibold">{name}</h1>
+          <h1 className="text-base font-semibold text-center flex-1 min-w-0 truncate px-2">
+            {name}
+          </h1>
         )}
         <Button
           variant="white"
           size="sm"
           onClick={handleSave}
           disabled={!isDirty}
+          className="shrink-0"
         >
-          <CareIcon icon="l-save" className="text-base hidden sm:block" />
-          {t("save")}
+          <CareIcon icon="l-save" className="text-base" />
+          <span className="hidden sm:inline ml-1">{t("save")}</span>
         </Button>
       </div>
 

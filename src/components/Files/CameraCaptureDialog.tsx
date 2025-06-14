@@ -134,13 +134,21 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                 ref={webRef}
                 videoConstraints={{
                   ...videoConstraints,
+                  width: {
+                    ...videoConstraints.width,
+                    ideal: window.innerWidth,
+                  },
+                  height: {
+                    ...videoConstraints.height,
+                    ideal: window.innerHeight,
+                  },
                   facingMode: cameraFacingMode,
                 }}
               />
             </div>
           ) : (
             <div className="m-3">
-              <img src={previewImage} />
+              <img loading="lazy" decoding="async" src={previewImage} />
             </div>
           )}
         </div>
