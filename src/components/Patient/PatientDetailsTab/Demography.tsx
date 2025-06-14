@@ -1,7 +1,8 @@
 import dayjs from "dayjs";
+import DOMPurify from "dompurify";
 import MarkdownIt from "markdown-it";
 import { navigate } from "raviger";
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -39,24 +40,59 @@ export const Demography = (props: PatientProps) => {
     (i) => i.id === patientData.gender,
   )?.text;
 
-  // Initialize markdown parser with linkify plugin
-  const md = new MarkdownIt({
-    linkify: true,
-    breaks: true,
-  });
+  // Initialise markdown-it once
+  const md = useMemo(() => {
+    const markdownIt = new MarkdownIt({
+      linkify: true,
+      breaks: true,
+    });
 
-  // Configure link rendering with security and styling
-  md.renderer.rules.link_open = (tokens, idx) => {
-    const token = tokens[idx];
-    const href = token.attrGet("href");
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline break-all">`;
-  };
+    // Store the original link renderer
+    const defaultRender =
+      markdownIt.renderer.rules.link_open ||
+      function (tokens, idx, options, env, renderer) {
+        return renderer.renderToken(tokens, idx, options);
+      };
 
+    // Override link rendering to add target="_blank"
+    markdownIt.renderer.rules.link_open = function (
+      tokens,
+      idx,
+      options,
+      env,
+      renderer,
+    ) {
+      const token = tokens[idx];
+
+      // Add target="_blank" and security attributes
+      token.attrSet("target", "_blank");
+      token.attrSet("rel", "noopener noreferrer");
+      token.attrSet(
+        "class",
+        "text-blue-600 hover:text-blue-800 underline break-all",
+      );
+
+      // Get the href - don't encode it
+      const href = token.attrGet("href");
+      if (href) {
+        token.attrSet("href", href);
+      }
+
+      return defaultRender(tokens, idx, options, env, renderer);
+    };
+
+    return markdownIt;
+  }, []);
   // Simple utility function to render text with clickable URLs using markdown-it
-  const renderTextWithLinks = (text: string) => {
-    if (!text) return "";
+  const renderTextWithLinks = (text: string): React.ReactNode => {
+    if (!text) return null;
 
-    const rendered = md.renderInline(text);
+    const rendered = DOMPurify.sanitize(
+      md.render(text).replace(/<\/?p>/g, ""),
+      {
+        ALLOWED_ATTR: ["href", "target", "rel", "class"],
+      },
+    );
     return <span dangerouslySetInnerHTML={{ __html: rendered }} />;
   };
 
