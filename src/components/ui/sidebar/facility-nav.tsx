@@ -71,7 +71,7 @@ function generateFacilityLinks(
         {
           key: "search_patients",
           name: t("search_patients"),
-          url: `${baseUrl}/patients/search`,
+          url: `${baseUrl}/patients`,
         },
         {
           key: "encounters",

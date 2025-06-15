@@ -17,7 +17,7 @@ const ExcalidrawEditor = lazy(
 );
 
 const PatientRoutes: AppRoutes = {
-  "/facility/:facilityId/patients/search": ({ facilityId }) => (
+  "/facility/:facilityId/patients": ({ facilityId }) => (
     <PatientIndex facilityId={facilityId} />
   ),
   "/facility/:facilityId/encounters": ({ facilityId }) => (

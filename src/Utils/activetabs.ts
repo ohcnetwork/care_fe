@@ -21,7 +21,7 @@ export const ROUTE_TO_TAB: Record<string, { parent: string; child?: string }> =
       parent: "patients",
       child: "locations",
     },
-    "/facility/:facilityId/patients/search": {
+    "/facility/:facilityId/patients": {
       parent: "patients",
       child: "search_patients",
     },
@@ -31,11 +31,11 @@ export const ROUTE_TO_TAB: Record<string, { parent: string; child?: string }> =
       parent: "settings",
       child: "general",
     },
-    "/facility/:facilityId/settings/devices": {
+    "/facility/:facilityId/settings/devices/:rest*": {
       parent: "settings",
       child: "devices",
     },
-    "/facility/:facilityId/settings/reportbuilder/": {
+    "/facility/:facilityId/settings/reportbuilder/:rest*": {
       parent: "settings",
       child: "report builder",
     },
@@ -49,21 +49,19 @@ export const ROUTE_TO_TAB: Record<string, { parent: string; child?: string }> =
     },
   };
 
+const ROUTE_TO_TAB_CACHE: [
+  ReturnType<typeof match>,
+  { parent: string; child?: string },
+][] = Object.entries(ROUTE_TO_TAB).map(([pattern, tabInfo]) => [
+  match(pattern, { decode: decodeURIComponent, end: false }),
+  tabInfo,
+]);
+
 export const resolveTabKey = (
   pathname: string,
 ): { parent: string; child?: string } | null => {
-  for (const [pattern, tabInfo] of Object.entries(ROUTE_TO_TAB)) {
-    try {
-      const matcher = match(pattern, {
-        decode: decodeURIComponent,
-        end: false,
-      });
-      if (matcher(pathname)) {
-        return tabInfo;
-      }
-    } catch (err) {
-      console.error("Failed to compile pattern:", pattern, err);
-    }
+  for (const [matcher, tabInfo] of ROUTE_TO_TAB_CACHE) {
+    if (matcher(pathname)) return tabInfo;
   }
   return null;
 };
