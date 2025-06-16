@@ -176,8 +176,17 @@ export default function ReceiveItem({
             {t("to_receive")}
           </h1>
           <div className="text-sm text-gray-600">
-            {t("dispatch_in_progress_from")} {delivery.origin?.name} {t("to")}{" "}
-            {delivery.destination.name}
+            {delivery.status === "in_progress" ? (
+              <>
+                {t("dispatch_in_progress_from")} {delivery.origin?.name}{" "}
+                {t("to")} {delivery.destination.name}
+              </>
+            ) : delivery.status === "completed" ? (
+              <>
+                {t("received")} {t("from")} {delivery.destination.name}{" "}
+                {t("to")} {delivery.origin?.name}
+              </>
+            ) : null}
           </div>
         </div>
 
@@ -247,9 +256,15 @@ export default function ReceiveItem({
                     {t("type")}:
                   </Label>
                   <div className="text-gray-950 text-normal font-semibold capitalize">
-                    {delivery.supplied_item?.product_knowledge.product_type ||
-                      delivery.supplied_inventory_item?.product
-                        .product_knowledge.product_type}
+                    {delivery.supplied_item?.product_knowledge.product_type
+                      ? t(delivery.supplied_item.product_knowledge.product_type)
+                      : delivery.supplied_inventory_item?.product
+                            .product_knowledge.product_type
+                        ? t(
+                            delivery.supplied_inventory_item.product
+                              .product_knowledge.product_type,
+                          )
+                        : t("n/a")}
                   </div>
                 </div>
                 <div>
@@ -467,33 +482,36 @@ export default function ReceiveItem({
                       </div>
                     )}
 
-                  <FormField
-                    control={form.control}
-                    name="markAsFullyReceived"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <Label className="text-sm font-medium">
-                              {t("mark_as_fully_received")}
-                            </Label>
+                  {delivery.supply_request?.status ===
+                    SupplyRequestStatus.active && (
+                    <FormField
+                      control={form.control}
+                      name="markAsFullyReceived"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <Label className="text-sm font-medium">
+                                {t("mark_as_fully_received")}
+                              </Label>
+                            </div>
+                            <div className="text-xs text-gray-600 text-center -ml-6">
+                              {t(
+                                "tick_if_all_items_are_received_the_request_will_be_cleared_from_the_pending_list",
+                              )}
+                            </div>
                           </div>
-                          <div className="text-xs text-gray-600 text-center -ml-6">
-                            {t(
-                              "tick_if_all_items_are_received_the_request_will_be_cleared_from_the_pending_list",
-                            )}
-                          </div>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
 
                 <div className="flex justify-end gap-3 pt-6 border-t">
@@ -502,7 +520,9 @@ export default function ReceiveItem({
                   </Button>
                   <Button type="submit" disabled={isPending}>
                     <CheckIcon className="w-4 h-4" />
-                    {t("mark_as_received")}
+                    {delivery.status !== SupplyDeliveryStatus.in_progress
+                      ? t("update_delivery")
+                      : t("mark_as_received")}
                   </Button>
                 </div>
               </form>
