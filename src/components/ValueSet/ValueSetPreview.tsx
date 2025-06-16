@@ -13,15 +13,16 @@ import {
 
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
-import { CreateValuesetModel } from "@/types/valueset/valueset";
+import { ValuesetFormType } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface ValueSetPreviewProps {
-  valueset: CreateValuesetModel;
+  valueset: ValuesetFormType;
   trigger: React.ReactNode;
 }
 
 export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
+  const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
 
@@ -31,8 +32,8 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
       queryParams: { search, count: 20 },
       body: {
         ...valueset,
-        name: valueset.name + "terminologies",
-        slug: valueset.slug + "terminologies",
+        name: valueset.name,
+        slug: valueset.slug,
         compose: valueset.compose.include[0]?.system
           ? valueset.compose
           : {
@@ -41,10 +42,11 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             },
       },
     }),
+    enabled: open,
   });
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">

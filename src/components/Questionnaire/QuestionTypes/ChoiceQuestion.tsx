@@ -86,7 +86,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           value={currentCoding}
           onSelect={handleCodingChange}
         ></ValueSetSelect>
-      ) : selectType === "dropdown" ? (
+      ) : selectType === "dropdown" || question.repeats ? (
         <Autocomplete
           value={currentValue || ""}
           onChange={handleValueChange}
