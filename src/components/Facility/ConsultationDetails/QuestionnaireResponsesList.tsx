@@ -154,6 +154,7 @@ function QuestionGroup({
     const value = response.values[0]?.value;
     const unit = response.values[0]?.unit || question.unit;
     const coding = response.values[0]?.coding;
+    const note = response?.note;
 
     return (
       <TableRow key={question.id}>
@@ -172,6 +173,30 @@ function QuestionGroup({
               </span>
             )}
           </div>
+        </TableCell>
+        <TableCell className="py-1 pr-0 align-top">
+          {note ? (
+            <div className="flex justify-end">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs shrink-0"
+                  >
+                    {t("see_note")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-52 p-4">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {note}
+                  </p>
+                </PopoverContent>
+              </Popover>
+            </div>
+          ) : (
+            ""
+          )}
         </TableCell>
       </TableRow>
     );
