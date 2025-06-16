@@ -156,7 +156,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
           <>
             <Button variant="primary" onClick={handleSwitchCamera}>
               <CareIcon icon="l-camera-change" className="text-lg" />
-              {`${t("switch")} ${t("camera")}`}
+              {t("switch_camera")}
             </Button>
             <Button variant="primary" onClick={captureImage}>
               <CareIcon icon="l-capture" className="text-lg" />
