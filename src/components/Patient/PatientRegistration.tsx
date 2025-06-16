@@ -328,7 +328,7 @@ export default function PatientRegistration(
         gender: patientQuery.data.gender as (typeof GENDERS)[number],
         blood_group: patientQuery.data.blood_group,
         age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
-        date_of_birth: patientQuery.data.date_of_birth || "",
+        date_of_birth: patientQuery.data.date_of_birth || undefined,
         age:
           !patientQuery.data.date_of_birth && patientQuery.data.year_of_birth
             ? new Date().getFullYear() - patientQuery.data.year_of_birth
@@ -340,7 +340,7 @@ export default function PatientRegistration(
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
-        deceased_datetime: patientQuery.data.deceased_datetime || "",
+        deceased_datetime: patientQuery.data.deceased_datetime || undefined,
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]);
