@@ -158,12 +158,12 @@ function QuestionGroup({
 
     return (
       <TableRow key={question.id}>
-        <TableCell className="py-1 pl-0 align-top">
+        <TableCell className="py-1 pl-0 align-top row-span-3">
           <div className="text-sm text-gray-600 break-words whitespace-normal">
             {question.text}
           </div>
         </TableCell>
-        <TableCell className="py-1 pr-0 align-top">
+        <TableCell className="py-1 pr-0 align-top" colSpan={note ? 1 : 2}>
           <div className="text-sm font-medium break-words whitespace-normal">
             {formatValue(value, question.type)}
             {unit && <span className="ml-1 text-gray-600">{unit.code}</span>}
@@ -174,8 +174,8 @@ function QuestionGroup({
             )}
           </div>
         </TableCell>
-        <TableCell className="py-1 pr-0 align-top">
-          {note ? (
+        {note && (
+          <TableCell className="py-1 pr-0 align-top">
             <div className="flex justify-end">
               <Popover>
                 <PopoverTrigger asChild>
@@ -194,10 +194,8 @@ function QuestionGroup({
                 </PopoverContent>
               </Popover>
             </div>
-          ) : (
-            ""
-          )}
-        </TableCell>
+          </TableCell>
+        )}
       </TableRow>
     );
   };
@@ -355,7 +353,10 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                             {question.text}
                           </div>
                         </TableCell>
-                        <TableCell className="py-1 pr-0 align-top text-center">
+                        <TableCell
+                          className="py-1 pr-0 align-top"
+                          colSpan={note ? 1 : 2}
+                        >
                           <div className="text-sm font-medium break-words whitespace-normal">
                             {formatValue(value, question.type)}
                             {unit && (
@@ -370,8 +371,8 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="py-1 pr-0 align-top text-right">
-                          {note ? (
+                        {note && (
+                          <TableCell className="py-1 pr-0 align-top text-right">
                             <div className="flex justify-end">
                               <Popover>
                                 <PopoverTrigger asChild>
@@ -390,10 +391,8 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                                 </PopoverContent>
                               </Popover>
                             </div>
-                          ) : (
-                            ""
-                          )}
-                        </TableCell>
+                          </TableCell>
+                        )}
                       </TableRow>
                     );
                   })}
