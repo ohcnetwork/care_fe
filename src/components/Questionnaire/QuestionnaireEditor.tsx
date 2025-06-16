@@ -492,6 +492,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }, 100);
   };
 
+  const rootQuestions: Question[] = useWatch({
+    control: form.control,
+    name: "questions",
+  });
+
   if (id && isLoading) return <Loading />;
 
   if (error) {
@@ -519,14 +524,21 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     field: keyof QuestionnaireDetail,
     value: unknown,
   ) => {
-    setQuestionnaire((prev) => (prev ? { ...prev, [field]: value } : null));
+    form.setValue(field, value, {
+      shouldValidate: false,
+    });
   };
   const handleValidatedChange = (
     field: keyof typeof questionnaire,
     value: (typeof questionnaire)[keyof typeof questionnaire],
   ) => {
-    updateQuestionnaireField(field, value);
     form.setValue(field as "title" | "description" | "slug", value, {
+      shouldValidate: true,
+    });
+  };
+
+  const updateQuestions = (newQuestions: Question[]) => {
+    form.setValue("questions", newQuestions, {
       shouldValidate: true,
     });
   };
@@ -551,7 +563,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     let hasError = false;
     const updatedErrors: Record<string, string | undefined> = {};
 
-    questionnaire.questions.forEach((q) => {
+    rootQuestions.forEach((q) => {
       if (q.type === "structured" && !q.structured_type) {
         updatedErrors[q.id] = t("field_required");
         hasError = true;
@@ -570,7 +582,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
 
-    questionnaire.questions.forEach((question, idx) => {
+    rootQuestions.forEach((question, idx) => {
       if (question.code && !question.code?.display) {
         form.setError(`questions.${idx}.code.display`, {
           type: "manual",
@@ -585,10 +597,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }
 
     if (id) {
-      updateQuestionnaire(questionnaire);
+      updateQuestionnaire({
+        ...questionnaire,
+        questions: rootQuestions,
+      });
     } else {
       createQuestionnaire({
         ...questionnaire,
+        questions: rootQuestions,
         organizations: selectedOrgs.map((o) => o.id),
         tags: selectedTags.map((t) => t.id),
       });
@@ -799,7 +815,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </CardHeader>
                 <CardContent className="p-0">
                   <nav className="space-y-1">
-                    {questionnaire.questions.map((question, index) => {
+                    {rootQuestions.map((question, index) => {
                       const hasSubQuestions =
                         question.type === "group" &&
                         question.questions &&
@@ -997,7 +1013,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       <div>
                         <CardTitle>
                           <p className="text-sm text-gray-700 font-medium mt-1">
-                            {(questionnaire.questions?.length || 0) > 1
+                            {(rootQuestions?.length || 0) > 1
                               ? t("questions")
                               : t("question")}
                           </p>
@@ -1016,7 +1032,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             questions: [],
                           };
                           handleValidatedChange("questions", [
-                            ...questionnaire.questions,
+                            ...rootQuestions,
                             newQuestion,
                           ]);
                           setExpandedQuestions(
@@ -1038,7 +1054,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     </CardHeader>
                     <CardContent className="p-0">
                       <div className="space-y-6">
-                        {questionnaire.questions.map((question, index) => (
+                        {rootQuestions.map((question, index) => (
                           <div
                             key={question.id}
                             id={`question-${question.link_id}`}
@@ -1051,30 +1067,16 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               question={question}
                               form={form}
                               onChange={(updatedQuestion) => {
-                                const newQuestions = [
-                                  ...questionnaire.questions,
-                                ];
-                                newQuestions[index] = updatedQuestion;
-                                updateQuestionnaireField(
-                                  "questions",
-                                  newQuestions,
+                                const newQuestions = rootQuestions.map(
+                                  (q, i) => (i === index ? updatedQuestion : q),
                                 );
-                                form.setValue("questions", newQuestions, {
-                                  shouldValidate: true,
-                                });
+                                updateQuestions(newQuestions);
                               }}
                               onDelete={() => {
-                                const newQuestions =
-                                  questionnaire.questions.filter(
-                                    (_, i) => i !== index,
-                                  );
-                                updateQuestionnaireField(
-                                  "questions",
-                                  newQuestions,
+                                const newQuestions = rootQuestions.filter(
+                                  (_, i) => i !== index,
                                 );
-                                form.setValue("questions", newQuestions, {
-                                  shouldValidate: true,
-                                });
+                                updateQuestions(newQuestions);
                               }}
                               isExpanded={expandedQuestions.has(
                                 question.link_id,
@@ -1086,42 +1088,25 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               onMoveUp={() => {
                                 if (index > 0) {
                                   const newQuestions = swapElements<Question>(
-                                    questionnaire.questions,
+                                    rootQuestions,
                                     index,
                                     index - 1,
                                   );
-                                  updateQuestionnaireField(
-                                    "questions",
-                                    newQuestions,
-                                  );
-                                  form.setValue("questions", newQuestions, {
-                                    shouldValidate: true,
-                                  });
+                                  updateQuestions(newQuestions);
                                 }
                               }}
                               onMoveDown={() => {
-                                if (
-                                  index <
-                                  questionnaire.questions.length - 1
-                                ) {
+                                if (index < rootQuestions.length - 1) {
                                   const newQuestions = swapElements<Question>(
-                                    questionnaire.questions,
+                                    rootQuestions,
                                     index,
                                     index + 1,
                                   );
-                                  updateQuestionnaireField(
-                                    "questions",
-                                    newQuestions,
-                                  );
-                                  form.setValue("questions", newQuestions, {
-                                    shouldValidate: true,
-                                  });
+                                  updateQuestions(newQuestions);
                                 }
                               }}
                               isFirst={index === 0}
-                              isLast={
-                                index === questionnaire.questions.length - 1
-                              }
+                              isLast={index === rootQuestions.length - 1}
                               structuredTypeError={
                                 structuredTypeErrors[question.id]
                               }
@@ -1495,7 +1480,9 @@ function QuestionEditor({
     questions: Question[],
     targetId: string,
   ): Question[] | null => {
-    const pathStack: [Question, Question[]][] = questions.map((q) => [q, []]);
+    const pathStack: [Question, Question[]][] = questions
+      .filter((q) => !!q && !!q.text)
+      .map((q) => [q, []]);
 
     while (pathStack.length > 0) {
       const [current, path] = pathStack.pop()!;
@@ -2700,17 +2687,19 @@ function QuestionEditor({
                             <SelectValue placeholder="Select a question" />
                           </SelectTrigger>
                           <SelectContent>
-                            {(rootQuestions || []).map((rootQn, index) => {
-                              if (rootQn.id === question.id) return null;
-                              return (
-                                <SelectItem
-                                  key={rootQn.id}
-                                  value={rootQn.link_id}
-                                >
-                                  {index + 1}. {rootQn.text}
-                                </SelectItem>
-                              );
-                            })}
+                            {(rootQuestions || [])
+                              .filter((q) => !!q && !!q.text)
+                              .map((rootQn, index) => {
+                                if (rootQn.id === question.id) return null;
+                                return (
+                                  <SelectItem
+                                    key={rootQn.id}
+                                    value={rootQn.link_id}
+                                  >
+                                    {index + 1}. {rootQn.text}
+                                  </SelectItem>
+                                );
+                              })}
                           </SelectContent>
                         </Select>
                         {enableWhenQuestionAnswers[idx]?.map((q, index) => {
@@ -2757,14 +2746,18 @@ function QuestionEditor({
                                 <SelectValue placeholder="Select a sub-question" />
                               </SelectTrigger>
                               <SelectContent>
-                                {q.questions?.map((question, index) => (
-                                  <SelectItem
-                                    key={question.id}
-                                    value={question.link_id}
-                                  >
-                                    {index + 1}. {question.text}
-                                  </SelectItem>
-                                ))}
+                                {q.questions?.map((subQuestion, index) => {
+                                  if (subQuestion.id === question.id)
+                                    return null;
+                                  return (
+                                    <SelectItem
+                                      key={subQuestion.id}
+                                      value={subQuestion.link_id}
+                                    >
+                                      {index + 1}. {subQuestion.text}
+                                    </SelectItem>
+                                  );
+                                })}
                               </SelectContent>
                             </Select>
                           );
@@ -2816,7 +2809,6 @@ function QuestionEditor({
                               };
                               break;
                           }
-
                           updateField("enable_when", newConditions);
                         }}
                       >
