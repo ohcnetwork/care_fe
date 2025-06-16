@@ -116,11 +116,29 @@ function QuestionGroup({
       return acc;
     }, []) || [];
 
-  const midPoint = isSingleGroup
+  // Check if any response has long text (>100 chars)
+  const hasLongText = questionsWithResponses.some((question) => {
+    const response = responses.find((r) => r.question_id === question.id);
+    if (!response) return false;
+
+    const value = response.values[0]?.value;
+    const coding = response.values[0]?.coding;
+    const text = [
+      value?.toString() || "",
+      coding?.display || "",
+      coding?.code || "",
+    ].join(" ");
+
+    return text.length > 50;
+  });
+
+  // Use single column if any response has long text
+  const shouldUseTwoColumns = isSingleGroup && !hasLongText;
+  const midPoint = shouldUseTwoColumns
     ? Math.ceil(questionsWithResponses.length / 2)
     : questionsWithResponses.length;
   const leftQuestions = questionsWithResponses.slice(0, midPoint);
-  const rightQuestions = isSingleGroup
+  const rightQuestions = shouldUseTwoColumns
     ? questionsWithResponses.slice(midPoint)
     : [];
 
@@ -161,7 +179,7 @@ function QuestionGroup({
       </h3>
       <div
         className={cn("w-full", {
-          "grid md:grid-cols-2 grid-cols-1 gap-8": isSingleGroup,
+          "grid md:grid-cols-2 grid-cols-1 gap-8": shouldUseTwoColumns,
         })}
       >
         {leftQuestions.length > 0 && (
@@ -172,7 +190,7 @@ function QuestionGroup({
           </div>
         )}
 
-        {isSingleGroup && rightQuestions.length > 0 && (
+        {shouldUseTwoColumns && rightQuestions.length > 0 && (
           <div className="w-full">
             <Table className="table-fixed w-full">
               <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
