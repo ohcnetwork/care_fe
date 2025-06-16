@@ -6,6 +6,7 @@ export enum SupplyRequestStatus {
   active = "active",
   suspended = "suspended",
   cancelled = "cancelled",
+  processed = "processed",
   completed = "completed",
   entered_in_error = "entered_in_error",
 }
@@ -77,6 +78,8 @@ export const getSupplyRequestStatusBadgeColor = (
       return "bg-blue-100 text-blue-800";
     case SupplyRequestStatus.cancelled:
       return "bg-red-100 text-red-800";
+    case SupplyRequestStatus.processed:
+      return "bg-orange-100 text-orange-800";
     default:
       return "bg-gray-100 text-gray-800";
   }

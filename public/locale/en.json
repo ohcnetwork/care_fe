@@ -2994,6 +2994,7 @@
   "procedure_suggestions": "Procedure Suggestions",
   "procedures_select_placeholder": "Select procedures to add details",
   "proceed": "Proceed",
+  "processed": "Processed",
   "processing": "Processing...",
   "product": "Product",
   "product_charge_item_definition_selection_description": "Select a charge item definition to associate with this product for billing purposes. This will be used when generating charges for this product.",
