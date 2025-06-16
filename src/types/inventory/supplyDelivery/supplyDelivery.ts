@@ -60,6 +60,7 @@ export interface SupplyDeliveryRead extends SupplyDeliveryBase {
   origin?: LocationDetail;
   destination: LocationDetail;
   supplier?: Organization;
+  modified_date?: string;
 }
 
 export interface SupplyDeliveryRetrieve extends SupplyDeliveryRead {
@@ -77,6 +78,19 @@ export const getSupplyDeliveryStatusBadgeColor = (
     case SupplyDeliveryStatus.abandoned:
       return "bg-red-100 text-red-800";
     case SupplyDeliveryStatus.entered_in_error:
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
+
+export const getSupplyDeliveryConditionBadgeColor = (
+  condition: SupplyDeliveryCondition,
+) => {
+  switch (condition) {
+    case SupplyDeliveryCondition.normal:
+      return "bg-green-100 text-green-800";
+    case SupplyDeliveryCondition.damaged:
       return "bg-red-100 text-red-800";
     default:
       return "bg-gray-100 text-gray-800";

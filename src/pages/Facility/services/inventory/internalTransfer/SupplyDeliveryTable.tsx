@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRightSquare, X } from "lucide-react";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -105,6 +106,16 @@ export default function SupplyDeliveryTable({
   const productKnowledges = productKnowledgeResponse?.results || [];
 
   const selectedProduct = productKnowledges.find((p) => p.id === qParams.item);
+
+  const handleSeeDetails = (deliveryId: string) => {
+    if (mode === "receive") {
+      navigate(
+        `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive/${deliveryId}`,
+      );
+    } else {
+      // Handle dispatch mode navigation if needed
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -254,7 +265,7 @@ export default function SupplyDeliveryTable({
                       variant="outline"
                       size="sm"
                       className="shadow-sm border-gray-400 font-semibold text-sm text-gray-950"
-                      onClick={() => {}}
+                      onClick={() => handleSeeDetails(delivery.id)}
                     >
                       <ArrowUpRightSquare strokeWidth={1} />
                       {t("see_details")}
