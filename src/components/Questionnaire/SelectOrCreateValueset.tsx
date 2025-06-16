@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -44,6 +44,18 @@ export function SelectOrCreateValueset({
     select: (data: PaginatedResponse<ValuesetBase>) => data.results,
   });
 
+  const { data: slugObj, isLoading: isLoadingSlug } = useQuery({
+    queryKey: ["valueset", value],
+    queryFn: query(valuesetApi.get, {
+      pathParams: { slug: value! },
+    }),
+    enabled: !!value,
+  });
+
+  useEffect(() => {
+    slugObj && setCurrentValueSet(slugObj);
+  }, [slugObj]);
+
   const valueSetOptions =
     valuesets?.map((vs) => ({
       label: vs.name,
@@ -67,7 +79,7 @@ export function SelectOrCreateValueset({
           onChange={handleValueSetChange}
           onSearch={setSearchQuery}
           placeholder={t("select_a_value_set")}
-          isLoading={isFetchingValuesets}
+          isLoading={isFetchingValuesets || isLoadingSlug}
           noOptionsMessage={t("no_valuesets_found")}
         />
       </div>
