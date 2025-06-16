@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  AArrowDown,
   ChevronDown,
   ChevronUp,
   ChevronsDownUp,
@@ -20,7 +21,6 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +54,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -66,6 +71,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
+import { AnimatedWrapper } from "@/components/Common/AnimatedWrapper";
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 import {
@@ -77,11 +83,10 @@ import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
+import { HTTPError } from "@/Utils/request/types";
 import { swapElements } from "@/Utils/request/utils";
 import organizationApi from "@/types/organization/organizationApi";
 import {
-  AnswerOption,
   EnableWhen,
   Question,
   QuestionType,
@@ -90,12 +95,11 @@ import {
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
-import { ValuesetBase } from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
 
 import { CodingEditor } from "./CodingEditor";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
+import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
 
 interface QuestionnaireEditorProps {
@@ -182,7 +186,7 @@ function LayoutOptionCard({
       <Label
         htmlFor={optionId}
         className={cn(
-          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-2 md:p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
           isSelected && "border-primary",
         )}
       >
@@ -406,7 +410,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           description: "",
           status: "draft",
           version: "1.0",
-          subject_type: "patient",
+          subject_type: "encounter",
           questions: [],
           slug: "",
           tags: [],
@@ -581,7 +585,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       description: importedData.description,
       status: "draft",
       version: "1.0",
-      subject_type: importedData.subject_type || "patient",
+      subject_type: importedData.subject_type || "encounter",
       questions:
         importedData.questions?.map((q: Question) => ({
           ...q,
@@ -899,8 +903,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               </FormControl>
                               <FormMessage />
                               <p className="text-sm text-gray-500 mt-1">
-                                A unique URL-friendly identifier for this
-                                questionnaire
+                                {t("unique_url_for_questionnaire")}
                               </p>
                             </FormItem>
                           )}
@@ -1340,21 +1343,21 @@ function QuestionEditor({
     unit,
   } = question;
 
+  // Memoize answer options to ensure unique IDs to avoid unnecessary re-renders in value field of AnwserOption
+
+  const annotatedAnswerOptions = useMemo(() => {
+    return (
+      answer_option?.map((option: any) => ({
+        ...option,
+        _id: option._id || crypto.randomUUID(),
+      })) || []
+    );
+  }, [answer_option]);
+
   const [expandedSubQuestions, setExpandedSubQuestions] = useState<Set<string>>(
     new Set(),
   );
-
-  const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
-  const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
-    queryKey: ["valuesets", valueSetSearchQuery],
-    queryFn: query.debounced(valuesetApi.list, {
-      queryParams: {
-        name: valueSetSearchQuery,
-        status: "active",
-      },
-    }),
-    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
-  });
+  const [inputPosition, setInputPosition] = useState("");
 
   const updateField = <K extends keyof Question>(
     field: K,
@@ -1440,6 +1443,7 @@ function QuestionEditor({
                 {t("move_down")}
               </DropdownMenuItem>
             )}
+
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={(e) => {
@@ -1821,7 +1825,7 @@ function QuestionEditor({
               <Card>
                 {question.type === "choice" && (
                   <>
-                    <CardHeader className="flex sm:flex-row sm:items-center sm:justify-between sm:space-y-0 sm:pb-2 flex-col">
+                    <CardHeader className="flex sm:flex-row sm:items-center sm:justify-between sm:space-y-0 sm:pb-2 flex-col gap-2">
                       <div>
                         <CardTitle className="text-base font-medium ">
                           {t("answer_options")}
@@ -1874,159 +1878,317 @@ function QuestionEditor({
                 )}
 
                 {question.type === "choice" && !question.answer_value_set ? (
-                  <CardContent className="sm:space-y-4 space-y-8">
-                    {answer_option &&
-                      answer_option.map((opt, idx) => (
-                        <div
-                          key={idx}
-                          className="space-y-4 pb-4 border-b border-gray-300 last:border-0 last:pb-0"
+                  <CardContent className="sm:space-y-4 space-y-3">
+                    {annotatedAnswerOptions.length !== 0 && (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="outline"
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                            const sorted = annotatedAnswerOptions
+                              ? [...annotatedAnswerOptions].sort((a, b) =>
+                                  a.value.localeCompare(b.value),
+                                )
+                              : [];
+                            updateField("answer_option", sorted);
+                          }}
                         >
-                          <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
-                            <div>
-                              <Label>{t("value")}</Label>
-                              <Input
-                                value={opt.value}
-                                onChange={(e) => {
-                                  const newOptions = [...answer_option];
-
-                                  newOptions[idx] = {
-                                    ...opt,
-                                    value: e.target.value,
-                                  };
-                                  updateField("answer_option", newOptions);
-                                }}
-                                placeholder={t("option_value")}
-                              />
-                            </div>
-                            <div className="flex gap-2">
-                              <div className="flex-1">
-                                <Label>{t("display_text")}</Label>
+                          <AArrowDown className="size-4" />
+                          {t("sort_alphabetically")}
+                        </Button>
+                      </div>
+                    )}
+                    {annotatedAnswerOptions &&
+                      annotatedAnswerOptions.map((opt, idx) => (
+                        <AnimatedWrapper key={opt._id} keyValue={opt._id}>
+                          <div className="space-y-4 pb-4 border-b border-gray-300 last:border-0 last:pb-0">
+                            <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
+                              <div>
+                                <Label className="mb-2">
+                                  {idx + 1} {" . "} {t("value")}
+                                </Label>
                                 <Input
-                                  value={opt.display || ""}
+                                  value={opt.value}
                                   onChange={(e) => {
-                                    const newOptions = [...answer_option];
+                                    const newOptions = [
+                                      ...annotatedAnswerOptions,
+                                    ];
+
                                     newOptions[idx] = {
                                       ...opt,
-                                      display: e.target.value,
+                                      value: e.target.value,
                                     };
                                     updateField("answer_option", newOptions);
                                   }}
-                                  placeholder={t("display_text_placeholder")}
+                                  placeholder={t("option_value")}
                                 />
                               </div>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="size-8"
-                                  >
-                                    <CareIcon
-                                      icon="l-ellipsis-v"
-                                      className="size-4"
-                                    />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  {idx !== 0 && (
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        const newOptions =
-                                          swapElements<AnswerOption>(
-                                            answer_option,
-                                            idx,
-                                            idx - 1,
-                                          );
-                                        updateField(
-                                          "answer_option",
-                                          newOptions,
-                                        );
-                                      }}
-                                    >
-                                      <ChevronUp className="mr-2 size-4" />
-                                      {t("move_up")}
-                                    </DropdownMenuItem>
-                                  )}
-                                  {idx !== answer_option.length - 1 && (
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        const newOptions =
-                                          swapElements<AnswerOption>(
-                                            answer_option,
-                                            idx,
-                                            idx + 1,
-                                          );
-                                        updateField(
-                                          "answer_option",
-                                          newOptions,
-                                        );
-                                      }}
-                                    >
-                                      <ChevronDown className="mr-2 size-4" />
-                                      {t("move_down")}
-                                    </DropdownMenuItem>
-                                  )}
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      const newOptions = answer_option.filter(
-                                        (_, i) => i !== idx,
-                                      );
+                              <div className="flex gap-2">
+                                <div className="flex-1">
+                                  <Label className="mb-2">
+                                    {t("display_text")}
+                                  </Label>
+                                  <Input
+                                    value={opt.display || ""}
+                                    onChange={(e) => {
+                                      const newOptions = [
+                                        ...annotatedAnswerOptions,
+                                      ];
+                                      newOptions[idx] = {
+                                        ...opt,
+                                        display: e.target.value,
+                                      };
                                       updateField("answer_option", newOptions);
                                     }}
-                                    className="text-destructive"
-                                  >
-                                    <CareIcon
-                                      icon="l-trash-alt"
-                                      className="mr-2 size-4"
-                                    />
-                                    {t("delete")}
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                    placeholder={t("display_text_placeholder")}
+                                  />
+                                </div>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-8"
+                                    >
+                                      <CareIcon
+                                        icon="l-ellipsis-v"
+                                        className="size-4"
+                                      />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-80">
+                                    <div className="flex flex-col gap-2">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className="font-semibold flex items-center gap-1">
+                                          <ChevronDown className="size-4" />
+                                          {t("move_item")}
+                                        </span>
+                                        <span className="text-xs font-medium">
+                                          {t("position")}{" "}
+                                          {inputPosition
+                                            ? inputPosition
+                                            : idx + 1}
+                                        </span>
+                                      </div>
+                                      <div className="border-b pb-2 mb-2">
+                                        <div className="font-semibold text-xs text-gray-500 mb-1">
+                                          {t("quick_actions")}
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={idx === 0}
+                                            onClick={() => {
+                                              if (idx > 0) {
+                                                const newOptions = swapElements(
+                                                  annotatedAnswerOptions,
+                                                  idx,
+                                                  idx - 1,
+                                                );
+                                                updateField(
+                                                  "answer_option",
+                                                  newOptions,
+                                                );
+                                              }
+                                            }}
+                                          >
+                                            ↑ {t("move_up")}
+                                          </Button>
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={
+                                              idx ===
+                                              annotatedAnswerOptions.length - 1
+                                            }
+                                            onClick={() => {
+                                              if (
+                                                idx <
+                                                annotatedAnswerOptions.length -
+                                                  1
+                                              ) {
+                                                const newOptions = swapElements(
+                                                  annotatedAnswerOptions,
+                                                  idx,
+                                                  idx + 1,
+                                                );
+                                                updateField(
+                                                  "answer_option",
+                                                  newOptions,
+                                                );
+                                              }
+                                            }}
+                                          >
+                                            ↓ {t("move_down")}
+                                          </Button>
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={idx === 0}
+                                            onClick={() => {
+                                              if (idx > 0) {
+                                                const newOptions = [
+                                                  ...annotatedAnswerOptions,
+                                                ];
+                                                const [item] =
+                                                  newOptions.splice(idx, 1);
+                                                newOptions.unshift(item);
+                                                updateField(
+                                                  "answer_option",
+                                                  newOptions,
+                                                );
+                                              }
+                                            }}
+                                          >
+                                            # {t("to_top")}
+                                          </Button>
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={
+                                              idx ===
+                                              annotatedAnswerOptions.length - 1
+                                            }
+                                            onClick={() => {
+                                              if (
+                                                idx <
+                                                annotatedAnswerOptions.length -
+                                                  1
+                                              ) {
+                                                const newOptions = [
+                                                  ...annotatedAnswerOptions,
+                                                ];
+                                                const [item] =
+                                                  newOptions.splice(idx, 1);
+                                                newOptions.push(item);
+                                                updateField(
+                                                  "answer_option",
+                                                  newOptions,
+                                                );
+                                              }
+                                            }}
+                                          >
+                                            # {t("to_bottom")}
+                                          </Button>
+                                        </div>
+                                      </div>
+                                      <div className="mb-2">
+                                        <div className="font-semibold text-xs text-gray-500 mb-1">
+                                          {t("move_to_specific_position")}
+                                        </div>
+                                        <div className="flex gap-2">
+                                          <Input
+                                            type="number"
+                                            min={1}
+                                            max={annotatedAnswerOptions.length}
+                                            className="h-7 w-full text-sm"
+                                            value={inputPosition}
+                                            onChange={(e) =>
+                                              setInputPosition(e.target.value)
+                                            }
+                                            placeholder={t("enter_position")}
+                                          />
+                                          <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            onClick={() => {
+                                              const newPosition =
+                                                parseInt(inputPosition) - 1;
+                                              if (
+                                                !isNaN(newPosition) &&
+                                                newPosition >= 0 &&
+                                                newPosition <
+                                                  annotatedAnswerOptions.length &&
+                                                newPosition !== idx
+                                              ) {
+                                                const newArray = [
+                                                  ...annotatedAnswerOptions,
+                                                ];
+                                                const [movedItem] =
+                                                  newArray.splice(idx, 1);
+                                                newArray.splice(
+                                                  newPosition,
+                                                  0,
+                                                  movedItem,
+                                                );
+                                                updateField(
+                                                  "answer_option",
+                                                  newArray,
+                                                );
+                                              }
+                                              setInputPosition("");
+                                            }}
+                                            className="gap-2"
+                                          >
+                                            {t("move")}
+                                          </Button>
+                                        </div>
+                                        <div className="text-xs text-gray-400 mt-1">
+                                          {t("range")}: 1 {t("to")}{" "}
+                                          {annotatedAnswerOptions.length}
+                                        </div>
+                                      </div>
+
+                                      <div className="border-t pt-2">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => {
+                                            const newOptions =
+                                              annotatedAnswerOptions.filter(
+                                                (_, i) => i !== idx,
+                                              );
+                                            updateField(
+                                              "answer_option",
+                                              newOptions,
+                                            );
+                                          }}
+                                        >
+                                          <CareIcon
+                                            icon="l-trash-alt"
+                                            className="mr-1 size-4"
+                                          />
+                                          {t("delete")}
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </AnimatedWrapper>
                       ))}
 
                     <Button
                       variant="outline"
+                      type="button"
                       size="sm"
-                      onClick={(e) => {
-                        e.preventDefault();
+                      onClick={() => {
                         const newOption = { value: "" };
-                        const newOptions = answer_option
-                          ? [...answer_option, newOption]
+                        const newOptions = annotatedAnswerOptions
+                          ? [...annotatedAnswerOptions, newOption]
                           : [newOption];
                         updateField("answer_option", newOptions);
                       }}
                     >
-                      <CareIcon icon="l-plus" className="mr-2 size-4" />
+                      <CareIcon icon="l-plus" className="size-4" />
                       {t("add_option")}
                     </Button>
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <Autocomplete
-                      options={(valuesets ?? []).map((valueset) => ({
-                        label: valueset.name,
-                        value: valueset.slug,
-                      }))}
+                    <SelectOrCreateValueset
+                      onValueSetChange={(val) =>
+                        updateField("answer_value_set", val)
+                      }
                       value={
                         question.answer_value_set === "valueset"
                           ? ""
                           : (question.answer_value_set ?? "")
                       }
-                      onChange={(val: string) =>
-                        updateField("answer_value_set", val)
-                      }
-                      onSearch={setValueSetSearchQuery}
-                      placeholder={t("select_a_value_set")}
-                      isLoading={isFetchingValuesets}
-                      noOptionsMessage={t("no_valuesets_found")}
                     />
                   </CardContent>
                 )}
@@ -2137,7 +2299,7 @@ function QuestionEditor({
             <div className="space-y-2">
               {(question.enable_when || []).length > 0 && (
                 <div>
-                  <Label className="text-xs">{t("enable_behavior")}</Label>
+                  <Label className="text-xs mb-1">{t("enable_behavior")}</Label>
                   <Select
                     value={question.enable_behavior ?? "all"}
                     onValueChange={(val: "all" | "any") =>
@@ -2161,10 +2323,10 @@ function QuestionEditor({
               {(question.enable_when || []).map((condition, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-[2fr_1fr_2fr] gap-2 items-start"
+                  className="grid grid-cols-1 md:grid-cols-[2fr_1fr_2fr] gap-2 items-start"
                 >
                   <div>
-                    <Label className="text-xs">Question</Label>
+                    <Label className="text-xs mb-1">{t("question")}</Label>
                     <Input
                       value={condition.question}
                       onChange={(e) => {
@@ -2179,7 +2341,7 @@ function QuestionEditor({
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">Operator</Label>
+                    <Label className="text-xs mb-1">{t("operator")}</Label>
                     <Select
                       value={condition.operator}
                       onValueChange={(
@@ -2239,13 +2401,14 @@ function QuestionEditor({
                         <SelectItem value="less_or_equals">
                           Less Than or Equal
                         </SelectItem>
-                        <SelectItem value="exists">Exists</SelectItem>
+                        Exists
+                        <SelectItem value="exists"></SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <Label className="text-xs">Answer</Label>
+                      <Label className="text-xs mb-1">Answer</Label>
                       {condition.operator === "exists" ? (
                         <Select
                           value={condition.answer ? "true" : "false"}
