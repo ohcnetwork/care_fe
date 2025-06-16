@@ -46,15 +46,12 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
   const currentCoding = questionnaireResponse.values[index]?.coding;
 
-  const selectedValues = question.repeats
-    ? questionnaireResponse.values
-        .map((v) => v.value?.toString())
-        .filter((v, i) => i !== index && v)
-    : [];
-
   const availableOptions = question.repeats
-    ? options.filter(
-        (option) => !selectedValues.includes(option.value.toString()),
+    ? options.filter((option) =>
+        questionnaireResponse.values.every(
+          (v, i) =>
+            i === index || v.value?.toString() !== option.value.toString(),
+        ),
       )
     : options;
 

@@ -310,9 +310,9 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                       (r) => r.question_id === question.id,
                     );
                     if (!response) return null;
-                    const value = question.repeats
-                      ? response.values?.map((v) => v.value).join(", ")
-                      : response.values[0]?.value;
+                    const value = response.values
+                      ?.map((v) => v.value)
+                      .join(", ");
                     const unit = response.values[0]?.unit || question.unit;
                     const coding = response.values[0]?.coding;
 
