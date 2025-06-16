@@ -100,13 +100,11 @@ export default function PatientRegistration(
           }),
           age_or_dob: z.enum(["dob", "age"]),
           date_of_birth: z
-            .string()
-            .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
-            .refine((date) => {
-              const parsedDate = dayjs(date);
-              return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
-            }, t("enter_valid_dob"))
-            .optional(),
+            .string({
+              required_error: t("date_of_birth_must_be_present"),
+              invalid_type_error: t("date_of_birth_format"),
+            })
+            .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format")),
           deceased_datetime: tzAwareDateTime.optional(),
           age: z
             .number()
@@ -126,31 +124,40 @@ export default function PatientRegistration(
             .max(999999, t("pincode_must_be_6_digits")),
           nationality: z.string().nonempty(t("nationality_is_required")),
           geo_organization: z
-            .string()
-            .uuid({ message: t("geo_organization_is_required") })
-            .optional(),
+            .string({
+              required_error: t("geo_organization_required"),
+              invalid_type_error: t("geo_organization_required"),
+            })
+            .uuid({ message: t("geo_organization_is_required") }),
         })
-        .refine(
-          (data) => (data.age_or_dob === "dob" ? !!data.date_of_birth : true),
-          {
-            message: t("date_of_birth_must_be_present"),
-            path: ["date_of_birth"],
-          },
-        )
-        .refine((data) => (data.age_or_dob === "age" ? !!data.age : true), {
-          message: t("age_must_be_present"),
-          path: ["age"],
+        .superRefine((data, ctx) => {
+          if (data.age_or_dob === "dob" && !data.date_of_birth) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("date_of_birth_must_be_present"),
+              path: ["date_of_birth"],
+            });
+          }
+          if (
+            data.age_or_dob === "age" &&
+            (data.age === undefined || data.age === null || isNaN(data.age))
+          ) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("age_must_be_present"),
+              path: ["age"],
+            });
+          }
+
+          if (data.nationality === defaultCountry && !data.geo_organization) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("geo_organization_required"),
+              path: ["geo_organization"],
+            });
+          }
         })
-        .refine(
-          (data) =>
-            data.nationality === defaultCountry
-              ? !!data.geo_organization
-              : true,
-          {
-            message: t("geo_organization_required"),
-            path: ["geo_organization"],
-          },
-        )
+
         .refine(
           (data) => {
             if (!data.deceased_datetime) return true;
@@ -321,7 +328,7 @@ export default function PatientRegistration(
         gender: patientQuery.data.gender as (typeof GENDERS)[number],
         blood_group: patientQuery.data.blood_group,
         age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
-        date_of_birth: patientQuery.data.date_of_birth || undefined,
+        date_of_birth: patientQuery.data.date_of_birth || "",
         age:
           !patientQuery.data.date_of_birth && patientQuery.data.year_of_birth
             ? new Date().getFullYear() - patientQuery.data.year_of_birth
@@ -333,7 +340,7 @@ export default function PatientRegistration(
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
-        deceased_datetime: patientQuery.data.deceased_datetime || undefined,
+        deceased_datetime: patientQuery.data.deceased_datetime || "",
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]);
@@ -554,7 +561,7 @@ export default function PatientRegistration(
                 onValueChange={(v) => {
                   form.setValue("age_or_dob", v as "dob" | "age");
                   if (v === "age") {
-                    form.setValue("date_of_birth", undefined);
+                    form.setValue("date_of_birth", "");
                   } else {
                     form.setValue("age", undefined);
                   }
