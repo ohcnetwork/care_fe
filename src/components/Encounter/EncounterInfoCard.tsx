@@ -109,7 +109,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             </Badge>
           </div>
           <div>
-            <Separator className="my-3" />
+            <Separator />
           </div>
         </div>
       </CardContent>
