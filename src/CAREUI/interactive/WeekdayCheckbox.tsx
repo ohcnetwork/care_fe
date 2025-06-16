@@ -27,7 +27,6 @@ interface Props {
   value: DayOfWeek[] | null;
   onChange: (value: DayOfWeek[] | null) => void;
   format?: "alphabet" | "short" | "long";
-  ref?: React.RefCallback<HTMLDivElement>;
 }
 
 export default function WeekdayCheckbox({
