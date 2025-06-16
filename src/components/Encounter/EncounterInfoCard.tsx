@@ -13,6 +13,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -63,7 +64,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
       data-status={encounter.status}
       key={props.encounter.id}
       className={cn(
-        "hover:shadow-lg transition-shadow group md:flex md:flex-col h-full",
+        "hover:shadow-lg transition-shadow group md:flex md:flex-col h-full overflow-clip",
         hideBorder && "border-none shadow-none",
       )}
     >
@@ -109,46 +110,41 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           </div>
           <div>
             <Separator className="my-3" />
-            <div className="flex flex-col gap-2">
-              {" "}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/patient/${encounter.patient.id}`,
-                  )
-                }
-                className="flex items-center justify-center gap-1.5 text-[9px] sm:text-xs px-1.5 py-2.5 h-auto sm:h-9 min-w-0"
-                data-cy="visit-patient-profile-button"
-                title={t("view_patient_profile")}
-              >
-                <CareIcon icon="l-user" className="size-2.5 flex-shrink-0" />
-                <span className="leading-none truncate">
-                  {t("view_patient_profile")}
-                </span>
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`,
-                  )
-                }
-                className="flex items-center justify-center gap-1.5 text-[9px] sm:text-xs px-1.5 py-2.5 h-auto sm:h-9 min-w-0"
-                data-cy="visit-encounter-details-button"
-                title={t("visit_encounter_details")}
-              >
-                <CareIcon icon="l-notes" className="size-2.5 flex-shrink-0" />
-                <span className="leading-none truncate">
-                  {t("visit_encounter_details")}
-                </span>
-              </Button>
-            </div>
           </div>
         </div>
       </CardContent>
+      <CardFooter className="flex flex-col sm:flex-row justify-between gap-2 items-center py-2 px-4 bg-gray-50">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            navigate(`/facility/${facilityId}/patient/${encounter.patient.id}`)
+          }
+          className="flex items-center justify-center gap-1 px-1 py-2 w-full h-9"
+          title={t("view_patient_profile")}
+        >
+          <CareIcon icon="l-user" className="size-2 flex-shrink-0" />
+          <span className="leading-none truncate">
+            {t("view_patient_profile")}
+          </span>
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() =>
+            navigate(
+              `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`,
+            )
+          }
+          className="flex items-center justify-center gap-1 px-1 py-2 w-full h-9"
+          title={t("view_encounter_details")}
+        >
+          <CareIcon icon="l-notes" className="size-2 flex-shrink-0" />
+          <span className="leading-none truncate">
+            {t("view_encounter_details")}
+          </span>
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
