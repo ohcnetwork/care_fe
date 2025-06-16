@@ -6,7 +6,12 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import { FormControl, FormField, FormItem } from "@/components/ui/form";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
 import mutate from "@/Utils/request/mutate";
@@ -81,6 +86,7 @@ export const CodingField = ({
                 }}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -97,6 +103,7 @@ export const CodingField = ({
                 readOnly
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />

@@ -410,7 +410,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           description: "",
           status: "draft",
           version: "1.0",
-          subject_type: "patient",
+          subject_type: "encounter",
           questions: [],
           slug: "",
           tags: [],
@@ -585,7 +585,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       description: importedData.description,
       status: "draft",
       version: "1.0",
-      subject_type: importedData.subject_type || "patient",
+      subject_type: importedData.subject_type || "encounter",
       questions:
         importedData.questions?.map((q: Question) => ({
           ...q,
