@@ -158,7 +158,7 @@ function QuestionGroup({
 
     return (
       <TableRow key={question.id}>
-        <TableCell className="py-1 pl-0 align-top row-span-3">
+        <TableCell className="py-1 pl-0 align-top">
           <div className="text-sm text-gray-600 break-words whitespace-normal">
             {question.text}
           </div>
