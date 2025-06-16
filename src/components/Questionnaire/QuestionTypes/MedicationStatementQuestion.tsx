@@ -122,7 +122,7 @@ const MEDICATION_STATEMENT_FIELDS: FieldDefinitions = {
       if (period.end) {
         const startDate = new Date(period.start);
         const endDate = new Date(period.end);
-        if (endDate <= startDate) {
+        if (endDate < startDate) {
           throw new Error(t("end_date_after_start"));
         }
       }
