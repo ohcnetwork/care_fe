@@ -205,7 +205,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
     setOrganizations({ organizations: selectedIds });
   };
 
-  const selectedOrganizations = organizations?.results.filter((org) =>
+  const selectedOrganizations = availableOrganizations?.results.filter((org) =>
     selectedIds.includes(org.id),
   );
 
