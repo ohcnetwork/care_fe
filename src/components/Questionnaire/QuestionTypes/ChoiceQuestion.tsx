@@ -1,15 +1,10 @@
+import { t } from "i18next";
 import { memo } from "react";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -50,6 +45,16 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       : "radio";
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
   const currentCoding = questionnaireResponse.values[index]?.coding;
+
+  const availableOptions = question.repeats
+    ? options.filter((option) =>
+        questionnaireResponse.values.every(
+          (v, i) =>
+            i === index || v.value?.toString() !== option.value.toString(),
+        ),
+      )
+    : options;
+
   const handleValueChange = (newValue: string) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
@@ -91,27 +96,17 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           value={currentCoding}
           onSelect={handleCodingChange}
         ></ValueSetSelect>
-      ) : selectType === "dropdown" ? (
-        <Select
-          value={currentValue}
-          onValueChange={handleValueChange}
+      ) : selectType === "dropdown" || question.repeats ? (
+        <Autocomplete
+          value={currentValue || ""}
+          onChange={handleValueChange}
+          options={availableOptions.map((option) => ({
+            label: properCase(option.display || option.value),
+            value: option.value.toString(),
+          }))}
+          placeholder={t("select_an_option")}
           disabled={disabled}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select an option" />
-          </SelectTrigger>
-          <SelectContent className="max-w-[var(--radix-select-trigger-width)] w-full">
-            {options.map((option: AnswerOption) => (
-              <SelectItem
-                key={`${question.id}-${option.value.toString()}`}
-                value={option.value.toString()}
-                className="whitespace-normal break-words py-3"
-              >
-                {properCase(option.display || option.value)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        />
       ) : (
         <div className="mt-2">
           <RadioGroup
@@ -120,7 +115,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
             className="flex flex-col gap-3"
             value={currentValue}
           >
-            {options.map((option: AnswerOption) => (
+            {availableOptions.map((option: AnswerOption) => (
               <Label
                 htmlFor={`${question.id}-${option.value.toString()}`}
                 className="cursor-pointer"
