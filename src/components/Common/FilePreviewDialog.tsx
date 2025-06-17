@@ -126,6 +126,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const [scale, setScale] = useState(0.75);
   const [dragState, setDragState] = useState<DragState>(initialDragState);
   const containerRef = useRef<HTMLDivElement>(null);
+  const dragStateRef = useRef(dragState);
+
+  useEffect(() => {
+    dragStateRef.current = dragState;
+  }, [dragState]);
 
   useEffect(() => {
     if (uploadedFiles && show) {
@@ -140,19 +145,16 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    // Attach touchmove with passive: false
     const handler = (e: TouchEvent) => {
-      // Only call the React handler if dragging
-      if (dragState.isDragging) {
-        // @ts-expect-error: React handler expects React.TouchEvent, but this is native
-        handleTouchMove(e);
+      if (dragStateRef.current.isDragging) {
+        handleTouchMove(e as unknown as React.TouchEvent);
       }
     };
     container.addEventListener("touchmove", handler, { passive: false });
     return () => {
       container.removeEventListener("touchmove", handler);
     };
-  }, [dragState.isDragging]);
+  }, []);
 
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
