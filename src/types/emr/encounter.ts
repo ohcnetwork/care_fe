@@ -88,18 +88,30 @@ export const ENCOUNTER_PRIORITY = [
 ] as const;
 
 export const ENCOUNTER_STATUSES = [
-  { id: "planned", icon: "l-calender" },
-  { id: "in_progress", icon: "l-spinner" },
+  { id: "planned" },
+  { id: "in_progress" },
   { id: "on_hold" },
-  { id: "discharged", icon: "l-home" },
-  { id: "completed", icon: "l-check" },
-  { id: "cancelled", icon: "l-x" },
+  { id: "discharged" },
+  { id: "completed" },
+  { id: "cancelled" },
   { id: "discontinued" },
   { id: "entered_in_error" },
   { id: "unknown" },
 ] as const;
 
 export const ENCOUNTER_STATUS = ENCOUNTER_STATUSES.map((status) => status.id);
+
+export const ENCOUNTER_STATUS_ICONS = {
+  planned: "l-calender",
+  in_progress: "l-spinner",
+  on_hold: undefined,
+  discharged: "l-home",
+  completed: "l-check",
+  cancelled: "l-x",
+  discontinued: undefined,
+  entered_in_error: undefined,
+  unknown: undefined,
+} as const;
 
 export const ENCOUNTER_CLASSES_ICONS = {
   imp: BedDouble,
@@ -111,20 +123,36 @@ export const ENCOUNTER_CLASSES_ICONS = {
 } as const satisfies Record<EncounterClass, LucideIcon>;
 
 export const ENCOUNTER_PRIORITIES = [
-  { id: "stat", emote: "🔴" },
-  { id: "ASAP", emote: "🟡" },
-  { id: "emergency", emote: "🔴" },
-  { id: "urgent", emote: "🟠" },
-  { id: "routine", emote: "⚪️" },
-  { id: "elective", emote: "🟤" },
-  { id: "rush_reporting", emote: "🟤" },
-  { id: "timing_critical", emote: "🟡" },
-  { id: "callback_results", emote: "🔵" },
-  { id: "callback_for_scheduling", emote: "🟣" },
-  { id: "preop", emote: "🟠" },
-  { id: "as_needed", emote: "⚫️" },
-  { id: "use_as_directed", emote: "🔵" },
-] as const satisfies { id: EncounterPriority; emote: string }[];
+  { id: "stat" },
+  { id: "ASAP" },
+  { id: "emergency" },
+  { id: "urgent" },
+  { id: "routine" },
+  { id: "elective" },
+  { id: "rush_reporting" },
+  { id: "timing_critical" },
+  { id: "callback_results" },
+  { id: "callback_for_scheduling" },
+  { id: "preop" },
+  { id: "as_needed" },
+  { id: "use_as_directed" },
+] as const satisfies { id: EncounterPriority }[];
+
+export const ENCOUNTER_PRIORITY_EMOTES = {
+  stat: "🔴",
+  ASAP: "🟡",
+  emergency: "🔴",
+  urgent: "🟠",
+  routine: "⚪️",
+  elective: "🟤",
+  rush_reporting: "🟤",
+  timing_critical: "🟡",
+  callback_results: "🔵",
+  callback_for_scheduling: "🟣",
+  preop: "🟠",
+  as_needed: "⚫️",
+  use_as_directed: "🔵",
+} as const satisfies Record<EncounterPriority, string>;
 
 export type EncounterAdmitSources = (typeof ENCOUNTER_ADMIT_SOURCE)[number];
 

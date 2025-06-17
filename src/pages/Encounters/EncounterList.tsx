@@ -37,7 +37,9 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import {
   ENCOUNTER_CLASSES,
   ENCOUNTER_PRIORITIES,
+  ENCOUNTER_PRIORITY_EMOTES,
   ENCOUNTER_STATUSES,
+  ENCOUNTER_STATUS_ICONS,
   Encounter,
   EncounterPriority,
 } from "@/types/emr/encounter";
@@ -267,7 +269,9 @@ export function EncounterList({
                     {ENCOUNTER_PRIORITIES.map((priority) => (
                       <SelectItem key={priority.id} value={priority.id}>
                         <div className="flex items-center">
-                          <span className="mr-2">{priority.emote}</span>
+                          <span className="mr-2">
+                            {ENCOUNTER_PRIORITY_EMOTES[priority.id]}
+                          </span>
                           {t(`encounter_priority__${priority.id}`)}
                         </div>
                       </SelectItem>
@@ -292,12 +296,14 @@ export function EncounterList({
                     <SelectContent>
                       <SelectItem value="all">{t("all_status")}</SelectItem>
                       {ENCOUNTER_STATUSES.filter(
-                        (status) => "icon" in status,
-                      ).map((status: { id: string; icon: IconName }) => (
+                        (status) => ENCOUNTER_STATUS_ICONS[status.id],
+                      ).map((status) => (
                         <SelectItem value={status.id} key={status.id}>
                           <div className="flex items-center">
                             <CareIcon
-                              icon={status.icon as IconName}
+                              icon={
+                                ENCOUNTER_STATUS_ICONS[status.id] as IconName
+                              }
                               className="mr-2 size-4"
                             />
                             {t(`encounter_status__${status.id}`)}
@@ -362,7 +368,7 @@ export function EncounterList({
                       </TabsTrigger>
 
                       {ENCOUNTER_STATUSES.filter(
-                        (status) => "icon" in status,
+                        (status) => ENCOUNTER_STATUS_ICONS[status.id],
                       ).map((status) => (
                         <TabsTrigger
                           key={status.id}
@@ -378,7 +384,7 @@ export function EncounterList({
                           }
                         >
                           <CareIcon
-                            icon={status.icon as IconName}
+                            icon={ENCOUNTER_STATUS_ICONS[status.id] as IconName}
                             className="size-4"
                           />
                           {t(`encounter_status__${status.id}`)}
