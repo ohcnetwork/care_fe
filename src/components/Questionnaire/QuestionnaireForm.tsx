@@ -18,6 +18,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/files";
@@ -664,7 +665,7 @@ export function QuestionnaireForm({
                   if (isNaN(date.getTime())) {
                     return { ...value, value: "" };
                   }
-                  const formattedDate = date.toISOString().split("T")[0];
+                  const formattedDate = dateQueryString(date);
                   return {
                     ...value,
                     value: formattedDate,
