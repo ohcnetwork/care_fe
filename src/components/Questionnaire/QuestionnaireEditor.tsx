@@ -430,6 +430,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       slug: questionnaire?.slug ?? "",
       description: questionnaire?.description ?? "",
       questions: questionnaire?.questions,
+      status: questionnaire?.status,
+      subject_type: questionnaire?.subject_type,
+      version: questionnaire?.version,
+      tags: questionnaire?.tags,
     },
     mode: "onChange",
   });
@@ -442,12 +446,27 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         slug: initialQuestionnaire.slug || "",
         description: initialQuestionnaire.description || "",
         questions: initialQuestionnaire.questions,
+        status: initialQuestionnaire.status,
+        subject_type: initialQuestionnaire.subject_type,
+        version: initialQuestionnaire.version,
+        tags: initialQuestionnaire.tags,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestionnaire]);
 
+  const rootQuestions: Question[] = useWatch({
+    control: form.control,
+    name: "questions",
+  });
+
+  const tags = useWatch({
+    control: form.control,
+    name: "tags",
+  });
+
   useEffect(() => {
-    if (!questionnaire) return;
+    if (!rootQuestions) return;
     const newEnableWhenDependencies = new Map<
       string,
       Set<{ question: Question; path: string[] }>
@@ -475,9 +494,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       });
     };
 
-    processQuestions(questionnaire.questions);
+    processQuestions(rootQuestions);
     setEnableWhenDependencies(newEnableWhenDependencies);
-  }, [questionnaire]);
+  }, [rootQuestions]);
 
   const handleEnableWhenDependentClick = (path: string[], targetId: string) => {
     const rootQuestionId = path[0];
@@ -489,11 +508,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       setExpandPath([]);
     }, 100);
   };
-
-  const rootQuestions: Question[] = useWatch({
-    control: form.control,
-    name: "questions",
-  });
 
   if (id && isLoading) return <Loading />;
 
@@ -527,8 +541,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     });
   };
   const handleValidatedChange = (
-    field: keyof typeof questionnaire,
-    value: (typeof questionnaire)[keyof typeof questionnaire],
+    field: keyof QuestionnaireDetail,
+    value: QuestionnaireDetail[keyof QuestionnaireDetail],
   ) => {
     form.setValue(field as "title" | "description" | "slug", value, {
       shouldValidate: true,
@@ -596,12 +610,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
     if (id) {
       updateQuestionnaire({
-        ...questionnaire,
+        ...form.getValues(),
         questions: rootQuestions,
       });
     } else {
       createQuestionnaire({
-        ...questionnaire,
+        ...form.getValues(),
         questions: rootQuestions,
         organizations: selectedOrgs.map((o) => o.id),
         tags: selectedTags.map((t) => t.id),
@@ -614,9 +628,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleDownload = () => {
-    const dataStr = JSON.stringify(questionnaire, null, 2);
+    const dataStr = JSON.stringify(form.getValues(), null, 2);
     const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
-    const exportFileDefaultName = `${questionnaire.slug || "questionnaire"}.json`;
+    const exportFileDefaultName = `${form.getValues("slug") || "questionnaire"}.json`;
 
     const linkElement = document.createElement("a");
     linkElement.setAttribute("href", dataUri);
@@ -663,7 +677,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     };
 
     setQuestionnaire({
-      ...questionnaire,
+      ...form.getValues(),
       ...mappedData,
     } as QuestionnaireDetail);
     form.reset({
@@ -734,10 +748,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         <div>
           <h1 className="text-2xl font-bold">
             {id
-              ? t("edit") + " " + questionnaire.title
+              ? t("edit") + " " + form.watch("title")
               : t("create_questionnaire")}
           </h1>
-          <p className="text-sm text-gray-500">{questionnaire.description}</p>
+          <p className="text-sm text-gray-500">{form.watch("description")}</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -895,7 +909,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               </Card>
               <div className="space-y-4 max-w-sm lg:hidden">
                 <QuestionnaireProperties
-                  questionnaire={questionnaire}
+                  form={form}
                   updateQuestionnaireField={updateQuestionnaireField}
                   id={id}
                   organizations={organizations}
@@ -909,7 +923,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     error: orgError,
                     setError: setOrgError,
                   }}
-                  tags={questionnaire.tags}
+                  tags={tags}
                   tagSelection={{
                     selectedTags: selectedTags,
                     onToggle: handleToggleTag,
@@ -1129,7 +1143,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </div>
             <div className="space-y-4 w-60 hidden lg:block">
               <QuestionnaireProperties
-                questionnaire={questionnaire}
+                form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
                 id={id}
                 organizations={organizations}
@@ -1143,7 +1157,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   error: orgError,
                   setError: setOrgError,
                 }}
-                tags={questionnaire.tags}
+                tags={tags}
                 tagSelection={{
                   selectedTags: selectedTags,
                   onToggle: handleToggleTag,
@@ -1157,7 +1171,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </div>
           </div>
           <DebugPreview
-            data={questionnaire}
+            data={form.getValues()}
             title={t("questionnaire")}
             className="mt-4"
           />
@@ -1172,7 +1186,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               <QuestionnaireForm
                 questionnaireSlug={id}
                 patientId="preview"
-                subjectType={questionnaire.subject_type}
+                subjectType={form.watch("subject_type")}
                 encounterId="preview"
                 facilityId="preview"
               />
