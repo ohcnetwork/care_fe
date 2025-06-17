@@ -994,6 +994,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   </Card>
                 </form>
               </Form>
+              <DebugPreview
+                data={questionnaire}
+                title={t("questionnaire")}
+                className="mt-4"
+              />
             </div>
             <div className="space-y-4 w-60 hidden lg:block">
               <QuestionnaireProperties
@@ -1024,11 +1029,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               />
             </div>
           </div>
-          <DebugPreview
-            data={questionnaire}
-            title={t("questionnaire")}
-            className="mt-4"
-          />
         </TabsContent>
 
         <TabsContent value="preview">

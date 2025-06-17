@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Building } from "lucide-react";
 import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -719,7 +718,7 @@ export function QuestionnaireForm({
   return (
     <div className="flex gap-4">
       {/* Left Navigation */}
-      <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
+      <div className="w-64 border-r border-gray-200 pr-4 py-3 pl-0 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         {questionnaireForms.map((form) => (
           <>
             {encounterId === "preview" ? (
@@ -776,46 +775,50 @@ export function QuestionnaireForm({
         {questionnaireForms.map((form, index) => (
           <div
             key={`${form.questionnaire.id}-${index}`}
-            className="rounded-lg py-6 space-y-6"
+            className="rounded-lg pb-6 space-y-6"
             data-questionnaire-id={form.questionnaire.id}
           >
-            <div className="flex justify-between items-center max-w-4xl p-2">
+            <div className="flex justify-between items-center max-w-4xl">
               <div
                 className={cn({
                   "space-y-5 border-2 border-gray-100 rounded-lg w-full shadow-sm p-3":
                     encounterId === "preview",
                 })}
               >
-                <div className="space-y-1">
-                  <h2 className="text-xl font-semibold">
-                    {form.questionnaire.title}
-                  </h2>
-                  {form.questionnaire.description && (
-                    <p className="text-sm text-gray-500">
-                      {form.questionnaire.description}
-                    </p>
+                <p className="text-lg text-gray-500 font-medium">
+                  {t("questionnaire_title_and_description")}
+                </p>
+                <div className="flex flex-col gap-4 ml-6">
+                  <div className="space-y-2">
+                    <h2 className="text-xl font-semibold">
+                      {form.questionnaire.title}
+                    </h2>
+                    {form.questionnaire.description && (
+                      <p className="text-sm text-gray-500">
+                        {form.questionnaire.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {encounterId === "preview" && organizations && (
+                    <div className="flex flex-col gap-3">
+                      <Label className="text-sm font-semibold">
+                        {t("organizations")}
+                      </Label>
+                      <div className="flex flex-wrap gap-3 mb-2">
+                        {organizations.map((org) => (
+                          <Badge
+                            key={org.id}
+                            variant="secondary"
+                            className="flex items-center gap-1 bg-gray-200"
+                          >
+                            {org.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
-
-                {encounterId === "preview" && organizations && (
-                  <div className="flex flex-col gap-3">
-                    <Label className="text-sm font-semibold">
-                      {t("organizations")}
-                    </Label>
-                    <div className="flex flex-wrap gap-3 mb-2">
-                      {organizations.map((org) => (
-                        <Badge
-                          key={org.id}
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          <Building className="h-3 w-3" />
-                          {org.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
               {form.questionnaire.slug !== questionnaireSlug && (
                 <Button

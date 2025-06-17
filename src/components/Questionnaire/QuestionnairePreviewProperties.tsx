@@ -22,13 +22,13 @@ export default function QuestionnairePreviewProperties({
         <div className="flex flex-col gap-8">
           <div className="flex flex-wrap lg:gap-3 justify-between">
             <div className="flex flex-col gap-0.5">
-              <Label className="text-xs text-gray-500">{t("status")}</Label>
+              <Label className="text-sm text-gray-500">{t("status")}</Label>
               <div className="text-sm font-semibold">
                 {t(questionnaire.status)}
               </div>
             </div>
             <div className="flex flex-col gap-0.5">
-              <Label className="text-xs text-gray-500">
+              <Label className="text-sm text-gray-500">
                 {t("subject_type")}
               </Label>
               <div className="text-sm font-semibold">
@@ -36,14 +36,14 @@ export default function QuestionnairePreviewProperties({
               </div>
             </div>
             <div className="flex flex-col gap-0.5">
-              <Label className="text-xs text-gray-500">{t("version")}</Label>
+              <Label className="text-sm text-gray-500">{t("version")}</Label>
               <div className="text-sm font-semibold">
                 {questionnaire.version || "0.0.1"}
               </div>
             </div>
           </div>
           <div className="flex flex-col gap-3">
-            <Label className="text-xs text-gray-500">{t("tags")}</Label>
+            <Label className="text-sm text-gray-500">{t("tags")}</Label>
             <div className="flex flex-wrap gap-2 mb-2">
               {questionnaire.tags.map((tag: QuestionnaireTagModel) => (
                 <Badge

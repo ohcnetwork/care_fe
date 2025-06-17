@@ -24,44 +24,51 @@ export function QuestionLabel({
 
   return (
     <Label className={className ?? defaultClass}>
-      <div className="flex flex-col gap-3 bg-gray-100 md:bg-transparent">
+      <div className="flex gap-3 bg-gray-100 md:bg-transparent">
         {(question.type === "structured" || !isSubQuestion) && (
           <div
-            className={cn("hidden md:block h-1 w-4 rounded-full", {
+            className={cn("hidden md:block h-5 w-1 rounded-full", {
               "bg-indigo-600": question.required,
-              "bg-green-500": !question.required,
+              "bg-gray-400": !question.required,
             })}
           />
         )}
-        <div className="flex gap-3 items-center">
-          {(question.type === "structured" || !isSubQuestion) && (
-            <div
-              className={cn(
-                "md:hidden absolute w-1 h-5 rounded-r-sm left-3.5",
-                {
-                  "bg-indigo-600": question.required,
-                  "bg-green-500": !question.required,
-                },
+        <div className="flex flex-col gap-1">
+          <div className="flex gap-3 items-center">
+            {(question.type === "structured" || !isSubQuestion) && (
+              <div
+                className={cn(
+                  "md:hidden absolute h-5 w-1 rounded-r-sm left-3.5",
+                  {
+                    "bg-indigo-600": question.required,
+                    "bg-gray-400": !question.required,
+                  },
+                )}
+              />
+            )}
+            <span>
+              <span
+                className={cn({
+                  "text-gray-950 font-semibold":
+                    question.type === "structured" ||
+                    groupLabel ||
+                    !isSubQuestion,
+                })}
+              >
+                {question.text}
+              </span>
+              {question.required && (
+                <span className="ml-1 text-red-500">*</span>
               )}
-            />
-          )}
-          <span>
-            <span
-              className={cn({
-                "text-gray-950 font-semibold":
-                  question.type === "structured" ||
-                  groupLabel ||
-                  !isSubQuestion,
-              })}
-            >
-              {question.text}
             </span>
-            {question.required && <span className="ml-1 text-red-500">*</span>}
-          </span>
-          {question.unit?.code && (
-            <span className="text-sm text-gray-500">
-              ({question.unit.code})
-            </span>
+            {question.unit?.code && (
+              <span className="text-sm text-gray-500">
+                ({question.unit.code})
+              </span>
+            )}
+          </div>
+          {question.description && (
+            <p className="text-sm text-gray-500">{question.description}</p>
           )}
         </div>
       </div>

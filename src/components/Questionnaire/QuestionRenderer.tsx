@@ -67,14 +67,14 @@ export function QuestionRenderer({
         </span>
         <div className="flex gap-4">
           <div className="flex gap-1 items-center">
-            <div className="block size-2 bg-indigo-600" />
+            <div className="size-2 bg-indigo-600" />
             <span className="text-sm text-gray-400 font-semibold">
               {questions.filter((q) => q.required).length.toString()}{" "}
               {t("required")}
             </span>
           </div>
           <div className="flex gap-1 items-center">
-            <div className="block size-2 bg-green-500" />
+            <div className="block size-2 bg-gray-400" />
             <span className="text-sm text-gray-400 font-semibold">
               {questions.filter((q) => !q.required).length.toString()}{" "}
               {t("optional")}

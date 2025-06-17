@@ -2443,6 +2443,7 @@
   "questionnaire_submission_failed": "Failed to submit questionnaire",
   "questionnaire_submitted_successfully": "Questionnaire submitted successfully",
   "questionnaire_symptom_no_encounter": "Symptoms cannot be recorded without an active encounter",
+  "questionnaire_title_and_description": "Questionnaire Title & Description",
   "questionnaire_updated_successfully": "Questionnaire updated successfully",
   "questionniare_load_error": "Failed to load questionnaire. Please try again later.",
   "questions": "Questions",
