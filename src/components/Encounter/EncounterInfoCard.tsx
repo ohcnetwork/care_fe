@@ -113,10 +113,10 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row justify-between gap-2 items-center py-2 px-4 bg-gray-50">
+      <CardFooter className="flex flex-wrap gap-2 items-center justify-between py-2 px-4 bg-gray-50">
         <Link
           href={`/facility/${facilityId}/patient/${encounter.patient.id}`}
-          className="w-full"
+          className="flex-1"
         >
           <Button
             variant="outline"
@@ -132,7 +132,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
         </Link>
         <Link
           href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
-          className="w-full"
+          className="flex-1"
         >
           <Button
             variant="primary"
