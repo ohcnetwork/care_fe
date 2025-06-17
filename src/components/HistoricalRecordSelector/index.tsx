@@ -369,7 +369,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
               {structuredTypes.map(({ type }) => (
                 <div
                   key={type}
-                  className="flex-1 cursor-default text-center py-1 text-sm text-black bg-white border border-gray-200 rounded-md shadow-sm"
+                  className="flex-1 font-semibold text-center py-1 text-md"
                 >
                   {type}
                 </div>
