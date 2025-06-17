@@ -2401,8 +2401,7 @@ function QuestionEditor({
                         <SelectItem value="less_or_equals">
                           Less Than or Equal
                         </SelectItem>
-                        Exists
-                        <SelectItem value="exists"></SelectItem>
+                        <SelectItem value="exists">Exists</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
