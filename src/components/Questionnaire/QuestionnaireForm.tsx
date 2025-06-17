@@ -41,6 +41,7 @@ import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
 import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
+import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
@@ -670,41 +671,50 @@ export function QuestionnaireForm({
             resource_id: encounterId ? encounterId : patientId,
             encounter: encounterId,
             patient: patientId,
-            results: validResponses.map((response) => ({
-              question_id: response.question_id,
-              values: response.values.map((value) => {
-                if (value.type === "date" && value.value) {
-                  const date = new Date(value.value);
-                  if (isNaN(date.getTime())) {
-                    return { ...value, value: "" };
+            results: validResponses
+              .filter((response) =>
+                isQuestionEnabled(
+                  form.questionnaire.questions.find(
+                    (q) => q.id === response.question_id,
+                  ) as Question,
+                  form.responses,
+                ),
+              )
+              .map((response) => ({
+                question_id: response.question_id,
+                values: response.values.map((value) => {
+                  if (value.type === "date" && value.value) {
+                    const date = new Date(value.value);
+                    if (isNaN(date.getTime())) {
+                      return { ...value, value: "" };
+                    }
+                    const formattedDate = dateQueryString(date);
+                    return {
+                      ...value,
+                      value: formattedDate,
+                    };
+                  } else if (value.type === "dateTime" && value.value) {
+                    return {
+                      ...value,
+                      value: value.value.toISOString(),
+                    };
                   }
-                  const formattedDate = dateQueryString(date);
-                  return {
-                    ...value,
-                    value: formattedDate,
-                  };
-                } else if (value.type === "dateTime" && value.value) {
-                  return {
-                    ...value,
-                    value: value.value.toISOString(),
-                  };
-                }
-                if (value.unit) {
-                  return {
-                    value: value.value?.toString(),
-                    unit: value.unit,
-                    coding: value.coding,
-                  };
-                }
-                if (value.coding) {
-                  return { coding: value.coding };
-                }
-                return { value: String(value.value) };
-              }),
-              note: response.note,
-              body_site: response.body_site,
-              method: response.method,
-            })),
+                  if (value.unit) {
+                    return {
+                      value: value.value?.toString(),
+                      unit: value.unit,
+                      coding: value.coding,
+                    };
+                  }
+                  if (value.coding) {
+                    return { coding: value.coding };
+                  }
+                  return { value: String(value.value) };
+                }),
+                note: response.note,
+                body_site: response.body_site,
+                method: response.method,
+              })),
           },
         });
       }

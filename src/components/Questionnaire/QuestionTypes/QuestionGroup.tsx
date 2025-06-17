@@ -31,7 +31,7 @@ interface QuestionGroupProps {
   isSubQuestion?: boolean;
 }
 
-function isQuestionEnabled(
+export function isQuestionEnabled(
   question: Question,
   questionnaireResponses: QuestionnaireResponse[],
 ) {
