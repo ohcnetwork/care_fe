@@ -102,7 +102,6 @@ export default function PatientRegistration(
           date_of_birth: z
             .string({
               required_error: t("date_of_birth_must_be_present"),
-              invalid_type_error: t("date_of_birth_format"),
             })
             .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format")),
           deceased_datetime: tzAwareDateTime.optional(),
@@ -126,7 +125,6 @@ export default function PatientRegistration(
           geo_organization: z
             .string({
               required_error: t("geo_organization_required"),
-              invalid_type_error: t("geo_organization_required"),
             })
             .uuid({ message: t("geo_organization_is_required") }),
         })
