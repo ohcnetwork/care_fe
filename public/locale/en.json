@@ -2436,7 +2436,6 @@
   "questionnaire_appointment_no_encounter": "Appointment cannot be recorded without an active encounter",
   "questionnaire_created_successfully": "Questionnaire created successfully",
   "questionnaire_diagnosis_no_encounter": "Diagnosis cannot be recorded without an active encounter",
-  "questionnaire_enabled_on": "Enabled on: ",
   "questionnaire_error_loading": "Error loading questionnaire",
   "questionnaire_files_no_encounter": "Create an encounter first to upload files",
   "questionnaire_imported_successfully": "Questionnaire Imported Successfully",
