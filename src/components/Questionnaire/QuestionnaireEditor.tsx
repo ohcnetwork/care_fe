@@ -1567,11 +1567,11 @@ function QuestionEditor({
     switch (currentEnableWhen?.type) {
       case "boolean": {
         // temp fix for boolean answers in existing questionnaires
-        let answer = condition.answer.toString().toLowerCase();
-        if (answer === "yes") {
-          answer = "true";
-        } else if (answer === "no") {
-          answer = "false";
+        let answer = condition.answer.toString();
+        if (answer === "true") {
+          answer = "Yes";
+        } else if (answer === "false") {
+          answer = "No";
         }
         return (
           <Select
@@ -1581,7 +1581,7 @@ function QuestionEditor({
               newConditions[index] = {
                 question: condition.question,
                 operator: condition.operator as "equals" | "not_equals",
-                answer: val === "true",
+                answer: val,
               };
               updateField("enable_when", newConditions);
             }}
@@ -1590,8 +1590,8 @@ function QuestionEditor({
               <SelectValue placeholder="Select a value" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="true">True</SelectItem>
-              <SelectItem value="false">False</SelectItem>
+              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">No</SelectItem>
             </SelectContent>
           </Select>
         );

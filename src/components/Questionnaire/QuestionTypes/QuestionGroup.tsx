@@ -43,6 +43,9 @@ function isQuestionEnabled(
     )?.values[0];
 
     function normalizeValue(value: unknown): unknown {
+      if (typeof value === "boolean") {
+        return value === true ? "Yes" : "No";
+      }
       return typeof value === "number" ? value.toString() : value;
     }
 
@@ -59,6 +62,12 @@ function isQuestionEnabled(
           );
         }
       case "equals": {
+        console.log(
+          question.text,
+          dependentValue?.value,
+          enableWhen.answer,
+          normalizeValue(dependentValue?.value),
+        );
         return normalizeValue(dependentValue?.value) === enableWhen.answer;
       }
       case "not_equals": {
