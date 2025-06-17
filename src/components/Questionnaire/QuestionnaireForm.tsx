@@ -659,16 +659,20 @@ export function QuestionnaireForm({
             results: validResponses.map((response) => ({
               question_id: response.question_id,
               values: response.values.map((value) => {
-                if (value.type === "dateTime" && value.value) {
+                if (value.type === "date" && value.value) {
                   const date = new Date(value.value);
                   if (isNaN(date.getTime())) {
                     return { ...value, value: "" };
                   }
                   const formattedDate = date.toISOString().split("T")[0];
-                  console.log(formattedDate);
                   return {
                     ...value,
                     value: formattedDate,
+                  };
+                } else if (value.type === "dateTime" && value.value) {
+                  return {
+                    ...value,
+                    value: value.value.toISOString(),
                   };
                 }
                 if (value.unit) {
