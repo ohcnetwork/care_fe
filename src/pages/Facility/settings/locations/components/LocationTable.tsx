@@ -194,7 +194,7 @@ export function LocationTable({
                     className="flex items-center justify-end"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center">
                       <TooltipProvider>
                         {/* Move Up button or spacer */}
                         {onMoveUp && !hideUpButton ? (
@@ -283,7 +283,7 @@ export function LocationTable({
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>
-                                  {t("remove_location", {
+                                  {t("remove_name", {
                                     name: location.name,
                                   })}
                                 </AlertDialogTitle>
