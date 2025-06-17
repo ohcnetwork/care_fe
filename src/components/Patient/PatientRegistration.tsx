@@ -158,28 +158,35 @@ export default function PatientRegistration(
           }
         })
 
-        .refine(
-          (data) => {
-            if (!data.deceased_datetime) return true;
+        .superRefine((data, ctx) => {
+          if (!data.deceased_datetime) return;
 
-            const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate.isValid()) return false;
+          const deathDate = dayjs(data.deceased_datetime);
+          if (!deathDate.isValid()) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
+              path: ["deceased_datetime"],
+            });
+            return;
+          }
 
-            const dob = data.date_of_birth
-              ? dayjs(data.date_of_birth)
-              : dayjs().subtract(data.age || 0, "years");
+          const dob = data.date_of_birth
+            ? dayjs(data.date_of_birth)
+            : dayjs().subtract(data.age || 0, "years");
 
-            return data.date_of_birth
-              ? dob.isBefore(deathDate)
-              : dob.year() < deathDate.year();
-          },
-          (data) => ({
-            message: dayjs(data.deceased_datetime).isValid()
-              ? t("death_date_must_be_after_dob")
-              : t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
-            path: ["deceased_datetime"],
-          }),
-        ),
+          const isValid = data.date_of_birth
+            ? dob.isBefore(deathDate)
+            : dob.year() < deathDate.year();
+
+          if (!isValid) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("death_date_must_be_after_dob"),
+              path: ["deceased_datetime"],
+            });
+          }
+        }),
 
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
