@@ -9,7 +9,7 @@ export class PatientEncounter {
   openFirstEncounterDetails() {
     cy.get('[data-cy="encounter-list-cards"]')
       .first()
-      .contains("View Encounter Details")
+      .contains("View Encounter")
       .click();
     return this;
   }
