@@ -79,6 +79,7 @@ import {
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
 
+import { useActiveQuestion } from "@/hooks/useActiveQuestion";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import mutate from "@/Utils/request/mutate";
@@ -227,7 +228,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     Record<string, string | undefined>
   >({});
   const { dragOver, onDragOver, onDragLeave } = useDragAndDrop();
-
+  const {
+    activeQuestionId,
+    activeSubQuestionId,
+    focusQuestion,
+    focusSubQuestion,
+  } = useActiveQuestion();
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
       error as {
@@ -763,11 +769,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 toggleQuestionExpanded(question.id);
                               }
                             }}
-                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                              expandedQuestions.has(question.id)
-                                ? "bg-accent"
-                                : ""
-                            }`}
+                            onFocus={() => focusQuestion(question.id)}
+                            className={cn(
+                              "w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2",
+                              expandedQuestions.has(question.id) &&
+                                !activeSubQuestionId &&
+                                activeQuestionId === question.id &&
+                                "bg-white text-green-700 shadow",
+                            )}
                           >
                             <span className="font-medium text-gray-500">
                               {index + 1}.
@@ -803,7 +812,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                         }
                                       }
                                     }}
-                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
+                                    onFocus={() =>
+                                      focusSubQuestion(subQuestion.id)
+                                    }
+                                    className={cn(
+                                      "w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 ",
+                                      activeSubQuestionId === subQuestion.id &&
+                                        "bg-white text-green-700 shadow",
+                                    )}
                                   >
                                     <span className="font-medium text-gray-500">
                                       {index + 1}.{subIndex + 1}
@@ -984,7 +1000,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           <div
                             key={question.id}
                             id={`question-${question.id}`}
-                            className="relative bg-white rounded-lg shadow-md"
+                            className={cn(
+                              "relative bg-white rounded-lg shadow-md",
+                              activeQuestionId === question.id &&
+                                "ring-2 ring-primary-500",
+                            )}
                           >
                             <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
                             <QuestionEditor
@@ -1013,6 +1033,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 );
                               }}
                               isExpanded={expandedQuestions.has(question.id)}
+                              activeQuestionId={activeQuestionId}
+                              activeSubQuestionId={activeSubQuestionId}
+                              onFocus={() => focusQuestion(question.id)}
+                              focusQuestion={focusQuestion}
+                              focusSubQuestion={focusSubQuestion}
                               onToggleExpand={() =>
                                 toggleQuestionExpanded(question.id)
                               }
@@ -1311,6 +1336,11 @@ interface QuestionEditorProps {
   isLast?: boolean;
   structuredTypeError?: string;
   setStructuredTypeError?: (error: string | undefined) => void;
+  onFocus?: () => void;
+  activeQuestionId?: string | null;
+  activeSubQuestionId?: string | null;
+  focusQuestion: (id: string) => void;
+  focusSubQuestion: (id: string) => void;
 }
 
 function QuestionEditor({
@@ -1329,6 +1359,11 @@ function QuestionEditor({
   index,
   structuredTypeError,
   setStructuredTypeError,
+  onFocus,
+  activeQuestionId,
+  activeSubQuestionId,
+  focusQuestion,
+  focusSubQuestion,
 }: QuestionEditorProps) {
   const { t } = useTranslation();
   const {
@@ -1481,6 +1516,7 @@ function QuestionEditor({
                             { shouldValidate: true },
                           );
                         }}
+                        onFocus={onFocus}
                       />
                     </FormControl>
                     <FormMessage />
@@ -1508,6 +1544,7 @@ function QuestionEditor({
                           );
                         }}
                         placeholder={t("link_id_placeholder")}
+                        onFocus={onFocus}
                       />
                     </FormControl>
                     <FormMessage />
@@ -1528,6 +1565,7 @@ function QuestionEditor({
                     <Textarea
                       {...field}
                       value={question.description || ""}
+                      onFocus={onFocus}
                       onChange={(e) => {
                         updateField("description", e.target.value);
                         form.setValue(
@@ -1570,7 +1608,11 @@ function QuestionEditor({
                   </SelectTrigger>
                   <SelectContent className="w-[var(--radix-select-trigger-width)]">
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
+                      <SelectItem
+                        key={type.value}
+                        value={type.value}
+                        onFocus={onFocus}
+                      >
                         <div className="flex flex-col items-start">
                           <span>{type.name}</span>
                           <span className="text-xs max-w-xs text-gray-500 whitespace-normal">
@@ -1602,7 +1644,11 @@ function QuestionEditor({
                     </SelectTrigger>
                     <SelectContent>
                       {STRUCTURED_QUESTIONS.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
+                        <SelectItem
+                          key={type.value}
+                          value={type.value}
+                          onFocus={onFocus}
+                        >
                           {type.label}
                         </SelectItem>
                       ))}
@@ -1636,6 +1682,7 @@ function QuestionEditor({
                             shouldValidate: true,
                           });
                         }}
+                        onFocus={onFocus}
                       />
                     </FormControl>
                     <FormMessage />
@@ -1649,6 +1696,7 @@ function QuestionEditor({
                 form={form}
                 questionIndex={index}
                 onChange={(newCode) => updateField("code", newCode)}
+                onFocus={onFocus}
               />
             )}
           </div>
@@ -1668,6 +1716,7 @@ function QuestionEditor({
                       checked={required ?? false}
                       onCheckedChange={(val) => updateField("required", val)}
                       id={`required-${getQuestionPath()}`}
+                      onFocus={onFocus}
                     />
                     <Label htmlFor={`required-${getQuestionPath()}`}>
                       {t("required")}
@@ -1680,6 +1729,7 @@ function QuestionEditor({
                         checked={repeats ?? false}
                         onCheckedChange={(val) => updateField("repeats", val)}
                         id={`repeats-${getQuestionPath()}`}
+                        onFocus={onFocus}
                       />
                       <Label htmlFor={`repeats-${getQuestionPath()}`}>
                         {t("repeatable")}
@@ -1692,6 +1742,7 @@ function QuestionEditor({
                       checked={question.read_only ?? false}
                       onCheckedChange={(val) => updateField("read_only", val)}
                       id={`read_only-${getQuestionPath()}`}
+                      onFocus={onFocus}
                     />
                     <Label htmlFor={`read_only-${getQuestionPath()}`}>
                       {t("read_only")}
@@ -1718,6 +1769,7 @@ function QuestionEditor({
                           updateField("is_component", val)
                         }
                         id={`is_component-${getQuestionPath()}`}
+                        onFocus={onFocus}
                       />
                       <Label htmlFor={`is_component-${getQuestionPath()}`}>
                         {t("is_component")}
@@ -1732,6 +1784,7 @@ function QuestionEditor({
                         updateField("collect_time", val)
                       }
                       id={`collect_time-${getQuestionPath()}`}
+                      onFocus={onFocus}
                     />
                     <Label htmlFor={`collect_time-${getQuestionPath()}`}>
                       {t("collect_time")}
@@ -1745,6 +1798,7 @@ function QuestionEditor({
                         updateField("collect_performer", val)
                       }
                       id={`collect_performer-${getQuestionPath()}`}
+                      onFocus={onFocus}
                     />
                     <Label htmlFor={`collect_performer-${getQuestionPath()}`}>
                       {t("collect_performer")}
@@ -1758,6 +1812,7 @@ function QuestionEditor({
                         updateField("collect_body_site", val)
                       }
                       id={`collect_body_site-${getQuestionPath()}`}
+                      onFocus={onFocus}
                     />
                     <Label htmlFor={`collect_body_site-${getQuestionPath()}`}>
                       {t("collect_body_site")}
@@ -1771,6 +1826,7 @@ function QuestionEditor({
                         updateField("collect_method", val)
                       }
                       id={`collect_method-${getQuestionPath()}`}
+                      onFocus={onFocus}
                     />
                     <Label htmlFor={`collect_method-${getQuestionPath()}`}>
                       {t("collect_method")}
@@ -1801,6 +1857,7 @@ function QuestionEditor({
                       containerClasses: val,
                     });
                   }}
+                  onFocus={onFocus}
                   className="grid grid-cols-4 gap-4"
                 >
                   {LAYOUT_OPTIONS.map((option) => {
@@ -1893,6 +1950,7 @@ function QuestionEditor({
                               : [];
                             updateField("answer_option", sorted);
                           }}
+                          onFocus={onFocus}
                         >
                           <AArrowDown className="size-4" />
                           {t("sort_alphabetically")}
@@ -1922,6 +1980,7 @@ function QuestionEditor({
                                     updateField("answer_option", newOptions);
                                   }}
                                   placeholder={t("option_value")}
+                                  onFocus={onFocus}
                                 />
                               </div>
                               <div className="flex gap-2">
@@ -1942,6 +2001,7 @@ function QuestionEditor({
                                       updateField("answer_option", newOptions);
                                     }}
                                     placeholder={t("display_text_placeholder")}
+                                    onFocus={onFocus}
                                   />
                                 </div>
                                 <Popover>
@@ -2173,6 +2233,7 @@ function QuestionEditor({
                           : [newOption];
                         updateField("answer_option", newOptions);
                       }}
+                      onFocus={onFocus}
                     >
                       <CareIcon icon="l-plus" className="size-4" />
                       {t("add_option")}
@@ -2222,6 +2283,7 @@ function QuestionEditor({
                     setExpandedSubQuestions(
                       (prev) => new Set([...prev, newQuestion.id]),
                     );
+
                     setTimeout(() => {
                       const element = document.getElementById(
                         `question-${newQuestion.id}`,
@@ -2241,7 +2303,11 @@ function QuestionEditor({
                   <div
                     key={subQuestion.id}
                     id={`question-${subQuestion.id}`}
-                    className="relative bg-white rounded-lg shadow-md"
+                    className={cn(
+                      "relative bg-white rounded-lg shadow-md",
+                      activeSubQuestionId === subQuestion.id &&
+                        "ring-2 ring-green-900",
+                    )}
                   >
                     <QuestionEditor
                       form={form}
@@ -2253,6 +2319,11 @@ function QuestionEditor({
                         newQuestions[idx] = updated;
                         updateField("questions", newQuestions);
                       }}
+                      activeQuestionId={activeQuestionId}
+                      activeSubQuestionId={activeSubQuestionId}
+                      onFocus={() => focusSubQuestion(subQuestion.id)}
+                      focusQuestion={focusQuestion}
+                      focusSubQuestion={focusSubQuestion}
                       onDelete={() => {
                         const newQuestions = questions?.filter(
                           (_, i) => i !== idx,
@@ -2337,6 +2408,7 @@ function QuestionEditor({
                         };
                         updateField("enable_when", newConditions);
                       }}
+                      onFocus={onFocus}
                       placeholder="Question Link ID"
                     />
                   </div>
@@ -2482,6 +2554,7 @@ function QuestionEditor({
                             newConditions[idx] = newCondition;
                             updateField("enable_when", newConditions);
                           }}
+                          onFocus={onFocus}
                           placeholder="Answer value"
                         />
                       )}
@@ -2518,6 +2591,7 @@ function QuestionEditor({
                     newCondition,
                   ]);
                 }}
+                onFocus={onFocus}
               >
                 <CareIcon icon="l-plus" className="mr-2 size-4" />
                 {t("add_condition")}

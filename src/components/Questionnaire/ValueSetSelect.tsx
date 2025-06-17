@@ -55,6 +55,7 @@ interface Props {
   controlledOpen?: boolean;
   title?: string;
   asSheet?: boolean;
+  onFocus?: () => void;
 }
 
 const Item = ({
@@ -105,6 +106,7 @@ export default function ValueSetSelect({
   controlledOpen = false,
   title,
   asSheet = false,
+  onFocus,
 }: Props) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -224,6 +226,7 @@ export default function ValueSetSelect({
           onValueChange={(value) => {
             setActiveTab(Number(value));
           }}
+          onFocus={onFocus}
           className={cn("md:hidden", !title && "p-2 w-full")}
         >
           <TabsList className="flex w-full">
@@ -242,6 +245,7 @@ export default function ValueSetSelect({
         className="outline-hidden border-none ring-0 shadow-none"
         onValueChange={setSearch}
         autoFocus
+        onFocus={onFocus}
       />
       <CommandList className="h-75 overflow-hidden">
         <CommandEmpty>
@@ -259,7 +263,7 @@ export default function ValueSetSelect({
           <div
             className={`${activeTab === 0 ? "block" : "hidden"} md:block flex-1 overflow-auto h-[300px]`}
           >
-            <CommandGroup>
+            <CommandGroup onFocus={onFocus}>
               {resultsWithRecents.map((option) => (
                 <Item
                   key={option.code}

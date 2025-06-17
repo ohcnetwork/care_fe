@@ -38,6 +38,7 @@ interface CodingEditorProps {
   questionIndex: number;
   form: ReturnType<typeof useForm<any>>;
   onChange: (code: Code | undefined) => void;
+  onFocus?: () => void;
 }
 
 export function CodingEditor({
@@ -45,6 +46,7 @@ export function CodingEditor({
   onChange,
   form,
   questionIndex,
+  onFocus,
 }: CodingEditorProps) {
   const { mutate: verifyCode, isPending } = useMutation({
     mutationFn: mutate(valuesetApi.lookup),
@@ -81,6 +83,7 @@ export function CodingEditor({
               display: "",
             });
           }}
+          onFocus={onFocus}
         >
           <CareIcon icon="l-plus" className="mr-2 size-4" />
           {t("add_coding")}
@@ -135,7 +138,7 @@ export function CodingEditor({
                     <SelectContent>
                       {Object.entries(TERMINOLOGY_SYSTEMS).map(
                         ([key, value]) => (
-                          <SelectItem key={key} value={value}>
+                          <SelectItem key={key} value={value} onFocus={onFocus}>
                             {key}
                           </SelectItem>
                         ),
@@ -171,6 +174,7 @@ export function CodingEditor({
                           `questions.${questionIndex}.code.display`,
                         ]);
                       }}
+                      onFocus={onFocus}
                       placeholder={t("enter_code")}
                     />
                   </FormControl>
@@ -193,6 +197,7 @@ export function CodingEditor({
                       placeholder="Unverified"
                       className={!code.display ? "text-gray-500" : undefined}
                       readOnly
+                      onFocus={onFocus}
                     />
                   </FormControl>
                   <FormMessage />
