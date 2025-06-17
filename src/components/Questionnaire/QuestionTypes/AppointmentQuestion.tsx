@@ -63,14 +63,16 @@ export function validateAppointmentQuestion(
   questionId: string,
   required: boolean,
 ): QuestionValidationError[] {
-  const reasonRequired = required || (value && value.slot_id !== undefined);
-  const slotRequired =
-    required || (value && value.reason_for_visit !== undefined);
-  const dynamicFields: FieldDefinitions = {
-    REASON: { ...APPOINTMENT_FIELDS.REASON, required: reasonRequired },
-    SLOT: { ...APPOINTMENT_FIELDS.SLOT, required: slotRequired },
-  };
-  return validateFields(value, questionId, dynamicFields);
+  return validateFields(value, questionId, {
+    REASON: {
+      ...APPOINTMENT_FIELDS.REASON,
+      required: required || value?.slot_id !== undefined,
+    },
+    SLOT: {
+      ...APPOINTMENT_FIELDS.SLOT,
+      required: required || value?.reason_for_visit !== undefined,
+    },
+  });
 }
 
 export function AppointmentQuestion({
