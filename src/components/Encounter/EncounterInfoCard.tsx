@@ -8,10 +8,12 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -62,28 +64,23 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
       data-status={encounter.status}
       key={props.encounter.id}
       className={cn(
-        "hover:shadow-lg transition-shadow group md:flex md:flex-col h-full",
+        "hover:shadow-lg transition-shadow group md:flex md:flex-col h-full overflow-hidden",
         hideBorder && "border-none shadow-none",
       )}
     >
       <CardHeader className="space-y-1 pb-2">
         <div className="flex items-center justify-between">
-          <Link
-            href={`/facility/${facilityId}/patient/${encounter.patient.id}`}
-            className="hover:text-primary"
-          >
-            <CardTitle className="group-hover:text-primary transition-colors">
-              {encounter.patient.name}
-              {encounter.patient.deceased_datetime && (
-                <Badge
-                  variant="destructive"
-                  className="ml-2 py-0 border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
-                >
-                  <h3 className="text-xs font-medium">{t("deceased")}</h3>
-                </Badge>
-              )}
-            </CardTitle>
-          </Link>
+          <CardTitle className="text-lg font-semibold">
+            {encounter.patient.name}
+            {encounter.patient.deceased_datetime && (
+              <Badge
+                variant="destructive"
+                className="ml-2 py-0 border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+              >
+                <h3 className="text-xs font-medium">{t("deceased")}</h3>
+              </Badge>
+            )}
+          </CardTitle>
         </div>
         <CardDescription className="flex items-center">
           <CareIcon icon="l-clock" className="mr-2 size-4" />
@@ -112,17 +109,44 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             </Badge>
           </div>
           <div>
-            <Separator className="my-2" />
-            <Link
-              href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
-              className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
-            >
-              {t("view_details")}
-              <CareIcon icon="l-arrow-right" className="ml-1 size-4" />
-            </Link>
+            <Separator />
           </div>
         </div>
       </CardContent>
+      <CardFooter className="flex flex-col sm:flex-row justify-between gap-2 items-center py-2 px-4 bg-gray-50">
+        <Link
+          href={`/facility/${facilityId}/patient/${encounter.patient.id}`}
+          className="w-full"
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center justify-center gap-1 px-1 py-2 w-full h-9"
+            title={t("view_patient_profile")}
+          >
+            <CareIcon icon="l-user" className="size-2 flex-shrink-0" />
+            <span className="leading-none truncate">
+              {t("view_patient_profile")}
+            </span>
+          </Button>
+        </Link>
+        <Link
+          href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
+          className="w-full"
+        >
+          <Button
+            variant="primary"
+            size="sm"
+            className="flex items-center justify-center gap-1 px-1 py-2 w-full h-9"
+            title={t("view_encounter_details")}
+          >
+            <CareIcon icon="l-notes" className="size-2 flex-shrink-0" />
+            <span className="leading-none truncate">
+              {t("view_encounter_details")}
+            </span>
+          </Button>
+        </Link>
+      </CardFooter>
     </Card>
   );
 }

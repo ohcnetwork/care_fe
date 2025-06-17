@@ -16,6 +16,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 import PaginationComponent from "@/components/Common/Pagination";
@@ -149,6 +154,7 @@ function QuestionGroup({
     const value = response.values[0]?.value;
     const unit = response.values[0]?.unit || question.unit;
     const coding = response.values[0]?.coding;
+    const note = response?.note;
 
     return (
       <TableRow key={question.id}>
@@ -157,7 +163,7 @@ function QuestionGroup({
             {question.text}
           </div>
         </TableCell>
-        <TableCell className="py-1 pr-0 align-top">
+        <TableCell className="py-1 pr-0 align-top" colSpan={note ? 1 : 2}>
           <div className="text-sm font-medium break-words whitespace-normal">
             {formatValue(value, question.type)}
             {unit && <span className="ml-1 text-gray-600">{unit.code}</span>}
@@ -168,6 +174,28 @@ function QuestionGroup({
             )}
           </div>
         </TableCell>
+        {note && (
+          <TableCell className="py-1 pr-0 align-top">
+            <div className="flex justify-end">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs shrink-0"
+                  >
+                    {t("see_note")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-52 p-4">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {note}
+                  </p>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </TableCell>
+        )}
       </TableRow>
     );
   };
@@ -314,6 +342,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                     const value = response.values[0]?.value;
                     const unit = response.values[0]?.unit || question.unit;
                     const coding = response.values[0]?.coding;
+                    const note = response?.note;
 
                     if (!value && !coding) return null;
 
@@ -324,7 +353,10 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                             {question.text}
                           </div>
                         </TableCell>
-                        <TableCell className="py-1 pr-0 align-top">
+                        <TableCell
+                          className="py-1 pr-0 align-top"
+                          colSpan={note ? 1 : 2}
+                        >
                           <div className="text-sm font-medium break-words whitespace-normal">
                             {formatValue(value, question.type)}
                             {unit && (
@@ -339,6 +371,28 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                             )}
                           </div>
                         </TableCell>
+                        {note && (
+                          <TableCell className="py-1 pr-0 align-top text-right">
+                            <div className="flex justify-end">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 text-xs shrink-0"
+                                  >
+                                    {t("see_note")}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-52 p-4">
+                                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                    {note}
+                                  </p>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     );
                   })}

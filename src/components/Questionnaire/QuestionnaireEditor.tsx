@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,7 +83,7 @@ import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
+import { HTTPError } from "@/Utils/request/types";
 import { swapElements } from "@/Utils/request/utils";
 import organizationApi from "@/types/organization/organizationApi";
 import {
@@ -96,12 +95,11 @@ import {
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
-import { ValuesetBase } from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
 
 import { CodingEditor } from "./CodingEditor";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
+import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
 
 interface QuestionnaireEditorProps {
@@ -976,8 +974,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               </FormControl>
                               <FormMessage />
                               <p className="text-sm text-gray-500 mt-1">
-                                A unique URL-friendly identifier for this
-                                questionnaire
+                                {t("unique_url_for_questionnaire")}
                               </p>
                             </FormItem>
                           )}
@@ -1437,17 +1434,6 @@ function QuestionEditor({
   >({});
 
   const [inputPosition, setInputPosition] = useState("");
-  const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
-  const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
-    queryKey: ["valuesets", valueSetSearchQuery],
-    queryFn: query.debounced(valuesetApi.list, {
-      queryParams: {
-        name: valueSetSearchQuery,
-        status: "active",
-      },
-    }),
-    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
-  });
 
   const updateField = <K extends keyof Question>(
     field: K,
@@ -2471,23 +2457,15 @@ function QuestionEditor({
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <Autocomplete
-                      options={(valuesets ?? []).map((valueset) => ({
-                        label: valueset.name,
-                        value: valueset.slug,
-                      }))}
+                    <SelectOrCreateValueset
+                      onValueSetChange={(val) =>
+                        updateField("answer_value_set", val)
+                      }
                       value={
                         question.answer_value_set === "valueset"
                           ? ""
                           : (question.answer_value_set ?? "")
                       }
-                      onChange={(val: string) =>
-                        updateField("answer_value_set", val)
-                      }
-                      onSearch={setValueSetSearchQuery}
-                      placeholder={t("select_a_value_set")}
-                      isLoading={isFetchingValuesets}
-                      noOptionsMessage={t("no_valuesets_found")}
                     />
                   </CardContent>
                 )}
@@ -2650,7 +2628,7 @@ function QuestionEditor({
                   </div>
                   <div className="flex flex-col gap-2">
                     <div>
-                      <Label className="text-xs">Question</Label>
+                      <Label className="text-xs mb-1">{t("question")}</Label>
                       <div className="grid grid-cols-2 gap-2 justify-around">
                         <Select
                           value={
@@ -2765,7 +2743,7 @@ function QuestionEditor({
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs">Operator</Label>
+                      <Label className="text-xs mb-1">{t("operator")}</Label>
                       <Select
                         value={condition.operator}
                         onValueChange={(
@@ -2826,7 +2804,7 @@ function QuestionEditor({
                     </div>
                     <div className="flex gap-2">
                       <div className="flex-1">
-                        <Label className="text-xs">Answer</Label>
+                        <Label className="text-xs mb-1">{t("answer")}</Label>
                         {condition.operator === "exists" ? (
                           <Select
                             value={condition.answer ? "true" : "false"}
