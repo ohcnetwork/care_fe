@@ -2,8 +2,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -24,7 +22,7 @@ export default function QuestionnaireNavigation({
   const { t } = useTranslation();
   return (
     <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
-      <CardHeader className="p-0 text-gray-500">
+      <CardHeader className="p-0">
         <CardTitle>{t("navigation")}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -37,7 +35,7 @@ export default function QuestionnaireNavigation({
             return (
               <div key={question.id} className="space-y-1">
                 <Button
-                  variant="outline"
+                  variant={null}
                   onClick={() => {
                     if (scrollToQuestion) {
                       scrollToQuestion(question.id);
@@ -61,16 +59,18 @@ export default function QuestionnaireNavigation({
                     },
                   )}
                 >
-                  <span className="font-medium">{index + 1}.</span>
+                  <span className="font-medium text-gray-500">
+                    {index + 1}.
+                  </span>
                   <span className="flex-1 truncate">
                     {question.text || t("untitled_question")}
                   </span>
                 </Button>
                 {hasSubQuestions && question.questions && (
-                  <div className="ml-6 pl-2 space-y-1">
+                  <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
                     {question.questions.map((subQuestion, subIndex) => (
                       <Button
-                        variant="outline"
+                        variant={null}
                         key={subQuestion.id}
                         onClick={() => {
                           if (scrollToQuestion) {
@@ -96,16 +96,12 @@ export default function QuestionnaireNavigation({
                             }
                           }
                         }}
-                        className="w-full text-left px-3 py-1.5 rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
+                        className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
                       >
-                        <CareIcon
-                          icon="l-corner-down-right"
-                          className="size-100 text-gray-500"
-                        />
-                        <span className="font-medium text-sm">
+                        <span className="font-medium text-gray-500">
                           {index + 1}.{subIndex + 1}
                         </span>
-                        <span className="flex-1 truncate text-sm">
+                        <span className="flex-1 truncate">
                           {subQuestion.text || "Untitled Question"}
                         </span>
                       </Button>
