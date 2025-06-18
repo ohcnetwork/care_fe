@@ -63,8 +63,10 @@ export function formatValue(
   switch (type) {
     case "dateTime":
       return value instanceof Date
-        ? formatDateTime(value.toISOString())
-        : formatDateTime(value.toString());
+        ? formatDateTime(value.toISOString(), "hh:mm A; DD/MM/YYYY")
+        : formatDateTime(value.toString(), "hh:mm A; DD/MM/YYYY");
+    case "date":
+      return formatDateTime(value.toString());
     case "choice":
       return properCase(value.toString());
     case "decimal":
@@ -338,8 +340,9 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                       (r) => r.question_id === question.id,
                     );
                     if (!response) return null;
-
-                    const value = response.values[0]?.value;
+                    const value = response.values
+                      ?.map((v) => v.value)
+                      .join(", ");
                     const unit = response.values[0]?.unit || question.unit;
                     const coding = response.values[0]?.coding;
                     const note = response?.note;
