@@ -54,7 +54,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import { formatName, trimNote } from "@/Utils/utils";
 import {
   DoseRange,
   INACTIVE_MEDICATION_STATUSES,
@@ -1322,6 +1322,13 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <Input
           value={medication.note || ""}
           onChange={(e) => onUpdate?.({ note: e.target.value })}
+          onBlur={(e) => {
+            const trimmed = trimNote(e.target.value);
+            if (trimmed !== e.target.value) {
+              e.target.value = trimmed ?? "";
+              onUpdate?.({ note: trimmed });
+            }
+          }}
           placeholder={t("additional_notes")}
           disabled={disabled}
           className="h-9 text-sm"

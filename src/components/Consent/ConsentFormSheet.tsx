@@ -46,6 +46,7 @@ import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import useFileUpload from "@/hooks/useFileUpload";
 
 import mutate from "@/Utils/request/mutate";
+import { trimNote } from "@/Utils/utils";
 import {
   CONSENT_CATEGORIES,
   CONSENT_DECISIONS,
@@ -497,6 +498,13 @@ export default function ConsentFormSheet({
                       className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-md"
                       rows={3}
                       {...field}
+                      onBlur={(e) => {
+                        const trimmed = trimNote(e.target.value);
+                        if (trimmed !== e.target.value) {
+                          e.target.value = trimmed ?? "";
+                          field.onChange(e);
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

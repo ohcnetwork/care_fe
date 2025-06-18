@@ -53,7 +53,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, trimNote } from "@/Utils/utils";
 import {
   ALLERGY_VERIFICATION_STATUS,
   type AllergyIntolerance,
@@ -289,6 +289,13 @@ function NotesInput({
       placeholder={t("additional_notes")}
       value={note ?? ""}
       onChange={onChange}
+      onBlur={(e) => {
+        const trimmed = trimNote(e.target.value);
+        if (trimmed !== e.target.value) {
+          e.target.value = trimmed ?? "";
+          onChange(e);
+        }
+      }}
       disabled={disabled}
       className="mt-1 lg:mt-0.5"
     />
