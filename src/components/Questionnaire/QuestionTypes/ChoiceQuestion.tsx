@@ -146,28 +146,29 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       <RadioGroup
         onValueChange={handleValueChange}
         disabled={disabled}
-        className="flex flex-wrap gap-4 "
+        className="flex flex-wrap gap-4 ml-2"
         value={selectedValue}
       >
         {options.map((option) => (
           <div
             className={cn(
-              "border rounded-md p-2 w-full sm:w-auto",
+              "border rounded-md p-2 w-full cursor-pointer sm:w-auto hover:border-primary-500 group",
+
               selectedValue === option.value
                 ? "bg-primary-100 border-primary-500"
                 : "border-gray-300",
             )}
             key={`${question.id}-${option.value.toString()}`}
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 ">
               <RadioGroupItem
                 value={option.value.toString()}
                 id={`${question.id}-${option.value.toString()}`}
-                className="h-4 w-4 border-2 border-gray-300 text-primary focus:ring-primary"
+                className="h-4 w-4 border-2 border-gray-300 text-primary focus:ring-primary group-hover:border-primary-500"
               />
               <Label
                 htmlFor={`${question.id}-${option.value.toString()}`}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed cursor-pointer peer-disabled:opacity-70"
               >
                 {properCase(option.display || option.value)}
               </Label>

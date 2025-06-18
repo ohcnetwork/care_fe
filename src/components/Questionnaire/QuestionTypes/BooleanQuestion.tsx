@@ -59,7 +59,7 @@ export function BooleanQuestion({
       ].map((option) => (
         <div
           className={cn(
-            "border rounded-md p-2",
+            "border rounded-md p-2 cursor-pointer sm:w-auto hover:border-primary-500 group",
             selectedValue === option.value
               ? "bg-primary-100 border-primary-500"
               : "border-gray-300",
@@ -70,11 +70,11 @@ export function BooleanQuestion({
             <RadioGroupItem
               value={option.value}
               id={`${question.id}-${option.value}`}
-              className="h-4 w-4 border-2 border-gray-300 text-primary focus:ring-primary"
+              className="h-4 w-4 border-2 border-gray-300 text-primary focus:ring-primary group-hover:border-primary-500"
             />
             <Label
               htmlFor={`${question.id}-${option.value}`}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
             >
               {option.label}
             </Label>

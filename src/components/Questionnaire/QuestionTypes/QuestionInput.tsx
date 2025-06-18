@@ -235,24 +235,26 @@ export function QuestionInput({
             <QuestionLabel
               question={question}
               isSubQuestion={isSubQuestion}
-              className="mb-3"
+              className="mb-2 text-md"
             />
             {question.description && (
               <p className="text-sm text-gray-500">{question.description}</p>
             )}
           </div>
-          <div className="flex-1 min-w-0">{renderSingleInput(0)}</div>
-          <NotesInput
-            questionnaireResponse={questionnaireResponse}
-            handleUpdateNote={(note) => {
-              updateQuestionnaireResponseCB(
-                [...questionnaireResponse.values],
-                questionnaireResponse.question_id,
-                note,
-              );
-            }}
-            disabled={disabled}
-          />
+          <div className="flex flex-col sm:flex-row">
+            <div className="flex-1 min-w-0">{renderSingleInput(0)}</div>
+            <NotesInput
+              questionnaireResponse={questionnaireResponse}
+              handleUpdateNote={(note) => {
+                updateQuestionnaireResponseCB(
+                  [...questionnaireResponse.values],
+                  questionnaireResponse.question_id,
+                  note,
+                );
+              }}
+              disabled={disabled}
+            />
+          </div>
         </div>
       );
     }
@@ -262,7 +264,7 @@ export function QuestionInput({
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 &&
-            question.type != "choice" && (
+            (question.type != "choice" || question.answer_value_set) && (
               <Button
                 variant="ghost"
                 size="icon"
