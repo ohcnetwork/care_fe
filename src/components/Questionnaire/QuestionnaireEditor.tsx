@@ -856,7 +856,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               expandedQuestions.has(question.link_id) &&
                                 !activeSubQuestionId &&
                                 activeQuestionId === question.link_id &&
-                                "bg-white text-green-700 shadow",
+                                "bg-white text-primary-500 shadow",
                             )}
                           >
                             <span className="font-medium text-gray-500">
@@ -1087,11 +1087,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             id={`question-${question.link_id}`}
                             className={cn(
                               "relative bg-white rounded-lg shadow-md",
-                              activeQuestionId === question.id &&
+                              expandedQuestions.has(question.link_id) &&
+                                !activeSubQuestionId &&
+                                activeQuestionId === question.link_id &&
                                 "ring-2 ring-primary-500",
                             )}
-                            id={`question-${question.link_id}`}
-                            className="relative bg-white rounded-lg shadow-md"
                           >
                             <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
                             <QuestionEditor
@@ -1111,7 +1111,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 );
                                 updateQuestions(newQuestions);
                               }}
-                              isExpanded={expandedQuestions.has(question.link_id)}
+                              isExpanded={expandedQuestions.has(
+                                question.link_id,
+                              )}
                               activeQuestionId={activeQuestionId}
                               activeSubQuestionId={activeSubQuestionId}
                               onFocus={() => focusQuestion(question.link_id)}
@@ -2596,7 +2598,7 @@ function QuestionEditor({
                     className={cn(
                       "relative bg-white rounded-lg shadow-md",
                       activeSubQuestionId === subQuestion.link_id &&
-                        "ring-2 ring-green-900",
+                        "ring-2 ring-primary-500",
                     )}
                   >
                     <QuestionEditor
@@ -2615,7 +2617,7 @@ function QuestionEditor({
                       }}
                       activeQuestionId={activeQuestionId}
                       activeSubQuestionId={activeSubQuestionId}
-                      onFocus={() => focusSubQuestion(subQuestion.id)}
+                      onFocus={() => focusSubQuestion(subQuestion.link_id)}
                       focusQuestion={focusQuestion}
                       focusSubQuestion={focusSubQuestion}
                       onDelete={() => {
