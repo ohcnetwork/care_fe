@@ -204,7 +204,7 @@ export default function PatientRegistration(
       same_phone_number: false,
       same_address: true,
     },
-    mode: "onChange",
+    mode: "onSubmit",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
