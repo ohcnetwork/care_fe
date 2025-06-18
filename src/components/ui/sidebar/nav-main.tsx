@@ -36,12 +36,12 @@ const matchPath = (pattern: string, path: string) => {
 };
 
 const isChildActive = (link: NavigationLink) => {
-  const { pathname } = window.location;
+  const currentPath = window.location.pathname;
 
   if (!link.children) return false;
 
   return link.children.some(({ url, matchPaths = [] }) =>
-    [url, ...matchPaths].some((pattern) => matchPath(pattern, pathname)),
+    [url, ...matchPaths].some((pattern) => matchPath(pattern, currentPath)),
   );
 };
 
