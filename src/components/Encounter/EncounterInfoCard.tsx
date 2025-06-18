@@ -88,7 +88,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             format(new Date(encounter.period.start), "PPp")}
         </CardDescription>
       </CardHeader>
-      <CardContent className="grow">
+      <CardContent className="grow pb-3">
         <div className="flex flex-col justify-between h-full space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <Badge
@@ -113,7 +113,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row justify-between gap-2 items-center py-2 px-4 bg-gray-50">
+      <CardFooter className="flex flex-col sm:flex-row justify-between gap-1 items-center py-2 px-2 bg-gray-50">
         <Link
           href={`/facility/${facilityId}/patient/${encounter.patient.id}`}
           className="w-full"
@@ -122,12 +122,10 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             variant="outline"
             size="sm"
             className="flex items-center justify-center gap-1 px-1 py-2 w-full h-9"
-            title={t("view_patient_profile")}
+            title={t("view_patient")}
           >
             <CareIcon icon="l-user" className="size-2 flex-shrink-0" />
-            <span className="leading-none truncate">
-              {t("view_patient_profile")}
-            </span>
+            <span className="leading-none truncate">{t("view_patient")}</span>
           </Button>
         </Link>
         <Link
@@ -135,15 +133,13 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           className="w-full"
         >
           <Button
-            variant="primary"
+            variant="outline"
             size="sm"
             className="flex items-center justify-center gap-1 px-1 py-2 w-full h-9"
-            title={t("view_encounter_details")}
+            title={t("view_encounter")}
           >
             <CareIcon icon="l-notes" className="size-2 flex-shrink-0" />
-            <span className="leading-none truncate">
-              {t("view_encounter_details")}
-            </span>
+            <span className="leading-none truncate">{t("view_encounter")}</span>
           </Button>
         </Link>
       </CardFooter>

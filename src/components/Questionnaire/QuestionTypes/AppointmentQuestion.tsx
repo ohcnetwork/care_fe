@@ -34,8 +34,6 @@ import {
 } from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
-import { FieldError } from "./FieldError";
-
 interface AppointmentQuestionProps {
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
@@ -53,10 +51,6 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
   REASON: {
     key: "reason_for_visit",
     required: true,
-    validate: (value: unknown) => {
-      const str = value as string;
-      return !!str?.trim();
-    },
   },
   SLOT: {
     key: "slot_id",
@@ -67,8 +61,18 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
 export function validateAppointmentQuestion(
   value: CreateAppointmentQuestion,
   questionId: string,
+  required: boolean,
 ): QuestionValidationError[] {
-  return validateFields(value, questionId, APPOINTMENT_FIELDS);
+  return validateFields(value, questionId, {
+    REASON: {
+      ...APPOINTMENT_FIELDS.REASON,
+      required: required || value?.slot_id !== undefined,
+    },
+    SLOT: {
+      ...APPOINTMENT_FIELDS.SLOT,
+      required: required || value?.reason_for_visit !== undefined,
+    },
+  });
 }
 
 export function AppointmentQuestion({
@@ -90,11 +94,21 @@ export function AppointmentQuestion({
   const value = values[0] ?? {};
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
-    updateQuestionnaireResponseCB(
-      [{ type: "appointment", value: [{ ...value, ...updates }] }],
-      questionnaireResponse.question_id,
-      questionnaireResponse.note,
-    );
+    const updatedValue = { ...value, ...updates };
+
+    if (!updatedValue.reason_for_visit && !updatedValue.slot_id) {
+      updateQuestionnaireResponseCB(
+        [],
+        questionnaireResponse.question_id,
+        questionnaireResponse.note,
+      );
+    } else {
+      updateQuestionnaireResponseCB(
+        [{ type: "appointment", value: [updatedValue] }],
+        questionnaireResponse.question_id,
+        questionnaireResponse.note,
+      );
+    }
   };
 
   // Query to get slot details for display
@@ -114,28 +128,27 @@ export function AppointmentQuestion({
       <div>
         <Label className="mb-2">
           {t("reason_for_visit")}
-          <span className="text-red-500 ml-0.5">*</span>
+          {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <Textarea
           placeholder={t("reason_for_visit_placeholder")}
           value={value.reason_for_visit || ""}
-          onChange={(e) => handleUpdate({ reason_for_visit: e.target.value })}
+          onChange={(e) =>
+            handleUpdate({
+              reason_for_visit: e.target.value.trim() || undefined,
+            })
+          }
           disabled={disabled}
           className={cn(
             hasError(APPOINTMENT_FIELDS.REASON.key) && "border-red-500",
           )}
-        />
-        <FieldError
-          fieldKey={APPOINTMENT_FIELDS.REASON.key}
-          questionId={question.id}
-          errors={errors}
         />
       </div>
 
       <div>
         <Label className="block mb-2">
           {t("select_practitioner")}
-          <span className="text-red-500 ml-0.5">*</span>
+          {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <div
           className={cn(
@@ -163,7 +176,7 @@ export function AppointmentQuestion({
       <div>
         <Label className="block mb-2">
           {t("appointment_slot")}
-          <span className="text-red-500 ml-0.5">*</span>
+          {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <div
           className={cn(
@@ -228,11 +241,6 @@ export function AppointmentQuestion({
               </div>
             </SheetContent>
           </Sheet>
-          <FieldError
-            fieldKey={APPOINTMENT_FIELDS.SLOT.key}
-            questionId={question.id}
-            errors={errors}
-          />
         </div>
       </div>
     </div>
