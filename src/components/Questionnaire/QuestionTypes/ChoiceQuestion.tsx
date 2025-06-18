@@ -51,10 +51,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   const handleValueChange = (newValue: string) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
-    newValues[index] = {
-      type: "string",
-      value: newValue,
-    };
+    newValues[index] = { type: "string", value: newValue };
 
     updateQuestionnaireResponseCB(
       newValues,
@@ -120,6 +117,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         placeholder={t("select_an_option")}
         disabled={disabled}
         id={`choice-${question.id}`}
+        className="bg-white"
       />
     );
   }
