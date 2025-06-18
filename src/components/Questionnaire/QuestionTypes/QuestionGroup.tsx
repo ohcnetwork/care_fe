@@ -58,7 +58,9 @@ export function isQuestionEnabled(
       case "exists":
         return (
           normalizedAnswers.length > 0 &&
-          normalizedAnswers.some((v) => v !== "")
+          normalizedAnswers.some(
+            (v) => v !== "" && v !== null && v !== undefined,
+          )
         );
 
       case "equals":
