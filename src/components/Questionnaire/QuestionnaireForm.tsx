@@ -31,7 +31,10 @@ import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
+import {
+  type Question,
+  findQuestionById,
+} from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
@@ -674,8 +677,9 @@ export function QuestionnaireForm({
             results: validResponses
               .filter((response) =>
                 isQuestionEnabled(
-                  form.questionnaire.questions.find(
-                    (q) => q.id === response.question_id,
+                  findQuestionById(
+                    form.questionnaire.questions,
+                    response.question_id,
                   ) as Question,
                   form.responses,
                 ),
