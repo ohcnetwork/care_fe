@@ -902,7 +902,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                     }
                                     className={cn(
                                       "w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 ",
-                                      activeSubQuestionId === subQuestion.id &&
+                                      activeSubQuestionId ===
+                                        subQuestion.link_id &&
                                         "bg-white text-green-700 shadow",
                                     )}
                                   >
@@ -1706,6 +1707,7 @@ function QuestionEditor({
               updateField("enable_when", newConditions);
             }}
             placeholder="Answer value"
+            onFocus={onFocus}
           />
         );
     }
