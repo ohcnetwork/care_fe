@@ -25,6 +25,7 @@ export type ResponseValue =
   | RV<"number", number | undefined>
   | RV<"boolean", boolean | undefined>
   | RV<"dateTime", Date | undefined>
+  | RV<"date", Date | undefined>
   | RV<"quantity", number | undefined>
   | RV<"allergy_intolerance", AllergyIntoleranceRequest[]>
   | RV<"medication_request", MedicationRequest[]>
