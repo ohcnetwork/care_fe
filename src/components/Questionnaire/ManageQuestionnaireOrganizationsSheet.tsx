@@ -205,9 +205,15 @@ export default function ManageQuestionnaireOrganizationsSheet({
     setOrganizations({ organizations: selectedIds });
   };
 
-  const selectedOrganizations = availableOrganizations?.results.filter((org) =>
-    selectedIds.includes(org.id),
-  );
+  const selectedOrganizations = [
+    ...(organizations?.results ?? []),
+    ...(availableOrganizations?.results ?? []),
+  ].filter((org, idx, arr) => {
+    return (
+      selectedIds.includes(org.id) &&
+      arr.findIndex((o) => o.id === org.id) === idx // de-duplication
+    );
+  });
 
   const hasChanges = !organizations?.results
     ? false
