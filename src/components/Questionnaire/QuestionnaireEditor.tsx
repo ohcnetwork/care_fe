@@ -856,7 +856,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               expandedQuestions.has(question.link_id) &&
                                 !activeSubQuestionId &&
                                 activeQuestionId === question.link_id &&
-                                "bg-white text-primary-500 shadow",
+                                "bg-white text-green-700 shadow",
                             )}
                           >
                             <span className="font-medium text-gray-500">
