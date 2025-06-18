@@ -30,10 +30,19 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import { NavigationLink } from "./facility-nav";
 
+const matchPath = (pattern: string, path: string) => {
+  const regex = new RegExp(`^${pattern.replace(/:\w+/g, "[^/]+")}`);
+  return regex.test(path);
+};
+
 const isChildActive = (link: NavigationLink) => {
+  const { pathname } = window.location;
+
   if (!link.children) return false;
-  const currentPath = window.location.pathname;
-  return link.children.some((child) => currentPath.startsWith(child.url));
+
+  return link.children.some(({ url, matchPaths = [] }) =>
+    [url, ...matchPaths].some((pattern) => matchPath(pattern, pathname)),
+  );
 };
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
@@ -149,6 +158,7 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <SidebarMenuButton
+          data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
           tooltip={link.name}
           className={cn(
             "cursor-pointer hover:bg-gray-200 hover:text-green-700",

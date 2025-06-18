@@ -22,6 +22,7 @@ export interface NavigationLink {
   icon?: React.ReactNode;
   visibility?: boolean;
   children?: NavigationLink[];
+  matchPaths?: string[];
 }
 
 interface FacilityNavProps {
@@ -71,6 +72,7 @@ function generateFacilityLinks(
         {
           name: t("encounters"),
           url: `${baseUrl}/encounters/patients`,
+          matchPaths: [`${baseUrl}/patient/:patientId`],
         },
         {
           name: t("locations"),
