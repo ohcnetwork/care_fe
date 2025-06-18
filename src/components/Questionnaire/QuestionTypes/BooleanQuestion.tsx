@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -30,9 +32,11 @@ export function BooleanQuestion({
 }: BooleanQuestionProps) {
   const { t } = useTranslation();
 
+  const selectedValue = questionnaireResponse.values[0]?.value?.toString();
+
   return (
     <RadioGroup
-      value={questionnaireResponse.values[0]?.value?.toString()}
+      value={selectedValue}
       onValueChange={(value) => {
         clearError();
         updateQuestionnaireResponseCB(
@@ -47,27 +51,36 @@ export function BooleanQuestion({
         );
       }}
       disabled={disabled}
+      className="flex flex-row gap-4"
     >
-      <div className="flex items-center space-x-6">
-        <div className="px-2 flex gap-1 items-center">
-          <RadioGroupItem value="true" id={`${question.id}-true`} />
-          <Label
-            htmlFor={`${question.id}-true`}
-            className="text-sm font-normal"
-          >
-            {t("yes")}
-          </Label>
+      {[
+        { value: "true", label: t("yes") },
+        { value: "false", label: t("no") },
+      ].map((option) => (
+        <div
+          className={cn(
+            "border rounded-md p-2 cursor-pointer sm:w-auto hover:border-primary-500 group",
+            selectedValue === option.value
+              ? "bg-primary-100 border-primary-500"
+              : "border-gray-300",
+          )}
+          key={option.value}
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem
+              value={option.value}
+              id={`${question.id}-${option.value}`}
+              className="h-4 w-4 border-2 border-gray-300 text-primary focus:ring-primary group-hover:border-primary-500"
+            />
+            <Label
+              htmlFor={`${question.id}-${option.value}`}
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+            >
+              {option.label}
+            </Label>
+          </div>
         </div>
-        <div className="px-2 flex gap-1 items-center">
-          <RadioGroupItem value="false" id={`${question.id}-false`} />
-          <Label
-            htmlFor={`${question.id}-false`}
-            className="text-sm font-normal"
-          >
-            {t("no")}
-          </Label>
-        </div>
-      </div>
+      ))}
     </RadioGroup>
   );
 }
