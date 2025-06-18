@@ -148,17 +148,19 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         value={selectedValue}
       >
         {options.map((option) => (
-          <div
+          <button
+            type="button"
             className={cn(
-              "border rounded-md p-2 w-full cursor-pointer sm:w-auto hover:border-primary-500 group",
-
+              "border rounded-md p-2 w-full cursor-pointer sm:w-auto hover:border-primary-500 group text-left",
               selectedValue === option.value
                 ? "bg-primary-100 border-primary-500"
                 : "border-gray-300",
             )}
             key={`${question.id}-${option.value.toString()}`}
+            onClick={() => handleValueChange(option.value.toString())}
+            disabled={disabled}
           >
-            <div className="flex items-center space-x-2 ">
+            <div className="flex items-center space-x-2">
               <RadioGroupItem
                 value={option.value.toString()}
                 id={`${question.id}-${option.value.toString()}`}
@@ -171,7 +173,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                 {properCase(option.display || option.value)}
               </Label>
             </div>
-          </div>
+          </button>
         ))}
       </RadioGroup>
     </div>
