@@ -86,111 +86,103 @@ export default function PatientRegistration(
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [isDeceased, setIsDeceased] = useState(false);
 
-  const formSchema = useMemo(
-    () =>
-      z
-        .object({
-          name: z.string().nonempty(t("name_is_required")),
-          phone_number: validators().phoneNumber.required,
-          same_phone_number: z.boolean(),
-          emergency_phone_number: validators().phoneNumber.required,
-          gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
-          blood_group: z.enum(BLOOD_GROUPS, {
-            required_error: t("blood_group_is_required"),
-          }),
-          age_or_dob: z.enum(["dob", "age"]),
-          date_of_birth: z
-            .string()
-            .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_must_be_present"))
-            .optional(),
-          deceased_datetime: tzAwareDateTime.optional(),
-          age: z
-            .number()
-            .int()
-            .positive()
-            .min(1, t("age_must_be_positive"))
-            .max(120, t("age_must_be_below_120"))
-            .optional(),
-          address: z.string().nonempty(t("address_is_required")),
-          same_address: z.boolean(),
-          permanent_address: z.string().nonempty(t("field_required")),
-          pincode: z
-            .number()
-            .int()
-            .positive()
-            .min(100000, t("pincode_must_be_6_digits"))
-            .max(999999, t("pincode_must_be_6_digits")),
-          nationality: z.string().nonempty(t("nationality_is_required")),
-          geo_organization: z
-            .string({
-              required_error: t("geo_organization_required"),
-            })
-            .uuid({ message: t("geo_organization_is_required") }),
+  const formSchema = z
+    .object({
+      name: z.string().nonempty(t("name_is_required")),
+      phone_number: validators().phoneNumber.required,
+      same_phone_number: z.boolean(),
+      emergency_phone_number: validators().phoneNumber.required,
+      gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
+      blood_group: z.enum(BLOOD_GROUPS, {
+        required_error: t("blood_group_is_required"),
+      }),
+      age_or_dob: z.enum(["dob", "age"]),
+      date_of_birth: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_must_be_present"))
+        .optional(),
+      deceased_datetime: tzAwareDateTime.optional(),
+      age: z
+        .number()
+        .int()
+        .positive()
+        .min(1, t("age_must_be_positive"))
+        .max(120, t("age_must_be_below_120"))
+        .optional(),
+      address: z.string().nonempty(t("address_is_required")),
+      same_address: z.boolean(),
+      permanent_address: z.string().nonempty(t("field_required")),
+      pincode: z
+        .number()
+        .int()
+        .positive()
+        .min(100000, t("pincode_must_be_6_digits"))
+        .max(999999, t("pincode_must_be_6_digits")),
+      nationality: z.string().nonempty(t("nationality_is_required")),
+      geo_organization: z
+        .string({
+          required_error: t("geo_organization_required"),
         })
-        .superRefine((data, ctx) => {
-          if (data.age_or_dob === "dob") {
-            if (!data.date_of_birth) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: t("date_of_birth_must_be_present"),
-                path: ["date_of_birth"],
-              });
-            }
-          }
+        .uuid({ message: t("geo_organization_is_required") }),
+    })
+    .superRefine((data, ctx) => {
+      if (data.age_or_dob === "dob") {
+        if (!data.date_of_birth) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t("date_of_birth_must_be_present"),
+            path: ["date_of_birth"],
+          });
+        }
+      }
 
-          if (data.age_or_dob === "age") {
-            if (
-              data.age === undefined ||
-              data.age === null ||
-              isNaN(data.age)
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: t("age_must_be_present"),
-                path: ["age"],
-              });
-            }
-          }
+      if (data.age_or_dob === "age") {
+        if (data.age === undefined || data.age === null || isNaN(data.age)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t("age_must_be_present"),
+            path: ["age"],
+          });
+        }
+      }
 
-          if (data.nationality === defaultCountry && !data.geo_organization) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: t("geo_organization_required"),
-              path: ["geo_organization"],
-            });
-          }
-          if (data.deceased_datetime) {
-            const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate.isValid()) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: t("invalid_date_format", {
-                  format: "DD-MM-YYYY HH:mm",
-                }),
-                path: ["deceased_datetime"],
-              });
-              return;
-            }
+      if (data.nationality === defaultCountry && !data.geo_organization) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("geo_organization_required"),
+          path: ["geo_organization"],
+        });
+      }
+      if (data.deceased_datetime) {
+        const deathDate = dayjs(data.deceased_datetime);
+        if (!deathDate.isValid()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t("invalid_date_format", {
+              format: "DD-MM-YYYY HH:mm",
+            }),
+            path: ["deceased_datetime"],
+          });
+          return;
+        }
 
-            const dob = data.date_of_birth
-              ? dayjs(data.date_of_birth)
-              : dayjs().subtract(data.age || 0, "years");
+        const dob = data.date_of_birth
+          ? dayjs(data.date_of_birth)
+          : dayjs().subtract(data.age || 0, "years");
 
-            if (
-              data.date_of_birth
-                ? !dob.isBefore(deathDate)
-                : !(dob.year() < deathDate.year())
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: t("death_date_must_be_after_dob"),
-                path: ["deceased_datetime"],
-              });
-            }
-          }
-        }),
-    [], // eslint-disable-line react-hooks/exhaustive-deps
-  );
+        if (
+          data.date_of_birth
+            ? !dob.isBefore(deathDate)
+            : !(dob.year() < deathDate.year())
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t("death_date_must_be_after_dob"),
+            path: ["deceased_datetime"],
+          });
+        }
+      }
+    });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
