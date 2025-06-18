@@ -124,7 +124,6 @@ export default function PatientRegistration(
           geo_organization: z
             .string({
               required_error: t("geo_organization_required"),
-              invalid_type_error: t("geo_organization_required"),
             })
             .uuid({ message: t("geo_organization_is_required") }),
         })
