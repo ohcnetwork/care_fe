@@ -57,7 +57,7 @@ export const extractGroupQuestions = (questions: Question[]): Question[] => {
     }));
 };
 
-export const extractQuestionById = (
+export const extractQuestionsByIds = (
   ids: Set<string>,
   questions: Question[],
 ) => {
@@ -67,14 +67,14 @@ export const extractQuestionById = (
       result.push(question);
     }
     if (question.questions) {
-      result.push(...extractQuestionById(ids, question.questions));
+      result.push(...extractQuestionsByIds(ids, question.questions));
     }
   }
   return result;
 };
 
-export const scrollToQuestion = (id: string) => {
-  const element = document.getElementById(`question-${id}`);
+export const scrollToQuestion = (linkId: string) => {
+  const element = document.getElementById(`question-${linkId}`);
   if (element) {
     element.scrollIntoView();
   }

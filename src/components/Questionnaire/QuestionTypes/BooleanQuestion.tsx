@@ -49,7 +49,7 @@ export function BooleanQuestion({
       disabled={disabled}
     >
       <div className="flex items-center space-x-6">
-        <div className="flex">
+        <div className="px-2 flex gap-1 items-center">
           <RadioGroupItem value="true" id={`${question.id}-true`} />
           <Label
             htmlFor={`${question.id}-true`}
@@ -58,7 +58,7 @@ export function BooleanQuestion({
             {t("yes")}
           </Label>
         </div>
-        <div className="flex">
+        <div className="px-2 flex gap-1 items-center">
           <RadioGroupItem value="false" id={`${question.id}-false`} />
           <Label
             htmlFor={`${question.id}-false`}

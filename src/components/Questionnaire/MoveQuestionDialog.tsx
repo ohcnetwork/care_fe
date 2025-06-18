@@ -29,7 +29,7 @@ import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import {
   addQuestionsToDestination,
   extractGroupQuestions,
-  extractQuestionById,
+  extractQuestionsByIds,
   removeQuestionsFromSource,
   scrollToQuestion,
 } from "./utils";
@@ -135,7 +135,7 @@ export default function MoveQuestionDialog({
 
   const groupQuestions = extractGroupQuestions(questionnaire.questions);
 
-  const selectedQuestions = extractQuestionById(
+  const selectedQuestions = extractQuestionsByIds(
     selectedQuestionIds,
     questionnaire.questions,
   );
@@ -171,8 +171,13 @@ export default function MoveQuestionDialog({
     props.onOpenChange?.(false);
     setDestinationId("");
     toast.success(t("questions_moved"));
-    scrollToQuestion(destinationId);
+    scrollToQuestion(destinationQuestion.link_id);
   };
+
+  const destinationQuestion = extractQuestionsByIds(
+    new Set([destinationId]),
+    questionnaire.questions,
+  )[0];
 
   const handleCopy = () => {
     if (!destinationId || selectedQuestions.length === 0) return;
@@ -191,7 +196,7 @@ export default function MoveQuestionDialog({
     props.onOpenChange?.(false);
     setDestinationId("");
     toast.success(t("questions_copied"));
-    scrollToQuestion(destinationId);
+    scrollToQuestion(destinationQuestion.link_id);
     setParentExpandedQuestions((prev) => {
       const newExpanded = new Set(prev);
       newExpanded.add(destinationId);
