@@ -1546,7 +1546,7 @@ function QuestionEditor({
       case "string":
       case "url":
       case "choice":
-        return ["equals", "not_equals"];
+        return ["equals", "not_equals", "exists"];
       default:
         return [
           "equals",
@@ -2635,6 +2635,18 @@ function QuestionEditor({
                           (_, i) => i !== idx,
                         );
                         updateField("enable_when", newConditions);
+                        setEnableWhenQuestionAnswers((prev) => {
+                          const newAnswers: typeof prev = {};
+                          Object.keys(prev)
+                            .map(Number)
+                            .sort((a, b) => a - b)
+                            .forEach((key) => {
+                              if (key < idx) newAnswers[key] = prev[key];
+                              else if (key > idx)
+                                newAnswers[key - 1] = prev[key];
+                            });
+                          return newAnswers;
+                        });
                       }}
                     >
                       <CareIcon icon="l-times" className="size-4" />
@@ -2818,32 +2830,11 @@ function QuestionEditor({
                     </div>
                     <div className="flex gap-2">
                       <div className="flex-1">
-                        <Label className="text-xs mb-1">{t("answer")}</Label>
+                        {condition.operator !== "exists" && (
+                          <Label className="text-xs mb-1">{t("answer")}</Label>
+                        )}
                         {condition.operator === "exists" ? (
-                          <Select
-                            value={condition.answer ? "true" : "false"}
-                            onValueChange={(val: "true" | "false") => {
-                              const newConditions = [
-                                ...(question.enable_when || []),
-                              ];
-                              newConditions[idx] = {
-                                question: condition.question,
-                                operator: "exists" as const,
-                                answer: val === "true",
-                              };
-                              updateField("enable_when", newConditions);
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="true">{t("true")}</SelectItem>
-                              <SelectItem value="false">
-                                {t("false")}
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <span></span>
                         ) : (
                           getAnswerChoices(idx, condition)
                         )}
@@ -2866,6 +2857,10 @@ function QuestionEditor({
                     ...(question.enable_when || []),
                     newCondition,
                   ]);
+                  setEnableWhenQuestionAnswers((prev) => ({
+                    ...prev,
+                    [question.enable_when?.length ?? 0]: [],
+                  }));
                 }}
               >
                 <CareIcon icon="l-plus" className="mr-2 size-4" />
