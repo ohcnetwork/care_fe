@@ -58,7 +58,7 @@ export function BooleanQuestion({
             "border rounded-md p-2 cursor-pointer sm:w-auto hover:border-primary-500 group text-left",
             selectedValue === option.value
               ? "bg-primary-100 border-primary-500"
-              : "border-gray-300",
+              : "bg-white border-gray-300",
           )}
           key={option.value}
           onClick={() => {
