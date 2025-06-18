@@ -100,10 +100,9 @@ export default function PatientRegistration(
           }),
           age_or_dob: z.enum(["dob", "age"]),
           date_of_birth: z
-            .string({
-              required_error: t("date_of_birth_must_be_present"),
-            })
-            .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format")),
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_must_be_present"))
+            .optional(),
           deceased_datetime: tzAwareDateTime.optional(),
           age: z
             .number()
@@ -125,26 +124,33 @@ export default function PatientRegistration(
           geo_organization: z
             .string({
               required_error: t("geo_organization_required"),
+              invalid_type_error: t("geo_organization_required"),
             })
             .uuid({ message: t("geo_organization_is_required") }),
         })
         .superRefine((data, ctx) => {
-          if (data.age_or_dob === "dob" && !data.date_of_birth) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: t("date_of_birth_must_be_present"),
-              path: ["date_of_birth"],
-            });
+          if (data.age_or_dob === "dob") {
+            if (!data.date_of_birth) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("date_of_birth_must_be_present"),
+                path: ["date_of_birth"],
+              });
+            }
           }
-          if (
-            data.age_or_dob === "age" &&
-            (data.age === undefined || data.age === null || isNaN(data.age))
-          ) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: t("age_must_be_present"),
-              path: ["age"],
-            });
+
+          if (data.age_or_dob === "age") {
+            if (
+              data.age === undefined ||
+              data.age === null ||
+              isNaN(data.age)
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("age_must_be_present"),
+                path: ["age"],
+              });
+            }
           }
 
           if (data.nationality === defaultCountry && !data.geo_organization) {
@@ -154,31 +160,36 @@ export default function PatientRegistration(
               path: ["geo_organization"],
             });
           }
-        })
-
-        .refine(
-          (data) => {
-            if (!data.deceased_datetime) return true;
-
+          if (data.deceased_datetime) {
             const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate.isValid()) return false;
+            if (!deathDate.isValid()) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("invalid_date_format", {
+                  format: "DD-MM-YYYY HH:mm",
+                }),
+                path: ["deceased_datetime"],
+              });
+              return;
+            }
 
             const dob = data.date_of_birth
               ? dayjs(data.date_of_birth)
               : dayjs().subtract(data.age || 0, "years");
 
-            return data.date_of_birth
-              ? dob.isBefore(deathDate)
-              : dob.year() < deathDate.year();
-          },
-          (data) => ({
-            message: dayjs(data.deceased_datetime).isValid()
-              ? t("death_date_must_be_after_dob")
-              : t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
-            path: ["deceased_datetime"],
-          }),
-        ),
-
+            if (
+              data.date_of_birth
+                ? !dob.isBefore(deathDate)
+                : !(dob.year() < deathDate.year())
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("death_date_must_be_after_dob"),
+                path: ["deceased_datetime"],
+              });
+            }
+          }
+        }),
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
@@ -189,10 +200,11 @@ export default function PatientRegistration(
       phone_number: phone_number || "",
       emergency_phone_number: "",
       age_or_dob: "dob",
+      date_of_birth: "",
       same_phone_number: false,
       same_address: true,
     },
-    mode: "onSubmit",
+    mode: "onChange",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
@@ -559,7 +571,7 @@ export default function PatientRegistration(
                 onValueChange={(v) => {
                   form.setValue("age_or_dob", v as "dob" | "age");
                   if (v === "age") {
-                    form.setValue("date_of_birth", "");
+                    form.setValue("date_of_birth", undefined);
                   } else {
                     form.setValue("age", undefined);
                   }
