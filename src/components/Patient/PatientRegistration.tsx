@@ -246,6 +246,26 @@ export default function PatientRegistration(
     meta: { persist: true },
   });
 
+  const getYearOfBirth = (
+    date_of_birth?: string,
+    age?: number,
+  ): number | undefined => {
+    const currentYear = dayjs().year();
+
+    if (date_of_birth) {
+      const parsed = dayjs(date_of_birth);
+      if (parsed.isValid()) {
+        return parsed.year();
+      }
+    }
+
+    if (typeof age === "number") {
+      return currentYear - age;
+    }
+
+    return undefined;
+  };
+
   const updateOfflinePatientEntry = async (
     db: AppCacheDB,
     patientId: string,
@@ -350,13 +370,16 @@ export default function PatientRegistration(
           selectedOrganization,
         );
       }
-
+      const yob = getYearOfBirth(
+        createPatientData.date_of_birth,
+        createPatientData.age,
+      );
       setNavTarget({
         to: `/facility/${facilityId}/patients/verify`,
         options: {
           query: {
             phone_number: createPatientData.phone_number,
-            year_of_birth: createPatientData.date_of_birth,
+            year_of_birth: yob,
             partial_id: generatedId.replace("offline-", "").slice(0, 5),
           },
         },
