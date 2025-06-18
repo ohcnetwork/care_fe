@@ -16,6 +16,7 @@ interface GovtOrganizationSelectorProps {
   required?: boolean;
   authToken?: string;
   selected?: Organization[];
+  setSelectedOrganization?: (org: Organization | null) => void;
 }
 
 interface OrganizationLevelProps {
@@ -91,7 +92,8 @@ function OrganizationLevelSelect({
 export default function GovtOrganizationSelector(
   props: GovtOrganizationSelectorProps,
 ) {
-  const { onChange, required, selected, authToken } = props;
+  const { onChange, required, selected, authToken, setSelectedOrganization } =
+    props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
   useEffect(() => {
@@ -129,11 +131,14 @@ export default function GovtOrganizationSelector(
       });
       if (!required || (required && !organization.has_children)) {
         onChange(organization.id);
+        setSelectedOrganization?.(organization);
       } else {
         onChange("");
+        setSelectedOrganization?.(null);
       }
     } else {
       onChange("");
+      setSelectedOrganization?.(null);
       // Reset subsequent levels when clearing a selection
       setSelectedLevels((prev) => prev.slice(0, index));
     }

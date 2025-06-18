@@ -24,6 +24,7 @@ export interface Patient {
   address: string;
   permanent_address: string;
   pincode: string;
+  age: number;
   date_of_birth: string;
   deceased_datetime?: string;
   blood_group?: BloodGroupChoices;

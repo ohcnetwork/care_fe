@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { onlineManager, useMutation, useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { InfoIcon } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
@@ -44,11 +45,15 @@ import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
 
 import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import { BLOOD_GROUP_CHOICES, GENDER_TYPES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import OfflinePatientWarningDialog from "@/OfflineSupport/OfflinePatientCreateWarning";
+import { saveOfflineWrite } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
@@ -68,21 +73,35 @@ interface PatientRegistrationPageProps {
 export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
   (typeof BLOOD_GROUP_CHOICES)[number]["id"],
 ];
+const isOfflineId = (id: string) => id.startsWith("offline-");
 
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
+  const db = new AppCacheDB();
+  const [navTarget, setNavTarget] = useState<
+    "back" | { to: string; options?: any } | null
+  >(null);
+
+  const user = useAuthUser();
   const [{ phone_number }] = useQueryParams();
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const defaultCountry = careConfig.defaultCountry.name;
-
+  const [
+    userConfirmedOfflineDuplicateRisk,
+    setUserConfirmedOfflineDuplicateRisk,
+  ] = useState(false);
+  const [selectedOrganization, setSelectedOrganization] =
+    useState<Organization | null>(null);
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [suppressOfflineDuplicateWarning, setSuppressOfflineDuplicateWarning] =
+    useState(!!patientId);
+  const queryClient = useQueryClient();
   const [isDeceased, setIsDeceased] = useState(false);
-
   const formSchema = useMemo(
     () =>
       z
@@ -223,9 +242,135 @@ export default function PatientRegistration(
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  queryClient.setQueryDefaults(["selectedGeoLocation"], {
+    meta: { persist: true },
+  });
+
+  const updateOfflinePatientEntry = async (
+    db: AppCacheDB,
+    patientId: string,
+    updatePatientData: any,
+  ) => {
+    const entry = await db.OfflineWrites.get(patientId);
+    if (!entry) {
+      toast.error(t("offline_patient_not_found"));
+      return;
+    }
+
+    try {
+      const updatedEntry = {
+        ...entry,
+        payload: {
+          ...(entry.payload as Patient),
+          ...updatePatientData,
+        },
+      };
+      await db.OfflineWrites.update(patientId, updatedEntry);
+      if (selectedOrganization) {
+        queryClient.setQueryData(
+          ["selectedGeoLocation", selectedOrganization.id],
+          selectedOrganization,
+        );
+      }
+      toast.success(t("offline_patient_update_success"));
+      setNavTarget("back");
+    } catch (error) {
+      console.error("Error updating unsynced patient:", error);
+      toast.error(t("offline_patient_update_error"));
+      return;
+    }
+    return;
+  };
+
+  const queuePatientUpdateOffline = async (updatePatientData: any) => {
+    if (!patientId) {
+      toast.error("Patient ID is missing");
+      return;
+    }
+    try {
+      const offlineWrite = {
+        id: patientId,
+        userId: user.external_id,
+        syncrouteKey: "updatePatient",
+        type: "updatePatient",
+        resourceType: "patient",
+        pathParams: { id: patientId || "" },
+        payload: updatePatientData,
+        serverTimestamp: patientQuery?.data?.modified_date,
+        queryrouteKey: "getPatient",
+        queryParams: { id: patientId || "" },
+      };
+      const saveResult = await saveOfflineWrite(offlineWrite);
+
+      if (saveResult && saveResult.success) {
+        const selectorganization = selectedOrganization
+          ? selectedOrganization
+          : patientQuery.data?.geo_organization;
+
+        if (selectorganization) {
+          queryClient.setQueryData(
+            ["selectedGeoLocation", selectorganization.id],
+            selectorganization,
+          );
+        }
+        toast.success(t("offline_patient_update_success"));
+
+        setNavTarget("back");
+      } else {
+        toast.error(saveResult.error);
+      }
+    } catch (error) {
+      console.error("Error updating unsynced patient:", error);
+      toast.error(t("offline_patient_update_error"));
+      return;
+    }
+  };
+
+  const queueNewPatientOffline = async (createPatientData: any) => {
+    try {
+      const generatedId = `offline-${crypto.randomUUID()}`;
+      const offlineWrite = {
+        id: generatedId,
+        userId: user.external_id,
+        syncrouteKey: "addPatient",
+        type: "createPatient",
+        resourceType: "patient",
+        payload: createPatientData,
+      };
+
+      const saveResult = await saveOfflineWrite(offlineWrite);
+      if (!saveResult.success) {
+        toast.error(saveResult.error);
+        return;
+      }
+
+      if (selectedOrganization) {
+        queryClient.setQueryData(
+          ["selectedGeoLocation", selectedOrganization.id],
+          selectedOrganization,
+        );
+      }
+
+      setNavTarget({
+        to: `/facility/${facilityId}/patients/verify`,
+        options: {
+          query: {
+            phone_number: createPatientData.phone_number,
+            year_of_birth: createPatientData.date_of_birth,
+            partial_id: generatedId.replace("offline-", "").slice(0, 5),
+          },
+        },
+      });
+      toast.success(t("offline_patient_update_success"));
+    } catch (error) {
+      console.error("Error saving offline patient:", error);
+      toast.error(t("offline_patient_update_error"));
+    }
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     if (patientId) {
-      updatePatient({
+      const updatePatientData = {
         ...values,
         ward_old: undefined,
         age: values.age_or_dob === "age" ? values.age : undefined,
@@ -237,12 +382,26 @@ export default function PatientRegistration(
         permanent_address: values.same_address
           ? values.address
           : values.permanent_address,
-      });
+      };
+
+      if (!onlineManager.isOnline()) {
+        if (isOfflineId(patientId)) {
+          await updateOfflinePatientEntry(db, patientId, updatePatientData);
+        } else {
+          const entry = await db.OfflineWrites.get(patientId);
+          if (entry) {
+            await updateOfflinePatientEntry(db, patientId, updatePatientData);
+          } else {
+            await queuePatientUpdateOffline(updatePatientData);
+          }
+        }
+      } else updatePatient(updatePatientData);
+
       return;
     }
 
     if (facilityId) {
-      createPatient({
+      const createPatientData = {
         ...values,
         emergency_phone_number: values.same_phone_number
           ? values.phone_number
@@ -252,7 +411,12 @@ export default function PatientRegistration(
           : values.permanent_address,
         facility: facilityId,
         ward_old: undefined,
-      });
+      };
+      if (!onlineManager.isOnline() && userConfirmedOfflineDuplicateRisk) {
+        await queueNewPatientOffline(createPatientData);
+        return;
+      } else createPatient(createPatientData);
+      return;
     }
   }
 
@@ -302,51 +466,100 @@ export default function PatientRegistration(
     enabled: !!patientId,
   });
 
+  const mappedPatientFields = (data: Patient): z.infer<typeof formSchema> => {
+    return {
+      name: data.name || "",
+      phone_number: data.phone_number || "",
+      emergency_phone_number: data.emergency_phone_number || "",
+      same_phone_number: data.phone_number === data.emergency_phone_number,
+      same_address: data.address === data.permanent_address,
+      gender: data.gender as (typeof GENDERS)[number],
+      blood_group: data.blood_group || "unknown",
+      age_or_dob: data.date_of_birth ? "dob" : "age",
+      date_of_birth: data.date_of_birth || undefined,
+      age: !data.date_of_birth
+        ? data.year_of_birth
+          ? new Date().getFullYear() - data.year_of_birth
+          : (data.age ?? undefined)
+        : undefined,
+      address: data.address || "",
+      permanent_address: data.permanent_address || "",
+      pincode: data.pincode ? Number(data.pincode) : 0,
+      nationality: data.nationality || defaultCountry,
+      geo_organization:
+        (data.geo_organization as any)?.id ??
+        (data.geo_organization as unknown as string),
+      deceased_datetime: data.deceased_datetime || undefined,
+    };
+  };
+
+  const populateFormOnline = (data: Patient) => {
+    setSelectedLevels([data.geo_organization as unknown as Organization]);
+
+    setIsDeceased(!!data.deceased_datetime);
+    form.reset(mappedPatientFields(data));
+  };
   useEffect(() => {
-    if (patientQuery.data) {
-      setSelectedLevels([
-        patientQuery.data.geo_organization as unknown as Organization,
-      ]);
-      setIsDeceased(!!patientQuery.data.deceased_datetime);
-      form.reset({
-        name: patientQuery.data.name || "",
-        phone_number: patientQuery.data.phone_number || "",
-        emergency_phone_number: patientQuery.data.emergency_phone_number || "",
-        same_phone_number:
-          patientQuery.data.phone_number ===
-          patientQuery.data.emergency_phone_number,
-        same_address:
-          patientQuery.data.address === patientQuery.data.permanent_address,
-        gender: patientQuery.data.gender as (typeof GENDERS)[number],
-        blood_group: patientQuery.data.blood_group,
-        age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
-        date_of_birth: patientQuery.data.date_of_birth || undefined,
-        age:
-          !patientQuery.data.date_of_birth && patientQuery.data.year_of_birth
-            ? new Date().getFullYear() - patientQuery.data.year_of_birth
-            : undefined,
-        address: patientQuery.data.address || "",
-        permanent_address: patientQuery.data.permanent_address || "",
-        pincode: patientQuery.data.pincode || undefined,
-        nationality: patientQuery.data.nationality || defaultCountry,
-        geo_organization: (
-          patientQuery.data.geo_organization as unknown as Organization
-        )?.id,
-        deceased_datetime: patientQuery.data.deceased_datetime || undefined,
-      } as unknown as z.infer<typeof formSchema>);
-    }
-  }, [patientQuery.data]);
+    const loadpatientData = async () => {
+      if (!patientId) return;
+
+      if (onlineManager.isOnline() && patientQuery.data) {
+        populateFormOnline(patientQuery.data);
+        return;
+      } else {
+        const entry = await db.OfflineWrites.get(patientId);
+
+        if (!onlineManager.isOnline() && (isOfflineId(patientId) || entry)) {
+          const patientData = entry?.payload as Patient;
+
+          const selectedOrg = queryClient.getQueryData<Organization>([
+            "selectedGeoLocation",
+            patientData.geo_organization as unknown as string,
+          ]);
+
+          if (selectedOrg) {
+            setSelectedLevels([selectedOrg]);
+          }
+          setIsDeceased(!!patientData.deceased_datetime);
+          form.reset(mappedPatientFields(patientData));
+        } else {
+          if (patientQuery.data) populateFormOnline(patientQuery.data);
+        }
+      }
+    };
+    void loadpatientData();
+  }, [patientQuery.data, queryClient, patientId]);
 
   const showDuplicate =
+    onlineManager.isOnline() &&
     !patientPhoneSearch.isLoading &&
     !!duplicatePatients?.length &&
     !!isValidPhoneNumber(phoneNumber) &&
     !suppressDuplicateWarning;
 
+  const showOfflineDuplicateWarningDialog =
+    !onlineManager.isOnline() &&
+    !!isValidPhoneNumber(phoneNumber) &&
+    !suppressOfflineDuplicateWarning;
+
+  useEffect(() => {
+    if (!navTarget) return;
+
+    if (navTarget === "back") {
+      goBack();
+    } else {
+      navigate(navTarget.to, navTarget.options);
+    }
+
+    // clear it so it won’t fire again
+    setNavTarget(null);
+  }, [navTarget, goBack, navigate]);
+
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(
-    form.formState.isDirty &&
+    !navTarget &&
+      form.formState.isDirty &&
       !isCreatingPatient &&
       !(isUpdatingPatient || isUpdateSuccess) &&
       !showDuplicate,
@@ -865,6 +1078,7 @@ export default function PatientRegistration(
                             {...field}
                             required={true}
                             selected={selectedLevels}
+                            setSelectedOrganization={setSelectedOrganization}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
                               form.setValue("geo_organization", value, {
@@ -915,6 +1129,23 @@ export default function PatientRegistration(
               handleDialogClose("close");
             }
           }}
+        />
+      )}
+      {showOfflineDuplicateWarningDialog && (
+        <OfflinePatientWarningDialog
+          open={showOfflineDuplicateWarningDialog}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSuppressOfflineDuplicateWarning(true);
+            }
+          }}
+          handleOk={() => {
+            if (userConfirmedOfflineDuplicateRisk) {
+              setSuppressOfflineDuplicateWarning(true);
+            }
+          }}
+          checked={userConfirmedOfflineDuplicateRisk}
+          setChecked={setUserConfirmedOfflineDuplicateRisk}
         />
       )}
     </Page>
