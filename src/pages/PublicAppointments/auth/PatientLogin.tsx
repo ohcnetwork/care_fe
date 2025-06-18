@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -39,7 +39,7 @@ import { TokenData } from "@/types/auth/otp";
 
 const FormSchema = z.object({
   pin: z.string().min(5, {
-    message: "Your one-time password must be 5 characters.",
+    error: "Your one-time password must be 5 characters.",
   }),
 });
 

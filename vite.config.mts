@@ -13,7 +13,7 @@ import { defineConfig, loadEnv } from "vite";
 import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
@@ -190,19 +190,18 @@ export default defineConfig(({ mode }) => {
         ],
       }),
       ValidateEnv({
-        validator: "zod",
+        validator: "standard",
         schema: {
-          REACT_CARE_API_URL: z.string().url(),
+          REACT_CARE_API_URL: z.url(),
 
-          REACT_SENTRY_DSN: z.string().url().optional(),
+          REACT_SENTRY_DSN: z.url().optional(),
           REACT_SENTRY_ENVIRONMENT: z.string().optional(),
 
           REACT_CDN_URLS: z
             .string()
             .optional()
             .transform((val) => val?.split(" "))
-            .pipe(z.array(z.string().url()).optional())
-            .describe("Optional: Space-separated list of CDN URLs"),
+            .pipe(z.array(z.url()).optional()),
         },
       }),
       viteStaticCopy({
@@ -300,7 +299,8 @@ export default defineConfig(({ mode }) => {
       host: "0.0.0.0",
       allowedHosts: true,
       headers: {
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Strict-Transport-Security":
+          "max-age=31536000; includeSubDomains; preload",
         "X-XSS-Protection": "1; mode=block",
         "X-Frame-Options": "SAMEORIGIN",
         "X-Content-Type-Options": "nosniff",

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -39,20 +39,20 @@ export default function UserResetPassword({
     .object({
       old_password: z
         .string()
-        .min(1, { message: t("please_enter_current_password") }),
+        .min(1, { error: t("please_enter_current_password") }),
       new_password_1: z
         .string()
-        .min(8, { message: t("invalid_password") })
-        .regex(/\d/, { message: t("invalid_password") })
+        .min(8, { error: t("invalid_password") })
+        .regex(/\d/, { error: t("invalid_password") })
         .regex(/[a-z]/, {
-          message: t("invalid_password"),
+          error: t("invalid_password"),
         })
         .regex(/[A-Z]/, {
-          message: t("invalid_password"),
+          error: t("invalid_password"),
         }),
       new_password_2: z
         .string()
-        .min(1, { message: t("please_enter_confirm_password") }),
+        .min(1, { error: t("please_enter_confirm_password") }),
     })
     .refine((values) => values.new_password_1 === values.new_password_2, {
       message: t("password_mismatch"),

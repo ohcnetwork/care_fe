@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import { z } from "zod/v4";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -63,7 +63,7 @@ export default function LocationForm({
     name: z
       .string()
       .trim()
-      .min(1, { message: t("field_required") }),
+      .min(1, { error: t("field_required") }),
     description: z.string().optional(),
     status: z.enum(["active", "inactive", "unknown"] as const),
     operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
@@ -77,7 +77,7 @@ export default function LocationForm({
     bedNames: z
       .array(
         z.object({
-          name: z.string().min(1, { message: t("field_required") }),
+          name: z.string().min(1, { error: t("field_required") }),
         }),
       )
       .default([]),

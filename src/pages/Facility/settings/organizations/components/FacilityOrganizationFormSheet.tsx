@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import { z } from "zod/v4";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -80,7 +80,7 @@ export default function FacilityOrganizationFormSheet({
     name: z
       .string()
       .trim()
-      .min(1, { message: t("field_required") }),
+      .min(1, { error: t("field_required") }),
     description: z.string().optional(),
     org_type: z.enum(["dept", "team"]),
   });

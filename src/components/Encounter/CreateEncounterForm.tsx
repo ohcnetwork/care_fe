@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import { z } from "zod/v4";
 
 import { cn } from "@/lib/utils";
 
@@ -83,7 +83,7 @@ export default function CreateEncounterForm({
     encounter_class: z.enum(ENCOUNTER_CLASS),
     priority: z.enum(ENCOUNTER_PRIORITY),
     organizations: z.array(z.string()).min(1, {
-      message: t("at_least_one_department_is_required"),
+      error: t("at_least_one_department_is_required"),
     }),
     start_date: z.string(),
   });

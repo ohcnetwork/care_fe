@@ -4,7 +4,7 @@ import { navigate, useNavigationPrompt } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { Button } from "@/components/ui/button";
 import DateField from "@/components/ui/date-field";
@@ -60,37 +60,31 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
-
   const patientSchema = z
     .object({
       name: z
         .string()
-        .min(1, t("field_required"))
-        .refine(validateName, t("min_char_length_error", { min_length: 3 })),
-      gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
-      address: z.string().min(1, t("field_required")),
+        .min(1, { error: t("field_required") })
+        .refine(validateName, {
+          error: t("min_char_length_error", { min_length: 3 }),
+        }),
+      gender: z.enum(GENDERS, { error: t("field_required") }),
+      address: z.string().min(1, { error: t("field_required") }),
       age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
-      pincode: z
-        .string()
-        .min(1, t("field_required"))
-        .refine((pincode) => {
-          if (!pincode) return true;
-          return validatePincode(pincode);
-        }, t("invalid_pincode_msg")),
-      geo_organization: z
-        .string()
-        .min(1, t("organization_required"))
-        .optional(),
+      pincode: z.string().refine(validatePincode, t("invalid_pincode")),
+      geo_organization: z.string().min(1, { error: t("field_required") }),
       ageInputType: z.enum(["age", "date_of_birth"]),
     })
-    .superRefine((data, ctx) => {
+    .check((ctx) => {
+      const data = ctx.value;
       const field = data.ageInputType === "age" ? "age" : "date_of_birth";
       if (!data[field]) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+        ctx.issues.push({
+          code: "custom",
           message: t("field_required"),
           path: [field],
+          input: data,
         });
         return;
       }
@@ -100,10 +94,11 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         !isNaN(Number(data.age)) &&
         Number(data.age) < 0
       ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+        ctx.issues.push({
+          code: "custom",
           message: t("age_less_than_0"),
           path: ["age"],
+          input: data,
         });
       }
     });
@@ -119,7 +114,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       date_of_birth: undefined,
       address: "",
       pincode: "",
-      geo_organization: undefined,
+      geo_organization: "",
     },
   });
 
@@ -150,7 +145,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       },
     });
 
-  const { mutate: createPatient } = useMutation({
+  const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationFn: (body: Partial<AppointmentPatientRegister>) =>
       mutate(routes.otp.createPatient, {
         body: { ...body, phone_number: tokenData.phoneNumber },
@@ -442,6 +437,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 variant="primary_gradient"
                 className="sm:w-1/5"
                 type="submit"
+                disabled={isCreatingPatient || !form.formState.isDirty}
               >
                 <span className="bg-linear-to-b from-white/15 to-transparent" />
                 {t("register_patient")}

@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { cn } from "@/lib/utils";
 
@@ -49,11 +49,16 @@ export default function ServiceHistoryForm({
   const isEditMode = !!serviceRecord;
 
   const formSchema = z.object({
-    note: z.string().min(1, { message: t("field_required") }),
+    note: z.string().min(1, { error: t("field_required") }),
     serviced_on: z
-      .date({ required_error: t("field_required") })
+      .date({
+        error: (issue) => {
+          if (issue.input === undefined) return t("field_required");
+          return undefined;
+        },
+      })
       .max(dayjs().toDate(), {
-        message: t("service_date_min_date"),
+        error: t("service_date_min_date"),
       }),
   });
 
@@ -63,7 +68,7 @@ export default function ServiceHistoryForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       note: "",
-      serviced_on: new Date(),
+      serviced_on: undefined,
     },
   });
 

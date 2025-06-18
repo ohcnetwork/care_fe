@@ -6,9 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
-
-import { tzAwareDateTime } from "@/lib/validators";
+import { z } from "zod/v4";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -66,10 +64,10 @@ const consentFormSchema = (isEdit: boolean) =>
       decision: z.enum(CONSENT_DECISIONS).default("permit"),
       category: z.enum(CONSENT_CATEGORIES).default("treatment"),
       status: z.enum(CONSENT_STATUSES).default("active"),
-      date: tzAwareDateTime,
+      date: z.iso.datetime({ offset: true }),
       period: z.object({
-        start: tzAwareDateTime.optional(),
-        end: z.union([tzAwareDateTime, z.undefined()]).optional(),
+        start: z.iso.datetime({ offset: true }).optional(),
+        end: z.iso.datetime({ offset: true }).optional(),
       }),
       note: z.string().optional(),
       fileEntries: z
@@ -81,17 +79,19 @@ const consentFormSchema = (isEdit: boolean) =>
         )
         .default([]),
     })
-    .superRefine((data, ctx) => {
+    .check((ctx) => {
       if (isEdit) return;
+      const data = ctx.value;
       if (
         data.period.start &&
         data.period.end &&
         data.period.start > data.period.end
       ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+        ctx.issues.push({
+          code: "custom",
           message: t("valid_from_after_valid_untill"),
           path: ["period.end"],
+          input: data,
         });
       }
 
@@ -99,10 +99,11 @@ const consentFormSchema = (isEdit: boolean) =>
         data.period.start &&
         new Date(data.period.start) < new Date(data.date)
       ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+        ctx.issues.push({
+          code: "custom",
           message: t("consent_period_start_before_consent_date_validation"),
           path: ["period.start"],
+          input: data,
         });
       }
     });

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import { z } from "zod/v4";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -48,7 +48,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
-import validators from "@/Utils/validators";
+import validators from "@/Utils/validatorsV4";
 import facilityApi from "@/types/facility/facilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { UserBase } from "@/types/user/user";
@@ -67,18 +67,21 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
-    status: z.string().min(1, { message: t("field_required") }),
-    category: z.string().min(1, { message: t("field_required") }),
-    assigned_facility: z.object({
-      id: z.string(),
-      name: z.string(),
-    }),
+    status: z.string().min(1, { error: t("field_required") }),
+    category: z.string().min(1, { error: t("field_required") }),
+    assigned_facility: z.object(
+      {
+        id: z.string(),
+        name: z.string(),
+      },
+      { error: t("field_required") },
+    ),
     emergency: z.enum(["true", "false"]),
-    title: z.string().min(1, { message: t("field_required") }),
-    reason: z.string().min(1, { message: t("field_required") }),
+    title: z.string().min(1, { error: t("field_required") }),
+    reason: z.string().min(1, { error: t("field_required") }),
     referring_facility_contact_name: z
       .string()
-      .min(1, { message: t("field_required") }),
+      .min(1, { error: t("field_required") }),
     referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),
     assigned_to: z.string().optional(),

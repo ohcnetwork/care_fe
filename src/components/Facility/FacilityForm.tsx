@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import { z } from "zod/v4";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -39,7 +39,7 @@ import { validatePincode } from "@/common/validation";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import validators from "@/Utils/validators";
+import validators from "@/Utils/validatorsV4";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
@@ -63,13 +63,13 @@ export default function FacilityForm({
   const geoOrganizationRef = useRef<HTMLDivElement>(null);
 
   const facilityFormSchema = z.object({
-    facility_type: z.string().min(1, t("facility_type_required")),
-    name: z.string().min(1, t("name_is_required")),
+    facility_type: z.string().min(1, t("field_required")),
+    name: z.string().min(1, t("field_required")),
     description: z.string().optional(),
     features: z.array(z.number()).default([]),
     pincode: z.string().refine(validatePincode, t("invalid_pincode")),
     geo_organization: z.string().min(1, t("field_required")),
-    address: z.string().min(1, t("address_is_required")),
+    address: z.string().min(1, t("field_required")),
     phone_number: validators().phoneNumber.required,
     latitude: validators().coordinates.latitude.optional(),
     longitude: validators().coordinates.longitude.optional(),
@@ -94,6 +94,8 @@ export default function FacilityForm({
       is_public: true,
     },
   });
+
+  console.log(form.watch("geo_organization"));
 
   const { data: org } = useQuery({
     queryKey: ["organization", organizationId],

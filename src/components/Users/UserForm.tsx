@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import { z } from "zod/v4";
 
 import { cn } from "@/lib/utils";
 
@@ -44,7 +44,7 @@ import { GENDERS } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import validators from "@/Utils/validators";
+import validators from "@/Utils/validatorsV4";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -79,31 +79,25 @@ export default function UserForm({
         ? z.string().optional()
         : z
             .string()
-            .min(4, t("field_required"))
-            .max(16, t("username_not_valid"))
-            .regex(/^[a-z0-9_-]*$/, t("username_not_valid"))
-            .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_not_valid"))
-            .refine(
-              (val) => !val.match(/(?:[_-]{2,})/),
-              t("username_not_valid"),
-            ),
+            .min(4, { error: t("field_required") })
+            .max(16, { error: t("username_not_valid") })
+            .regex(/^[a-z0-9_-]*$/, { error: t("username_not_valid") })
+            .regex(/^[a-z0-9].*[a-z0-9]$/, { error: t("username_not_valid") })
+            .refine((val) => !val.match(/(?:[_-]{2,})/), {
+              error: t("username_not_valid"),
+            }),
       password_setup_method: z.enum(["immediate", "email"]).optional(),
       password: z.string().optional(),
       c_password: z.string().optional(),
-      first_name: z.string().min(1, t("field_required")),
-      last_name: z.string().min(1, t("field_required")),
+      first_name: z.string().min(1, { error: t("field_required") }),
+      last_name: z.string().min(1, { error: t("field_required") }),
       email: isEditMode
         ? z.string().optional()
-        : z.string().email(t("invalid_email_address")),
+        : z.email({ error: t("invalid_email_address") }),
       phone_number: validators().phoneNumber.required,
-      gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
+      gender: z.enum(GENDERS, { error: t("field_required") }),
       prefix: z.string().optional(),
       suffix: z.string().optional(),
-      /* TODO: Userbase doesn't currently support these, neither does BE
-      but we will probably need these */
-      /* qualification: z.string().optional(),
-      doctor_experience_commenced_on: z.string().optional(),
-      doctor_medical_council_registration: z.string().optional(), */
       geo_organization: z.string().optional(),
     })
     .refine(
@@ -114,7 +108,7 @@ export default function UserForm({
         return true;
       },
       {
-        message: t("password_mismatch"),
+        error: t("password_mismatch"),
         path: ["c_password"],
       },
     )
@@ -135,7 +129,7 @@ export default function UserForm({
         return true;
       },
       {
-        message: t("new_password_validation"),
+        error: t("new_password_validation"),
         path: ["password"],
       },
     );
