@@ -17,6 +17,7 @@ interface DateQuestionProps {
   disabled?: boolean;
   clearError: () => void;
   classes?: string;
+  index: number;
 }
 
 export function DateQuestion({
@@ -25,22 +26,24 @@ export function DateQuestion({
   disabled,
   clearError,
   classes,
+  index,
 }: DateQuestionProps) {
-  const currentValue = questionnaireResponse.values[0]?.value
-    ? new Date(questionnaireResponse.values[0].value as string)
+  const currentValue = questionnaireResponse.values[index]?.value
+    ? new Date(questionnaireResponse.values[index].value as string)
     : undefined;
 
   const handleSelect = (date: Date | undefined) => {
     if (!date) return;
 
     clearError();
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "date",
+      value: date,
+    };
+
     updateQuestionnaireResponseCB(
-      [
-        {
-          type: "dateTime",
-          value: date,
-        },
-      ],
+      newValues,
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );

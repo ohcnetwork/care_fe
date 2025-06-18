@@ -36,6 +36,7 @@ import {
 import { Badge, BadgeProps } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -63,6 +64,7 @@ import {
 } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
@@ -394,9 +396,11 @@ const AppointmentDetails = ({
       </Card>
 
       <div className="text-sm text-gray-600">
-        {t("booked_by")} {appointment.booked_by?.first_name}{" "}
-        {appointment.booked_by?.last_name} {t("on")}{" "}
-        {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
+        {t("booked_by")}{" "}
+        {appointment.booked_by
+          ? formatName(appointment.booked_by)
+          : `${appointment.patient.name} (${t("patient")})`}{" "}
+        {t("on")} {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
       </div>
     </div>
   );
@@ -419,7 +423,11 @@ const AppointmentActions = ({
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [selectedPractitioner, setSelectedPractitioner] = useState(
+    appointment.user,
+  );
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
@@ -488,9 +496,18 @@ const AppointmentActions = ({
             </SheetHeader>
 
             <div className="mt-6">
+              <div className="my-4">
+                <Label className="mb-2">{t("select_practitioner")}</Label>
+                <PractitionerSelector
+                  facilityId={facilityId}
+                  selected={selectedPractitioner}
+                  onSelect={(user) => user && setSelectedPractitioner(user)}
+                  clearSelection={t("show_all")}
+                />
+              </div>
               <AppointmentSlotPicker
                 facilityId={facilityId}
-                resourceId={appointment.user?.id}
+                resourceId={selectedPractitioner?.id}
                 selectedSlotId={selectedSlotId}
                 onSlotSelect={setSelectedSlotId}
               />
