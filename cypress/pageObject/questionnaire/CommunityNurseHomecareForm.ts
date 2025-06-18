@@ -121,10 +121,9 @@ export class CommunityQuestionnaireForm {
         case "radio":
           {
             const radioValue = value.toUpperCase().replace(/\s+/g, "_");
-            cy.verifyAndClickElement(
-              `${baseSelector} [data-cy="radio-group-question-item-${radioValue}"]`,
-              value,
-            );
+            const element = `${baseSelector} [data-cy="radio-group-question-item-${radioValue}"]`;
+            cy.get(element).scrollIntoView();
+            cy.get(element).should("be.visible").click();
           }
           break;
 

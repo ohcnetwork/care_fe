@@ -163,7 +163,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           >
             <div className="flex items-center space-x-2 ">
               <RadioGroupItem
-                data-cy="radio-group-question-item"
+                data-cy={`radio-group-question-item-${option.value.toString()}`}
                 value={option.value.toString()}
                 id={`${question.id}-${option.value.toString()}`}
                 className="h-4 w-4 border-2 border-gray-300 text-primary focus:ring-primary group-hover:border-primary-500"
