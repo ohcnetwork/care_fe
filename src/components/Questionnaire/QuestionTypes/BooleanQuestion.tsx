@@ -40,12 +40,7 @@ export function BooleanQuestion({
       onValueChange={(value) => {
         clearError();
         updateQuestionnaireResponseCB(
-          [
-            {
-              type: "boolean",
-              value: value === "true",
-            },
-          ],
+          [{ type: "boolean", value: value === "true" }],
           questionnaireResponse.question_id,
           questionnaireResponse.note,
         );
@@ -57,14 +52,24 @@ export function BooleanQuestion({
         { value: "true", label: t("yes") },
         { value: "false", label: t("no") },
       ].map((option) => (
-        <div
+        <button
+          type="button"
           className={cn(
-            "border rounded-md p-2 cursor-pointer sm:w-auto hover:border-primary-500 group",
+            "border rounded-md p-2 cursor-pointer sm:w-auto hover:border-primary-500 group text-left",
             selectedValue === option.value
               ? "bg-primary-100 border-primary-500"
-              : "border-gray-300",
+              : "bg-white border-gray-300",
           )}
           key={option.value}
+          onClick={() => {
+            clearError();
+            updateQuestionnaireResponseCB(
+              [{ type: "boolean", value: option.value === "true" }],
+              questionnaireResponse.question_id,
+              questionnaireResponse.note,
+            );
+          }}
+          disabled={disabled}
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem
@@ -79,7 +84,7 @@ export function BooleanQuestion({
               {option.label}
             </Label>
           </div>
-        </div>
+        </button>
       ))}
     </RadioGroup>
   );
