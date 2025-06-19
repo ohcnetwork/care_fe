@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import isEqual from "lodash/isEqual";
 import {
   AArrowDown,
   ChevronDown,
@@ -216,6 +217,16 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [importUrl, setImportUrl] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showFileImportDialog, setShowFileImportDialog] = useState(false);
+  const [initialFormValues, setInitialFormValues] = useState<{
+    title: string;
+    slug: string;
+    description: string;
+    questions: Question[];
+    status: string;
+    subject_type: string;
+    version: string | undefined;
+    tags: QuestionnaireTagModel[];
+  } | null>(null);
   const [selectedImportFile, setSelectedImportFile] = useState<File | null>(
     null,
   );
@@ -440,8 +451,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   useEffect(() => {
     if (initialQuestionnaire) {
-      setQuestionnaire(initialQuestionnaire);
-      form.reset({
+      const formValues = {
         title: initialQuestionnaire.title || "",
         slug: initialQuestionnaire.slug || "",
         description: initialQuestionnaire.description || "",
@@ -450,7 +460,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         subject_type: initialQuestionnaire.subject_type,
         version: initialQuestionnaire.version,
         tags: initialQuestionnaire.tags,
-      });
+      };
+
+      setQuestionnaire(initialQuestionnaire);
+      setInitialFormValues(formValues);
+      form.reset(formValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestionnaire]);
@@ -607,12 +621,17 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     if (!isValid || !hasOrganizations || !hasValidStructuredType) {
       return;
     }
+    const currentValues = {
+      ...form.getValues(),
+      questions: rootQuestions,
+    };
 
     if (id) {
-      updateQuestionnaire({
-        ...form.getValues(),
-        questions: rootQuestions,
-      });
+      if (isEqual(currentValues, initialFormValues)) {
+        toast.info(t("no_changes_made"));
+        return;
+      }
+      updateQuestionnaire(currentValues);
     } else {
       createQuestionnaire({
         ...form.getValues(),
