@@ -158,7 +158,6 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <SidebarMenuButton
-          data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
           tooltip={link.name}
           className={cn(
             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
