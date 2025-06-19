@@ -56,7 +56,12 @@ export function isQuestionEnabled(
 
     switch (enableWhen.operator) {
       case "exists":
-        return normalizedAnswers.length > 0;
+        return (
+          normalizedAnswers.length > 0 &&
+          normalizedAnswers.some(
+            (v) => v !== "" && v !== null && v !== undefined,
+          )
+        );
 
       case "equals":
         return normalizedAnswers.includes(enableWhen.answer);
