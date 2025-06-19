@@ -22,6 +22,8 @@ import { PasswordInput } from "@/components/ui/input-password";
 import { ValidationHelper } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
 
+import { validatePassword } from "@/common/validation";
+
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { UserBase } from "@/types/user/user";
@@ -42,14 +44,7 @@ export default function UserResetPassword({
         .min(1, { error: t("please_enter_current_password") }),
       new_password_1: z
         .string()
-        .min(8, { error: t("invalid_password") })
-        .regex(/\d/, { error: t("invalid_password") })
-        .regex(/[a-z]/, {
-          error: t("invalid_password"),
-        })
-        .regex(/[A-Z]/, {
-          error: t("invalid_password"),
-        }),
+        .refine(validatePassword, { error: t("invalid_password") }),
       new_password_2: z
         .string()
         .min(1, { error: t("please_enter_confirm_password") }),

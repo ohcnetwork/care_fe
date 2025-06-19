@@ -1944,7 +1944,7 @@
   "new_drawing": "New Drawing",
   "new_password": "New Password",
   "new_password_confirmation": "Confirm New Password",
-  "new_password_same_as_old": "Your new password <strong>must not match the old password </strong> ",
+  "new_password_same_as_old": "Your new password must not match the old password",
   "new_password_validation": "New password is not valid.",
   "new_section": "New Section",
   "new_session": "New Session",
