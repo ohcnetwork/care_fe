@@ -9,9 +9,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
@@ -24,7 +22,6 @@ import { dateQueryString } from "@/Utils/utils";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/files";
-import { Organization } from "@/types/organization/organization";
 import {
   DetailedValidationError,
   QuestionValidationError,
@@ -44,7 +41,6 @@ import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
 import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
-import QuestionnaireNavigation from "./QuestionnaireNavigation";
 import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
@@ -70,7 +66,7 @@ interface ServerValidationError {
 }
 
 export interface QuestionnaireFormProps {
-  organizations?: Organization[];
+  previewGroupId?: string;
   questionnaireSlug?: string;
   patientId: string;
   encounterId?: string;
@@ -320,7 +316,6 @@ const STRUCTURED_TYPE_VALIDATORS = {
 } as const;
 
 export function QuestionnaireForm({
-  organizations,
   questionnaireSlug,
   patientId,
   encounterId,
@@ -328,6 +323,7 @@ export function QuestionnaireForm({
   onSubmit,
   onCancel,
   facilityId,
+  previewGroupId,
 }: QuestionnaireFormProps) {
   const { t } = useTranslation();
 
@@ -735,9 +731,7 @@ export function QuestionnaireForm({
     let element: Element | null;
 
     if (groupId) {
-      element =
-        document.querySelector(`[data-group-id="${groupId}"]`) ||
-        document.querySelector(`[data-question-id="${groupId}"]`);
+      element = document.querySelector(`[data-group-id="${groupId}"]`);
     } else {
       element = document.querySelector(
         `[data-questionnaire-id="${questionnaireId}"]`,
@@ -752,56 +746,47 @@ export function QuestionnaireForm({
   return (
     <div className="flex gap-4">
       {/* Left Navigation */}
-      <div className="w-64 border-r border-gray-200 pr-4 py-3 pl-0 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
-        {questionnaireForms.map((form) => (
-          <>
-            {encounterId === "preview" ? (
-              <QuestionnaireNavigation
-                questionnaire={form.questionnaire}
-                scrollToQuestion={(questionId?: string) => {
-                  scrollToQuestion(form.questionnaire.id, questionId);
-                }}
-              />
-            ) : (
-              <div key={form.questionnaire.id} className="space-y-2">
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
-                    activeQuestionnaireId === form.questionnaire.id &&
-                      "bg-gray-100 text-green-600",
-                  )}
-                  onClick={() => scrollToQuestion(form.questionnaire.id)}
-                  disabled={isPending}
-                >
-                  {form.questionnaire.title}
-                </Button>
-                <div className="pl-4 space-y-1">
-                  {form.questionnaire.questions
-                    .filter((q) => q.type === "group")
-                    .map((group) => (
-                      <Button
-                        variant="outline"
-                        key={group.id}
-                        className={cn(
-                          "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
-                          activeGroupId === group.id &&
-                            "bg-gray-100 text-green-600",
-                        )}
-                        onClick={() => {
-                          scrollToQuestion(form.questionnaire.id, group.id);
-                        }}
-                        disabled={isPending}
-                      >
-                        {group.text}
-                      </Button>
-                    ))}
-                </div>
+      {encounterId !== "preview" && (
+        <div className="w-64 border-r border-gray-200 pr-4 py-3 pl-0 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
+          {questionnaireForms.map((form) => (
+            <div key={form.questionnaire.id} className="space-y-2">
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
+                  activeQuestionnaireId === form.questionnaire.id &&
+                    "bg-gray-100 text-green-600",
+                )}
+                onClick={() => scrollToQuestion(form.questionnaire.id)}
+                disabled={isPending}
+              >
+                {form.questionnaire.title}
+              </Button>
+              <div className="pl-4 space-y-1">
+                {form.questionnaire.questions
+                  .filter((q) => q.type === "group")
+                  .map((group) => (
+                    <Button
+                      variant="outline"
+                      key={group.id}
+                      className={cn(
+                        "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
+                        activeGroupId === group.id &&
+                          "bg-gray-100 text-green-600",
+                      )}
+                      onClick={() => {
+                        scrollToQuestion(form.questionnaire.id, group.id);
+                      }}
+                      disabled={isPending}
+                    >
+                      {group.text}
+                    </Button>
+                  ))}
               </div>
-            )}
-          </>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
@@ -813,47 +798,6 @@ export function QuestionnaireForm({
             data-questionnaire-id={form.questionnaire.id}
           >
             <div className="flex justify-between items-center max-w-4xl">
-              <div
-                className={cn({
-                  "space-y-5 border-2 border-gray-100 rounded-lg w-full shadow-sm p-3":
-                    encounterId === "preview",
-                })}
-              >
-                <p className="text-lg text-gray-500 font-medium">
-                  {t("questionnaire_title_and_description")}
-                </p>
-                <div className="flex flex-col gap-4 ml-6">
-                  <div className="space-y-2">
-                    <h2 className="text-xl font-semibold">
-                      {form.questionnaire.title}
-                    </h2>
-                    {form.questionnaire.description && (
-                      <p className="text-sm text-gray-500">
-                        {form.questionnaire.description}
-                      </p>
-                    )}
-                  </div>
-
-                  {encounterId === "preview" && organizations && (
-                    <div className="flex flex-col gap-3">
-                      <Label className="text-sm font-semibold">
-                        {t("organizations")}
-                      </Label>
-                      <div className="flex flex-wrap gap-3 mb-2">
-                        {organizations.map((org) => (
-                          <Badge
-                            key={org.id}
-                            variant="secondary"
-                            className="flex items-center gap-1 bg-gray-200"
-                          >
-                            {org.name}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
               {form.questionnaire.slug !== questionnaireSlug && (
                 <Button
                   type="button"
@@ -904,7 +848,7 @@ export function QuestionnaireForm({
                 }
               }}
               disabled={isPending}
-              activeGroupId={activeGroupId}
+              activeGroupId={activeGroupId || previewGroupId}
               errors={form.errors}
               patientId={patientId}
               clearError={(questionId: string) => {

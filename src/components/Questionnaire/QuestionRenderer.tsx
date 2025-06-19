@@ -61,27 +61,29 @@ export function QuestionRenderer({
 
   return (
     <div className="space-y-8 bg-white md:space-y-3">
-      <div className="flex flex-col gap-3 md:flex-row md:justify-between md:ml-5">
-        <span className="text-sm text-gray-400 font-semibold">
-          {questions.length.toString()} Questions
-        </span>
-        <div className="flex gap-4">
-          <div className="flex gap-1 items-center">
-            <div className="size-2 bg-indigo-600" />
-            <span className="text-sm text-gray-400 font-semibold">
-              {questions.filter((q) => q.required).length.toString()}{" "}
-              {t("required")}
-            </span>
-          </div>
-          <div className="flex gap-1 items-center">
-            <div className="block size-2 bg-gray-400" />
-            <span className="text-sm text-gray-400 font-semibold">
-              {questions.filter((q) => !q.required).length.toString()}{" "}
-              {t("optional")}
-            </span>
+      {isPreview && (
+        <div className="flex flex-col gap-3 md:flex-row md:justify-between md:ml-5">
+          <span className="text-sm text-gray-400 font-semibold">
+            {questions.length.toString()} Questions
+          </span>
+          <div className="flex gap-4">
+            <div className="flex gap-1 items-center">
+              <div className="size-2 bg-indigo-600" />
+              <span className="text-sm text-gray-400 font-semibold">
+                {questions.filter((q) => q.required).length.toString()}{" "}
+                {t("required")}
+              </span>
+            </div>
+            <div className="flex gap-1 items-center">
+              <div className="block size-2 bg-gray-400" />
+              <span className="text-sm text-gray-400 font-semibold">
+                {questions.filter((q) => !q.required).length.toString()}{" "}
+                {t("optional")}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
       {questions.map((question) => (
         <div
           key={question.id}

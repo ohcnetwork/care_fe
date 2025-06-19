@@ -228,6 +228,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [structuredTypeErrors, setStructuredTypeErrors] = useState<
     Record<string, string | undefined>
   >({});
+  const [previewGroupId, setPreviewGroupId] = useState<string>();
   const { dragOver, onDragOver, onDragLeave } = useDragAndDrop();
   const [enableWhenDependencies, setEnableWhenDependencies] = useState<
     Map<string, Set<{ question: Question; path: string[] }>>
@@ -711,7 +712,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       return next;
     });
   };
-
   const handleToggleOrganization = (orgId: string) => {
     const newOrg = availableOrganizations?.results.find((o) => o.id === orgId);
     setSelectedOrgs((current) => {
@@ -742,6 +742,16 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const handleTagCreated = (tag: QuestionnaireTagModel) => {
     setSelectedTags((current) => [...current, tag]);
+  };
+
+  const scrollToQuestion = (groupId: string) => {
+    setPreviewGroupId(groupId);
+
+    const element = document.querySelector(`[data-question-id="${groupId}"]`);
+
+    if (element) {
+      element.scrollIntoView({ block: "start" });
+    }
   };
 
   return (
@@ -822,104 +832,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsList>
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
-
             <div className="space-y-4 md:w-60 ">
-              <div className="sticky top-6 h-screen lg:block hidden">
+              <div className="lg:sticky lg:top-6">
                 <QuestionnaireNavigation
-                  questionnaire={questionnaire}
+                  rootQuestions={rootQuestions}
                   toggleQuestionExpanded={toggleQuestionExpanded}
                   expandedQuestions={expandedQuestions}
                 />
               </div>
-
-            <div className="space-y-4 md:w-60">
-              <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
-                <CardHeader className="p-0">
-                  <CardTitle>{t("navigation")}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <nav className="space-y-1">
-                    {rootQuestions.map((question, index) => {
-                      const hasSubQuestions =
-                        question.type === "group" &&
-                        question.questions &&
-                        question.questions.length > 0;
-                      return (
-                        <div key={question.link_id} className="space-y-1">
-                          <button
-                            onClick={() => {
-                              const element = document.getElementById(
-                                `question-${question.link_id}`,
-                              );
-                              if (element) {
-                                element.scrollIntoView();
-                                toggleQuestionExpanded(question.link_id);
-                              }
-                            }}
-                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                              expandedQuestions.has(question.link_id)
-                                ? "bg-accent"
-                                : ""
-                            }`}
-                          >
-                            <span className="font-medium text-gray-500">
-                              {index + 1}.
-                            </span>
-                            <span className="flex-1 truncate">
-                              {question.text || t("untitled_question")}
-                            </span>
-                          </button>
-                          {hasSubQuestions && question.questions && (
-                            <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
-                              {question.questions.map(
-                                (subQuestion, subIndex) => (
-                                  <button
-                                    key={subQuestion.id}
-                                    onClick={() => {
-                                      if (
-                                        !expandedQuestions.has(question.link_id)
-                                      ) {
-                                        toggleQuestionExpanded(
-                                          question.link_id,
-                                        );
-                                        setTimeout(() => {
-                                          const element =
-                                            document.getElementById(
-                                              `question-${subQuestion.link_id}`,
-                                            );
-                                          if (element) {
-                                            element.scrollIntoView();
-                                          }
-                                        }, 100);
-                                      } else {
-                                        const element = document.getElementById(
-                                          `question-${subQuestion.link_id}`,
-                                        );
-                                        if (element) {
-                                          element.scrollIntoView();
-                                        }
-                                      }
-                                    }}
-                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
-                                  >
-                                    <span className="font-medium text-gray-500">
-                                      {index + 1}.{subIndex + 1}
-                                    </span>
-                                    <span className="flex-1 truncate">
-                                      {subQuestion.text || "Untitled Question"}
-                                    </span>
-                                  </button>
-                                ),
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </nav>
-                </CardContent>
-              </Card>
-
               <div className="space-y-4 max-w-sm lg:hidden">
                 <QuestionnaireProperties
                   form={form}
@@ -1154,7 +1074,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </form>
               </Form>
               <DebugPreview
-                data={questionnaire}
+                data={form.getValues()}
                 title={t("questionnaire")}
                 className="mt-4"
               />
@@ -1188,29 +1108,85 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               />
             </div>
           </div>
-        
-          <DebugPreview
-            data={form.getValues()}
-            title={t("questionnaire")}
-            className="mt-4"
-          />
         </TabsContent>
 
         <TabsContent value="preview">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("preview")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <QuestionnaireForm
-                questionnaireSlug={id}
-                patientId="preview"
-                subjectType={form.watch("subject_type")}
-                encounterId="preview"
-                facilityId="preview"
-              />
-            </CardContent>
-          </Card>
+          <div className="flex flex-col md:flex-row gap-2">
+            <div className="space-y-4 md:w-60 ">
+              <div className="lg:sticky lg:top-6">
+                <QuestionnaireNavigation
+                  rootQuestions={rootQuestions}
+                  toggleQuestionExpanded={toggleQuestionExpanded}
+                  expandedQuestions={expandedQuestions}
+                  scrollToQuestion={(questionId: string) =>
+                    scrollToQuestion(questionId)
+                  }
+                />
+              </div>
+              <div className="space-y-4 max-w-sm lg:hidden">
+                <QuestionnairePreviewProperties questionnaire={questionnaire} />
+              </div>
+            </div>
+            <div className="space-y-4 flex-1">
+              <Card>
+                <CardContent>
+                  <div className="flex justify-between items-center max-w-4xl">
+                    <div className="space-y-5 w-full p-3">
+                      <p className="text-sm text-gray-500 font-medium">
+                        {t("questionnaire_title_and_description")}
+                      </p>
+                      <div className="flex flex-col gap-4 ml-6">
+                        <div className="space-y-2">
+                          <h2 className="text-xl font-semibold">
+                            {questionnaire.title}
+                          </h2>
+                          {questionnaire.description && (
+                            <p className="text-sm text-gray-500">
+                              {questionnaire.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {organizations?.results && (
+                          <div className="flex flex-col gap-3">
+                            <Label className="text-sm font-semibold">
+                              {t("organizations")}
+                            </Label>
+                            <div className="flex flex-wrap gap-3 mb-2">
+                              {organizations.results.map((org) => (
+                                <Badge
+                                  key={org.id}
+                                  variant="secondary"
+                                  className="flex items-center gap-1 bg-gray-200"
+                                >
+                                  {org.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent>
+                  <QuestionnaireForm
+                    questionnaireSlug={id}
+                    patientId="preview"
+                    subjectType={form.watch("subject_type")}
+                    encounterId="preview"
+                    facilityId="preview"
+                    previewGroupId={previewGroupId}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="space-y-4 w-60 hidden lg:block">
+              <QuestionnairePreviewProperties questionnaire={questionnaire} />
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
       <Dialog

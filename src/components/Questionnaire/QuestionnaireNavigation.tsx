@@ -1,20 +1,17 @@
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { Question } from "@/types/questionnaire/question";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 
 export default function QuestionnaireNavigation({
-  questionnaire,
   scrollToQuestion,
   toggleQuestionExpanded,
   expandedQuestions,
+  rootQuestions,
 }: {
-  questionnaire: QuestionnaireDetail;
+  rootQuestions: Question[];
   toggleQuestionExpanded?: (questionId: string) => void;
   expandedQuestions?: Set<string>;
   scrollToQuestion?: (questionId: string) => void;
@@ -27,13 +24,13 @@ export default function QuestionnaireNavigation({
       </CardHeader>
       <CardContent className="p-0">
         <nav className="space-y-1">
-          {questionnaire.questions.map((question: Question, index: number) => {
+          {rootQuestions.map((question, index) => {
             const hasSubQuestions =
               question.type === "group" &&
               question.questions &&
               question.questions.length > 0;
             return (
-              <div key={question.id} className="space-y-1">
+              <div key={question.link_id} className="space-y-1">
                 <Button
                   variant={null}
                   onClick={() => {
@@ -41,23 +38,20 @@ export default function QuestionnaireNavigation({
                       scrollToQuestion(question.id);
                     } else {
                       const element = document.getElementById(
-                        `question-${question.id}`,
+                        `question-${question.link_id}`,
                       );
 
                       if (element) {
                         element.scrollIntoView();
                         if (toggleQuestionExpanded) {
-                          toggleQuestionExpanded(question.id);
+                          toggleQuestionExpanded(question.link_id);
                         }
                       }
                     }
                   }}
-                  className={cn(
-                    "w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2",
-                    {
-                      "bg-accent": expandedQuestions?.has(question.id),
-                    },
-                  )}
+                  className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
+                    expandedQuestions?.has(question.link_id) ? "bg-accent" : ""
+                  }`}
                 >
                   <span className="font-medium text-gray-500">
                     {index + 1}.
@@ -70,18 +64,20 @@ export default function QuestionnaireNavigation({
                   <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
                     {question.questions.map((subQuestion, subIndex) => (
                       <Button
+                        key={subQuestion.link_id}
                         variant={null}
-                        key={subQuestion.id}
                         onClick={() => {
                           if (scrollToQuestion) {
                             scrollToQuestion(subQuestion.id);
-                          } else if (!expandedQuestions?.has(question.id)) {
+                          } else if (
+                            !expandedQuestions?.has(question.link_id)
+                          ) {
                             if (toggleQuestionExpanded) {
-                              toggleQuestionExpanded(question.id);
+                              toggleQuestionExpanded(question.link_id);
                             }
                             setTimeout(() => {
                               const element = document.getElementById(
-                                `question-${subQuestion.id}`,
+                                `question-${subQuestion.link_id}`,
                               );
                               if (element) {
                                 element.scrollIntoView();
@@ -89,7 +85,7 @@ export default function QuestionnaireNavigation({
                             }, 100);
                           } else {
                             const element = document.getElementById(
-                              `question-${subQuestion.id}`,
+                              `question-${subQuestion.link_id}`,
                             );
                             if (element) {
                               element.scrollIntoView();
