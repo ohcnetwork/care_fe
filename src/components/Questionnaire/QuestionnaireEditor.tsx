@@ -592,7 +592,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const validateGroupQuestions = (): boolean => {
     let hasError = false;
 
-    const checkGroups = (questions: Question[]): boolean => {
+    const checkGroups = (questions: Question[]): void => {
       for (const q of questions) {
         if (q.type === "group") {
           if (!q.questions || q.questions.length === 0) {
@@ -603,10 +603,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           }
         }
       }
-      return !hasError;
     };
-
-    return checkGroups(rootQuestions);
+    checkGroups(rootQuestions);
+    return !hasError;
   };
   const handleSave = async () => {
     let isValid = await form.trigger();
