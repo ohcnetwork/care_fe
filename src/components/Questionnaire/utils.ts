@@ -4,19 +4,24 @@ export const removeQuestionsFromSource = (
   questions: Question[],
   selectedQuestionIds: Set<string>,
 ): Question[] => {
-  return questions.map((q) => ({
-    ...q,
-    questions: q.questions
-      ? q.questions
-          .filter((subQ) => !selectedQuestionIds.has(subQ.id))
-          .map((subQ) => ({
-            ...subQ,
-            questions: subQ.questions
-              ? removeQuestionsFromSource(subQ.questions, selectedQuestionIds)
-              : subQ.questions,
-          }))
-      : q.questions,
-  }));
+  const newQuestions: Question[] = [];
+  for (const question of questions) {
+    if (selectedQuestionIds.size === 0) {
+      break;
+    }
+    if (selectedQuestionIds.has(question.id)) {
+      selectedQuestionIds.delete(question.id);
+    } else {
+      newQuestions.push(question);
+    }
+    if (selectedQuestionIds.size > 0 && question.questions) {
+      question.questions = removeQuestionsFromSource(
+        question.questions,
+        selectedQuestionIds,
+      );
+    }
+  }
+  return newQuestions;
 };
 
 export const addQuestionsToDestination = (
@@ -24,26 +29,16 @@ export const addQuestionsToDestination = (
   destId: string,
   questionsToAdd: Question[],
 ): Question[] => {
-  return questions.map((q) => {
-    if (q.id === destId) {
-      return {
-        ...q,
-        questions: [...(q.questions || []), ...questionsToAdd],
-      };
+  for (const question of questions) {
+    if (question.id === destId) {
+      question.questions = [...(question.questions || []), ...questionsToAdd];
+      return questions;
     }
-
-    if (q.questions && q.questions.length > 0) {
-      return {
-        ...q,
-        questions: addQuestionsToDestination(
-          q.questions,
-          destId,
-          questionsToAdd,
-        ),
-      };
+    if (question.questions?.length) {
+      addQuestionsToDestination(question.questions, destId, questionsToAdd);
     }
-    return q;
-  });
+  }
+  return questions;
 };
 
 export const extractGroupQuestions = (questions: Question[]): Question[] => {
