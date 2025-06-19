@@ -415,6 +415,7 @@
   "age_must_be_positive": "Age must be greater than 0",
   "age_must_be_present": "Age must be present",
   "age_notice": "Only year of birth will be stored for age.",
+  "age_validation_message": "Age must be between 1 and 120",
   "ago": "ago",
   "align_center": "Center",
   "align_left": "Left",

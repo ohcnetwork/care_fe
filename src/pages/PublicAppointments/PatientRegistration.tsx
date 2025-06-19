@@ -24,7 +24,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { GENDERS, GENDER_TYPES } from "@/common/constants";
-import { validateName, validatePincode } from "@/common/validation";
+import {
+  validateAge,
+  validateName,
+  validatePincode,
+} from "@/common/validation";
 
 import { usePubSub } from "@/Utils/pubsubContext";
 import routes from "@/Utils/request/api";
@@ -70,8 +74,32 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         }),
       gender: z.enum(GENDERS, { error: t("field_required") }),
       address: z.string().min(1, { error: t("field_required") }),
-      age: z.string().optional(),
-      date_of_birth: z.date().or(z.string()).optional(),
+      age: z.string().refine(
+        (val) => {
+          if (form.watch("ageInputType") === "age") {
+            return !!val;
+          }
+          return true;
+        },
+        {
+          error: t("field_required"),
+        },
+      ),
+      date_of_birth: z
+        .date()
+        .or(z.string())
+        .refine(
+          (val) => {
+            if (form.watch("ageInputType") === "date_of_birth") {
+              console.log(val);
+              return !!val;
+            }
+            return true;
+          },
+          {
+            error: t("field_required"),
+          },
+        ),
       pincode: z.string().refine(validatePincode, t("invalid_pincode")),
       geo_organization: z.string().min(1, { error: t("field_required") }),
       ageInputType: z.enum(["age", "date_of_birth"]),
@@ -79,24 +107,10 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     .check((ctx) => {
       const data = ctx.value;
       const field = data.ageInputType === "age" ? "age" : "date_of_birth";
-      if (!data[field]) {
+      if (field === "age" && data.age && !validateAge(Number(data.age))) {
         ctx.issues.push({
           code: "custom",
-          message: t("field_required"),
-          path: [field],
-          input: data,
-        });
-        return;
-      }
-      if (
-        field === "age" &&
-        data.age &&
-        !isNaN(Number(data.age)) &&
-        Number(data.age) < 0
-      ) {
-        ctx.issues.push({
-          code: "custom",
-          message: t("age_less_than_0"),
+          message: t("age_validation_message"),
           path: ["age"],
           input: data,
         });
@@ -110,13 +124,15 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     defaultValues: {
       name: "",
       ageInputType: "date_of_birth",
-      age: undefined,
-      date_of_birth: undefined,
+      age: "",
+      date_of_birth: "",
       address: "",
       pincode: "",
       geo_organization: "",
     },
   });
+
+  console.log(form.formState.errors);
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
@@ -181,6 +197,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       geo_organization: data.geo_organization,
       is_active: true,
     };
+
     createPatient(formattedData);
   });
 
@@ -333,12 +350,13 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormField
                     control={form.control}
                     name="age"
-                    render={() => (
+                    render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel aria-required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
-                            {...form.register("age")}
+                            {...field}
+                            type="number"
                             placeholder={t("type_patient_age")}
                           />
                         </FormControl>
@@ -346,21 +364,15 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         <span className="text-xs text-gray-500">
                           {t("age_notice")}
                         </span>
-                        {form.getValues("age") && (
-                          <div className="text-sm font-bold">
-                            {Number(form.getValues("age")) <= 0 ? (
-                              <span className="text-red-600">
-                                {t("invalid_age")}
-                              </span>
-                            ) : (
-                              <span className="text-violet-600">
-                                {t("year_of_birth")}:{" "}
-                                {new Date().getFullYear() -
-                                  Number(form.getValues("age"))}
-                              </span>
-                            )}
-                          </div>
-                        )}
+                        {form.getValues("age") &&
+                          Number(form.watch("age")) > 0 &&
+                          Number(form.getValues("age")) < 120 && (
+                            <span className="text-sm font-bold text-violet-600">
+                              {t("year_of_birth")}:{" "}
+                              {new Date().getFullYear() -
+                                Number(form.getValues("age"))}
+                            </span>
+                          )}
                       </FormItem>
                     )}
                   />
