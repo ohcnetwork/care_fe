@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 
 import MoveQuestionDialog from "./MoveQuestionDialog";
@@ -22,21 +23,21 @@ import { removeQuestionsFromSource } from "./utils";
 
 interface QuestionActionsProps {
   selectedQuestions: Set<string>;
-  questionnaire: QuestionnaireDetail;
+  questions: Question[];
   updateQuestionnaireField: (
     field: keyof QuestionnaireDetail,
     value: unknown,
   ) => void;
-  setQuestionnaire: (questionnaire: QuestionnaireDetail) => void;
+  onQuestionsChange: (questions: Question[]) => void;
   setSelectedQuestions: (questions: Set<string>) => void;
   setExpandedQuestions: Dispatch<SetStateAction<Set<string>>>;
 }
 
 export function QuestionActions({
   selectedQuestions,
-  questionnaire,
+  questions,
   updateQuestionnaireField,
-  setQuestionnaire,
+  onQuestionsChange,
   setSelectedQuestions,
   setExpandedQuestions,
 }: QuestionActionsProps) {
@@ -46,7 +47,7 @@ export function QuestionActions({
 
   const handleRemoveQuestions = () => {
     const updatedQuestions = removeQuestionsFromSource(
-      questionnaire.questions,
+      questions,
       selectedQuestions,
     );
     updateQuestionnaireField("questions", updatedQuestions);
@@ -118,12 +119,12 @@ export function QuestionActions({
         </DialogContent>
       </Dialog>
       <MoveQuestionDialog
+        questions={questions}
         open={showMoveDialog}
         onOpenChange={setShowMoveDialog}
-        questionnaire={questionnaire}
         selectedQuestionIds={selectedQuestions}
-        onSuccess={(questionnaire) => {
-          setQuestionnaire(questionnaire);
+        onSuccess={(questions) => {
+          onQuestionsChange(questions);
           setSelectedQuestions(new Set());
         }}
         updateSelectedQuestionIds={setSelectedQuestions}

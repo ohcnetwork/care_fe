@@ -79,3 +79,15 @@ export const scrollToQuestion = (linkId: string) => {
     element.scrollIntoView();
   }
 };
+
+export const copyQuestionWithNewIds = (question: Question): Question => {
+  const newQuestion = {
+    ...question,
+    id: crypto.randomUUID(),
+    link_id: `${question.link_id}-copy-${Date.now().toString().slice(-6)}`,
+    questions: question.questions
+      ? question.questions.map((subQ) => copyQuestionWithNewIds(subQ))
+      : [],
+  };
+  return newQuestion;
+};

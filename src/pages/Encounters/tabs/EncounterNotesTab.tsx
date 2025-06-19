@@ -518,7 +518,7 @@ export const EncounterNotesTab = ({
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 overflow-y-auto">
           <div className="space-y-2 p-4">
             {threadsData?.results.length === 0 ? (
               <div className="text-center py-6">

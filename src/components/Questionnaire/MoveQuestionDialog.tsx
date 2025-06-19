@@ -24,10 +24,10 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 import { Question } from "@/types/questionnaire/question";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 
 import {
   addQuestionsToDestination,
+  copyQuestionWithNewIds,
   extractGroupQuestions,
   extractQuestionsByIds,
   removeQuestionsFromSource,
@@ -113,15 +113,15 @@ function QuestionTreeNode({
 }
 
 interface MoveQuestionDialogProps {
-  questionnaire: QuestionnaireDetail;
+  questions: Question[];
   selectedQuestionIds: Set<string>;
-  onSuccess: (questionnaire: QuestionnaireDetail) => void;
+  onSuccess: (questions: Question[]) => void;
   updateSelectedQuestionIds: (ids: Set<string>) => void;
   setParentExpandedQuestions: Dispatch<SetStateAction<Set<string>>>;
 }
 
 export default function MoveQuestionDialog({
-  questionnaire,
+  questions,
   selectedQuestionIds,
   onSuccess,
   updateSelectedQuestionIds,
@@ -133,11 +133,11 @@ export default function MoveQuestionDialog({
     new Set(),
   );
 
-  const groupQuestions = extractGroupQuestions(questionnaire.questions);
+  const groupQuestions = extractGroupQuestions(questions);
 
   const selectedQuestions = extractQuestionsByIds(
     selectedQuestionIds,
-    questionnaire.questions,
+    questions,
   );
 
   const handleToggleExpand = (id: string) => {
@@ -152,17 +152,13 @@ export default function MoveQuestionDialog({
 
   const handleMove = () => {
     if (!destinationId || selectedQuestions.length === 0) return;
-    const updatedQuestionnaire = { ...questionnaire };
-    updatedQuestionnaire.questions = removeQuestionsFromSource(
-      updatedQuestionnaire.questions,
-      selectedQuestionIds,
+    onSuccess(
+      addQuestionsToDestination(
+        removeQuestionsFromSource([...questions], selectedQuestionIds),
+        destinationId,
+        selectedQuestions,
+      ),
     );
-    updatedQuestionnaire.questions = addQuestionsToDestination(
-      updatedQuestionnaire.questions,
-      destinationId,
-      selectedQuestions,
-    );
-    onSuccess(updatedQuestionnaire);
     setParentExpandedQuestions((prev) => {
       const newExpanded = new Set(prev);
       newExpanded.add(destinationId);
@@ -176,23 +172,16 @@ export default function MoveQuestionDialog({
 
   const destinationQuestion = extractQuestionsByIds(
     new Set([destinationId]),
-    questionnaire.questions,
+    questions,
   )[0];
 
   const handleCopy = () => {
     if (!destinationId || selectedQuestions.length === 0) return;
-    const updatedQuestionnaire = { ...questionnaire };
-    const questionsCopy = selectedQuestions.map((q) => ({
-      ...q,
-      id: crypto.randomUUID(),
-      link_id: `${q.link_id}-copy-${Date.now().toString().slice(-6)}`,
-    }));
-    updatedQuestionnaire.questions = addQuestionsToDestination(
-      updatedQuestionnaire.questions,
-      destinationId,
-      questionsCopy,
+    const questionsCopy = selectedQuestions.map(copyQuestionWithNewIds);
+
+    onSuccess(
+      addQuestionsToDestination([...questions], destinationId, questionsCopy),
     );
-    onSuccess(updatedQuestionnaire);
     props.onOpenChange?.(false);
     setDestinationId("");
     toast.success(t("questions_copied"));

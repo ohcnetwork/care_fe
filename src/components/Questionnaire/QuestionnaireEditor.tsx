@@ -937,9 +937,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 />
                 <QuestionActions
                   selectedQuestions={selectedQuestions}
-                  questionnaire={questionnaire}
+                  questions={rootQuestions}
                   updateQuestionnaireField={updateQuestionnaireField}
-                  setQuestionnaire={setQuestionnaire}
+                  onQuestionsChange={(questions) => {
+                    handleValidatedChange("questions", questions);
+                  }}
                   setSelectedQuestions={setSelectedQuestions}
                   setExpandedQuestions={setExpandedQuestions}
                 />
@@ -1175,9 +1177,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               />
               <QuestionActions
                 selectedQuestions={selectedQuestions}
-                questionnaire={questionnaire}
+                questions={rootQuestions}
+                onQuestionsChange={(questions) => {
+                  handleValidatedChange("questions", questions);
+                }}
                 updateQuestionnaireField={updateQuestionnaireField}
-                setQuestionnaire={setQuestionnaire}
                 setSelectedQuestions={setSelectedQuestions}
                 setExpandedQuestions={setExpandedQuestions}
               />
