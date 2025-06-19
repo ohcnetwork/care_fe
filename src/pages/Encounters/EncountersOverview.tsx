@@ -34,7 +34,7 @@ export default function EncountersOverview({
               value="patients"
               className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
             >
-              {t("patients")}
+              {t("encounters")}
             </TabsTrigger>
             <TabsTrigger
               value="locations"
