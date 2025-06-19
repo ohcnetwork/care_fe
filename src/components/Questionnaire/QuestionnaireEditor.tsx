@@ -589,10 +589,30 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     return !hasError;
   };
 
+  const validateGroupQuestions = (): boolean => {
+    let hasError = false;
+
+    const checkGroups = (questions: Question[]): boolean => {
+      for (const q of questions) {
+        if (q.type === "group") {
+          if (!q.questions || q.questions.length === 0) {
+            toast.error(t("group_must_have_subquestion"));
+            hasError = true;
+          } else {
+            checkGroups(q.questions);
+          }
+        }
+      }
+      return !hasError;
+    };
+
+    return checkGroups(rootQuestions);
+  };
   const handleSave = async () => {
     let isValid = await form.trigger();
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
+    const hasValidGroups = validateGroupQuestions();
 
     rootQuestions.forEach((question, idx) => {
       if (question.code && !question.code?.display) {
@@ -604,7 +624,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       }
     });
 
-    if (!isValid || !hasOrganizations || !hasValidStructuredType) {
+    if (
+      !isValid ||
+      !hasOrganizations ||
+      !hasValidStructuredType ||
+      !hasValidGroups
+    ) {
       return;
     }
 

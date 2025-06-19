@@ -1537,6 +1537,7 @@
   "greater": "Greater Than",
   "greater_or_equals": "Greater Than or Equal",
   "group_layout_options": "Group layout options",
+  "group_must_have_subquestion": "Group must have at least one sub-question.",
   "has_allergies": "Has Allergies",
   "has_child_locations": "Has child locations",
   "has_child_organizations": "Has child organizations",
