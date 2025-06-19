@@ -754,8 +754,7 @@ export function QuestionnaireForm({
         <div className="w-64 border-r border-gray-200 pr-4 py-3 pl-0 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
           {questionnaireForms.map((form) => (
             <div key={form.questionnaire.id} className="space-y-2">
-              <Button
-                variant="outline"
+              <button
                 className={cn(
                   "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
                   activeQuestionnaireId === form.questionnaire.id &&
@@ -765,13 +764,12 @@ export function QuestionnaireForm({
                 disabled={isPending}
               >
                 {form.questionnaire.title}
-              </Button>
+              </button>
               <div className="pl-4 space-y-1">
                 {form.questionnaire.questions
                   .filter((q) => q.type === "group")
                   .map((group) => (
-                    <Button
-                      variant="outline"
+                    <button
                       key={group.id}
                       className={cn(
                         "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
@@ -784,7 +782,7 @@ export function QuestionnaireForm({
                       disabled={isPending}
                     >
                       {group.text}
-                    </Button>
+                    </button>
                   ))}
               </div>
             </div>

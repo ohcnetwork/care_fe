@@ -120,7 +120,7 @@ export const QuestionGroup = memo(function QuestionGroup({
 
   if (question.type !== "group") {
     return (
-      <div data-preview-question-id={encounterId == "preview" && question.id}>
+      <div data-preview-question-id={encounterId === "preview" && question.id}>
         <QuestionInput
           question={question}
           questionnaireResponses={questionnaireResponses}
