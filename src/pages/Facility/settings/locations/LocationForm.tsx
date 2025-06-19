@@ -131,6 +131,7 @@ export default function LocationForm({
         }),
       );
       replaceBedFields(defaultNames);
+      form.trigger("bedNames");
     }
   };
 
