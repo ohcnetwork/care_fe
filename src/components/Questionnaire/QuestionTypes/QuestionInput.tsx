@@ -228,11 +228,43 @@ export function QuestionInput({
       ? [{ value: "", type: "string" } as ResponseValue]
       : questionnaireResponse.values;
 
+    if (question.type === "choice" && !question.answer_value_set) {
+      return (
+        <div className="bg-gray-100 md:bg-transparent px-2 py-1.5">
+          <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
+            <QuestionLabel
+              question={question}
+              isSubQuestion={isSubQuestion}
+              className="mb-2 text-md"
+            />
+            {question.description && (
+              <p className="text-sm text-gray-500">{question.description}</p>
+            )}
+          </div>
+          <div className="flex flex-col sm:flex-row">
+            <div className="flex-1 min-w-0">{renderSingleInput(0)}</div>
+            <NotesInput
+              questionnaireResponse={questionnaireResponse}
+              handleUpdateNote={(note) => {
+                updateQuestionnaireResponseCB(
+                  [...questionnaireResponse.values],
+                  questionnaireResponse.question_id,
+                  note,
+                );
+              }}
+              disabled={disabled}
+            />
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="bg-gray-100 md:bg-transparent px-2 py-1.5">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
-            questionnaireResponse.values.length > 1 && (
+            questionnaireResponse.values.length > 1 &&
+            (question.type != "choice" || question.answer_value_set) && (
               <Button
                 variant="ghost"
                 size="icon"
