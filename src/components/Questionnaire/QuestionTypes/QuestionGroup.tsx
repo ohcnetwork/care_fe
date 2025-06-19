@@ -161,7 +161,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         </div>
       )}
       <div
-        data-preview-question-id={encounterId == "preview" && question.id}
+        data-preview-question-id={encounterId === "preview" && question.id}
         data-cy="group_container_styling"
         className={cn(
           "gap-1",
