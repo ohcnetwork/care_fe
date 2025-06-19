@@ -68,7 +68,6 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton
-                          data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                           tooltip={link.name}
                           className="cursor-pointer hover:bg-gray-200 hover:text-green-700"
                         >
@@ -92,7 +91,6 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                             <SidebarMenuSubItem key={subItem.name}>
                               <SidebarMenuSubButton
                                 asChild
-                                data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
                                 className={
                                   "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                                 }
@@ -121,7 +119,6 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                     className={
                       "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                     }
-                    data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     <ActiveLink
                       href={link.url}
