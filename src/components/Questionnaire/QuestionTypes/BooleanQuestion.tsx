@@ -1,9 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import type {
   QuestionnaireResponse,
@@ -33,11 +30,16 @@ export function BooleanQuestion({
   const { t } = useTranslation();
 
   const selectedValue = questionnaireResponse.values[0]?.value?.toString();
+  const options = [
+    { value: "true", label: t("yes") },
+    { value: "false", label: t("no") },
+  ];
 
   return (
-    <RadioGroup
-      value={selectedValue}
-      onValueChange={(value) => {
+    <RadioInput
+      options={options}
+      selectedValue={selectedValue ?? ""}
+      handleValueChange={(value) => {
         clearError();
         updateQuestionnaireResponseCB(
           [{ type: "boolean", value: value === "true" }],
@@ -46,46 +48,7 @@ export function BooleanQuestion({
         );
       }}
       disabled={disabled}
-      className="flex flex-row gap-4"
-    >
-      {[
-        { value: "true", label: t("yes") },
-        { value: "false", label: t("no") },
-      ].map((option) => (
-        <button
-          type="button"
-          className={cn(
-            "border rounded-md p-2 cursor-pointer sm:w-auto hover:border-primary-500 group text-left",
-            selectedValue === option.value
-              ? "bg-primary-100 border-primary-500"
-              : "bg-white border-gray-300",
-          )}
-          key={option.value}
-          onClick={() => {
-            clearError();
-            updateQuestionnaireResponseCB(
-              [{ type: "boolean", value: option.value === "true" }],
-              questionnaireResponse.question_id,
-              questionnaireResponse.note,
-            );
-          }}
-          disabled={disabled}
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem
-              value={option.value}
-              id={`${question.id}-${option.value}`}
-              className="h-4 w-4 border-2 border-gray-300 text-primary focus:ring-primary group-hover:border-primary-500"
-            />
-            <Label
-              htmlFor={`${question.id}-${option.value}`}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-            >
-              {option.label}
-            </Label>
-          </div>
-        </button>
-      ))}
-    </RadioGroup>
+      question={question}
+    />
   );
 }
