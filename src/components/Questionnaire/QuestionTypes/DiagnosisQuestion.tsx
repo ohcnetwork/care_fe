@@ -504,6 +504,7 @@ export function DiagnosisQuestion({
   return (
     <div className="space-y-4">
       <HistoricalRecordSelector<DiagnosisRequest>
+        title={t("diagnosis_history")}
         structuredTypes={[
           {
             type: t("diagnoses"),
