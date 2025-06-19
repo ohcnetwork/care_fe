@@ -53,7 +53,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { dateQueryString, trimNote } from "@/Utils/utils";
+import { dateQueryString } from "@/Utils/utils";
 import {
   ALLERGY_VERIFICATION_STATUS,
   type AllergyIntolerance,
@@ -290,11 +290,9 @@ function NotesInput({
       value={note ?? ""}
       onChange={onChange}
       onBlur={(e) => {
-        const trimmed = trimNote(e.target.value);
-        if (trimmed !== e.target.value) {
-          e.target.value = trimmed ?? "";
-          onChange(e);
-        }
+        const trimmedValue = e.target.value.trim();
+        e.target.value = trimmedValue;
+        onChange({ ...e, target: { ...e.target, value: trimmedValue } });
       }}
       disabled={disabled}
       className="mt-1 lg:mt-0.5"

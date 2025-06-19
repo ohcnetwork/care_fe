@@ -51,7 +51,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { dateQueryString, formatName, trimNote } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import {
   Onset,
   SYMPTOM_CLINICAL_STATUS,
@@ -207,11 +207,9 @@ function NotesInput({
       value={note || ""}
       onChange={onChange}
       onBlur={(e) => {
-        const trimmed = trimNote(e.target.value);
-        if (trimmed !== e.target.value) {
-          e.target.value = trimmed ?? "";
-          onChange(e);
-        }
+        const trimmedValue = e.target.value.trim();
+        e.target.value = trimmedValue;
+        onChange({ ...e, target: { ...e.target, value: trimmedValue } });
       }}
       disabled={disabled}
     />

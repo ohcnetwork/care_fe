@@ -333,9 +333,3 @@ export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
 
   return intervals;
 }
-
-export const trimNote = (note?: string): string | undefined => {
-  if (!note) return undefined;
-  const trimmed = note.trim();
-  return trimmed || undefined;
-};

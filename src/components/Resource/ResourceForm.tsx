@@ -47,7 +47,7 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { mergeAutocompleteOptions, trimNote } from "@/Utils/utils";
+import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import facilityApi from "@/types/facility/facilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
@@ -476,11 +476,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       placeholder={t("request_reason_placeholder")}
                       onChange={(value) => field.onChange(value)}
                       onBlur={(e) => {
-                        const trimmed = trimNote(e.target.value);
-                        if (trimmed !== e.target.value) {
-                          e.target.value = trimmed ?? "";
-                          field.onChange(e);
-                        }
+                        const trimmedValue = e.target.value.trim();
+                        field.onChange(trimmedValue);
                       }}
                     />
                   </FormControl>
