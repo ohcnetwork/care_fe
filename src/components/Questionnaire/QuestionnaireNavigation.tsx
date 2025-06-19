@@ -69,6 +69,7 @@ export default function QuestionnaireNavigation({
                         onClick={() => {
                           if (scrollToQuestion) {
                             scrollToQuestion(subQuestion.id);
+                            console.log(subQuestion.id);
                           } else if (
                             !expandedQuestions?.has(question.link_id)
                           ) {

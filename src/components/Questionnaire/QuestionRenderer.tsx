@@ -86,6 +86,7 @@ export function QuestionRenderer({
       )}
       {questions.map((question) => (
         <div
+          data-question-id={question.id}
           key={question.id}
           ref={(el) => {
             questionRefs.current[question.id] = el;

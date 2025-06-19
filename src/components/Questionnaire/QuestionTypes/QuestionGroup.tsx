@@ -120,18 +120,20 @@ export const QuestionGroup = memo(function QuestionGroup({
 
   if (question.type !== "group") {
     return (
-      <QuestionInput
-        question={question}
-        questionnaireResponses={questionnaireResponses}
-        encounterId={encounterId}
-        updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
-        errors={errors}
-        clearError={() => clearError(question.id)}
-        disabled={disabled}
-        facilityId={facilityId}
-        patientId={patientId}
-        isSubQuestion={isSubQuestion}
-      />
+      <div data-preview-question-id={encounterId == "preview" && question.id}>
+        <QuestionInput
+          question={question}
+          questionnaireResponses={questionnaireResponses}
+          encounterId={encounterId}
+          updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+          errors={errors}
+          clearError={() => clearError(question.id)}
+          disabled={disabled}
+          facilityId={facilityId}
+          patientId={patientId}
+          isSubQuestion={isSubQuestion}
+        />
+      </div>
     );
   }
 
@@ -159,6 +161,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         </div>
       )}
       <div
+        data-preview-question-id={encounterId == "preview" && question.id}
         data-cy="group_container_styling"
         className={cn(
           "gap-1",

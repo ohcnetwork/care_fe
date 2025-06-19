@@ -744,10 +744,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     setSelectedTags((current) => [...current, tag]);
   };
 
-  const scrollToQuestion = (groupId: string) => {
+  const scrollToQuestion = (groupId?: string) => {
     setPreviewGroupId(groupId);
-
-    const element = document.querySelector(`[data-question-id="${groupId}"]`);
+    const element = document.querySelector(
+      `[data-preview-question-id="${groupId}"]`,
+    );
 
     if (element) {
       element.scrollIntoView({ block: "start" });
