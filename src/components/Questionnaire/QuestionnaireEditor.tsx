@@ -375,22 +375,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         text: z.string().trim().min(1, t("field_required")),
         link_id: z.string().trim().min(1, t("field_required")),
         description: z.string().optional(),
-        type: z.enum([
-          "group",
-          "structured",
-          "text",
-          "string",
-          "boolean",
-          "date",
-          "choice",
-          "decimal",
-          "integer",
-          "dateTime",
-          "time",
-          "display",
-          "quantity",
-          "url",
-        ]),
+        type: z.string(),
         code: z
           .object({
             system: z.string().optional(),
@@ -619,6 +604,29 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     let isValid = await form.trigger();
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
+
+    if (!isValid) {
+      const questionsErrors = form.formState.errors.questions as
+        | any[]
+        | undefined;
+      if (questionsErrors) {
+        const firstGroupErrorIndex = questionsErrors.findIndex(
+          (q) => q?.questions?.message,
+        );
+        if (firstGroupErrorIndex !== -1) {
+          const errorQuestion = rootQuestions[firstGroupErrorIndex];
+          if (errorQuestion) {
+            const element = document.getElementById(
+              `question-${errorQuestion.link_id}`,
+            );
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          }
+        }
+      }
+      return;
+    }
 
     rootQuestions.forEach((question, idx) => {
       if (question.code && !question.code?.display) {
