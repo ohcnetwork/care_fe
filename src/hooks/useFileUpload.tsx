@@ -134,7 +134,7 @@ export default function useFileUpload(
       return null;
     }
   };
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
     if (!e.target.files?.length) {
       return;
     }
@@ -218,6 +218,52 @@ export default function useFileUpload(
       },
     });
 
+  const uploadfile = async (
+    data: CreateFileResponse,
+    file: File,
+    associating_id: string,
+  ) => {
+    const url = data.signed_url;
+    const internal_name = data.internal_name;
+    const newFile = new File([file], `${internal_name}`);
+
+    return new Promise<void>((resolve, reject) => {
+      uploadFile(
+        url,
+        newFile,
+        "PUT",
+        { "Content-Type": file.type },
+        async (xhr: XMLHttpRequest) => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setProgress(null);
+            await markUploadComplete({
+              data,
+              associating_id: associating_id,
+            });
+            if (markUploadCompleteError) {
+              toast.error(t("file_error__mark_complete_failed"));
+              reject();
+              return;
+            }
+            resolve();
+          } else {
+            toast.error(
+              t("file_error__dynamic", { statusText: xhr.statusText }),
+            );
+            setProgress(null);
+            reject();
+          }
+        },
+        setProgress as any,
+        () => {
+          toast.error(t("file_error__network"));
+          setProgress(null);
+          reject();
+        },
+      );
+    });
+  };
+
   const { mutateAsync: createUpload } = useMutation({
     mutationFn: (body: {
       original_name: string;
@@ -249,8 +295,6 @@ export default function useFileUpload(
     if (!validateFileUpload()) return;
 
     setProgress(0);
-    const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-    let bytesUploadedSoFar = 0;
     const errors: File[] = [];
     if (combineToPDF) {
       if (!uploadFileNames.length || !uploadFileNames[0]) {
@@ -298,59 +342,7 @@ export default function useFileUpload(
         });
 
         if (data) {
-          let lastFilePercent = 0;
-          await new Promise<void>((resolve, reject) => {
-            uploadFile(
-              data.signed_url,
-              new File([file], `${data.internal_name}`),
-              "PUT",
-              { "Content-Type": file.type },
-              async (xhr: XMLHttpRequest) => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                  bytesUploadedSoFar +=
-                    file.size - Math.round((lastFilePercent / 100) * file.size);
-                  setProgress(
-                    totalBytes > 0
-                      ? (bytesUploadedSoFar / totalBytes) * 100
-                      : 0,
-                  );
-                  await markUploadComplete({
-                    data,
-                    associating_id: associating_id,
-                  });
-                  if (markUploadCompleteError) {
-                    toast.error(t("file_error__mark_complete_failed"));
-                    reject();
-                    return;
-                  }
-                  resolve();
-                } else {
-                  toast.error(
-                    t("file_error__dynamic", { statusText: xhr.statusText }),
-                  );
-                  reject();
-                }
-              },
-              (percent: number | ((prev: number) => number)) => {
-                if (typeof percent === "number") {
-                  bytesUploadedSoFar -= Math.round(
-                    (lastFilePercent / 100) * file.size,
-                  );
-                  bytesUploadedSoFar += Math.round((percent / 100) * file.size);
-                  lastFilePercent = percent;
-                  setProgress(
-                    totalBytes > 0
-                      ? (bytesUploadedSoFar / totalBytes) * 100
-                      : 0,
-                  );
-                }
-              },
-              () => {
-                toast.error(t("file_error__network"));
-                reject();
-              },
-            );
-          });
+          await uploadfile(data, file, associating_id);
         }
       } catch {
         errors.push(file);

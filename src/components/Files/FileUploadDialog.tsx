@@ -52,6 +52,11 @@ export default function FileUploadDialog({
     };
   }, [fileUpload.files]);
 
+  const uploadedFilesCount =
+    fileUpload.files.length -
+    fileUpload.files.filter((f) => f.size > 0).length +
+    Math.floor((fileUpload.progress ?? 0) / (100 / fileUpload.files.length));
+
   return (
     <Dialog
       open={open}
@@ -260,7 +265,7 @@ export default function FileUploadDialog({
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>
-                {`${fileUpload.files.length - fileUpload.files.filter((f) => f.size > 0).length + Math.floor((fileUpload.progress ?? 0) / (100 / fileUpload.files.length))}/${fileUpload.files.length} ${t("files_uploaded")}`}
+                {`${uploadedFilesCount}/${fileUpload.files.length} ${t("files_uploaded")}`}
               </span>
               <span>
                 {(fileUpload.progress ?? 0) < 100
