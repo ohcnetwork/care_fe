@@ -1363,7 +1363,6 @@
   "error_loading_questionnaire_response": "Error loading questionnaire response",
   "error_removing_bed_assignment": "Error while removing the bed assignment. Please try again later.",
   "error_saving_file": "Error saving file",
-  "error_to_parse_selectedSlot_from_URL_parameters": "Failed to parse selectedSlot from URL parameters",
   "error_updating_consent": "Error updating consent",
   "error_updating_encounter": "Error to Updating Encounter",
   "error_updating_location": "Error updating location",
