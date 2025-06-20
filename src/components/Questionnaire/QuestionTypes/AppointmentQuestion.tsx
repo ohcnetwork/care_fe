@@ -135,7 +135,7 @@ export function AppointmentQuestion({
           value={value.reason_for_visit || ""}
           onChange={(e) =>
             handleUpdate({
-              reason_for_visit: e.target.value.trim() || undefined,
+              reason_for_visit: e.target.value || undefined,
             })
           }
           disabled={disabled}
