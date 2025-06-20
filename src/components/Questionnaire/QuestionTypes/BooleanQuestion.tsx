@@ -6,10 +6,8 @@ import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
 
 interface BooleanQuestionProps {
-  question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
     values: ResponseValue[],
@@ -21,7 +19,6 @@ interface BooleanQuestionProps {
 }
 
 export function BooleanQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -38,8 +35,8 @@ export function BooleanQuestion({
   return (
     <RadioInput
       options={options}
-      selectedValue={selectedValue ?? ""}
-      handleValueChange={(value) => {
+      value={selectedValue ?? ""}
+      onValueChange={(value) => {
         clearError();
         updateQuestionnaireResponseCB(
           [{ type: "boolean", value: value === "true" }],
@@ -48,7 +45,6 @@ export function BooleanQuestion({
         );
       }}
       disabled={disabled}
-      question={question}
     />
   );
 }

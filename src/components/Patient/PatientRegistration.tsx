@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -45,6 +44,7 @@ import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
@@ -489,29 +489,18 @@ export default function PatientRegistration(
                 control={form.control}
                 name="gender"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
+                  <FormItem>
                     <FormLabel aria-required>{t("sex")}</FormLabel>
                     <FormControl>
-                      <RadioGroup
+                      <RadioInput
                         {...field}
                         onValueChange={field.onChange}
                         value={field.value ?? undefined}
-                        className="flex gap-5 flex-wrap"
-                      >
-                        {GENDER_TYPES.map((g) => (
-                          <FormItem key={g.id} className="flex">
-                            <FormControl>
-                              <RadioGroupItem
-                                value={g.id}
-                                data-cy={`gender-radio-${g.id.toLowerCase()}`}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {t(`GENDER__${g.id}`)}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </RadioGroup>
+                        options={GENDER_TYPES.map((g) => ({
+                          value: g.id,
+                          label: t(`GENDER__${g.id}`),
+                        }))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

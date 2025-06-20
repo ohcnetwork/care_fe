@@ -139,11 +139,13 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   return (
     <div className="mt-2">
       <RadioInput
-        options={options}
-        selectedValue={selectedValue ?? ""}
-        handleValueChange={handleValueChange}
+        options={options.map((option) => ({
+          label: properCase(option.display || option.value),
+          value: option.value.toString(),
+        }))}
+        value={selectedValue ?? ""}
+        onValueChange={handleValueChange}
         disabled={disabled}
-        question={question}
       />
     </div>
   );
