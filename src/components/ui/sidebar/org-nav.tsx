@@ -11,10 +11,12 @@ interface OrgNavProps {
 function generateOrganizationLinks(
   organizations: Organization[],
 ): NavigationLink[] {
-  return organizations.map((org) => ({
-    name: org.name,
-    url: `/organization/${org.id}`,
-  }));
+  return organizations
+    .filter((org) => org.org_type !== "role")
+    .map((org) => ({
+      name: org.name,
+      url: `/organization/${org.id}`,
+    }));
 }
 
 export function OrgNav({ organizations }: OrgNavProps) {

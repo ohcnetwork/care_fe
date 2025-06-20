@@ -48,7 +48,6 @@ export default function UserDashboard() {
 
   const tabsData = [
     { id: DashboardTabs.TAB_FACILITIES, items: facilities },
-    { id: DashboardTabs.TAB_ASSOCIATIONS, items: associations },
     { id: DashboardTabs.TAB_GOVERNANCE, items: governance },
   ];
 
