@@ -135,10 +135,10 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 />
                 <div className="w-full flex justify-center sm:justify-start sm:w-auto">
                   <Tabs value={incoming ? "incoming" : "outgoing"}>
-                    <TabsList className="inline-flex bg-transparent p-0 h-8">
+                    <TabsList className="inline-flex bg-gray-100 rounded-lg p-1 h-10 min-w-[200px]">
                       <TabsTrigger
                         value="outgoing"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all text-center data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:text-gray-900"
                         onClick={() => updateQuery({ incoming: false })}
                         data-cy="tab-outgoing"
                       >
@@ -146,7 +146,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       </TabsTrigger>
                       <TabsTrigger
                         value="incoming"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all text-center data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:text-gray-900"
                         onClick={() => updateQuery({ incoming: true })}
                         data-cy="tab-incoming"
                       >
@@ -158,17 +158,17 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               </div>
               <div className="flex justify-center sm:justify-end w-full sm:w-auto">
                 <Tabs value={isActive ? "active" : "completed"}>
-                  <TabsList className="bg-transparent p-0 h-8">
+                  <TabsList className="inline-flex bg-gray-100 rounded-lg p-1 h-10 min-w-[200px]">
                     <TabsTrigger
                       value="active"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all text-center data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:text-gray-900"
                       onClick={() => updateQuery({ status: "pending" })}
                     >
                       {t("active")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="completed"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all text-center data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:text-gray-900"
                       onClick={() => updateQuery({ status: "completed" })}
                     >
                       {t("completed")}
