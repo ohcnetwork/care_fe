@@ -369,6 +369,54 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   const urlSchema = z.string().url(t("please enter a valid url"));
+  const QuestionSchema: z.ZodType<any> = z.lazy(() =>
+    z
+      .object({
+        text: z.string().trim().min(1, t("field_required")),
+        link_id: z.string().trim().min(1, t("field_required")),
+        description: z.string().optional(),
+        type: z.enum([
+          "group",
+          "structured",
+          "text",
+          "string",
+          "boolean",
+          "date",
+          "choice",
+          "decimal",
+          "integer",
+          "dateTime",
+          "time",
+          "display",
+          "quantity",
+          "url",
+        ]),
+        code: z
+          .object({
+            system: z.string().optional(),
+            code: z.string().optional(),
+            display: z.string().optional(),
+          })
+          .optional(),
+        unit: z
+          .object({
+            system: z.string().optional(),
+            code: z.string().optional(),
+            display: z.string().optional(),
+          })
+          .optional(),
+        questions: z.array(z.lazy(() => QuestionSchema)).optional(),
+      })
+      .superRefine((q, ctx) => {
+        if (q.type === "group" && (!q.questions || q.questions.length === 0)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t("group_must_have_subquestion"),
+            path: ["questions"],
+          });
+        }
+      }),
+  );
 
   const QuestionnaireFormPartialSchema = z.object({
     title: z.string().trim().min(1, t("field_required")),
@@ -381,28 +429,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         message: t("slug_format_message"),
       }),
     description: z.string().optional(),
-    questions: z.array(
-      z.object({
-        text: z.string().trim().min(1, t("field_required")),
-        link_id: z.string().trim().min(1, t("field_required")),
-        description: z.string().optional(),
-        code: z
-          .object({
-            system: z.string().optional(),
-            code: z.string().optional(),
-            display: z.string().optional(),
-          })
-          .optional(),
-
-        unit: z
-          .object({
-            system: z.string().optional(),
-            code: z.string().optional(),
-            display: z.string().optional(),
-          })
-          .optional(),
-      }),
-    ),
+    questions: z.array(QuestionSchema),
   });
 
   const [questionnaire, setQuestionnaire] =
@@ -437,7 +464,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     },
     mode: "onChange",
   });
-
   useEffect(() => {
     if (initialQuestionnaire) {
       setQuestionnaire(initialQuestionnaire);
@@ -589,29 +615,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     return !hasError;
   };
 
-  const validateGroupQuestions = (): boolean => {
-    let hasError = false;
-
-    const checkGroups = (questions: Question[]): void => {
-      for (const q of questions) {
-        if (q.type === "group") {
-          if (!q.questions || q.questions.length === 0) {
-            toast.error(t("group_must_have_subquestion"));
-            hasError = true;
-          } else {
-            checkGroups(q.questions);
-          }
-        }
-      }
-    };
-    checkGroups(rootQuestions);
-    return !hasError;
-  };
   const handleSave = async () => {
     let isValid = await form.trigger();
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
-    const hasValidGroups = validateGroupQuestions();
 
     rootQuestions.forEach((question, idx) => {
       if (question.code && !question.code?.display) {
@@ -623,12 +630,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       }
     });
 
-    if (
-      !isValid ||
-      !hasOrganizations ||
-      !hasValidStructuredType ||
-      !hasValidGroups
-    ) {
+    if (!isValid || !hasOrganizations || !hasValidStructuredType) {
       return;
     }
 
@@ -1453,6 +1455,10 @@ function QuestionEditor({
     control: form.control,
     name: "questions",
   }) as Question[];
+
+  const groupError = (form.formState.errors.questions as any[] | undefined)?.[
+    index
+  ]?.questions;
   // Memoize answer options to ensure unique IDs to avoid unnecessary re-renders in value field of AnwserOption
 
   const annotatedAnswerOptions = useMemo(() => {
@@ -2551,6 +2557,11 @@ function QuestionEditor({
                   {t("add_sub_question")}
                 </Button>
               </div>
+              {groupError?.message && (
+                <div className="text-red-500 text-sm mb-2">
+                  {groupError.message}
+                </div>
+              )}
               <div className="space-y-4">
                 {(questions || []).map((subQuestion, idx) => (
                   <div
