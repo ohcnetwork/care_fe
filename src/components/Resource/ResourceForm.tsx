@@ -478,14 +478,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       data-cy="reason-input"
                       placeholder={t("request_reason_placeholder")}
                       onChange={(value) => field.onChange(value)}
-                      onBlur={(e) => {
-                        const trimmedValue = e.target.value.trim();
-                        e.target.value = trimmedValue;
-                        field.onChange({
-                          ...e,
-                          target: { ...e.target, value: trimmedValue },
-                        });
-                      }}
                     />
                   </FormControl>
                   <FormDescription>
