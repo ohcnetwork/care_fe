@@ -30,6 +30,8 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import { NavigationLink } from "./facility-nav";
 
+/* Converts a route pattern like '/path/:id' to a RegExp to match dynamic segments in URLs.
+Helps in checking if the current path matches a pattern for active link detection. */
 const matchPath = (pattern: string, path: string) => {
   const regex = new RegExp(`^${pattern.replace(/:\w+/g, "[^/]+")}`);
   return regex.test(path);
