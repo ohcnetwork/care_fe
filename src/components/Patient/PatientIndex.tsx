@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { onlineManager, useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   formatPhoneNumberIntl,
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -38,12 +39,17 @@ import SearchInput from "@/components/Common/SearchInput";
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { PartialPatientModel } from "@/types/emr/patient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
+  const db = new AppCacheDB();
+  const [partialOfflinePatients, setPartialOfflinePatients] = useState<
+    PartialPatientModel[] | []
+  >([]);
   const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
     useQueryParams();
   const [yearOfBirth, setYearOfBirth] = useState("");
@@ -144,6 +150,37 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     });
   };
 
+  useEffect(() => {
+    const loadOfflinePatient = async () => {
+      try {
+        const allOfflinePatients = await db.OfflineWrites.where("type")
+          .equals("createPatient")
+          .toArray();
+
+        const partialOfflinePatients: PartialPatientModel[] =
+          allOfflinePatients.map((record) => {
+            const { name, gender, phone_number } = record.payload as any;
+
+            return {
+              id: record.id,
+              gender: gender,
+              name: name,
+              phone_number: phone_number,
+              partial_id: record.id,
+            };
+          });
+
+        setPartialOfflinePatients(partialOfflinePatients);
+      } catch (error) {
+        console.error("Error while fetch offline Patient : ", error);
+        toast.error("Offline_Patient_fetch_error");
+      }
+    };
+    if (!onlineManager.isOnline()) {
+      loadOfflinePatient();
+    }
+  });
+
   return (
     <div>
       <div className="container max-w-5xl mx-auto py-6">
@@ -240,6 +277,66 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                     )}
                   </>
                 )}
+                {partialOfflinePatients.length > 0 &&
+                  !onlineManager.isOnline() && (
+                    <>
+                      <div className="mt-4">
+                        <h2 className="text-lg font-semibold">
+                          {t("newly_Offline_Patient")}
+                        </h2>
+                        <div className="text-sm mb-4">
+                          {t("general_info_Newly_offline_Patient")}
+                        </div>
+                      </div>
+                      <div className="rounded-lg border border-gray-200">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[300px]">
+                                {t("patient_name")}
+                              </TableHead>
+                              <TableHead>{t("phone_number")}</TableHead>
+                              <TableHead>{t("gender")}</TableHead>
+                              <TableHead>{t("status")}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {partialOfflinePatients.map((patient) => (
+                              <TableRow
+                                key={patient.id}
+                                className="cursor-pointer"
+                                onClick={() => handlePatientSelect(patient)}
+                              >
+                                <TableCell className="font-medium">
+                                  {patient.name}
+                                </TableCell>
+                                <TableCell>
+                                  {formatPhoneNumberIntl(patient.phone_number)}
+                                </TableCell>
+                                <TableCell>
+                                  {
+                                    GENDER_TYPES.find(
+                                      (g) => g.id === patient.gender,
+                                    )?.text
+                                  }
+                                </TableCell>
+                                <TableCell>
+                                  <Badge
+                                    variant="outline"
+                                    className="py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
+                                  >
+                                    <h3 className="text-xs font-medium">
+                                      {t("Pending_sync")}
+                                    </h3>
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
+                  )}
               </div>
             </div>
           </div>

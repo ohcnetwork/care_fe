@@ -6,13 +6,14 @@ import {
 } from "@tanstack/react-query";
 import { AlertCircle, CalendarIcon } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -34,13 +35,20 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
+import {
+  isOfflineId,
+  normalizeOfflineEncounterRecord,
+  normalizeOfflinePatientRecord,
+} from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/patient";
 
 interface SearchPatientParams {
@@ -50,12 +58,24 @@ interface SearchPatientParams {
 }
 
 export default function VerifyPatient(props: { facilityId: string }) {
+  const db = new AppCacheDB();
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
   const { phone_number, year_of_birth, partial_id } = qParams;
   const { goBack } = useAppHistory();
   const { hasPermission } = usePermissions();
   const queryClient = useQueryClient();
+  const [offlinePatientPayload, setOfflinePatientPayload] =
+    useState<Patient | null>(null);
+  const [newofflineEncounters, setNewOfflineEncounters] = useState<Encounter[]>(
+    [],
+  );
+  const [offlineUpdatedEncounters, setOfflineUpdatedEncounters] = useState<
+    OfflineWritesEntry[]
+  >([]);
+  const [hasReachedEncounterLimitOffline, sethasReachedEncounterLimitOffline] =
+    useState(false);
+
   const { data: patientverificationdata } = useQuery({
     queryKey: ["PatientVerification", phone_number, year_of_birth, partial_id],
     queryFn: async () => {
@@ -101,7 +121,8 @@ export default function VerifyPatient(props: { facilityId: string }) {
 
   const patientData = onlineManager.isOnline()
     ? onlinepatientData
-    : patientverificationdata;
+    : (patientverificationdata ??
+      (isOfflineId(partial_id) ? offlinePatientPayload : null));
 
   const { data: encounters, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounters", patientData?.id],
@@ -118,6 +139,113 @@ export default function VerifyPatient(props: { facilityId: string }) {
   });
 
   useEffect(() => {
+    const loadOfflinePatient = async () => {
+      if (!onlineManager.isOnline() && isOfflineId(partial_id)) {
+        try {
+          const record = await db.OfflineWrites.get(partial_id);
+          if (record) {
+            const normalized = normalizeOfflinePatientRecord(
+              record,
+              queryClient,
+            );
+            setOfflinePatientPayload(normalized);
+          }
+        } catch (error) {
+          console.error("Error while fetching patient record", error);
+          toast.error(t("offline_patient_payload_fetch_error"));
+        }
+      }
+    };
+    loadOfflinePatient();
+  }, [partial_id, queryClient]);
+
+  useEffect(() => {
+    const loadOfflineEncounters = async () => {
+      if (!patientData?.id || !facilityData) return;
+
+      try {
+        const allWrites = await db.OfflineWrites.where("type")
+          .equals("createEncounter")
+          .toArray();
+        const patientEncounters = allWrites.filter((entry) => {
+          const payload = entry.payload as any;
+          return (
+            payload?.patient === patientData.id ||
+            entry.parentMutationIds?.includes(patientData.id)
+          );
+        });
+
+        const normalized = patientEncounters.map((entry) =>
+          normalizeOfflineEncounterRecord(entry, patientData),
+        );
+        setNewOfflineEncounters(normalized);
+
+        // 2. Load updateEncounter writes
+        const updateWrites = await db.OfflineWrites.where("type")
+          .equals("updateEncounter")
+          .toArray();
+
+        const offlineEncounterUpdates = updateWrites.filter((entry) => {
+          const payload = entry.payload as any;
+          return payload?.patient === patientData.id;
+        });
+
+        setOfflineUpdatedEncounters(offlineEncounterUpdates);
+      } catch (error) {
+        console.error("Failed to load offline encounters:", error);
+        toast.error(t("offline_encounter_payload_fetch_error"));
+      }
+    };
+
+    if (!onlineManager.isOnline()) {
+      loadOfflineEncounters();
+    }
+  }, [patientData, facilityData]);
+
+  const FinalOfflinEncounters = useMemo(() => {
+    if (!patientData && onlineManager.isOnline()) return [];
+
+    const offlineUpdateMap = new Map(
+      offlineUpdatedEncounters.map((entry: any) => [
+        entry.id,
+        entry?.payload?.status,
+      ]),
+    );
+
+    const patchedSyncedEncounters = (encounters?.results ?? []).map((enc) =>
+      offlineUpdateMap.has(enc.id)
+        ? {
+            ...enc,
+            status: offlineUpdateMap.get(enc.id),
+            isUpdatedOffline: true,
+          }
+        : enc,
+    );
+
+    return [...patchedSyncedEncounters, ...newofflineEncounters];
+  }, [
+    encounters?.results,
+    offlineUpdatedEncounters,
+    newofflineEncounters,
+    patientData,
+  ]);
+
+  useEffect(() => {
+    if (!onlineManager.isOnline() && FinalOfflinEncounters) {
+      const activeCount = FinalOfflinEncounters.filter(
+        (encounter) =>
+          !inactiveEncounterStatus.includes(
+            encounter.status as (typeof inactiveEncounterStatus)[number],
+          ),
+      ).length;
+
+      sethasReachedEncounterLimitOffline(activeCount >= 5);
+    } else {
+      sethasReachedEncounterLimitOffline(false);
+    }
+  }, [FinalOfflinEncounters]);
+
+  useEffect(() => {
     if (
       onlineManager.isOnline() &&
       phone_number &&
@@ -131,6 +259,10 @@ export default function VerifyPatient(props: { facilityId: string }) {
       });
     }
   }, [phone_number, year_of_birth, partial_id, verifyPatient]);
+
+  const Encounters = onlineManager.isOnline()
+    ? encounters?.results
+    : FinalOfflinEncounters;
 
   if (isVerifyingPatient || facilityLoading || encounterLoading) {
     return (
@@ -168,7 +300,18 @@ export default function VerifyPatient(props: { facilityId: string }) {
                         className="text-xl font-bold capitalize text-gray-950"
                       >
                         {patientData.name}
+                        {isOfflineId(patientData.id) && (
+                          <Badge
+                            variant="outline"
+                            className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
+                          >
+                            <h3 className="text-xs font-medium">
+                              {t("Pending_sync")}
+                            </h3>
+                          </Badge>
+                        )}
                       </h1>
+
                       <h3 className="text-sm font-medium text-gray-600">
                         {formatPatientAge(patientData, true)},{"  "}
                         <span className="capitalize">
@@ -236,6 +379,9 @@ export default function VerifyPatient(props: { facilityId: string }) {
                     patientId={patientData.id}
                     facilityId={props.facilityId}
                     patientName={patientData.name}
+                    hasReachedEncounterLimitOffline={
+                      hasReachedEncounterLimitOffline
+                    }
                     trigger={
                       <Button
                         variant="outline"
@@ -282,9 +428,9 @@ export default function VerifyPatient(props: { facilityId: string }) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-3 pt-2">
-                {encounters?.results && encounters.results.length > 0 ? (
+                {Encounters && Encounters.length > 0 ? (
                   <>
-                    {encounters.results.map((encounter: Encounter) => (
+                    {Encounters.map((encounter: Encounter) => (
                       <EncounterCard
                         encounter={encounter}
                         key={encounter.id}

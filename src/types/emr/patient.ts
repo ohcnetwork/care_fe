@@ -24,7 +24,7 @@ export interface Patient {
   address: string;
   permanent_address: string;
   pincode: string;
-  age: number;
+  age?: number;
   date_of_birth: string;
   deceased_datetime?: string;
   blood_group?: BloodGroupChoices;
@@ -36,7 +36,7 @@ export interface Patient {
   updated_by: UserBareMinimum | null;
   permissions: string[];
   nationality?: string;
-  partial_id: string;
+  partial_id?: string;
 }
 
 export interface PartialPatientModel {

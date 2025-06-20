@@ -12,12 +12,16 @@ import { Separator } from "@/components/ui/separator";
 import { getPermissions } from "@/common/Permissions";
 import { encounterIcons } from "@/common/constants";
 
+import { isOfflineId } from "@/OfflineSupport/offlineWriteHelpers";
 import { formatDateTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 
+interface EncounterWithMeta extends Encounter {
+  isUpdatedOffline?: boolean;
+}
 interface EncounterCardProps {
-  encounter: Encounter;
+  encounter: EncounterWithMeta;
   permissions: string[];
   facilityId?: string;
 }
@@ -81,6 +85,14 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 {Icon}
                 {t(`encounter_class__${encounter.encounter_class}`)}
               </Badge>
+              {(isOfflineId(encounter.id) || encounter?.isUpdatedOffline) && (
+                <Badge
+                  variant="outline"
+                  className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
+                >
+                  <h3 className="text-xs font-medium">{t("Pending_sync")}</h3>
+                </Badge>
+              )}
             </div>
 
             <div className="grid sm:flex sm:flex-wrap sm:justify-between gap-4">

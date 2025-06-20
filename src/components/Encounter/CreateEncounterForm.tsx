@@ -1,6 +1,10 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  onlineManager,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Stethoscope } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -13,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -45,6 +50,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import {
+  isOfflineId,
+  saveOfflineWrite,
+} from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
@@ -61,6 +72,7 @@ interface Props {
   patientId: string;
   facilityId: string;
   patientName: string;
+  hasReachedEncounterLimitOffline?: boolean;
   encounterClass?: EncounterClass;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
@@ -70,6 +82,7 @@ export default function CreateEncounterForm({
   patientId,
   facilityId,
   patientName,
+  hasReachedEncounterLimitOffline,
   encounterClass,
   trigger,
   onSuccess,
@@ -77,7 +90,7 @@ export default function CreateEncounterForm({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-
+  const user = useAuthUser();
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
     encounter_class: z.enum(ENCOUNTER_CLASS),
@@ -113,7 +126,50 @@ export default function CreateEncounterForm({
     },
   });
 
-  function onSubmit(data: z.infer<typeof encounterFormSchema>) {
+  const queueNewEncounterOffline = async (encounterRequest: any) => {
+    try {
+      const generatedId = `offline-${crypto.randomUUID()}`;
+      const baseEntry = {
+        id: generatedId,
+        userId: user.external_id,
+        syncrouteKey: "createEncounter",
+        type: "createEncounter",
+        resourceType: "Encounter",
+        payload: encounterRequest,
+      };
+
+      const offlineWrite = isOfflineId(patientId)
+        ? {
+            ...baseEntry,
+            parentMutationIds: [patientId],
+            dependentFields: [
+              {
+                parentId: patientId,
+                parentField: "id",
+                childField: "patient",
+              },
+            ],
+          }
+        : baseEntry;
+
+      const saveResult = await saveOfflineWrite(offlineWrite);
+      if (!saveResult.success) {
+        toast.error(saveResult.error);
+        return;
+      }
+      toast.success(t("encounter_created_offline"));
+      setIsOpen(false);
+      form.reset();
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${generatedId}/updates`,
+      );
+    } catch (error) {
+      console.error("Error saving offline encounter:", error);
+      toast.error(t("offline_encounter_create_error"));
+    }
+  };
+
+  async function onSubmit(data: z.infer<typeof encounterFormSchema>) {
     const encounterRequest: EncounterRequest = {
       ...data,
       patient: patientId,
@@ -123,7 +179,9 @@ export default function CreateEncounterForm({
       },
     };
 
-    createEncounter(encounterRequest);
+    if (!onlineManager.isOnline()) {
+      await queueNewEncounterOffline(encounterRequest);
+    } else createEncounter(encounterRequest);
   }
 
   return (
@@ -332,6 +390,14 @@ export default function CreateEncounterForm({
                 </FormItem>
               )}
             />
+            {!onlineManager.isOnline() &&
+              hasReachedEncounterLimitOffline === true && (
+                <Alert variant="destructive" className="flex items-start gap-3">
+                  <AlertDescription>
+                    {t("offline_encounter_limit_reached")}
+                  </AlertDescription>
+                </Alert>
+              )}
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
@@ -346,7 +412,11 @@ export default function CreateEncounterForm({
               <Button
                 data-cy="create-encounter-button"
                 type="submit"
-                disabled={isPending || !form.watch("organizations").length}
+                disabled={
+                  isPending ||
+                  !form.watch("organizations").length ||
+                  hasReachedEncounterLimitOffline === true
+                }
               >
                 {isPending ? t("creating") : t("create_encounter")}
               </Button>

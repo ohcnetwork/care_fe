@@ -56,7 +56,10 @@ import countryList from "@/common/static/countries.json";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import OfflinePatientWarningDialog from "@/OfflineSupport/OfflinePatientCreateWarning";
-import { saveOfflineWrite } from "@/OfflineSupport/offlineWriteHelpers";
+import {
+  getYearOfBirth,
+  saveOfflineWrite,
+} from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
@@ -249,26 +252,6 @@ export default function PatientRegistration(
     meta: { persist: true },
   });
 
-  const getYearOfBirth = (
-    date_of_birth?: string,
-    age?: number,
-  ): number | undefined => {
-    const currentYear = dayjs().year();
-
-    if (date_of_birth) {
-      const parsed = dayjs(date_of_birth);
-      if (parsed.isValid()) {
-        return parsed.year();
-      }
-    }
-
-    if (typeof age === "number") {
-      return currentYear - age;
-    }
-
-    return undefined;
-  };
-
   const updateOfflinePatientEntry = async (
     db: AppCacheDB,
     patientId: string,
@@ -383,7 +366,7 @@ export default function PatientRegistration(
           query: {
             phone_number: createPatientData.phone_number,
             year_of_birth: yob,
-            partial_id: generatedId.replace("offline-", "").slice(0, 5),
+            partial_id: generatedId,
           },
         },
       });
