@@ -120,30 +120,28 @@ export default function PatientRegistration(
         .max(999999, t("pincode_must_be_6_digits")),
       nationality: z.string().nonempty(t("nationality_is_required")),
       geo_organization: z
-        .string({
-          required_error: t("geo_organization_required"),
-        })
-        .uuid({ message: t("geo_organization_is_required") }),
+        .string()
+        .uuid({ message: t("geo_organization_is_required") })
+        .optional(),
     })
     .superRefine((data, ctx) => {
-      if (data.age_or_dob === "dob") {
-        if (!data.date_of_birth) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: t("date_of_birth_must_be_present"),
-            path: ["date_of_birth"],
-          });
-        }
+      if (data.age_or_dob === "dob" && !data.date_of_birth) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("date_of_birth_must_be_present"),
+          path: ["date_of_birth"],
+        });
       }
 
-      if (data.age_or_dob === "age") {
-        if (data.age === undefined || data.age === null || isNaN(data.age)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: t("age_must_be_present"),
-            path: ["age"],
-          });
-        }
+      if (
+        data.age_or_dob === "age" &&
+        (data.age === undefined || data.age === null || isNaN(data.age))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("age_must_be_present"),
+          path: ["age"],
+        });
       }
 
       if (data.nationality === defaultCountry && !data.geo_organization) {
@@ -194,6 +192,7 @@ export default function PatientRegistration(
       date_of_birth: "",
       same_phone_number: false,
       same_address: true,
+      geo_organization: "",
     },
     mode: "onSubmit",
   });
