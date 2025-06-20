@@ -71,7 +71,7 @@ const consentFormSchema = (isEdit: boolean) =>
         start: tzAwareDateTime.optional(),
         end: z.union([tzAwareDateTime, z.undefined()]).optional(),
       }),
-      note: z.string().optional(),
+      note: z.string().trim().optional(),
       fileEntries: z
         .array(
           z.object({
