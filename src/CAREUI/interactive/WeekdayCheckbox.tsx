@@ -27,14 +27,15 @@ interface Props {
   value: DayOfWeek[] | null;
   onChange: (value: DayOfWeek[] | null) => void;
   format?: "alphabet" | "short" | "long";
+  ref?: React.RefCallback<HTMLDivElement>;
 }
 
 export default function WeekdayCheckbox({
   value = [],
   onChange,
   format = "alphabet",
-  ...props
-}: Props & React.ComponentProps<"div">) {
+  ref,
+}: Props) {
   const selectedDays = value ?? [];
   const { t } = useTranslation();
 
@@ -49,7 +50,7 @@ export default function WeekdayCheckbox({
   };
 
   return (
-    <div className="flex gap-2 md:gap-4" {...props} tabIndex={-1}>
+    <div className="flex gap-2 md:gap-4" ref={ref} tabIndex={-1}>
       {dayOfWeekKeys.map((day) => {
         const dow = DayOfWeek[day as keyof typeof DayOfWeek];
         const isSelected = selectedDays.includes(dow);
