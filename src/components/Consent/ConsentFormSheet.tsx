@@ -499,7 +499,11 @@ export default function ConsentFormSheet({
                       {...field}
                       onBlur={(e) => {
                         const trimmedValue = e.target.value.trim();
-                        field.onChange(trimmedValue);
+                        e.target.value = trimmedValue;
+                        field.onChange({
+                          ...e,
+                          target: { ...e.target, value: trimmedValue },
+                        });
                       }}
                     />
                   </FormControl>

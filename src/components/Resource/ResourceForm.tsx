@@ -477,7 +477,11 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       onChange={(value) => field.onChange(value)}
                       onBlur={(e) => {
                         const trimmedValue = e.target.value.trim();
-                        field.onChange(trimmedValue);
+                        e.target.value = trimmedValue;
+                        field.onChange({
+                          ...e,
+                          target: { ...e.target, value: trimmedValue },
+                        });
                       }}
                     />
                   </FormControl>
