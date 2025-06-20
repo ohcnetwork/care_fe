@@ -1,6 +1,7 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useEffect } from "react";
 import { useState } from "react";
@@ -114,7 +115,19 @@ const MEDICATION_STATEMENT_FIELDS: FieldDefinitions = {
     required: true,
     validate: (value: unknown) => {
       const period = value as { start?: string; end?: string };
-      return !!period?.start;
+      if (!period?.start) {
+        throw Error(t("start_date_required"));
+      }
+
+      if (period.end) {
+        const startDate = new Date(period.start);
+        const endDate = new Date(period.end);
+        if (endDate < startDate) {
+          throw new Error(t("end_date_after_start"));
+        }
+      }
+
+      return true;
     },
   },
 } as const;
