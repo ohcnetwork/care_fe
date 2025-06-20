@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import isEqual from "lodash/isEqual";
 import {
   AArrowDown,
   ChevronDown,
@@ -217,16 +216,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [importUrl, setImportUrl] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showFileImportDialog, setShowFileImportDialog] = useState(false);
-  const [initialFormValues, setInitialFormValues] = useState<{
-    title: string;
-    slug: string;
-    description: string;
-    questions: Question[];
-    status: string;
-    subject_type: string;
-    version: string | undefined;
-    tags: QuestionnaireTagModel[];
-  } | null>(null);
   const [selectedImportFile, setSelectedImportFile] = useState<File | null>(
     null,
   );
@@ -463,7 +452,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       };
 
       setQuestionnaire(initialQuestionnaire);
-      setInitialFormValues(formValues);
       form.reset(formValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -552,6 +540,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   ) => {
     form.setValue(field, value, {
       shouldValidate: false,
+      shouldDirty: true,
     });
   };
   const handleValidatedChange = (
@@ -560,12 +549,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   ) => {
     form.setValue(field as "title" | "description" | "slug", value, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
   const updateQuestions = (newQuestions: Question[]) => {
     form.setValue("questions", newQuestions, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
@@ -621,17 +612,16 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     if (!isValid || !hasOrganizations || !hasValidStructuredType) {
       return;
     }
-    const currentValues = {
-      ...form.getValues(),
-      questions: rootQuestions,
-    };
 
     if (id) {
-      if (isEqual(currentValues, initialFormValues)) {
+      if (!form.formState.isDirty) {
         toast.info(t("no_changes_made"));
         return;
       }
-      updateQuestionnaire(currentValues);
+      updateQuestionnaire({
+        ...form.getValues(),
+        questions: rootQuestions,
+      });
     } else {
       createQuestionnaire({
         ...form.getValues(),
