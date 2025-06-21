@@ -827,7 +827,7 @@ export function QuestionnaireForm({
                       activeQuestionId === question.id &&
                         "border  text-green-600 bg-white shadow-sm",
                     )}
- issues/12548/ImproveQuestionnareUX
+
                     onClick={() => {
                       setActiveQuestionnaireId(form.questionnaire.id);
                       setActiveQuestionId(question.id);
