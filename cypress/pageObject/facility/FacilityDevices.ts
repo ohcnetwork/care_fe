@@ -67,13 +67,22 @@ export class FacilityDevices {
     if (manufacturer) {
       cy.typeIntoField('[data-cy="manufacturer-input"]', manufacturer);
     }
-
     if (manufactureDate) {
-      cy.typeIntoField('[data-cy="manufacture-date-input"]', manufactureDate);
+      // Handle DatePicker component - click to open the popover
+      cy.get('[data-cy="manufacture-date-input"]').click();
+      // Wait for the calendar popover to be visible and select the date
+      cy.get('[role="gridcell"]')
+        .contains(new Date(manufactureDate).getDate().toString())
+        .click();
     }
 
     if (expirationDate) {
-      cy.typeIntoField('[data-cy="expiration-date-input"]', expirationDate);
+      // Handle DatePicker component - click to open the popover
+      cy.get('[data-cy="expiration-date-input"]').click();
+      // Wait for the calendar popover to be visible and select the date
+      cy.get('[role="gridcell"]')
+        .contains(new Date(expirationDate).getDate().toString())
+        .click();
     }
 
     if (lotNumber) {
@@ -94,6 +103,8 @@ export class FacilityDevices {
     return this;
   }
   submitDeviceForm() {
+    // Wait for the form to be ready and button to be enabled
+    cy.get('[data-cy="save-device-button"]').should("not.be.disabled");
     cy.verifyAndClickElement('[data-cy="save-device-button"]', "Save");
     return this;
   }
