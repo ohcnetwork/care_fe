@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
-import { t } from "i18next";
 import { navigate } from "raviger";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -9,24 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { UserAssignedModel } from "@/components/Users/models";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { formatName } from "@/Utils/utils";
+import { UserBase } from "@/types/user/user";
 
 interface Props {
-  user: UserAssignedModel;
+  user: UserBase;
   className?: string;
   facilityId: string;
 }
 
 export function UserCard({ user, className, facilityId }: Props) {
-  const name = formatName({
-    first_name: user.first_name || "",
-    last_name: user.last_name || "",
-  });
-
+  const { t } = useTranslation();
   const { patientToken: tokenData } = useAuthContext();
 
   const returnLink = useMemo(() => {
@@ -46,21 +42,16 @@ export function UserCard({ user, className, facilityId }: Props) {
         <div className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <Avatar
-              imageUrl={user.read_profile_picture_url}
-              name={name}
-              className="h-32 w-32 rounded-lg"
+              imageUrl={user.profile_picture_url}
+              name={formatName(user, true)}
+              className="size-32 rounded-lg"
             />
 
             <div className="flex grow flex-col min-w-0">
-              <h3 className="truncate text-xl font-semibold">{name}</h3>
+              <h3 className="truncate text-xl font-semibold">
+                {formatName(user)}
+              </h3>
               <p className="text-sm text-gray-500">{user.user_type}</p>
-
-              {user.qualification && (
-                <>
-                  <p className="text-xs mt-3">{t("education")}: </p>
-                  <p className="text-sm text-gray-500">{user.qualification}</p>
-                </>
-              )}
             </div>
           </div>
         </div>

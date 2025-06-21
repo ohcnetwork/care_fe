@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import LocationPicker from "@/components/Common/GeoLocationPicker";
 import { FacilityModel } from "@/components/Facility/models";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
@@ -59,6 +60,7 @@ export default function FacilityForm({
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const geoOrganizationRef = useRef<HTMLDivElement>(null);
 
   const facilityFormSchema = z.object({
     facility_type: z.string().min(1, t("facility_type_required")),
@@ -76,7 +78,7 @@ export default function FacilityForm({
 
   type FacilityFormValues = z.infer<typeof facilityFormSchema>;
 
-  const form = useForm<FacilityFormValues>({
+  const form = useForm({
     resolver: zodResolver(facilityFormSchema),
     defaultValues: {
       facility_type: "",
@@ -84,12 +86,12 @@ export default function FacilityForm({
       description: "",
       features: [],
       pincode: "",
-      geo_organization: "",
+      geo_organization: organizationId || "",
       address: "",
       phone_number: "",
       latitude: undefined,
       longitude: undefined,
-      is_public: false,
+      is_public: true,
     },
   });
 
@@ -158,6 +160,16 @@ export default function FacilityForm({
     }
   };
 
+  const handleSubmit = form.handleSubmit(onSubmit, (errors) => {
+    // Show generic error toast for any validation error
+    toast.error(t("please_fill_all_required_fields"));
+
+    // Scroll to geo-organization field if it has an error
+    if (errors.geo_organization) {
+      geoOrganizationRef.current?.scrollIntoView({ block: "center" });
+    }
+  });
+
   const handleFeatureChange = (value: string[]) => {
     const features = value.map((val) => Number(val));
     form.setValue("features", features, { shouldDirty: true });
@@ -218,20 +230,23 @@ export default function FacilityForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Information */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("basic_info")}</h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
             <FormField
               control={form.control}
               name="facility_type"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>{t("facility_type")}</FormLabel>
+                <FormItem className="max-w-full">
+                  <FormLabel aria-required>{t("facility_type")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger data-cy="facility-type">
+                      <SelectTrigger
+                        data-cy="facility-type"
+                        className="max-w-full truncate"
+                      >
                         <SelectValue placeholder={t("select_facility_type")} />
                       </SelectTrigger>
                     </FormControl>
@@ -257,7 +272,7 @@ export default function FacilityForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("facility_name")}</FormLabel>
+                  <FormLabel aria-required>{t("facility_name")}</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-name"
@@ -302,7 +317,7 @@ export default function FacilityForm({
                         icon: obj.icon,
                       }))}
                       onValueChange={handleFeatureChange}
-                      value={field.value.map((val) => val.toString())}
+                      value={field.value?.map((val) => val.toString()) || []}
                       placeholder={t("select_facility_feature")}
                       id="facility-features"
                     />
@@ -315,15 +330,15 @@ export default function FacilityForm({
         </div>
 
         {/* Contact Information */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("contact_info")}</h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
             <FormField
               control={form.control}
               name="phone_number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("phone_number")}</FormLabel>
+                  <FormLabel aria-required>{t("phone_number")}</FormLabel>
                   <FormControl>
                     <PhoneInput
                       data-cy="facility-phone"
@@ -341,7 +356,7 @@ export default function FacilityForm({
               name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("pincode")}</FormLabel>
+                  <FormLabel aria-required>{t("pincode")}</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-pincode"
@@ -357,20 +372,23 @@ export default function FacilityForm({
 
             <FormField
               name="geo_organization"
+              control={form.control}
               render={({ field }) => (
-                <FormItem className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
+                <FormItem className="md:col-span-2" ref={geoOrganizationRef}>
                   <FormControl>
-                    <GovtOrganizationSelector
-                      {...field}
-                      value={form.watch("geo_organization")}
-                      selected={selectedLevels}
-                      onChange={(value) =>
-                        form.setValue("geo_organization", value, {
-                          shouldDirty: true,
-                        })
-                      }
-                      required
-                    />
+                    <div className="grid-cols-1 grid md:grid-cols-2 gap-5">
+                      <GovtOrganizationSelector
+                        {...field}
+                        value={form.watch("geo_organization")}
+                        selected={selectedLevels}
+                        onChange={(value) =>
+                          form.setValue("geo_organization", value, {
+                            shouldDirty: true,
+                          })
+                        }
+                        required
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -383,7 +401,7 @@ export default function FacilityForm({
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("address")}</FormLabel>
+                <FormLabel aria-required>{t("address")}</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
@@ -398,99 +416,27 @@ export default function FacilityForm({
         </div>
 
         {/* Location Information */}
-        <div className="space-y-4 rounded-lg border p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">{t("location_details")}</h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleGetCurrentLocation}
-              disabled={isGettingLocation}
-              className="flex items-center gap-2"
-              data-cy="get-location-button"
-            >
-              {isGettingLocation ? (
-                <>
-                  <CareIcon icon="l-spinner" className="h-4 w-4 animate-spin" />
-                  {t("getting_location")}
-                </>
-              ) : (
-                <>
-                  <CareIcon icon="l-location-point" className="h-4 w-4" />
-                  {t("get_current_location")}
-                </>
-              )}
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="latitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("latitude")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      onChange={(e) => {
-                        form.setValue(
-                          "latitude",
-                          e.target.value ? Number(e.target.value) : undefined,
-                          { shouldDirty: true },
-                        );
-                      }}
-                      data-cy="facility-latitude"
-                      placeholder={t("enter_latitude")}
-                      disabled={isGettingLocation}
-                      className={isGettingLocation ? "animate-pulse" : ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="longitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("longitude")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      onChange={(e) => {
-                        form.setValue(
-                          "longitude",
-                          e.target.value ? Number(e.target.value) : undefined,
-                          { shouldDirty: true },
-                        );
-                      }}
-                      data-cy="facility-longitude"
-                      placeholder={t("enter_longitude")}
-                      disabled={isGettingLocation}
-                      className={isGettingLocation ? "animate-pulse" : ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
+          <LocationPicker
+            latitude={form.watch("latitude")}
+            longitude={form.watch("longitude")}
+            onLocationSelect={(lat, lng) => {
+              form.setValue("latitude", lat, { shouldDirty: true });
+              form.setValue("longitude", lng, { shouldDirty: true });
+            }}
+            isGettingLocation={isGettingLocation}
+            onGetCurrentLocation={handleGetCurrentLocation}
+          />
         </div>
 
         {/* Visibility Settings */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("visibility_settings")}</h3>
           <FormField
             control={form.control}
             name="is_public"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/5">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -526,7 +472,7 @@ export default function FacilityForm({
               <>
                 <CareIcon
                   icon="l-spinner"
-                  className="mr-2 h-4 w-4 animate-spin"
+                  className="mr-2 size-4 animate-spin"
                 />
                 {t("updating_facility")}
               </>
@@ -535,10 +481,7 @@ export default function FacilityForm({
             )
           ) : isPending ? (
             <>
-              <CareIcon
-                icon="l-spinner"
-                className="mr-2 h-4 w-4 animate-spin"
-              />
+              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
               {t("creating_facility")}
             </>
           ) : (

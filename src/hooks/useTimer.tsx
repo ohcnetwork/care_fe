@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
  * @returns {Object} A set of properties and methods to control and display the timer:
  *
  * @property {number} seconds - The total elapsed time in seconds.
- * @property {JSX.Element} time - A JSX element displaying the current time in MM:SS format.
+ * @property {React.ReactNode} time - A React node displaying the current time in MM:SS format.
  * @property {function} start - Function to start the timer.
  * @property {function} stop - Function to stop the timer.
  *

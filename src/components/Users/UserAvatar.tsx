@@ -13,19 +13,19 @@ import Loading from "@/components/Common/Loading";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
-import { formatDisplayName, sleep } from "@/Utils/utils";
+import { formatName, sleep } from "@/Utils/utils";
 
 export default function UserAvatar({ username }: { username: string }) {
   const { t } = useTranslation();
   const [editAvatar, setEditAvatar] = useState(false);
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
+  const canEditAvatar = authUser.is_superuser || authUser.username === username;
 
   const { mutateAsync: mutateAvatarDelete } = useMutation({
     mutationFn: mutate(routes.deleteProfilePicture, {
@@ -109,15 +109,15 @@ export default function UserAvatar({ username }: { username: string }) {
         onOpenChange={(open) => setEditAvatar(open)}
       />
       <div>
-        <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex justify-between">
+        <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 flex justify-between">
           <div className="flex items-center">
             <Avatar
-              name={formatDisplayName(userData)}
+              name={formatName(userData, true)}
               imageUrl={userData?.profile_picture_url}
-              className="h-20 w-20"
+              className="size-20"
             />
             <div className="my-4 ml-4 flex flex-col gap-2">
-              {!showAvatarEdit(authUser, userData) ? (
+              {!canEditAvatar ? (
                 <TooltipComponent
                   content={t("edit_avatar_permission_error")}
                   className="w-full"
@@ -146,7 +146,9 @@ export default function UserAvatar({ username }: { username: string }) {
               )}
 
               <p className="text-xs leading-5 text-gray-500">
-                {t("change_avatar_note")}
+                {t("change_avatar_note", {
+                  maxSize: careConfig.imageUploadMaxSizeInMB,
+                })}
               </p>
             </div>
           </div>

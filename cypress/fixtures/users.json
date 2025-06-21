@@ -1,30 +1,30 @@
 {
-  "admin": {
-    "username": "devsuperadmin",
-    "password": "Test@123"
-  },
-  "nurse": {
-    "username": "nihal-nurse",
-    "password": "Test@123"
+  "volunteer": {
+    "username": "volunteer_2_0",
+    "password": "Coronasafe@123"
   },
   "doctor": {
-    "username": "arjun-doctor",
-    "password": "Test@123"
+    "username": "doctor_2_0",
+    "password": "Coronasafe@123"
   },
   "staff": {
-    "username": "nihalstaff",
-    "password": "Test@123"
+    "username": "staff_2_0",
+    "password": "Coronasafe@123"
   },
-  "devnurse": {
-    "username": "dev-nurse",
-    "password": "Test@123"
+  "nurse": {
+    "username": "nurse_2_0",
+    "password": "Coronasafe@123"
   },
-  "devdoctor": {
-    "username": "developdoctor",
-    "password": "Test@123"
+  "administrator": {
+    "username": "administrator_2_0",
+    "password": "Coronasafe@123"
   },
-  "teststaff4": {
-    "username": "teststaff4",
-    "password": "Test@123"
+  "facility_admin": {
+    "username": "facility_admin_2_0",
+    "password": "Coronasafe@123"
+  },
+  "superadmin": {
+    "username": "admin",
+    "password": "admin"
   }
 }

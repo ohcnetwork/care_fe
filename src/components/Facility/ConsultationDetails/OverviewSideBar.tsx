@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -9,9 +9,12 @@ import QuickAccess from "./QuickAccess";
 
 interface Props {
   encounter: Encounter;
+  canAccess: boolean;
+  canEdit: boolean;
 }
 
 export default function SideOverview(props: Props) {
+  const { t } = useTranslation();
   return (
     <div className="mt-4 flex w-full h-auto flex-col gap-4 text-sm">
       <Tabs defaultValue="quick_access" className="w-full">
@@ -28,10 +31,13 @@ export default function SideOverview(props: Props) {
 
         <div>
           <TabsContent value="quick_access" className="p-2">
-            <QuickAccess encounter={props.encounter} />
+            <QuickAccess encounter={props.encounter} canEdit={props.canEdit} />
           </TabsContent>
           <TabsContent value="observations" className="p-2">
-            <ObservationsList encounter={props.encounter} />
+            <ObservationsList
+              encounter={props.encounter}
+              canAccess={props.canAccess}
+            />
           </TabsContent>
         </div>
       </Tabs>

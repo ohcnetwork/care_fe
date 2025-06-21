@@ -67,7 +67,7 @@ export default function SectionNavigator(props: {
           onClick={() => {
             const element = document.getElementById(section.id);
             if (element) {
-              element.scrollIntoView({ behavior: "smooth" });
+              element.scrollIntoView();
             }
           }}
         >

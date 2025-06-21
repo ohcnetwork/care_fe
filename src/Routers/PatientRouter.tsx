@@ -5,9 +5,12 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
+
+import useSidebarState from "@/hooks/useSidebarState";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
@@ -83,6 +86,8 @@ export default function PatientRouter() {
 
   const appointmentPages = useRoutes(AppointmentRoutes);
 
+  const sidebarOpen = useSidebarState();
+
   if (!pages) {
     if (appointmentPages) {
       return <PatientUserProvider>{appointmentPages}</PatientUserProvider>;
@@ -92,13 +97,14 @@ export default function PatientRouter() {
 
   return (
     <PatientUserProvider>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={sidebarOpen}>
         <AppSidebar sidebarFor={SidebarFor.PATIENT} />
         <main
           id="pages"
-          className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
+          className="flex-1 overflow-y-auto bg-gray-100 focus:outline-hidden md:pb-2 md:pr-2"
         >
-          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
+          <BrowserWarning />
+          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow-sm md:hidden">
             <div className="flex items-center">
               <SidebarTrigger className="px-2" />
             </div>
@@ -114,7 +120,7 @@ export default function PatientRouter() {
             </a>
           </div>
           <div
-            className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow"
+            className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border border-gray-200 bg-gray-50 p-3 shadow-sm"
             data-cui-page
           >
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>

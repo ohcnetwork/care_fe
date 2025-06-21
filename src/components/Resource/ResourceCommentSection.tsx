@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import PaginationComponent from "@/components/Common/Pagination";
+import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
@@ -20,11 +21,11 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 
-const CommentSection = (props: { id: string }) => {
-  const { id } = props;
+const CommentSection = ({ id }: { id: string }) => {
+  const { t } = useTranslation();
   const [commentBox, setCommentBox] = useState("");
   const queryClient = useQueryClient();
 
@@ -73,7 +74,11 @@ const CommentSection = (props: { id: string }) => {
         />
 
         <div className="flex w-full justify-end mt-2">
-          <Button variant="primary" onClick={submitComment}>
+          <Button
+            variant="primary"
+            onClick={submitComment}
+            disabled={commentBox.trim().length == 0}
+          >
             {t("post_your_comment")}
           </Button>
         </div>
@@ -144,22 +149,19 @@ export const Comment = ({
         <div className="flex">
           <Avatar
             name={`${created_by.first_name} ${created_by.last_name}`}
-            className="w-8 h-8 rounded-full object-cover"
+            className="size-8 rounded-full object-cover"
           />
         </div>
       </TooltipComponent>
-      <div className="flex flex-col flex-grow mt-1">
+      <div className="flex flex-col grow mt-1">
         <div className="flex items-center justify-between w-full">
           <span className="text-gray-700 font-medium text-xs md:text-sm">
             {formatName(created_by)}
           </span>
-          <time
+          <RelativeDateTooltip
+            date={created_date}
             className="text-gray-500 text-xs"
-            dateTime={created_date}
-            title={formatDateTime(created_date)}
-          >
-            {relativeTime(created_date)}
-          </time>
+          />
         </div>
         <div className="break-words whitespace-pre-wrap mt-1">
           <Markdown content={comment} />

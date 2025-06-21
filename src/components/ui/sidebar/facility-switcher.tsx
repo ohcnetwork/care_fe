@@ -29,7 +29,7 @@ export function FacilitySwitcher({
   facilities: UserFacilityModel[];
   selectedFacility: UserFacilityModel | null;
 }) {
-  const { isMobile, setOpenMobile } = useSidebar();
+  const { isMobile } = useSidebar();
   const { t } = useTranslation();
 
   return (
@@ -54,7 +54,7 @@ export function FacilitySwitcher({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg max-h-screen overflow-y-auto"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg max-h-screen overflow-y-auto"
             align="start"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
@@ -71,9 +71,6 @@ export function FacilitySwitcher({
                 key={index}
                 onClick={() => {
                   navigate(`/facility/${facility.id}/overview`);
-                  if (isMobile) {
-                    setOpenMobile(false);
-                  }
                 }}
                 className={cn(
                   "gap-2 p-2",
@@ -81,8 +78,8 @@ export function FacilitySwitcher({
                     "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
                 )}
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
-                  <Hospital className="size-4 shrink-0" />
+                <div className="flex size-6 items-center justify-center rounded-sm border border-gray-200">
+                  <Hospital className="size-4 shrink-0 text-current" />
                 </div>
                 {facility.name}
               </DropdownMenuItem>

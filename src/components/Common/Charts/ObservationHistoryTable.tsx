@@ -130,7 +130,7 @@ export const ObservationHistoryTable = ({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Avatar name={name} className="h-6 w-6" />
+                      <Avatar name={name} className="size-6" />
                       <span>{name}</span>
                     </div>
                   </TableCell>

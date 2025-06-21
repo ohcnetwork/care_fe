@@ -32,28 +32,13 @@ import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
   AppointmentCreateRequest,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-
-// const initialForm: Omit<AppointmentPatientRegister, "gender"> & {
-//   ageInputType: "age" | "date_of_birth";
-//   gender: "male" | "female" | "transgender" | "non_binary";
-// } = {
-//   name: "",
-//   gender: "male",
-//   ageInputType: "date_of_birth",
-//   year_of_birth: undefined,
-//   date_of_birth: undefined,
-//   phone_number: "",
-//   address: "",
-//   pincode: "",
-//   geo_organization: undefined,
-// };
 
 type PatientRegistrationProps = {
   facilityId: string;
@@ -84,7 +69,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         .refine(validateName, t("min_char_length_error", { min_length: 3 })),
       gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
       address: z.string().min(1, t("field_required")),
-      year_of_birth: z.string().optional(),
+      age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
       pincode: z
         .string()
@@ -100,8 +85,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       ageInputType: z.enum(["age", "date_of_birth"]),
     })
     .superRefine((data, ctx) => {
-      const field =
-        data.ageInputType === "age" ? "year_of_birth" : "date_of_birth";
+      const field = data.ageInputType === "age" ? "age" : "date_of_birth";
       if (!data[field]) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -110,30 +94,28 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         });
         return;
       }
-      // yob corresponds to age till now, only converted to year after validation
       if (
-        field === "year_of_birth" &&
-        data.year_of_birth &&
-        !isNaN(Number(data.year_of_birth)) &&
-        Number(data.year_of_birth) < 0
+        field === "age" &&
+        data.age &&
+        !isNaN(Number(data.age)) &&
+        Number(data.age) < 0
       ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("age_less_than_0"),
-          path: ["year_of_birth"],
+          path: ["age"],
         });
       }
     });
 
-  type PatientFormData = z.infer<typeof patientSchema>;
   const formResolver = zodResolver(patientSchema);
 
-  const form = useForm<PatientFormData>({
+  const form = useForm({
     resolver: formResolver,
     defaultValues: {
       name: "",
       ageInputType: "date_of_birth",
-      year_of_birth: undefined,
+      age: undefined,
       date_of_birth: undefined,
       address: "",
       pincode: "",
@@ -178,6 +160,9 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       })(body),
     onSuccess: (data: Patient) => {
       toast.success(t("patient_created_successfully"));
+      queryClient.invalidateQueries({
+        queryKey: ["patients"],
+      });
       publish("patient:upsert", data);
       createAppointment({
         patient: data.id,
@@ -196,7 +181,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         data.ageInputType === "date_of_birth"
           ? dateQueryString(data.date_of_birth)
           : undefined,
-      age: data.ageInputType === "age" ? data.year_of_birth : undefined,
+      age: data.ageInputType === "age" ? data.age : undefined,
       pincode: data.pincode || undefined,
       geo_organization: data.geo_organization,
       is_active: true,
@@ -247,7 +232,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel required>{t("patient_name")}</FormLabel>
+                    <FormLabel aria-required>{t("patient_name")}</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder={t("type_patient_name")} />
                     </FormControl>
@@ -260,7 +245,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 name="gender"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
-                    <FormLabel required>{t("sex")}</FormLabel>
+                    <FormLabel aria-required>{t("sex")}</FormLabel>
                     <FormControl>
                       <RadioGroup
                         {...field}
@@ -269,10 +254,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         className="flex gap-5 flex-wrap"
                       >
                         {GENDER_TYPES.map((g) => (
-                          <FormItem
-                            key={g.id}
-                            className="flex items-center space-x-2 space-y-0"
-                          >
+                          <FormItem key={g.id} className="flex">
                             <FormControl>
                               <RadioGroupItem
                                 value={g.id}
@@ -297,7 +279,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   name="ageInputType"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>
+                      <FormLabel aria-required>
                         {t("date_of_birth_or_age")}
                       </FormLabel>
                       <FormControl>
@@ -307,12 +289,17 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                           className="flex items-center divide-x divide-secondary-400 bg-white rounded-md w-fit border border-secondary-400"
                         >
                           <div className="flex items-center gap-2 px-4 py-2">
-                            <RadioGroupItem value="date_of_birth" />
-                            <Label>{t("date_of_birth")}</Label>
+                            <RadioGroupItem
+                              id="dob-option"
+                              value="date_of_birth"
+                            />
+                            <Label htmlFor="dob-option">
+                              {t("date_of_birth")}
+                            </Label>
                           </div>
                           <div className="flex items-center gap-2 px-4 py-2">
-                            <RadioGroupItem value="age" />
-                            <Label>{t("age")}</Label>
+                            <RadioGroupItem id="age-option" value="age" />
+                            <Label htmlFor="age-option">{t("age")}</Label>
                           </div>
                         </RadioGroup>
                       </FormControl>
@@ -327,7 +314,9 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                     name="date_of_birth"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel required>{t("date_of_birth")}</FormLabel>
+                        <FormLabel aria-required>
+                          {t("date_of_birth")}
+                        </FormLabel>
                         <FormControl>
                           <DateField
                             date={
@@ -348,13 +337,13 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 {form.watch("ageInputType") === "age" && (
                   <FormField
                     control={form.control}
-                    name="year_of_birth"
+                    name="age"
                     render={() => (
                       <FormItem className="flex flex-col">
-                        <FormLabel required>{t("age")}</FormLabel>
+                        <FormLabel aria-required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
-                            {...form.register("year_of_birth")}
+                            {...form.register("age")}
                             placeholder={t("type_patient_age")}
                           />
                         </FormControl>
@@ -362,6 +351,21 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         <span className="text-xs text-gray-500">
                           {t("age_notice")}
                         </span>
+                        {form.getValues("age") && (
+                          <div className="text-sm font-bold">
+                            {Number(form.getValues("age")) <= 0 ? (
+                              <span className="text-red-600">
+                                {t("invalid_age")}
+                              </span>
+                            ) : (
+                              <span className="text-violet-600">
+                                {t("year_of_birth")}:{" "}
+                                {new Date().getFullYear() -
+                                  Number(form.getValues("age"))}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -375,7 +379,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 name="address"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel required>{t("current_address")}</FormLabel>
+                    <FormLabel aria-required>{t("current_address")}</FormLabel>
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
@@ -389,7 +393,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 name="pincode"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel required>{t("pincode")}</FormLabel>
+                    <FormLabel aria-required>{t("pincode")}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -431,7 +435,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   )
                 }
               >
-                <span className="bg-gradient-to-b from-white/15 to-transparent" />
+                <span className="bg-linear-to-b from-white/15 to-transparent" />
                 {t("cancel")}
               </Button>
               <Button
@@ -439,7 +443,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 className="sm:w-1/5"
                 type="submit"
               >
-                <span className="bg-gradient-to-b from-white/15 to-transparent" />
+                <span className="bg-linear-to-b from-white/15 to-transparent" />
                 {t("register_patient")}
               </Button>
             </div>

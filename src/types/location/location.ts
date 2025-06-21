@@ -38,6 +38,7 @@ export interface LocationBase {
 export interface LocationDetail extends LocationBase {
   id: string;
   organizations: FacilityOrganization[];
+  sort_index: number;
 }
 
 export interface LocationList extends LocationBase {
@@ -45,6 +46,7 @@ export interface LocationList extends LocationBase {
   has_children: boolean;
   parent?: LocationList;
   current_encounter?: Encounter;
+  sort_index: number;
 }
 
 export interface LocationWrite extends LocationBase {
@@ -89,3 +91,21 @@ export const LocationTypeIcons = {
   jdn: Map, // garden
   vi: Eye, // virtual
 } as const satisfies Record<LocationForm, LucideIcon>;
+
+export const LocationTypeBadgeColors = {
+  bd: "bg-blue-100 text-blue-900", // bed
+  wa: "bg-teal-100 text-teal-900", // ward
+  lvl: "bg-green-100 text-green-900", // level/floor
+  bu: "bg-yellow-100 text-yellow-900", // building
+  si: "bg-red-100 text-red-900", // site
+  wi: "bg-indigo-100 text-indigo-900", // wing
+  co: "bg-pink-100 text-pink-900", // corridor
+  ro: "bg-blue-100 text-blue-900", // room
+  ve: "bg-cyan-100 text-cyan-900", // vehicle
+  ho: "bg-emerald-100 text-emerald-900", // house
+  ca: "bg-violet-100 text-violet-900", // carpark
+  rd: "bg-amber-100 text-amber-900", // road
+  area: "bg-lime-100 text-lime-900", // area
+  jdn: "bg-teal-100 text-teal-900", // garden
+  vi: "bg-rose-100 text-rose-900", // virtual
+} as const satisfies Record<LocationForm, string>;

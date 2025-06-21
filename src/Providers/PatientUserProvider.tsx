@@ -6,8 +6,8 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { TokenData } from "@/types/auth/otpToken";
-import { Patient } from "@/types/emr/newPatient";
+import { TokenData } from "@/types/auth/otp";
+import { Patient } from "@/types/emr/patient";
 
 export type PatientUserContextType = {
   patients?: Patient[];
@@ -43,14 +43,7 @@ export default function PatientUserProvider({ children }: Props) {
   useEffect(() => {
     if (userData?.results && userData.results.length > 0) {
       setPatients(userData.results);
-      const localPatient: Patient | undefined = JSON.parse(
-        localStorage.getItem("selectedPatient") || "{}",
-      );
-      const selectedPatient =
-        userData.results.find((patient) => patient.id === localPatient?.id) ||
-        userData.results[0];
-      setSelectedPatient(selectedPatient);
-      localStorage.setItem("selectedPatient", JSON.stringify(selectedPatient));
+      setSelectedPatient(userData.results[0]);
     }
   }, [userData]);
 

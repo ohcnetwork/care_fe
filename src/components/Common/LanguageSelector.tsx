@@ -31,7 +31,7 @@ export const LanguageSelector = (props: any) => {
       <select
         className={cn(
           props.className,
-          "w-full cursor-pointer appearance-none rounded-md py-2 pl-2 pr-10 focus:border-primary-500 focus:outline-none focus:ring-primary-500",
+          "w-full cursor-pointer appearance-none rounded-md py-2 pl-2 pr-10 focus:border-primary-500 focus:outline-hidden focus:ring-primary-500",
         )}
         id="language-selector"
         name="language"

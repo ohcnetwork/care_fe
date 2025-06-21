@@ -4,7 +4,12 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-export type UserType = "doctor" | "nurse" | "staff" | "volunteer";
+export type UserType =
+  | "doctor"
+  | "nurse"
+  | "staff"
+  | "volunteer"
+  | "administrator";
 
 export type Gender = "male" | "female" | "non_binary" | "transgender";
 
@@ -58,9 +63,9 @@ export const ValidationHelper = ({
 
 export const validateRule = (
   isConditionMet: boolean,
-  initialMessage: JSX.Element | string,
+  initialMessage: React.ReactNode,
   isInitialRender: boolean = false,
-  successMessage: JSX.Element | string,
+  successMessage: React.ReactNode,
 ) => {
   return (
     <div>

@@ -7,9 +7,12 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns from "@/components/Common/UserColumns";
+import { userChildProps } from "@/components/Common/UserColumns";
+import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
 import UserResetPassword from "@/components/Users/UserResetPassword";
@@ -17,22 +20,19 @@ import UserSoftwareUpdate from "@/components/Users/UserSoftwareUpdate";
 import {
   BasicInfoDetails,
   ContactInfoDetails,
+  GeoOrgDetails,
 } from "@/components/Users/UserViewDetails";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import {
-  editUserPermissions,
-  showAvatarEdit,
-  showUserDelete,
-  showUserPasswordReset,
-} from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
-import { UserBase } from "@/types/user/user";
 
-export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
+export default function UserSummaryTab({
+  userData,
+  permissions,
+}: userChildProps) {
   const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const authUser = useAuthUser();
@@ -45,7 +45,11 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
     onSuccess: () => {
       toast.success(t("user_deleted_successfully"));
       setShowDeleteDialog(false);
-      navigate("/users");
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        navigate("/");
+      }
     },
     onError: () => {
       setShowDeleteDialog(false);
@@ -63,15 +67,15 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
   const userColumnsData = {
     userData,
     username: userData.username,
+    permissions,
   };
-  const deletePermitted = showUserDelete(authUser, userData);
-  const passwordResetPermitted = showUserPasswordReset(authUser, userData);
-  const avatarPermitted = showAvatarEdit(authUser, userData);
-  const editPermissions = editUserPermissions(authUser, userData);
+  const loggedInUsersProfile = authUser.username === userData.username;
+  const canEditUser = authUser.is_superuser || loggedInUsersProfile;
+  const canResetPassword = loggedInUsersProfile;
 
   const renderBasicInformation = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
         <BasicInfoDetails user={userData} />
       </div>
     );
@@ -79,8 +83,16 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
 
   const renderContactInformation = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
         <ContactInfoDetails user={userData} />
+      </div>
+    );
+  };
+
+  const renderGeoOrgDetails = () => {
+    return (
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
+        <GeoOrgDetails user={userData} />
       </div>
     );
   };
@@ -104,18 +116,18 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
         setOpen={setShowEditUserSheet}
       />
       <div className="mt-10 flex flex-col gap-y-6">
-        {editPermissions && (
+        {canEditUser && (
           <Button
             variant="outline"
             className="w-fit self-end"
             data-cy="edit-user-button"
             onClick={() => setShowEditUserSheet(true)}
           >
-            <CareIcon icon="l-pen" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-pen" className="mr-2 size-4" />
             {t("edit_user")}
           </Button>
         )}
-        {avatarPermitted && (
+        {canEditUser && (
           <UserColumns
             heading={t("edit_avatar")}
             note={
@@ -132,7 +144,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
           note={
             authUser.username === userData.username
               ? t("personal_information_note_self")
-              : editPermissions
+              : canEditUser
                 ? t("personal_information_note")
                 : t("personal_information_note_view")
           }
@@ -144,14 +156,28 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
           note={
             authUser.username === userData.username
               ? t("contact_info_note_self")
-              : editPermissions
+              : canEditUser
                 ? t("contact_info_note")
                 : t("contact_info_note_view")
           }
           Child={renderContactInformation}
           childProps={userColumnsData}
         />
-        {passwordResetPermitted && (
+        {"geo_organization" in userData && (
+          <UserColumns
+            heading={t("location_info")}
+            note={
+              authUser.username === userData.username
+                ? t("location_info_note_self")
+                : canEditUser
+                  ? t("location_info_note")
+                  : t("location_info_note_view")
+            }
+            Child={renderGeoOrgDetails}
+            childProps={userColumnsData}
+          />
+        )}
+        {canResetPassword && (
           <UserColumns
             heading={t("reset_password")}
             note={t("reset_password_note_self")}
@@ -161,6 +187,12 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
         )}
         {authUser.username === userData.username && (
           <>
+            <UserColumns
+              heading={t("two_factor_authentication")}
+              note={t("two_factor_authentication_note")}
+              Child={TwoFactorAuth}
+              childProps={userColumnsData}
+            />
             <UserColumns
               heading={t("language_selection")}
               note={t("set_your_local_language")}
@@ -175,27 +207,34 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
             />
           </>
         )}
-        {deletePermitted && (
-          <div className="mt-3 flex flex-col items-center gap-5 border-t-2 pt-5 sm:flex-row">
-            <div className="sm:w-1/4">
-              <div className="my-1 text-sm leading-5">
-                <p className="mb-2 font-semibold">{t("delete_account")}</p>
-                <p className="text-secondary-600">{t("delete_account_note")}</p>
+        {canEditUser && (
+          <Card className="border-red-500">
+            <CardHeader>
+              <CardTitle className="text-destructive">
+                {t("danger_zone")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-4">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium">{t("delete_account")}</h3>
+                  <p className="text-sm text-gray-700">
+                    {t("delete_account_note")}
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setShowDeleteDialog(true)}
+                  variant="destructive"
+                  data-testid="user-delete-button"
+                  disabled={isDeleting}
+                  className="w-fit"
+                >
+                  <CareIcon icon="l-trash" className="h-4 mr-2" />
+                  {t("delete")}
+                </Button>
               </div>
-            </div>
-            <div className="w-3/4">
-              <Button
-                onClick={() => setShowDeleteDialog(true)}
-                variant="destructive"
-                data-testid="user-delete-button"
-                className="my-1 inline-flex"
-                disabled={isDeleting}
-              >
-                <CareIcon icon="l-trash" className="h-4" />
-                <span className="">{t("delete_account_btn")}</span>
-              </Button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </>

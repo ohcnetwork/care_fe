@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,7 @@ interface DateTimeQuestionProps {
   disabled?: boolean;
   clearError: () => void;
   classes?: string;
+  index: number;
 }
 
 export function DateTimeQuestion({
@@ -37,9 +38,12 @@ export function DateTimeQuestion({
   disabled,
   clearError,
   classes,
+  index,
 }: DateTimeQuestionProps) {
-  const currentValue = questionnaireResponse.values[0]?.value
-    ? new Date(questionnaireResponse.values[0].value as string)
+  const { t } = useTranslation();
+
+  const currentValue = questionnaireResponse.values[index]?.value
+    ? new Date(questionnaireResponse.values[index].value as string)
     : undefined;
 
   const handleSelect = (date: Date | undefined) => {
@@ -51,13 +55,14 @@ export function DateTimeQuestion({
       date.setMinutes(currentValue.getMinutes());
     }
 
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "dateTime",
+      value: date,
+    };
+
     updateQuestionnaireResponseCB(
-      [
-        {
-          type: "dateTime",
-          value: date,
-        },
-      ],
+      newValues,
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );
@@ -71,13 +76,14 @@ export function DateTimeQuestion({
     date.setHours(hours);
     date.setMinutes(minutes);
 
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "dateTime",
+      value: date,
+    };
+
     updateQuestionnaireResponseCB(
-      [
-        {
-          type: "dateTime",
-          value: date,
-        },
-      ],
+      newValues,
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );
@@ -104,7 +110,7 @@ export function DateTimeQuestion({
             )}
             disabled={disabled}
           >
-            <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-calender" className="mr-2 size-4" />
             {currentValue ? format(currentValue, "PPP") : t("pick_a_date")}
           </Button>
         </PopoverTrigger>
@@ -119,7 +125,7 @@ export function DateTimeQuestion({
       </Popover>
       <Input
         type="time"
-        className="sm:w-[150px] border-t-0 sm:border-t"
+        className="sm:w-[150px] border-t-0 sm:border-t border-gray-200"
         value={formatTime(currentValue)}
         onChange={handleTimeChange}
         disabled={disabled || !currentValue}

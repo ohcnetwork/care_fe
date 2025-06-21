@@ -9,6 +9,11 @@ declare global {
       getAttached(selector: string): Chainable<Subject>;
       clickSubmitButton(buttonText?: string): Chainable<Element>;
       clickCancelButton(buttonText?: string): Chainable<Element>;
+      typeAndVerifyOptionNotPresent(
+        selector: string,
+        value: string,
+        emptyMessage: string,
+      ): Chainable<void>;
       typeAndSelectOption(
         element: string,
         reference: string,
@@ -20,7 +25,8 @@ declare global {
       ): Chainable<Element>;
       clickAndSelectOption(
         element: string,
-        reference: string,
+        reference?: string,
+        options?: { position?: "first" | "last" },
       ): Chainable<Element>;
       verifyAndClickElement(
         element: string,
@@ -32,6 +38,8 @@ declare global {
         selector: string,
         texts: string[],
       ): Chainable<Element>;
+      saveCurrentUrl(): Chainable<Subject>;
+      navigateToSavedUrl(): Chainable<Subject>;
       verifyErrorMessages(errors: ErrorMessageItem[]): Chainable<void>;
       typeIntoField(
         selector: string,
@@ -40,6 +48,7 @@ declare global {
           clearBeforeTyping?: boolean;
           skipVerification?: boolean;
           delay?: number;
+          position?: "first" | "last";
         },
       ): Chainable<Element>;
     }

@@ -13,6 +13,9 @@ import Loading from "@/components/Common/Loading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import { getPermissions } from "@/common/Permissions";
+
+import { usePermissions } from "@/context/PermissionContext";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 
 type QueryParams = {
@@ -22,7 +25,16 @@ type QueryParams = {
 export const EncounterPlotsTab = (props: EncounterTabProps) => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<QueryParams>();
-
+  const { hasPermission } = usePermissions();
+  const { canViewClinicalData } = getPermissions(
+    hasPermission,
+    props.patient.permissions,
+  );
+  const { canViewEncounter } = getPermissions(
+    hasPermission,
+    props.encounter.permissions,
+  );
+  const canAccess = canViewClinicalData || canViewEncounter;
   const plotColumns = useBreakpoints({ default: 1, lg: 2 });
 
   const { data, isLoading } = useQuery<ObservationPlotConfig>({
@@ -64,6 +76,7 @@ export const EncounterPlotsTab = (props: EncounterTabProps) => {
               encounterId={props.encounter.id}
               codeGroups={tab.groups}
               gridCols={plotColumns}
+              canAccess={canAccess}
             />
           </TabsContent>
         ))}

@@ -22,7 +22,7 @@ export function FacilityCard({ facility, className }: Props) {
       <div className="flex flex-col h-full">
         <div className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="h-32 w-32 shrink-0 overflow-hidden rounded-lg">
+            <div className="size-32 shrink-0 overflow-hidden rounded-lg">
               <Avatar
                 imageUrl={facility.read_cover_image_url}
                 name={facility.name || ""}

@@ -28,7 +28,7 @@ export const SYMPTOM_SEVERITY = ["severe", "moderate", "mild"] as const;
 
 export type SymptomSeverity = (typeof SYMPTOM_SEVERITY)[number];
 
-type Onset = {
+export type Onset = {
   onset_datetime?: string;
   onset_age?: string;
   onset_string?: string;
@@ -46,6 +46,10 @@ export interface Symptom {
   note?: string;
   created_by: UserBase;
   updated_by: UserBase;
+  category: string;
+  encounter: string;
+  created_date?: string;
+  updated_date?: string;
 }
 
 export interface SymptomRequest {
@@ -58,6 +62,10 @@ export interface SymptomRequest {
   recorded_date?: string;
   note?: string;
   encounter: string;
+  category: string;
+  created_date?: string;
+  updated_date?: string;
+  created_by?: UserBase;
 }
 
 export const SYMPTOM_CLINICAL_STATUS_STYLES = {

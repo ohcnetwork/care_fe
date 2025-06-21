@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -18,6 +18,10 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
+import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
+import { FileUploadQuestion } from "@/types/files/files";
 import {
   DetailedValidationError,
   QuestionValidationError,
@@ -27,11 +31,20 @@ import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
+import {
+  type Question,
+  findQuestionById,
+} from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import { QuestionRenderer } from "./QuestionRenderer";
+import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
+import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
+import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
+import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
+import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
@@ -74,6 +87,8 @@ function ValidationErrorDisplay({
   questionnaireForms,
   serverErrors,
 }: ValidationErrorDisplayProps) {
+  const { t } = useTranslation();
+
   const hasErrors =
     questionnaireForms.some((form) => form.errors.length > 0) ||
     (serverErrors?.length ?? 0) > 0;
@@ -135,7 +150,7 @@ function ValidationErrorDisplay({
         <div className="flex items-center gap-2 mb-4">
           <CareIcon
             icon="l-exclamation-circle"
-            className="h-5 w-5 text-red-500"
+            className="size-5 text-red-500"
           />
           <h3 className="font-medium text-red-700">Validation Errors</h3>
         </div>
@@ -151,7 +166,7 @@ function ValidationErrorDisplay({
           return (
             <div
               key={`server-${index}`}
-              className="bg-white rounded p-3 border border-red-100 shadow-sm"
+              className="bg-white rounded p-3 border border-red-100 shadow-xs"
             >
               <div className="font-medium text-gray-900 mb-1">
                 {getErrorTitle(error)}
@@ -159,7 +174,7 @@ function ValidationErrorDisplay({
               <div className="text-sm text-red-600 flex items-start gap-2">
                 <CareIcon
                   icon="l-exclamation-circle"
-                  className="h-4 w-4 mt-0.5 flex-shrink-0"
+                  className="size-4 mt-0.5 shrink-0"
                 />
                 <span>{error.message}</span>
               </div>
@@ -173,10 +188,7 @@ function ValidationErrorDisplay({
                       `[data-question-id="${structuredQuestion.questionId}"]`,
                     );
                     if (element) {
-                      element.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                      });
+                      element.scrollIntoView({ block: "center" });
                       element.classList.add(
                         "ring-2",
                         "ring-red-500",
@@ -194,7 +206,7 @@ function ValidationErrorDisplay({
                     }
                   }}
                 >
-                  <CareIcon icon="l-arrow-up" className="mr-1 h-3 w-3" />
+                  <CareIcon icon="l-arrow-up" className="mr-1 size-3" />
                   {t("scroll_to_question")}
                 </Button>
               )}
@@ -217,7 +229,7 @@ function ValidationErrorDisplay({
                   {form.errors.map((error, errorIndex) => (
                     <div
                       key={errorIndex}
-                      className="bg-white rounded p-3 border border-red-100 shadow-sm"
+                      className="bg-white rounded p-3 border border-red-100 shadow-xs"
                     >
                       <div className="text-sm text-gray-600 mb-1">
                         {findQuestionText(form, error.question_id)}
@@ -225,7 +237,7 @@ function ValidationErrorDisplay({
                       <div className="text-sm text-red-600 flex items-start gap-2">
                         <CareIcon
                           icon="l-exclamation-circle"
-                          className="h-4 w-4 mt-0.5 flex-shrink-0"
+                          className="size-4 mt-0.5 shrink-0"
                         />
                         <span>{error.error}</span>
                       </div>
@@ -238,10 +250,7 @@ function ValidationErrorDisplay({
                             `[data-question-id="${error.question_id}"]`,
                           );
                           if (element) {
-                            element.scrollIntoView({
-                              behavior: "smooth",
-                              block: "center",
-                            });
+                            element.scrollIntoView({ block: "center" });
                             element.classList.add(
                               "ring-2",
                               "ring-red-500",
@@ -259,7 +268,7 @@ function ValidationErrorDisplay({
                           }
                         }}
                       >
-                        <CareIcon icon="l-arrow-up" className="mr-1 h-3 w-3" />
+                        <CareIcon icon="l-arrow-up" className="mr-1 size-3" />
                         {t("scroll_to_question")}
                       </Button>
                     </div>
@@ -273,6 +282,41 @@ function ValidationErrorDisplay({
   );
 }
 
+const STRUCTURED_TYPE_VALIDATORS = {
+  appointment: (
+    response: ResponseValue | undefined,
+    questionId: string,
+    required?: boolean,
+  ) => {
+    const appointmentData =
+      (response?.value as CreateAppointmentQuestion[]) || [];
+    return validateAppointmentQuestion(
+      appointmentData[0],
+      questionId,
+      required ?? false,
+    );
+  },
+  medication_statement: (
+    response: ResponseValue | undefined,
+    questionId: string,
+  ) => {
+    const medicationData =
+      (response?.value as MedicationStatementRequest[]) || [];
+    return validateMedicationStatementQuestion(medicationData, questionId);
+  },
+  medication_request: (
+    response: ResponseValue | undefined,
+    questionId: string,
+  ) => {
+    const medicationData = (response?.value as MedicationRequest[]) || [];
+    return validateMedicationRequestQuestion(medicationData, questionId);
+  },
+  files: (response: ResponseValue | undefined, quesitonId: string) => {
+    const files = (response?.value as FileUploadQuestion[]) || [];
+    return validateFileUploadQuestion(files, quesitonId);
+  },
+} as const;
+
 export function QuestionnaireForm({
   questionnaireSlug,
   patientId,
@@ -282,6 +326,8 @@ export function QuestionnaireForm({
   onCancel,
   facilityId,
 }: QuestionnaireFormProps) {
+  const { t } = useTranslation();
+
   const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
@@ -509,7 +555,6 @@ export function QuestionnaireForm({
     // Validate all required fields
     const formsWithValidation = formsWithClearedErrors.map((form) => {
       const errors: QuestionValidationError[] = [];
-
       const validateQuestion = (q: Question) => {
         // Handle nested questions in groups
         if (q.type === "group" && q.questions) {
@@ -518,12 +563,23 @@ export function QuestionnaireForm({
         }
 
         if (q.required) {
+          // Handle appointment validation
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
-            (v) => v.value !== undefined && v.value !== null && v.value !== "",
+            (v) =>
+              v.value !== undefined &&
+              v.value !== null &&
+              v.value !== "" &&
+              (Array.isArray(v.value) ? v.value.length > 0 : true),
           );
 
-          if (!hasValue) {
+          const hasProperty = (arr: any[] | undefined, prop: string) =>
+            Array.isArray(arr) && arr.some((item) => item?.[prop] != null);
+
+          const hasCoding = hasProperty(response?.values, "coding");
+          const hasUnit = hasProperty(response?.values, "unit");
+
+          if (!hasValue && !hasCoding && !hasUnit) {
             errors.push({
               question_id: q.id,
               error: t("field_required"),
@@ -531,6 +587,27 @@ export function QuestionnaireForm({
               msg: t("field_required"),
             });
             firstErrorId = firstErrorId ? firstErrorId : q.id;
+          }
+        }
+
+        if (q.type === "structured" && q.structured_type) {
+          const response = form.responses.find((r) => r.question_id === q.id);
+          const validator =
+            STRUCTURED_TYPE_VALIDATORS[
+              q.structured_type as keyof typeof STRUCTURED_TYPE_VALIDATORS
+            ];
+
+          if (validator) {
+            let validationErrors: QuestionValidationError[] = [];
+            validationErrors = validator(
+              response?.values?.[0],
+              q.id,
+              q.required,
+            );
+            errors.push(...validationErrors);
+            if (validationErrors.length > 0) {
+              firstErrorId = firstErrorId ? firstErrorId : q.id;
+            }
           }
         }
       };
@@ -542,15 +619,12 @@ export function QuestionnaireForm({
     setQuestionnaireForms(formsWithValidation);
 
     if (firstErrorId) {
-      const element = document.querySelector(
-        `[data-question-id="${firstErrorId}"]`,
-      );
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-
-    if (formsWithValidation.some((form) => form.errors.length > 0)) {
+      setTimeout(() => {
+        const element = document.querySelector(
+          `[data-question-id="${firstErrorId}"]`,
+        );
+        element?.scrollIntoView({ block: "center" });
+      });
       return;
     }
 
@@ -558,31 +632,41 @@ export function QuestionnaireForm({
     const requests: FormBatchRequest[] = [];
     if (encounterId && patientId) {
       const context = { facilityId, patientId, encounterId };
-      // First, collect all structured data requests if encounterId is provided
+      const structuredPromises: Promise<FormBatchRequest[]>[] = [];
+
       formsWithValidation.forEach((form) => {
         form.responses.forEach((response) => {
           if (response.structured_type) {
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
-              const structuredRequests = getStructuredRequests(
-                response.structured_type,
-                structuredData,
-                context,
+              structuredPromises.push(
+                getStructuredRequests(
+                  response.structured_type,
+                  structuredData,
+                  context,
+                ),
               );
-              requests.push(...structuredRequests);
             }
           }
         });
+      });
+
+      const structuredRequestsArrays = await Promise.all(structuredPromises);
+
+      structuredRequestsArrays.forEach((requestArray) => {
+        requests.push(...requestArray);
       });
     }
 
     // Then, add questionnaire submission requests
     formsWithValidation.forEach((form) => {
-      const nonStructuredResponses = form.responses.filter(
-        (response) => !response.structured_type,
+      const validResponses = form.responses.filter(
+        (response) =>
+          !response.structured_type &&
+          response.values.length > 0 &&
+          response.values?.[0]?.value !== "",
       );
-
-      if (nonStructuredResponses.length > 0) {
+      if (validResponses.length > 0) {
         requests.push({
           url: `/api/v1/questionnaire/${form.questionnaire.slug}/submit/`,
           method: "POST",
@@ -591,22 +675,44 @@ export function QuestionnaireForm({
             resource_id: encounterId ? encounterId : patientId,
             encounter: encounterId,
             patient: patientId,
-            results: nonStructuredResponses
-              .filter(
-                (response) =>
-                  response.values.length > 0 && !response.structured_type,
+            results: validResponses
+              .filter((response) =>
+                isQuestionEnabled(
+                  findQuestionById(
+                    form.questionnaire.questions,
+                    response.question_id,
+                  ) as Question,
+                  form.responses,
+                ),
               )
               .map((response) => ({
                 question_id: response.question_id,
                 values: response.values.map((value) => {
-                  if (value.type === "dateTime" && value.value) {
+                  if (value.type === "date" && value.value) {
+                    const date = new Date(value.value);
+                    if (isNaN(date.getTime())) {
+                      return { ...value, value: "" };
+                    }
+                    const formattedDate = dateQueryString(date);
+                    return {
+                      ...value,
+                      value: formattedDate,
+                    };
+                  } else if (value.type === "dateTime" && value.value) {
                     return {
                       ...value,
                       value: value.value.toISOString(),
                     };
                   }
-                  if (value.value_code) {
-                    return { value_code: value.value_code };
+                  if (value.unit) {
+                    return {
+                      value: value.value?.toString(),
+                      unit: value.unit,
+                      coding: value.coding,
+                    };
+                  }
+                  if (value.coding) {
+                    return { coding: value.coding };
                   }
                   return { value: String(value.value) };
                 }),
@@ -618,14 +724,32 @@ export function QuestionnaireForm({
         });
       }
     });
-
     submitBatch({ requests });
+  };
+
+  const scrollToQuestion = (questionnaireId: string, groupId?: string) => {
+    setActiveQuestionnaireId(questionnaireId);
+    setActiveGroupId(groupId);
+
+    let element: Element | null;
+
+    if (groupId) {
+      element = document.querySelector(`[data-group-id="${groupId}"]`);
+    } else {
+      element = document.querySelector(
+        `[data-questionnaire-id="${questionnaireId}"]`,
+      );
+    }
+
+    if (element) {
+      element.scrollIntoView({ block: "start" });
+    }
   };
 
   return (
     <div className="flex gap-4">
       {/* Left Navigation */}
-      <div className="w-64 border-r p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
+      <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         {questionnaireForms.map((form) => (
           <div key={form.questionnaire.id} className="space-y-2">
             {/* Questionnaire Title */}
@@ -635,7 +759,7 @@ export function QuestionnaireForm({
                 activeQuestionnaireId === form.questionnaire.id &&
                   "bg-gray-100 text-green-600",
               )}
-              onClick={() => setActiveQuestionnaireId(form.questionnaire.id)}
+              onClick={() => scrollToQuestion(form.questionnaire.id)}
               disabled={isPending}
             >
               {form.questionnaire.title}
@@ -703,6 +827,7 @@ export function QuestionnaireForm({
                       activeQuestionId === question.id &&
                         "border  text-green-600 bg-white shadow-sm",
                     )}
+ issues/12548/ImproveQuestionnareUX
                     onClick={() => {
                       setActiveQuestionnaireId(form.questionnaire.id);
                       setActiveQuestionId(question.id);
@@ -714,6 +839,7 @@ export function QuestionnaireForm({
                           block: "center",
                         });
                     }}
+
                     disabled={isPending}
                   >
                     {`${index + 1}. ${question.text}`}
@@ -731,9 +857,10 @@ export function QuestionnaireForm({
         {questionnaireForms.map((form, index) => (
           <div
             key={`${form.questionnaire.id}-${index}`}
-            className="rounded-lg py-6 px-4 space-y-6"
+            className="rounded-lg py-6 space-y-6"
+            data-questionnaire-id={form.questionnaire.id}
           >
-            <div className="flex justify-between items-center max-w-4xl">
+            <div className="flex justify-between items-center max-w-4xl p-2">
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">
                   {form.questionnaire.title}
@@ -744,8 +871,7 @@ export function QuestionnaireForm({
                   </p>
                 )}
               </div>
-
-              {form.questionnaire.id !== questionnaireData?.id && (
+              {form.questionnaire.slug !== questionnaireSlug && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -824,7 +950,7 @@ export function QuestionnaireForm({
           <>
             <div
               key={`${questionnaireForms.length}`}
-              className="flex gap-4 items-center m-4 max-w-4xl"
+              className="flex gap-4 items-center max-w-4xl px-2"
             >
               <QuestionnaireSearch
                 subjectType={subjectType}
@@ -871,7 +997,7 @@ export function QuestionnaireForm({
                     <>
                       <span className="opacity-0">{t("submit")}</span>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
+                        <div className="size-5 animate-spin rounded-full border-b-2 border-white" />
                       </div>
                     </>
                   ) : (

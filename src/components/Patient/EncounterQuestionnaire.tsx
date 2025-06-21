@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -10,9 +10,13 @@ import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm"
 
 import useAppHistory from "@/hooks/useAppHistory";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
+import { inactiveEncounterStatus } from "@/types/emr/encounter";
 
 interface Props {
   facilityId?: string;
@@ -29,6 +33,8 @@ export default function EncounterQuestionnaire({
   questionnaireSlug,
   subjectType,
 }: Props) {
+  const { t } = useTranslation();
+
   const { goBack } = useAppHistory();
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -38,16 +44,29 @@ export default function EncounterQuestionnaire({
     }),
     enabled: !!encounterId,
   });
+
+  const { hasPermission } = usePermissions();
+  const { canWriteEncounter } = getPermissions(
+    hasPermission,
+    encounterId ? (encounter?.patient.permissions ?? []) : [],
+  );
+
+  const canWrite = encounterId
+    ? canWriteEncounter &&
+      !inactiveEncounterStatus.includes(encounter?.status ?? "")
+    : false;
+
   return (
     <Page title={t("questionnaire_one")}>
-      <div className="flex flex-col space-y-4 mt-4 overflow-y-auto">
+      <div className="flex flex-col space-y-4 mt-4">
         {encounter && (
-          <div className="size-full rounded-lg border bg-white text-black shadow">
+          <div className="size-full rounded-lg border border-gray-200 bg-white text-black shadow-sm">
             <PatientInfoCard
               patient={encounter.patient}
               encounter={encounter}
               fetchPatientData={() => {}}
               disableButtons={true}
+              canWrite={canWrite}
             />
 
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">

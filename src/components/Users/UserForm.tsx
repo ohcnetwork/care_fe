@@ -1,13 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Lock, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -19,7 +23,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/input-password";
+import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -33,7 +39,7 @@ import {
   validateRule,
 } from "@/components/Users/UserFormValidations";
 
-import { GENDER_TYPES } from "@/common/constants";
+import { GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
@@ -60,51 +66,50 @@ export default function UserForm({
   const isEditMode = !!existingUsername;
   const queryClient = useQueryClient();
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
   const userFormSchema = z
     .object({
       user_type: isEditMode
-        ? z.enum(["doctor", "nurse", "staff", "volunteer"]).optional()
-        : z.enum(["doctor", "nurse", "staff", "volunteer"]),
+        ? z
+            .enum(["doctor", "nurse", "staff", "volunteer", "administrator"])
+            .optional()
+        : z.enum(["doctor", "nurse", "staff", "volunteer", "administrator"]),
       username: isEditMode
         ? z.string().optional()
         : z
             .string()
             .min(4, t("field_required"))
             .max(16, t("username_not_valid"))
-            .regex(/^[a-z0-9._-]*$/, t("username_not_valid"))
+            .regex(/^[a-z0-9_-]*$/, t("username_not_valid"))
             .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_not_valid"))
             .refine(
-              (val) => !val.match(/(?:[._-]{2,})/),
+              (val) => !val.match(/(?:[_-]{2,})/),
               t("username_not_valid"),
             ),
-      password: isEditMode
-        ? z.string().optional()
-        : z
-            .string()
-            .min(8, t("field_required"))
-            .regex(/[a-z]/, t("new_password_validation"))
-            .regex(/[A-Z]/, t("new_password_validation"))
-            .regex(/[0-9]/, t("new_password_validation")),
-      c_password: isEditMode ? z.string().optional() : z.string(),
+      password_setup_method: z.enum(["immediate", "email"]).optional(),
+      password: z.string().optional(),
+      c_password: z.string().optional(),
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
-      email: z.string().email(t("invalid_email_address")),
+      email: isEditMode
+        ? z.string().optional()
+        : z.string().email(t("invalid_email_address")),
       phone_number: validators().phoneNumber.required,
       gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
+      prefix: z.string().optional(),
+      suffix: z.string().optional(),
       /* TODO: Userbase doesn't currently support these, neither does BE
       but we will probably need these */
       /* qualification: z.string().optional(),
       doctor_experience_commenced_on: z.string().optional(),
       doctor_medical_council_registration: z.string().optional(), */
-      geo_organization: isEditMode
-        ? z.string().optional()
-        : z.string().min(1, t("field_required")),
+      geo_organization: z.string().optional(),
     })
     .refine(
       (data) => {
-        if (!isEditMode) {
-          return data.password === data.c_password;
+        if (!isEditMode && data.password_setup_method === "immediate") {
+          return data.password && data.password === data.c_password;
         }
         return true;
       },
@@ -112,11 +117,32 @@ export default function UserForm({
         message: t("password_mismatch"),
         path: ["c_password"],
       },
+    )
+    .refine(
+      (data) => {
+        if (
+          !isEditMode &&
+          data.password_setup_method === "immediate" &&
+          data.password
+        ) {
+          return (
+            data.password.length >= 8 &&
+            /[a-z]/.test(data.password) &&
+            /[A-Z]/.test(data.password) &&
+            /[0-9]/.test(data.password)
+          );
+        }
+        return true;
+      },
+      {
+        message: t("new_password_validation"),
+        path: ["password"],
+      },
     );
 
   type UserFormValues = z.infer<typeof userFormSchema>;
 
-  const form = useForm<UserFormValues>({
+  const form = useForm({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       user_type: "nurse",
@@ -127,6 +153,9 @@ export default function UserForm({
       last_name: "",
       email: "",
       phone_number: "",
+      prefix: "",
+      suffix: "",
+      password_setup_method: "immediate",
     },
   });
 
@@ -146,12 +175,13 @@ export default function UserForm({
         email: userData.email,
         phone_number: userData.phone_number || "",
         gender: userData.gender || undefined,
+        prefix: userData.prefix || "",
+        suffix: userData.suffix || "",
       };
       form.reset(formData);
     }
   }, [userData, form, isEditMode]);
 
-  const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
   const [isUsernameFieldFocused, setIsUsernameFieldFocused] = useState(false);
 
   //const userType = form.watch("user_type");
@@ -231,18 +261,13 @@ export default function UserForm({
     }),
     onSuccess: (resp: UserBase) => {
       toast.success(t("user_updated_successfully"));
-      queryClient.invalidateQueries({
-        queryKey: ["facilityUsers"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["organizationUsers"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["facilityOrganizationUsers"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["getUserDetails", resp.username],
-      });
+      [
+        ["facilityUsers"],
+        ["organizationUsers"],
+        ["facilityOrganizationUsers"],
+        ["getUserDetails", resp.username],
+        ["currentUser"],
+      ].forEach((key) => queryClient.invalidateQueries({ queryKey: key }));
       onSubmitSuccess?.(resp);
     },
   });
@@ -255,8 +280,16 @@ export default function UserForm({
     } else {
       createUser({
         ...data,
-        password: data.password,
+        password:
+          data.password_setup_method === "immediate"
+            ? data.password
+            : undefined,
+        c_password:
+          data.password_setup_method === "immediate"
+            ? data.c_password
+            : undefined,
         profile_picture_url: "",
+        geo_organization: data.geo_organization || null,
       } as CreateUserModel);
     }
   };
@@ -275,6 +308,14 @@ export default function UserForm({
     setSelectedLevels(levels);
   }, [org, organizationId]);
 
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (isEditMode && userData && "geo_organization" in userData) {
+      levels.push(userData.geo_organization as Organization);
+      setSelectedLevels(levels);
+    }
+  }, [org, userData, isEditMode]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -284,7 +325,7 @@ export default function UserForm({
             name="user_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("user_type")}</FormLabel>
+                <FormLabel aria-required>{t("user_type")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -299,6 +340,9 @@ export default function UserForm({
                     <SelectItem value="nurse">{t("nurse")}</SelectItem>
                     <SelectItem value="staff">{t("staff")}</SelectItem>
                     <SelectItem value="volunteer">{t("volunteer")}</SelectItem>
+                    <SelectItem value="administrator">
+                      {t("administrator")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -307,13 +351,36 @@ export default function UserForm({
           />
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 items-start">
+          <FormField
+            control={form.control}
+            name="prefix"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("prefix")}</FormLabel>
+                <Autocomplete
+                  options={NAME_PREFIXES.map((prefix) => ({
+                    label: prefix,
+                    value: prefix,
+                  }))}
+                  freeInput
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  noOptionsMessage=""
+                  className="min-w-0"
+                  placeholder={t("select_or_type")}
+                  inputPlaceholder={t("select_or_type")}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="first_name"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel required>{t("first_name")}</FormLabel>
+              <FormItem className="flex-1">
+                <FormLabel aria-required>{t("first_name")}</FormLabel>
                 <FormControl>
                   <Input
                     data-cy="first-name-input"
@@ -325,13 +392,12 @@ export default function UserForm({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="last_name"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel required>{t("last_name")}</FormLabel>
+              <FormItem className="flex-1">
+                <FormLabel aria-required>{t("last_name")}</FormLabel>
                 <FormControl>
                   <Input
                     data-cy="last-name-input"
@@ -339,6 +405,22 @@ export default function UserForm({
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="suffix"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("suffix")}</FormLabel>
+                <Input
+                  data-cy="suffix-input"
+                  placeholder={t("suffix")}
+                  {...field}
+                />
+
                 <FormMessage />
               </FormItem>
             )}
@@ -352,7 +434,7 @@ export default function UserForm({
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>{t("username")}</FormLabel>
+                  <FormLabel aria-required>{t("username")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
@@ -364,12 +446,13 @@ export default function UserForm({
                       />
                     </div>
                   </FormControl>
-                  {isUsernameFieldFocused ? (
-                    <>
-                      <div
-                        className="text-small mt-2 pl-2 text-secondary-500"
-                        aria-live="polite"
-                      >
+
+                  <div className={cn(!isUsernameFieldFocused && "hidden")}>
+                    <div
+                      className="text-small pl-2 text-secondary-500"
+                      aria-live="polite"
+                    >
+                      {(isUsernameChecking || !isUsernameTaken) && (
                         <ValidationHelper
                           isInputEmpty={!field.value}
                           successMessage={t("username_success_message")}
@@ -402,37 +485,139 @@ export default function UserForm({
                             },
                           ]}
                         />
-                      </div>
-                      <div className="pl-2">
-                        {renderUsernameFeedback(usernameInput || "")}
-                      </div>
-                    </>
-                  ) : (
+                      )}
+                    </div>
+                    <div className="pl-2">
+                      {renderUsernameFeedback(usernameInput || "")}
+                    </div>
+                  </div>
+                  <div className={cn(isUsernameFieldFocused && "hidden")}>
                     <FormMessage />
-                  )}
+                  </div>
                 </FormItem>
               )}
             />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {!isEditMode && (
               <FormField
                 control={form.control}
-                name="password"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("password")}</FormLabel>
+                    <FormLabel aria-required>{t("email")}</FormLabel>
                     <FormControl>
-                      <PasswordInput
-                        data-cy="password-input"
-                        placeholder={t("password")}
+                      <Input
+                        data-cy="email-input"
+                        type="email"
+                        placeholder={t("email")}
                         {...field}
-                        onFocus={() => setIsPasswordFieldFocused(true)}
-                        onBlur={() => setIsPasswordFieldFocused(false)}
                       />
                     </FormControl>
-                    {isPasswordFieldFocused ? (
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <FormField
+              control={form.control}
+              name="password_setup_method"
+              render={({ field }) => (
+                <FormItem className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <FormLabel className="text-base font-medium mb-3 block">
+                    {t("password_setup_method")}
+                  </FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="space-y-3"
+                    >
                       <div
-                        className="text-small mt-2 pl-2 text-secondary-500"
+                        className={cn(
+                          "flex items-start space-x-3 rounded-md border p-3",
+                          field.value === "immediate"
+                            ? "bg-white border-primary"
+                            : "bg-transparent  border-gray-200",
+                        )}
+                      >
+                        <RadioGroupItem
+                          value="immediate"
+                          id="immediate"
+                          className="mt-1"
+                        />
+                        <div className="space-y-1.5">
+                          <Label
+                            htmlFor="immediate"
+                            className="text-base font-medium cursor-pointer flex items-center"
+                          >
+                            <Lock className="size-4" />
+                            {t("set_password_now")}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {t("set_password_now_description")}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        className={cn(
+                          "flex items-start space-x-3 rounded-md border p-3",
+                          field.value === "email"
+                            ? "bg-white border-primary"
+                            : "bg-transparent  border-gray-200",
+                        )}
+                      >
+                        <RadioGroupItem
+                          value="email"
+                          id="email"
+                          className="mt-1"
+                        />
+                        <div className="space-y-1.5">
+                          <Label
+                            htmlFor="email"
+                            className="text-base font-medium cursor-pointer flex items-center"
+                          >
+                            <Mail className="size-4" />
+                            {t("send_email_invitation")}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {t("send_email_invitation_description")}
+                          </p>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {form.watch("password_setup_method") === "immediate" && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel aria-required>{t("password")}</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <PasswordInput
+                            data-cy="password-input"
+                            placeholder={t("password")}
+                            {...field}
+                            onFocus={() => setIsPasswordFieldFocused(true)}
+                            onBlur={() => setIsPasswordFieldFocused(false)}
+                          />
+                        </div>
+                      </FormControl>
+
+                      <div
+                        className={cn(
+                          "text-small pl-2 text-secondary-500",
+                          !isPasswordFieldFocused && "hidden",
+                        )}
                         aria-live="polite"
                       >
                         <ValidationHelper
@@ -458,62 +643,45 @@ export default function UserForm({
                           ]}
                         />
                       </div>
-                    ) : (
-                      <FormMessage />
-                    )}
-                  </FormItem>
-                )}
-              />
 
-              <FormField
-                control={form.control}
-                name="c_password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>{t("confirm_password")}</FormLabel>
-                    <FormControl>
-                      <PasswordInput
-                        data-cy="confirm-password-input"
-                        placeholder={t("confirm_password")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                      <div className={cn(isPasswordFieldFocused && "hidden")}>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="c_password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel aria-required>
+                        {t("confirm_password")}
+                      </FormLabel>
+                      <FormControl>
+                        <PasswordInput
+                          data-cy="confirm-password-input"
+                          placeholder={t("confirm_password")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
           </>
         )}
 
-        {!isEditMode && (
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required>{t("email")}</FormLabel>
-                <FormControl>
-                  <Input
-                    data-cy="email-input"
-                    type="email"
-                    placeholder={t("email")}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
           <FormField
             control={form.control}
             name="phone_number"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("phone_number")}</FormLabel>
+                <FormLabel aria-required>{t("phone_number")}</FormLabel>
                 <FormControl>
                   <PhoneInput
                     data-cy="phone-number-input"
@@ -531,7 +699,7 @@ export default function UserForm({
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>{t("gender")}</FormLabel>
+                <FormLabel aria-required>{t("gender")}</FormLabel>
                 <Select
                   {...field}
                   onValueChange={field.onChange}
@@ -624,28 +792,28 @@ export default function UserForm({
             </div>
           </>
         )} */}
-        {!isEditMode && (
-          <FormField
-            control={form.control}
-            name="geo_organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <GovtOrganizationSelector
-                    {...field}
-                    value={form.watch("geo_organization")}
-                    selected={selectedLevels}
-                    onChange={(value) =>
-                      form.setValue("geo_organization", value)
-                    }
-                    required={!isEditMode}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="geo_organization"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <GovtOrganizationSelector
+                  {...field}
+                  value={form.watch("geo_organization")}
+                  selected={selectedLevels}
+                  onChange={(value) =>
+                    form.setValue("geo_organization", value, {
+                      shouldDirty: true,
+                    })
+                  }
+                  required={false}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button
           type="submit"

@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   CartesianGrid,
   Legend,
@@ -11,6 +13,11 @@ import {
 } from "recharts";
 
 import { Card } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -53,6 +60,7 @@ interface ObservationVisualizerProps {
   height?: number;
   gridCols?: number;
   encounterId: string;
+  canAccess: boolean;
 }
 
 interface ChartData {
@@ -103,7 +111,10 @@ export const ObservationVisualizer = ({
   encounterId,
   height = 300,
   gridCols = 2,
+  canAccess,
 }: ObservationVisualizerProps) => {
+  const { t } = useTranslation();
+
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
 
@@ -123,6 +134,7 @@ export const ObservationVisualizer = ({
         codes: allCodes,
       },
     }),
+    enabled: canAccess,
   });
 
   if (isLoading) {
@@ -235,13 +247,42 @@ export const ObservationVisualizer = ({
       {processedDataByGroup.map((group, groupIndex) => (
         <Card key={groupIndex} className="p-4">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-medium">{group.title}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-medium">{group.title}</h3>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Info className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                </PopoverTrigger>
+                <PopoverContent
+                  className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
+                  side="bottom"
+                  align="start"
+                  sideOffset={4}
+                  collisionPadding={16}
+                >
+                  <div className="space-y-2">
+                    <div className="font-medium">Observations:</div>
+                    {group.codes.map((code) => (
+                      <div key={code.code} className="text-xs">
+                        {code.display} ({code.code})
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
           <Tabs defaultValue="graph" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="graph">Graph</TabsTrigger>
-              <TabsTrigger value="data">Recent Data</TabsTrigger>
-              <TabsTrigger value="history">Full History</TabsTrigger>
+            <TabsList className="flex w-full">
+              <TabsTrigger className="flex-1" value="graph">
+                {t("graph")}
+              </TabsTrigger>
+              <TabsTrigger className="flex-1" value="data">
+                {t("recent_data")}
+              </TabsTrigger>
+              <TabsTrigger className="flex-1" value="history">
+                {t("full_history")}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="graph">
@@ -353,7 +394,7 @@ export const ObservationVisualizer = ({
                             <div className="flex items-center gap-2">
                               <Avatar
                                 name={observations[0].details.enteredBy}
-                                className="h-6 w-6"
+                                className="size-6"
                               />
                               <span>{observations[0].details.enteredBy}</span>
                             </div>

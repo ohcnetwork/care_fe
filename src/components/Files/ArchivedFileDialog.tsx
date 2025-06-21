@@ -1,9 +1,12 @@
 import dayjs from "dayjs";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -20,6 +23,8 @@ export default function ArchivedFileDialog({
   onOpenChange: (open: boolean) => void;
   file: FileUploadModel | null;
 }) {
+  const { t } = useTranslation();
+
   if (!file) {
     return <></>;
   }
@@ -31,14 +36,14 @@ export default function ArchivedFileDialog({
       aria-labelledby="file-archive-dialog"
     >
       <DialogContent
-        className="mb-8 rounded-lg p-4 w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)]"
+        className="mb-8 rounded-lg p-4 w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)] max-w-2xl"
         aria-describedby="file-archive"
       >
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="break-words">
             {t("archived_file")}:{" "}
             <TooltipComponent content={fileName}>
-              <span className="max-w-sm truncate inline-block align-bottom">
+              <span className="sm:max-w-sm inline-block align-bottom">
                 {fileName}
               </span>
             </TooltipComponent>
@@ -49,18 +54,31 @@ export default function ArchivedFileDialog({
             <span className="text-sm text-gray-500">
               {t("archived_reason")}:
             </span>
-            <span>{file?.archive_reason}</span>
+            <span className="break-words" data-cy="archived-reason">
+              {file?.archive_reason}
+            </span>
           </div>
-          <div className="flex flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
-            <span>
+          <div className="flex flex-col sm:flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
+            <span className="break-words">
               {t("archived_by")}: {file.archived_by?.username}
             </span>
-            <span>
+            <span className="whitespace-nowrap">
               {t("archived_at")}:{" "}
               {dayjs(file.archived_datetime).format("DD MMM YYYY, hh:mm A")}
             </span>
           </div>
         </div>
+        <DialogFooter className="sm:justify-start">
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="secondary"
+              data-cy="archive-dialog-close"
+            >
+              {t("close")}
+            </Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

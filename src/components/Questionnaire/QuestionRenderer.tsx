@@ -2,15 +2,14 @@ import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
+
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import {
-  Question,
-  StructuredQuestionType,
-} from "@/types/questionnaire/question";
+import { Question } from "@/types/questionnaire/question";
 
 import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
 
@@ -50,10 +49,7 @@ export function QuestionRenderer({
 
   useEffect(() => {
     if (activeGroupId && questionRefs.current[activeGroupId]) {
-      questionRefs.current[activeGroupId]?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      questionRefs.current[activeGroupId]?.scrollIntoView({ block: "start" });
     }
   }, [activeGroupId]);
 
@@ -63,27 +59,31 @@ export function QuestionRenderer({
     FULL_WIDTH_QUESTION_TYPES.includes(question.structured_type);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8 bg-white md:space-y-3">
       {questions.map((question) => (
         <div
           key={question.id}
-          ref={(el) => (questionRefs.current[question.id] = el)}
+          ref={(el) => {
+            questionRefs.current[question.id] = el;
+          }}
           className={cn(
             shouldBeFullWidth(question) ? "md:w-auto" : "max-w-4xl",
           )}
         >
-          <QuestionGroup
-            facilityId={facilityId}
-            question={question}
-            encounterId={encounterId}
-            questionnaireResponses={responses}
-            updateQuestionnaireResponseCB={onResponseChange}
-            errors={errors}
-            clearError={clearError}
-            disabled={disabled || isPreview}
-            activeGroupId={activeGroupId}
-            patientId={patientId}
-          />
+          <div className="lg:m-2">
+            <QuestionGroup
+              facilityId={facilityId}
+              question={question}
+              encounterId={encounterId}
+              questionnaireResponses={responses}
+              updateQuestionnaireResponseCB={onResponseChange}
+              errors={errors}
+              clearError={clearError}
+              disabled={disabled || isPreview}
+              activeGroupId={activeGroupId}
+              patientId={patientId}
+            />
+          </div>
         </div>
       ))}
     </div>

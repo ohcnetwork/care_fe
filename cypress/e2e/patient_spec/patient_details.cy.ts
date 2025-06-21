@@ -10,16 +10,17 @@ const patientDetails = new PatientDetails();
 describe("Patient Management", () => {
   beforeEach(() => {
     cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
-    cy.loginByApi("devdoctor");
+    cy.loginByApi("doctor");
     cy.visit("/");
   });
 
   it("Assign users to a patient", () => {
-    const userName = "nihal-nurse";
+    const userName = "Admin User";
     const userRole = "Nurse";
-    facilityCreation.selectFacility("GHC payyanur");
+    facilityCreation.selectFirstRandomFacility();
     patientEncounter
       .navigateToEncounters()
+      .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
       .clickPatientDetailsButton();
     patientDetails

@@ -1,6 +1,5 @@
-import { ChevronDown, ChevronRight, ChevronUp, Folder } from "lucide-react";
+import { ChevronDown, ChevronRight, Hospital, Pencil } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import ReactFlow, {
   Background,
@@ -11,15 +10,19 @@ import ReactFlow, {
   MarkerType,
   Node,
   NodeProps,
-  Panel,
   Position,
   ReactFlowProvider,
   useReactFlow,
+  useViewport,
 } from "reactflow";
 
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import {
   LocationList as LocationListType,
@@ -29,24 +32,35 @@ import {
 // Constants
 const LEVEL_HEIGHT = 220;
 const NODE_WIDTH = 280;
-const ROOT_SPACING = 100;
+const ROOT_SPACING = 50;
 
 interface LocationMapProps {
   locations: LocationListType[];
   onLocationClick: (location: LocationListType) => void;
+  onLocationEdit?: (location: LocationListType) => void;
   facilityName: string;
   searchQuery?: string;
+  isEditing?: boolean;
 }
 
 const CustomNode = ({ data }: NodeProps) => {
   const { t } = useTranslation();
+  const { zoom } = useViewport();
   const hasChildren = data.childCount > 0;
   const Icon =
-    LocationTypeIcons[data.form as keyof typeof LocationTypeIcons] || Folder;
+    data.form === "facility"
+      ? Hospital
+      : LocationTypeIcons[data.form as keyof typeof LocationTypeIcons];
+  const showTooltip = zoom < 1 || data.name.length > 25;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     data.onToggle(data.id);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    data.onEdit(data.id);
   };
 
   return (
@@ -69,51 +83,55 @@ const CustomNode = ({ data }: NodeProps) => {
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[97%] h-full border-2 border-gray-200 rounded-lg bg-white" />
         </>
       )}
-      <div
-        onClick={() => data.onClick({ id: data.id })}
-        className={cn(
-          "relative w-[240px] bg-white rounded-lg border-2 overflow-hidden shadow-sm cursor-pointer",
-          "border-gray-200",
-          "hover:border-primary/50 hover:shadow-lg",
-          "transition-all duration-200",
-        )}
-      >
-        <div className="p-4">
+      <div className="relative w-65 bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-200">
+        <div className="p-4 pb-2 cursor-pointer" onClick={handleEdit}>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-md shrink-0">
-              <Icon className="h-5 w-5" />
+              <Icon className="size-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 truncate">
-                {data.name}
-              </h3>
+              <TooltipProvider>
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <h3 className="font-medium text-gray-900 truncate">
+                      {data.name}
+                    </h3>
+                  </TooltipTrigger>
+                  {showTooltip && (
+                    <TooltipContent>
+                      <p>{data.name}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
               <p className="text-sm text-gray-500 truncate">{data.type}</p>
             </div>
+            {data.form !== "facility" && <Pencil className="size-4" />}
           </div>
-          {hasChildren && (
-            <div
-              className="flex justify-center mt-2 border-t pt-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 hover:bg-gray-100 transition-colors"
-                onClick={handleToggle}
-              >
-                <span className="text-sm mr-2 text-gray-600">
-                  {data.childCount} {t("level_inside")}
-                </span>
-                {data.form !== "facility" &&
-                  (data.isExpanded ? (
-                    <ChevronDown className="h-4 w-4 text-gray-600" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 text-gray-600" />
-                  ))}
-              </Button>
-            </div>
-          )}
         </div>
+        {hasChildren && (
+          <div
+            className="flex justify-center m-2 border-t border-gray-200 pt-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 hover:bg-gray-100 transition-colors"
+              onClick={handleToggle}
+            >
+              <span className="text-sm text-gray-600">
+                {data.childCount} {t("level_inside")}
+              </span>
+              {data.form !== "facility" &&
+                (data.isExpanded ? (
+                  <ChevronDown className="size-4 text-gray-600" />
+                ) : (
+                  <ChevronRight className="size-4 text-gray-600" />
+                ))}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -175,19 +193,15 @@ function createLocationNode(
   isExpanded: boolean,
   level: number,
   offsetX: number,
-  nodePositions: Record<string, { x: number; y: number }>,
   toggleNode: (id: string) => void,
   onLocationClick: (location: LocationListType) => void,
   t: (key: string) => string,
+  onLocationEdit?: (location: LocationListType) => void,
 ): Node {
   return {
     id: location.id,
     type: "custom",
-    position: nodePositions[location.id] || {
-      x: offsetX,
-      y: level * LEVEL_HEIGHT,
-    },
-    draggable: true,
+    position: { x: offsetX, y: level * LEVEL_HEIGHT },
     data: {
       name: location.name,
       type: t(`location_form__${location.form}`),
@@ -197,6 +211,7 @@ function createLocationNode(
       isExpanded,
       onToggle: toggleNode,
       onClick: (_loc: LocationListType) => onLocationClick(location),
+      onEdit: onLocationEdit ? () => onLocationEdit(location) : undefined,
     },
   };
 }
@@ -230,10 +245,10 @@ function processLocationHierarchy(
   level: number,
   offsetX: number,
   parentX: number | null,
-  nodePositions: Record<string, { x: number; y: number }>,
   toggleNode: (id: string) => void,
   onLocationClick: (location: LocationListType) => void,
   t: (key: string) => string,
+  onLocationEdit?: (location: LocationListType) => void,
 ): { nodes: Node[]; edges: Edge[] } {
   const isExpanded = expandedNodes.includes(location.id);
   const childLocations = locations.filter(
@@ -248,10 +263,10 @@ function processLocationHierarchy(
     isExpanded,
     level,
     offsetX,
-    nodePositions,
     toggleNode,
     onLocationClick,
     t,
+    onLocationEdit,
   );
   result.nodes.push(node);
 
@@ -281,10 +296,10 @@ function processLocationHierarchy(
         level + 1,
         childX,
         offsetX,
-        nodePositions,
         toggleNode,
         onLocationClick,
         t,
+        onLocationEdit,
       );
       result.nodes.push(...childResult.nodes);
       result.edges.push(...childResult.edges);
@@ -298,6 +313,7 @@ function processLocationHierarchy(
 function LocationMapContent({
   locations,
   onLocationClick,
+  onLocationEdit,
   facilityName,
   searchQuery,
 }: LocationMapProps) {
@@ -306,9 +322,6 @@ function LocationMapContent({
   const { fitView } = useReactFlow();
   const { t } = useTranslation();
   const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
-  const [nodePositions, setNodePositions] = useState<
-    Record<string, { x: number; y: number }>
-  >({});
 
   // Get root locations
   const rootLocations = useMemo(
@@ -319,66 +332,8 @@ function LocationMapContent({
     [locations],
   );
 
-  // Effect to handle search updates
-  useEffect(() => {
-    // Reset positions
-    setNodePositions({});
-
-    // Get all location IDs that match the search
-    const matchedIds = new Set<string>();
-
-    // Add all locations and their children to matched IDs
-    const processLocation = (location: LocationListType) => {
-      matchedIds.add(location.id);
-
-      // Find and process all children
-      const children = locations.filter(
-        (loc) => loc.parent?.id === location.id,
-      );
-      children.forEach((child) => {
-        processLocation(child); // Recursively process each child
-      });
-    };
-
-    // Process all root locations first
-    rootLocations.forEach((location) => {
-      processLocation(location);
-    });
-
-    // For any remaining locations that might be children, ensure their parents are included
-    locations.forEach((location) => {
-      if (location.parent?.id) {
-        let current = location;
-        while (current.parent?.id) {
-          matchedIds.add(current.parent.id);
-          const parent = locations.find((loc) => loc.id === current.parent?.id);
-          if (!parent) break;
-          current = parent;
-        }
-      }
-    });
-
-    // Expand all nodes when there's a search query, collapse all when search is cleared
-    if (searchQuery && searchQuery.trim()) {
-      setExpandedNodes(Array.from(matchedIds));
-    } else {
-      setExpandedNodes([]); // Collapse all nodes when search is cleared
-    }
-
-    // Fit view after nodes are updated
-    setTimeout(() => {
-      fitView({
-        padding: 0.2,
-        minZoom: 0.2,
-        maxZoom: 0.7,
-        duration: 800,
-      });
-    }, 100);
-  }, [locations, fitView, rootLocations, searchQuery]);
-
   const toggleNode = useCallback(
     (nodeId: string) => {
-      setNodePositions({});
       setExpandedNodes((prev) => {
         const isExpanding = !prev.includes(nodeId);
         const newExpandedNodes = isExpanding
@@ -418,51 +373,75 @@ function LocationMapContent({
     [fitView, locations],
   );
 
-  const toggleAllNodes = useCallback(() => {
-    setNodePositions({});
-    setExpandedNodes((prev) => {
-      const isExpanding = prev.length !== locations.length;
-      const newExpandedNodes = isExpanding
-        ? locations.map((loc) => loc.id)
-        : [];
+  // Effect to handle search updates
+  useEffect(() => {
+    // Get all location IDs that match the search
+    const matchedIds = new Set<string>();
 
+    // Add all locations and their children to matched IDs
+    const processLocation = (location: LocationListType) => {
+      matchedIds.add(location.id);
+
+      // Find and process all children
+      const children = locations.filter(
+        (loc) => loc.parent?.id === location.id,
+      );
+      children.forEach((child) => {
+        processLocation(child);
+      });
+    };
+
+    // Process all root locations first
+    rootLocations.forEach((location) => {
+      processLocation(location);
+    });
+
+    // For any remaining locations that might be children, ensure their parents are included
+    locations.forEach((location) => {
+      if (location.parent?.id) {
+        let current = location;
+        while (current.parent?.id) {
+          matchedIds.add(current.parent.id);
+          const parent = locations.find((loc) => loc.id === current.parent?.id);
+          if (!parent) break;
+          current = parent;
+        }
+      }
+    });
+
+    // Only update expanded nodes for search
+    if (searchQuery && searchQuery.trim()) {
+      setExpandedNodes((prev) => {
+        const newExpanded = Array.from(matchedIds);
+        return [...new Set([...prev, ...newExpanded])];
+      });
+
+      // Only fit view when there's an actual search
       setTimeout(() => {
         fitView({
           padding: 0.2,
-          minZoom: 0.1,
-          maxZoom: 0.8,
+          minZoom: 0.2,
+          maxZoom: 0.7,
           duration: 800,
         });
       }, 100);
+    }
+  }, [locations, fitView, rootLocations, searchQuery]);
 
-      return newExpandedNodes;
-    });
-  }, [locations, fitView]);
-
-  const onNodeDrag = useCallback((_: ReactMouseEvent, node: Node) => {
-    setNodePositions((prev) => ({
-      ...prev,
-      [node.id]: node.position,
-    }));
-  }, []);
-
-  const onNodeDragStop = useCallback(
-    (_: ReactMouseEvent, node: Node) => {
-      setNodePositions((prev) => ({
-        ...prev,
-        [node.id]: node.position,
-      }));
-      requestAnimationFrame(() => {
+  useEffect(() => {
+    if (searchQuery === "") {
+      setExpandedNodes([]);
+      // Fit view when collapsing all nodes
+      setTimeout(() => {
         fitView({
           padding: 0.2,
-          duration: 300,
           minZoom: 0.2,
-          maxZoom: 1,
+          maxZoom: 0.7,
+          duration: 800,
         });
-      });
-    },
-    [fitView],
-  );
+      }, 100);
+    }
+  }, [searchQuery, fitView]);
 
   // Generate nodes and edges
   useEffect(() => {
@@ -503,10 +482,10 @@ function LocationMapContent({
             1,
             locationX,
             null,
-            nodePositions,
             toggleNode,
             onLocationClick,
             t,
+            onLocationEdit,
           );
 
         newNodes.push(...locationNodes);
@@ -526,14 +505,14 @@ function LocationMapContent({
     expandedNodes,
     toggleNode,
     onLocationClick,
+    onLocationEdit,
     t,
-    nodePositions,
     rootLocations,
     facilityName,
   ]);
 
   return (
-    <div className="h-[600px] w-full bg-gray-50 rounded-lg border">
+    <div className="h-[calc(100vh-14rem)] w-full bg-gray-50 rounded-lg border border-gray-200">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -553,9 +532,6 @@ function LocationMapContent({
           },
         }}
         proOptions={{ hideAttribution: true }}
-        draggable={true}
-        onNodeDrag={onNodeDrag}
-        onNodeDragStop={onNodeDragStop}
         fitView={true}
         fitViewOptions={{
           padding: 0.2,
@@ -573,29 +549,6 @@ function LocationMapContent({
       >
         <Background />
         <Controls showFitView={true} showZoom={true} showInteractive={false} />
-        <Panel
-          position="top-right"
-          className="bg-white/80 backdrop-blur-sm rounded-lg p-2 shadow-sm"
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleAllNodes}
-            className="flex items-center gap-2"
-          >
-            {expandedNodes.length === locations.length ? (
-              <>
-                <ChevronUp className="h-4 w-4" />
-                {t("collapse_all")}
-              </>
-            ) : (
-              <>
-                <ChevronDown className="h-4 w-4" />
-                {t("expand_all")}
-              </>
-            )}
-          </Button>
-        </Panel>
       </ReactFlow>
     </div>
   );

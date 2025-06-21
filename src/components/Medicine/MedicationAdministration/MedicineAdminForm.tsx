@@ -1,8 +1,6 @@
-"use client";
-
 import { format, formatDistanceToNow } from "date-fns";
-import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -56,6 +54,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   formId,
   isValid,
 }) => {
+  const { t } = useTranslation();
+
   const [isPastTime, setIsPastTime] = useState(
     administrationRequest.occurrence_period_start !==
       administrationRequest.occurrence_period_end || !!administrationRequest.id,
@@ -109,11 +109,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
       setEndTimeError("");
       isValid?.(!startError);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     administrationRequest.occurrence_period_start,
     administrationRequest.occurrence_period_end,
     administrationRequest.status,
-    isValid,
   ]);
 
   const handleDateChange = (newTime: string, isStartTime: boolean) => {
@@ -315,11 +315,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             }}
             className="flex gap-4"
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex gap-1">
               <RadioGroupItem value="yes" id={`yes-${formId}`} />
               <Label htmlFor={`yes-${formId}`}>{t("yes")}</Label>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex gap-1">
               <RadioGroupItem value="no" id={`no-${formId}`} />
               <Label htmlFor={`no-${formId}`}>{t("no")}</Label>
             </div>
@@ -341,7 +341,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 )}
                 disabled={!isPastTime || !!administrationRequest.id}
               >
-                <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-calender" className="mr-2 size-4" />
                 {administrationRequest.occurrence_period_start
                   ? format(
                       new Date(administrationRequest.occurrence_period_start),
@@ -373,7 +373,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           </Popover>
           <Input
             type="time"
-            className="w-[150px]"
+            className="w-full max-w-[7rem] sm:max-w-[9.5rem] text-sm sm:text-base py-0"
             value={formatTime(administrationRequest.occurrence_period_start)}
             onChange={(e) => handleTimeChange(e, true)}
             disabled={!isPastTime || !!administrationRequest.id}
@@ -403,7 +403,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   administrationRequest.status === "in_progress"
                 }
               >
-                <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-calender" className="mr-2 size-4" />
                 {administrationRequest.occurrence_period_end
                   ? format(
                       new Date(administrationRequest.occurrence_period_end),
@@ -435,7 +435,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           </Popover>
           <Input
             type="time"
-            className="w-[150px]"
+            className="w-full max-w-[7rem] sm:max-w-[9.5rem] text-sm sm:text-base py-0"
             value={formatTime(administrationRequest.occurrence_period_end)}
             onChange={(e) => handleTimeChange(e, false)}
             disabled={

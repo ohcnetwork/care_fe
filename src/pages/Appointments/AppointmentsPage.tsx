@@ -1,6 +1,5 @@
 import careConfig from "@careConfig";
 import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
-import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDays,
@@ -12,16 +11,20 @@ import {
   isYesterday,
   subDays,
 } from "date-fns";
+import dayjs from "dayjs";
 import { Edit3Icon } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { Link, navigate } from "raviger";
+import { useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import {
   Command,
   CommandEmpty,
@@ -31,7 +34,6 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -47,6 +49,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSidebar } from "@/components/ui/sidebar";
 import {
   Table,
   TableBody,
@@ -57,21 +60,28 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
+import useFilters, { FilterState } from "@/hooks/useFilters";
 
+import { getPermissions } from "@/common/Permissions";
+
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
-  formatDisplayName,
+  formatDateTime,
   formatName,
   formatPatientAge,
 } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
@@ -84,17 +94,24 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
-interface QueryParams {
-  practitioner: string | null;
-  slot: string | null;
-  date_from: string | null;
-  date_to: string | null;
-  search: string | null;
-}
-
 interface DateRangeDisplayProps {
   dateFrom: string | null;
   dateTo: string | null;
+}
+
+function AppointmentsEmptyState() {
+  const { t } = useTranslation();
+  return (
+    <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
+      <div className="rounded-full bg-primary/10 p-3 mb-4">
+        <CareIcon icon="l-calendar-slash" className="size-6 text-primary" />
+      </div>
+      <h3 className="text-lg font-semibold mb-1">{t("no_appointments")}</h3>
+      <p className="text-sm text-gray-500 mb-4">
+        {t("adjust_appointments_filters")}
+      </p>
+    </Card>
+  );
 }
 
 function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
@@ -239,18 +256,37 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   );
 }
 
-export default function AppointmentsPage(props: { facilityId?: string }) {
+export default function AppointmentsPage({
+  facilityId,
+}: {
+  facilityId: string;
+}) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-
-  const [qParams, setQParams] = useQueryParams<QueryParams>();
-
-  const facilityId = props.facilityId ?? authUser.home_facility!;
+  const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
+    limit: 15,
+  });
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
+  const { open: isSidebarOpen } = useSidebar();
+
+  const { hasPermission } = usePermissions();
+  const { goBack } = useAppHistory();
+
+  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
+
+  const { canViewAppointments } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
 
   const schedulableUsersQuery = useQuery({
-    queryKey: ["schedulable-users", facilityId],
+    queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
@@ -267,8 +303,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       return;
     }
 
-    const updates: Partial<QueryParams> = {};
-
     // Sets the practitioner filter to the current user if they are in the list of
     // schedulable users and no practitioner was selected.
     if (
@@ -277,7 +311,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         (r) => r.username === authUser.username,
       )
     ) {
-      updates.practitioner = authUser.username;
+      qParams.practitioner = authUser.username;
     }
 
     // Set default date range if no dates are present
@@ -287,25 +321,24 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
       if (defaultDays === 0) {
         // Today only
-        updates.date_from = dateQueryString(today);
-        updates.date_to = dateQueryString(today);
+        qParams.date_from = dateQueryString(today);
+        qParams.date_to = dateQueryString(today);
       } else {
         // Past or future days based on configuration
         const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
         const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
-        updates.date_from = dateQueryString(fromDate);
-        updates.date_to = dateQueryString(toDate);
+        qParams.date_from = dateQueryString(fromDate);
+        qParams.date_to = dateQueryString(toDate);
       }
     }
 
     // Only update if there are changes
-    if (Object.keys(updates).length > 0) {
-      setQParams({
+    if (Object.keys(qParams).length > 0) {
+      updateQuery({
         ...qParams,
-        ...updates,
       });
     }
-  }, [schedulableUsersQuery.isLoading, qParams]);
+  }, [schedulableUsersQuery.isLoading]);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
@@ -330,6 +363,14 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const slots = slotsQuery.data?.results?.filter((s) => s.allocated > 0);
   const slot = slots?.find((s) => s.id === qParams.slot);
 
+  useEffect(() => {
+    if (!canViewAppointments && !isFacilityLoading) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack("/");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canViewAppointments, isFacilityLoading]);
+
   if (schedulableUsersQuery.isLoading) {
     return <Loading />;
   }
@@ -344,11 +385,11 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         >
           <TabsList>
             <TabsTrigger value="board">
-              <CareIcon icon="l-kanban" className="mr-2" />
+              <CareIcon icon="l-kanban" />
               <span>{t("board")}</span>
             </TabsTrigger>
             <TabsTrigger value="list">
-              <CareIcon icon="l-list-ul" className="mr-2" />
+              <CareIcon icon="l-list-ul" />
               <span>{t("list")}</span>
             </TabsTrigger>
           </TabsList>
@@ -356,101 +397,22 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       }
     >
       <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
-        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start">
-          <div className="mt-1">
+        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start md:w-xs">
+          <div className="mt-1 w-full">
             <Label className="mb-2 text-black">
               {t("select_practitioner")}
             </Label>
-            <Popover>
-              <PopoverTrigger
-                asChild
-                disabled={schedulableUsersQuery.isLoading}
-              >
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className="min-w-60 justify-start"
-                >
-                  {practitioner ? (
-                    <div className="flex items-center gap-2">
-                      <Avatar
-                        imageUrl={practitioner.profile_picture_url}
-                        name={formatName(practitioner)}
-                        className="size-6 rounded-full"
-                      />
-                      <span>{formatName(practitioner)}</span>
-                    </div>
-                  ) : (
-                    <span>{t("show_all")}</span>
-                  )}
-                  <CaretDownIcon className="ml-auto" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0" align="start">
-                <Command>
-                  <CommandInput
-                    placeholder={t("search")}
-                    className="outline-none border-none ring-0 shadow-none"
-                  />
-                  <CommandList>
-                    <CommandEmpty>
-                      {schedulableUsersQuery.isFetching
-                        ? t("searching")
-                        : t("no_results")}
-                    </CommandEmpty>
-                    <CommandGroup>
-                      <CommandItem
-                        value="all"
-                        onSelect={() =>
-                          setQParams({
-                            ...qParams,
-                            practitioner: null,
-                            slot: null,
-                          })
-                        }
-                        className="cursor-pointer w-full"
-                      >
-                        <PopoverClose className="w-full flex items-start">
-                          <span>{t("show_all")}</span>
-                          {!qParams.practitioner && (
-                            <CheckIcon className="ml-auto" />
-                          )}
-                        </PopoverClose>
-                      </CommandItem>
-                      {schedulableUsersQuery.data?.users.map((user) => (
-                        <CommandItem
-                          key={user.id}
-                          value={formatName(user)}
-                          onSelect={() =>
-                            setQParams({
-                              ...qParams,
-                              practitioner: user.username,
-                              slot: null,
-                            })
-                          }
-                          className="cursor-pointer w-full"
-                        >
-                          <PopoverClose className="flex items-center gap-2 w-full">
-                            <Avatar
-                              imageUrl={user.profile_picture_url}
-                              name={formatName(user)}
-                              className="size-6 rounded-full"
-                            />
-                            <span>{formatName(user)}</span>
-                            <span className="text-xs text-gray-500 font-medium">
-                              {user.user_type}
-                            </span>
-                          </PopoverClose>
-                          {qParams.practitioner === user.username && (
-                            <CheckIcon className="ml-auto" />
-                          )}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <PractitionerSelector
+              facilityId={facilityId}
+              selected={practitioner ?? null}
+              onSelect={(user) =>
+                updateQuery({
+                  practitioner: user?.username ?? null,
+                  slot: null,
+                })
+              }
+              clearSelection={t("show_all")}
+            />
           </div>
 
           <div>
@@ -475,8 +437,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(subDays(today, 7)),
                             date_to: dateQueryString(today),
                             slot: null,
@@ -491,8 +452,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(subDays(today, 1)),
                             date_to: dateQueryString(subDays(today, 1)),
                             slot: null,
@@ -507,8 +467,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(today),
                             slot: null,
@@ -523,8 +482,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(addDays(today, 7)),
                             slot: null,
@@ -539,8 +497,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(addDays(today, 30)),
                             slot: null,
@@ -551,26 +508,63 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                       </Button>
                     </div>
 
-                    <DateRangePicker
-                      date={{
-                        from: qParams.date_from
-                          ? new Date(qParams.date_from)
-                          : undefined,
-                        to: qParams.date_to
-                          ? new Date(qParams.date_to)
-                          : undefined,
-                      }}
-                      onChange={(date) =>
-                        setQParams({
-                          ...qParams,
-                          date_from: date?.from
-                            ? dateQueryString(date.from)
-                            : null,
-                          date_to: date?.to ? dateQueryString(date?.to) : null,
-                          slot: null,
-                        })
-                      }
-                    />
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-sm font-medium">
+                        {t("start_date")}
+                      </Label>
+                      <CombinedDatePicker
+                        value={
+                          qParams.date_from
+                            ? new Date(qParams.date_from)
+                            : undefined
+                        }
+                        onChange={(date) => {
+                          if (qParams.date_to && date) {
+                            if (
+                              dayjs(date).isAfter(dayjs(qParams.date_to), "day")
+                            ) {
+                              updateQuery({
+                                date_from: date ? dateQueryString(date) : null,
+                                date_to: null,
+                                slot: null,
+                              });
+                              return;
+                            }
+                          }
+                          updateQuery({
+                            date_from: date ? dateQueryString(date) : null,
+                            slot: null,
+                          });
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-sm font-medium">
+                        {t("end_date")}
+                      </Label>
+                      <CombinedDatePicker
+                        value={
+                          qParams.date_to
+                            ? new Date(qParams.date_to)
+                            : undefined
+                        }
+                        onChange={(date) => {
+                          updateQuery({
+                            date_to: date ? dateQueryString(date) : null,
+                            slot: null,
+                          });
+                        }}
+                        blockDate={(date) =>
+                          qParams.date_from
+                            ? dayjs(date).isBefore(
+                                dayjs(qParams.date_from),
+                                "day",
+                              )
+                            : false
+                        }
+                      />
+                    </div>
                   </div>
                 </PopoverContent>
               </Popover>
@@ -582,9 +576,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 selectedSlot={slot}
                 onSelect={(slot) => {
                   if (slot === "all") {
-                    setQParams({ ...qParams, slot: null });
+                    updateQuery({ slot: null });
                   } else {
-                    setQParams({ ...qParams, slot });
+                    updateQuery({ slot });
                   }
                 }}
               />
@@ -594,16 +588,23 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
         <div className="flex gap-4 items-center">
           <Input
-            className="w-[300px]"
+            className="md:w-xs w-full"
             placeholder={t("search")}
             value={qParams.search ?? ""}
-            onChange={(e) => setQParams({ ...qParams, search: e.target.value })}
+            onChange={(e) => updateQuery({ search: e.target.value })}
           />
         </div>
       </div>
 
       {activeTab === "board" ? (
-        <ScrollArea>
+        <ScrollArea
+          className={cn(
+            "transition-all duration-200",
+            isSidebarOpen
+              ? "ease-out md:w-[calc(100vw-21.5rem)]"
+              : "ease-in md:w-[calc(100vw-8rem)]",
+          )}
+        >
           <div className="flex w-max space-x-4">
             {(
               [
@@ -623,6 +624,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
                 search={qParams.search?.toLowerCase()}
+                canViewAppointments={canViewAppointments}
               />
             ))}
           </div>
@@ -631,11 +633,17 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       ) : (
         <AppointmentRow
           facilityId={facilityId}
+          updateQuery={updateQuery}
           practitioner={practitioner?.id ?? null}
           slot={qParams.slot}
+          page={qParams.page}
           date_from={qParams.date_from}
           date_to={qParams.date_to}
           search={qParams.search?.toLowerCase()}
+          canViewAppointments={canViewAppointments}
+          resultsPerPage={resultsPerPage}
+          status={qParams.status}
+          Pagination={Pagination}
         />
       )}
     </Page>
@@ -650,6 +658,7 @@ function AppointmentColumn(props: {
   date_from: string | null;
   date_to: string | null;
   search?: string;
+  canViewAppointments: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -674,7 +683,7 @@ function AppointmentColumn(props: {
         date_before: props.date_to,
       },
     }),
-    enabled: !!props.date_from && !!props.date_to,
+    enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
   });
 
   let appointments = data?.results ?? [];
@@ -744,7 +753,7 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
   const { t } = useTranslation();
 
   return (
-    <div className="bg-white p-3 rounded shadow group hover:ring-1 hover:ring-primary-700 hover:ring-offset-1 hover:ring-offset-white hover:shadow-md transition-all duration-100 ease-in-out">
+    <div className="bg-white p-3 rounded shadow-sm group hover:ring-1 hover:ring-primary-700 hover:ring-offset-1 hover:ring-offset-white hover:shadow-md transition-all duration-100 ease-in-out">
       <div className="flex justify-between items-start mb-2">
         <div>
           <h3 className="font-semibold text-base group-hover:text-primary-700 transition-all duration-200 ease-in-out">
@@ -753,6 +762,12 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
           <p className="text-sm text-gray-700">
             {formatPatientAge(patient as any, true)},{" "}
             {t(`GENDER__${patient.gender}`)}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            {formatDateTime(
+              appointment.token_slot.start_datetime,
+              "ddd, DD MMM YYYY, HH:mm",
+            )}
           </p>
         </div>
 
@@ -767,22 +782,35 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
     </div>
   );
 }
+
 function AppointmentRow(props: {
   facilityId: string;
+  page: number | null;
   practitioner: string | null;
+  Pagination: ({
+    totalCount,
+    noMargin,
+  }: {
+    totalCount: number;
+    noMargin?: boolean;
+  }) => React.ReactNode;
+  updateQuery: (filter: FilterState) => void;
+  resultsPerPage: number;
   slot: string | null;
+  status: string | null;
   date_from: string | null;
   date_to: string | null;
   search?: string;
+  canViewAppointments: boolean;
 }) {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<Appointment["status"]>("booked");
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: [
       "appointments",
       props.facilityId,
-      status,
+      props.status,
+      props.page,
       props.practitioner,
       props.slot,
       props.date_from,
@@ -791,15 +819,16 @@ function AppointmentRow(props: {
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: props.facilityId },
       queryParams: {
-        status: status,
-        limit: 100,
+        status: props.status ?? "booked",
         slot: props.slot,
         user: props.practitioner ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
+        limit: props.resultsPerPage,
+        offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
       },
     }),
-    enabled: !!props.date_from && !!props.date_to,
+    enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
   });
 
   let appointments = data?.results ?? [];
@@ -810,36 +839,68 @@ function AppointmentRow(props: {
     );
   }
   return (
-    <>
+    <div className="overflow-x-auto">
       <div className={cn(!data && "animate-pulse")}>
-        <Tabs
-          value={status}
-          className="w-full overflow-scroll"
-          onValueChange={(value) => setStatus(value as Appointment["status"])}
-        >
-          <TabsList>
-            <TabsTrigger value="booked">{t("booked")}</TabsTrigger>
-            <TabsTrigger value="checked_in">{t("checked_in")}</TabsTrigger>
-            <TabsTrigger value="in_consultation">
-              {t("in_consultation")}
-            </TabsTrigger>
-            <TabsTrigger value="fulfilled">{t("fulfilled")}</TabsTrigger>
-            <TabsTrigger value="noshow">{t("noshow")}</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        {appointments.length === 0 ? (
-          <div className="flex mt-2 bg-white justify-center items-center h-[calc(100vh-22rem)]">
-            <p className="text-gray-500">{t("no_appointments")}</p>
-          </div>
+        <div className="hidden md:flex">
+          <Tabs
+            value={props.status ?? "booked"}
+            className="overflow-x-auto"
+            onValueChange={(value) => props.updateQuery({ status: value })}
+          >
+            <TabsList>
+              <TabsTrigger value="booked">{t("booked")}</TabsTrigger>
+              <TabsTrigger value="checked_in">{t("checked_in")}</TabsTrigger>
+              <TabsTrigger value="in_consultation">
+                {t("in_consultation")}
+              </TabsTrigger>
+              <TabsTrigger value="fulfilled">{t("fulfilled")}</TabsTrigger>
+              <TabsTrigger value="noshow">{t("noshow")}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        {/* Status Filter - Mobile */}
+        <div className="md:hidden">
+          <Select
+            value={props.status || "booked"}
+            onValueChange={(value) => props.updateQuery({ status: value })}
+          >
+            <SelectTrigger className="h-8 w-40">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="booked">
+                <div className="flex items-center">Booked</div>
+              </SelectItem>
+              <SelectItem value="checked_in">
+                <div className="flex items-center">Checked In</div>
+              </SelectItem>
+              <SelectItem value="in_consultation">
+                <div className="flex items-center">In Consultation</div>
+              </SelectItem>
+              <SelectItem value="fulfilled">
+                <div className="flex items-center">Fulfilled</div>
+              </SelectItem>
+              <SelectItem value="noshow">
+                <div className="flex items-center">No Show</div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {isLoading ? (
+          <TableSkeleton count={5} />
+        ) : appointments.length === 0 ? (
+          <AppointmentsEmptyState />
         ) : (
-          <Table className="p-2 border-separate border-spacing-y-3 min-w-[900px]">
+          <Table className="p-2 border-separate border-gray-200 border-spacing-y-3">
             <TableHeader>
               <TableRow>
                 <TableHead className="pl-8 font-semibold text-black text-xs">
                   {t("patient")}
                 </TableHead>
                 <TableHead className="font-semibold text-black text-xs">
-                  {t("consulting_doctor")}
+                  {t("practitioner")}
                 </TableHead>
                 <TableHead className="font-semibold text-black text-xs">
                   {t("current_status")}
@@ -853,7 +914,7 @@ function AppointmentRow(props: {
               {appointments.map((appointment) => (
                 <TableRow
                   key={appointment.id}
-                  className="shadow rounded-lg cursor-pointer group"
+                  className="shadow-sm rounded-lg cursor-pointer group"
                   onClick={() =>
                     navigate(
                       `/facility/${props.facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
@@ -869,8 +930,9 @@ function AppointmentRow(props: {
             </TableBody>
           </Table>
         )}
+        {props.Pagination({ totalCount: data?.count ?? 0 })}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -903,7 +965,7 @@ function AppointmentRowItem({
       </TableCell>
       {/* TODO: Replace with relevant information */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        {formatDisplayName(appointment.user)}
+        {formatName(appointment.user)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         <AppointmentStatusDropdown
@@ -1070,7 +1132,7 @@ export const SlotFilter = ({
         <Command>
           <CommandInput
             placeholder={t("search")}
-            className="outline-none border-none ring-0 shadow-none"
+            className="outline-hidden border-none ring-0 shadow-none"
           />
           <CommandList>
             <CommandEmpty>{t("no_slots_found")}</CommandEmpty>

@@ -24,6 +24,13 @@
     },
     "typeRoots": ["./node_modules/@types", "./src/remote-modules.d.ts"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "care.config.ts","scripts/**/*.ts","cypress.config.ts","plugins/**/*.ts"],
-  "exclude": ["src/**/*.gen.tsx"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "care.config.ts",
+    "scripts/**/*.ts",
+    "cypress.config.ts",
+    "plugins/**/*.ts"
+  ]
 }

@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -23,11 +23,13 @@ interface GenericTableProps {
 }
 
 export default function PrintTable({ headers, rows }: GenericTableProps) {
+  const { t } = useTranslation();
+
   return (
-    <div className="overflow-hidden rounded-lg border border-gray">
+    <div className="overflow-hidden rounded-lg border border-gray-200">
       <Table className="w-full">
         <TableHeader>
-          <TableRow className="bg-transparent hover:bg-transparent divide-x divide-gray border-b-gray">
+          <TableRow className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">
             {headers.map(({ key, width }, index) => (
               <TableHead
                 className={cn(
@@ -47,7 +49,7 @@ export default function PrintTable({ headers, rows }: GenericTableProps) {
             rows.map((row, index) => (
               <TableRow
                 key={index}
-                className="bg-transparent hover:bg-transparent divide-x divide-gray"
+                className="bg-transparent hover:bg-transparent divide-x divide-gray-200"
               >
                 {headers.map(({ key }) => (
                   <TableCell

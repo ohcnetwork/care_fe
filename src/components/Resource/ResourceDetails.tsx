@@ -19,9 +19,9 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { PatientModel } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient";
 
-function PatientCard({ patient }: { patient: PatientModel }) {
+function PatientCard({ patient }: { patient: Patient }) {
   const { t } = useTranslation();
   return (
     <Card>
@@ -134,7 +134,7 @@ export default function ResourceDetails({
               }
               className="w-full sm:w-auto"
             >
-              <CareIcon icon="l-file-alt" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-file-alt" className="mr-2 size-4" />
               {t("request_letter")}
             </Button>
             <Button
@@ -143,8 +143,9 @@ export default function ResourceDetails({
               onClick={() =>
                 navigate(`/facility/${facilityId}/resource/${id}/update`)
               }
+              data-cy="update-status-button"
             >
-              <CareIcon icon="l-pen" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-pen" className="mr-2 size-4" />
               {t("update_status")}
             </Button>
           </div>

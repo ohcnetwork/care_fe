@@ -18,6 +18,7 @@ const LIMIT = 20;
 
 interface Props {
   encounter: Encounter;
+  canAccess: boolean;
 }
 
 interface GroupedObservations {
@@ -99,6 +100,7 @@ export default function ObservationsList(props: Props) {
         const currentOffset = allPages.length * LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
+      enabled: props.canAccess,
     });
 
   useEffect(() => {

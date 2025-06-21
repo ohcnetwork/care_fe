@@ -2,7 +2,9 @@ import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterH
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
 
-import { Patient } from "@/types/emr/newPatient";
+import { HasPermissionFn, getPermissions } from "@/common/Permissions";
+
+import { Patient } from "@/types/emr/patient";
 
 import { Appointments } from "./Appointments";
 import { PatientFilesTab } from "./PatientFiles";
@@ -16,7 +18,17 @@ export interface PatientProps {
   patientData: Patient;
 }
 
-export const patientTabs = [
+export interface Tab {
+  route: string;
+  component: (props: PatientProps) => React.ReactNode;
+  visible?: boolean;
+}
+
+interface Tabs {
+  getPatientTabs: Tab[];
+}
+
+export const BASE_PATIENT_TABS: Tab[] = [
   {
     route: "demography",
     component: Demography,
@@ -50,3 +62,46 @@ export const patientTabs = [
     component: PatientFilesTab,
   },
 ];
+
+export function getTabs(
+  permissions: string[],
+  hasPermission: HasPermissionFn,
+): Tabs {
+  const {
+    canViewAppointments,
+    canViewEncounter,
+    canViewClinicalData,
+    canViewPatientQuestionnaireResponses,
+    canListEncounters,
+    canViewPatients,
+  } = getPermissions(hasPermission, permissions);
+
+  const getTabVisibility = (tab: Tab) => {
+    switch (tab.route) {
+      case "appointments":
+        return { ...tab, visible: canViewAppointments };
+      case "encounters":
+        return { ...tab, visible: canListEncounters || canViewPatients };
+      case "health-profile":
+        return { ...tab, visible: canViewClinicalData };
+      case "files":
+        return { ...tab, visible: canViewEncounter || canViewClinicalData };
+      case "updates":
+        return {
+          ...tab,
+          visible: canViewPatientQuestionnaireResponses,
+        };
+      default:
+        return tab;
+    }
+  };
+
+  return {
+    getPatientTabs: BASE_PATIENT_TABS.map((tab) =>
+      getTabVisibility(tab),
+    ).filter((tab) => tab.visible ?? true),
+  };
+}
+
+// For router types
+export const patientTabs = BASE_PATIENT_TABS;

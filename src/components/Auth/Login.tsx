@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
-import { Link, useQueryParams } from "raviger";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
@@ -20,6 +21,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { PasswordInput } from "@/components/ui/input-password";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
@@ -27,7 +33,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
-import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
@@ -38,7 +43,9 @@ import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
-import { TokenData } from "@/types/auth/otpToken";
+import { TokenData } from "@/types/auth/otp";
+
+import { AuthHero } from "./AuthHero";
 
 interface OtpLoginData {
   phone_number: string;
@@ -77,7 +84,6 @@ const Login = (props: LoginProps) => {
     customLogoAlt,
     resendOtpTimeout,
   } = careConfig;
-  const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
   const initForm: any = {
     username: "",
     password: "",
@@ -218,12 +224,12 @@ const Login = (props: LoginProps) => {
       ) {
         if (!form[key].match(/\w/)) {
           hasError = true;
-          err[key] = t("field_required");
+          err[key] = "field_required";
         }
       }
       if (!form[key]) {
         hasError = true;
-        err[key] = t("field_required");
+        err[key] = "field_required";
       }
     });
     if (hasError) {
@@ -256,12 +262,12 @@ const Login = (props: LoginProps) => {
     if (typeof form.username === "string") {
       if (!form.username.match(/\w/)) {
         hasError = true;
-        err.username = t("field_required");
+        err.username = "field_required";
       }
     }
     if (!form.username) {
       hasError = true;
-      err.username = t("field_required");
+      err.username = "field_required";
     }
 
     if (hasError) {
@@ -270,7 +276,6 @@ const Login = (props: LoginProps) => {
     }
     return form;
   };
-
   const handleForgetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const valid = validateForgetData();
@@ -315,113 +320,8 @@ const Login = (props: LoginProps) => {
   );
 
   return (
-    <div className="relative flex md:h-screen flex-col-reverse md:flex-row">
-      {!forgotPassword && <BrowserWarning />}
-
-      {/* Hero Section */}
-      <div className="login-hero relative flex flex-auto flex-col justify-between p-6 md:h-full md:w-[calc(50%+130px)] md:flex-none md:p-0 md:px-16 md:pr-[calc(4rem+130px)]">
-        <div></div>
-        <div className="mt-4 flex flex-col items-start rounded-lg py-4 md:mt-12">
-          <div className="mb-4 hidden items-center gap-6 md:flex">
-            {logos.map((logo, index) =>
-              logo && logo.light ? (
-                <div key={index} className="flex items-center">
-                  <img
-                    src={logo.light}
-                    className="h-16 rounded-lg py-3"
-                    alt="state logo"
-                  />
-                </div>
-              ) : null,
-            )}
-            {logos.length === 0 && (
-              <a
-                href={urls.ohcn}
-                className="inline-block"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src={customLogoAlt?.light ?? "/images/ohc_logo_light.svg"}
-                  className="h-8"
-                  alt="Open Healthcare Network logo"
-                />
-              </a>
-            )}
-          </div>
-          <div className="max-w-lg">
-            <h1 className="text-4xl font-black leading-tight tracking-wider text-white lg:text-5xl">
-              {t("care")}
-            </h1>
-            {customDescriptionHtml ? (
-              <div className="py-6">
-                <div
-                  className="max-w-xl text-secondary-400"
-                  dangerouslySetInnerHTML={{
-                    __html: __CUSTOM_DESCRIPTION_HTML__,
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="max-w-xl py-6 pl-1 text-base font-semibold text-secondary-400 md:text-lg lg:text-xl">
-                {t("goal")}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="mb-6 flex items-center">
-          <div className="max-w-lg text-xs md:text-sm">
-            <div className="mb-2 ml-1 flex items-center gap-4">
-              <a
-                href="https://www.digitalpublicgoods.net/r/care"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <img
-                  src="https://cdn.ohc.network/dpg-logo.svg"
-                  className="h-12"
-                  alt="Logo of Digital Public Goods Alliance"
-                />
-              </a>
-              <div className="ml-2 h-8 w-px rounded-full bg-white/50" />
-              <a href={urls.ohcn} rel="noopener noreferrer" target="_blank">
-                <img
-                  src="/images/ohc_logo_light.svg"
-                  className="inline-block h-10"
-                  alt="Open Healthcare Network logo"
-                />
-              </a>
-            </div>
-            <a
-              href={urls.ohcn}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-secondary-500"
-            >
-              {t("footer_body")}
-            </a>
-            <div className="mx-auto mt-2">
-              <a
-                href={urls.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary-400 hover:text-primary-500"
-              >
-                {t("contribute_github")}
-              </a>
-              <span className="mx-2 text-primary-400">|</span>
-              <Link
-                href="/licenses"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary-400 hover:text-primary-500"
-              >
-                {t("third_party_software_licenses")}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="relative flex min-h-screen flex-col md:h-screen md:flex-row">
+      <AuthHero />
 
       {/* Login Forms Section */}
       <div className="login-hero-form my-4 w-full md:mt-0 md:h-full md:w-1/2">
@@ -477,9 +377,13 @@ const Login = (props: LoginProps) => {
                     }
                   }}
                 >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="staff">Staff Login</TabsTrigger>
-                    <TabsTrigger value="patient">Patient Login</TabsTrigger>
+                  <TabsList className="flex w-full">
+                    <TabsTrigger className="flex-1" value="staff">
+                      {t("staff_login")}
+                    </TabsTrigger>
+                    <TabsTrigger className="flex-1" value="patient">
+                      {t("patient_login")}
+                    </TabsTrigger>
                   </TabsList>
 
                   {/* Staff Login */}
@@ -493,6 +397,7 @@ const Login = (props: LoginProps) => {
                             name="username"
                             type="text"
                             data-cy="username"
+                            autoComplete="username"
                             value={form.username}
                             onChange={handleChange}
                             className={cn(
@@ -502,7 +407,7 @@ const Login = (props: LoginProps) => {
                           />
                           {errors.username && (
                             <p className="text-sm text-red-500">
-                              {errors.username}
+                              {t(errors.username)}
                             </p>
                           )}
                         </div>
@@ -512,6 +417,7 @@ const Login = (props: LoginProps) => {
                             id="password"
                             name="password"
                             data-cy="password"
+                            autoComplete="current-password"
                             value={form.password}
                             onChange={handleChange}
                             className={cn(
@@ -521,7 +427,7 @@ const Login = (props: LoginProps) => {
                           />
                           {errors.password && (
                             <p className="text-sm text-red-500">
-                              {errors.password}
+                              {t(errors.password)}
                             </p>
                           )}
                         </div>
@@ -596,7 +502,7 @@ const Login = (props: LoginProps) => {
                             />
                             {errors.username && (
                               <p className="text-sm text-red-500">
-                                {errors.username}
+                                {t(errors.username)}
                               </p>
                             )}
                           </div>
@@ -628,7 +534,7 @@ const Login = (props: LoginProps) => {
                           name="phone"
                           value={phone}
                           onChange={(value) => {
-                            setPhone(value);
+                            setPhone(value ?? "");
                             setOtpError("");
                             setOtpValidationError("");
                           }}
@@ -642,38 +548,41 @@ const Login = (props: LoginProps) => {
 
                       {isOtpSent && (
                         <div className="space-y-2">
-                          <Label htmlFor="otp">{t("enter_otp")}</Label>
-                          <Input
-                            id="otp"
-                            name="otp"
-                            type="text"
-                            value={otp}
-                            autoComplete="one-time-code"
-                            onChange={(e) => {
-                              setOtp(e.target.value);
-                              setOtpValidationError("");
-                            }}
-                            maxLength={5}
-                            placeholder="Enter 5-digit OTP"
-                            autoFocus
-                          />
+                          <Label htmlFor="otp" className="mb-4">
+                            {t("enter_otp")}
+                          </Label>
+                          <div className="flex justify-center">
+                            <InputOTP
+                              value={otp}
+                              maxLength={5}
+                              pattern={REGEXP_ONLY_DIGITS}
+                              autoComplete="one-time-code"
+                              autoFocus
+                              onChange={(value) => {
+                                setOtp(value);
+                                setOtpValidationError("");
+                              }}
+                            >
+                              <InputOTPGroup>
+                                {[...Array(5)].map((_, index) => (
+                                  <InputOTPSlot
+                                    key={index}
+                                    index={index}
+                                    className={cn(
+                                      "size-10",
+                                      otpValidationError &&
+                                        "border-red-500 focus-visible:ring-red-500",
+                                    )}
+                                  />
+                                ))}
+                              </InputOTPGroup>
+                            </InputOTP>
+                          </div>
                           {otpValidationError && (
-                            <p className="text-sm text-red-500">
+                            <p className="text-sm text-red-500 text-center">
                               {otpValidationError}
                             </p>
                           )}
-                          <Button
-                            variant="link"
-                            type="button"
-                            onClick={() => {
-                              setIsOtpSent(false);
-                              setOtpError("");
-                              setOtpValidationError("");
-                            }}
-                            className="px-0"
-                          >
-                            {t("change_phone_number")}
-                          </Button>
                         </div>
                       )}
 
@@ -695,13 +604,13 @@ const Login = (props: LoginProps) => {
                           t("send_otp")
                         )}
                       </Button>
-                      {isOtpSent &&
-                        (resendOtpCountdown <= 0 ? (
-                          <div className="flex justify-center">
+                      {isOtpSent && (
+                        <div className="flex flex-col items-center gap-2 text-center">
+                          {resendOtpCountdown <= 0 ? (
                             <Button
                               variant="link"
                               type="button"
-                              className=" text-center cursor-pointer hover:underline inline-block "
+                              className="h-auto p-0"
                               onClick={() => {
                                 sendOtp({ phone_number: phone });
                                 setResendOtpCountdown(resendOtpTimeout);
@@ -709,14 +618,29 @@ const Login = (props: LoginProps) => {
                             >
                               {t("resend_otp")}
                             </Button>
+                          ) : (
+                            <p className="text-sm text-gray-500">
+                              {t("resend_otp_timer", {
+                                time: resendOtpCountdown,
+                              })}
+                            </p>
+                          )}
+                          <div className="flex items-center text-sm">
+                            <Button
+                              variant="link"
+                              type="button"
+                              className="h-auto p-0 text-primary-600"
+                              onClick={() => {
+                                setIsOtpSent(false);
+                                setOtpError("");
+                                setOtpValidationError("");
+                              }}
+                            >
+                              {t("change_phone_number")}
+                            </Button>
                           </div>
-                        ) : (
-                          <p className=" text-gray-500 text-center mt-5 ">
-                            {t("resend_otp_timer", {
-                              time: resendOtpCountdown,
-                            })}
-                          </p>
-                        ))}
+                        </div>
+                      )}
                     </form>
                   </TabsContent>
                 </Tabs>

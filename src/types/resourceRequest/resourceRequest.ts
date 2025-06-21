@@ -1,12 +1,12 @@
 import { FacilityModel } from "@/components/Facility/models";
 import { UserBareMinimum } from "@/components/Users/models";
 
-import { PatientModel } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient";
 import { UserBase } from "@/types/user/user";
 
 export interface ResourceRequest {
   approving_facility: FacilityModel | null;
-  assigned_facility: FacilityModel | null;
+  assigned_facility: FacilityModel | undefined;
   category: string;
   emergency: boolean;
   id: string;
@@ -23,7 +23,7 @@ export interface ResourceRequest {
   updated_by: UserBase;
   created_date: string;
   modified_date: string;
-  related_patient: PatientModel | null;
+  related_patient: Patient | null;
 }
 
 export interface CreateResourceRequest {

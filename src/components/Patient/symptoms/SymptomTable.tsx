@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar } from "@/components/Common/Avatar";
+import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 
 import {
   SYMPTOM_CLINICAL_STATUS_STYLES,
@@ -30,6 +31,8 @@ interface SymptomTableProps {
 }
 
 export function SymptomTable({ symptoms }: SymptomTableProps) {
+  const { t } = useTranslation();
+
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>
@@ -37,22 +40,22 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
           <TableHead className="first:rounded-l-md h-auto  py-1 px-2  text-gray-600">
             {t("symptom")}
           </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600">
+          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
             {t("severity")}
           </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600">
+          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
             {t("status")}
           </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600">
+          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
             {t("verification")}
           </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600">
+          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
             {t("onset")}
           </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600">
+          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
             {t("notes")}
           </TableHead>
-          <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
+          <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600 text-center">
             {t("logged_by")}
           </TableHead>
         </TableRow>
@@ -67,7 +70,7 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
                 : ""
             }`}
           >
-            <TableCell className="font-medium first:rounded-l-md">
+            <TableCell className="font-medium first:rounded-l-md md:whitespace-normal">
               {symptom.code.display}
             </TableCell>
             <TableCell>
@@ -106,12 +109,14 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
                 {t(symptom.verification_status)}
               </Badge>
             </TableCell>
-            <TableCell className="whitespace-nowrap">
-              {symptom.onset?.onset_datetime
-                ? new Date(symptom.onset.onset_datetime).toLocaleDateString()
-                : "-"}
+            <TableCell className="whitespace-nowrap text-center">
+              {symptom.onset?.onset_datetime ? (
+                <RelativeDateTooltip date={symptom.onset.onset_datetime} />
+              ) : (
+                "-"
+              )}
             </TableCell>
-            <TableCell className="max-w-[200px]">
+            <TableCell className="max-w-[200px] text-center">
               {symptom.note ? (
                 <div className="flex items-center gap-2">
                   <Popover>
@@ -139,7 +144,7 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
               <div className="flex items-center gap-2">
                 <Avatar
                   name={symptom.created_by.username}
-                  className="w-4 h-4"
+                  className="size-4"
                   imageUrl={symptom.created_by.profile_picture_url}
                 />
 

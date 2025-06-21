@@ -1,55 +1,75 @@
 export class FacilityCreation {
   // Navigation
-  navigateToOrganization(orgName: string) {
-    cy.verifyAndClickElement('[data-cy="organization-list"]', orgName);
+  navigateToGovernance(governanceName: string) {
+    cy.verifyAndClickElement('[data-cy="dashboard-sections"]', "Governance");
+    cy.verifyAndClickElement(
+      '[data-cy="governance-panel-list"]',
+      governanceName,
+    );
+    return this;
   }
 
   navigateToFacilitiesList() {
     cy.verifyAndClickElement('[data-cy="org-nav-facilities"]', "Facilities");
+    return this;
   }
 
-  selectFacility(facilityName: string) {
-    cy.verifyAndClickElement("[data-cy='facility-list']", facilityName);
+  selectFirstRandomFacility() {
+    cy.verifyAndClickElement(
+      "[data-cy='facilities-panel-list']",
+      "View facility details",
+    );
+    cy.get("[data-sidebar='rail']").click();
+    cy.wait(1000);
     return this;
   }
 
   clickAddFacility() {
     cy.get('[data-cy="add-facility-button"]').should("be.visible").click();
+    return this;
   }
 
   // Individual field methods
   enterFacilityName(name: string) {
     cy.typeIntoField('[data-cy="facility-name"]', name);
+    return this;
   }
 
   selectFacilityType(facilityType: string) {
     cy.clickAndSelectOption('[data-cy="facility-type"]', facilityType);
+    return this;
   }
 
   enterDescription(description: string) {
     cy.typeIntoField('[data-cy="facility-description"]', description);
+    return this;
   }
 
   enterPhoneNumber(phone: string) {
     cy.typeIntoField('[data-cy="facility-phone"]', phone, {
       skipVerification: true,
     });
+    return this;
   }
 
   enterPincode(pincode: string) {
     cy.typeIntoField('[data-cy="facility-pincode"]', pincode);
+    return this;
   }
 
   enterAddress(address: string) {
     cy.typeIntoField('[data-cy="facility-address"]', address);
+    return this;
   }
 
   enterLatitude(latitude: string) {
     cy.typeIntoField('[data-cy="facility-latitude"]', latitude);
+    return this;
   }
 
   enterLongitude(longitude: string) {
     cy.typeIntoField('[data-cy="facility-longitude"]', longitude);
+    return this;
   }
 
   // Combined methods using individual functions
@@ -57,34 +77,45 @@ export class FacilityCreation {
     this.enterFacilityName(name);
     this.selectFacilityType(facilityType);
     this.enterDescription(description);
+    return this;
   }
 
   selectFeatures(features: string[]) {
     cy.clickAndMultiSelectOption("#facility-features", features);
+    return this;
   }
 
   fillContactDetails(phone: string, pincode: string, address: string) {
     this.enterPhoneNumber(phone);
     this.enterPincode(pincode);
     this.enterAddress(address);
+    return this;
   }
 
-  fillLocationDetails(latitude: string, longitude: string) {
-    this.enterLatitude(latitude);
-    this.enterLongitude(longitude);
-  }
-
-  makePublicFacility() {
-    cy.get('[data-cy="make-facility-public"]').click();
+  fillLocationDetails(location: string) {
+    cy.typeAndSelectOption('[data-cy="location-search"]', location);
+    return this;
   }
 
   submitFacilityCreationForm() {
     cy.clickSubmitButton("Create Facility");
+    return this;
+  }
+
+  interceptFacilityCreation() {
+    cy.intercept("POST", "**/api/v1/facility/").as("facilityCreation");
+    return this;
+  }
+
+  verifyFacilityCreation() {
+    cy.wait("@facilityCreation").its("response.statusCode").should("eq", 200);
+    return this;
   }
 
   // Verification Methods
   verifySuccessMessage() {
     cy.verifyNotification("Facility created successfully");
+    return this;
   }
 
   verifyValidationErrors() {
@@ -98,6 +129,7 @@ export class FacilityCreation {
       },
       { label: "Pincode", message: "Invalid Pincode" },
     ]);
+    return this;
   }
 
   searchFacility(facilityName: string) {
@@ -114,38 +146,64 @@ export class FacilityCreation {
         cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
       }
     });
+    return this;
   }
 
   verifyFacilityNameInCard(facilityName: string) {
     cy.get('[data-cy="facility-cards"]').should("contain", facilityName);
+    return this;
   }
 
   waitForFacilityCardsToLoad(timeout = 10000) {
     cy.get('[data-cy="facility-cards"]', { timeout })
       .should("be.visible")
       .should("not.be.empty");
+    return this;
   }
 
-  fillLocationHierarchy(location: {
-    state: string;
-    district: string;
-    localBody: string;
-    ward: string;
-  }) {
-    cy.typeAndSelectOption('[data-cy="select-state"]', location.state, false);
-    cy.typeAndSelectOption(
-      '[data-cy="select-district"]',
-      location.district,
-      false,
+  fillLocationHierarchy(
+    location: Partial<{
+      state: string;
+      district: string;
+      localBody: string;
+      ward: string;
+    }>,
+  ) {
+    if (location.state) {
+      cy.typeAndSelectOption('[data-cy="select-state"]', location.state, false);
+    }
+    if (location.district) {
+      cy.typeAndSelectOption(
+        '[data-cy="select-district"]',
+        location.district,
+        false,
+      );
+    }
+    if (location.localBody) {
+      cy.typeAndSelectOption(
+        '[data-cy="select-local_body"]',
+        location.localBody,
+        false,
+      );
+    }
+    if (location.ward) {
+      cy.typeAndSelectOption('[data-cy="select-ward"]', location.ward, false);
+    }
+    return this;
+  }
+
+  verifyFacilityDetails(
+    facilityName: string,
+    facilityType: string,
+    address: string,
+  ) {
+    cy.verifyAndClickElement(
+      '[data-cy="view-facility-button"]',
+      "View Facility",
     );
-    // Don't verify selection for local body (false parameter)
-    cy.typeAndSelectOption(
-      '[data-cy="select-local_body"]',
-      location.localBody,
-      false,
-    );
-    // Verify selection for ward (default behavior)
-    cy.typeAndSelectOption('[data-cy="select-ward"]', location.ward);
+    cy.verifyContentPresence('[data-cy="facility-address-details"]', [address]);
+    cy.verifyContentPresence('[data-cy="facility-name-card"]', [facilityName]);
+    cy.verifyContentPresence('[data-cy="facility-type-card"]', [facilityType]);
     return this;
   }
 }

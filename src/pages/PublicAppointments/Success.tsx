@@ -6,13 +6,13 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Loading from "@/components/Common/Loading";
-import { UserModel } from "@/components/Users/models";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import { UserBase } from "@/types/user/user";
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
   const { appointmentId } = props;
@@ -21,7 +21,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
 
-  const userData: UserModel = JSON.parse(localStorage.getItem("user") ?? "{}");
+  const userData: UserBase = JSON.parse(localStorage.getItem("user") ?? "{}");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["appointment", tokenData.phoneNumber],
@@ -51,9 +51,9 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
 
   return (
     <div className="mx-auto p-2 max-w-3xl">
-      <div className="bg-secondary-100/50 rounded-lg shadow-sm p-12 border border-secondary-400 text-center mb-12">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6">
-          <CareIcon icon="l-check" className="w-8 h-8 text-green-600" />
+      <div className="bg-secondary-100/50 rounded-lg shadow-xs p-12 border border-secondary-400 text-center mb-12">
+        <div className="inline-flex items-center justify-center size-16 rounded-full bg-green-100 mb-6">
+          <CareIcon icon="l-check" className="size-8 text-green-600" />
         </div>
 
         <h1 className="text-2xl font-medium text-gray-900 mb-2">

@@ -1,23 +1,17 @@
-// create a layout for the facility settings page
-import { Link, useRoutes } from "raviger";
-import { useTranslation } from "react-i18next";
-
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import ReportBuilderList from "@/pages/Encounters/ReportBuilder";
+import ReportBuilder from "@/pages/Encounters/ReportBuilder/ReportBuilder";
 import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
-import DeviceDetail from "@/pages/Facility/settings/devices/DeviceDetail";
-import DeviceLocationHistory from "@/pages/Facility/settings/devices/DeviceLocationHistory";
+import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
 import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 
 import { GeneralSettings } from "./general/general";
-import LocationList from "./locations/LocationList";
-import LocationView from "./locations/LocationView";
-import FacilityOrganizationIndex from "./organizations/FacilityOrganizationIndex";
-import FacilityOrganizationUsers from "./organizations/FacilityOrganizationUsers";
-import FacilityOrganizationView from "./organizations/FacilityOrganizationView";
+import LocationSettings from "./locations/LocationSettings";
+import FacilityOrganizationList from "./organizations/FacilityOrganizationList";
 
 interface SettingsLayoutProps {
   facilityId: string;
@@ -25,16 +19,17 @@ interface SettingsLayoutProps {
 
 const getRoutes = (facilityId: string) => ({
   "/general": () => <GeneralSettings facilityId={facilityId} />,
-  "/departments": () => <FacilityOrganizationIndex facilityId={facilityId} />,
-  "/departments/:id": ({ id }: { id: string }) => (
-    <FacilityOrganizationView facilityId={facilityId} id={id} />
+  "/departments": () => <FacilityOrganizationList facilityId={facilityId} />,
+  "/departments/:id/:tab": ({ id, tab }: { id: string; tab: string }) => (
+    <FacilityOrganizationList
+      facilityId={facilityId}
+      organizationId={id}
+      currentTab={tab}
+    />
   ),
-  "/departments/:id/users": ({ id }: { id: string }) => (
-    <FacilityOrganizationUsers facilityId={facilityId} id={id} />
-  ),
-  "/locations": () => <LocationList facilityId={facilityId} />,
-  "/location/:id": ({ id }: { id: string }) => (
-    <LocationView facilityId={facilityId} id={id} />
+  "/locations": () => <LocationSettings facilityId={facilityId} />,
+  "/locations/:id": ({ id }: { id: string }) => (
+    <LocationSettings facilityId={facilityId} locationId={id} />
   ),
   "/devices": () => <DevicesList facilityId={facilityId} />,
   "/devices/create": () => <CreateDevice facilityId={facilityId} />,
@@ -44,14 +39,22 @@ const getRoutes = (facilityId: string) => ({
   "/devices/:id/edit": ({ id }: { id: string }) => (
     <UpdateDevice facilityId={facilityId} deviceId={id} />
   ),
-  "/devices/:id/locationHistory": ({ id }: { id: string }) => (
-    <DeviceLocationHistory facilityId={facilityId} deviceId={id} />
+  "/reportbuilder": () => <ReportBuilderList facilityId={facilityId} />,
+  "/reportbuilder/new": () => <ReportBuilder facilityId={facilityId} />,
+  "/reportbuilder/:reportTemplateId": ({
+    reportTemplateId,
+  }: {
+    reportTemplateId: string;
+  }) => (
+    <ReportBuilder
+      facilityId={facilityId}
+      reportTemplateId={reportTemplateId}
+    />
   ),
   "*": () => <ErrorPage />,
 });
 
 export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
-  const { t } = useTranslation();
   const basePath = `/facility/${facilityId}/settings`;
   const routeResult = useRoutes(getRoutes(facilityId), {
     basePath,
@@ -60,50 +63,5 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
     },
   });
 
-  const settingsTabs = [
-    {
-      value: "general",
-      label: t("general"),
-      href: `${basePath}/general`,
-    },
-    {
-      value: "departments",
-      label: t("departments"),
-      href: `${basePath}/departments`,
-    },
-    {
-      value: "locations",
-      label: t("locations"),
-      href: `${basePath}/locations`,
-    },
-    {
-      value: "devices",
-      label: t("devices"),
-      href: `${basePath}/devices`,
-    },
-  ];
-
-  // Extract the current tab from the URL
-  const currentPath = window.location.pathname;
-  const currentTab = currentPath.split("/").pop() || "general";
-
-  return (
-    <div className="container mx-auto p-4">
-      <Tabs defaultValue={currentTab} className="w-full" value={currentTab}>
-        <TabsList className="w-full justify-evenly sm:justify-start border-b bg-transparent p-0 h-auto">
-          {settingsTabs.map((tab) => (
-            <Link key={tab.value} href={tab.href}>
-              <TabsTrigger
-                value={tab.value}
-                className="border-b-2 border-transparent px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-primary-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {tab.label}
-              </TabsTrigger>
-            </Link>
-          ))}
-        </TabsList>
-        <div className="mt-6">{routeResult}</div>
-      </Tabs>
-    </div>
-  );
+  return <div className="container mx-auto p-4">{routeResult}</div>;
 }

@@ -28,49 +28,67 @@ interface QuestionGroupProps {
   activeGroupId?: string;
   facilityId?: string;
   patientId: string;
+  isSubQuestion?: boolean;
 }
 
-function isQuestionEnabled(
+export function isQuestionEnabled(
   question: Question,
   questionnaireResponses: QuestionnaireResponse[],
 ) {
   if (!question.enable_when?.length) return true;
 
   const checkCondition = (enableWhen: EnableWhen) => {
-    const dependentValue = questionnaireResponses.find(
+    const dependentValues = questionnaireResponses.find(
       (v) => v.link_id === enableWhen.question,
-    )?.values[0];
+    )?.values;
 
-    // Early return if no dependent value exists
-    if (!dependentValue?.value) return false;
+    if (!dependentValues || dependentValues.length === 0) return false;
+
+    function normalizeValue(value: unknown): unknown {
+      if (typeof value === "boolean") return value ? "Yes" : "No";
+      if (typeof value === "number") return value.toString();
+      return value;
+    }
+
+    const normalizedAnswers = dependentValues.map((v) =>
+      normalizeValue(v.value),
+    );
 
     switch (enableWhen.operator) {
       case "exists":
-        return dependentValue !== undefined && dependentValue !== null;
+        return (
+          normalizedAnswers.length > 0 &&
+          normalizedAnswers.some(
+            (v) => v !== "" && v !== null && v !== undefined,
+          )
+        );
+
       case "equals":
-        return dependentValue.value === enableWhen.answer;
+        return normalizedAnswers.includes(enableWhen.answer);
+
       case "not_equals":
-        return dependentValue.value !== enableWhen.answer;
+        return !normalizedAnswers.includes(enableWhen.answer);
+
       case "greater":
-        return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value > enableWhen.answer
+        return normalizedAnswers.some(
+          (v) => !isNaN(Number(v)) && Number(v) > enableWhen.answer,
         );
+
       case "less":
-        return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value < enableWhen.answer
+        return normalizedAnswers.some(
+          (v) => !isNaN(Number(v)) && Number(v) < enableWhen.answer,
         );
+
       case "greater_or_equals":
-        return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value >= enableWhen.answer
+        return normalizedAnswers.some(
+          (v) => !isNaN(Number(v)) && Number(v) >= enableWhen.answer,
         );
+
       case "less_or_equals":
-        return (
-          typeof dependentValue.value === "number" &&
-          dependentValue.value <= enableWhen.answer
+        return normalizedAnswers.some(
+          (v) => !isNaN(Number(v)) && Number(v) <= enableWhen.answer,
         );
+
       default:
         return true;
     }
@@ -92,6 +110,7 @@ export const QuestionGroup = memo(function QuestionGroup({
   activeGroupId,
   facilityId,
   patientId,
+  isSubQuestion = false,
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
@@ -111,6 +130,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         disabled={disabled}
         facilityId={facilityId}
         patientId={patientId}
+        isSubQuestion={isSubQuestion}
       />
     );
   }
@@ -121,14 +141,18 @@ export const QuestionGroup = memo(function QuestionGroup({
     <div
       data-cy="group_styling"
       className={cn(
-        "space-y-4 rounded-lg",
+        "sm:rounded-lg bg-gray-100 md:bg-transparent",
         isActive && "ring-2 ring-primary",
         question.styling_metadata?.classes && question.styling_metadata.classes,
       )}
     >
       {question.text && (
-        <div className="space-y-1">
-          <QuestionLabel question={question} groupLabel />
+        <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
+          <QuestionLabel
+            question={question}
+            groupLabel
+            isSubQuestion={isSubQuestion}
+          />
           {question.description && (
             <p className="text-sm text-gray-500">{question.description}</p>
           )}
@@ -137,7 +161,7 @@ export const QuestionGroup = memo(function QuestionGroup({
       <div
         data-cy="group_container_styling"
         className={cn(
-          "gap-2",
+          "gap-1",
           question.styling_metadata?.containerClasses &&
             question.styling_metadata.containerClasses,
         )}
@@ -155,6 +179,7 @@ export const QuestionGroup = memo(function QuestionGroup({
             disabled={disabled}
             activeGroupId={activeGroupId}
             patientId={patientId}
+            isSubQuestion={true}
           />
         ))}
       </div>

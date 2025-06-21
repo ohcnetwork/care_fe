@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -19,10 +19,13 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
+import { getPermissions } from "@/common/Permissions";
+
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import { usePermissions } from "@/context/PermissionContext";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 
 interface EncounterActionsProps {
   encounter: Encounter;
@@ -43,6 +46,14 @@ export default function EncounterActions({
 }: EncounterActionsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
+  const { canWriteEncounter } = getPermissions(
+    hasPermission,
+    encounter.permissions,
+  );
+  const organizationId = usePathParams("/organization/:organizationId/*");
+  const canWrite =
+    canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
 
   const { mutate: updateEncounter } = useMutation({
     mutationFn: mutate(routes.encounter.update, {
@@ -64,15 +75,21 @@ export default function EncounterActions({
       organizations: encounter.organizations.map((org) => org.id),
       patient: encounter.patient.id,
       encounter_class: encounter.encounter_class,
-      period: encounter.period,
+      period: {
+        start: encounter.period.start,
+        end: encounter.period.end
+          ? encounter.period.end
+          : new Date().toISOString(),
+      },
       hospitalization: encounter.hospitalization,
       priority: encounter.priority,
       external_identifier: encounter.external_identifier,
       facility: encounter.facility.id,
+      discharge_summary_advice: encounter.discharge_summary_advice,
     });
   };
 
-  if (completedEncounterStatus.includes(encounter.status) || disableButtons) {
+  if (disableButtons) {
     return null;
   }
 
@@ -82,49 +99,56 @@ export default function EncounterActions({
         <>
           <DropdownMenuItem asChild>
             <Link
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`}
+              href={
+                organizationId
+                  ? `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`
+                  : `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`
+              }
             >
               {t("treatment_summary")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/files/discharge_summary`}
-            >
+            <Link href="files?file=discharge_summary">
               {t("discharge_summary")}
             </Link>
           </DropdownMenuItem>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                {t("mark_as_complete")}
-              </DropdownMenuItem>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t("mark_encounter_as_complete_confirmation")}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-
-              <PLUGIN_Component
-                __name="PatientInfoCardMarkAsComplete"
-                encounter={encounter}
-              />
-
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                <AlertDialogAction
-                  className={cn(buttonVariants({ variant: "primary" }))}
-                  onClick={handleMarkAsComplete}
+          {canWrite && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
                   data-cy="mark-encounter-as-complete"
                 >
                   {t("mark_as_complete")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("mark_encounter_as_complete_confirmation")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <PLUGIN_Component
+                  __name="PatientInfoCardMarkAsComplete"
+                  encounter={encounter}
+                />
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    className={buttonVariants({ variant: "primary" })}
+                    onClick={handleMarkAsComplete}
+                    data-cy="encounter-complete-dropdown"
+                  >
+                    {t("mark_as_complete")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </>
       );
     }
@@ -138,7 +162,11 @@ export default function EncounterActions({
           asChild
         >
           <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`}
+            href={
+              organizationId
+                ? `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`
+                : `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/treatment_summary`
+            }
           >
             {t("treatment_summary")}
           </Link>
@@ -149,51 +177,54 @@ export default function EncounterActions({
           className="w-full justify-start"
           asChild
         >
-          <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/files/discharge_summary`}
-          >
+          <Link href="files?file=discharge_summary">
             {t("discharge_summary")}
           </Link>
         </Button>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant={variant}
-              size={size}
-              className="w-full justify-start"
-            >
-              {t("mark_as_complete")}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("mark_encounter_as_complete_confirmation")}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+        {canWrite && (
+          <>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  data-cy="mark-encounter-complete"
+                  variant={variant}
+                  size={size}
+                  className="w-full justify-start"
+                >
+                  {t("mark_as_complete")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("mark_encounter_as_complete_confirmation")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
 
+                <PLUGIN_Component
+                  __name="PatientInfoCardMarkAsComplete"
+                  encounter={encounter}
+                />
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    className={cn(buttonVariants({ variant: "primary" }))}
+                    onClick={handleMarkAsComplete}
+                    data-cy="confirm-encounter-complete"
+                  >
+                    {t("mark_as_complete")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <PLUGIN_Component
-              __name="PatientInfoCardMarkAsComplete"
+              __name="PatientInfoCardActions"
               encounter={encounter}
             />
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-              <AlertDialogAction
-                className={cn(buttonVariants({ variant: "primary" }))}
-                onClick={handleMarkAsComplete}
-                data-cy="mark-encounter-as-complete"
-              >
-                {t("mark_as_complete")}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-        <PLUGIN_Component
-          __name="PatientInfoCardActions"
-          encounter={encounter}
-        />
+          </>
+        )}
       </div>
     );
   };

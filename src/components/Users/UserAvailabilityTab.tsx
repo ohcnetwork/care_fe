@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
+import { endOfMonth, format, startOfMonth } from "date-fns";
+import dayjs from "dayjs";
+import { ExternalLinkIcon } from "lucide-react";
+import { Link, usePathParams, useQueryParams } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -22,8 +25,9 @@ import {
 } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
+import { userChildProps } from "@/components/Common/UserColumns";
 
-import useSlug from "@/hooks/useSlug";
+import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import {
@@ -31,10 +35,13 @@ import {
   formatTimeShort,
   humanizeStrings,
 } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
+import { useAvailabilityHeatmap } from "@/pages/Appointments/utils";
 import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
 import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
+import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import {
   computeAppointmentSlots,
   filterAvailabilitiesByDayOfWeek,
@@ -49,10 +56,6 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserBase } from "@/types/user/user";
 
-type Props = {
-  userData: UserBase;
-};
-
 type AvailabilityTabQueryParams = {
   tab?: "schedule" | "exceptions" | null;
   sheet?: "create_template" | "add_exception" | null;
@@ -60,30 +63,55 @@ type AvailabilityTabQueryParams = {
   valid_to?: string | null;
 };
 
-export default function UserAvailabilityTab({ userData: user }: Props) {
+export default function UserAvailabilityTab({
+  userData: user,
+  permissions,
+}: userChildProps) {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<AvailabilityTabQueryParams>();
   const view = qParams.tab || "schedule";
   const [month, setMonth] = useState(new Date());
+  const { hasPermission } = usePermissions();
+  const { canViewSchedule } = getPermissions(hasPermission, permissions ?? []);
 
-  const facilityId = useSlug("facility");
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
 
   const templatesQuery = useQuery({
-    queryKey: ["user-schedule-templates", { facilityId, userId: user.id }],
+    queryKey: [
+      "user-schedule-templates",
+      { facilityId, userId: user.id, month },
+    ],
     queryFn: query(scheduleApis.templates.list, {
       pathParams: { facility_id: facilityId! },
-      queryParams: { user: user.id },
+      queryParams: {
+        user: user.id,
+        valid_from: format(startOfMonth(month), "yyyy-MM-dd'T'HH:mm"),
+        valid_to: format(endOfMonth(month), "yyyy-MM-dd'T'HH:mm"),
+      },
     }),
-    enabled: !!facilityId,
+    enabled: !!facilityId && canViewSchedule,
   });
 
   const exceptionsQuery = useQuery({
-    queryKey: ["user-schedule-exceptions", { facilityId, userId: user.id }],
+    queryKey: [
+      "user-schedule-exceptions",
+      { facilityId, userId: user.id, month },
+    ],
     queryFn: query(scheduleApis.exceptions.list, {
       pathParams: { facility_id: facilityId! },
-      queryParams: { user: user.id },
+      queryParams: {
+        user: user.id,
+        valid_from: format(startOfMonth(month), "yyyy-MM-dd"),
+        valid_to: format(endOfMonth(month), "yyyy-MM-dd"),
+      },
     }),
+    enabled: !!facilityId && canViewSchedule,
   });
+
+  const { data: isSchedulableResource } = useIsUserSchedulableResource(
+    facilityId,
+    user.id,
+  );
 
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
@@ -107,9 +135,11 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
           );
 
           const unavailableExceptions =
-            exceptionsQuery.data?.results.filter((exception) =>
-              isDateInRange(date, exception.valid_from, exception.valid_to),
-            ) ?? [];
+            exceptionsQuery.data?.results
+              .filter((exception) =>
+                isDateInRange(date, exception.valid_from, exception.valid_to),
+              )
+              .sort((a, b) => a.start_time.localeCompare(b.start_time)) ?? [];
 
           const isFullDayUnavailable = unavailableExceptions.some(
             (exception) =>
@@ -125,6 +155,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                     "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
                     templatesQuery.isLoading &&
                       "opacity-50 pointer-events-none",
+                    !isSchedulableResource && "pointer-events-none",
                     "transition-all duration-200 ease-in-out",
                     "relative overflow-hidden",
                   )}
@@ -163,12 +194,15 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                   <div />
                 </div>
               </PopoverTrigger>
-              <DayDetailsPopover
-                date={date}
-                templates={templates}
-                unavailableExceptions={unavailableExceptions}
-                setQParams={setQParams}
-              />
+              {isSchedulableResource && (
+                <DayDetailsPopover
+                  date={date}
+                  templates={templates}
+                  unavailableExceptions={unavailableExceptions}
+                  setQParams={setQParams}
+                  user={user}
+                />
+              )}
             </Popover>
           );
         }}
@@ -181,7 +215,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
               variant={view === "schedule" ? "outline" : "ghost"}
               onClick={() => setQParams({ tab: "schedule" })}
               className={cn(
-                view === "schedule" && "shadow",
+                view === "schedule" && "shadow-sm",
                 "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
               )}
             >
@@ -191,7 +225,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
               variant={view === "exceptions" ? "outline" : "ghost"}
               onClick={() => setQParams({ tab: "exceptions" })}
               className={cn(
-                view === "exceptions" && "shadow",
+                view === "exceptions" && "shadow-sm",
                 "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
               )}
             >
@@ -251,13 +285,22 @@ function DayDetailsPopover({
   templates,
   unavailableExceptions,
   setQParams,
+  user,
 }: {
   date: Date;
   templates: ScheduleTemplate[];
   unavailableExceptions: ScheduleException[];
   setQParams: (params: AvailabilityTabQueryParams) => void;
+  user: UserBase;
 }) {
   const { t } = useTranslation();
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+  const { data: heatmapData } = useAvailabilityHeatmap({
+    facilityId: facilityId!,
+    userId: user.id,
+    month: date,
+  });
+  const bookedSlots = heatmapData?.[dateQueryString(date)]?.booked_slots ?? 0;
 
   return (
     <PopoverContent className="p-6" align="center" sideOffset={5}>
@@ -269,25 +312,46 @@ function DayDetailsPopover({
             year: "numeric",
           })}
         </p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            setQParams({
-              tab: "exceptions",
-              sheet: "add_exception",
-              valid_from: dateQueryString(date),
-              valid_to: dateQueryString(date),
-            })
-          }
-        >
-          {t("add_exception")}
-        </Button>
+        {!dayjs(date).isBefore(dayjs(), "day") && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setQParams({
+                tab: "exceptions",
+                sheet: "add_exception",
+                valid_from: dateQueryString(date),
+                valid_to: dateQueryString(date),
+              })
+            }
+          >
+            {t("add_exception")}
+          </Button>
+        )}
       </div>
 
       <ScrollArea className="max-h-[22rem] overflow-auto">
+        {bookedSlots > 0 && (
+          <>
+            <hr className="bg-gray-200 h-px my-3" />
+            <Link
+              className="flex items-center gap-2 text-sm text-gray-500 underline underline-offset-2"
+              href={`/facility/${facilityId}/appointments?practitioner=${user.username}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`}
+            >
+              <span className="text-sm text-gray-500">
+                {t("appointments_scheduled_for_day_link", {
+                  count: bookedSlots,
+                })}
+              </span>
+              <ExternalLinkIcon className="size-4" />
+            </Link>
+          </>
+        )}
+
+        <hr className="bg-gray-200 h-px my-3" />
+
         {templates.map((template) => (
-          <div key={template.id} className="border-t pt-3 mt-3">
+          <div key={template.id}>
             <div className="flex items-center">
               <ColoredIndicator
                 className="mr-2 size-3 rounded"

@@ -71,7 +71,7 @@ const ScheduleTemplateItem = ({
   const [qParams, setQParams] = useQueryParams<{ edit: string | null }>();
 
   return (
-    <div className="rounded-lg bg-white py-2 shadow">
+    <div className="rounded-lg bg-white py-2 shadow-sm">
       <div className="flex items-center justify-between py-2 pr-4">
         <div className="flex">
           <ColoredIndicator
