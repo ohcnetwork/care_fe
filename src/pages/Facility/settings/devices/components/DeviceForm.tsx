@@ -126,6 +126,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     registered_name: "",
     contact: [],
   };
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues,
@@ -219,6 +220,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="user_friendly_name"
@@ -236,6 +238,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="status"
@@ -260,6 +263,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="availability_status"
@@ -286,6 +290,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="identifier"
@@ -303,6 +308,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="manufacturer"
@@ -320,6 +326,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="manufacture_date"
@@ -337,6 +344,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="expiration_date"
@@ -351,6 +359,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="lot_number"
@@ -368,6 +377,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="serial_number"
@@ -385,6 +395,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="model_number"
@@ -402,6 +413,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="part_number"
