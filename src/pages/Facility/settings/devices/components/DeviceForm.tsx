@@ -339,7 +339,6 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                     field.onChange(date);
                     form.trigger("expiration_date");
                   }}
-                  data-cy="manufacture-date-input"
                 />
                 <FormMessage />
               </FormItem>
