@@ -134,7 +134,7 @@ export default function useFileUpload(
       return null;
     }
   };
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
     if (!e.target.files?.length) {
       return;
     }
