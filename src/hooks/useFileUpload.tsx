@@ -23,7 +23,7 @@ import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import uploadFile from "@/Utils/request/uploadFile";
+import { uploadMultipleFiles } from "@/Utils/request/uploadFile";
 
 export type FileUploadOptions = {
   multiple?: boolean;
@@ -249,31 +249,11 @@ export default function useFileUpload(
     if (!validateFileUpload()) return;
 
     setProgress(0);
-    const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-    let bytesUploadedSoFar = 0;
-    const errors: File[] = [];
-    if (combineToPDF) {
-      if (!uploadFileNames.length || !uploadFileNames[0]) {
-        setError(t("file_error__single_file_name"));
-        return;
-      }
-    } else {
-      for (const [index, file] of files.entries()) {
-        const filename =
-          allowNameFallback && uploadFileNames[index] === "" && file
-            ? file.name
-            : uploadFileNames[index];
-        if (!filename) {
-          setError(t("file_error__single_file_name"));
-          return;
-        }
-      }
-    }
-
+    let filesToUpload = files;
     if (combineToPDF && files.length > 1) {
       const pdfFile = await generatePDF(files);
       if (pdfFile) {
-        files.splice(0, files.length, pdfFile);
+        filesToUpload = [pdfFile];
       } else {
         clearFiles();
         setError(t("file_error__generate_pdf"));
@@ -283,9 +263,10 @@ export default function useFileUpload(
 
     setUploading(true);
 
-    for (const [index, file] of files.entries()) {
-      try {
-        const data = await createUpload({
+    const { errors } = await uploadMultipleFiles(
+      filesToUpload,
+      async (file, index) =>
+        await createUpload({
           original_name: file.name ?? "",
           file_type: fileType,
           name:
@@ -295,72 +276,24 @@ export default function useFileUpload(
           associating_id,
           file_category: category,
           mime_type: file.type ?? "",
-        });
-
-        if (data) {
-          let lastFilePercent = 0;
-          await new Promise<void>((resolve, reject) => {
-            uploadFile(
-              data.signed_url,
-              new File([file], `${data.internal_name}`),
-              "PUT",
-              { "Content-Type": file.type },
-              async (xhr: XMLHttpRequest) => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                  bytesUploadedSoFar +=
-                    file.size - Math.round((lastFilePercent / 100) * file.size);
-                  setProgress(
-                    totalBytes > 0
-                      ? (bytesUploadedSoFar / totalBytes) * 100
-                      : 0,
-                  );
-                  await markUploadComplete({
-                    data,
-                    associating_id: associating_id,
-                  });
-                  if (markUploadCompleteError) {
-                    toast.error(t("file_error__mark_complete_failed"));
-                    reject();
-                    return;
-                  }
-                  resolve();
-                } else {
-                  toast.error(
-                    t("file_error__dynamic", { statusText: xhr.statusText }),
-                  );
-                  reject();
-                }
-              },
-              (percent: number | ((prev: number) => number)) => {
-                if (typeof percent === "number") {
-                  bytesUploadedSoFar -= Math.round(
-                    (lastFilePercent / 100) * file.size,
-                  );
-                  bytesUploadedSoFar += Math.round((percent / 100) * file.size);
-                  lastFilePercent = percent;
-                  setProgress(
-                    totalBytes > 0
-                      ? (bytesUploadedSoFar / totalBytes) * 100
-                      : 0,
-                  );
-                }
-              },
-              () => {
-                toast.error(t("file_error__network"));
-                reject();
-              },
-            );
-          });
+        }),
+      async ({ data, associating_id }) => {
+        await markUploadComplete({ data, associating_id });
+        if (markUploadCompleteError) {
+          toast.error(t("file_error__mark_complete_failed"));
         }
-      } catch {
-        errors.push(file);
-      }
-    }
+      },
+      {
+        associating_id,
+        setProgress,
+        setError,
+      },
+    );
 
     setUploading(false);
     setFiles(errors);
     setUploadFileNames(errors?.map((f) => f.name) ?? []);
-    setError(t("file_error__network"));
+    if (errors.length > 0) setError(t("file_error__network"));
     setCameraModalOpen(false);
   };
 

@@ -62,4 +62,85 @@ const uploadFile = async (
     xhr.send(file);
   });
 };
+
+export const uploadMultipleFiles = async (
+  files: File[],
+  createUploadFn: (file: File, index: number) => Promise<any>,
+  markUploadCompleteFn: (args: {
+    data: any;
+    associating_id: string;
+  }) => Promise<any>,
+  options: {
+    associating_id: string;
+    setProgress: (progress: number) => void;
+    setError: (msg: string) => void;
+  },
+): Promise<{ errors: File[] }> => {
+  const { associating_id, setProgress, setError } = options;
+
+  const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+  let bytesUploadedSoFar = 0;
+  const errors: File[] = [];
+
+  for (const [index, file] of files.entries()) {
+    try {
+      const data = await createUploadFn(file, index);
+      if (data) {
+        let lastFilePercent = 0;
+        await new Promise<void>((resolve, reject) => {
+          uploadFile(
+            data.signed_url,
+            new File([file], `${data.internal_name}`),
+            "PUT",
+            { "Content-Type": file.type },
+            async (xhr: XMLHttpRequest) => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                bytesUploadedSoFar +=
+                  file.size - Math.round((lastFilePercent / 100) * file.size);
+                setProgress(
+                  totalBytes > 0 ? (bytesUploadedSoFar / totalBytes) * 100 : 0,
+                );
+                await markUploadCompleteFn({
+                  data,
+                  associating_id,
+                });
+                resolve();
+              } else {
+                toast.error(
+                  t("file_error__dynamic", { statusText: xhr.statusText }),
+                );
+                setError(
+                  t("file_error__dynamic", { statusText: xhr.statusText }),
+                );
+                reject();
+              }
+            },
+            (percent: number | ((prev: number) => number)) => {
+              if (typeof percent === "number") {
+                bytesUploadedSoFar -= Math.round(
+                  (lastFilePercent / 100) * file.size,
+                );
+                bytesUploadedSoFar += Math.round((percent / 100) * file.size);
+                lastFilePercent = percent;
+                setProgress(
+                  totalBytes > 0 ? (bytesUploadedSoFar / totalBytes) * 100 : 0,
+                );
+              }
+            },
+            () => {
+              toast.error(t("file_error__network"));
+              setError(t("file_error__network"));
+              reject();
+            },
+          );
+        });
+      }
+    } catch {
+      errors.push(file);
+      setError(t("file_error__network"));
+    }
+  }
+  return { errors };
+};
+
 export default uploadFile;
