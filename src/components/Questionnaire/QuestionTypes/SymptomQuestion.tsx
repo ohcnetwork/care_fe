@@ -206,11 +206,6 @@ function NotesInput({
       placeholder={t("additional_notes")}
       value={note || ""}
       onChange={onChange}
-      onBlur={(e) => {
-        const trimmedValue = e.target.value.trim();
-        e.target.value = trimmedValue;
-        onChange({ ...e, target: { ...e.target, value: trimmedValue } });
-      }}
       disabled={disabled}
     />
   );

@@ -26,6 +26,13 @@ type StructuredHandler<T extends StructuredQuestionType> = {
   >;
 };
 
+const sanitizeNote = (note?: string, hasId?: boolean): string | undefined => {
+  if (note === undefined) return undefined;
+  const trimmed = note.trim();
+  if (trimmed !== "") return trimmed;
+  return hasId ? "" : undefined;
+};
+
 export const structuredHandlers: {
   [K in StructuredQuestionType]: StructuredHandler<K>;
 } = {
@@ -38,6 +45,7 @@ export const structuredHandlers: {
           body: {
             datapoints: allergies.map((allergy) => ({
               ...allergy,
+              note: sanitizeNote(allergy.note, Boolean(allergy.id)),
               encounter: encounterId,
             })),
           },
@@ -55,6 +63,7 @@ export const structuredHandlers: {
           body: {
             datapoints: medications.map((medication) => ({
               ...medication,
+              note: sanitizeNote(medication.note, Boolean(medication.id)),
               encounter: encounterId,
               patient: patientId,
             })),
@@ -91,6 +100,7 @@ export const structuredHandlers: {
           body: {
             datapoints: symptoms.map((symptom) => ({
               ...symptom,
+              note: sanitizeNote(symptom.note, Boolean(symptom.id)),
               encounter: encounterId,
             })),
           },
@@ -110,6 +120,7 @@ export const structuredHandlers: {
               .filter((diagnosis) => diagnosis.dirty)
               .map((diagnosis) => ({
                 ...diagnosis,
+                note: sanitizeNote(diagnosis.note, Boolean(diagnosis.id)),
                 encounter: encounterId,
               })),
           },

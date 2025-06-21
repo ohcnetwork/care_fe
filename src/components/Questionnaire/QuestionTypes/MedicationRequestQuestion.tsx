@@ -1322,10 +1322,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <Input
           value={medication.note || ""}
           onChange={(e) => onUpdate?.({ note: e.target.value })}
-          onBlur={(e) => {
-            e.target.value = e.target.value.trim();
-            onUpdate?.({ note: e.target.value });
-          }}
           placeholder={t("additional_notes")}
           disabled={disabled}
           className="h-9 text-sm"
