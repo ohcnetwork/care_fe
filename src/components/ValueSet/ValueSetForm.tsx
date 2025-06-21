@@ -147,6 +147,7 @@ function FilterFields({
                     disabled={disabled}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -162,6 +163,7 @@ function FilterFields({
                     disabled={disabled}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -177,6 +179,7 @@ function FilterFields({
                     disabled={disabled}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -319,14 +322,19 @@ export function ValueSetForm({
         z.object({
           system: z.string(),
           concept: z
-            .array(z.object({ code: z.string(), display: z.string() }))
+            .array(
+              z.object({
+                code: z.string().min(1, t("field_required")),
+                display: z.string().min(1, t("field_required")),
+              }),
+            )
             .optional(),
           filter: z
             .array(
               z.object({
-                property: z.string(),
-                op: z.string(),
-                value: z.string(),
+                property: z.string().min(1, t("field_required")),
+                op: z.string().min(1, t("field_required")),
+                value: z.string().min(1, t("field_required")),
               }),
             )
             .optional(),
@@ -336,14 +344,19 @@ export function ValueSetForm({
         z.object({
           system: z.string(),
           concept: z
-            .array(z.object({ code: z.string(), display: z.string() }))
+            .array(
+              z.object({
+                code: z.string().min(1, t("field_required")),
+                display: z.string().min(1, t("field_required")),
+              }),
+            )
             .optional(),
           filter: z
             .array(
               z.object({
-                property: z.string(),
-                op: z.string(),
-                value: z.string(),
+                property: z.string().min(1, t("field_required")),
+                op: z.string().min(1, t("field_required")),
+                value: z.string().min(1, t("field_required")),
               }),
             )
             .optional(),
@@ -374,7 +387,7 @@ export function ValueSetForm({
       <div className="flex justify-end">
         {!initialData?.id && (
           <ValueSetPreview
-            valueset={form.getValues()}
+            valueset={form.watch()}
             trigger={
               <Button variant="outline_primary">
                 <CareIcon icon={"l-eye"} className="h-4 w-4" />
