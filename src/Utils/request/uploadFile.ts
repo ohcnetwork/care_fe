@@ -79,14 +79,18 @@ export const uploadMultipleFiles = async (
   const { associating_id, setProgress, setError } = options;
 
   const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-  let bytesUploadedSoFar = 0;
+  let completedFilesBytes = 0;
   const errors: File[] = [];
+
+  const updateProgress = (currentFileBytes: number) => {
+    const totalUploadedBytes = completedFilesBytes + currentFileBytes;
+    setProgress(totalBytes > 0 ? (totalUploadedBytes / totalBytes) * 100 : 0);
+  };
 
   for (const [index, file] of files.entries()) {
     try {
       const data = await createUploadFn(file, index);
       if (data) {
-        let lastFilePercent = 0;
         await new Promise<void>((resolve, reject) => {
           uploadFile(
             data.signed_url,
@@ -95,11 +99,8 @@ export const uploadMultipleFiles = async (
             { "Content-Type": file.type },
             async (xhr: XMLHttpRequest) => {
               if (xhr.status >= 200 && xhr.status < 300) {
-                bytesUploadedSoFar +=
-                  file.size - Math.round((lastFilePercent / 100) * file.size);
-                setProgress(
-                  totalBytes > 0 ? (bytesUploadedSoFar / totalBytes) * 100 : 0,
-                );
+                completedFilesBytes += file.size;
+                updateProgress(0);
                 await markUploadCompleteFn({
                   data,
                   associating_id,
@@ -117,14 +118,10 @@ export const uploadMultipleFiles = async (
             },
             (percent: number | ((prev: number) => number)) => {
               if (typeof percent === "number") {
-                bytesUploadedSoFar -= Math.round(
-                  (lastFilePercent / 100) * file.size,
+                const currentFileBytes = Math.round(
+                  (percent / 100) * file.size,
                 );
-                bytesUploadedSoFar += Math.round((percent / 100) * file.size);
-                lastFilePercent = percent;
-                setProgress(
-                  totalBytes > 0 ? (bytesUploadedSoFar / totalBytes) * 100 : 0,
-                );
+                updateProgress(currentFileBytes);
               }
             },
             () => {
