@@ -232,7 +232,7 @@ export default function LocationContent({
       currentPage,
       searchQuery,
     ],
-    queryFn: query(locationApi.list, {
+    queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: selectedLocationId || undefined,
