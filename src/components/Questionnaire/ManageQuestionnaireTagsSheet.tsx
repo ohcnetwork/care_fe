@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Hash, Loader2, Plus, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { UseFormReturn, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -47,7 +48,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
 interface Props {
-  questionnaire: QuestionnaireDetail;
+  form: UseFormReturn<QuestionnaireDetail>;
   trigger?: React.ReactNode;
 }
 
@@ -143,10 +144,7 @@ export function TagSelectorPopover({
   );
 }
 
-export default function ManageQuestionnaireTagsSheet({
-  questionnaire,
-  trigger,
-}: Props) {
+export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -163,13 +161,16 @@ export default function ManageQuestionnaireTagsSheet({
     }),
   });
 
+  const slug = useWatch({ control: form.control, name: "slug" });
+  const tags = useWatch({ control: form.control, name: "tags" });
+
   const { mutate: setTags, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.setTags, {
-      pathParams: { slug: questionnaire.slug },
+      pathParams: { slug: slug },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["questionnaireDetail", questionnaire.slug],
+        queryKey: ["questionnaireDetail", slug],
       });
       toast.success(t("tag_updated_successfully"));
       setOpen(false);
@@ -193,10 +194,10 @@ export default function ManageQuestionnaireTagsSheet({
 
   // Initialize selected tags from questionnaire tags
   useEffect(() => {
-    if (questionnaire.tags) {
-      setSelectedTags(questionnaire.tags);
+    if (tags) {
+      setSelectedTags(tags);
     }
-  }, [questionnaire.tags]);
+  }, [tags]);
 
   // Simple merge of selected tags with available tags
   const tagOptions = useMemo(() => {
@@ -241,11 +242,8 @@ export default function ManageQuestionnaireTagsSheet({
   };
 
   const hasChanges =
-    new Set(questionnaire.tags.map((tag) => tag.id)).size !==
-      new Set(selectedTags).size ||
-    !questionnaire.tags.every((tag) =>
-      selectedTags.some((st) => st.id === tag.id),
-    );
+    new Set(tags?.map((tag) => tag.id)).size !== new Set(selectedTags).size ||
+    !tags?.every((tag) => selectedTags.some((st) => st.id === tag.id));
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -371,7 +369,7 @@ export default function ManageQuestionnaireTagsSheet({
               type="button"
               variant="outline"
               onClick={() => {
-                setSelectedTags(questionnaire.tags);
+                setSelectedTags(tags);
                 setNewTagName("");
                 setNewTagSlug("");
                 setIsCreateOpen(false);
