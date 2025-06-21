@@ -354,7 +354,6 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <DatePicker
                   date={field.value}
                   onChange={(date) => field.onChange(date)}
-                  data-cy="expiration-date-input"
                 />
                 <FormMessage />
               </FormItem>
