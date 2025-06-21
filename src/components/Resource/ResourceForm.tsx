@@ -277,6 +277,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormControl>
                       <Autocomplete
                         data-cy="select-facility"
+                        isError={!!form.formState.errors.assigned_facility}
                         options={mergeAutocompleteOptions(
                           facilityOptions ?? [],
                           field.value
@@ -289,6 +290,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         value={field.value?.id ?? ""}
                         placeholder={t("start_typing_to_search")}
                         onSearch={setFacilitySearch}
+                        ref={field.ref}
                         onChange={(value) => {
                           const facility = facilities?.results.find(
                             (f) => f.id === value,

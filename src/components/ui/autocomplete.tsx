@@ -44,6 +44,10 @@ interface AutocompleteProps {
   freeInput?: boolean;
   closeOnSelect?: boolean;
   "data-cy"?: string;
+
+  ref?: React.RefCallback<HTMLButtonElement | null>;
+
+  isError?: boolean;
 }
 
 export default function Autocomplete({
@@ -62,6 +66,8 @@ export default function Autocomplete({
   freeInput = false,
   closeOnSelect = true,
   "data-cy": dataCy,
+  ref,
+  isError,
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -174,9 +180,14 @@ export default function Autocomplete({
                 : undefined
             }
             variant="outline"
+            ref={ref}
             role="combobox"
             aria-expanded={open}
-            className={cn("w-full justify-between", className)}
+            className={cn(
+              "w-full justify-between",
+              isError && "border-red-500",
+              className,
+            )}
             disabled={disabled}
             data-cy={dataCy}
             type="button"
@@ -212,10 +223,15 @@ export default function Autocomplete({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between", className)}
+          className={cn(
+            "w-full justify-between",
+            isError && "border-red-500",
+            className,
+          )}
           disabled={disabled}
           data-cy={dataCy}
           onClick={() => setOpen(!open)}
+          ref={ref}
         >
           <span
             className={cn(

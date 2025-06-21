@@ -852,6 +852,7 @@ export default function PatientRegistration(
                         <FormControl>
                           <GovtOrganizationSelector
                             {...field}
+                            isError={!!form.formState.errors.geo_organization}
                             required={true}
                             selected={selectedLevels}
                             value={form.watch("geo_organization")}

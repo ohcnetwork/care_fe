@@ -414,6 +414,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         onChange={(value) => {
                           field.onChange(value);
                         }}
+                        isError={!!form.formState.errors.geo_organization}
                       />
                     </FormControl>
                     <FormMessage />
