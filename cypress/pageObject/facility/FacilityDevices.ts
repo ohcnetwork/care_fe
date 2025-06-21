@@ -68,20 +68,48 @@ export class FacilityDevices {
       cy.typeIntoField('[data-cy="manufacturer-input"]', manufacturer);
     }
     if (manufactureDate) {
+      // Validate date string before processing
+      const date = new Date(manufactureDate);
+      if (isNaN(date.getTime())) {
+        throw new Error(`Invalid manufacture date: ${manufactureDate}`);
+      }
+
       // Handle DatePicker component - click to open the popover
       cy.get('[data-cy="manufacture-date-input"]').click();
-      // Wait for the calendar popover to be visible and select the date
+      // Wait for the calendar popover to be visible
+      cy.get('[role="dialog"]').should("be.visible");
+
+      // Extract date components for reliable selection
+      const day = date.getDate();
+
+      // Select the correct date, ensuring it's not disabled and is the exact day
       cy.get('[role="gridcell"]')
-        .contains(new Date(manufactureDate).getDate().toString())
+        .contains(new RegExp(`^${day}$`))
+        .not('[aria-disabled="true"]')
+        .first()
         .click();
     }
 
     if (expirationDate) {
+      // Validate date string before processing
+      const date = new Date(expirationDate);
+      if (isNaN(date.getTime())) {
+        throw new Error(`Invalid expiration date: ${expirationDate}`);
+      }
+
       // Handle DatePicker component - click to open the popover
       cy.get('[data-cy="expiration-date-input"]').click();
-      // Wait for the calendar popover to be visible and select the date
+      // Wait for the calendar popover to be visible
+      cy.get('[role="dialog"]').should("be.visible");
+
+      // Extract date components for reliable selection
+      const day = date.getDate();
+
+      // Select the correct date, ensuring it's not disabled and is the exact day
       cy.get('[role="gridcell"]')
-        .contains(new Date(expirationDate).getDate().toString())
+        .contains(new RegExp(`^${day}$`))
+        .not('[aria-disabled="true"]')
+        .first()
         .click();
     }
 
@@ -103,7 +131,6 @@ export class FacilityDevices {
     return this;
   }
   submitDeviceForm() {
-    // Wait for the form to be ready and button to be enabled
     cy.get('[data-cy="save-device-button"]').should("not.be.disabled");
     cy.verifyAndClickElement('[data-cy="save-device-button"]', "Save");
     return this;
