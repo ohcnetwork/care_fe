@@ -54,7 +54,7 @@ export const ResourceRequests = (props: PatientProps) => {
 
     return (
       <Badge className={statusColors[status] || statusColors.DEFAULT}>
-        {status}
+        {t(`resource_status__${status}`)}
       </Badge>
     );
   };
@@ -109,7 +109,7 @@ export const ResourceRequests = (props: PatientProps) => {
                     )?.text || "--"}
                   </TableCell>
                   <TableCell>{request.title}</TableCell>
-                  <TableCell>{getStatusBadge(t(request.status))}</TableCell>
+                  <TableCell>{getStatusBadge(request.status)}</TableCell>
                   <TableCell>{formatDateTime(request.created_date)}</TableCell>
                   <TableCell>{formatDateTime(request.modified_date)}</TableCell>
                   <TableCell className="text-right">
