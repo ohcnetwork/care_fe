@@ -332,7 +332,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           { value: "true", label: t("yes") },
                           { value: "false", label: t("no") },
                         ]}
-                        className="m"
                       />
                     </FormControl>
                     <FormDescription>

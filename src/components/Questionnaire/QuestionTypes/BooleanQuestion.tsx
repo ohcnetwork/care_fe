@@ -27,14 +27,13 @@ export function BooleanQuestion({
   const { t } = useTranslation();
 
   const selectedValue = questionnaireResponse.values[0]?.value?.toString();
-  const options = [
-    { value: "true", label: t("yes") },
-    { value: "false", label: t("no") },
-  ];
 
   return (
     <RadioInput
-      options={options}
+      options={[
+        { value: "true", label: t("yes") },
+        { value: "false", label: t("no") },
+      ]}
       value={selectedValue ?? ""}
       onValueChange={(value) => {
         clearError();

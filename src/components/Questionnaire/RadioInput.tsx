@@ -3,8 +3,6 @@ import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { properCase } from "@/Utils/utils";
-
 interface RadioInputProps extends React.ComponentProps<typeof RadioGroup> {
   options: {
     label: string;
@@ -26,7 +24,7 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
               ? "bg-primary-100 border-primary-500"
               : "bg-white border-gray-300",
           )}
-          key={`${option.value}-${props.value}`}
+          key={`${option.value}-${props.value}`} // to prevent race condition
           onClick={() => {
             if (!props.disabled) {
               props.onValueChange?.(option.value.toString());
@@ -43,7 +41,7 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
               htmlFor={option.value}
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed cursor-pointer peer-disabled:opacity-70"
             >
-              {properCase(option.label)}
+              {option.label}
             </Label>
           </div>
         </div>
