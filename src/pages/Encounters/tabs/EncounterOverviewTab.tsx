@@ -1,3 +1,4 @@
+import { onlineManager } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { usePathParams } from "raviger";
 import { Link, navigate } from "raviger";
@@ -10,6 +11,8 @@ import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
+
+import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -36,20 +39,29 @@ const actionLinks = [
 export const EncounterOverviewTab = ({
   encounter,
   patient,
+  setIsMarkAsCompleteOffline,
+  IsMarkAsCompleteOffline,
 }: EncounterTabProps) => {
   const { hasPermission } = usePermissions();
+  const user = useAuthUser();
+  const encounterPermissions = onlineManager.isOnline()
+    ? (encounter?.permissions ?? [])
+    : (user.permissions ?? []);
+
   const {
     canViewClinicalData,
     canViewEncounter,
     canSubmitEncounterQuestionnaire,
-  } = getPermissions(hasPermission, encounter.permissions);
+  } = getPermissions(hasPermission, encounterPermissions);
+
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
     facilityIdExists &&
     canSubmitEncounterQuestionnaire &&
-    !inactiveEncounterStatus.includes(encounter.status ?? "");
+    !inactiveEncounterStatus.includes(encounter.status ?? "") &&
+    (onlineManager.isOnline() || IsMarkAsCompleteOffline === false);
 
   return (
     <div className="flex flex-col gap-4">
@@ -139,6 +151,8 @@ export const EncounterOverviewTab = ({
             encounter={encounter}
             canAccess={canAccess}
             canEdit={canEdit}
+            setIsMarkAsCompleteOffline={setIsMarkAsCompleteOffline}
+            IsMarkAsCompleteOffline={IsMarkAsCompleteOffline}
           />
         </div>
       </div>

@@ -76,7 +76,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
   const [hasReachedEncounterLimitOffline, sethasReachedEncounterLimitOffline] =
     useState(false);
 
-  const { data: patientverificationdata } = useQuery({
+  const { data: patientverificationdata } = useQuery<Patient>({
     queryKey: ["PatientVerification", phone_number, year_of_birth, partial_id],
     queryFn: async () => {
       throw new Error("Should not fetch online");
@@ -94,7 +94,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
     meta: { persist: true },
     networkMode: "online",
   });
-
+  console.log("facility ddata :", facilityData);
   const { canCreateAppointment, canCreateEncounter, canListEncounters } =
     getPermissions(hasPermission, facilityData?.permissions ?? []);
 
@@ -137,6 +137,12 @@ export default function VerifyPatient(props: { facilityId: string }) {
     networkMode: "online",
     enabled: !!patientData?.id && canListEncounters,
   });
+
+  useEffect(() => {
+    if (!patientData) return;
+
+    queryClient.setQueryData(["patient", patientData.id], patientData);
+  }, [patientData, queryClient]);
 
   useEffect(() => {
     const loadOfflinePatient = async () => {
@@ -182,7 +188,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
 
         // 2. Load updateEncounter writes
         const updateWrites = await db.OfflineWrites.where("type")
-          .equals("updateEncounter")
+          .equals("markAsCompleteEncounter")
           .toArray();
 
         const offlineEncounterUpdates = updateWrites.filter((entry) => {

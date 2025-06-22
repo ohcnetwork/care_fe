@@ -1,3 +1,4 @@
+import { onlineManager } from "@tanstack/react-query";
 import {
   BedSingle,
   Building,
@@ -9,6 +10,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { Link, usePathParams } from "raviger";
+import { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -35,6 +37,7 @@ import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
+import { isOfflineId } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
@@ -52,14 +55,32 @@ export interface PatientInfoCardProps {
   fetchPatientData?: (state: { aborted: boolean }) => void;
   canWrite: boolean;
   disableButtons?: boolean;
+  isMarkAsCompleteOffline?: boolean;
+  isEncounterUpdatedOffline?: boolean;
+  setIsMarkAsCompleteOffline?: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function PatientInfoCard(props: PatientInfoCardProps) {
-  const { patient, encounter, canWrite, disableButtons = false } = props;
+  const {
+    patient,
+    encounter,
+    canWrite,
+    disableButtons = false,
+    isMarkAsCompleteOffline,
+    isEncounterUpdatedOffline,
+  } = props;
+  console.log("ptient:", patient, "encounter:", encounter);
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { t } = useTranslation();
 
+  const effectiveStatus = onlineManager.isOnline()
+    ? props.encounter.status
+    : isMarkAsCompleteOffline === true
+      ? "completed"
+      : props.encounter.status;
+
+  console.log("isupdated:", isEncounterUpdatedOffline);
   return (
     <>
       <section className="flex flex-col lg:flex-row">
@@ -85,11 +106,25 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   data-cy="patient-details-button"
                 >
                   {patient.name}
+
                   <CareIcon
                     icon="l-external-link-alt"
                     className="size-3 opacity-50 mt-1"
                   />
+                  {!onlineManager.isOnline() &&
+                    (isEncounterUpdatedOffline === true ||
+                      isOfflineId(encounter.id)) && (
+                      <Badge
+                        variant="outline"
+                        className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
+                      >
+                        <h3 className="text-xs font-medium">
+                          {t("Pending_sync")}
+                        </h3>
+                      </Badge>
+                    )}
                 </Link>
+
                 <div className="my-[2px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
@@ -128,6 +163,18 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     icon="l-external-link-alt"
                     className="size-4 opacity-70"
                   />
+                  {!onlineManager.isOnline() &&
+                    (isEncounterUpdatedOffline === true ||
+                      isOfflineId(encounter.id)) && (
+                      <Badge
+                        variant="outline"
+                        className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
+                      >
+                        <h3 className="text-xs font-medium">
+                          {t("Pending_sync")}
+                        </h3>
+                      </Badge>
+                    )}
                 </Link>
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
@@ -194,9 +241,8 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           variant="outline"
                           title={`Encounter Status: ${t(`encounter_status__${props.encounter.status}`)}`}
                         >
-                          {completedEncounterStatus.includes(
-                            props.encounter.status,
-                          ) || props.encounter.status === "discharged" ? (
+                          {completedEncounterStatus.includes(effectiveStatus) ||
+                          props.encounter.status === "discharged" ? (
                             <CircleCheck
                               className="size-4 text-green-300"
                               fill="green"
@@ -204,7 +250,9 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           ) : (
                             <CircleDashed className="size-4 text-yellow-500" />
                           )}
-                          {t(`encounter_status__${props.encounter.status}`)}
+                          {isMarkAsCompleteOffline && !onlineManager.isOnline()
+                            ? t("completed")
+                            : t(`encounter_status__${props.encounter.status}`)}
                           <ChevronDown className="size-3 opacity-50" />
                         </Badge>
                       </div>
@@ -492,6 +540,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
                         >
                           <EncounterActions
+                            setIsMarkAsCompleteOffline={
+                              props.setIsMarkAsCompleteOffline
+                            }
+                            IsMarkAsCompleteOffline={isMarkAsCompleteOffline}
                             encounter={encounter}
                             layout="dropdown"
                           />

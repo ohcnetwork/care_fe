@@ -9,10 +9,11 @@ export interface QueryCacheEntry {
 export interface OfflineWritesEntry {
   id: string;
   userId: string;
-  syncrouteKey: string;
+  mutationSyncrouteKey: string;
   type?: string;
   resourceType?: string;
-  pathParams?: Record<string, any>;
+  mutationPathParams?: Record<string, any>;
+  mutationQueryParams?: Record<string, any>;
   payload: unknown;
   response?: unknown;
   parentMutationIds?: string[];
@@ -28,8 +29,9 @@ export interface OfflineWritesEntry {
   lastError?: string;
   retries?: number;
   conflictData?: unknown;
-  queryrouteKey?: string;
-  queryParams?: Record<string, any>;
+  useQueryrouteKey?: string;
+  useQueryPathParams?: Record<string, any>;
+  useQueryParams?: Record<string, any>;
 }
 
 export class AppCacheDB extends Dexie {

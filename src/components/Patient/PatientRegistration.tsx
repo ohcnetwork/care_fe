@@ -297,14 +297,14 @@ export default function PatientRegistration(
       const offlineWrite = {
         id: patientId,
         userId: user.external_id,
-        syncrouteKey: "updatePatient",
+        mutationSyncrouteKey: "updatePatient",
         type: "updatePatient",
         resourceType: "patient",
-        pathParams: { id: patientId || "" },
+        mutationPathParams: { id: patientId || "" },
         payload: updatePatientData,
         serverTimestamp: patientQuery?.data?.modified_date,
-        queryrouteKey: "getPatient",
-        queryParams: { id: patientId || "" },
+        useQueryrouteKey: "getPatient",
+        useQueryPathParams: { id: patientId || "" },
       };
       const saveResult = await saveOfflineWrite(offlineWrite);
 
@@ -338,7 +338,7 @@ export default function PatientRegistration(
       const offlineWrite = {
         id: generatedId,
         userId: user.external_id,
-        syncrouteKey: "addPatient",
+        mutationSyncrouteKey: "addPatient",
         type: "createPatient",
         resourceType: "patient",
         payload: createPatientData,

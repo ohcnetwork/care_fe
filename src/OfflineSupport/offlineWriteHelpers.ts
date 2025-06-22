@@ -15,10 +15,11 @@ export type SaveOfflineWriteResult =
 export type saveOfflineWriteData = {
   id: string;
   userId: string;
-  syncrouteKey: string;
+  mutationSyncrouteKey: string;
+  mutationPathParams?: Record<string, any>;
+  mutationQueryParams?: Record<string, any>;
   type?: string;
   resourceType?: string;
-  pathParams?: Record<string, any>;
   payload: unknown;
   parentMutationIds?: string[];
   dependentFields?: Array<{
@@ -27,31 +28,35 @@ export type saveOfflineWriteData = {
     parentField: string;
   }>;
   serverTimestamp?: string;
-  queryrouteKey?: string;
-  queryParams?: Record<string, any>;
+  useQueryrouteKey?: string;
+  useQueryPathParams?: Record<string, any>;
+  useQueryParams?: Record<string, any>;
 };
 const db = new AppCacheDB();
 export const saveOfflineWrite = async ({
   id,
   userId,
-  syncrouteKey,
+  mutationSyncrouteKey,
   type,
   resourceType,
-  pathParams,
+  mutationPathParams,
+  mutationQueryParams,
   payload,
   parentMutationIds,
   dependentFields,
   serverTimestamp,
-  queryrouteKey,
-  queryParams,
+  useQueryrouteKey,
+  useQueryPathParams,
+  useQueryParams,
 }: saveOfflineWriteData): Promise<SaveOfflineWriteResult> => {
   const writeEntry = {
     id,
     userId,
-    syncrouteKey,
+    mutationSyncrouteKey,
     type,
     resourceType,
-    pathParams,
+    mutationPathParams,
+    mutationQueryParams,
     payload,
     parentMutationIds,
     dependentFields,
@@ -59,8 +64,9 @@ export const saveOfflineWrite = async ({
     serverTimestamp,
     syncStatus: "pending" as const,
     retries: 0,
-    queryrouteKey,
-    queryParams,
+    useQueryrouteKey,
+    useQueryPathParams,
+    useQueryParams,
   };
   try {
     await db.OfflineWrites.add(writeEntry);

@@ -132,7 +132,7 @@ export default function CreateEncounterForm({
       const baseEntry = {
         id: generatedId,
         userId: user.external_id,
-        syncrouteKey: "createEncounter",
+        mutationSyncrouteKey: "createEncounter",
         type: "createEncounter",
         resourceType: "Encounter",
         payload: encounterRequest,
