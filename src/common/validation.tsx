@@ -16,3 +16,8 @@ export const validatePincode = (pincode: string) => {
 export const validateAge = (age: number) => {
   return age > 0 && age <= 120;
 };
+
+export const validateUsername = (username: string) => {
+  const usernameRegex = /^(?!.*[_-]{2})(?=^[a-z0-9][a-z0-9_-]{2,14}[a-z0-9]$)/;
+  return usernameRegex.test(username);
+};

@@ -41,6 +41,7 @@ import {
 
 import { GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
+import { validatePassword, validateUsername } from "@/common/validation";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -79,20 +80,43 @@ export default function UserForm({
         ? z.string().optional()
         : z
             .string()
-            .min(4, { error: t("field_required") })
-            .max(16, { error: t("username_not_valid") })
-            .regex(/^[a-z0-9_-]*$/, { error: t("username_not_valid") })
-            .regex(/^[a-z0-9].*[a-z0-9]$/, { error: t("username_not_valid") })
-            .refine((val) => !val.match(/(?:[_-]{2,})/), {
-              error: t("username_not_valid"),
-            }),
+            .trim()
+            .min(1, { error: t("field_required") })
+            .refine(validateUsername, t("invalid")),
       password_setup_method: z.enum(["immediate", "email"]).optional(),
-      password: z.string().optional(),
-      c_password: z.string().optional(),
+      password: z
+        .string()
+        .refine(
+          (val) => {
+            if (
+              !isEditMode &&
+              form.watch("password_setup_method") == "immediate"
+            )
+              return !!val;
+            return true;
+          },
+          { error: t("field_required") },
+        )
+        .optional(),
+      c_password: z
+        .string()
+        .refine(
+          (val): boolean => {
+            if (
+              !isEditMode &&
+              form.watch("password_setup_method") == "immediate"
+            ) {
+              return !!val && val === form.watch("password");
+            }
+            return true;
+          },
+          { error: t("password_mismatch") },
+        )
+        .optional(),
       first_name: z.string().min(1, { error: t("field_required") }),
       last_name: z.string().min(1, { error: t("field_required") }),
       email: isEditMode
-        ? z.string().optional()
+        ? z.email().optional()
         : z.email({ error: t("invalid_email_address") }),
       phone_number: validators().phoneNumber.required,
       gender: z.enum(GENDERS, { error: t("field_required") }),
@@ -100,39 +124,23 @@ export default function UserForm({
       suffix: z.string().optional(),
       geo_organization: z.string().optional(),
     })
-    .refine(
-      (data) => {
-        if (!isEditMode && data.password_setup_method === "immediate") {
-          return data.password && data.password === data.c_password;
+    .check((ctx) => {
+      const data = ctx.value;
+      if (
+        !isEditMode &&
+        data.password_setup_method === "immediate" &&
+        data.password
+      ) {
+        if (!validatePassword(data.password)) {
+          ctx.issues.push({
+            code: "custom",
+            message: t("new_password_validation"),
+            path: ["password"],
+            input: data,
+          });
         }
-        return true;
-      },
-      {
-        error: t("password_mismatch"),
-        path: ["c_password"],
-      },
-    )
-    .refine(
-      (data) => {
-        if (
-          !isEditMode &&
-          data.password_setup_method === "immediate" &&
-          data.password
-        ) {
-          return (
-            data.password.length >= 8 &&
-            /[a-z]/.test(data.password) &&
-            /[A-Z]/.test(data.password) &&
-            /[0-9]/.test(data.password)
-          );
-        }
-        return true;
-      },
-      {
-        error: t("new_password_validation"),
-        path: ["password"],
-      },
-    );
+      }
+    });
 
   type UserFormValues = z.infer<typeof userFormSchema>;
 
@@ -152,6 +160,8 @@ export default function UserForm({
       password_setup_method: "immediate",
     },
   });
+
+  console.log("hello " + form.formState.errors.username);
 
   const { data: userData, isLoading: isLoadingUser } = useQuery({
     queryKey: ["user", existingUsername],
@@ -267,6 +277,7 @@ export default function UserForm({
   });
 
   const onSubmit = async (data: UserFormValues) => {
+    console.log(data.geo_organization);
     if (isEditMode) {
       updateUser({
         ...data,

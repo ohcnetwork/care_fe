@@ -75,7 +75,7 @@ export class UserCreation {
       },
       {
         label: "Gender",
-        message: "Gender is required",
+        message: "This field is required",
       },
     ]);
     return this;

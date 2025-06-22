@@ -120,9 +120,9 @@ export class FacilityCreation {
 
   verifyValidationErrors() {
     cy.verifyErrorMessages([
-      { label: "Facility Name", message: "Name is required" },
-      { label: "Facility Type", message: "Facility type is required" },
-      { label: "Address", message: "Address is required" },
+      { label: "Facility Name", message: "This field is required" },
+      { label: "Facility Type", message: "This field is required" },
+      { label: "Address", message: "This field is required" },
       {
         label: "Phone Number",
         message: "This field is required",
