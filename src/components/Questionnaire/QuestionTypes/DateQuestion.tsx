@@ -38,7 +38,7 @@ export function DateQuestion({
     clearError();
     const newValues = [...questionnaireResponse.values];
     newValues[index] = {
-      type: "dateTime",
+      type: "date",
       value: date,
     };
 
