@@ -69,7 +69,7 @@ const consentFormSchema = (isEdit: boolean) =>
       date: tzAwareDateTime,
       period: z.object({
         start: tzAwareDateTime.optional(),
-        end: z.union([tzAwareDateTime, z.undefined()]).optional(),
+        end: tzAwareDateTime.optional(),
       }),
       note: z.string().optional(),
       fileEntries: z
@@ -230,10 +230,10 @@ export default function ConsentFormSheet({
         period: {
           start: existingConsent!.period.start
             ? new Date(existingConsent!.period.start).toISOString()
-            : "",
+            : undefined,
           end: existingConsent!.period.end
             ? new Date(existingConsent!.period.end).toISOString()
-            : "",
+            : undefined,
         },
         note: existingConsent!.note || "",
         fileEntries: [],
@@ -572,11 +572,12 @@ export default function ConsentFormSheet({
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
+                variant="outline"
                 onClick={() => {
                   setIsOpen(false);
                   form.reset();
                 }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                disabled={isPending}
               >
                 {t("cancel")}
               </Button>

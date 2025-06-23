@@ -494,7 +494,7 @@ export const EncounterNotesTab = ({
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] overflow-hidden">
+    <div className="flex h-[calc(100vh-12rem)] overflow-hidden lg:h-[calc(80vh-12rem)]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
         <div className="p-4 border-b border-gray-200">
@@ -721,7 +721,7 @@ export const EncounterNotesTab = ({
                                 handleSendMessage(e);
                               }
                             }}
-                            className="flex-1 min-h-20 max-h-[50vh]"
+                            className="flex-1 min-h-10 max-h-[50vh]"
                           />
                           <Button
                             data-cy="send-chat-message-button"
