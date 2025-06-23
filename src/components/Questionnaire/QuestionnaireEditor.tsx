@@ -1078,6 +1078,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             className="relative bg-white rounded-lg shadow-md"
                           >
                             <QuestionEditor
+                              name={`questions.${index}`}
                               index={index}
                               key={question.link_id}
                               question={question}
@@ -1386,6 +1387,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 }
 
 interface QuestionEditorProps {
+  name: string;
   form: ReturnType<typeof useForm<any>>;
   index: number;
   question: Question;
@@ -1412,6 +1414,7 @@ interface QuestionEditorProps {
 }
 
 function QuestionEditor({
+  name,
   form,
   question,
   onChange,
@@ -1567,7 +1570,7 @@ function QuestionEditor({
       case "string":
       case "url":
       case "choice":
-        return ["equals", "not_equals"];
+        return ["equals", "not_equals", "exists"];
       default:
         return [
           "equals",
@@ -1785,7 +1788,7 @@ function QuestionEditor({
             <div className="flex-1">
               <FormField
                 control={form.control}
-                name={`questions.${index}.text`}
+                name={`${name}.text`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("question_text")}</FormLabel>
@@ -1795,11 +1798,9 @@ function QuestionEditor({
                         value={text}
                         onChange={(e) => {
                           updateField("text", e.target.value);
-                          form.setValue(
-                            `questions.${index}.text`,
-                            e.target.value,
-                            { shouldValidate: true },
-                          );
+                          form.setValue(`${name}.text`, e.target.value, {
+                            shouldValidate: true,
+                          });
                         }}
                       />
                     </FormControl>
@@ -1813,7 +1814,7 @@ function QuestionEditor({
           <div>
             <FormField
               control={form.control}
-              name={`questions.${index}.description`}
+              name={`${name}.description`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("description")}</FormLabel>
@@ -1823,11 +1824,9 @@ function QuestionEditor({
                       value={question.description || ""}
                       onChange={(e) => {
                         updateField("description", e.target.value);
-                        form.setValue(
-                          `questions.${index}.description`,
-                          e.target.value,
-                          { shouldValidate: true },
-                        );
+                        form.setValue(`${name}.description`, e.target.value, {
+                          shouldValidate: true,
+                        });
                       }}
                       placeholder={t("question_description_placeholder")}
                       className="h-20"
@@ -1941,7 +1940,7 @@ function QuestionEditor({
             {UNIT_TYPES.includes(type) && (
               <FormField
                 control={form.control}
-                name={`questions.${index}.unit`}
+                name={`${name}.unit`}
                 render={({ field }) => (
                   <FormItem className="pb-4">
                     <FormLabel>{t("unit")}</FormLabel>
@@ -1953,7 +1952,7 @@ function QuestionEditor({
                         value={unit}
                         onSelect={(code) => {
                           updateField("unit", code);
-                          form.setValue(`questions.${index}.unit`, code, {
+                          form.setValue(`${name}.unit`, code, {
                             shouldValidate: true,
                           });
                         }}
@@ -2560,6 +2559,7 @@ function QuestionEditor({
                     className="relative bg-white rounded-lg shadow-md"
                   >
                     <QuestionEditor
+                      name={`${name}.questions.${idx}`}
                       handleEnableWhenDependentClick={
                         handleEnableWhenDependentClick
                       }
@@ -2662,6 +2662,18 @@ function QuestionEditor({
                           (_, i) => i !== idx,
                         );
                         updateField("enable_when", newConditions);
+                        setEnableWhenQuestionAnswers((prev) => {
+                          const newAnswers: typeof prev = {};
+                          Object.keys(prev)
+                            .map(Number)
+                            .sort((a, b) => a - b)
+                            .forEach((key) => {
+                              if (key < idx) newAnswers[key] = prev[key];
+                              else if (key > idx)
+                                newAnswers[key - 1] = prev[key];
+                            });
+                          return newAnswers;
+                        });
                       }}
                     >
                       <CareIcon icon="l-times" className="size-4" />
@@ -2845,32 +2857,11 @@ function QuestionEditor({
                     </div>
                     <div className="flex gap-2">
                       <div className="flex-1">
-                        <Label className="text-xs mb-1">{t("answer")}</Label>
+                        {condition.operator !== "exists" && (
+                          <Label className="text-xs mb-1">{t("answer")}</Label>
+                        )}
                         {condition.operator === "exists" ? (
-                          <Select
-                            value={condition.answer ? "true" : "false"}
-                            onValueChange={(val: "true" | "false") => {
-                              const newConditions = [
-                                ...(question.enable_when || []),
-                              ];
-                              newConditions[idx] = {
-                                question: condition.question,
-                                operator: "exists" as const,
-                                answer: val === "true",
-                              };
-                              updateField("enable_when", newConditions);
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="true">{t("true")}</SelectItem>
-                              <SelectItem value="false">
-                                {t("false")}
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <span></span>
                         ) : (
                           getAnswerChoices(idx, condition)
                         )}
@@ -2893,6 +2884,10 @@ function QuestionEditor({
                     ...(question.enable_when || []),
                     newCondition,
                   ]);
+                  setEnableWhenQuestionAnswers((prev) => ({
+                    ...prev,
+                    [question.enable_when?.length ?? 0]: [],
+                  }));
                 }}
               >
                 <CareIcon icon="l-plus" className="mr-2 size-4" />
