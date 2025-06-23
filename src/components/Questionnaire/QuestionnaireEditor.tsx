@@ -346,6 +346,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }),
     onSuccess: (data: QuestionnaireDetail) => {
       toast.success(t("questionnaire_updated_successfully"));
+      // Update the form's default values to the latest saved data
+      form.reset({
+        ...form.getValues(),
+        ...data,
+      });
       navigate(`/admin/questionnaire/${data.slug}/edit`);
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
