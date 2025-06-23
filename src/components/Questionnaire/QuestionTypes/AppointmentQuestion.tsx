@@ -95,8 +95,7 @@ export function AppointmentQuestion({
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
     const updatedValue = { ...value, ...updates };
-
-    if (!updatedValue.reason_for_visit && !updatedValue.slot_id) {
+    if (!updatedValue.reason_for_visit?.trim() && !updatedValue.slot_id) {
       updateQuestionnaireResponseCB(
         [],
         questionnaireResponse.question_id,
@@ -135,7 +134,7 @@ export function AppointmentQuestion({
           value={value.reason_for_visit || ""}
           onChange={(e) =>
             handleUpdate({
-              reason_for_visit: e.target.value.trim() || undefined,
+              reason_for_visit: e.target.value || undefined,
             })
           }
           disabled={disabled}
