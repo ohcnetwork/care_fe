@@ -10,7 +10,7 @@ import {
   ViewIcon,
 } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -201,6 +201,16 @@ function LayoutOptionCard({
 
 const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "group", "display"];
 
+function findFirstErrorIndex(errors: any): number | null {
+  if (!Array.isArray(errors)) return null;
+  for (let i = 0; i < errors.length; i++) {
+    if (errors[i] && Object.keys(errors[i]).length > 0) {
+      return i;
+    }
+  }
+  return null;
+}
+
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -231,6 +241,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     Map<string, Set<{ question: Question; path: string[] }>>
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
+  const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -605,6 +616,34 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     });
 
     if (!isValid || !hasOrganizations || !hasValidStructuredType) {
+      const errorEntries = Object.entries(form.formState.errors);
+
+      for (const [fieldName, error] of errorEntries) {
+        if (fieldName !== "questions") {
+          const el = document.querySelector(`[name="${fieldName}"]`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            break;
+          }
+        } else {
+          const firstErrorIdx = findFirstErrorIndex(error);
+
+          if (firstErrorIdx !== null) {
+            const question = rootQuestions[firstErrorIdx];
+            if (question && question.link_id) {
+              setExpandedQuestions((prev) =>
+                new Set(prev).add(question.link_id),
+              );
+              setTimeout(() => {
+                const el = questionRefs.current[question.link_id];
+                if (el) {
+                  el.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+              }, 100);
+            }
+          }
+        }
+      }
       return;
     }
 
@@ -1069,6 +1108,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           <div
                             key={question.id}
                             id={`question-${question.link_id}`}
+                            ref={(el) => {
+                              questionRefs.current[question.link_id] = el;
+                            }}
                             className="relative bg-white rounded-lg shadow-md"
                           >
                             <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
