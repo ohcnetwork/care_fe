@@ -474,6 +474,7 @@ export const EncounterNotesTab = ({
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const canSend =
       newMessage.trim() && selectedThread && !createMessageMutation.isPending;
     if (canSend) {
@@ -716,8 +717,6 @@ export const EncounterNotesTab = ({
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter" && e.shiftKey) {
-                                e.preventDefault();
-                                e.stopPropagation();
                                 handleSendMessage(e);
                               }
                             }}
