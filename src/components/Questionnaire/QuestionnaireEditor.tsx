@@ -1075,6 +1075,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           >
                             <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
                             <QuestionEditor
+                              name={`questions.${index}`}
                               index={index}
                               key={question.link_id}
                               question={question}
@@ -1371,6 +1372,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 }
 
 interface QuestionEditorProps {
+  name: string;
   form: ReturnType<typeof useForm<any>>;
   index: number;
   question: Question;
@@ -1395,6 +1397,7 @@ interface QuestionEditorProps {
 }
 
 function QuestionEditor({
+  name,
   form,
   question,
   onChange,
@@ -1757,7 +1760,7 @@ function QuestionEditor({
             <div className="flex-1">
               <FormField
                 control={form.control}
-                name={`questions.${index}.text`}
+                name={`${name}.text`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("question_text")}</FormLabel>
@@ -1767,11 +1770,9 @@ function QuestionEditor({
                         value={text}
                         onChange={(e) => {
                           updateField("text", e.target.value);
-                          form.setValue(
-                            `questions.${index}.text`,
-                            e.target.value,
-                            { shouldValidate: true },
-                          );
+                          form.setValue(`${name}.text`, e.target.value, {
+                            shouldValidate: true,
+                          });
                         }}
                       />
                     </FormControl>
@@ -1785,7 +1786,7 @@ function QuestionEditor({
           <div>
             <FormField
               control={form.control}
-              name={`questions.${index}.description`}
+              name={`${name}.description`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("description")}</FormLabel>
@@ -1795,11 +1796,9 @@ function QuestionEditor({
                       value={question.description || ""}
                       onChange={(e) => {
                         updateField("description", e.target.value);
-                        form.setValue(
-                          `questions.${index}.description`,
-                          e.target.value,
-                          { shouldValidate: true },
-                        );
+                        form.setValue(`${name}.description`, e.target.value, {
+                          shouldValidate: true,
+                        });
                       }}
                       placeholder={t("question_description_placeholder")}
                       className="h-20"
@@ -1913,7 +1912,7 @@ function QuestionEditor({
             {UNIT_TYPES.includes(type) && (
               <FormField
                 control={form.control}
-                name={`questions.${index}.unit`}
+                name={`${name}.unit`}
                 render={({ field }) => (
                   <FormItem className="pb-4">
                     <FormLabel>{t("unit")}</FormLabel>
@@ -1925,7 +1924,7 @@ function QuestionEditor({
                         value={unit}
                         onSelect={(code) => {
                           updateField("unit", code);
-                          form.setValue(`questions.${index}.unit`, code, {
+                          form.setValue(`${name}.unit`, code, {
                             shouldValidate: true,
                           });
                         }}
@@ -2537,6 +2536,7 @@ function QuestionEditor({
                     className="relative bg-white rounded-lg shadow-md"
                   >
                     <QuestionEditor
+                      name={`${name}.questions.${idx}`}
                       handleEnableWhenDependentClick={
                         handleEnableWhenDependentClick
                       }
