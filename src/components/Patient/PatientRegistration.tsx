@@ -123,6 +123,8 @@ export default function PatientRegistration(
         .string()
         .uuid({ message: t("geo_organization_is_required") })
         .optional(),
+      _selected_levels: z.array(z.custom<Organization>()),
+      _is_deceased: z.boolean(),
     })
     .superRefine((data, ctx) => {
       if (data.age_or_dob === "dob" && !data.date_of_birth) {
@@ -193,6 +195,8 @@ export default function PatientRegistration(
       same_phone_number: false,
       same_address: true,
       geo_organization: "",
+      _selected_levels: [],
+      _is_deceased: false,
     },
     mode: "onSubmit",
   });
