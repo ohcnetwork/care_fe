@@ -153,10 +153,11 @@ function QuestionGroup({
     const response = responses.find((r) => r.question_id === question.id);
     if (!response) return null;
 
-    const value = response.values[0]?.value;
-    const unit = response.values[0]?.unit || question.unit;
-    const coding = response.values[0]?.coding;
-    const note = response?.note;
+    const values = response.values;
+    if (!values?.length) return null;
+
+    const hasAnyValue = values.some((v) => v.value || v.coding);
+    if (!hasAnyValue) return null;
 
     return (
       <TableRow key={question.id}>
@@ -165,18 +166,28 @@ function QuestionGroup({
             {question.text}
           </div>
         </TableCell>
-        <TableCell className="py-1 pr-0 align-top" colSpan={note ? 1 : 2}>
+        <TableCell
+          className="py-1 pr-0 align-top"
+          colSpan={response.note ? 1 : 2}
+        >
           <div className="text-sm font-medium break-words whitespace-normal">
-            {formatValue(value, question.type)}
-            {unit && <span className="ml-1 text-gray-600">{unit.code}</span>}
-            {coding && (
-              <span className="ml-1 text-gray-600">
-                {coding.display} ({coding.code})
-              </span>
-            )}
+            {values.map((val, idx) => (
+              <React.Fragment key={idx}>
+                {idx > 0 && ", "}
+                {val.value && formatValue(val.value, question.type)}
+                {val.unit && (
+                  <span className="ml-1 text-gray-600">{val.unit.code}</span>
+                )}
+                {val.coding && (
+                  <span className="ml-1 text-gray-600">
+                    {val.coding.display} ({val.coding.code})
+                  </span>
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </TableCell>
-        {note && (
+        {response.note && (
           <TableCell className="py-1 pr-0 align-top">
             <div className="flex justify-end">
               <Popover>
@@ -191,7 +202,7 @@ function QuestionGroup({
                 </PopoverTrigger>
                 <PopoverContent className="w-52 p-4">
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                    {note}
+                    {response.note}
                   </p>
                 </PopoverContent>
               </Popover>
@@ -340,14 +351,12 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                       (r) => r.question_id === question.id,
                     );
                     if (!response) return null;
-                    const value = response.values
-                      ?.map((v) => v.value)
-                      .join(", ");
-                    const unit = response.values[0]?.unit || question.unit;
-                    const coding = response.values[0]?.coding;
-                    const note = response?.note;
 
-                    if (!value && !coding) return null;
+                    const values = response.values;
+                    if (!values?.length) return null;
+
+                    const hasAnyValue = values.some((v) => v.value || v.coding);
+                    if (!hasAnyValue) return null;
 
                     return (
                       <TableRow key={question.id}>
@@ -358,23 +367,29 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                         </TableCell>
                         <TableCell
                           className="py-1 pr-0 align-top"
-                          colSpan={note ? 1 : 2}
+                          colSpan={response.note ? 1 : 2}
                         >
                           <div className="text-sm font-medium break-words whitespace-normal">
-                            {formatValue(value, question.type)}
-                            {unit && (
-                              <span className="ml-1 text-gray-600">
-                                {unit.code}
-                              </span>
-                            )}
-                            {coding && (
-                              <span className="ml-1 text-gray-600">
-                                {coding.display} ({coding.code})
-                              </span>
-                            )}
+                            {values.map((val, idx) => (
+                              <React.Fragment key={idx}>
+                                {idx > 0 && ", "}
+                                {val.value &&
+                                  formatValue(val.value, question.type)}
+                                {val.unit && (
+                                  <span className="ml-1 text-gray-600">
+                                    {val.unit.code}
+                                  </span>
+                                )}
+                                {val.coding && (
+                                  <span className="ml-1 text-gray-600">
+                                    {val.coding.display} ({val.coding.code})
+                                  </span>
+                                )}
+                              </React.Fragment>
+                            ))}
                           </div>
                         </TableCell>
-                        {note && (
+                        {response.note && (
                           <TableCell className="py-1 pr-0 align-top text-right">
                             <div className="flex justify-end">
                               <Popover>
@@ -389,7 +404,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                                 </PopoverTrigger>
                                 <PopoverContent className="w-52 p-4">
                                   <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                                    {note}
+                                    {response.note}
                                   </p>
                                 </PopoverContent>
                               </Popover>

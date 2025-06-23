@@ -305,7 +305,7 @@ export function ValueSetList() {
   });
   const { data: response, isLoading } = useQuery({
     queryKey: ["valuesets", qParams],
-    queryFn: query(valuesetApi.list, {
+    queryFn: query.debounced(valuesetApi.list, {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
