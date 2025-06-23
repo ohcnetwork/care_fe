@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -42,6 +41,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { DateTimeInput } from "@/components/Common/DateTimeInput";
+import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
@@ -377,27 +377,16 @@ export default function ConsentFormSheet({
                   control={form.control}
                   name="decision"
                   render={({ field }) => (
-                    <FormItem className="space-y-2">
+                    <FormItem>
                       <FormLabel>{t("consent_decision")}</FormLabel>
-                      <RadioGroup
+                      <RadioInput
+                        {...field}
+                        options={CONSENT_DECISIONS.map((decision) => ({
+                          label: t(`consent_decision__${decision}`),
+                          value: decision,
+                        }))}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        value={field.value}
-                        className="flex gap-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="permit" id="permit" />
-                          <Label htmlFor="permit">
-                            {t("consent_decision__permit")}
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="deny" id="deny" />
-                          <Label htmlFor="deny">
-                            {t("consent_decision__deny")}
-                          </Label>
-                        </div>
-                      </RadioGroup>
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
