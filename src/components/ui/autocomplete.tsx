@@ -184,11 +184,7 @@ export default function Autocomplete({
             ref={ref}
             role="combobox"
             aria-expanded={open}
-            className={cn(
-              "w-full justify-between",
-
-              className,
-            )}
+            className={cn("w-full justify-between", className)}
             disabled={disabled}
             data-cy={dataCy}
             type="button"
