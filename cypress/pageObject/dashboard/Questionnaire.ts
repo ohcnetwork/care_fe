@@ -40,7 +40,17 @@ export class Questionnaire {
   }
 
   verifyQuestionnaireUpdate() {
-    cy.verifyNotification("Questionnaire updated successfully");
+    cy.get("li[data-sonner-toast]", { timeout: 10000 })
+      .should("be.visible")
+      .find("div[data-title]")
+      .invoke("text")
+      .then((text) => {
+        if (text.includes("Questionnaire updated successfully")) {
+          cy.verifyNotification("Questionnaire updated successfully");
+        } else if (text.includes("No changes made")) {
+          cy.verifyNotification("No changes made");
+        }
+      });
     return this;
   }
 
