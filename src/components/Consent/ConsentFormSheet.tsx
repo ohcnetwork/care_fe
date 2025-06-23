@@ -66,8 +66,8 @@ const consentFormSchema = (isEdit: boolean) =>
       status: z.enum(CONSENT_STATUSES).default("active"),
       date: z.iso.datetime({ offset: true }),
       period: z.object({
-        start: tzAwareDateTime.optional(),
-        end: tzAwareDateTime.optional(),
+        start: z.iso.datetime({ offset: true }).optional(),
+        end: z.iso.datetime({ offset: true }).optional(),
       }),
       note: z.string().optional(),
       fileEntries: z
