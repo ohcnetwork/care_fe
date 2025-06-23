@@ -16,6 +16,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 import PaginationComponent from "@/components/Common/Pagination";
@@ -58,8 +63,10 @@ export function formatValue(
   switch (type) {
     case "dateTime":
       return value instanceof Date
-        ? formatDateTime(value.toISOString())
-        : formatDateTime(value.toString());
+        ? formatDateTime(value.toISOString(), "hh:mm A; DD/MM/YYYY")
+        : formatDateTime(value.toString(), "hh:mm A; DD/MM/YYYY");
+    case "date":
+      return formatDateTime(value.toString());
     case "choice":
       return properCase(value.toString());
     case "decimal":
@@ -116,11 +123,29 @@ function QuestionGroup({
       return acc;
     }, []) || [];
 
-  const midPoint = isSingleGroup
+  // Check if any response has long text (>100 chars)
+  const hasLongText = questionsWithResponses.some((question) => {
+    const response = responses.find((r) => r.question_id === question.id);
+    if (!response) return false;
+
+    const value = response.values[0]?.value;
+    const coding = response.values[0]?.coding;
+    const text = [
+      value?.toString() || "",
+      coding?.display || "",
+      coding?.code || "",
+    ].join(" ");
+
+    return text.length > 50;
+  });
+
+  // Use single column if any response has long text
+  const shouldUseTwoColumns = isSingleGroup && !hasLongText;
+  const midPoint = shouldUseTwoColumns
     ? Math.ceil(questionsWithResponses.length / 2)
     : questionsWithResponses.length;
   const leftQuestions = questionsWithResponses.slice(0, midPoint);
-  const rightQuestions = isSingleGroup
+  const rightQuestions = shouldUseTwoColumns
     ? questionsWithResponses.slice(midPoint)
     : [];
 
@@ -128,9 +153,11 @@ function QuestionGroup({
     const response = responses.find((r) => r.question_id === question.id);
     if (!response) return null;
 
-    const value = response.values[0]?.value;
-    const unit = response.values[0]?.unit || question.unit;
-    const coding = response.values[0]?.coding;
+    const values = response.values;
+    if (!values?.length) return null;
+
+    const hasAnyValue = values.some((v) => v.value || v.coding);
+    if (!hasAnyValue) return null;
 
     return (
       <TableRow key={question.id}>
@@ -139,17 +166,49 @@ function QuestionGroup({
             {question.text}
           </div>
         </TableCell>
-        <TableCell className="py-1 pr-0 align-top">
+        <TableCell
+          className="py-1 pr-0 align-top"
+          colSpan={response.note ? 1 : 2}
+        >
           <div className="text-sm font-medium break-words whitespace-normal">
-            {formatValue(value, question.type)}
-            {unit && <span className="ml-1 text-gray-600">{unit.code}</span>}
-            {coding && (
-              <span className="ml-1 text-gray-600">
-                {coding.display} ({coding.code})
-              </span>
-            )}
+            {values.map((val, idx) => (
+              <React.Fragment key={idx}>
+                {idx > 0 && ", "}
+                {val.value && formatValue(val.value, question.type)}
+                {val.unit && (
+                  <span className="ml-1 text-gray-600">{val.unit.code}</span>
+                )}
+                {val.coding && (
+                  <span className="ml-1 text-gray-600">
+                    {val.coding.display} ({val.coding.code})
+                  </span>
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </TableCell>
+        {response.note && (
+          <TableCell className="py-1 pr-0 align-top">
+            <div className="flex justify-end">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs shrink-0"
+                  >
+                    {t("see_note")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-52 p-4">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {response.note}
+                  </p>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </TableCell>
+        )}
       </TableRow>
     );
   };
@@ -161,7 +220,7 @@ function QuestionGroup({
       </h3>
       <div
         className={cn("w-full", {
-          "grid md:grid-cols-2 grid-cols-1 gap-8": isSingleGroup,
+          "grid md:grid-cols-2 grid-cols-1 gap-8": shouldUseTwoColumns,
         })}
       >
         {leftQuestions.length > 0 && (
@@ -172,7 +231,7 @@ function QuestionGroup({
           </div>
         )}
 
-        {isSingleGroup && rightQuestions.length > 0 && (
+        {shouldUseTwoColumns && rightQuestions.length > 0 && (
           <div className="w-full">
             <Table className="table-fixed w-full">
               <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
@@ -293,11 +352,11 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                     );
                     if (!response) return null;
 
-                    const value = response.values[0]?.value;
-                    const unit = response.values[0]?.unit || question.unit;
-                    const coding = response.values[0]?.coding;
+                    const values = response.values;
+                    if (!values?.length) return null;
 
-                    if (!value && !coding) return null;
+                    const hasAnyValue = values.some((v) => v.value || v.coding);
+                    if (!hasAnyValue) return null;
 
                     return (
                       <TableRow key={question.id}>
@@ -306,21 +365,52 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                             {question.text}
                           </div>
                         </TableCell>
-                        <TableCell className="py-1 pr-0 align-top">
+                        <TableCell
+                          className="py-1 pr-0 align-top"
+                          colSpan={response.note ? 1 : 2}
+                        >
                           <div className="text-sm font-medium break-words whitespace-normal">
-                            {formatValue(value, question.type)}
-                            {unit && (
-                              <span className="ml-1 text-gray-600">
-                                {unit.code}
-                              </span>
-                            )}
-                            {coding && (
-                              <span className="ml-1 text-gray-600">
-                                {coding.display} ({coding.code})
-                              </span>
-                            )}
+                            {values.map((val, idx) => (
+                              <React.Fragment key={idx}>
+                                {idx > 0 && ", "}
+                                {val.value &&
+                                  formatValue(val.value, question.type)}
+                                {val.unit && (
+                                  <span className="ml-1 text-gray-600">
+                                    {val.unit.code}
+                                  </span>
+                                )}
+                                {val.coding && (
+                                  <span className="ml-1 text-gray-600">
+                                    {val.coding.display} ({val.coding.code})
+                                  </span>
+                                )}
+                              </React.Fragment>
+                            ))}
                           </div>
                         </TableCell>
+                        {response.note && (
+                          <TableCell className="py-1 pr-0 align-top text-right">
+                            <div className="flex justify-end">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 text-xs shrink-0"
+                                  >
+                                    {t("see_note")}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-52 p-4">
+                                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                    {response.note}
+                                  </p>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     );
                   })}
