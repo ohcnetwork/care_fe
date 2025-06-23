@@ -17,9 +17,9 @@ interface GovtOrganizationSelectorProps {
   authToken?: string;
   selected?: Organization[];
 
-  isError?: boolean;
-
   ref?: React.RefCallback<HTMLButtonElement | null>;
+
+  "aria-invalid"?: boolean;
 }
 
 interface OrganizationLevelProps {
@@ -83,7 +83,7 @@ function OrganizationLevelSelect({
       <div className="flex items-center gap-2">
         {isFetching && <Loader2 className="size-6 animate-spin" />}
         <Autocomplete
-          isError={isError}
+          aria-invalid={isError}
           ref={ref}
           value={currentLevel?.id || ""}
           options={options}
@@ -163,7 +163,7 @@ export default function GovtOrganizationSelector(
     <>
       {Array.from({ length: totalLevels }).map((_, index) => (
         <OrganizationLevelSelect
-          isError={props.isError && !selectedLevels[index]}
+          isError={props["aria-invalid"] && !selectedLevels[index]}
           key={index}
           ref={props.ref}
           index={index}

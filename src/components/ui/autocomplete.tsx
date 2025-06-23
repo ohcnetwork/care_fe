@@ -47,7 +47,7 @@ interface AutocompleteProps {
 
   ref?: React.RefCallback<HTMLButtonElement | null>;
 
-  isError?: boolean;
+  "aria-invalid"?: boolean;
 }
 
 export default function Autocomplete({
@@ -67,7 +67,7 @@ export default function Autocomplete({
   closeOnSelect = true,
   "data-cy": dataCy,
   ref,
-  isError,
+  ...props
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -172,6 +172,7 @@ export default function Autocomplete({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button
+            aria-invalid={props["aria-invalid"]}
             title={
               value
                 ? freeInput
@@ -185,7 +186,7 @@ export default function Autocomplete({
             aria-expanded={open}
             className={cn(
               "w-full justify-between",
-              isError && "border-red-500",
+
               className,
             )}
             disabled={disabled}
@@ -222,12 +223,9 @@ export default function Autocomplete({
           title={selectedOption ? selectedOption.label : undefined}
           variant="outline"
           role="combobox"
+          aria-invalid={props["aria-invalid"]}
           aria-expanded={open}
-          className={cn(
-            "w-full justify-between",
-            isError && "border-red-500",
-            className,
-          )}
+          className={cn("w-full justify-between", className)}
           disabled={disabled}
           data-cy={dataCy}
           onClick={() => setOpen(!open)}

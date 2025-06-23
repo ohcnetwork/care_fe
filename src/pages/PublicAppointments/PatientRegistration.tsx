@@ -409,12 +409,12 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormControl>
                       <GovtOrganizationSelector
+                        {...field}
                         required
                         authToken={tokenData.token}
                         onChange={(value) => {
                           field.onChange(value);
                         }}
-                        isError={!!form.formState.errors.geo_organization}
                       />
                     </FormControl>
                     <FormMessage />

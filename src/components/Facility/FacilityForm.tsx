@@ -369,7 +369,6 @@ export default function FacilityForm({
                     <div className="grid-cols-1 grid md:grid-cols-2 gap-5">
                       <GovtOrganizationSelector
                         {...field}
-                        isError={!!form.formState.errors.geo_organization}
                         value={form.watch("geo_organization")}
                         selected={selectedLevels}
                         onChange={(value) =>

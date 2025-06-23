@@ -359,12 +359,11 @@ export default function UserForm({
               <FormItem>
                 <FormLabel>{t("prefix")}</FormLabel>
                 <Autocomplete
+                  {...field}
                   options={NAME_PREFIXES.map((prefix) => ({
                     label: prefix,
                     value: prefix,
                   }))}
-                  isError={!!form.formState.errors.prefix}
-                  ref={field.ref}
                   freeInput
                   value={field.value || ""}
                   onChange={field.onChange}
@@ -802,7 +801,6 @@ export default function UserForm({
               <FormControl>
                 <GovtOrganizationSelector
                   {...field}
-                  isError={!!form.formState.errors.geo_organization}
                   value={form.watch("geo_organization")}
                   selected={selectedLevels}
                   onChange={(value) =>

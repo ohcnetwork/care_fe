@@ -276,8 +276,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     </FormLabel>
                     <FormControl>
                       <Autocomplete
+                        {...field}
                         data-cy="select-facility"
-                        isError={!!form.formState.errors.assigned_facility}
                         options={mergeAutocompleteOptions(
                           facilityOptions ?? [],
                           field.value
