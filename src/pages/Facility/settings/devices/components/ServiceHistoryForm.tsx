@@ -68,7 +68,7 @@ export default function ServiceHistoryForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       note: "",
-      serviced_on: undefined,
+      serviced_on: new Date(),
     },
   });
 

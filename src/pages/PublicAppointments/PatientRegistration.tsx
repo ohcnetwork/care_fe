@@ -91,7 +91,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         .refine(
           (val) => {
             if (form.watch("ageInputType") === "date_of_birth") {
-              console.log(val);
               return !!val;
             }
             return true;
@@ -131,8 +130,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       geo_organization: "",
     },
   });
-
-  console.log(form.formState.errors);
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
@@ -402,7 +399,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("pincode")}</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} type="number" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -161,8 +161,6 @@ export default function UserForm({
     },
   });
 
-  console.log("hello " + form.formState.errors.username);
-
   const { data: userData, isLoading: isLoadingUser } = useQuery({
     queryKey: ["user", existingUsername],
     queryFn: query(userApi.get, {
@@ -277,7 +275,6 @@ export default function UserForm({
   });
 
   const onSubmit = async (data: UserFormValues) => {
-    console.log(data.geo_organization);
     if (isEditMode) {
       updateUser({
         ...data,

@@ -201,7 +201,8 @@ export default defineConfig(({ mode }) => {
             .string()
             .optional()
             .transform((val) => val?.split(" "))
-            .pipe(z.array(z.url()).optional()),
+            .pipe(z.array(z.url()).optional())
+            .describe("Optional: Space-separated list of CDN URLs"),
         },
       }),
       viteStaticCopy({

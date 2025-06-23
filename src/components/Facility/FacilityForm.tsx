@@ -95,8 +95,6 @@ export default function FacilityForm({
     },
   });
 
-  console.log(form.watch("geo_organization"));
-
   const { data: org } = useQuery({
     queryKey: ["organization", organizationId],
     queryFn: query(organizationApi.get, {

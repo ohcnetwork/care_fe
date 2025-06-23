@@ -37,12 +37,6 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { TokenData } from "@/types/auth/otp";
 
-const FormSchema = z.object({
-  pin: z.string().min(5, {
-    error: "Your one-time password must be 5 characters.",
-  }),
-});
-
 export default function PatientLogin({
   facilityId,
   staffId,
@@ -56,6 +50,11 @@ export default function PatientLogin({
   const { t } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState("");
+  const FormSchema = z.object({
+    pin: z.string().min(5, {
+      error: t("otp_validation_message"),
+    }),
+  });
   const OTPForm = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
