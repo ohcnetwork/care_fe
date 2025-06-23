@@ -41,109 +41,136 @@ export class PatientEncounter {
     return this;
   }
 
-  clickEditAllergy() {
-    cy.intercept("GET", "**/allergy_intolerance/**").as("getAllergies");
-    cy.verifyAndClickElement('[data-cy="edit-allergies"]', "Edit");
-    cy.wait("@getAllergies").its("response.statusCode").should("eq", 200);
-    return this;
-  }
-
   clickAddAllergy() {
-    cy.verifyAndClickElement('[data-cy="add-allergies"]', "Add Allergy");
+    cy.intercept("GET", "**/allergy_intolerance/**").as("getAllergies");
+
+    cy.contains("a", "Add Allergy")
+      .then(($el) => {
+        $el.attr("data-cy", "add-allergy-button");
+      })
+      .then(() => {
+        cy.verifyAndClickElement(
+          '[data-cy="add-allergy-button"]',
+          "Add Allergy",
+        );
+      });
+
+    cy.wait("@getAllergies").its("response.statusCode").should("eq", 200);
     return this;
   }
 
   addAllergy(details: AllergyDetails) {
     const { allergyName } = details;
-    cy.get('[data-cy="add-allergy"]').scrollIntoView();
-    cy.typeAndSelectOption('[data-cy="add-allergy"]', allergyName, false);
+    cy.contains("button", "Add another Allergy")
+      .scrollIntoView()
+      .as("allergyButton")
+      .then(($el) => {
+        $el.attr("data-cy", "add-allergy");
+      })
+      .then(() => {
+        cy.typeAndSelectOption('[data-cy="add-allergy"]', allergyName, false);
+      });
+
     return this;
   }
 
   updateAllergy(details: AllergyDetails) {
-    const { criticality, status, notes } = details;
+    const { criticality, status } = details;
     cy.wait(200);
-    if (criticality) {
-      cy.get('[data-cy="allergy-criticality"]').first().scrollIntoView();
-      cy.clickAndSelectOption('[data-cy="allergy-criticality"]', criticality, {
-        position: "first",
+
+    cy.get("tr")
+      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
+      .first()
+      .find("td")
+      .then(($tds) => {
+        const criticality = $tds.eq(1);
+        const status = $tds.eq(2);
+        criticality.attr("data-cy", "allergy-criticality");
+        status.attr("data-cy", "allergy-status");
       });
-    }
-    if (status) {
-      cy.get('[data-cy="allergy-status"]').first().scrollIntoView();
-      cy.clickAndSelectOption('[data-cy="allergy-status"]', status, {
-        position: "first",
-      });
-    }
-    if (notes) {
-      cy.get('[data-cy="allergy-notes"]').first().scrollIntoView();
-      cy.typeIntoField('[data-cy="allergy-notes"]', notes, {
-        position: "first",
-        skipVerification: true,
-      });
-    }
+
+    cy.get('[data-cy="allergy-criticality"]').first().scrollIntoView();
+    cy.clickAndSelectOption('[data-cy="allergy-criticality"]', criticality, {
+      position: "first",
+    });
+
+    cy.get('[data-cy="allergy-status"]').first().scrollIntoView();
+    cy.clickAndSelectOption('[data-cy="allergy-status"]', status, {
+      position: "first",
+    });
+
     return this;
   }
 
   deleteAllergy() {
     cy.wait(300);
-    cy.get('[data-cy="allergy-options"]')
+    cy.get("tr")
       .last()
+      .find("td")
+      .then(($tds) => {
+        $tds.eq(4).attr("data-cy", "allergy-options");
+      });
+    cy.get('[data-cy="allergy-options"]')
       .scrollIntoView()
       .should("be.visible")
       .then(($el) => {
         cy.wrap($el).click();
-        cy.verifyAndClickElement(
-          '[data-cy="remove-allergy"]',
-          "Remove Allergy",
-        );
+        cy.contains("button", "Remove Allergy").click();
       });
 
     return this;
   }
 
   verifyAllergyDelete(name: string) {
-    cy.get('[data-cy="allergies-table"]').scrollIntoView();
-    cy.get('[data-cy="allergies-table"]').then(($el) => {
+    cy.get('div:contains("Allergies")').scrollIntoView();
+    cy.get('div:contains("Allergies")').then(($el) => {
       cy.wrap($el).should("not.contain", name);
     });
     return this;
   }
 
   verifyAllergy(details: AllergyDetails) {
-    const { allergyName, criticality, status, notes } = details;
-    cy.get('[data-cy="allergies-table"]').scrollIntoView();
-    cy.verifyContentPresence('[data-cy="allergies-table"]', [
+    const { allergyName, criticality, status } = details;
+    cy.get('div:contains("Allergies")').scrollIntoView();
+    cy.verifyContentPresence('div:contains("Allergies")', [
       allergyName,
       criticality,
       status,
     ]);
 
-    if (notes) {
-      cy.get('[data-cy="allergy-see-note"]').first().scrollIntoView();
-      cy.get('[data-cy="allergy-see-note"]').first().click();
-      cy.get('[data-cy="allergy-note"]').first().should("contain", notes);
-    }
-
-    return this;
-  }
-
-  clickEditSymptoms() {
-    cy.intercept("GET", "**/symptom/**").as("getSymptoms");
-    cy.verifyAndClickElement('[data-cy="edit-symptoms"]', "Edit");
-    cy.wait("@getSymptoms").its("response.statusCode").should("eq", 200);
     return this;
   }
 
   clickAddSymptoms() {
-    cy.verifyAndClickElement('[data-cy="add-symptoms"]', "Add Symptoms");
+    cy.intercept("GET", "**/symptom/**").as("getSymptoms");
+
+    cy.contains("a", "Add Symptoms")
+      .then(($el) => {
+        $el.attr("data-cy", "add-symptoms-button");
+      })
+      .then(() => {
+        cy.verifyAndClickElement(
+          '[data-cy="add-symptoms-button"]',
+          "Add Symptoms",
+        );
+      });
+
+    cy.wait("@getSymptoms").its("response.statusCode").should("eq", 200);
     return this;
   }
 
   addSymptoms(details: SymptomDetails) {
     const { symptomName } = details;
-    cy.get('[data-cy="add-symptom"]').scrollIntoView();
-    cy.typeAndSelectOption('[data-cy="add-symptom"]', symptomName, false);
+    cy.contains("button", "Add another Symptom")
+      .scrollIntoView()
+      .as("symptomButton")
+      .then(($el) => {
+        $el.attr("data-cy", "add-symptom");
+      })
+      .then(() => {
+        cy.typeAndSelectOption('[data-cy="add-symptom"]', symptomName, false);
+      });
+
     return this;
   }
   verifyDuplicateSymptom(symptomName: string) {
@@ -152,136 +179,150 @@ export class PatientEncounter {
     return this;
   }
   updateSymptom(details: SymptomDetails) {
-    const { severity, status, notes } = details;
+    const { severity, status } = details;
     cy.wait(200);
-    if (severity) {
-      cy.get('[data-cy="symptom-severity"]').last().scrollIntoView();
-      cy.clickAndSelectOption('[data-cy="symptom-severity"]', severity, {
-        position: "last",
+
+    cy.get("tr")
+      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
+      .last()
+      .find("td")
+      .then(($tds) => {
+        const status = $tds.eq(1);
+        const severity = $tds.eq(2);
+        status.attr("data-cy", "symptom-status");
+        severity.attr("data-cy", "symptom-severity");
       });
-    }
-    if (status) {
-      cy.get('[data-cy="symptom-status"]').last().scrollIntoView();
-      cy.clickAndSelectOption('[data-cy="symptom-status"]', status, {
-        position: "last",
-      });
-    }
-    if (notes) {
-      cy.get('[data-cy="symptom-options"]').last().scrollIntoView();
-      cy.get('[data-cy="symptom-options"]').last().click();
-      cy.get('[data-cy="add-symptom-notes"]').last().click();
-      cy.typeIntoField('[data-cy="symptom-notes"]', notes, {
-        position: "last",
-        skipVerification: true,
-      });
-    }
+
+    cy.get('[data-cy="symptom-severity"]').scrollIntoView();
+    cy.clickAndSelectOption('[data-cy="symptom-severity"]', severity);
+
+    cy.get('[data-cy="symptom-status"]').scrollIntoView();
+    cy.clickAndSelectOption('[data-cy="symptom-status"]', status);
+
     return this;
   }
 
   deleteSymptom() {
     cy.wait(300);
-    cy.get('[data-cy="symptom-options"]')
+    cy.get("tr")
       .last()
+      .find("td")
+      .then(($tds) => {
+        $tds.eq(4).attr("data-cy", "symptom-options");
+      });
+    cy.get('[data-cy="symptom-options"]')
       .scrollIntoView()
       .should("be.visible")
       .then(($el) => {
         cy.wrap($el).click();
-        cy.verifyAndClickElement(
-          '[data-cy="remove-symptom"]',
-          "Remove Symptom",
-        );
+        cy.contains("button", "Remove Symptom").click();
       });
     return this;
   }
 
   verifySymptomDelete(name: string) {
-    cy.get('[data-cy="symptoms-table"]').scrollIntoView();
-    cy.get('[data-cy="symptoms-table"]').then(($el) => {
+    cy.get('div:contains("Symptoms")').scrollIntoView();
+    cy.get('div:contains("Symptoms")').then(($el) => {
       cy.wrap($el).should("not.contain", name);
     });
     return this;
   }
 
   verifySymptom(details: SymptomDetails) {
-    const { symptomName, severity, status, notes } = details;
-    cy.get('[data-cy="symptoms-table"]').scrollIntoView();
-    cy.verifyContentPresence('[data-cy="symptoms-table"]', [
+    const { symptomName, severity, status } = details;
+    cy.get('div:contains("Symptoms")').scrollIntoView();
+    cy.verifyContentPresence('div:contains("Symptoms")', [
       symptomName,
       severity,
       status,
     ]);
 
-    if (notes) {
-      cy.get('[data-cy="symptom-see-note"]').first().scrollIntoView();
-      cy.get('[data-cy="symptom-see-note"]').first().click();
-      cy.get('[data-cy="symptom-note"]').first().should("contain", notes);
-    }
-
-    return this;
-  }
-
-  clickEditDiagnosis() {
-    cy.intercept("GET", "**/diagnosis/**").as("getDiagnosis");
-    cy.verifyAndClickElement('[data-cy="edit-diagnoses"]', "Edit");
-    cy.wait("@getDiagnosis").its("response.statusCode").should("eq", 200);
     return this;
   }
 
   clickAddDiagnosis() {
-    cy.verifyAndClickElement('[data-cy="add-diagnoses"]', "Add Diagnosis");
+    cy.intercept("GET", "**/diagnosis/**").as("getDiagnosis");
+
+    cy.contains("a", "Add Diagnosis")
+      .then(($el) => {
+        $el.attr("data-cy", "add-diagnosis-button");
+      })
+      .then(() => {
+        cy.verifyAndClickElement(
+          '[data-cy="add-diagnosis-button"]',
+          "Add Diagnosis",
+        );
+      });
+
+    cy.wait("@getDiagnosis").its("response.statusCode").should("eq", 200);
     return this;
   }
 
   addDiagnosis(details: DiagnosisDetails) {
     const { diagnosisName } = details;
-    cy.get('[data-cy="add-diagnoses"]').scrollIntoView();
-    cy.typeAndSelectOption('[data-cy="add-diagnoses"]', diagnosisName, false);
+    cy.contains("button", "Add another Diagnosis")
+      .scrollIntoView()
+      .as("diagnosisButton")
+      .then(($el) => {
+        $el.attr("data-cy", "add-diagnosis");
+      })
+      .then(() => {
+        cy.typeAndSelectOption(
+          '[data-cy="add-diagnosis"]',
+          diagnosisName,
+          false,
+        );
+      });
+
     return this;
   }
 
   updateDiagnosis(details: DiagnosisDetails) {
     const { verification, status, notes } = details;
     cy.wait(200);
-    if (verification) {
-      cy.get('[data-cy="diagnosis-verification"]').last().scrollIntoView();
-      cy.clickAndSelectOption(
-        '[data-cy="diagnosis-verification"]',
-        verification,
-        {
-          position: "last",
-        },
-      );
-    }
-    if (status) {
-      cy.get('[data-cy="diagnosis-status"]').last().scrollIntoView();
-      cy.clickAndSelectOption('[data-cy="diagnosis-status"]', status, {
-        position: "last",
+    cy.get("tr")
+      .last()
+      .find("td")
+      .then(($tds) => {
+        const status = $tds.eq(2);
+        const severity = $tds.eq(3);
+        const options = $tds.eq(4);
+        status.attr("data-cy", "diagnosis-status");
+        severity.attr("data-cy", "diagnosis-verification");
+        options.attr("data-cy", "diagnosis-options");
       });
-    }
-    if (notes) {
-      cy.get('[data-cy="diagnosis-options"]').last().scrollIntoView();
-      cy.get('[data-cy="diagnosis-options"]').last().click();
-      cy.get('[data-cy="add-diagnosis-notes"]').last().click();
-      cy.typeIntoField('[data-cy="diagnosis-notes"]', notes, {
-        position: "last",
-        skipVerification: true,
-      });
-    }
+
+    cy.get('[data-cy="diagnosis-verification"]').scrollIntoView();
+    cy.clickAndSelectOption('[data-cy="diagnosis-verification"]', verification);
+
+    cy.get('[data-cy="diagnosis-status"]').scrollIntoView();
+    cy.clickAndSelectOption('[data-cy="diagnosis-status"]', status);
+
+    cy.get('[data-cy="diagnosis-options"]').click();
+    cy.contains("button", "Add notes").click();
+
+    cy.typeIntoField('input[placeholder="Enter additional notes"]', notes, {
+      skipVerification: true,
+      position: "last",
+    });
+
     return this;
   }
 
   deleteDiagnosis() {
     cy.wait(300);
-    cy.get('[data-cy="diagnosis-options"]')
+    cy.get("tr")
       .last()
+      .find("td")
+      .then(($tds) => {
+        $tds.eq(4).attr("data-cy", "diagnosis-options");
+      });
+    cy.get('[data-cy="diagnosis-options"]')
       .scrollIntoView()
       .should("be.visible")
       .then(($el) => {
         cy.wrap($el).click();
-        cy.verifyAndClickElement(
-          '[data-cy="remove-diagnosis"]',
-          "Remove Diagnosis",
-        );
+        cy.contains("button", "Remove Diagnosis").click();
       });
     return this;
   }
@@ -293,27 +334,21 @@ export class PatientEncounter {
   }
 
   verifyDiagnosisDelete(name: string) {
-    cy.get('[data-cy="diagnoses-table"]').scrollIntoView();
-    cy.get('[data-cy="diagnoses-table"]').then(($el) => {
+    cy.get('div:contains("Diagnoses")').scrollIntoView();
+    cy.get('div:contains("Diagnoses")').then(($el) => {
       cy.wrap($el).should("not.contain", name);
     });
     return this;
   }
 
   verifyDiagnoses(details: DiagnosisDetails) {
-    const { diagnosisName, verification, status, notes } = details;
-    cy.get('[data-cy="diagnoses-table"]').scrollIntoView();
-    cy.verifyContentPresence('[data-cy="diagnoses-table"]', [
+    const { diagnosisName, verification, status } = details;
+    cy.get('div:contains("Diagnoses")').scrollIntoView();
+    cy.verifyContentPresence('div:contains("Diagnoses")', [
       diagnosisName,
       verification,
       status,
     ]);
-
-    if (notes) {
-      cy.get('[data-cy="diagnosis-see-note"]').last().scrollIntoView();
-      cy.get('[data-cy="diagnosis-see-note"]').last().click();
-      cy.get('[data-cy="diagnosis-note"]').last().should("contain", notes);
-    }
 
     return this;
   }

@@ -95,12 +95,12 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyAllergy(createAllergyDetails);
     // update the patient allergy
-    patientEncounter.clickEditAllergy().updateAllergy(updateAllergyDetails);
+    patientEncounter.clickAddAllergy().updateAllergy(updateAllergyDetails);
 
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyAllergy(updateAllergyDetails);
 
-    patientEncounter.clickEditAllergy().deleteAllergy();
+    patientEncounter.clickAddAllergy().deleteAllergy();
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyAllergyDelete(createAllergyDetails.allergyName);
   });
@@ -130,7 +130,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
 
     // verify duplicate symptoms behavior
     patientEncounter
-      .clickEditSymptoms()
+      .clickAddSymptoms()
       .verifyDuplicateSymptom(createSymptomsDetails.symptomName);
 
     patientEncounter.deleteSymptom();
@@ -142,12 +142,12 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientEncounter.verifySymptom(createSymptomsDetails);
 
     // update the patient symptom
-    patientEncounter.clickEditSymptoms().updateSymptom(updateSymptomsDetails);
+    patientEncounter.clickAddSymptoms().updateSymptom(updateSymptomsDetails);
 
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifySymptom(updateSymptomsDetails);
 
-    patientEncounter.clickEditSymptoms().deleteSymptom();
+    patientEncounter.clickAddSymptoms().deleteSymptom();
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifySymptomDelete(createSymptomsDetails.symptomName);
   });
@@ -190,13 +190,13 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientEncounter.verifyDiagnoses(createDiagnosisDetails);
 
     patientEncounter
-      .clickEditDiagnosis()
+      .clickAddDiagnosis()
       .updateDiagnosis(updateDiagnosisDetails);
 
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyDiagnoses(updateDiagnosisDetails);
 
-    patientEncounter.clickEditDiagnosis().deleteDiagnosis();
+    patientEncounter.clickAddDiagnosis().deleteDiagnosis();
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyDiagnosisDelete(
       createDiagnosisDetails.diagnosisName,

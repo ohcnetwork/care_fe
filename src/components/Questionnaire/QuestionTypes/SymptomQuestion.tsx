@@ -269,24 +269,12 @@ function SymptomActionsMenu({
           size="icon"
           disabled={disabled}
           className="size-9"
-          data-cy={
-            symptom.verification_status !== "entered_in_error"
-              ? "symptom-options"
-              : undefined
-          }
         >
           <DotsVerticalIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={onToggleNotes}
-          data-cy={
-            symptom.verification_status !== "entered_in_error"
-              ? "add-symptom-notes"
-              : undefined
-          }
-        >
+        <DropdownMenuItem onClick={onToggleNotes}>
           <Pencil2Icon className="size-4 mr-2" />
           {showNotes
             ? t("hide_notes")
@@ -299,11 +287,6 @@ function SymptomActionsMenu({
           className="text-destructive focus:text-destructive"
           onClick={onRemove}
           disabled={verificationStatus === "entered_in_error"}
-          data-cy={
-            symptom.verification_status !== "entered_in_error"
-              ? "remove-symptom"
-              : undefined
-          }
         >
           <MinusCircledIcon className="size-4 mr-2" />
           {verificationStatus === "entered_in_error"
@@ -602,26 +585,14 @@ const SymptomRow = React.memo(function SymptomRow({
             hasId={!!symptom.id}
           />
         </TableCell>
-        <TableCell
-          data-cy={
-            symptom.verification_status !== "entered_in_error"
-              ? "symptom-status"
-              : undefined
-          }
-        >
+        <TableCell>
           <StatusSelect
             status={symptom.clinical_status}
             onValueChange={handleStatusChange}
             disabled={disabled}
           />
         </TableCell>
-        <TableCell
-          data-cy={
-            symptom.verification_status !== "entered_in_error"
-              ? "symptom-severity"
-              : undefined
-          }
-        >
+        <TableCell>
           <SeveritySelect
             severity={symptom.severity}
             onValueChange={handleSeverityChange}
@@ -648,15 +619,7 @@ const SymptomRow = React.memo(function SymptomRow({
       </TableRow>
       {showNotes && (
         <TableRow>
-          <TableCell
-            colSpan={5}
-            className="px-3 pb-3"
-            data-cy={
-              symptom.verification_status !== "entered_in_error"
-                ? "symptom-notes"
-                : undefined
-            }
-          >
+          <TableCell colSpan={5} className="px-3 pb-3">
             <NotesInput
               note={symptom.note}
               onChange={handleNotesChange}
@@ -979,14 +942,12 @@ export function SymptomQuestion({
           </div>
         </EntitySelectionSheet>
       ) : (
-        <div data-cy="add-symptom">
-          <ValueSetSelect
-            system="system-condition-code"
-            placeholder={addSymptomPlaceholder}
-            onSelect={handleCodeSelect}
-            disabled={disabled}
-          />
-        </div>
+        <ValueSetSelect
+          system="system-condition-code"
+          placeholder={addSymptomPlaceholder}
+          onSelect={handleCodeSelect}
+          disabled={disabled}
+        />
       )}
     </div>
   );

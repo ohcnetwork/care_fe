@@ -165,16 +165,12 @@ export function AllergyList({
                     variant="outline"
                     size="sm"
                     className="h-7 text-xs shrink-0"
-                    data-cy="allergy-see-note"
                   >
                     {t("see_note")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-4">
-                  <p
-                    className="text-sm text-gray-700 whitespace-pre-wrap"
-                    data-cy="allergy-note"
-                  >
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
                     {allergy.note}
                   </p>
                 </PopoverContent>
