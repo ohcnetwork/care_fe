@@ -167,10 +167,12 @@ function SeveritySelect({
 function VerificationStatusSelect({
   status,
   onValueChange,
+  isExistingRecord,
   disabled,
 }: {
   status: string;
   onValueChange: (value: string) => void;
+  isExistingRecord?: boolean;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -180,11 +182,14 @@ function VerificationStatusSelect({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {SYMPTOM_VERIFICATION_STATUS.map((status) => (
-          <SelectItem key={status} value={status}>
-            {t(status)}
-          </SelectItem>
-        ))}
+        {SYMPTOM_VERIFICATION_STATUS.map(
+          (value) =>
+            (isExistingRecord || value !== "entered_in_error") && (
+              <SelectItem key={value} value={value}>
+                {t(value)}
+              </SelectItem>
+            ),
+        )}
       </SelectContent>
     </Select>
   );
@@ -396,6 +401,7 @@ const SymptomRow = React.memo(function SymptomRow({
             status={symptom.verification_status}
             onValueChange={handleVerificationStatusChange}
             disabled={disabled}
+            isExistingRecord={!!symptom.id}
           />
         </div>
         <div>
@@ -415,12 +421,7 @@ const SymptomRow = React.memo(function SymptomRow({
   // For mobile view - Card Layout
   if (isMobile) {
     return (
-      <div
-        className={cn("group hover:bg-gray-50", {
-          "opacity-40 pointer-events-none":
-            symptom.verification_status === "entered_in_error",
-        })}
-      >
+      <div className="group hover:bg-gray-50">
         <Card
           className={cn(
             "mb-2 rounded-lg border-0 shadow-none",
@@ -542,6 +543,7 @@ const SymptomRow = React.memo(function SymptomRow({
                     status={symptom.verification_status}
                     onValueChange={handleVerificationStatusChange}
                     disabled={disabled}
+                    isExistingRecord={!!symptom.id}
                   />
                 </div>
                 <div>
@@ -565,12 +567,7 @@ const SymptomRow = React.memo(function SymptomRow({
   // For desktop view - Table Row
   return (
     <>
-      <TableRow
-        className={cn({
-          "opacity-40 pointer-events-none":
-            symptom.verification_status === "entered_in_error",
-        })}
-      >
+      <TableRow className={cn(disabled && "opacity-40 pointer-events-none")}>
         <TableCell className="font-medium">
           <div className="truncate max-w-[300px]" title={symptom.code.display}>
             {symptom.code.display}
@@ -604,6 +601,7 @@ const SymptomRow = React.memo(function SymptomRow({
             status={symptom.verification_status}
             onValueChange={handleVerificationStatusChange}
             disabled={disabled}
+            isExistingRecord={!!symptom.id}
           />
         </TableCell>
         <TableCell className="text-center">
@@ -887,7 +885,11 @@ export function SymptomQuestion({
                     <SymptomRow
                       symptom={symptom}
                       index={index}
-                      disabled={disabled}
+                      disabled={
+                        disabled ||
+                        patientSymptoms?.results[index]?.verification_status ===
+                          "entered_in_error"
+                      }
                       onUpdate={handleUpdateSymptom}
                       onRemove={handleRemoveSymptom}
                       key={
@@ -907,7 +909,11 @@ export function SymptomQuestion({
                 <SymptomRow
                   symptom={symptom}
                   index={index}
-                  disabled={disabled}
+                  disabled={
+                    disabled ||
+                    patientSymptoms?.results[index]?.verification_status ===
+                      "entered_in_error"
+                  }
                   onUpdate={handleUpdateSymptom}
                   onRemove={handleRemoveSymptom}
                   key={symptom.id || `symptom-${symptom.code.code}-${index}`}

@@ -147,10 +147,12 @@ function ClinicalStatusSelect({
 function VerificationStatusSelect({
   status,
   onValueChange,
+  isExistingRecord,
   disabled,
 }: {
   status: string;
   onValueChange: (value: string) => void;
+  isExistingRecord?: boolean;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -166,11 +168,14 @@ function VerificationStatusSelect({
         />
       </SelectTrigger>
       <SelectContent>
-        {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
-          <SelectItem key={status} value={status} className="capitalize">
-            {t(status)}
-          </SelectItem>
-        ))}
+        {DIAGNOSIS_VERIFICATION_STATUS.map(
+          (status) =>
+            (isExistingRecord || status !== "entered_in_error") && (
+              <SelectItem key={status} value={status} className="capitalize">
+                {t(status)}
+              </SelectItem>
+            ),
+        )}
       </SelectContent>
     </Select>
   );
@@ -245,6 +250,7 @@ function DiagnosisDetailsForm({
                 value as DiagnosisRequest["verification_status"],
             })
           }
+          isExistingRecord={!!diagnosis.id}
           disabled={disabled}
         />
       </div>
@@ -353,7 +359,6 @@ export function DiagnosisQuestion({
       return dateA.getTime() - dateB.getTime();
     });
   }, [questionnaireResponse.values]);
-
   const { data: patientDiagnoses } = useQuery({
     queryKey: ["diagnoses", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
@@ -361,22 +366,7 @@ export function DiagnosisQuestion({
       queryParams: {
         encounter: encounterId,
         limit: 100,
-        category: "encounter_diagnosis",
-        exclude_verification_status: "entered_in_error",
-      },
-    }),
-    enabled: !isPreview,
-  });
-
-  const { data: patientChronicConditions } = useQuery({
-    queryKey: ["chronic_condition", patientId],
-    queryFn: query(diagnosisApi.listDiagnosis, {
-      pathParams: { patientId },
-      queryParams: {
-        category: "chronic_condition",
-        limit: 100,
-        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
-        exclude_verification_status: "entered_in_error",
+        category: "encounter_diagnosis,chronic_condition",
       },
     }),
     enabled: !isPreview,
@@ -619,7 +609,11 @@ export function DiagnosisQuestion({
                       `diagnosis-${diagnosis.code.code}-${index}`
                     }
                     diagnosis={diagnosis}
-                    disabled={disabled}
+                    disabled={
+                      disabled ||
+                      patientDiagnoses?.results[index]?.verification_status ===
+                        "entered_in_error"
+                    }
                     onUpdate={(updates) =>
                       handleUpdateDiagnosis(index, updates)
                     }
@@ -638,7 +632,11 @@ export function DiagnosisQuestion({
                   diagnosis.id || `diagnosis-${diagnosis.code.code}-${index}`
                 }
                 diagnosis={diagnosis}
-                disabled={disabled}
+                disabled={
+                  disabled ||
+                  patientDiagnoses?.results[index]?.verification_status ===
+                    "entered_in_error"
+                }
                 onUpdate={(updates) => handleUpdateDiagnosis(index, updates)}
                 onRemove={() => handleRemoveDiagnosis(index)}
               />
@@ -697,13 +695,7 @@ const DiagnosisTableRow = ({
   const { t } = useTranslation();
   return (
     <>
-      <TableRow
-        className={cn(
-          diagnosis.verification_status === "entered_in_error" &&
-            "opacity-40 pointer-events-none",
-          diagnosis.category === "chronic_condition" && "bg-yellow-50/50",
-        )}
-      >
+      <TableRow className={cn(disabled && "opacity-40 pointer-events-none")}>
         <TableCell className="py-1">
           <div className="flex items-center space-x-2 min-w-0">
             <div
@@ -756,6 +748,7 @@ const DiagnosisTableRow = ({
                   value as DiagnosisRequest["verification_status"],
               })
             }
+            isExistingRecord={!!diagnosis.id}
             disabled={disabled}
           />
         </TableCell>
@@ -819,13 +812,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
   );
   const { t } = useTranslation();
   return (
-    <div
-      className={cn("group hover:bg-gray-50", {
-        "opacity-40 pointer-events-none":
-          diagnosis.verification_status === "entered_in_error",
-        "bg-yellow-50/50": diagnosis.category === "chronic_condition",
-      })}
-    >
+    <div className="group hover:bg-gray-50">
       {/* Mobile View - Card Layout */}
       <Card
         className={cn("mb-2 rounded-lg", {
