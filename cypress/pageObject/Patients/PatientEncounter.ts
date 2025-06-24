@@ -77,11 +77,11 @@ export class PatientEncounter {
 
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .first()
+      .eq(1)
       .find("td")
       .then(($tds) => {
-        const criticality = $tds.eq(1);
-        const status = $tds.eq(2);
+        const criticality = $tds.eq(2);
+        const status = $tds.eq(3);
         criticality.attr("data-cy", "allergy-criticality");
         status.attr("data-cy", "allergy-status");
       });
@@ -109,7 +109,7 @@ export class PatientEncounter {
       .should("be.visible")
       .then(($el) => {
         cy.wrap($el).click();
-        cy.contains("button", "Remove Allergy").click();
+        cy.contains("Remove Allergy").click();
       });
 
     return this;
@@ -198,7 +198,7 @@ export class PatientEncounter {
       .should("be.visible")
       .then(($el) => {
         cy.wrap($el).click();
-        cy.contains("button", "Remove Symptom").click();
+        cy.contains("Remove Symptom").click();
       });
     return this;
   }
@@ -287,7 +287,7 @@ export class PatientEncounter {
       .should("be.visible")
       .then(($el) => {
         cy.wrap($el).click();
-        cy.contains("button", "Remove Diagnosis").click();
+        cy.contains("Remove Diagnosis").click();
       });
     return this;
   }
