@@ -1,11 +1,11 @@
+import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps, cva } from "class-variance-authority";
-import { LucideIcon } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2 py-1 text-sm font-medium transition-colors gap-1.5",
+  "inline-flex items-center rounded-md border text-gray-950 px-2.5 py-px text-sm font-medium transition-colors gap-1.5",
   {
     variants: {
       variant: {
@@ -13,7 +13,7 @@ const badgeVariants = cva(
         secondary: "border-gray-300 bg-gray-100 text-gray-900",
         outline: "border-gray-300",
         danger: "border-red-800 bg-red-600 text-white",
-        red: "border-red-300 bg-red-100 text-red-900",
+        destructive: "border-red-300 bg-red-100 text-red-900",
         indigo: "border-indigo-300 bg-indigo-100 text-indigo-900",
         purple: "border-purple-300 bg-purple-100 text-purple-900",
         blue: "border-blue-300 bg-blue-100 text-blue-900",
@@ -37,44 +37,23 @@ const badgeVariants = cva(
   },
 );
 
-export type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
-
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    Omit<VariantProps<typeof badgeVariants>, "variant"> {
-  "data-cy"?: string;
-  variant?: BadgeVariant | string;
-  icon?: LucideIcon;
-  iconProps?: React.ComponentProps<LucideIcon>;
-  iconPosition?: "left" | "right";
-}
-
-export function Badge({
+function Badge({
   className,
   variant,
   size,
-  icon: Icon,
-  iconProps,
-  iconPosition = "left",
-  "data-cy": dataCy,
-  children,
+  asChild = false,
   ...props
-}: BadgeProps) {
-  const finalClassName = cn(
-    badgeVariants({ variant: variant as BadgeVariant, size }),
-    className,
-  );
-
-  const iconSize = size === "md" ? 16 : 14;
-  const iconElement = Icon && <Icon size={iconSize} {...iconProps} />;
+}: React.ComponentProps<"span"> &
+  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot : "span";
 
   return (
-    <div className={finalClassName} data-cy={dataCy} {...props}>
-      {Icon && iconPosition === "left" && iconElement}
-      {children}
-      {Icon && iconPosition === "right" && iconElement}
-    </div>
+    <Comp
+      data-slot="badge"
+      className={cn(badgeVariants({ variant, size }), className)}
+      {...props}
+    />
   );
 }
 
-export { badgeVariants };
+export { Badge, badgeVariants };

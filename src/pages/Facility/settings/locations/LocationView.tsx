@@ -216,7 +216,7 @@ export default function LocationView({
                   </Badge>
                   <Badge
                     variant={
-                      location?.status === "active" ? "default" : "secondary"
+                      location?.status === "active" ? "primary" : "secondary"
                     }
                     className="capitalize"
                   >

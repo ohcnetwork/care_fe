@@ -33,7 +33,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge, BadgeProps } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -249,7 +249,10 @@ const AppointmentDetails = ({
                     rescheduled: "secondary",
                     noshow: "destructive",
                   } as Partial<
-                    Record<Appointment["status"], BadgeProps["variant"]>
+                    Record<
+                      Appointment["status"],
+                      "secondary" | "primary" | "destructive" | "outline"
+                    >
                   >
                 )[appointment.status] ?? "outline"
               }

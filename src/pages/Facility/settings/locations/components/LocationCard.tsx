@@ -120,14 +120,14 @@ export function LocationCard({
               <div className="mt-2 flex flex-wrap gap-2 overflow-hidden">
                 <Badge
                   variant={
-                    location.status === "active" ? "default" : "secondary"
+                    location.status === "active" ? "primary" : "secondary"
                   }
                 >
                   {t(location.status)}
                 </Badge>
                 <Badge
                   variant={
-                    !location.current_encounter ? "default" : "destructive"
+                    !location.current_encounter ? "secondary" : "destructive"
                   }
                   className="capitalize"
                 >

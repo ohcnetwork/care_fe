@@ -57,7 +57,7 @@ function PatientIndex() {
               ? "primary"
               : status === "cancelled"
                 ? "destructive"
-                : "default"
+                : "outline"
         }
       >
         {t(status)}

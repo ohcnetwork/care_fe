@@ -29,22 +29,22 @@ export interface EncounterInfoCardProps {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "planned":
-      return "bg-blue-100 text-blue-800";
+      return "blue" as const;
     case "in_progress":
-      return "bg-yellow-100 text-yellow-800";
+      return "yellow" as const;
     case "completed":
-      return "bg-green-100 text-green-800";
+      return "green" as const;
     case "cancelled":
-      return "bg-red-100 text-red-800";
+      return "destructive" as const;
     default:
-      return "bg-gray-100 text-gray-800";
+      return "outline" as const;
   }
 };
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
     case "stat":
-      return "bg-red-100 text-red-800";
+      return "red";
     case "urgent":
       return "bg-orange-100 text-orange-800";
     case "asap":
@@ -93,8 +93,8 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           <div className="flex flex-wrap items-center gap-2">
             <Badge
               data-cy="encounter-status-badge"
-              className={getStatusColor(encounter.status)}
-              variant="outline"
+              variant={getStatusColor(encounter.status)}
+              // variant="outline"
             >
               {t(`encounter_status__${encounter.status}`)}
             </Badge>
