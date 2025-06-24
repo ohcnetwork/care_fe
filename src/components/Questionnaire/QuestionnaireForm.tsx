@@ -629,7 +629,7 @@ export function QuestionnaireForm({
 
     // Continue with existing submission logic...
     const requests: FormBatchRequest[] = [];
-    if (encounterId && patientId) {
+    if (patientId) {
       const context = { facilityId, patientId, encounterId };
       const structuredPromises: Promise<FormBatchRequest[]>[] = [];
 
