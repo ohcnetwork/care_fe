@@ -230,7 +230,10 @@ export function QuestionInput({
 
     if (question.type === "choice" && !question.answer_value_set) {
       return (
-        <div className="bg-gray-100 md:bg-transparent px-2 py-1.5">
+        <div
+          className="bg-gray-100 md:bg-transparent px-2 py-1.5"
+          data-question-id={question.id}
+        >
           <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
             <QuestionLabel
               question={question}
