@@ -18,7 +18,6 @@ export const removeQuestionsFromSource = (
       );
     }
   }
-  console.log("newQuestions", newQuestions);
   return newQuestions;
 };
 
