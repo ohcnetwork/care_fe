@@ -179,7 +179,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     if (!onlineManager.isOnline()) {
       loadOfflinePatient();
     }
-  });
+  }, []);
 
   return (
     <div>

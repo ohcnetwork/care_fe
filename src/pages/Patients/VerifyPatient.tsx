@@ -165,6 +165,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
     loadOfflinePatient();
   }, [partial_id, queryClient]);
 
+  console.log("patient,", newofflineEncounters);
   useEffect(() => {
     const loadOfflineEncounters = async () => {
       if (!patientData?.id || !facilityData) return;

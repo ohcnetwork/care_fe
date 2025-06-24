@@ -192,7 +192,7 @@ export const EncounterShow = (props: Props) => {
     };
 
     if (!onlineManager.isOnline()) fetchOfflinePatient();
-  });
+  }, []);
 
   useEffect(() => {
     const checkEncounterExist = async () => {
@@ -232,7 +232,7 @@ export const EncounterShow = (props: Props) => {
     if (!onlineManager.isOnline()) {
       checkEncounterExist();
     }
-  }, [offlinePatientPayload, isMarkAsCompleteOffline]);
+  }, [offlinePatientPayload]);
 
   console.log(isLoading, !encounterData, !facilityIdFromProps, !onlinePatient);
 

@@ -79,8 +79,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
     : isMarkAsCompleteOffline === true
       ? "completed"
       : props.encounter.status;
-
-  console.log("isupdated:", isEncounterUpdatedOffline);
   return (
     <>
       <section className="flex flex-col lg:flex-row">
