@@ -115,7 +115,15 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
       </CardContent>
       <CardFooter className="flex flex-col sm:flex-row justify-between gap-1 items-center py-2 px-2 bg-gray-50">
         <Link
-          href={`/facility/${facilityId}/patient/${encounter.patient.id}`}
+          href={
+            encounter.status === "completed"
+              ? `/facility/${facilityId}/patients/verify?${new URLSearchParams({
+                  phone_number: encounter.patient.phone_number,
+                  year_of_birth: encounter.patient.year_of_birth.toString(),
+                  partial_id: encounter.patient.id.slice(0, 5),
+                }).toString()}`
+              : `/facility/${facilityId}/patient/${encounter.patient.id}`
+          }
           className="w-full"
         >
           <Button
