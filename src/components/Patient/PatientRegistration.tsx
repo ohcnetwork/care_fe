@@ -606,6 +606,8 @@ export default function PatientRegistration(
                         <FormControl>
                           <Input
                             type="number"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             placeholder={t("age")}
                             min={1}
                             max={120}
@@ -799,6 +801,8 @@ export default function PatientRegistration(
                     <FormControl>
                       <Input
                         type="number"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         {...field}
                         onChange={(e) => {
                           const value = e.target.value
