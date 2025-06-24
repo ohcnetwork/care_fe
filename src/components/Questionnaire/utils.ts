@@ -6,21 +6,19 @@ export const removeQuestionsFromSource = (
 ): Question[] => {
   const newQuestions: Question[] = [];
   for (const question of questions) {
-    if (selectedQuestionIds.size === 0) {
-      break;
-    }
     if (selectedQuestionIds.has(question.id)) {
       selectedQuestionIds.delete(question.id);
     } else {
       newQuestions.push(question);
     }
-    if (selectedQuestionIds.size > 0 && question.questions) {
+    if (selectedQuestionIds.size > 0 && question.questions?.length) {
       question.questions = removeQuestionsFromSource(
         question.questions,
         selectedQuestionIds,
       );
     }
   }
+  console.log("newQuestions", newQuestions);
   return newQuestions;
 };
 
