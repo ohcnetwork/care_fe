@@ -232,7 +232,7 @@ export function QuestionInput({
       return (
         <div
           className="bg-gray-100 md:bg-transparent px-2 py-1.5"
-          data-question-id={question.id}
+          id={"question-" + question.id}
         >
           <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
             <QuestionLabel
@@ -286,7 +286,7 @@ export function QuestionInput({
             >
               <div
                 className={cn("space-y-1", { "flex-1": removeButton })}
-                data-question-id={question.id}
+                id={"question-" + question.id}
               >
                 {index === 0 && (
                   <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
