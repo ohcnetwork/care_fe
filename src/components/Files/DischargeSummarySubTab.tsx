@@ -103,6 +103,7 @@ export const DischargeTab = ({
         ...(qParams.is_archived !== undefined && {
           is_archived: qParams.is_archived,
         }),
+        ordering: "-modified_date",
       },
     }),
   });

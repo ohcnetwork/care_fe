@@ -51,7 +51,11 @@ export const Appointments = (props: PatientProps) => {
           facility_id: facilityId ?? "",
           patient_id: patientId,
         },
-        queryParams: { patient: patientId, limit: 100 },
+        queryParams: {
+          patient: patientId,
+          limit: 100,
+          ordering: "-token_slot__start_datetime",
+        },
       },
     ),
   });
