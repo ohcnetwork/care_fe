@@ -1107,8 +1107,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {dosageInstruction?.timing && (
             <Input
               type="number"
-              inputMode="numeric"
-              pattern="[0-9]*"
+              inputMode="decimal"
+              pattern="[0-9]*[.]?[0-9]*"
               min={0}
               value={
                 dosageInstruction.timing.repeat.bounds_duration?.value == 0
