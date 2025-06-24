@@ -324,6 +324,8 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             {...field}
                             placeholder={t("type_patient_age")}
                           />
