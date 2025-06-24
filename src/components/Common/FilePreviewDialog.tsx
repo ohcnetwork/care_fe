@@ -5,6 +5,7 @@ import {
   Suspense,
   lazy,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -124,6 +125,12 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const [index, setIndex] = useState<number>(currentIndex);
   const [scale, setScale] = useState(0.75);
   const [dragState, setDragState] = useState<DragState>(initialDragState);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragStateRef = useRef(dragState);
+
+  useEffect(() => {
+    dragStateRef.current = dragState;
+  }, [dragState]);
 
   useEffect(() => {
     if (uploadedFiles && show) {
@@ -134,6 +141,20 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   useEffect(() => {
     setDragState(initialDragState);
   }, [index, show]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const handler = (e: TouchEvent) => {
+      if (dragStateRef.current.isDragging) {
+        handleTouchMove(e as unknown as React.TouchEvent);
+      }
+    };
+    container.addEventListener("touchmove", handler, { passive: false });
+    return () => {
+      container.removeEventListener("touchmove", handler);
+    };
+  }, []);
 
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
@@ -357,6 +378,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </Button>
               )}
               <div
+                ref={containerRef}
                 className={cn(
                   "flex h-[50vh] md:h-[70vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200 touch-none",
                   dragState.isDragging ? "cursor-grabbing" : "cursor-grab",
@@ -366,7 +388,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
                 onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
               >
                 {file_state.isImage ? (
