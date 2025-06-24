@@ -2442,6 +2442,7 @@
   "question_type_time_description": "Lets users select a specific time of day.",
   "question_type_url_description": "Collects website addresses or links.",
   "questionnaire": "Questionnaire",
+  "questionnaire_allergy_intolerance_no_encounter": "Allergy Intolerances cannot be recorded without an active encounter",
   "questionnaire_appointment_no_encounter": "Appointment cannot be recorded without an active encounter",
   "questionnaire_created_successfully": "Questionnaire created successfully",
   "questionnaire_diagnosis_no_encounter": "Diagnosis cannot be recorded without an active encounter",
