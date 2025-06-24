@@ -338,14 +338,14 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormField
                     control={form.control}
                     name="age"
-                    render={() => (
+                    render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel aria-required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
+                            {...field}
                             placeholder={t("type_patient_age")}
-                            {...form.register("age")}
                           />
                         </FormControl>
                         <FormMessage />
