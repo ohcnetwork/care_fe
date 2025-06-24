@@ -46,6 +46,7 @@ export function NumberQuestion({
   return (
     <Input
       type="number"
+      pattern="[0-9]*"
       value={questionnaireResponse.values[index]?.value?.toString() || ""}
       onChange={(e) => handleChange(e.target.value)}
       step={question.type === "decimal" ? "0.01" : "1"}
