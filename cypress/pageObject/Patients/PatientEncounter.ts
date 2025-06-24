@@ -2,21 +2,18 @@ interface AllergyDetails {
   allergyName?: string;
   criticality?: string;
   status?: string;
-  notes?: string;
 }
 
 interface DiagnosisDetails {
   diagnosisName?: string;
   status?: string;
   verification?: string;
-  notes?: string;
 }
 
 interface SymptomDetails {
   symptomName?: string;
   severity?: string;
   status?: string;
-  notes?: string;
 }
 export class PatientEncounter {
   // Navigation
@@ -61,7 +58,7 @@ export class PatientEncounter {
 
   addAllergy(details: AllergyDetails) {
     const { allergyName } = details;
-    cy.contains("button", "Add another Allergy")
+    cy.contains("button", /Add (another )?Allergy/i)
       .scrollIntoView()
       .as("allergyButton")
       .then(($el) => {
@@ -90,14 +87,10 @@ export class PatientEncounter {
       });
 
     cy.get('[data-cy="allergy-criticality"]').first().scrollIntoView();
-    cy.clickAndSelectOption('[data-cy="allergy-criticality"]', criticality, {
-      position: "first",
-    });
+    cy.clickAndSelectOption('[data-cy="allergy-criticality"]', criticality);
 
     cy.get('[data-cy="allergy-status"]').first().scrollIntoView();
-    cy.clickAndSelectOption('[data-cy="allergy-status"]', status, {
-      position: "first",
-    });
+    cy.clickAndSelectOption('[data-cy="allergy-status"]', status);
 
     return this;
   }
@@ -105,6 +98,7 @@ export class PatientEncounter {
   deleteAllergy() {
     cy.wait(300);
     cy.get("tr")
+      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
       .last()
       .find("td")
       .then(($tds) => {
@@ -121,22 +115,10 @@ export class PatientEncounter {
     return this;
   }
 
-  verifyAllergyDelete(name: string) {
-    cy.get('div:contains("Allergies")').scrollIntoView();
-    cy.get('div:contains("Allergies")').then(($el) => {
-      cy.wrap($el).should("not.contain", name);
-    });
-    return this;
-  }
-
   verifyAllergy(details: AllergyDetails) {
     const { allergyName, criticality, status } = details;
-    cy.get('div:contains("Allergies")').scrollIntoView();
-    cy.verifyContentPresence('div:contains("Allergies")', [
-      allergyName,
-      criticality,
-      status,
-    ]);
+    cy.get("table").scrollIntoView();
+    cy.verifyContentPresence("table", [allergyName, criticality, status]);
 
     return this;
   }
@@ -161,7 +143,7 @@ export class PatientEncounter {
 
   addSymptoms(details: SymptomDetails) {
     const { symptomName } = details;
-    cy.contains("button", "Add another Symptom")
+    cy.contains("button", /Add (another )?Symptom/i)
       .scrollIntoView()
       .as("symptomButton")
       .then(($el) => {
@@ -205,6 +187,7 @@ export class PatientEncounter {
   deleteSymptom() {
     cy.wait(300);
     cy.get("tr")
+      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
       .last()
       .find("td")
       .then(($tds) => {
@@ -220,22 +203,10 @@ export class PatientEncounter {
     return this;
   }
 
-  verifySymptomDelete(name: string) {
-    cy.get('div:contains("Symptoms")').scrollIntoView();
-    cy.get('div:contains("Symptoms")').then(($el) => {
-      cy.wrap($el).should("not.contain", name);
-    });
-    return this;
-  }
-
   verifySymptom(details: SymptomDetails) {
     const { symptomName, severity, status } = details;
-    cy.get('div:contains("Symptoms")').scrollIntoView();
-    cy.verifyContentPresence('div:contains("Symptoms")', [
-      symptomName,
-      severity,
-      status,
-    ]);
+    cy.get("table").scrollIntoView();
+    cy.verifyContentPresence("table", [symptomName, severity, status]);
 
     return this;
   }
@@ -260,7 +231,7 @@ export class PatientEncounter {
 
   addDiagnosis(details: DiagnosisDetails) {
     const { diagnosisName } = details;
-    cy.contains("button", "Add another Diagnosis")
+    cy.contains("button", /Add (another )?Diagnosis/i)
       .scrollIntoView()
       .as("diagnosisButton")
       .then(($el) => {
@@ -278,9 +249,10 @@ export class PatientEncounter {
   }
 
   updateDiagnosis(details: DiagnosisDetails) {
-    const { verification, status, notes } = details;
+    const { verification, status } = details;
     cy.wait(200);
     cy.get("tr")
+      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
       .last()
       .find("td")
       .then(($tds) => {
@@ -298,20 +270,13 @@ export class PatientEncounter {
     cy.get('[data-cy="diagnosis-status"]').scrollIntoView();
     cy.clickAndSelectOption('[data-cy="diagnosis-status"]', status);
 
-    cy.get('[data-cy="diagnosis-options"]').click();
-    cy.contains("button", "Add notes").click();
-
-    cy.typeIntoField('input[placeholder="Enter additional notes"]', notes, {
-      skipVerification: true,
-      position: "last",
-    });
-
     return this;
   }
 
   deleteDiagnosis() {
     cy.wait(300);
     cy.get("tr")
+      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
       .last()
       .find("td")
       .then(($tds) => {
@@ -333,9 +298,9 @@ export class PatientEncounter {
     return this;
   }
 
-  verifyDiagnosisDelete(name: string) {
-    cy.get('div:contains("Diagnoses")').scrollIntoView();
-    cy.get('div:contains("Diagnoses")').then(($el) => {
+  verifyItemDelete(name: string) {
+    cy.get("table").scrollIntoView();
+    cy.get("table").then(($el) => {
       cy.wrap($el).should("not.contain", name);
     });
     return this;
@@ -343,12 +308,8 @@ export class PatientEncounter {
 
   verifyDiagnoses(details: DiagnosisDetails) {
     const { diagnosisName, verification, status } = details;
-    cy.get('div:contains("Diagnoses")').scrollIntoView();
-    cy.verifyContentPresence('div:contains("Diagnoses")', [
-      diagnosisName,
-      verification,
-      status,
-    ]);
+    cy.get("table").scrollIntoView();
+    cy.verifyContentPresence("table", [diagnosisName, verification, status]);
 
     return this;
   }

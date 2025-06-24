@@ -84,7 +84,6 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       allergyName: createAllergyDetails.allergyName,
       criticality: getRandomAllergyCriticality(),
       status: getRandomAllergyStatus(),
-      notes: "Edit allergy notes",
     };
     patientEncounter
       .navigateToEncounters()
@@ -102,7 +101,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
 
     patientEncounter.clickAddAllergy().deleteAllergy();
     patientPrescription.submitQuestionnaire();
-    patientEncounter.verifyAllergyDelete(createAllergyDetails.allergyName);
+    patientEncounter.verifyItemDelete(createAllergyDetails.allergyName);
   });
 
   it("Create and edit a symptom and verify the changes", () => {
@@ -116,7 +115,6 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       symptomName: createSymptomsDetails.symptomName,
       severity: getRandomSymptomSeverity(),
       status: getRandomConditionStatus(),
-      notes: "Edit symptom notes",
     };
 
     patientEncounter
@@ -135,7 +133,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
 
     patientEncounter.deleteSymptom();
     patientPrescription.submitQuestionnaire();
-    patientEncounter.verifySymptomDelete(createSymptomsDetails.symptomName);
+    patientEncounter.verifyItemDelete(createSymptomsDetails.symptomName);
 
     patientEncounter.clickAddSymptoms().addSymptoms(createSymptomsDetails);
     patientPrescription.submitQuestionnaire();
@@ -149,7 +147,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
 
     patientEncounter.clickAddSymptoms().deleteSymptom();
     patientPrescription.submitQuestionnaire();
-    patientEncounter.verifySymptomDelete(createSymptomsDetails.symptomName);
+    patientEncounter.verifyItemDelete(createSymptomsDetails.symptomName);
   });
 
   it("Create and edit a diagnosis and verify the changes", () => {
@@ -163,7 +161,6 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       diagnosisName: createDiagnosisDetails.diagnosisName,
       verification: getRandomDiagnosisVerification(),
       status: getRandomConditionStatus(),
-      notes: "Edit diagnosis notes",
     };
 
     patientEncounter
@@ -181,9 +178,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
 
     patientEncounter.deleteDiagnosis();
     patientPrescription.submitQuestionnaire();
-    patientEncounter.verifyDiagnosisDelete(
-      createDiagnosisDetails.diagnosisName,
-    );
+    patientEncounter.verifyItemDelete(createDiagnosisDetails.diagnosisName);
 
     patientEncounter.clickAddDiagnosis().addDiagnosis(createDiagnosisDetails);
     patientPrescription.submitQuestionnaire();
@@ -198,8 +193,6 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
 
     patientEncounter.clickAddDiagnosis().deleteDiagnosis();
     patientPrescription.submitQuestionnaire();
-    patientEncounter.verifyDiagnosisDelete(
-      createDiagnosisDetails.diagnosisName,
-    );
+    patientEncounter.verifyItemDelete(createDiagnosisDetails.diagnosisName);
   });
 });
