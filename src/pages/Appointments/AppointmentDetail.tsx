@@ -67,6 +67,7 @@ import { AppointmentTokenCard } from "@/pages/Appointments/components/Appointmen
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { FacilityData } from "@/types/facility/facility";
 import {
+  APPOINTMENT_STATUS_COLORS,
   Appointment,
   AppointmentFinalStatuses,
   AppointmentUpdateRequest,
@@ -234,29 +235,7 @@ const AppointmentDetails = ({
             <span className="mr-3 inline-block mb-2">
               {t("schedule_information")}
             </span>
-            <Badge
-              variant={
-                (
-                  {
-                    booked: "secondary",
-                    checked_in: "primary",
-                    in_consultation: "primary",
-                    pending: "secondary",
-                    arrived: "primary",
-                    fulfilled: "primary",
-                    entered_in_error: "destructive",
-                    cancelled: "destructive",
-                    rescheduled: "secondary",
-                    noshow: "destructive",
-                  } as Partial<
-                    Record<
-                      Appointment["status"],
-                      "secondary" | "primary" | "destructive" | "outline"
-                    >
-                  >
-                )[appointment.status] ?? "outline"
-              }
-            >
+            <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
               {t(appointment.status)}
             </Badge>
           </CardTitle>

@@ -122,12 +122,13 @@ export function LocationCard({
                   variant={
                     location.status === "active" ? "primary" : "secondary"
                   }
+                  className="capitalize whitespace-nowrap"
                 >
                   {t(location.status)}
                 </Badge>
                 <Badge
                   variant={
-                    !location.current_encounter ? "secondary" : "destructive"
+                    !location.current_encounter ? "green" : "destructive"
                   }
                   className="capitalize"
                 >
@@ -136,7 +137,10 @@ export function LocationCard({
                     : t("available")}
                 </Badge>
                 {location.has_children && (
-                  <Badge variant="outline" className="flex items-center gap-1">
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 whitespace-nowrap"
+                  >
                     <FolderOpen className="size-3" />
                     {t("has_child_locations")}
                   </Badge>

@@ -42,7 +42,10 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { ValuesetBase } from "@/types/valueset/valueset";
+import {
+  VALUESET_STATUS_COLORS,
+  ValuesetBase,
+} from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 function EmptyState() {
@@ -86,16 +89,8 @@ const RenderCard = ({
               <CardContent className="p-6 relative">
                 <div className="absolute top-4 right-4">
                   <Badge
-                    className={
-                      {
-                        active:
-                          "bg-green-100 text-green-800 hover:bg-green-200",
-                        draft:
-                          "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-                        retired: "bg-red-100 text-red-800 hover:bg-red-200",
-                        unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                      }[valueset.status]
-                    }
+                    variant={VALUESET_STATUS_COLORS[valueset.status]}
+                    className="whitespace-nowrap"
                   >
                     {t(valueset.status)}
                   </Badge>
@@ -248,16 +243,8 @@ const RenderTable = ({
                 </TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4">
                   <Badge
-                    className={
-                      {
-                        active:
-                          "bg-green-100 text-green-800 hover:bg-green-200",
-                        draft:
-                          "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-                        retired: "bg-red-100 text-red-800 hover:bg-red-200",
-                        unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                      }[valueset.status]
-                    }
+                    variant={VALUESET_STATUS_COLORS[valueset.status]}
+                    className="whitespace-nowrap"
                   >
                     {t(valueset.status)}
                   </Badge>

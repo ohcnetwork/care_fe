@@ -129,6 +129,21 @@ export const AppointmentFinalStatuses: AppointmentStatus[] = [
   "rescheduled",
 ];
 
+export const APPOINTMENT_STATUS_COLORS = {
+  proposed: "secondary",
+  pending: "secondary",
+  booked: "secondary",
+  arrived: "primary",
+  fulfilled: "primary",
+  noshow: "orange",
+  checked_in: "primary",
+  waitlist: "secondary",
+  in_consultation: "primary",
+  cancelled: "outline",
+  entered_in_error: "destructive",
+  rescheduled: "yellow",
+} as const satisfies Record<AppointmentStatus, string>;
+
 export type AppointmentNonCancelledStatus =
   (typeof AppointmentNonCancelledStatuses)[number];
 

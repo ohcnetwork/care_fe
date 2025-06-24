@@ -18,41 +18,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { Encounter } from "@/types/emr/encounter";
+import {
+  ENCOUNTER_PRIORITY_COLORS,
+  ENCOUNTER_STATUS_COLORS,
+  Encounter,
+} from "@/types/emr/encounter";
 
 export interface EncounterInfoCardProps {
   encounter: Encounter;
   facilityId: string;
   hideBorder?: boolean;
 }
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "planned":
-      return "blue" as const;
-    case "in_progress":
-      return "yellow" as const;
-    case "completed":
-      return "green" as const;
-    case "cancelled":
-      return "destructive" as const;
-    default:
-      return "outline" as const;
-  }
-};
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "stat":
-      return "red";
-    case "urgent":
-      return "bg-orange-100 text-orange-800";
-    case "asap":
-      return "bg-yellow-100 text-yellow-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
 
 export default function EncounterInfoCard(props: EncounterInfoCardProps) {
   const { t } = useTranslation();
@@ -93,18 +69,14 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           <div className="flex flex-wrap items-center gap-2">
             <Badge
               data-cy="encounter-status-badge"
-              variant={getStatusColor(encounter.status)}
-              // variant="outline"
+              variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
             >
               {t(`encounter_status__${encounter.status}`)}
             </Badge>
             <Badge className="bg-gray-100 text-gray-800" variant="outline">
               {t(`encounter_class__${encounter.encounter_class}`)}
             </Badge>
-            <Badge
-              className={getPriorityColor(encounter.priority)}
-              variant="outline"
-            >
+            <Badge variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}>
               {t(`encounter_priority__${encounter.priority}`)}
             </Badge>
           </div>
