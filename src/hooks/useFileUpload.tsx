@@ -249,6 +249,23 @@ export default function useFileUpload(
     if (!validateFileUpload()) return;
 
     setProgress(0);
+    if (combineToPDF) {
+      if (!uploadFileNames.length || !uploadFileNames[0]) {
+        setError(t("file_error__single_file_name"));
+        return;
+      }
+    } else {
+      for (const [index, file] of files.entries()) {
+        const filename =
+          allowNameFallback && uploadFileNames[index] === "" && file
+            ? file.name
+            : uploadFileNames[index];
+        if (!filename) {
+          setError(t("file_error__single_file_name"));
+          return;
+        }
+      }
+    }
     let filesToUpload = files;
     if (combineToPDF && files.length > 1) {
       const pdfFile = await generatePDF(files);
