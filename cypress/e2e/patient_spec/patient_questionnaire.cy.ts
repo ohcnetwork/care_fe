@@ -17,11 +17,13 @@ describe("All combination of encounter types", () => {
   });
 
   it("Verify the non-supported questionnaire are not accessible in patient update", () => {
-    // create a new questionnaire
+    // Create a questionnaire with patient subject type to test restrictions
     const slugName = faker.string.alphanumeric({ length: { min: 5, max: 10 } });
     const questionnaireName = faker.string.alpha({
       length: { min: 5, max: 10 },
     });
+
+    // Navigate to admin dashboard and create questionnaire
     cy.get("a").contains("Admin Dashboard").click();
     cy.get("button").contains("Create Questionnaire").click();
     cy.get("button").contains("Import").click();
@@ -34,11 +36,15 @@ describe("All combination of encounter types", () => {
     );
     cy.get("[data-slot='button']").contains("Import").click({ force: true });
     cy.get("[data-slot='button']").contains("Import Form").click();
+
+    // Configure questionnaire properties for patient subject type
     cy.get("[data-slot='card-title']").contains("Properties").scrollIntoView();
     cy.clickRadioButton("Status", "active");
-    cy.clickRadioButton("Subject Type", "patient");
+    cy.clickRadioButton("Subject Type", "patient"); // This makes it patient-specific
     cy.clearAndTypeIntoField("input[name='title']", questionnaireName);
     cy.clearAndTypeIntoField("input[name='slug']", slugName);
+
+    // Assign questionnaire to Doctor organization
     cy.get("label")
       .contains("Organizations")
       .parent()
@@ -49,9 +55,12 @@ describe("All combination of encounter types", () => {
     cy.get("[cmdk-item]").contains("Doctor").first().click();
     cy.get("body").type("{esc}");
     cy.get("button[type='submit']").scrollIntoView().click();
+
+    // Logout and switch to doctor user to test questionnaire access
     cy.get("[data-slot='avatar']").click();
     cy.get("[data-slot='dropdown-menu-item']").contains("Log Out").click();
-    // Switch to a new doctor user
+
+    // Test questionnaire access as doctor user
     cy.loginByApi("doctor");
     cy.visit("/");
     facilityCreation.selectFirstRandomFacility();
@@ -66,6 +75,9 @@ describe("All combination of encounter types", () => {
       questionnaireName,
       false,
     );
+
+    // Verify that patient-specific questionnaires show appropriate error messages
+    // when accessed outside of an active encounter
     cy.verifyContentPresence("[data-slot='card-content']", [
       "Allergy Intolerances cannot be recorded without an active encounter",
       "Medication requests cannot be recorded without an active encounter",
@@ -77,7 +89,7 @@ describe("All combination of encounter types", () => {
   });
 
   it("Verify the allergy questionnaire are only accessible in encounter ", () => {
-    // create a new questionnaire
+    // Create a questionnaire with encounter subject type for allergy testing
     const slugName = faker.string.alphanumeric({ length: { min: 5, max: 10 } });
     const questionnaireName = faker.string.alpha({
       length: { min: 5, max: 10 },
@@ -94,6 +106,8 @@ describe("All combination of encounter types", () => {
       "Olipudase alfa",
     ];
     const allergyName = faker.helpers.arrayElement(allergyOptions);
+
+    // Navigate to admin dashboard and create questionnaire
     cy.get("a").contains("Admin Dashboard").click();
     cy.get("button").contains("Create Questionnaire").click();
     cy.get("button").contains("Import").click();
@@ -106,11 +120,15 @@ describe("All combination of encounter types", () => {
     );
     cy.get("[data-slot='button']").contains("Import").click({ force: true });
     cy.get("[data-slot='button']").contains("Import Form").click();
+
+    // Configure questionnaire properties for encounter subject type
     cy.get("[data-slot='card-title']").contains("Properties").scrollIntoView();
     cy.clickRadioButton("Status", "active");
-    cy.clickRadioButton("Subject Type", "encounter");
+    cy.clickRadioButton("Subject Type", "encounter"); // This makes it encounter-specific
     cy.clearAndTypeIntoField("input[name='title']", questionnaireName);
     cy.clearAndTypeIntoField("input[name='slug']", slugName);
+
+    // Assign questionnaire to Doctor organization
     cy.get("label")
       .contains("Organizations")
       .parent()
@@ -121,9 +139,12 @@ describe("All combination of encounter types", () => {
     cy.get("[cmdk-item]").contains("Doctor").first().click();
     cy.get("body").type("{esc}");
     cy.get("button[type='submit']").scrollIntoView().click();
+
+    // Logout and switch to doctor user to test encounter questionnaire
     cy.get("[data-slot='avatar']").click();
     cy.get("[data-slot='dropdown-menu-item']").contains("Log Out").click();
-    // Switch to a new doctor user
+
+    // Test questionnaire access within an active encounter
     cy.loginByApi("doctor");
     cy.visit("/");
     facilityCreation.selectFirstRandomFacility();
@@ -135,7 +156,8 @@ describe("All combination of encounter types", () => {
       questionnaireName,
       false,
     );
-    // add allergy to the patient
+
+    // Add allergy information to the questionnaire
     cy.get("button").contains("Allergy").click();
     cy.typeAndSelectOption(
       "input[placeholder='Type to search and select from the list']",
@@ -143,10 +165,12 @@ describe("All combination of encounter types", () => {
       false,
     );
     cy.get("button").contains("Done").click();
-    // submit the questionnaire
+
+    // Submit the questionnaire and verify success
     cy.verifyAndClickElement("button[type='submit']", "Submit");
     cy.verifyNotification("Questionnaire submitted successfully");
-    // verify the allergy is in overview page
+
+    // Verify the allergy information appears in the patient overview
     cy.verifyContentPresence("[data-slot='accordion']", [
       "Allergies",
       allergyName,
@@ -163,12 +187,13 @@ describe("Patient Encounter Questionnaire", () => {
   });
 
   it("Create a new ABG questionnaire and verify the values", () => {
+    // Test data for respiratory support questionnaire
     const respiratorySupportValues = {
       "etco2-(mmhg)": "120",
     };
     facilityCreation.selectFirstRandomFacility();
 
-    // Chain the methods instead of multiple separate calls
+    // Execute questionnaire workflow using page object methods
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
@@ -177,16 +202,21 @@ describe("Patient Encounter Questionnaire", () => {
       .addQuestionnaire("Respiratory Support")
       .fillQuestionnaire(respiratorySupportValues);
     patientPrescription.submitQuestionnaire();
+
+    // Verify the submitted values appear in the overview
     patientEncounter.verifyOverviewValues(
       Object.values(respiratorySupportValues),
     );
   });
 
   it("verify the 500 character limit in input field", () => {
+    // Generate text exceeding the 500 character limit to test validation
     const characterMaxLimit = generateRandomCharacter({
-      charLimit: 510,
+      charLimit: 510, // Exceeds the 500 character limit
     });
     facilityCreation.selectFirstRandomFacility();
+
+    // Attempt to submit questionnaire with oversized text
     patientEncounter
       .navigateToEncounters()
       .clickInProgressEncounterFilter()
@@ -197,6 +227,8 @@ describe("Patient Encounter Questionnaire", () => {
         "any-suggestions-for-improvement": characterMaxLimit,
       });
     patientPrescription.clickSubmitQuestionnaire();
+
+    // Verify that submission fails with appropriate error message
     cy.verifyNotification("Failed to submit questionnaire");
     cy.verifyErrorMessages([
       { label: "Text", message: "Text too long. Max allowed size is 500" },
