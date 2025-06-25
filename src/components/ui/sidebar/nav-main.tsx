@@ -59,9 +59,9 @@ const MultiActiveLink = ({
   className?: string;
   [key: string]: any;
 }) => {
-  const Path = usePath();
+  const path = usePath();
   const isActive = [href, ...matchPaths].some((pattern) =>
-    matchPath(pattern, Path),
+    matchPath(pattern, path),
   );
 
   return (
@@ -78,7 +78,7 @@ const MultiActiveLink = ({
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const Path = usePath();
+  const path = usePath();
 
   return (
     <SidebarGroup>
@@ -93,7 +93,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                 ) : (
                   <Collapsible
                     asChild
-                    defaultOpen={isChildActive(link, Path)}
+                    defaultOpen={isChildActive(link, path)}
                     className="group/collapsible"
                   >
                     <SidebarMenuItem>
@@ -106,7 +106,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                             {
                               "bg-white text-green-700 shadow": isChildActive(
                                 link,
-                                Path,
+                                path,
                               ),
                             },
                           )}
@@ -162,7 +162,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       {
                         "bg-white text-green-700 shadow": isChildActive(
                           link,
-                          Path,
+                          path,
                         ),
                       },
                     )}
@@ -199,7 +199,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
 
 function PopoverMenu({ link }: { link: NavigationLink }) {
   const [open, setOpen] = useState(false);
-  const Path = usePath();
+  const path = usePath();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -209,7 +209,7 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
           className={cn(
             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
             {
-              "bg-white text-green-700 shadow": isChildActive(link, Path),
+              "bg-white text-green-700 shadow": isChildActive(link, path),
             },
           )}
         >
