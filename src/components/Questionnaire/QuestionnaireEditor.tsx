@@ -811,6 +811,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </DropdownMenu>
           )}
           <Button
+            type="submit"
             onClick={handleSave}
             disabled={isCreating || isUpdating}
             data-cy="save-questionnaire-form"
