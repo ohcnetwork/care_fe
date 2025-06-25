@@ -231,7 +231,7 @@ export function QuestionnaireList() {
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["questionnaires", qParams],
-    queryFn: query(questionnaireApi.list, {
+    queryFn: query.debounced(questionnaireApi.list, {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,

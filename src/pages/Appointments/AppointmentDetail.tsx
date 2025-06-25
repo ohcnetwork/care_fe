@@ -1,4 +1,5 @@
 import {
+  AvatarIcon,
   CalendarIcon,
   CheckCircledIcon,
   ClockIcon,
@@ -268,6 +269,19 @@ const AppointmentDetails = ({
               </p>
             </div>
           </div>
+          <div className="flex items-center space-x-4 text-sm">
+            <AvatarIcon className="size-5 text-gray-600" />
+            <div className="text-sm">
+              <p className="font-medium">{t("booked_by")}</p>
+              <p className="text-gray-600">
+                {appointment.booked_by
+                  ? formatName(appointment.booked_by)
+                  : `${appointment.patient.name} (${t("patient")})`}{" "}
+                {t("on")}{" "}
+                {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
+              </p>
+            </div>
+          </div>
           <Separator />
           <div className="text-sm">
             <p className="font-medium">{t("reason_for_visit")}</p>
@@ -372,14 +386,6 @@ const AppointmentDetails = ({
           </div>
         </CardContent>
       </Card>
-
-      <div className="text-sm text-gray-600">
-        {t("booked_by")}{" "}
-        {appointment.booked_by
-          ? formatName(appointment.booked_by)
-          : `${appointment.patient.name} (${t("patient")})`}{" "}
-        {t("on")} {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
-      </div>
     </div>
   );
 };
