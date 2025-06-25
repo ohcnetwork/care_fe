@@ -10,11 +10,13 @@ export default function QuestionnaireNavigation({
   toggleQuestionExpanded,
   expandedQuestions,
   rootQuestions,
+  isPreview = false,
 }: {
   rootQuestions: Question[];
   toggleQuestionExpanded?: (questionId: string) => void;
   expandedQuestions?: Set<string>;
-  scrollToQuestion?: (questionId: string) => void;
+  scrollToQuestion: (questionId: string) => void;
+  isPreview?: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -34,20 +36,11 @@ export default function QuestionnaireNavigation({
                 <Button
                   variant={null}
                   onClick={() => {
-                    if (scrollToQuestion) {
-                      scrollToQuestion(question.id);
-                    } else {
-                      const element = document.getElementById(
-                        `question-${question.link_id}`,
-                      );
-
-                      if (element) {
-                        element.scrollIntoView();
-                        if (toggleQuestionExpanded) {
-                          toggleQuestionExpanded(question.link_id);
-                        }
-                      }
-                    }
+                    scrollToQuestion(
+                      isPreview ? question.id : question.link_id,
+                    );
+                    if (toggleQuestionExpanded)
+                      toggleQuestionExpanded(question.link_id);
                   }}
                   className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
                     expandedQuestions?.has(question.link_id) ? "bg-accent" : ""
@@ -67,30 +60,18 @@ export default function QuestionnaireNavigation({
                         key={subQuestion.link_id}
                         variant={null}
                         onClick={() => {
-                          if (scrollToQuestion) {
-                            scrollToQuestion(subQuestion.id);
-                            console.log(subQuestion.id);
-                          } else if (
-                            !expandedQuestions?.has(question.link_id)
+                          if (
+                            !expandedQuestions?.has(question.link_id) &&
+                            toggleQuestionExpanded
                           ) {
-                            if (toggleQuestionExpanded) {
-                              toggleQuestionExpanded(question.link_id);
-                            }
+                            toggleQuestionExpanded(question.link_id);
                             setTimeout(() => {
-                              const element = document.getElementById(
-                                `question-${subQuestion.link_id}`,
-                              );
-                              if (element) {
-                                element.scrollIntoView();
-                              }
+                              scrollToQuestion(subQuestion.link_id);
                             }, 100);
                           } else {
-                            const element = document.getElementById(
-                              `question-${subQuestion.link_id}`,
+                            scrollToQuestion(
+                              isPreview ? subQuestion.id : subQuestion.link_id,
                             );
-                            if (element) {
-                              element.scrollIntoView();
-                            }
                           }
                         }}
                         className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "

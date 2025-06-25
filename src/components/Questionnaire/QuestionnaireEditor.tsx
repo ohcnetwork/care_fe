@@ -761,7 +761,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     setSelectedTags((current) => [...current, tag]);
   };
 
-  const scrollToQuestion = (groupId?: string) => {
+  const scrollToPreviewQuestion = (groupId?: string) => {
     setPreviewGroupId(groupId);
     const element = document.querySelector(
       `[data-preview-question-id="${groupId}"]`,
@@ -857,113 +857,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   rootQuestions={rootQuestions}
                   toggleQuestionExpanded={toggleQuestionExpanded}
                   expandedQuestions={expandedQuestions}
-                />
-              </div>
-            <div className="space-y-4 md:w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto">
-              <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
-                <CardHeader className="p-0">
-                  <CardTitle>{t("navigation")}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <nav className="space-y-1">
-                    {rootQuestions.map((question, index) => {
-                      const hasSubQuestions =
-                        question.type === "group" &&
-                        question.questions &&
-                        question.questions.length > 0;
-                      return (
-                        <div key={question.link_id} className="space-y-1">
-                          <button
-                            onClick={() => {
-                              scrollToQuestion(question.link_id);
-                              toggleQuestionExpanded(question.link_id);
-                            }}
-                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                              expandedQuestions.has(question.link_id)
-                                ? "bg-accent"
-                                : ""
-                            }`}
-                          >
-                            <span className="font-medium text-gray-500">
-                              {index + 1}.
-                            </span>
-                            <span className="flex-1 truncate">
-                              {question.text || t("untitled_question")}
-                            </span>
-                          </button>
-                          {hasSubQuestions && question.questions && (
-                            <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
-                              {question.questions.map(
-                                (subQuestion, subIndex) => (
-                                  <button
-                                    key={subQuestion.id}
-                                    onClick={() => {
-                                      if (
-                                        !expandedQuestions.has(question.link_id)
-                                      ) {
-                                        toggleQuestionExpanded(
-                                          question.link_id,
-                                        );
-                                        setTimeout(() => {
-                                          scrollToQuestion(subQuestion.link_id);
-                                        }, 100);
-                                      } else {
-                                        scrollToQuestion(subQuestion.link_id);
-                                      }
-                                    }}
-                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
-                                  >
-                                    <span className="font-medium text-gray-500">
-                                      {index + 1}.{subIndex + 1}
-                                    </span>
-                                    <span className="flex-1 truncate">
-                                      {subQuestion.text || "Untitled Question"}
-                                    </span>
-                                  </button>
-                                ),
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </nav>
-                </CardContent>
-              </Card>
-              <div className="space-y-4 max-w-sm lg:hidden">
-                <QuestionnaireProperties
-                  form={form}
-                  updateQuestionnaireField={updateQuestionnaireField}
-                  id={id}
-                  organizations={organizations}
-                  organizationSelection={{
-                    selectedOrgs: selectedOrgs,
-                    onToggle: handleToggleOrganization,
-                    searchQuery: orgSearchQuery,
-                    setSearchQuery: setOrgSearchQuery,
-                    available: availableOrganizations,
-                    isLoading: isLoadingAvailableOrganizations,
-                    error: orgError,
-                    setError: setOrgError,
-                  }}
-                  tags={tags}
-                  tagSelection={{
-                    selectedTags: selectedTags,
-                    onToggle: handleToggleTag,
-                    searchQuery: tagSearchQuery,
-                    setSearchQuery: setTagSearchQuery,
-                    available: tagOptions,
-                    isLoading: isLoadingAvailableTags,
-                    onTagCreated: !id ? handleTagCreated : undefined,
-                  }}
-                />
-                <QuestionActions
-                  selectedQuestions={selectedQuestions}
-                  questions={rootQuestions}
-                  updateQuestionnaireField={updateQuestionnaireField}
-                  onQuestionsChange={updateQuestions}
-                  setSelectedQuestions={setSelectedQuestions}
-                  setExpandedQuestions={setExpandedQuestions}
+                  scrollToQuestion={scrollToQuestion}
                 />
               </div>
             </div>
@@ -1218,9 +1112,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   rootQuestions={rootQuestions}
                   toggleQuestionExpanded={toggleQuestionExpanded}
                   expandedQuestions={expandedQuestions}
-                  scrollToQuestion={(questionId: string) =>
-                    scrollToQuestion(questionId)
-                  }
+                  isPreview={true}
+                  scrollToQuestion={scrollToPreviewQuestion}
                 />
               </div>
               <div className="space-y-4 max-w-sm lg:hidden">
