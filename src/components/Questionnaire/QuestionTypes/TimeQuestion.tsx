@@ -17,6 +17,7 @@ interface TimeQuestionProps {
   disabled?: boolean;
   clearError: () => void;
   classes?: string;
+  index: number;
 }
 
 export function TimeQuestion({
@@ -25,18 +26,20 @@ export function TimeQuestion({
   disabled,
   clearError,
   classes,
+  index,
 }: TimeQuestionProps) {
   const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const [hours, minutes] = event.target.value.split(":");
 
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "time",
+      value: `${hours}:${minutes}:00`,
+    };
+
     clearError();
     updateQuestionnaireResponseCB(
-      [
-        {
-          type: "time",
-          value: `${hours}:${minutes}:00`,
-        },
-      ],
+      newValues,
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );
@@ -46,8 +49,8 @@ export function TimeQuestion({
     <Input
       type="time"
       value={
-        questionnaireResponse.values[0]?.value
-          ? (questionnaireResponse.values[0].value as string).slice(0, 5)
+        questionnaireResponse.values[index]?.value
+          ? (questionnaireResponse.values[index].value as string).slice(0, 5)
           : ""
       }
       className={cn(classes)}
