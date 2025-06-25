@@ -4,6 +4,8 @@ import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown, Clock } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -48,6 +50,7 @@ interface StructuredTypeConfig<T extends BaseRecord> {
 interface HistoricalRecordSelectorProps<T extends BaseRecord> {
   structuredTypes: StructuredTypeConfig<T>[];
   onAddSelected: (selected: T[]) => void;
+  limitHistoryButtonWidth?: boolean;
   buttonLabel?: string;
   title?: string;
 }
@@ -142,6 +145,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   onAddSelected,
   buttonLabel,
   title,
+  limitHistoryButtonWidth = false,
 }: HistoricalRecordSelectorProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeType, setActiveType] = useState<string>(
@@ -335,18 +339,25 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          data-cy="view-history"
-          className="border-gray-400 flex ml-auto"
-        >
-          <Clock className="size-4" />
-          <span className="font-semibold">
-            {buttonLabel || t("view_history")}
-          </span>
-        </Button>
-      </SheetTrigger>
+      <div
+        className={cn(
+          "flex items-center justify-end",
+          limitHistoryButtonWidth ? "w-full" : "max-w-4xl",
+        )}
+      >
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            data-cy="view-history"
+            className="border-gray-400 flex ml-auto sm:-mt-8.5 mt-0"
+          >
+            <Clock className="size-4" />
+            <span className="font-semibold">
+              {buttonLabel || t("view_history")}
+            </span>
+          </Button>
+        </SheetTrigger>
+      </div>
       <SheetContent className="w-full sm:max-w-3xl p-0 overflow-y-auto">
         <div className="flex flex-col gap-2 p-2">
           <SheetHeader className="p-0">
