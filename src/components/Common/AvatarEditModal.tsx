@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
+import { useMediaStream } from "@/hooks/useMediaStream";
 
 import { getCroppedImg } from "@/Utils/getCroppedImg";
 import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
@@ -99,12 +100,29 @@ export default function AvatarEditModal({
   const [constraint, setConstraint] = useState<IVideoConstraint>(
     VideoConstraints.user,
   );
-  const [currentStream, setCurrentStream] = useState<MediaStream | null>(null);
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const { requestPermission } = useMediaDevicePermission();
   const [showCroppedPreview, setShowCroppedPreview] = useState(false);
   const [showCameraPreview, setShowCameraPreview] = useState(false);
+
+  const { startStream, stopStream } = useMediaStream({
+    constraints: { video: { facingMode: constraint.facingMode } },
+  });
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isCameraOpen) {
+      timer = setTimeout(() => {
+        startStream();
+      }, 100);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      stopStream();
+    };
+  }, [isCameraOpen]);
 
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
@@ -151,34 +169,6 @@ export default function AvatarEditModal({
       );
     }
   };
-
-  const stopCamera = useCallback(() => {
-    try {
-      if (webRef.current) {
-        const openCamera = webRef.current?.video?.srcObject as MediaStream;
-        if (openCamera) {
-          openCamera.getTracks().forEach((track) => track.stop());
-        }
-      }
-    } catch {
-      toast.error(t("failed_to_stop_camera"));
-    } finally {
-      setIsCameraOpen(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!open || !isCameraOpen) {
-      if (currentStream) {
-        currentStream.getTracks().forEach((track) => track.stop());
-        setCurrentStream(null);
-      }
-      if (webRef.current?.stream) {
-        const tracks = webRef.current.stream.getTracks();
-        tracks.forEach((track) => track.stop());
-      }
-    }
-  }, [open, isCameraOpen, currentStream]);
 
   const closeModal = () => {
     setPreview(undefined);
@@ -604,7 +594,8 @@ export default function AvatarEditModal({
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      stopCamera();
+                      setIsCameraOpen(false);
+                      setPreview(undefined);
                       closeModal();
                     }}
                     disabled={isProcessing}
