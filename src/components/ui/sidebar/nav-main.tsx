@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react";
-import { ActiveLink } from "raviger";
+import { ActiveLink, usePath } from "raviger";
 import { useState } from "react";
 import React from "react";
 
@@ -32,16 +32,13 @@ import { NavigationLink } from "./facility-nav";
 
 /* Converts a route pattern like '/path/:id' to a RegExp to match dynamic segments in URLs.
 Helps in checking if the current path matches a pattern for active link detection. */
-const matchPath = (pattern: string, path: string) => {
+const matchPath = (pattern: string, path: string | null) => {
   const regex = new RegExp(`^${pattern.replace(/:\w+/g, "[^/]+")}`);
-  return regex.test(path);
+  return regex.test(path || "");
 };
 
-const isChildActive = (link: NavigationLink) => {
-  const currentPath = window.location.pathname;
-
+const isChildActive = (link: NavigationLink, currentPath: string | null) => {
   if (!link.children) return false;
-
   return link.children.some(({ url, matchPaths = [] }) =>
     [url, ...matchPaths].some((pattern) => matchPath(pattern, currentPath)),
   );
@@ -62,9 +59,9 @@ const MultiActiveLink = ({
   className?: string;
   [key: string]: any;
 }) => {
-  const currentPath = window.location.pathname;
+  const Path = usePath();
   const isActive = [href, ...matchPaths].some((pattern) =>
-    matchPath(pattern, currentPath),
+    matchPath(pattern, Path),
   );
 
   return (
@@ -81,6 +78,7 @@ const MultiActiveLink = ({
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const Path = usePath();
 
   return (
     <SidebarGroup>
@@ -95,7 +93,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                 ) : (
                   <Collapsible
                     asChild
-                    defaultOpen={isChildActive(link)}
+                    defaultOpen={isChildActive(link, Path)}
                     className="group/collapsible"
                   >
                     <SidebarMenuItem>
@@ -106,8 +104,10 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                           className={cn(
                             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
                             {
-                              "bg-white text-green-700 shadow":
-                                isChildActive(link),
+                              "bg-white text-green-700 shadow": isChildActive(
+                                link,
+                                Path,
+                              ),
                             },
                           )}
                         >
@@ -160,7 +160,10 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                     className={cn(
                       "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700",
                       {
-                        "bg-white text-green-700 shadow": isChildActive(link),
+                        "bg-white text-green-700 shadow": isChildActive(
+                          link,
+                          Path,
+                        ),
                       },
                     )}
                     data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
@@ -196,6 +199,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
 
 function PopoverMenu({ link }: { link: NavigationLink }) {
   const [open, setOpen] = useState(false);
+  const Path = usePath();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -205,7 +209,7 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
           className={cn(
             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
             {
-              "bg-white text-green-700 shadow": isChildActive(link),
+              "bg-white text-green-700 shadow": isChildActive(link, Path),
             },
           )}
         >
