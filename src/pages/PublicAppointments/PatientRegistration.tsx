@@ -332,8 +332,10 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         <FormLabel aria-required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
-                            {...field}
                             type="number"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            {...field}
                             placeholder={t("type_patient_age")}
                           />
                         </FormControl>

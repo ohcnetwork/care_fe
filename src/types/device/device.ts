@@ -19,6 +19,16 @@ export const DeviceAvailabilityStatuses = [
   "available",
 ] as const;
 
+export const DEVICE_AVAILABILITY_STATUS_COLORS = {
+  lost: "yellow",
+  damaged: "destructive",
+  destroyed: "destructive",
+  available: "green",
+  active: "primary",
+  inactive: "secondary",
+  entered_in_error: "destructive",
+} as const;
+
 export type DeviceAvailabilityStatus =
   (typeof DeviceAvailabilityStatuses)[number];
 
