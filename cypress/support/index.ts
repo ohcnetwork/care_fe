@@ -51,6 +51,28 @@ declare global {
           position?: "first" | "last";
         },
       ): Chainable<Element>;
+      selectComboboxDropdown(
+        labelText: string,
+        value: string,
+        unit?: string,
+      ): Chainable<Element>;
+      clickAndSelectOptionV2(
+        selector: string,
+        reference: string,
+      ): Chainable<Element>;
+      typeAndSelectOptionV2(
+        labelText: string,
+        value: string,
+      ): Chainable<Element>;
+      clearAndTypeIntoField(
+        selector: string,
+        value: string,
+      ): Chainable<JQuery<HTMLElement>>;
+      getFacilityIdAndNavigate(path?: string): Chainable<string>;
+      clickRadioButton(
+        labelText: string,
+        buttonValue: string,
+      ): Chainable<Element>;
     }
   }
 }

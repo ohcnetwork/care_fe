@@ -24,6 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
@@ -97,10 +98,12 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
 import { CodingEditor } from "./CodingEditor";
+import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
 import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
+import { scrollToQuestion } from "./utils";
 
 interface QuestionnaireEditorProps {
   id?: string;
@@ -216,6 +219,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [importUrl, setImportUrl] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showFileImportDialog, setShowFileImportDialog] = useState(false);
+  const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(
+    new Set(),
+  );
   const [selectedImportFile, setSelectedImportFile] = useState<File | null>(
     null,
   );
@@ -455,6 +461,17 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestionnaire]);
 
+  const handleToggleSelection = (questionId: string) => {
+    setSelectedQuestions((prev) => {
+      const next = new Set(prev);
+      if (next.has(questionId)) {
+        next.delete(questionId);
+      } else {
+        next.add(questionId);
+      }
+      return next;
+    });
+  };
   const rootQuestions: Question[] = useWatch({
     control: form.control,
     name: "questions",
@@ -794,6 +811,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </DropdownMenu>
           )}
           <Button
+            type="submit"
             onClick={handleSave}
             disabled={isCreating || isUpdating}
             data-cy="save-questionnaire-form"
@@ -820,7 +838,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsList>
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 md:w-60">
+            <div className="space-y-4 md:w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto">
               <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
                 <CardHeader className="p-0">
                   <CardTitle>{t("navigation")}</CardTitle>
@@ -836,13 +854,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         <div key={question.link_id} className="space-y-1">
                           <button
                             onClick={() => {
-                              const element = document.getElementById(
-                                `question-${question.link_id}`,
-                              );
-                              if (element) {
-                                element.scrollIntoView();
-                                toggleQuestionExpanded(question.link_id);
-                              }
+                              scrollToQuestion(question.link_id);
+                              toggleQuestionExpanded(question.link_id);
                             }}
                             className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
                               expandedQuestions.has(question.link_id)
@@ -871,21 +884,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                           question.link_id,
                                         );
                                         setTimeout(() => {
-                                          const element =
-                                            document.getElementById(
-                                              `question-${subQuestion.link_id}`,
-                                            );
-                                          if (element) {
-                                            element.scrollIntoView();
-                                          }
+                                          scrollToQuestion(subQuestion.link_id);
                                         }, 100);
                                       } else {
-                                        const element = document.getElementById(
-                                          `question-${subQuestion.link_id}`,
-                                        );
-                                        if (element) {
-                                          element.scrollIntoView();
-                                        }
+                                        scrollToQuestion(subQuestion.link_id);
                                       }
                                     }}
                                     className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
@@ -933,6 +935,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     isLoading: isLoadingAvailableTags,
                     onTagCreated: !id ? handleTagCreated : undefined,
                   }}
+                />
+                <QuestionActions
+                  selectedQuestions={selectedQuestions}
+                  questions={rootQuestions}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  onQuestionsChange={updateQuestions}
+                  setSelectedQuestions={setSelectedQuestions}
+                  setExpandedQuestions={setExpandedQuestions}
                 />
               </div>
             </div>
@@ -1042,20 +1052,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             type: "string",
                             questions: [],
                           };
-                          handleValidatedChange("questions", [
-                            ...rootQuestions,
-                            newQuestion,
-                          ]);
+                          updateQuestions([...rootQuestions, newQuestion]);
                           setExpandedQuestions(
                             (prev) => new Set([...prev, newQuestion.link_id]),
                           );
                           setTimeout(() => {
-                            const element = document.getElementById(
-                              `question-${newQuestion.link_id}`,
-                            );
-                            if (element) {
-                              element.scrollIntoView();
-                            }
+                            scrollToQuestion(newQuestion.link_id);
                           }, 100);
                         }}
                       >
@@ -1071,12 +1073,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             id={`question-${question.link_id}`}
                             className="relative bg-white rounded-lg shadow-md"
                           >
-                            <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
                             <QuestionEditor
                               name={`questions.${index}`}
                               index={index}
                               key={question.link_id}
                               question={question}
+                              selectedQuestions={selectedQuestions}
+                              onToggleSelection={handleToggleSelection}
                               form={form}
                               onChange={(updatedQuestion) => {
                                 const newQuestions = rootQuestions.map(
@@ -1142,7 +1145,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </form>
               </Form>
             </div>
-            <div className="space-y-4 w-60 hidden lg:block">
+            <div className="space-y-4 w-60 lg:block sticky top-4 self-start h-fit">
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
@@ -1168,6 +1171,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   isLoading: isLoadingAvailableTags,
                   onTagCreated: handleTagCreated,
                 }}
+              />
+              <QuestionActions
+                selectedQuestions={selectedQuestions}
+                questions={rootQuestions}
+                onQuestionsChange={updateQuestions}
+                updateQuestionnaireField={updateQuestionnaireField}
+                setSelectedQuestions={setSelectedQuestions}
+                setExpandedQuestions={setExpandedQuestions}
               />
             </div>
           </div>
@@ -1386,6 +1397,8 @@ interface QuestionEditorProps {
   isLast?: boolean;
   structuredTypeError?: string;
   setStructuredTypeError?: (error: string | undefined) => void;
+  onToggleSelection: (id: string) => void;
+  selectedQuestions: Set<string>;
   enableWhenDependencies: Map<
     string,
     Set<{ question: Question; path: string[] }>
@@ -1411,6 +1424,8 @@ function QuestionEditor({
   index,
   structuredTypeError,
   setStructuredTypeError,
+  onToggleSelection,
+  selectedQuestions,
   enableWhenDependencies,
   handleEnableWhenDependentClick,
   expandPath,
@@ -1685,6 +1700,14 @@ function QuestionEditor({
       className={`rounded-lg p-1 bg-card text-card-foreground`}
     >
       <div className={cn("flex items-center p-2", isExpanded && "bg-gray-50")}>
+        {depth > 0 && (
+          <Checkbox
+            checked={selectedQuestions.has(question.id)}
+            onCheckedChange={() => onToggleSelection(question.id)}
+            onChange={(e) => e.stopPropagation()}
+            className="mb-6 mr-2"
+          />
+        )}
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
             <div className="font-semibold text-left">
@@ -1701,6 +1724,7 @@ function QuestionEditor({
               )}
             </div>
           </div>
+
           {isExpanded ? (
             <ChevronsDownUp className="size-4 text-gray-500" />
           ) : (
@@ -2513,12 +2537,7 @@ function QuestionEditor({
                       (prev) => new Set([...prev, newQuestion.link_id]),
                     );
                     setTimeout(() => {
-                      const element = document.getElementById(
-                        `question-${newQuestion.link_id}`,
-                      );
-                      if (element) {
-                        element.scrollIntoView();
-                      }
+                      scrollToQuestion(newQuestion.link_id);
                     }, 100);
                   }}
                 >
@@ -2542,6 +2561,8 @@ function QuestionEditor({
                       form={form}
                       index={idx}
                       key={subQuestion.link_id}
+                      onToggleSelection={onToggleSelection}
+                      selectedQuestions={selectedQuestions}
                       question={subQuestion}
                       onChange={(updated) => {
                         const newQuestions = [...(questions || [])];
