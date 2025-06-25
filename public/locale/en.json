@@ -1907,6 +1907,7 @@
   "min_char_length_error": "Must be at least {{ min_length }} characters",
   "min_password_len_8": "Minimum password length 8",
   "min_time_bw_doses": "Min. time b/w doses",
+  "minimal_patient_registration_geo_organization_required": "Atleast one level geo-organization is required",
   "minimize": "Minimize",
   "missing_required_params_for_patient_verification": "Missing required parameters for patient verification",
   "mobile": "Mobile",
