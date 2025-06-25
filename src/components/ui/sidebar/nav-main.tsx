@@ -47,6 +47,37 @@ const isChildActive = (link: NavigationLink) => {
   );
 };
 
+const MultiActiveLink = ({
+  href,
+  matchPaths = [],
+  children,
+  activeClass = "",
+  className = "",
+  ...props
+}: {
+  href: string;
+  matchPaths?: string[];
+  children: React.ReactNode;
+  activeClass?: string;
+  className?: string;
+  [key: string]: any;
+}) => {
+  const currentPath = window.location.pathname;
+  const isActive = [href, ...matchPaths].some((pattern) =>
+    matchPath(pattern, currentPath),
+  );
+
+  return (
+    <ActiveLink
+      href={href}
+      className={cn(className, isActive && activeClass)}
+      {...props}
+    >
+      {children}
+    </ActiveLink>
+  );
+};
+
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -72,7 +103,13 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                         <SidebarMenuButton
                           data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                           tooltip={link.name}
-                          className="cursor-pointer hover:bg-gray-200 hover:text-green-700"
+                          className={cn(
+                            "cursor-pointer hover:bg-gray-200 hover:text-green-700",
+                            {
+                              "bg-white text-green-700 shadow":
+                                isChildActive(link),
+                            },
+                          )}
                         >
                           {link.icon ? (
                             link.icon
@@ -99,14 +136,14 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                                   "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                                 }
                               >
-                                <ActiveLink
+                                <MultiActiveLink
                                   href={subItem.url}
+                                  matchPaths={subItem.matchPaths}
                                   className="w-full"
                                   activeClass="bg-white text-green-700 shadow"
-                                  exactActiveClass="bg-white text-green-700 shadow"
                                 >
                                   {subItem.name}
-                                </ActiveLink>
+                                </MultiActiveLink>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                           ))}
@@ -120,15 +157,19 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   <SidebarMenuButton
                     asChild
                     tooltip={link.name}
-                    className={
-                      "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-                    }
+                    className={cn(
+                      "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700",
+                      {
+                        "bg-white text-green-700 shadow": isChildActive(link),
+                      },
+                    )}
                     data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                   >
-                    <ActiveLink
+                    <MultiActiveLink
                       href={link.url}
-                      activeClass="bg-white text-green-700 shadow-sm"
-                      exactActiveClass="bg-white text-green-700 shadow-sm"
+                      matchPaths={link.matchPaths}
+                      className="w-full"
+                      activeClass="bg-white text-green-700 shadow"
                     >
                       {link.icon ? (
                         link.icon
@@ -142,7 +183,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       <span className="group-data-[collapsible=icon]:hidden ml-1">
                         {link.name}
                       </span>
-                    </ActiveLink>
+                    </MultiActiveLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
@@ -183,16 +224,17 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
       >
         <div className="flex flex-col gap-1">
           {link.children?.map((subItem) => (
-            <ActiveLink
+            <MultiActiveLink
               key={subItem.name}
               href={subItem.url}
+              matchPaths={subItem.matchPaths}
               onClick={() => setOpen(false)}
               className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
               activeClass="bg-gray-100 text-green-700"
               exactActiveClass="bg-gray-100 text-green-700"
             >
               {subItem.name}
-            </ActiveLink>
+            </MultiActiveLink>
           ))}
         </div>
       </PopoverContent>
