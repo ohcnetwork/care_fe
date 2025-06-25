@@ -328,14 +328,14 @@ export const FilesPage = ({
       <div className="flex flex-row gap-2 mt-2 mx-2">
         <Badge
           data-cy="file-status-badge"
-          variant="secondary"
-          className="cursor-pointer border border-gray-300 bg-white"
+          variant="outline"
+          className="cursor-pointer"
           onClick={() => updateQuery({ is_archived: undefined })}
         >
           {t(
             qParams.is_archived === "false" ? "active_files" : "archived_files",
           )}
-          <CareIcon icon="l-times-circle" className="ml-1" />
+          <CareIcon icon="l-times-circle" />
         </Badge>
       </div>
     );

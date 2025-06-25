@@ -578,7 +578,7 @@ export function MedicationStatementQuestion({
                                   <div className="text-sm mt-1 text-gray-600">
                                     <span>
                                       {t(
-                                        `medication_status_${medication.status}`,
+                                        `medication_status__${medication.status}`,
                                       )}
                                       {" · "}
                                     </span>
