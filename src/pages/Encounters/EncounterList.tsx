@@ -177,10 +177,7 @@ export function EncounterList({
     <Page
       title={t("encounters")}
       componentRight={
-        <Badge
-          className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
-          variant="outline"
-        >
+        <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
           {isLoading
             ? t("loading")
             : t("entity_count", {

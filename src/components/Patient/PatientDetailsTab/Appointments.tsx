@@ -27,6 +27,7 @@ import { getPermissions } from "@/common/Permissions";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { APPOINTMENT_STATUS_COLORS } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 export const Appointments = (props: PatientProps) => {
@@ -65,27 +66,6 @@ export const Appointments = (props: PatientProps) => {
   }, [canViewAppointments]);
 
   const appointments = data?.results;
-
-  const getStatusBadge = (status: string) => {
-    const statusColors: Record<string, string> = {
-      booked:
-        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900",
-      checked_in:
-        "bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900",
-      cancelled: "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900",
-    };
-
-    return (
-      <Badge
-        className={
-          statusColors[status] ||
-          "bg-gray-100 text-gray-800 hover:bg-gray-200 hover:text-gray-900"
-        }
-      >
-        {status.replace("_", " ").toUpperCase()}
-      </Badge>
-    );
-  };
 
   return (
     <div className="mt-4 px-3 md:px-0">
@@ -149,7 +129,13 @@ export const Appointments = (props: PatientProps) => {
                       <span className="text-gray-500">{t("self_booked")}</span>
                     )}
                   </TableCell>
-                  <TableCell>{getStatusBadge(appointment.status)}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
+                    >
+                      {t(appointment.status)}
+                    </Badge>
+                  </TableCell>
                   {facilityId && (
                     <TableCell className="text-right">
                       <Button variant="outline" size="sm" asChild>
