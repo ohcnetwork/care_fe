@@ -150,22 +150,24 @@ function ConsentCard({
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500">{t("valid_period")}</span>
-            <p className="font-medium text-right text-xs">
+            <p className="font-medium text-xs">
               {consent.period.start ? (
                 <>
                   <span>
-                    {format(new Date(consent.period.start), "MMMM d, yyyy")}{" "}
-                    {format(new Date(consent.period.start), "h:mm a")} {" - "}
+                    {format(new Date(consent.period.start), "MMMM d, yyyy")}
+                    <br />
+                    {format(new Date(consent.period.start), "h:mm a")} -
                   </span>
                   <br />
-                  <span>
-                    {consent.period.end
-                      ? `${format(new Date(consent.period.end), "MMMM d, yyyy")} ${format(
-                          new Date(consent.period.end),
-                          "h:mm a",
-                        )}`
-                      : t("na")}
-                  </span>
+                  {consent.period.end ? (
+                    <span>
+                      {format(new Date(consent.period.end), "MMMM d, yyyy")}
+                      <br />
+                      {format(new Date(consent.period.end), "h:mm a")}
+                    </span>
+                  ) : (
+                    <span>{t("na")}</span>
+                  )}
                 </>
               ) : (
                 <span>{t("na")}</span>
