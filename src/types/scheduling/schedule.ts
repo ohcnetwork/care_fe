@@ -132,14 +132,14 @@ export const AppointmentFinalStatuses: AppointmentStatus[] = [
 export const APPOINTMENT_STATUS_COLORS = {
   proposed: "secondary",
   pending: "secondary",
-  booked: "secondary",
+  booked: "blue",
   arrived: "primary",
   fulfilled: "primary",
   noshow: "orange",
-  checked_in: "primary",
+  checked_in: "green",
   waitlist: "secondary",
   in_consultation: "primary",
-  cancelled: "outline",
+  cancelled: "destructive",
   entered_in_error: "destructive",
   rescheduled: "yellow",
 } as const satisfies Record<AppointmentStatus, string>;
