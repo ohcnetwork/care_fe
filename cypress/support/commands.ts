@@ -235,3 +235,92 @@ Cypress.Commands.add(
     });
   },
 );
+
+Cypress.Commands.add(
+  "selectComboboxDropdown",
+  (labelText: string, value: string, unit?: string) => {
+    cy.contains("label", labelText)
+      .parent('[data-slot="form-item"]')
+      .find("input")
+      .click({ force: true })
+      .type(value);
+    if (unit) {
+      cy.get('[role="option"]').contains(unit).click();
+    } else {
+      cy.get('[role="option"]').contains(value).click();
+    }
+  },
+);
+
+Cypress.Commands.add(
+  "clickAndSelectOptionV2",
+  (labelText: string, reference: string) => {
+    cy.contains("label", labelText)
+      .parent('[data-slot="form-item"]')
+      .find('[type="button"]')
+      .click();
+    cy.get('[role="option"]').contains(reference).click();
+  },
+);
+
+Cypress.Commands.add(
+  "typeAndSelectOptionV2",
+  (labelText: string, value: string) => {
+    // Click to open the dropdown
+    cy.contains("label", labelText)
+      .parent('[data-slot="form-item"]')
+      .find("[data-slot='popover-trigger']")
+      .click()
+      .scrollIntoView()
+      .then(() => {
+        // Type in the command input
+        cy.get("[cmdk-input]")
+          .should("be.visible")
+          .type(value)
+          .then(() => {
+            // Select the filtered option from command menu
+            cy.get("[cmdk-group]")
+              .find("[cmdk-item]")
+              .contains(value)
+              .should("be.visible")
+              .click();
+          });
+      });
+  },
+);
+
+Cypress.Commands.add(
+  "clearAndTypeIntoField",
+  (selector: string, value: string) => {
+    cy.get(selector)
+      .scrollIntoView()
+      .should("be.visible")
+      .clear()
+      .click()
+      .type(value);
+  },
+);
+
+Cypress.Commands.add("getFacilityIdAndNavigate", (path?: string) => {
+  cy.url().then((url) => {
+    const facilityId = url.split("/facility/")[1].split("/")[0];
+    if (path) {
+      cy.visit(`/facility/${facilityId}/${path}`);
+    }
+    cy.wrap(facilityId);
+  });
+});
+
+// Custom command for clicking radio buttons
+Cypress.Commands.add(
+  "clickRadioButton",
+  (labelText: string, buttonValue: string) => {
+    cy.get("label").contains(labelText).scrollIntoView();
+    cy.get("label")
+      .contains(labelText)
+      .parent()
+      .within(() => {
+        cy.get(`button[value='${buttonValue}']`).click();
+      });
+  },
+);

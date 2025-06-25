@@ -163,7 +163,12 @@ export function QuestionInput({
               </span>
             );
           case "allergy_intolerance":
-            return <AllergyQuestion {...commonProps} />;
+            if (encounterId) {
+              return <AllergyQuestion {...commonProps} />;
+            }
+            return (
+              <span>{t("questionnaire_allergy_intolerance_no_encounter")}</span>
+            );
           case "symptom":
             if (encounterId) {
               return (
