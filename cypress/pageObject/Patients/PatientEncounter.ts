@@ -102,15 +102,16 @@ export class PatientEncounter {
       .last()
       .find("td")
       .then(($tds) => {
-        $tds.eq(4).attr("data-cy", "allergy-options");
+        $tds.eq(5).attr("data-cy", "allergy-options");
       });
     cy.get('[data-cy="allergy-options"]')
       .scrollIntoView()
       .should("be.visible")
       .then(($el) => {
         cy.wrap($el).click();
-        cy.contains("Remove Allergy").click();
       });
+
+    cy.contains("Remove Allergy").click();
 
     return this;
   }
@@ -193,13 +194,15 @@ export class PatientEncounter {
       .then(($tds) => {
         $tds.eq(4).attr("data-cy", "symptom-options");
       });
+
     cy.get('[data-cy="symptom-options"]')
       .scrollIntoView()
       .should("be.visible")
       .then(($el) => {
         cy.wrap($el).click();
-        cy.contains("Remove Symptom").click();
       });
+
+    cy.contains("Remove Symptom").click();
     return this;
   }
 
@@ -287,8 +290,8 @@ export class PatientEncounter {
       .should("be.visible")
       .then(($el) => {
         cy.wrap($el).click();
-        cy.contains("Remove Diagnosis").click();
       });
+    cy.contains("Remove Diagnosis").click();
     return this;
   }
 
