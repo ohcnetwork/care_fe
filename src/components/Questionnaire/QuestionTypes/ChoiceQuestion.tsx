@@ -111,17 +111,16 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     );
   };
 
-  if (question.answer_value_set && !question.repeats) {
-    return (
-      <ValueSetSelect
-        system={question.answer_value_set}
-        value={currentCoding}
-        onSelect={handleCodingChange}
-      ></ValueSetSelect>
-    );
-  }
-
   if (question.answer_value_set) {
+    if (!question.repeats) {
+      return (
+        <ValueSetSelect
+          system={question.answer_value_set}
+          value={currentCoding}
+          onSelect={handleCodingChange}
+        ></ValueSetSelect>
+      );
+    }
     return (
       <>
         {questionnaireResponse.values.map((value, idx) => {

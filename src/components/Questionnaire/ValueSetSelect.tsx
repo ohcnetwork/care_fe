@@ -412,9 +412,7 @@ export default function ValueSetSelect({
           <Button
             variant="outline"
             role="combobox"
-            onClick={() => {
-              setInternalOpen(true);
-            }}
+            onClick={() => setInternalOpen(true)}
             className={cn(
               "w-full justify-between",
               wrapTextForSmallScreen
