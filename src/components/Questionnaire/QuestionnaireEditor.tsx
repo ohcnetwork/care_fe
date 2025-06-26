@@ -634,10 +634,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }
 
     if (id) {
-      if (!isDirty) {
-        toast.info(t("no_changes_made"));
-        return;
-      }
       updateQuestionnaire({
         ...form.getValues(),
         questions: rootQuestions,
@@ -825,7 +821,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <Button
             type="submit"
             onClick={handleSave}
-            disabled={isCreating || isUpdating}
+            disabled={!isDirty || isCreating || isUpdating}
             data-cy="save-questionnaire-form"
           >
             <CareIcon icon="l-save" className="mr-2 size-4" />
