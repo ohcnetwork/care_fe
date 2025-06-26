@@ -17,7 +17,10 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { Appointment } from "@/types/scheduling/schedule";
+import {
+  APPOINTMENT_STATUS_COLORS,
+  Appointment,
+} from "@/types/scheduling/schedule";
 
 import AppointmentDialog from "./components/AppointmentDialog";
 
@@ -46,24 +49,6 @@ function PatientIndex() {
     }),
     enabled: !!tokenData?.token,
   });
-
-  const getStatusChip = (status: string) => {
-    return (
-      <Badge
-        variant={
-          status === "checked_in"
-            ? "secondary"
-            : status === "booked"
-              ? "primary"
-              : status === "cancelled"
-                ? "destructive"
-                : "default"
-        }
-      >
-        {t(status)}
-      </Badge>
-    );
-  };
 
   if (isLoading) {
     return (
@@ -140,7 +125,13 @@ function PatientIndex() {
               </div>
               <div className="flex flex-col gap-0 items-start md:flex-none">
                 <span className="text-xs font-medium">{t("status")}: </span>
-                <span>{getStatusChip(appointment.status)}</span>
+                <span>
+                  <Badge
+                    variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
+                  >
+                    {t(appointment.status)}
+                  </Badge>
+                </span>
               </div>
             </div>
             <div className="flex flex-row gap-3 justify-between md:flex-none">

@@ -179,10 +179,12 @@ function StatusSelect({
   verificationStatus,
   onValueChange,
   disabled,
+  isExistingRecord,
 }: {
   verificationStatus: string;
   onValueChange: (value: string) => void;
   disabled?: boolean;
+  isExistingRecord?: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -195,11 +197,14 @@ function StatusSelect({
         <SelectValue placeholder={t("verify")} />
       </SelectTrigger>
       <SelectContent>
-        {Object.entries(ALLERGY_VERIFICATION_STATUS).map(([value, label]) => (
-          <SelectItem key={value} value={value}>
-            {label}
-          </SelectItem>
-        ))}
+        {Object.entries(ALLERGY_VERIFICATION_STATUS).map(
+          ([value, label]) =>
+            (isExistingRecord || value !== "entered_in_error") && (
+              <SelectItem key={value} value={value}>
+                {t(label)}
+              </SelectItem>
+            ),
+        )}
       </SelectContent>
     </Select>
   );
@@ -329,14 +334,12 @@ const AllergyItem = ({
   const { t } = useTranslation();
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
-
   if (desktopLayout) {
     return (
       <>
         <TableRow
           className={cn({
-            "opacity-40 pointer-events-none":
-              allergy.verification_status === "entered_in_error",
+            "opacity-40 pointer-events-none": disabled,
             "opacity-60": allergy.clinical_status === "inactive",
             "[&_*]:line-through": allergy.clinical_status === "resolved",
           })}
@@ -369,6 +372,7 @@ const AllergyItem = ({
                   verification_status: value as AllergyVerificationStatus,
                 });
               }}
+              isExistingRecord={!!allergy.id}
               disabled={disabled}
             />
           </TableCell>
@@ -509,6 +513,7 @@ const AllergyItem = ({
             });
           }}
           disabled={disabled}
+          isExistingRecord={!!allergy.id}
         />
       </div>
 
@@ -694,7 +699,11 @@ export function AllergyQuestion({
                   <AllergyItem
                     key={index}
                     allergy={allergy}
-                    disabled={disabled}
+                    disabled={
+                      disabled ||
+                      patientAllergies?.results[index]?.verification_status ===
+                        "entered_in_error"
+                    }
                     onUpdate={(updates) => handleUpdateAllergy(index, updates)}
                     onRemove={() => handleRemoveAllergy(index)}
                   />
@@ -721,7 +730,9 @@ export function AllergyQuestion({
                     expandedAllergyIndex === index &&
                       "border border-primary-500 bg-gray-50",
                     expandedAllergyIndex !== index && "border-0 shadow-none",
-                    allergy.verification_status === "entered_in_error" &&
+                    (disabled ||
+                      patientAllergies?.results[index]?.verification_status ===
+                        "entered_in_error") &&
                       "opacity-40",
                     allergy.clinical_status === "inactive" && "opacity-60",
                     allergy.clinical_status === "resolved" && "line-through",
@@ -756,11 +767,7 @@ export function AllergyQuestion({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                disabled={
-                                  disabled ||
-                                  allergy.verification_status ===
-                                    "entered_in_error"
-                                }
+                                disabled={disabled}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleRemoveAllergy(index);
@@ -813,8 +820,7 @@ export function AllergyQuestion({
                     <CardContent
                       className={cn(
                         "p-3 pt-2 space-y-3 rounded-lg bg-gray-50",
-                        allergy.verification_status === "entered_in_error" &&
-                          "pointer-events-none",
+                        disabled && "pointer-events-none",
                       )}
                     >
                       <AllergyItem
