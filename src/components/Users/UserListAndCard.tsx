@@ -41,25 +41,18 @@ export const UserStatusIndicator = ({
   return (
     <span className={cn(addPadding ? "px-3 py-1" : "py-px", className)}>
       {isUserOnline(user) || isAuthUser ? (
-        <Badge variant="outline" className="bg-green-100 whitespace-nowrap">
-          <span className="inline-block size-2 shrink-0 rounded-full bg-green-500 mr-2" />
-          <span className="text-xs text-green-700">{t("online")}</span>
+        <Badge variant="primary" className="whitespace-nowrap">
+          <span className="inline-block size-2 shrink-0 rounded-full bg-green-500" />
+          <span>{t("online")}</span>
         </Badge>
       ) : user.last_login ? (
-        <Badge variant="outline" className="bg-yellow-100 whitespace-nowrap">
-          <span className="inline-block size-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
-
-          <RelativeDateTooltip
-            date={user.last_login}
-            className="text-xs text-yellow-700"
-          />
+        <Badge variant="yellow" className="whitespace-nowrap">
+          <span className="inline-block size-2 shrink-0 rounded-full bg-yellow-500" />
+          <RelativeDateTooltip date={user.last_login} />
         </Badge>
       ) : (
-        <Badge
-          variant="outline"
-          className="bg-gray-100 whitespace-nowrap text-xs text-gray-700"
-        >
-          <span className="inline-block size-2 shrink-0 rounded-full bg-gray-500 mr-2" />
+        <Badge variant="secondary" className="whitespace-nowrap">
+          <span className="inline-block size-2 shrink-0 rounded-full bg-gray-500" />
           <span className="hidden lg:inline">{t("never_logged_in")}</span>
           <span className="lg:hidden">{t("never")}</span>
         </Badge>

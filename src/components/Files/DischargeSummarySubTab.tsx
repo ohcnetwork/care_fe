@@ -309,8 +309,8 @@ export const DischargeTab = ({
     return (
       <div className="flex flex-row gap-2 mt-2 mx-2">
         <Badge
-          variant="secondary"
-          className="cursor-pointer border border-gray-300 bg-white"
+          variant="outline"
+          className="cursor-pointer"
           onClick={() => updateQuery({ is_archived: undefined })}
         >
           {t(

@@ -30,4 +30,11 @@ export default () => ({
       .min(-180, t("invalid_longitude"))
       .max(180, t("invalid_longitude")),
   },
+
+  pincode: z
+    .number()
+    .int()
+    .positive()
+    .min(100000, t("pincode_must_be_6_digits"))
+    .max(999999, t("pincode_must_be_6_digits")),
 });
