@@ -812,7 +812,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
               (status) =>
                 (medication.id || status !== "entered_in_error") && (
                   <SelectItem key={status} value={status}>
-                    {t(`medication_status_${status}`)}
+                    {t(`medication_status__${status}`)}
                   </SelectItem>
                 ),
             )}
