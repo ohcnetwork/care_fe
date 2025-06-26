@@ -338,7 +338,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                       `/facility/${facilityId}/appointments/${staffId}/patient-select`,
                       {
                         query: {
-                          selectedSlot: JSON.stringify(selectedSlot),
+                          slotId: selectedSlot?.id,
                           reason: reason,
                         },
                       },

@@ -23,7 +23,6 @@ import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
   AppointmentCreateRequest,
-  TokenSlot,
 } from "@/types/scheduling/schedule";
 
 interface PatientCardProps {
@@ -112,7 +111,7 @@ export default function PatientSelect({
 }) {
   const { t } = useTranslation();
   const [params] = useQueryParams();
-  const selectedSlot = JSON.parse(params.selectedSlot) as TokenSlot;
+  const slotId = params.slotId;
   const reason = params.reason || "";
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
@@ -127,7 +126,7 @@ export default function PatientSelect({
   } else if (!tokenData) {
     toast.error(t("phone_number_not_found"));
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
-  } else if (!selectedSlot) {
+  } else if (!slotId) {
     toast.error(t("selected_slot_not_found"));
     navigate(
       `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
@@ -148,7 +147,7 @@ export default function PatientSelect({
   const { mutate: createAppointment } = useMutation({
     mutationFn: (body: AppointmentCreateRequest) =>
       mutate(PublicAppointmentApi.createAppointment, {
-        pathParams: { id: selectedSlot?.id ?? "" },
+        pathParams: { id: slotId ?? "" },
         body,
         headers: {
           Authorization: `Bearer ${tokenData.token}`,

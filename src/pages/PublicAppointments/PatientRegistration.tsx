@@ -37,7 +37,6 @@ import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
   AppointmentCreateRequest,
-  TokenSlot,
 } from "@/types/scheduling/schedule";
 
 type PatientRegistrationProps = {
@@ -49,7 +48,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   const { staffId } = props;
   const { t } = useTranslation();
   const [params] = useQueryParams();
-  const selectedSlot = JSON.parse(params.selectedSlot) as TokenSlot;
+  const slotId = params.slotId;
   const reason = params.reason || "";
 
   const queryClient = useQueryClient();
@@ -125,7 +124,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     useMutation({
       mutationFn: (body: AppointmentCreateRequest) =>
         mutate(PublicAppointmentApi.createAppointment, {
-          pathParams: { id: selectedSlot?.id ?? "" },
+          pathParams: { id: slotId ?? "" },
           body,
           headers: {
             Authorization: `Bearer ${tokenData.token}`,
