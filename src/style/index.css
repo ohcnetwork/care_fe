@@ -357,6 +357,11 @@
     @apply data-[state=checked]:border-primary-500 data-[state=checked]:text-primary-500 border-gray-300 shadow-sm;
   }
 
+  /* Styling for autocomplete */
+  [data-slot="popover-trigger"] {
+    @apply px-3;
+  }
+
   /* Styling fix for Select for backwards compatibility */
   button[role="combobox"] {
     @apply w-full;
