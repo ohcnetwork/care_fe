@@ -221,9 +221,7 @@ export default function ValueSetSelect({
   }, [isOpen]);
 
   useEffect(() => {
-    if (setIsOpen != undefined) {
-      setIsOpen(internalOpen);
-    }
+    setIsOpen?.(internalOpen);
   }, [internalOpen]);
 
   const content = (
