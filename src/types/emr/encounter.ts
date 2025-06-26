@@ -8,6 +8,8 @@ import {
   Stethoscope,
 } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
+
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { Patient } from "@/types/emr/patient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
@@ -92,7 +94,10 @@ export const ENCOUNTER_PRIORITY_COLORS = {
   preop: "pink",
   as_needed: "teal",
   use_as_directed: "indigo",
-} as const satisfies Record<EncounterPriority, string>;
+} as const satisfies Record<
+  EncounterPriority,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
 export const ENCOUNTER_STATUS = [
   "planned",
@@ -116,7 +121,10 @@ export const ENCOUNTER_STATUS_COLORS = {
   discontinued: "destructive",
   entered_in_error: "destructive",
   unknown: "secondary",
-} as const satisfies Record<EncounterStatus, string>;
+} as const satisfies Record<
+  EncounterStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
 export const ENCOUNTER_CLASSES_ICONS = {
   imp: BedDouble,
