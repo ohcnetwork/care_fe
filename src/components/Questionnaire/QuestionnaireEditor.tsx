@@ -639,47 +639,52 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     validateQuestions(rootQuestions);
 
     if (!isValid || !hasOrganizations || !hasValidStructuredType) {
-      const errorEntries = Object.entries(form.formState.errors);
+      setTimeout(() => {
+        const errorEntries = Object.entries(form.formState.errors);
 
-      for (const [fieldName, error] of errorEntries) {
-        if (fieldName !== "questions") {
-          const el = document.querySelector(`[name="${fieldName}"]`);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-            break;
-          }
-        } else {
-          const errorPath = findFirstErrorPath(error);
-          if (errorPath) {
-            // Expand all parent groups
-            for (let i = 0; i < errorPath.length; i++) {
-              const question = getQuestionByPath(
-                rootQuestions,
-                errorPath.slice(0, i + 1),
-              );
-              if (question?.link_id) {
-                setExpandedQuestions((prev) =>
-                  new Set(prev).add(question.link_id),
-                );
-              }
+        for (const [fieldName, error] of errorEntries) {
+          if (fieldName !== "questions") {
+            const el = document.querySelector(`[name="${fieldName}"]`);
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              break;
             }
-
-            // After expanding, scroll to the error question
-            setTimeout(() => {
-              const errorQuestion = getQuestionByPath(rootQuestions, errorPath);
-              if (
-                errorQuestion?.link_id &&
-                questionRefs.current[errorQuestion.link_id]
-              ) {
-                questionRefs.current[errorQuestion.link_id]?.scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                });
+          } else {
+            const errorPath = findFirstErrorPath(error);
+            if (errorPath) {
+              // Expand parent groups
+              for (let i = 0; i < errorPath.length; i++) {
+                const question = getQuestionByPath(
+                  rootQuestions,
+                  errorPath.slice(0, i + 1),
+                );
+                if (question?.link_id) {
+                  setExpandedQuestions((prev) =>
+                    new Set(prev).add(question.link_id),
+                  );
+                }
               }
-            }, 200);
+
+              // After expanding, scroll to the error question
+              setTimeout(() => {
+                const errorQuestion = getQuestionByPath(
+                  rootQuestions,
+                  errorPath,
+                );
+                if (
+                  errorQuestion?.link_id &&
+                  questionRefs.current[errorQuestion.link_id]
+                ) {
+                  questionRefs.current[errorQuestion.link_id]?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                }
+              }, 200);
+            }
           }
         }
-      }
+      }, 0); // delay lets react-hook-form update `formState.errors`
       return;
     }
 
