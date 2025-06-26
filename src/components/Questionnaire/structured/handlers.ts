@@ -26,8 +26,11 @@ type StructuredHandler<T extends StructuredQuestionType> = {
   >;
 };
 
-const sanitizeNote = (note?: string, hasId?: boolean): string | undefined => {
-  if (note === undefined) return undefined;
+const sanitizeNote = (
+  note?: string | null,
+  hasId?: boolean,
+): string | undefined => {
+  if (note === undefined || note === null) return undefined;
   const trimmed = note.trim();
   if (trimmed !== "") return trimmed;
   return hasId ? "" : undefined;
