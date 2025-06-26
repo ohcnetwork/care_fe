@@ -32,6 +32,13 @@ export interface ValuesetBase {
   updated_by: string | null;
 }
 
+export const VALUESET_STATUS_COLORS = {
+  active: "primary",
+  draft: "yellow",
+  retired: "destructive",
+  unknown: "secondary",
+} as const;
+
 export type CreateValuesetModel = Omit<
   ValuesetBase,
   "id" | "created_by" | "updated_by"
