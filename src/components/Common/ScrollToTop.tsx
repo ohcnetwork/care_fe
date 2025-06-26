@@ -25,7 +25,7 @@ export function ScrollToTopButton({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const smRight = rightOffset ? `sm:right-${rightOffset}` : "";
+  const smRight = rightOffset ? `right-${rightOffset}` : "";
 
   if (!isVisible) return null;
 
@@ -33,8 +33,8 @@ export function ScrollToTopButton({
     <Button
       onClick={scrollToTop}
       className={cn(
-        "fixed bottom-10 right-2 z-50 rounded-full shadow-md",
         smRight,
+        "fixed bottom-10 max-sm:right-2 z-50 rounded-full shadow-md",
       )}
       variant="outline_primary"
       size="icon"
