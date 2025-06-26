@@ -80,6 +80,7 @@ import {
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import mutate from "@/Utils/request/mutate";
@@ -237,7 +238,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     Map<string, Set<{ question: Question; path: string[] }>>
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
-
+  const isMobile = useBreakpoints({ default: true, sm: false });
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
       error as {
@@ -911,42 +912,44 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               </Card>
             </div>
 
-            <div className="space-y-4 flex flex-col sm:hidden">
-              <QuestionnaireProperties
-                form={form}
-                updateQuestionnaireField={updateQuestionnaireField}
-                id={id}
-                organizations={organizations}
-                organizationSelection={{
-                  selectedOrgs: selectedOrgs,
-                  onToggle: handleToggleOrganization,
-                  searchQuery: orgSearchQuery,
-                  setSearchQuery: setOrgSearchQuery,
-                  available: availableOrganizations,
-                  isLoading: isLoadingAvailableOrganizations,
-                  error: orgError,
-                  setError: setOrgError,
-                }}
-                tags={tags}
-                tagSelection={{
-                  selectedTags: selectedTags,
-                  onToggle: handleToggleTag,
-                  searchQuery: tagSearchQuery,
-                  setSearchQuery: setTagSearchQuery,
-                  available: tagOptions,
-                  isLoading: isLoadingAvailableTags,
-                  onTagCreated: !id ? handleTagCreated : undefined,
-                }}
-              />
-              <QuestionActions
-                selectedQuestions={selectedQuestions}
-                questions={rootQuestions}
-                updateQuestionnaireField={updateQuestionnaireField}
-                onQuestionsChange={updateQuestions}
-                setSelectedQuestions={setSelectedQuestions}
-                setExpandedQuestions={setExpandedQuestions}
-              />
-            </div>
+            {isMobile && (
+              <div className="space-y-4">
+                <QuestionnaireProperties
+                  form={form}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  id={id}
+                  organizations={organizations}
+                  organizationSelection={{
+                    selectedOrgs: selectedOrgs,
+                    onToggle: handleToggleOrganization,
+                    searchQuery: orgSearchQuery,
+                    setSearchQuery: setOrgSearchQuery,
+                    available: availableOrganizations,
+                    isLoading: isLoadingAvailableOrganizations,
+                    error: orgError,
+                    setError: setOrgError,
+                  }}
+                  tags={tags}
+                  tagSelection={{
+                    selectedTags: selectedTags,
+                    onToggle: handleToggleTag,
+                    searchQuery: tagSearchQuery,
+                    setSearchQuery: setTagSearchQuery,
+                    available: tagOptions,
+                    isLoading: isLoadingAvailableTags,
+                    onTagCreated: !id ? handleTagCreated : undefined,
+                  }}
+                />
+                <QuestionActions
+                  selectedQuestions={selectedQuestions}
+                  questions={rootQuestions}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  onQuestionsChange={updateQuestions}
+                  setSelectedQuestions={setSelectedQuestions}
+                  setExpandedQuestions={setExpandedQuestions}
+                />
+              </div>
+            )}
 
             <div className="space-y-4 flex-1">
               <Form {...form}>
