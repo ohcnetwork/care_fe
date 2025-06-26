@@ -365,7 +365,7 @@ export const FilesPage = ({
             onSelect={(e) => {
               e.preventDefault();
             }}
-            aria-label={t("choose_file")}
+            aria-label={t("choose_files")}
           >
             <Label
               htmlFor={`file_upload_${type}`}
@@ -373,7 +373,7 @@ export const FilesPage = ({
               className="flex items-center w-full text-primary-900 hover:text-black py-1 font-normal"
             >
               <CareIcon icon="l-file-upload-alt" />
-              <span>{t("choose_file")}</span>
+              <span>{t("choose_files")}</span>
             </Label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
