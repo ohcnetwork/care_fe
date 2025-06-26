@@ -346,11 +346,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }),
     onSuccess: (data: QuestionnaireDetail) => {
       toast.success(t("questionnaire_updated_successfully"));
-      // Update the form's default values to the latest saved data
-      form.reset({
-        ...form.getValues(),
-        ...data,
-      });
       navigate(`/admin/questionnaire/${data.slug}/edit`);
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
@@ -442,6 +437,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     },
     mode: "onChange",
   });
+
+  const { isDirty } = form.formState;
 
   useEffect(() => {
     if (initialQuestionnaire) {
@@ -544,8 +541,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     value: unknown,
   ) => {
     form.setValue(field, value, {
-      shouldValidate: false,
+      shouldValidate: true,
       shouldDirty: true,
+      shouldTouch: true,
     });
   };
   const handleValidatedChange = (
@@ -619,7 +617,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }
 
     if (id) {
-      if (!form.formState.isDirty) {
+      if (!isDirty) {
         toast.info(t("no_changes_made"));
         return;
       }
@@ -1782,7 +1780,7 @@ function QuestionEditor({
                           form.setValue(
                             `questions.${index}.text`,
                             e.target.value,
-                            { shouldValidate: true },
+                            { shouldValidate: true, shouldDirty: true },
                           );
                         }}
                       />
@@ -1810,7 +1808,7 @@ function QuestionEditor({
                         form.setValue(
                           `questions.${index}.description`,
                           e.target.value,
-                          { shouldValidate: true },
+                          { shouldValidate: true, shouldDirty: true },
                         );
                       }}
                       placeholder={t("question_description_placeholder")}
@@ -1939,6 +1937,7 @@ function QuestionEditor({
                           updateField("unit", code);
                           form.setValue(`questions.${index}.unit`, code, {
                             shouldValidate: true,
+                            shouldDirty: true,
                           });
                         }}
                       />
