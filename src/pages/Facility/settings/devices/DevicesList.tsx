@@ -81,10 +81,7 @@ export default function DevicesList({ facilityId }: Props) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           <PageTitle title={t("devices")} className="mt-2" />
-          <Badge
-            className="bg-purple-50 text-purple-700 text-sm font-medium rounded-xl px-3 w-max"
-            variant="outline"
-          >
+          <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
             {isLoading
               ? t("loading")
               : t("entity_count", {
