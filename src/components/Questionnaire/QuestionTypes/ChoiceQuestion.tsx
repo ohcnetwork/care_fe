@@ -48,7 +48,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       : "radio";
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
   const currentCoding = questionnaireResponse.values[index]?.coding;
-  const [isOpen, setIsOpen] = useState(false);
+  const [valuesetSelection, setIsValuesetSelectOpen] = useState(false);
   const handleValueChange = (newValue: string) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
@@ -155,14 +155,14 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
 
         <div>
           <ValueSetSelect
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
+            valuesetSelection={valuesetSelection}
+            setIsValuesetSelectOpen={setIsValuesetSelectOpen}
             system={question.answer_value_set}
             value={null}
             onSelect={(newValue) => {
               handleCodingChange(newValue);
               setTimeout(() => {
-                setIsOpen(true);
+                setIsValuesetSelectOpen(true);
               }, 100);
             }}
           />

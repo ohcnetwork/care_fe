@@ -43,8 +43,8 @@ import { Code } from "@/types/questionnaire/code";
 import valuesetRoutes from "@/types/valueset/valuesetApi";
 
 interface Props {
-  isOpen?: boolean;
-  setIsOpen?: (isOpen: boolean) => void;
+  valuesetSelection?: boolean;
+  setIsValuesetSelectOpen?: (valuesetSelection: boolean) => void;
   system: string;
   value?: Code | null;
   onSelect: (value: Code) => void;
@@ -95,8 +95,8 @@ const Item = ({
 );
 
 export default function ValueSetSelect({
-  isOpen,
-  setIsOpen,
+  valuesetSelection,
+  setIsValuesetSelectOpen,
   system,
   value,
   onSelect,
@@ -111,7 +111,7 @@ export default function ValueSetSelect({
   asSheet = false,
 }: Props) {
   const { t } = useTranslation();
-  const [internalOpen, setInternalOpen] = useState(isOpen || false);
+  const [internalOpen, setInternalOpen] = useState(valuesetSelection || false);
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
   const [activeTab, setActiveTab] = useState(0);
@@ -215,14 +215,14 @@ export default function ValueSetSelect({
   }, [internalOpen, isMobile]);
 
   useEffect(() => {
-    if (isOpen != undefined) {
-      setInternalOpen(isOpen);
+    if (valuesetSelection != undefined) {
+      setInternalOpen(valuesetSelection);
     }
-  }, [isOpen]);
+  }, [valuesetSelection]);
 
   useEffect(() => {
-    if (setIsOpen != undefined) {
-      setIsOpen(internalOpen);
+    if (setIsValuesetSelectOpen != undefined) {
+      setIsValuesetSelectOpen(internalOpen);
     }
   }, [internalOpen]);
 
