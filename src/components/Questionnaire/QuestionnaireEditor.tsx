@@ -605,15 +605,26 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
 
-    rootQuestions.forEach((question, idx) => {
-      if (question.code && !question.code?.display) {
-        form.setError(`questions.${idx}.code.display`, {
-          type: "manual",
-          message: t("code_verification_required"),
-        });
-        isValid = false;
-      }
-    });
+    const validateQuestions = (questions: any[], path = "questions") => {
+      console.log(questions);
+      questions.forEach((question, idx) => {
+        const currentPath = `${path}.${idx}`;
+
+        if (question.code && !question.code?.display) {
+          console.log(`${currentPath}.code.display`);
+          form.setError(`${currentPath}.code.display`, {
+            type: "manual",
+            message: t("code_verification_required"),
+          });
+          isValid = false;
+        }
+
+        if (question.type === "group" && Array.isArray(question.questions)) {
+          validateQuestions(question.questions, `${currentPath}.questions`);
+        }
+      });
+    };
+    validateQuestions(rootQuestions);
 
     if (!isValid || !hasOrganizations || !hasValidStructuredType) {
       const errorEntries = Object.entries(form.formState.errors);
@@ -1979,7 +1990,7 @@ function QuestionEditor({
               <CodingEditor
                 code={code}
                 form={form}
-                questionIndex={index}
+                name={name}
                 onChange={(newCode) => updateField("code", newCode)}
               />
             )}

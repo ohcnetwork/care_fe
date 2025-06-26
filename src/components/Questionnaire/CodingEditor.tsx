@@ -35,7 +35,7 @@ import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface CodingEditorProps {
   code?: Code;
-  questionIndex: number;
+  name: string;
   form: ReturnType<typeof useForm<any>>;
   onChange: (code: Code | undefined) => void;
 }
@@ -44,7 +44,7 @@ export function CodingEditor({
   code,
   onChange,
   form,
-  questionIndex,
+  name,
 }: CodingEditorProps) {
   const { mutate: verifyCode, isPending } = useMutation({
     mutationFn: mutate(valuesetApi.lookup),
@@ -59,7 +59,7 @@ export function CodingEditor({
     },
     onError: (error) => {
       console.error(error);
-      form.setError(`questions.${questionIndex}.code.display`, {
+      form.setError(`${name}.code.display`, {
         type: "manual",
         message: t("code_verification_required"),
       });
@@ -100,7 +100,7 @@ export function CodingEditor({
             onClick={(e) => {
               e.preventDefault();
               onChange(undefined);
-              form.clearErrors([`questions.${questionIndex}.code`]);
+              form.clearErrors([`${name}.code`]);
             }}
           >
             <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
@@ -113,7 +113,7 @@ export function CodingEditor({
         <div>
           <FormField
             control={form.control}
-            name={`questions.${questionIndex}.code.system`}
+            name={`${name}.code.system`}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("system")}</FormLabel>
@@ -153,7 +153,7 @@ export function CodingEditor({
           <div>
             <FormField
               control={form.control}
-              name={`questions.${questionIndex}.code.code`}
+              name={`${name}.code.code`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("code")}</FormLabel>
@@ -167,9 +167,7 @@ export function CodingEditor({
                           code: e.target.value,
                           display: "",
                         });
-                        form.clearErrors([
-                          `questions.${questionIndex}.code.display`,
-                        ]);
+                        form.clearErrors([`${name}.code.display`]);
                       }}
                       placeholder={t("enter_code")}
                     />
@@ -182,7 +180,7 @@ export function CodingEditor({
           <div>
             <FormField
               control={form.control}
-              name={`questions.${questionIndex}.code.display`}
+              name={`${name}.code.display`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("display")}</FormLabel>
