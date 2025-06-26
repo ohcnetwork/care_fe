@@ -375,22 +375,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         text: z.string().trim().min(1, t("field_required")),
         link_id: z.string().trim().min(1, t("field_required")),
         description: z.string().optional(),
-        type: z.enum([
-          "group",
-          "structured",
-          "text",
-          "string",
-          "boolean",
-          "date",
-          "choice",
-          "decimal",
-          "integer",
-          "dateTime",
-          "time",
-          "display",
-          "quantity",
-          "url",
-        ]),
+        type: z.enum(
+          SUPPORTED_QUESTION_TYPES.map((t) => t.value) as [
+            QuestionType,
+            ...QuestionType[],
+          ],
+        ),
         code: z
           .object({
             system: z.string().optional(),
