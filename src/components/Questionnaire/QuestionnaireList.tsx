@@ -40,6 +40,7 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { QUESTIONNAIRE_STATUS_COLORS } from "@/types/questionnaire/questionnaire";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -93,15 +94,7 @@ const RenderCard = ({
                     {questionnaire.title}
                   </p>
                   <Badge
-                    className={
-                      {
-                        active:
-                          "bg-green-100 text-green-800 hover:bg-green-200",
-                        draft:
-                          "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-                        retired: "bg-red-100 text-red-800 hover:bg-red-200",
-                      }[questionnaire.status]
-                    }
+                    variant={QUESTIONNAIRE_STATUS_COLORS[questionnaire.status]}
                   >
                     {t(questionnaire.status)}
                   </Badge>
@@ -238,7 +231,7 @@ export function QuestionnaireList() {
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["questionnaires", qParams],
-    queryFn: query(questionnaireApi.list, {
+    queryFn: query.debounced(questionnaireApi.list, {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
