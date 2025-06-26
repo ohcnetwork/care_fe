@@ -243,7 +243,9 @@ export function QuestionInput({
           </div>
           <div
             className={cn(
-              question.answer_value_set ? "flex flex-col" : "flex flex-row",
+              question.answer_value_set
+                ? "flex flex-col gap-4"
+                : "flex flex-row",
             )}
           >
             <div className="flex-1 min-w-0">{renderSingleInput(0)}</div>

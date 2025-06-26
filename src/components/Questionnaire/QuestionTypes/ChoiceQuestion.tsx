@@ -64,27 +64,34 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     );
   };
 
-  const handleCodingChange = (newValue: Code, idx: number) => {
+  const handleCodingChange = (newValue: Code, idx?: number) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
 
-    if (newValues.some((value) => value.coding?.code === newValue.code)) {
-      toast.error(t("value_already_selected"));
-      return;
-    }
-
-    newValues[idx] = {
+    const newResponseValue = {
       type: "quantity",
       coding: {
         code: newValue.code,
         system: newValue.system,
         display: newValue.display,
       },
-    };
+    } as ResponseValue;
 
-    if (idx === 0 || idx === questionnaireResponse.values.length - 1) {
-      newValues.push({ type: "string", value: "" });
+    if (newValues.some((value) => value.coding?.code === newValue.code)) {
+      toast.error(t("value_already_selected"));
+      return;
     }
+
+    if (idx === undefined) {
+      updateQuestionnaireResponseCB(
+        [...newValues, newResponseValue],
+        questionnaireResponse.question_id,
+        questionnaireResponse.note,
+      );
+      return;
+    }
+
+    newValues[idx] = newResponseValue;
 
     updateQuestionnaireResponseCB(
       newValues,
@@ -107,54 +114,63 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     );
   };
 
+  if (question.answer_value_set && !question.repeats) {
+    return (
+      <ValueSetSelect
+        system={question.answer_value_set}
+        value={currentCoding}
+        onSelect={handleCodingChange}
+      ></ValueSetSelect>
+    );
+  }
+
   if (question.answer_value_set) {
     return (
       <>
-        {question.answer_value_set &&
-          (questionnaireResponse.values.length === 0 ? (
-            <div>
-              <ValueSetSelect
-                isOpen={isOpen}
-                system={question.answer_value_set}
-                value={currentCoding}
-                onSelect={(newValue) => handleCodingChange(newValue, 0)}
-                setIsOpen={setIsOpen}
-              />
+        {questionnaireResponse.values.map((value, idx) => {
+          return (
+            <div key={idx} className="flex items-center gap-2 mb-2">
+              <div className="flex-1">
+                <ValueSetSelect
+                  system={question.answer_value_set!}
+                  value={value.coding}
+                  onSelect={(newValue) => handleCodingChange(newValue, idx)}
+                />
+              </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  const newValues = questionnaireResponse.values.filter(
+                    (_, i) => i !== idx,
+                  );
+                  updateQuestionnaireResponseCB(
+                    newValues,
+                    questionnaireResponse.question_id,
+                  );
+                }}
+              >
+                <CareIcon icon="l-trash" className="size-4" />
+              </Button>
             </div>
-          ) : (
-            questionnaireResponse.values.map((value, idx) => {
-              return (
-                <div key={idx} className="flex items-center gap-2 mb-2">
-                  <div className="flex-1">
-                    <ValueSetSelect
-                      isOpen={isOpen}
-                      system={question.answer_value_set!}
-                      value={value.coding}
-                      onSelect={(newValue) => handleCodingChange(newValue, idx)}
-                      setIsOpen={setIsOpen}
-                    />
-                  </div>
-                  {idx != questionnaireResponse.values.length - 1 && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        const newValues = questionnaireResponse.values.filter(
-                          (_, i) => i !== idx,
-                        );
-                        updateQuestionnaireResponseCB(
-                          newValues,
-                          questionnaireResponse.question_id,
-                        );
-                      }}
-                    >
-                      <CareIcon icon="l-trash" className="size-4" />
-                    </Button>
-                  )}
-                </div>
-              );
-            })
-          ))}
+          );
+        })}
+
+        <div>
+          <ValueSetSelect
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            system={question.answer_value_set}
+            value={null}
+            onSelect={(newValue) => {
+              handleCodingChange(newValue);
+              setTimeout(() => {
+                setIsOpen(true);
+              }, 100);
+            }}
+          />
+        </div>
       </>
     );
   }

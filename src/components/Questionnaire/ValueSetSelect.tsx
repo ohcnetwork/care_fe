@@ -215,8 +215,16 @@ export default function ValueSetSelect({
   }, [internalOpen, isMobile]);
 
   useEffect(() => {
-    setIsOpen?.(true);
-  }, []);
+    if (isOpen != undefined) {
+      setInternalOpen(isOpen);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (setIsOpen != undefined) {
+      setIsOpen(internalOpen);
+    }
+  }, [internalOpen]);
 
   const content = (
     <Command filter={() => 1} className="rounded-t-3xl">
@@ -452,7 +460,7 @@ export default function ValueSetSelect({
                 icon="l-plus"
                 className="mr-2 text-5xl text-primary-700 font-normal"
               />
-              <span className="text-primary-700 flex items-center font-semibold text-base text-wrap">
+              <span className="text-primary-700 flex items-center font-semibold text-wrap text-sm md:text-base">
                 {value?.display || placeholder}
               </span>
             </div>
