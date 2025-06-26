@@ -2,9 +2,15 @@ import { ArrowUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 
-export function ScrollToTopButton() {
+export function ScrollToTopButton({
+  smRight = "sm:right-20",
+}: {
+  smRight?: string;
+}) {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
@@ -24,7 +30,10 @@ export function ScrollToTopButton() {
   return (
     <Button
       onClick={scrollToTop}
-      className="fixed bottom-10 right-20 z-50 rounded-full shadow-md"
+      className={cn(
+        "fixed bottom-10 right-2 z-50 rounded-full shadow-md",
+        smRight,
+      )}
       variant="outline_primary"
       size="icon"
       aria-label={t("scroll_to_top")}
