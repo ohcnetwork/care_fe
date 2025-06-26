@@ -855,6 +855,8 @@ const NewAvailabilityCard = ({
                             <FormControl>
                               <Input
                                 type="number"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 min={1}
                                 defaultValue={1}
                                 {...field}
@@ -885,6 +887,8 @@ const NewAvailabilityCard = ({
                       <FormControl>
                         <Input
                           type="number"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           min={0}
                           placeholder="e.g. 10"
                           {...field}
@@ -911,6 +915,8 @@ const NewAvailabilityCard = ({
                       <FormControl>
                         <Input
                           type="number"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           min={0}
                           placeholder="e.g. 1"
                           {...field}

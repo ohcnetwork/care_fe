@@ -68,17 +68,15 @@ function ConsentCard({
     <Card className="overflow-hidden transition-all h-full flex flex-col">
       <div className="flex flex-wrap gap-2">
         <Badge
-          variant="outline"
-          className="w-fit justify-center border-b border-gray-300 rounded-b-md rounded-t-none px-2.5 py-1 text-center ml-3 bg-indigo-100 text-indigo-900"
+          variant="indigo"
+          className="w-fit border-b rounded-b-md border-t-0 rounded-t-none py-1 ml-3 font-semibold text-xs"
         >
-          <h3 className="font-semibold text-xs text-gray-900 uppercase">
-            {t(`consent_category__${consent.category}`)}
-          </h3>
+          {t(`consent_category__${consent.category}`).toUpperCase()}
         </Badge>
         {consent.period.end && isPast(consent.period.end) && (
           <Badge
-            variant="destructive"
-            className="flex gap-1 items-center text-xs uppercase"
+            variant="danger"
+            className="flex bg-red-500 my-1 border-none items-center font-semibold text-xs uppercase"
           >
             {t("expired")}
           </Badge>
@@ -114,23 +112,12 @@ function ConsentCard({
 
           <div className="flex justify-start items-center flex-wrap w-full gap-1.5">
             {consent.decision === "permit" ? (
-              <Badge
-                className="flex gap-1 items-center text-xs"
-                variant={"primary"}
-              >
-                {t("permitted")}
-              </Badge>
+              <Badge variant="green">{t("permitted")}</Badge>
             ) : (
-              <Badge
-                variant="destructive"
-                className="flex gap-1 items-center text-xs"
-              >
-                {t("denied")}
-              </Badge>
+              <Badge variant="destructive">{t("denied")}</Badge>
             )}
             <Badge
               variant={consent.status === "active" ? "primary" : "secondary"}
-              className="flex gap-1 items-center text-xs"
             >
               {t(`consent_status__${consent.status}`)}
             </Badge>
@@ -252,7 +239,7 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
 
       {filteredConsents && filteredConsents.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredConsents.map((consent) => (
               <ConsentCard
                 key={consent.id}
