@@ -27,7 +27,9 @@ interface Props {
   value: DayOfWeek[] | null;
   onChange: (value: DayOfWeek[] | null) => void;
   format?: "alphabet" | "short" | "long";
-  ref?: React.RefCallback<HTMLDivElement>;
+  ref?: React.RefCallback<HTMLButtonElement>;
+
+  "aria-invalid"?: boolean;
 }
 
 export default function WeekdayCheckbox({
@@ -35,6 +37,7 @@ export default function WeekdayCheckbox({
   onChange,
   format = "alphabet",
   ref,
+  ...props
 }: Props) {
   const selectedDays = value ?? [];
   const { t } = useTranslation();
@@ -50,7 +53,7 @@ export default function WeekdayCheckbox({
   };
 
   return (
-    <div className="flex gap-2 md:gap-4" ref={ref} tabIndex={-1}>
+    <div className="flex gap-2 md:gap-4" tabIndex={-1}>
       {dayOfWeekKeys.map((day) => {
         const dow = DayOfWeek[day as keyof typeof DayOfWeek];
         const isSelected = selectedDays.includes(dow);
@@ -58,6 +61,8 @@ export default function WeekdayCheckbox({
         return (
           <Button
             key={dow}
+            ref={ref}
+            aria-invalid={props["aria-invalid"]}
             type="button"
             variant={isSelected ? "primary" : "outline"}
             onClick={() => handleDayToggle(dow)}

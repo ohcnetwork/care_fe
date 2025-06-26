@@ -19,9 +19,16 @@ interface DatePickerProps {
   onChange?: (date?: Date) => void;
   disabled?: (date: Date) => boolean;
   ref?: React.RefCallback<HTMLButtonElement>;
+  "aria-invalid"?: boolean;
 }
 
-export function DatePicker({ date, onChange, disabled, ref }: DatePickerProps) {
+export function DatePicker({
+  date,
+  onChange,
+  disabled,
+  ref,
+  ...props
+}: DatePickerProps) {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
@@ -31,6 +38,7 @@ export function DatePicker({ date, onChange, disabled, ref }: DatePickerProps) {
       <PopoverTrigger asChild>
         <Button
           ref={ref}
+          aria-invalid={props["aria-invalid"]}
           variant="outline"
           className={cn(
             "w-full justify-start text-left font-normal",

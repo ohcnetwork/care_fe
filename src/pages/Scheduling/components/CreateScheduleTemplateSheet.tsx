@@ -314,11 +314,13 @@ export default function CreateScheduleTemplateSheet({
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={(date) => field.onChange(date)}
-                        ref={field.ref}
-                      />
+                      <FormControl>
+                        <DatePicker
+                          date={field.value}
+                          onChange={(date) => field.onChange(date)}
+                          ref={field.ref}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -330,11 +332,13 @@ export default function CreateScheduleTemplateSheet({
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={(date) => field.onChange(date)}
-                        ref={field.ref}
-                      />
+                      <FormControl>
+                        <DatePicker
+                          date={field.value}
+                          onChange={(date) => field.onChange(date)}
+                          ref={field.ref}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

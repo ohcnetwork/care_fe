@@ -333,14 +333,16 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("manufacture_date")}</FormLabel>
-                <DatePicker
-                  date={field.value}
-                  ref={field.ref}
-                  onChange={(date) => {
-                    field.onChange(date);
-                    form.trigger("expiration_date");
-                  }}
-                />
+                <FormControl>
+                  <DatePicker
+                    date={field.value}
+                    ref={field.ref}
+                    onChange={(date) => {
+                      field.onChange(date);
+                      form.trigger("expiration_date");
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -352,11 +354,13 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("expiration_date")}</FormLabel>
-                <DatePicker
-                  date={field.value}
-                  onChange={(date) => field.onChange(date)}
-                  ref={field.ref}
-                />
+                <FormControl>
+                  <DatePicker
+                    date={field.value}
+                    onChange={(date) => field.onChange(date)}
+                    ref={field.ref}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
