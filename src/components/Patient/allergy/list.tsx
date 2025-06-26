@@ -31,9 +31,9 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import {
-  ALLERGY_CLINICAL_STATUS_STYLES,
-  ALLERGY_CRITICALITY_STYLES,
-  ALLERGY_VERIFICATION_STATUS_STYLES,
+  ALLERGY_CLINICAL_STATUS_COLORS,
+  ALLERGY_CRITICALITY_COLORS,
+  ALLERGY_VERIFICATION_STATUS_COLORS,
   AllergyCategory,
   AllergyIntolerance,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
@@ -128,30 +128,26 @@ export function AllergyList({
         </TableCell>
         <TableCell>
           <Badge
-            variant="outline"
-            className={`whitespace-nowrap ${
-              ALLERGY_CLINICAL_STATUS_STYLES[allergy.clinical_status]
-            }`}
+            variant={ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]}
+            className="whitespace-nowrap"
           >
             {t(allergy.clinical_status)}
           </Badge>
         </TableCell>
         <TableCell>
           <Badge
-            variant="outline"
-            className={`whitespace-nowrap ${
-              ALLERGY_CRITICALITY_STYLES[allergy.criticality]
-            }`}
+            variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
+            className="whitespace-nowrap"
           >
             {t(allergy.criticality)}
           </Badge>
         </TableCell>
         <TableCell>
           <Badge
-            variant="outline"
-            className={`whitespace-nowrap capitalize ${
-              ALLERGY_VERIFICATION_STATUS_STYLES[allergy.verification_status]
-            }`}
+            variant={
+              ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
+            }
+            className="whitespace-nowrap capitalize"
           >
             {t(allergy.verification_status)}
           </Badge>

@@ -474,7 +474,10 @@ export const EncounterNotesTab = ({
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim() && selectedThread) {
+    e.stopPropagation();
+    const canSend =
+      newMessage.trim() && selectedThread && !createMessageMutation.isPending;
+    if (canSend) {
       createMessageMutation.mutate({ message: newMessage.trim() });
     }
   };
@@ -714,10 +717,7 @@ export const EncounterNotesTab = ({
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter" && e.shiftKey) {
-                                e.preventDefault();
-                                if (newMessage.trim()) {
-                                  handleSendMessage(e);
-                                }
+                                handleSendMessage(e);
                               }
                             }}
                             className="flex-1 min-h-10 max-h-[50vh]"
